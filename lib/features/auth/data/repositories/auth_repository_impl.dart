@@ -64,7 +64,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await localDataSource.clearSession();
-      return Right<Failure, void>(null);
+      return const Right<Failure, void>(null);
     } catch (_) {
       return const Left(StorageFailure('Failed to clear session'));
     }
