@@ -3,6 +3,9 @@ import 'package:school_app_flutter/features/auth/domain/entities/authenticated_u
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
 
+// Sentinel object used to distinguish "not provided" from explicit null in copyWith.
+const _undefined = Object();
+
 class AuthState extends Equatable {
   final AuthStatus status;
   final AuthenticatedUser? user;
@@ -16,15 +19,23 @@ class AuthState extends Equatable {
 
   factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
 
+  /// Returns a copy of this state with the given fields replaced.
+  ///
+  /// Pass [clearUser] or [clearErrorMessage] as `true` to explicitly set
+  /// the corresponding nullable field to `null`.
   AuthState copyWith({
     AuthStatus? status,
-    AuthenticatedUser? user,
-    String? errorMessage,
+    Object? user = _undefined,
+    Object? errorMessage = _undefined,
   }) {
     return AuthState(
       status: status ?? this.status,
-      user: user ?? this.user,
-      errorMessage: errorMessage ?? this.errorMessage,
+      user: identical(user, _undefined)
+          ? this.user
+          : user as AuthenticatedUser?,
+      errorMessage: identical(errorMessage, _undefined)
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
 
