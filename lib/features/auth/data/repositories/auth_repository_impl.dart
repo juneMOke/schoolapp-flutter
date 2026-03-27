@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -27,12 +28,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final session = response.toAuthSession();
       await localDataSource.saveSession(session);
       return Right(session);
-    } on InvalidCredentialsFailure catch (e) {
-      return Left(e);
-    } on ServerFailure catch (e) {
-      return Left(e);
-    } on NetworkFailure catch (e) {
-      return Left(e);
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
     } on StorageFailure catch (e) {
       return Left(e);
     } catch (_) {

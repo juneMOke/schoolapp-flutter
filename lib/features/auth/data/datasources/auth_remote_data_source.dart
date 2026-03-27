@@ -1,35 +1,15 @@
 import 'package:dio/dio.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_request_model.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_response_model.dart';
 
+part 'auth_remote_data_source.g.dart';
+
+@RestApi()
 abstract class AuthRemoteDataSource {
-  Future<LoginResponseModel> login(LoginRequestModel request);
-}
+  factory AuthRemoteDataSource(Dio dio, {String baseUrl}) = _AuthRemoteDataSource;
 
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final Dio _dio;
-
-  const AuthRemoteDataSourceImpl(this._dio);
-
-  @override
-  Future<LoginResponseModel> login(LoginRequestModel request) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '/api/auth/login',
-        data: request.toJson(),
-      );
-      return LoginResponseModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw const InvalidCredentialsFailure('Invalid credentials');
-      } else if (e.response?.statusCode != null &&
-          e.response!.statusCode! >= 500) {
-        throw const ServerFailure('Server error');
-      }
-      throw const NetworkFailure('Network error');
-    }
-  }
+  @POST(AppConstants.loginEndpoint)
+  Future<LoginResponseModel> login(@Body() LoginRequestModel request);
 }

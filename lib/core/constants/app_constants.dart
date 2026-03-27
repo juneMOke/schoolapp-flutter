@@ -1,7 +1,8 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'http://10.0.2.2:8080';
+  static const String loginEndpoint = '/api/v1/auth/login';
 
   static const String accessTokenKey = 'access_token';
   static const String tokenTypeKey = 'token_type';

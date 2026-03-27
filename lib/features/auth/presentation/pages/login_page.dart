@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/login_form.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -21,7 +23,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'SchoolApp',
+                  l10n.schoolApp,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.indigo,
@@ -29,7 +31,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue',
+                  l10n.signInToContinue,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey,
                       ),

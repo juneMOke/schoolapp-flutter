@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/auth_repository_impl.dart';
@@ -20,17 +21,58 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerLazySingleton<Dio>(
-    () => Dio(
-      BaseOptions(
-        baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    ),
+    () {
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: AppConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onError: (DioException e, handler) {
+            if (e.response?.statusCode == 401) {
+              return handler.reject(
+                DioException(
+                  requestOptions: e.requestOptions,
+                  response: e.response,
+                  error: const InvalidCredentialsFailure('Invalid credentials'),
+                  type: e.type,
+                ),
+              );
+            } else if (e.response?.statusCode == 403) {
+              return handler.reject(
+                DioException(
+                  requestOptions: e.requestOptions,
+                  response: e.response,
+                  error: const UnauthorizedFailure('Access forbidden'),
+                  type: e.type,
+                ),
+              );
+            } else if (e.response?.statusCode != null &&
+                e.response!.statusCode! >= 500) {
+              return handler.reject(
+                DioException(
+                  requestOptions: e.requestOptions,
+                  response: e.response,
+                  error: const ServerFailure('Server error'),
+                  type: e.type,
+                ),
+              );
+            }
+            return handler.next(e);
+          },
+        ),
+      );
+
+      return dio;
+    },
   );
 
   getIt.registerLazySingleton<TokenStorageService>(
@@ -38,7 +80,7 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(getIt<Dio>()),
+    () => AuthRemoteDataSource(getIt<Dio>()),
   );
 
   getIt.registerLazySingleton<AuthLocalDataSource>(
