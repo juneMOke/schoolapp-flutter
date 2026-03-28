@@ -36,7 +36,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Veuillez entrer un email valide';
 
   @override
-  String get schoolApp => 'ETEELO CONNECT';
+  String get schoolApp => 'ETEELO TECH';
 
   @override
   String get logout => 'Déconnexion';

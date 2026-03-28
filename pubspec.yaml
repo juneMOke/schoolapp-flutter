@@ -46,6 +46,7 @@ dependencies:
   equatable: ^2.0.8
   dartz: ^0.10.1
   json_annotation: ^4.11.0
+  flutter_native_splash: ^2.4.4
 
 
 dev_dependencies:
@@ -109,3 +110,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#F7F9FF"
+  image: lib/features/splash/presentation/widgets/ETEELO_TECH.png
+  android_12:
+    image: lib/features/splash/presentation/widgets/ETEELO_TECH.png
+    color: "#F7F9FF"
+  web: false

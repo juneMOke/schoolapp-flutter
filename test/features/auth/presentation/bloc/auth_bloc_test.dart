@@ -14,17 +14,16 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 
 class MockLoginUseCase extends Mock implements LoginUseCase {}
 
-class MockCheckAuthStatusUseCase extends Mock implements CheckAuthStatusUseCase {}
+class MockCheckAuthStatusUseCase extends Mock
+    implements CheckAuthStatusUseCase {}
 
 class MockLogoutUseCase extends Mock implements LogoutUseCase {}
 
 const tUser = AuthenticatedUser(
-  id: 'user-id',
   email: 'test@example.com',
   firstName: 'John',
   lastName: 'Doe',
   role: 'ADMIN',
-  createdAt: '2026-01-01T00:00:00.000Z',
 );
 
 const tSession = AuthSession(
@@ -46,17 +45,18 @@ void main() {
   });
 
   AuthBloc buildBloc() => AuthBloc(
-        loginUseCase: mockLoginUseCase,
-        checkAuthStatusUseCase: mockCheckAuthStatusUseCase,
-        logoutUseCase: mockLogoutUseCase,
-      );
+    loginUseCase: mockLoginUseCase,
+    checkAuthStatusUseCase: mockCheckAuthStatusUseCase,
+    logoutUseCase: mockLogoutUseCase,
+  );
 
   group('AuthCheckRequested', () {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, authenticated] when session exists',
       setUp: () {
-        when(() => mockCheckAuthStatusUseCase())
-            .thenAnswer((_) async => const Right(tSession));
+        when(
+          () => mockCheckAuthStatusUseCase(),
+        ).thenAnswer((_) async => const Right(tSession));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(const AuthCheckRequested()),
@@ -69,8 +69,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, unauthenticated] when no session exists',
       setUp: () {
-        when(() => mockCheckAuthStatusUseCase())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCheckAuthStatusUseCase(),
+        ).thenAnswer((_) async => const Right(null));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(const AuthCheckRequested()),
@@ -83,9 +84,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, unauthenticated] on storage failure',
       setUp: () {
-        when(() => mockCheckAuthStatusUseCase()).thenAnswer(
-          (_) async => const Left(StorageFailure('Storage error')),
-        );
+        when(
+          () => mockCheckAuthStatusUseCase(),
+        ).thenAnswer((_) async => const Left(StorageFailure('Storage error')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(const AuthCheckRequested()),
@@ -127,10 +128,7 @@ void main() {
       'emits [loading, failure] on invalid credentials',
       setUp: () {
         when(
-          () => mockLoginUseCase(
-            email: 'test@example.com',
-            password: 'wrong',
-          ),
+          () => mockLoginUseCase(email: 'test@example.com', password: 'wrong'),
         ).thenAnswer(
           (_) async =>
               const Left(InvalidCredentialsFailure('Invalid credentials')),
@@ -138,10 +136,7 @@ void main() {
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const AuthLoginRequested(
-          email: 'test@example.com',
-          password: 'wrong',
-        ),
+        const AuthLoginRequested(email: 'test@example.com', password: 'wrong'),
       ),
       expect: () => const [
         AuthState(status: AuthStatus.loading),
@@ -157,8 +152,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, unauthenticated] on successful logout',
       setUp: () {
-        when(() => mockLogoutUseCase())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockLogoutUseCase(),
+        ).thenAnswer((_) async => const Right(null));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(const AuthLogoutRequested()),
@@ -171,18 +167,15 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, failure] when logout fails',
       setUp: () {
-        when(() => mockLogoutUseCase()).thenAnswer(
-          (_) async => const Left(StorageFailure('Storage error')),
-        );
+        when(
+          () => mockLogoutUseCase(),
+        ).thenAnswer((_) async => const Left(StorageFailure('Storage error')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(const AuthLogoutRequested()),
       expect: () => const [
         AuthState(status: AuthStatus.loading),
-        AuthState(
-          status: AuthStatus.failure,
-          errorMessage: 'Storage error',
-        ),
+        AuthState(status: AuthStatus.failure, errorMessage: 'Storage error'),
       ],
     );
   });

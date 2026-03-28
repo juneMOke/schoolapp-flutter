@@ -24,12 +24,10 @@ void main() {
       expect(model.accessToken, 'test_access_token');
       expect(model.tokenType, 'Bearer');
       expect(model.expiresIn, 86400);
-      expect(model.user.id, '3fa85f64-5717-4562-b3fc-2c963f66afa6');
       expect(model.user.email, 'user@example.com');
       expect(model.user.firstName, 'John');
       expect(model.user.lastName, 'Doe');
       expect(model.user.role, 'ADMIN');
-      expect(model.user.createdAt, '2026-03-27T16:57:27.393Z');
     });
 
     test('toAuthSession converts model to domain entity', () {
@@ -40,7 +38,6 @@ void main() {
       expect(session.accessToken, 'test_access_token');
       expect(session.tokenType, 'Bearer');
       expect(session.expiresIn, 86400);
-      expect(session.user.id, '3fa85f64-5717-4562-b3fc-2c963f66afa6');
       expect(session.user.email, 'user@example.com');
       expect(session.user.firstName, 'John');
       expect(session.user.lastName, 'Doe');

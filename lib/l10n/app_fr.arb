@@ -8,7 +8,7 @@
   "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères",
   "pleaseEnterEmail": "Veuillez entrer votre email",
   "pleaseEnterValidEmail": "Veuillez entrer un email valide",
-  "schoolApp": "ETEELO CONNECT",
+  "schoolApp": "ETEELO TECH",
   "logout": "Déconnexion",
   "welcome": "Bienvenue{name} !",
   "@welcome": {

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/login_page.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
+import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -34,7 +35,8 @@ class AppRouter {
       redirect: (context, state) {
         final authState = authBloc.state;
         final isAuthenticated = authState.status == AuthStatus.authenticated;
-        final isLoading = authState.status == AuthStatus.loading ||
+        final isLoading =
+            authState.status == AuthStatus.loading ||
             authState.status == AuthStatus.initial;
         final isOnLogin = state.matchedLocation == '/login';
 
@@ -46,6 +48,11 @@ class AppRouter {
         return null;
       },
       routes: [
+        GoRoute(
+          path: '/splash',
+          name: 'splash',
+          builder: (context, state) => const SplashPage(),
+        ),
         GoRoute(
           path: '/login',
           name: 'login',

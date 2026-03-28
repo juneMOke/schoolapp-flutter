@@ -28,6 +28,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(status: AuthStatus.loading));
+    
+    // Ajout d'un délai pour afficher la page splash
+    await Future.delayed(const Duration(seconds: 2));
+
     final result = await _checkAuthStatusUseCase();
     result.fold(
       (failure) => emit(

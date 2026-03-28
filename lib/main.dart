@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
     return BlocProvider<AuthBloc>.value(
       value: _authBloc,
       child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -54,7 +55,7 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         ),
-        routerConfig: _router,
+        routerConfig: _router
       ),
     );
   }
