@@ -48,4 +48,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInToContinue => 'Sign in to continue';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot password';
+
+  @override
+  String get receiveOtp => 'Receive an OTP code';
+
+  @override
+  String get enterEmailToReceiveOtp => 'Enter your email to receive a verification code.';
+
+  @override
+  String get sendCode => 'Send code';
+
+  @override
+  String get otpValidation => 'OTP Validation';
+
+  @override
+  String get enterSixDigitCode => 'Enter the 6-digit code';
+
+  @override
+  String codeSentTo(String email) {
+    return 'Code sent to $email';
+  }
+
+  @override
+  String get otpCodeLabel => 'OTP Code';
+
+  @override
+  String get validateCode => 'Validate code';
+
+  @override
+  String get otpMustBeSixDigits => 'OTP code must contain 6 digits';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get chooseNewPassword => 'Choose a new password';
+
+  @override
+  String account(String email) {
+    return 'Account: $email';
+  }
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get validateAndLogin => 'Validate and Login';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm your password';
 }

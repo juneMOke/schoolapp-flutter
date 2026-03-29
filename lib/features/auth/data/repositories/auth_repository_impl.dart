@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_request_model.dart';
+import 'package:school_app_flutter/features/auth/data/models/reset_password_request_model.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 
@@ -67,6 +68,28 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right<Failure, void>(null);
     } catch (_) {
       return const Left(StorageFailure('Failed to clear session'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+    required String newPassword,
+    required String otpToken,
+  }) async {
+    try {
+      await remoteDataSource.resetPassword(
+        ResetPasswordRequest(userEmail: email, newPassword: newPassword),
+        token: 'Bearer $otpToken',
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
 }

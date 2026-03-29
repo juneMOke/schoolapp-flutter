@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_email_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_password_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -16,7 +22,6 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -50,38 +55,16 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
+              EteeloEmailInput(
                 controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: l10n.email,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.email,
                 validator: (value) => validateEmail(context, value),
                 enabled: !isLoading,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              EteeloPasswordInput(
                 controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: l10n.password,
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
+                label: l10n.password,
                 validator: (value) => validatePassword(context, value),
                 enabled: !isLoading,
                 onFieldSubmitted: (_) => _submit(),
@@ -99,21 +82,25 @@ class _LoginFormState extends State<LoginForm> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              SizedBox(
-                height: 48,
-                child: FilledButton(
-                  onPressed: isLoading ? null : _submit,
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(l10n.signIn),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          context.read<ForgotPasswordBloc>().add(
+                            const ForgotPasswordFlowResetRequested(),
+                          );
+                          context.goNamed(AppRoutesNames.forgotPasswordEmail);
+                        },
+                  child: Text(l10n.forgotPassword),
                 ),
+              ),
+              const SizedBox(height: 8),
+              EteeloValidationButton(
+                onPressed: _submit,
+                label: l10n.signIn,
+                isLoading: isLoading,
               ),
             ],
           ),

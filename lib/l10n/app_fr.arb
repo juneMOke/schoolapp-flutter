@@ -19,5 +19,37 @@
       }
     }
   },
-  "signInToContinue": "Connectez-vous pour continuer"
+  "signInToContinue": "Connectez-vous pour continuer",
+  "forgotPassword": "Mot de passe oublié ?",
+  "forgotPasswordTitle": "Mot de passe oublié",
+  "receiveOtp": "Recevoir un code OTP",
+  "enterEmailToReceiveOtp": "Saisissez votre email pour recevoir un code de vérification.",
+  "sendCode": "Envoyer le code",
+  "otpValidation": "Validation OTP",
+  "enterSixDigitCode": "Entrez le code à 6 chiffres",
+  "codeSentTo": "Code envoyé à {email}",
+  "@codeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "otpCodeLabel": "Code OTP",
+  "validateCode": "Valider le code",
+  "otpMustBeSixDigits": "Le code OTP doit contenir 6 chiffres",
+  "newPassword": "Nouveau mot de passe",
+  "chooseNewPassword": "Choisissez un nouveau mot de passe",
+  "account": "Compte: {email}",
+  "@account": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPassword": "Confirmer le mot de passe",
+  "validateAndLogin": "Valider et se connecter",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe"
 }

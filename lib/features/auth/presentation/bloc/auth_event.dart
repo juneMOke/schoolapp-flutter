@@ -24,3 +24,18 @@ class AuthLoginRequested extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+class AuthResetPasswordRequested extends AuthEvent {
+  final String email;
+  final String newPassword;
+  final String otpToken;
+
+  const AuthResetPasswordRequested({
+    required this.email,
+    required this.newPassword,
+    required this.otpToken,
+  });
+
+  @override
+  List<Object?> get props => [email, newPassword, otpToken];
+}

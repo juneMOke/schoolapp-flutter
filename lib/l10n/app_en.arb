@@ -19,5 +19,37 @@
       }
     }
   },
-  "signInToContinue": "Sign in to continue"
+  "signInToContinue": "Sign in to continue",
+  "forgotPassword": "Forgot password?",
+  "forgotPasswordTitle": "Forgot password",
+  "receiveOtp": "Receive an OTP code",
+  "enterEmailToReceiveOtp": "Enter your email to receive a verification code.",
+  "sendCode": "Send code",
+  "otpValidation": "OTP Validation",
+  "enterSixDigitCode": "Enter the 6-digit code",
+  "codeSentTo": "Code sent to {email}",
+  "@codeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "otpCodeLabel": "OTP Code",
+  "validateCode": "Validate code",
+  "otpMustBeSixDigits": "OTP code must contain 6 digits",
+  "newPassword": "New password",
+  "chooseNewPassword": "Choose a new password",
+  "account": "Account: {email}",
+  "@account": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPassword": "Confirm password",
+  "validateAndLogin": "Validate and Login",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "pleaseConfirmPassword": "Please confirm your password"
 }

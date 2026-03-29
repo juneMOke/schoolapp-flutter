@@ -152,7 +152,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolApp.
   ///
   /// In en, this message translates to:
-  /// **'ETEELO CONNECT'**
+  /// **'ETEELO TECH'**
   String get schoolApp;
 
   /// No description provided for @logout.
@@ -172,6 +172,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to continue'**
   String get signInToContinue;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @receiveOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive an OTP code'**
+  String get receiveOtp;
+
+  /// No description provided for @enterEmailToReceiveOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email to receive a verification code.'**
+  String get enterEmailToReceiveOtp;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCode;
+
+  /// No description provided for @otpValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Validation'**
+  String get otpValidation;
+
+  /// No description provided for @enterSixDigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get enterSixDigitCode;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to {email}'**
+  String codeSentTo(String email);
+
+  /// No description provided for @otpCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Code'**
+  String get otpCodeLabel;
+
+  /// No description provided for @validateCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate code'**
+  String get validateCode;
+
+  /// No description provided for @otpMustBeSixDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP code must contain 6 digits'**
+  String get otpMustBeSixDigits;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @chooseNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get chooseNewPassword;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: {email}'**
+  String account(String email);
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @validateAndLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate and Login'**
+  String get validateAndLogin;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @pleaseConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get pleaseConfirmPassword;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -13,4 +13,10 @@ abstract class AuthRepository {
   Future<Either<Failure, AuthSession?>> getCurrentSession();
 
   Future<Either<Failure, void>> logout();
+
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+    required String newPassword,
+    required String otpToken,
+  });
 }

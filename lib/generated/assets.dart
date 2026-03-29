@@ -4,6 +4,37 @@ import 'package:flutter/widgets.dart';
 
 class Assets {
   Assets._();
+
+  static const $AssetsFeaturesGen features = $AssetsFeaturesGen();
+}
+
+class $AssetsFeaturesGen {
+  const $AssetsFeaturesGen();
+
+  final $AssetsAuthGen auth = const $AssetsAuthGen();
+}
+
+class $AssetsAuthGen {
+  const $AssetsAuthGen();
+
+  final $AssetsDataGen data = const $AssetsDataGen();
+}
+
+class $AssetsDataGen {
+  const $AssetsDataGen();
+
+  final $AssetsDatasourcesGen datasources = const $AssetsDatasourcesGen();
+}
+
+class $AssetsDatasourcesGen {
+  const $AssetsDatasourcesGen();
+
+  final String authLocalDataSource =
+      'lib/features/auth/data/datasources/auth_local_data_source.dart';
+  final String authRemoteDataSource =
+      'lib/features/auth/data/datasources/auth_remote_data_source.dart';
+  final String forgotPasswordRemoteDataSource =
+      'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
 }
 
 class AssetGenImage {

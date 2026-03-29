@@ -110,6 +110,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  assets:
+    - lib/features/auth/data/datasources/
+
 
 flutter_native_splash:
   color: "#F7F9FF"

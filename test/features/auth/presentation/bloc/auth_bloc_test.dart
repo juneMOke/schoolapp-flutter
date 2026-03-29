@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/auth/domain/entities/authenticated_u
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/login_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/logout_use_case.dart';
+import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -18,6 +19,8 @@ class MockCheckAuthStatusUseCase extends Mock
     implements CheckAuthStatusUseCase {}
 
 class MockLogoutUseCase extends Mock implements LogoutUseCase {}
+
+class MockResetPasswordUseCase extends Mock implements ResetPasswordUseCase {}
 
 const tUser = AuthenticatedUser(
   email: 'test@example.com',
@@ -37,17 +40,20 @@ void main() {
   late MockLoginUseCase mockLoginUseCase;
   late MockCheckAuthStatusUseCase mockCheckAuthStatusUseCase;
   late MockLogoutUseCase mockLogoutUseCase;
+  late MockResetPasswordUseCase mockResetPasswordUseCase;
 
   setUp(() {
     mockLoginUseCase = MockLoginUseCase();
     mockCheckAuthStatusUseCase = MockCheckAuthStatusUseCase();
     mockLogoutUseCase = MockLogoutUseCase();
+    mockResetPasswordUseCase = MockResetPasswordUseCase();
   });
 
   AuthBloc buildBloc() => AuthBloc(
     loginUseCase: mockLoginUseCase,
     checkAuthStatusUseCase: mockCheckAuthStatusUseCase,
     logoutUseCase: mockLogoutUseCase,
+    resetPasswordUseCase: mockResetPasswordUseCase,
   );
 
   group('AuthCheckRequested', () {
