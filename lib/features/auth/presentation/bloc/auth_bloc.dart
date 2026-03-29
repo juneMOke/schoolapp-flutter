@@ -17,11 +17,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required CheckAuthStatusUseCase checkAuthStatusUseCase,
     required LogoutUseCase logoutUseCase,
     required ResetPasswordUseCase resetPasswordUseCase,
-  })  : _loginUseCase = loginUseCase,
-        _checkAuthStatusUseCase = checkAuthStatusUseCase,
-        _logoutUseCase = logoutUseCase,
-        _resetPasswordUseCase = resetPasswordUseCase,
-        super(AuthState.initial()) {
+  }) : _loginUseCase = loginUseCase,
+       _checkAuthStatusUseCase = checkAuthStatusUseCase,
+       _logoutUseCase = logoutUseCase,
+       _resetPasswordUseCase = resetPasswordUseCase,
+       super(AuthState.initial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
@@ -33,9 +33,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    
-    // Ajout d'un délai pour afficher la page splash
-    await Future.delayed(const Duration(seconds: 2));
 
     final result = await _checkAuthStatusUseCase();
     result.fold(
@@ -47,10 +44,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
       (session) => emit(
         session != null
-            ? AuthState(
-                status: AuthStatus.authenticated,
-                user: session.user,
-              )
+            ? AuthState(status: AuthStatus.authenticated, user: session.user)
             : const AuthState(status: AuthStatus.unauthenticated),
       ),
     );
@@ -67,17 +61,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     result.fold(
       (failure) => emit(
-        AuthState(
-          status: AuthStatus.failure,
-          errorMessage: failure.message,
-        ),
+        AuthState(status: AuthStatus.failure, errorMessage: failure.message),
       ),
-      (session) => emit(
-        AuthState(
-          status: AuthStatus.authenticated,
-          user: session.user,
-        ),
-      ),
+      (session) =>
+          emit(AuthState(status: AuthStatus.authenticated, user: session.user)),
     );
   }
 
@@ -89,10 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _logoutUseCase();
     result.fold(
       (failure) => emit(
-        AuthState(
-          status: AuthStatus.failure,
-          errorMessage: failure.message,
-        ),
+        AuthState(status: AuthStatus.failure, errorMessage: failure.message),
       ),
       (_) => emit(const AuthState(status: AuthStatus.unauthenticated)),
     );
@@ -111,14 +95,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(
-        AuthState(
-          status: AuthStatus.failure,
-          errorMessage: failure.message,
-        ),
+        AuthState(status: AuthStatus.failure, errorMessage: failure.message),
       ),
       (_) => emit(state.copyWith(status: AuthStatus.unauthenticated)),
     );
-
-
   }
 }
