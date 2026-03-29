@@ -93,8 +93,8 @@ class _TechIcon extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  EteeloTechLogo.primaryBlue.withOpacity(0.15),
-                  EteeloTechLogo.secondaryGreen.withOpacity(0.15),
+                  EteeloTechLogo.primaryBlue.withValues(alpha: 0.15),
+                  EteeloTechLogo.secondaryGreen.withValues(alpha: 0.15),
                 ],
               ),
               shape: BoxShape.circle,
@@ -116,7 +116,7 @@ class _TechIcon extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: EteeloTechLogo.primaryBlue.withOpacity(0.4),
+                  color: EteeloTechLogo.primaryBlue.withValues(alpha: 0.4),
                   blurRadius: 15,
                   offset: const Offset(0, 6),
                 ),
@@ -143,7 +143,6 @@ class _PositionedNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double angle = (index * 90 + 45) * 3.14159 / 180;
     const double radius = 35;
     
     return Positioned(
@@ -180,7 +179,9 @@ class _CircuitPainter extends CustomPainter {
     
     // Draw connecting lines with gradients
     for (int i = 0; i < 4; i++) {
-      paint.color = i % 2 == 0 ? color1.withOpacity(0.5) : color2.withOpacity(0.5);
+      paint.color = i % 2 == 0
+          ? color1.withValues(alpha: 0.5)
+          : color2.withValues(alpha: 0.5);
       final double endX = i < 2 ? size.width * 0.25 : size.width * 0.75;
       final double endY = i % 2 == 0 ? size.height * 0.25 : size.height * 0.75;
       
@@ -193,7 +194,7 @@ class _CircuitPainter extends CustomPainter {
     
     // Draw an outer circle dash-like
     paint.strokeWidth = 1;
-    canvas.drawCircle(center, 42, paint..color = color1.withOpacity(0.2));
+    canvas.drawCircle(center, 42, paint..color = color1.withValues(alpha: 0.2));
   }
 
   @override

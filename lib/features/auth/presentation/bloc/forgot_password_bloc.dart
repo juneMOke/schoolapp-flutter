@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/generate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
