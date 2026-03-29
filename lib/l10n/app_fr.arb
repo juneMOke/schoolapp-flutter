@@ -51,5 +51,22 @@
   "confirmPassword": "Confirmer le mot de passe",
   "validateAndLogin": "Valider et se connecter",
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
-  "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe"
+  "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe",
+  "menuInscriptions": "Inscriptions",
+  "menuFinances": "Finances",
+  "menuClasses": "Classes",
+  "menuDisciplines": "Disciplines",
+  "subMenuDashboard": "Tableau de Bord",
+  "subMenuPreRegistrations": "Pré-Inscriptions",
+  "subMenuReRegistrations": "Re-Inscriptions",
+  "subMenuFirstRegistration": "Première Inscription",
+  "subMenuBilling": "Facturations",
+  "subMenuOrganization": "Organisation",
+  "subMenuClassesList": "Classes",
+  "subMenuAttendance": "Présences",
+  "subMenuDisciplinesList": "Disciplines",
+  "profile": "Profil",
+  "settings": "Paramètres",
+  "home": "Accueil",
+  "pageUnderConstruction": "Cette page est en cours de développement"
 }
