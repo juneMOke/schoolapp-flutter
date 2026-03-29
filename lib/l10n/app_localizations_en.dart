@@ -106,4 +106,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseConfirmPassword => 'Please confirm your password';
+
+  @override
+  String get menuInscriptions => 'Registrations';
+
+  @override
+  String get menuFinances => 'Finances';
+
+  @override
+  String get menuClasses => 'Classes';
+
+  @override
+  String get menuDisciplines => 'Disciplines';
+
+  @override
+  String get subMenuDashboard => 'Dashboard';
+
+  @override
+  String get subMenuPreRegistrations => 'Pre-Registrations';
+
+  @override
+  String get subMenuReRegistrations => 'Re-Registrations';
+
+  @override
+  String get subMenuFirstRegistration => 'First Registration';
+
+  @override
+  String get subMenuBilling => 'Billing';
+
+  @override
+  String get subMenuOrganization => 'Organization';
+
+  @override
+  String get subMenuClassesList => 'Classes List';
+
+  @override
+  String get subMenuAttendance => 'Attendance';
+
+  @override
+  String get subMenuDisciplinesList => 'Disciplines List';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get pageUnderConstruction => 'This page is under development';
 }

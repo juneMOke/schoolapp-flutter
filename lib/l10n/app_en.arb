@@ -51,5 +51,64 @@
   "confirmPassword": "Confirm password",
   "validateAndLogin": "Validate and Login",
   "passwordsDoNotMatch": "Passwords do not match",
-  "pleaseConfirmPassword": "Please confirm your password"
+  "pleaseConfirmPassword": "Please confirm your password",
+  "@pleaseConfirmPassword": {
+    "description": "Confirm password validation message"
+  },
+  "menuInscriptions": "Registrations",
+  "@menuInscriptions": {
+    "description": "Inscriptions menu title"
+  },
+  "menuFinances": "Finances",
+  "@menuFinances": {
+    "description": "Finances menu title"
+  },
+  "menuClasses": "Classes",
+  "@menuClasses": {
+    "description": "Classes menu title"
+  },
+  "menuDisciplines": "Disciplines",
+  "@menuDisciplines": {
+    "description": "Disciplines menu title"
+  },
+  "subMenuDashboard": "Dashboard",
+  "@subMenuDashboard": {
+    "description": "Dashboard sub-menu title"
+  },
+  "subMenuPreRegistrations": "Pre-Registrations",
+  "@subMenuPreRegistrations": {
+    "description": "Pre-registrations sub-menu title"
+  },
+  "subMenuReRegistrations": "Re-Registrations",
+  "@subMenuReRegistrations": {
+    "description": "Re-registrations sub-menu title"
+  },
+  "subMenuFirstRegistration": "First Registration",
+  "@subMenuFirstRegistration": {
+    "description": "First registration sub-menu title"
+  },
+  "subMenuBilling": "Billing",
+  "@subMenuBilling": {
+    "description": "Billing sub-menu title"
+  },
+  "subMenuOrganization": "Organization",
+  "@subMenuOrganization": {
+    "description": "Organization sub-menu title"
+  },
+  "subMenuClassesList": "Classes List",
+  "@subMenuClassesList": {
+    "description": "Classes list sub-menu title"
+  },
+  "subMenuAttendance": "Attendance",
+  "@subMenuAttendance": {
+    "description": "Attendance sub-menu title"
+  },
+  "subMenuDisciplinesList": "Disciplines List",
+  "@subMenuDisciplinesList": {
+    "description": "Disciplines list sub-menu title"
+  },
+  "profile": "Profile",
+  "settings": "Settings",
+  "home": "Home",
+  "pageUnderConstruction": "This page is under development"
 }

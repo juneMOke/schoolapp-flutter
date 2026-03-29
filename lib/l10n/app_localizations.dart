@@ -275,11 +275,113 @@ abstract class AppLocalizations {
   /// **'Passwords do not match'**
   String get passwordsDoNotMatch;
 
-  /// No description provided for @pleaseConfirmPassword.
+  /// Confirm password validation message
   ///
   /// In en, this message translates to:
   /// **'Please confirm your password'**
   String get pleaseConfirmPassword;
+
+  /// Inscriptions menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations'**
+  String get menuInscriptions;
+
+  /// Finances menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Finances'**
+  String get menuFinances;
+
+  /// Classes menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get menuClasses;
+
+  /// Disciplines menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplines'**
+  String get menuDisciplines;
+
+  /// Dashboard sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get subMenuDashboard;
+
+  /// Pre-registrations sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Registrations'**
+  String get subMenuPreRegistrations;
+
+  /// Re-registrations sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Re-Registrations'**
+  String get subMenuReRegistrations;
+
+  /// First registration sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'First Registration'**
+  String get subMenuFirstRegistration;
+
+  /// Billing sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get subMenuBilling;
+
+  /// Organization sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get subMenuOrganization;
+
+  /// Classes list sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Classes List'**
+  String get subMenuClassesList;
+
+  /// Attendance sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get subMenuAttendance;
+
+  /// Disciplines list sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplines List'**
+  String get subMenuDisciplinesList;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @pageUnderConstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'This page is under development'**
+  String get pageUnderConstruction;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
