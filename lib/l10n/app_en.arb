@@ -1,0 +1,55 @@
+{
+  "hello": "Hello",
+  "login": "Login",
+  "email": "Email",
+  "password": "Password",
+  "signIn": "Sign In",
+  "pleaseEnterPassword": "Please enter your password",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "pleaseEnterEmail": "Please enter your email",
+  "pleaseEnterValidEmail": "Please enter a valid email",
+  "schoolApp": "ETEELO TECH",
+  "logout": "Logout",
+  "welcome": "Welcome{name}!",
+  "@welcome": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": ", John"
+      }
+    }
+  },
+  "signInToContinue": "Sign in to continue",
+  "forgotPassword": "Forgot password?",
+  "forgotPasswordTitle": "Forgot password",
+  "receiveOtp": "Receive an OTP code",
+  "enterEmailToReceiveOtp": "Enter your email to receive a verification code.",
+  "sendCode": "Send code",
+  "otpValidation": "OTP Validation",
+  "enterSixDigitCode": "Enter the 6-digit code",
+  "codeSentTo": "Code sent to {email}",
+  "@codeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "otpCodeLabel": "OTP Code",
+  "validateCode": "Validate code",
+  "otpMustBeSixDigits": "OTP code must contain 6 digits",
+  "newPassword": "New password",
+  "chooseNewPassword": "Choose a new password",
+  "account": "Account: {email}",
+  "@account": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPassword": "Confirm password",
+  "validateAndLogin": "Validate and Login",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "pleaseConfirmPassword": "Please confirm your password"
+}
