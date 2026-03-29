@@ -19,6 +19,15 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_academic_fees_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_pre_registrations_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_school_level_groups_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_school_levels_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_student_detail_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_students_use_case.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -147,5 +156,39 @@ Future<void> configureDependencies() async {
       generateOtpUseCase: getIt<GenerateOtpUseCase>(),
       validateOtpUseCase: getIt<ValidateOtpUseCase>(),
     ),
+  );
+
+  getIt.registerLazySingleton<EnrollmentRemoteDataSource>(
+    () => EnrollmentRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<EnrollmentRepository>(
+    () => EnrollmentRepositoryImpl(
+      remoteDataSource: getIt<EnrollmentRemoteDataSource>(),
+    ),
+  );
+
+  getIt.registerFactory<GetPreRegistrationsUseCase>(
+    () => GetPreRegistrationsUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<SearchStudentsUseCase>(
+    () => SearchStudentsUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetStudentDetailUseCase>(
+    () => GetStudentDetailUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetSchoolLevelGroupsUseCase>(
+    () => GetSchoolLevelGroupsUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetSchoolLevelsUseCase>(
+    () => GetSchoolLevelsUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetAcademicFeesUseCase>(
+    () => GetAcademicFeesUseCase(getIt<EnrollmentRepository>()),
   );
 }
