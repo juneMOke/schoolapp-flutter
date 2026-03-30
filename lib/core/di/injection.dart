@@ -19,6 +19,15 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -146,6 +155,70 @@ Future<void> configureDependencies() async {
     () => ForgotPasswordBloc(
       generateOtpUseCase: getIt<GenerateOtpUseCase>(),
       validateOtpUseCase: getIt<ValidateOtpUseCase>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<EnrollmentRemoteDataSource>(
+    () => EnrollmentRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<EnrollmentRepository>(
+    () => EnrollmentRepositoryImpl(
+      remoteDataSource: getIt<EnrollmentRemoteDataSource>(),
+    ),
+  );
+
+  getIt.registerFactory<GetEnrollmentSummaryListByStatusUseCase>(
+    () => GetEnrollmentSummaryListByStatusUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetEnrollmentDetailUseCase>(
+    () => GetEnrollmentDetailUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<
+    SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
+  >(
+    () =>
+        SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase(
+          getIt<EnrollmentRepository>(),
+        ),
+  );
+
+  getIt.registerFactory<
+    SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
+  >(
+    () =>
+        SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase(
+          getIt<EnrollmentRepository>(),
+        ),
+  );
+
+  getIt.registerFactory<
+    SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
+  >(
+    () => SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase(
+      getIt<EnrollmentRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<EnrollmentBloc>(
+    () => EnrollmentBloc(
+      getEnrollmentSummariesUseCase:
+          getIt<GetEnrollmentSummaryListByStatusUseCase>(),
+      getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
+      searchByStudentNameUseCase:
+          getIt<
+            SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
+          >(),
+      searchByStudentNamesAndDateOfBirthUseCase:
+          getIt<
+            SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
+          >(),
+      searchByDateOfBirthUseCase:
+          getIt<
+            SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
+          >(),
     ),
   );
 }
