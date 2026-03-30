@@ -2,14 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/academic_fee_model.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/paginated_response_model.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/academic_fee.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/paginated_response.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/student_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 
 class EnrollmentRepositoryImpl implements EnrollmentRepository {
@@ -18,16 +12,17 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   const EnrollmentRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, List<StudentSummary>>> getPreRegistrations({
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  getEnrollmentSummaryListByStatus({
     required String status,
     required String academicYearId,
   }) async {
     try {
-      final models = await remoteDataSource.getPreRegistrations(
-        status,
-        academicYearId,
+      final enrollmentModelList = await remoteDataSource
+          .getEnrollmentSummaryByStatusAndAcademicYear(status, academicYearId);
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
       );
-      return Right(models.map((m) => m.toStudentSummary()).toList());
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);
@@ -39,20 +34,26 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }
 
   @override
-  Future<Either<Failure, List<StudentSummary>>> searchStudents({
-    String? firstName,
-    String? lastName,
-    String? middleName,
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName({
+    required String status,
     required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
   }) async {
     try {
-      final models = await remoteDataSource.searchStudents(
-        firstName,
-        lastName,
-        middleName,
-        academicYearId,
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+            status,
+            academicYearId,
+            firstName,
+            lastName,
+            surname,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
       );
-      return Right(models.map((m) => m.toStudentSummary()).toList());
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);
@@ -64,88 +65,74 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }
 
   @override
-  Future<Either<Failure, StudentDetail>> getStudentDetail({
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String dateOfBirth,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+            status,
+            academicYearId,
+            firstName,
+            lastName,
+            surname,
+            dateOfBirth,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String dateOfBirth,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+            status,
+            academicYearId,
+            dateOfBirth,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   }) async {
     try {
-      final model = await remoteDataSource.getStudentDetail(enrollmentId);
-      return Right(model.toStudentDetail());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<SchoolLevelGroup>>> getSchoolLevelGroups({
-    required String academicYearId,
-  }) async {
-    try {
-      final models =
-          await remoteDataSource.getSchoolLevelGroups(academicYearId);
-      return Right(models.map((m) => m.toSchoolLevelGroup()).toList());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<SchoolLevel>>> getSchoolLevels({
-    required String levelGroupId,
-    required String academicYearId,
-  }) async {
-    try {
-      final models = await remoteDataSource.getSchoolLevels(
-        levelGroupId,
-        academicYearId,
+      final enrollmentModel = await remoteDataSource.getEnrollmentDetail(
+        enrollmentId,
       );
-      return Right(models.map((m) => m.toSchoolLevel()).toList());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, PaginatedResponse<AcademicFee>>> getAcademicFees({
-    required String levelId,
-    required String academicYearId,
-    required int page,
-    required int size,
-  }) async {
-    try {
-      final data = await remoteDataSource.getAcademicFees(
-        levelId,
-        academicYearId,
-        page,
-        size,
-      );
-      final paginated = PaginatedResponseModel<AcademicFeeModel>.fromJson(
-        data,
-        AcademicFeeModel.fromJson,
-      );
-      return Right(
-        PaginatedResponse<AcademicFee>(
-          content: paginated.content.map((m) => m.toAcademicFee()).toList(),
-          totalElements: paginated.totalElements,
-          totalPages: paginated.totalPages,
-          page: paginated.page,
-          size: paginated.size,
-        ),
-      );
+      return Right(enrollmentModel.toEnrollmentDetail());
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);

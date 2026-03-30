@@ -20,7 +20,8 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<List<StudentSummaryModel>> getPreRegistrations(
+  Future<List<EnrollmentSummaryModel>>
+  getEnrollmentSummaryByStatusAndAcademicYear(
     String status,
     String academicYearId,
   ) async {
@@ -31,23 +32,23 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<StudentSummaryModel>>(
+    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/pre-registrations',
+            '/api/v1/enrollments',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<StudentSummaryModel> _value;
+    late List<EnrollmentSummaryModel> _value;
     try {
       _value = _result.data!
           .map(
             (dynamic i) =>
-                StudentSummaryModel.fromJson(i as Map<String, dynamic>),
+                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
           )
           .toList();
     } on Object catch (e, s) {
@@ -58,39 +59,41 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<StudentSummaryModel>> searchStudents(
-    String? firstName,
-    String? lastName,
-    String? middleName,
+  Future<List<EnrollmentSummaryModel>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+    String status,
     String academicYearId,
+    String firstName,
+    String lastName,
+    String surname,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
+      r'status': status,
+      r'academicYearId': academicYearId,
       r'firstName': firstName,
       r'lastName': lastName,
-      r'middleName': middleName,
-      r'academicYearId': academicYearId,
+      r'surname': surname,
     };
-    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<StudentSummaryModel>>(
+    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/students/search',
+            '/api/v1/enrollments',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<StudentSummaryModel> _value;
+    late List<EnrollmentSummaryModel> _value;
     try {
       _value = _result.data!
           .map(
             (dynamic i) =>
-                StudentSummaryModel.fromJson(i as Map<String, dynamic>),
+                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
           )
           .toList();
     } on Object catch (e, s) {
@@ -101,136 +104,113 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<StudentDetailModel> getStudentDetail(String enrollmentId) async {
+  Future<List<EnrollmentSummaryModel>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+    String status,
+    String academicYearId,
+    String firstName,
+    String lastName,
+    String surname,
+    String dateOfBirth,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'status': status,
+      r'academicYearId': academicYearId,
+      r'firstName': firstName,
+      r'lastName': lastName,
+      r'surname': surname,
+      r'dateOfBirth': dateOfBirth,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<EnrollmentSummaryModel> _value;
+    try {
+      _value = _result.data!
+          .map(
+            (dynamic i) =>
+                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
+          )
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<List<EnrollmentSummaryModel>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+    String status,
+    String academicYearId,
+    String dateOfBirth,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'status': status,
+      r'academicYearId': academicYearId,
+      r'dateOfBirth': dateOfBirth,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<EnrollmentSummaryModel> _value;
+    try {
+      _value = _result.data!
+          .map(
+            (dynamic i) =>
+                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
+          )
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<EnrollmentDetailModel> getEnrollmentDetail(String enrollmentId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<StudentDetailModel>(
+    final _options = _setStreamType<EnrollmentDetailModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/students/${enrollmentId}',
+            '/api/v1/enrollments/${enrollmentId}/detail',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late StudentDetailModel _value;
+    late EnrollmentDetailModel _value;
     try {
-      _value = StudentDetailModel.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<List<SchoolLevelGroupModel>> getSchoolLevelGroups(
-    String academicYearId,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'academicYearId': academicYearId,
-    };
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<SchoolLevelGroupModel>>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v1/enrollment/school-level-groups',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<SchoolLevelGroupModel> _value;
-    try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                SchoolLevelGroupModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<List<SchoolLevelModel>> getSchoolLevels(
-    String levelGroupId,
-    String academicYearId,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'levelGroupId': levelGroupId,
-      r'academicYearId': academicYearId,
-    };
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<SchoolLevelModel>>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v1/enrollment/school-levels',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<SchoolLevelModel> _value;
-    try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                SchoolLevelModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<Map<String, dynamic>> getAcademicFees(
-    String levelId,
-    String academicYearId,
-    int page,
-    int size,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'levelId': levelId,
-      r'academicYearId': academicYearId,
-      r'page': page,
-      r'size': size,
-    };
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<Map<String, dynamic>>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v1/enrollment/academic-fees',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late Map<String, dynamic> _value;
-    try {
-      _value = _result.data!;
+      _value = EnrollmentDetailModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

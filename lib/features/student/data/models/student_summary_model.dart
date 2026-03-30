@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/student_summary.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 class StudentSummaryModel {
   final String id;

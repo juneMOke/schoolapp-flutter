@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
 
 class StudentDetail extends Equatable {
   final String id;
@@ -9,15 +10,15 @@ class StudentDetail extends Equatable {
   final String surname;
   final String dateOfBirth;
   final Gender gender;
-  final String? placeOfBirth;
-  final String? nationality;
+  final String birthPlace;
+  final String nationality;
   final String? photoUrl;
-  final String? city;
-  final String? district;
-  final String? commune;
-  final String? neighborhood;
-  final String? addressComplement;
-  final EnrollmentDetail? enrollment;
+  final String city;
+  final String district;
+  final String commune;
+  final String address;
+  final SchoolLevel schoolLevel;
+  final SchoolLevelGroup schoolLevelGroup;
 
   const StudentDetail({
     required this.id,
@@ -26,15 +27,15 @@ class StudentDetail extends Equatable {
     required this.surname,
     required this.dateOfBirth,
     required this.gender,
-    this.placeOfBirth,
-    this.nationality,
+    required this.birthPlace,
+    required this.nationality,
     this.photoUrl,
-    this.city,
-    this.district,
-    this.commune,
-    this.neighborhood,
-    this.addressComplement,
-    this.enrollment,
+    required this.city,
+    required this.district,
+    required this.commune,
+    required this.address,
+    required this.schoolLevel,
+    required this.schoolLevelGroup,
   });
 
   @override
@@ -45,14 +46,14 @@ class StudentDetail extends Equatable {
     surname,
     dateOfBirth,
     gender,
-    placeOfBirth,
+    birthPlace,
     nationality,
     photoUrl,
     city,
     district,
     commune,
-    neighborhood,
-    addressComplement,
-    enrollment,
+    address,
+    schoolLevel,
+    schoolLevelGroup,
   ];
 }

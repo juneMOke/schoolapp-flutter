@@ -1,33 +1,36 @@
-import 'package:school_app_flutter/features/enrollment/domain/entities/parent_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
+import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 
-class ParentDetailModel {
+class ParentSummaryModel {
   final String id;
   final String firstName;
   final String lastName;
   final String? surname;
-  final String phone;
-  final String? email;
+  final String identificationNumber;
+  final String phoneNumber;
+  final String email;
   final String relationshipType;
 
-  const ParentDetailModel({
+  const ParentSummaryModel({
     required this.id,
     required this.firstName,
     required this.lastName,
     this.surname,
-    required this.phone,
-    this.email,
+    required this.identificationNumber,
+    required this.phoneNumber,
+    required this.email,
     required this.relationshipType,
   });
 
-  factory ParentDetailModel.fromJson(Map<String, dynamic> json) =>
-      ParentDetailModel(
+  factory ParentSummaryModel.fromJson(Map<String, dynamic> json) =>
+      ParentSummaryModel(
         id: json['id'] as String,
         firstName: json['firstName'] as String,
         lastName: json['lastName'] as String,
         surname: json['surname'] as String?,
-        phone: json['phone'] as String,
-        email: json['email'] as String?,
+        identificationNumber: json['identificationNumber'] as String,
+        phoneNumber: json['phone'] as String,
+        email: json['email'] as String,
         relationshipType: json['relationshipType'] as String,
       );
 
@@ -36,17 +39,18 @@ class ParentDetailModel {
     'firstName': firstName,
     'lastName': lastName,
     'surname': surname,
-    'phone': phone,
+    'phone': phoneNumber,
     'email': email,
     'relationshipType': relationshipType,
   };
 
-  ParentDetail toParentDetail() => ParentDetail(
+  ParentSummary toParentSummary() => ParentSummary(
     id: id,
     firstName: firstName,
     lastName: lastName,
     surname: surname,
-    phone: phone,
+    identificationNumber: identificationNumber,
+    phoneNumber: phoneNumber,
     email: email,
     relationshipType: RelationshipType.fromString(relationshipType),
   );

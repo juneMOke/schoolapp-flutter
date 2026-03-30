@@ -19,11 +19,11 @@ enum RelationshipType {
         return RelationshipType.aunt;
       case 'GRANDPARENT':
         return RelationshipType.grandparent;
-      case 'OTHER':
-        return RelationshipType.other;
       case 'FATHER':
-      default:
         return RelationshipType.father;
+      case 'OTHER':
+      default:
+        return RelationshipType.other;
     }
   }
 }

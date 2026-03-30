@@ -1,42 +1,42 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/academic_fee.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/paginated_response.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/student_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 
 abstract class EnrollmentRepository {
-  Future<Either<Failure, List<StudentSummary>>> getPreRegistrations({
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  getEnrollmentSummaryListByStatus({
     required String status,
     required String academicYearId,
   });
 
-  Future<Either<Failure, List<StudentSummary>>> searchStudents({
-    String? firstName,
-    String? lastName,
-    String? middleName,
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName({
+    required String status,
     required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
   });
 
-  Future<Either<Failure, StudentDetail>> getStudentDetail({
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String dateOfBirth,
+  });
+
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String dateOfBirth,
+  });
+
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
-  });
-
-  Future<Either<Failure, List<SchoolLevelGroup>>> getSchoolLevelGroups({
-    required String academicYearId,
-  });
-
-  Future<Either<Failure, List<SchoolLevel>>> getSchoolLevels({
-    required String levelGroupId,
-    required String academicYearId,
-  });
-
-  Future<Either<Failure, PaginatedResponse<AcademicFee>>> getAcademicFees({
-    required String levelId,
-    required String academicYearId,
-    required int page,
-    required int size,
   });
 }

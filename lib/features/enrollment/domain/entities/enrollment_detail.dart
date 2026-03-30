@@ -1,39 +1,15 @@
-import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
+import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 
-class EnrollmentDetail extends Equatable {
-  final String enrollmentId;
-  final String enrollmentCode;
-  final EnrollmentStatus status;
-  final String academicYearId;
-  final String studentId;
-  final String? levelId;
-  final String? levelGroupId;
-  final String? createdAt;
-  final String? updatedAt;
+class EnrollmentDetail {
+  final StudentDetail studentDetail;
+  final ParentSummary parentDetails;
+  final EnrollmentSchoolDetail enrollmentDetail;
 
-  const EnrollmentDetail({
-    required this.enrollmentId,
-    required this.enrollmentCode,
-    required this.status,
-    required this.academicYearId,
-    required this.studentId,
-    this.levelId,
-    this.levelGroupId,
-    this.createdAt,
-    this.updatedAt,
+  EnrollmentDetail({
+    required this.studentDetail,
+    required this.parentDetails,
+    required this.enrollmentDetail,
   });
-
-  @override
-  List<Object?> get props => [
-    enrollmentId,
-    enrollmentCode,
-    status,
-    academicYearId,
-    studentId,
-    levelId,
-    levelGroupId,
-    createdAt,
-    updatedAt,
-  ];
 }

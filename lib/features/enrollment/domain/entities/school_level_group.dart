@@ -3,14 +3,14 @@ import 'package:equatable/equatable.dart';
 class SchoolLevelGroup extends Equatable {
   final String id;
   final String name;
-  final String? description;
+  final String code;
 
   const SchoolLevelGroup({
     required this.id,
     required this.name,
-    this.description,
+    required this.code,
   });
 
   @override
-  List<Object?> get props => [id, name, description];
+  List<Object?> get props => [id, name, code];
 }
