@@ -4,7 +4,7 @@ import 'package:school_app_flutter/features/student/domain/entities/student_deta
 
 class EnrollmentDetail {
   final StudentDetail studentDetail;
-  final ParentSummary parentDetails;
+  final List<ParentSummary> parentDetails;
   final EnrollmentSchoolDetail enrollmentDetail;
 
   EnrollmentDetail({

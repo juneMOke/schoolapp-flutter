@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_email_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_otp_page.dart';
@@ -83,6 +86,17 @@ class AppRouter {
           path: '/home',
           name: AppRoutesNames.home,
           builder: (context, state) => const HomePage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.preInscriptions,
+          builder: (context, state) => const PreRegistrationsPage(),
+        ),
+        GoRoute(
+          path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+          builder: (context, state) {
+            final enrollmentId = state.pathParameters['enrollmentId']!;
+            return EnrollmentDetailPage(enrollmentId: enrollmentId);
+          },
         ),
       ],
     );

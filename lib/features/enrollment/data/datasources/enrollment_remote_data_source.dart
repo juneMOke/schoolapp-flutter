@@ -14,6 +14,7 @@ abstract class EnrollmentRemoteDataSource {
   @GET(AppConstants.enrollmentEndpoint)
   Future<List<EnrollmentSummaryModel>>
   getEnrollmentSummaryByStatusAndAcademicYear(
+    @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
   );
@@ -21,6 +22,7 @@ abstract class EnrollmentRemoteDataSource {
   @GET(AppConstants.enrollmentSearchByStudentInfoEndpoint)
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+    @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
     @Query('firstName') String firstName,
@@ -31,6 +33,7 @@ abstract class EnrollmentRemoteDataSource {
   @GET(AppConstants.enrollmentSearchByStudentInfoWithDateOfBirthEndpoint)
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+    @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
     @Query('firstName') String firstName,
@@ -42,6 +45,7 @@ abstract class EnrollmentRemoteDataSource {
   @GET(AppConstants.enrollmentSearchByDateOfBirthEndpoint)
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+    @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
     @Query('dateOfBirth') String dateOfBirth,
@@ -49,6 +53,7 @@ abstract class EnrollmentRemoteDataSource {
 
   @GET(AppConstants.enrollmentDetailEndpoint)
   Future<EnrollmentDetailModel> getEnrollmentDetail(
+    @Extras() Map<String, dynamic> extras,
     @Path('enrollmentId') String enrollmentId,
   );
 }

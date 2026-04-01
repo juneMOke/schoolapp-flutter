@@ -54,7 +54,7 @@ class StudentDetailModel {
         photoUrl: json['photoUrl'] as String?,
         city: json['city'] as String,
         district: json['district'] as String,
-        municipality: json['commune'] as String,
+        municipality: json['municipality'] as String,
         address: json['address'] as String,
         schoolLevelId: json['schoolLevelId'] as String? ?? '',
         schoolLevelGroupId: json['schoolLevelGroupId'] as String? ?? '',
@@ -96,7 +96,7 @@ class StudentDetailModel {
     photoUrl: photoUrl,
     city: city,
     district: district,
-    commune: municipality,
+    municipality: municipality,
     address: address,
     schoolLevel: SchoolLevel(
       id: schoolLevelId,

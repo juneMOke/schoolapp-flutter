@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -51,6 +52,18 @@ Future<void> configureDependencies() async {
 
     dio.interceptors.add(
       InterceptorsWrapper(
+        onRequest: (RequestOptions options, handler) async {
+          final requiresAuth = options.extra['requiresAuth'] ?? false;
+          if (requiresAuth) {
+            final tokenStorage = getIt<TokenStorageService>();
+            final session = await tokenStorage.readAuthSession();
+            if (session != null && session.accessToken.isNotEmpty) {
+              options.headers['Authorization'] =
+                  'Bearer ${session.accessToken}';
+            }
+          }
+          return handler.next(options);
+        },
         onError: (DioException e, handler) {
           if (e.response?.statusCode == 401) {
             return handler.reject(
@@ -88,6 +101,10 @@ Future<void> configureDependencies() async {
 
     return dio;
   });
+
+  getIt.registerLazySingleton<Map<String, dynamic>>(
+    () => RequestOptionsExtra.auth(),
+  );
 
   getIt.registerLazySingleton<TokenStorageService>(
     () => TokenStorageService(getIt<FlutterSecureStorage>()),
@@ -165,11 +182,13 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<EnrollmentRepository>(
     () => EnrollmentRepositoryImpl(
       remoteDataSource: getIt<EnrollmentRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
 
   getIt.registerFactory<GetEnrollmentSummaryListByStatusUseCase>(
-    () => GetEnrollmentSummaryListByStatusUseCase(getIt<EnrollmentRepository>()),
+    () =>
+        GetEnrollmentSummaryListByStatusUseCase(getIt<EnrollmentRepository>()),
   );
 
   getIt.registerFactory<GetEnrollmentDetailUseCase>(
@@ -179,10 +198,9 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<
     SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   >(
-    () =>
-        SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase(
-          getIt<EnrollmentRepository>(),
-        ),
+    () => SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase(
+      getIt<EnrollmentRepository>(),
+    ),
   );
 
   getIt.registerFactory<

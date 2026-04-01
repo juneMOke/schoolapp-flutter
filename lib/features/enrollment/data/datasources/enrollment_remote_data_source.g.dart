@@ -22,10 +22,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   @override
   Future<List<EnrollmentSummaryModel>>
   getEnrollmentSummaryByStatusAndAcademicYear(
+    Map<String, dynamic> extras,
     String status,
     String academicYearId,
   ) async {
     final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'status': status,
       r'academicYearId': academicYearId,
@@ -61,6 +63,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   @override
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+    Map<String, dynamic> extras,
     String status,
     String academicYearId,
     String firstName,
@@ -68,6 +71,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
     String surname,
   ) async {
     final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'status': status,
       r'academicYearId': academicYearId,
@@ -81,7 +85,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollments',
+            '/api/v1/enrollment/search/by-names',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -106,6 +110,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   @override
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+    Map<String, dynamic> extras,
     String status,
     String academicYearId,
     String firstName,
@@ -114,6 +119,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
     String dateOfBirth,
   ) async {
     final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'status': status,
       r'academicYearId': academicYearId,
@@ -128,7 +134,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollments',
+            '/api/v1/enrollment/search/by-names-and-dob',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -153,11 +159,13 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   @override
   Future<List<EnrollmentSummaryModel>>
   searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+    Map<String, dynamic> extras,
     String status,
     String academicYearId,
     String dateOfBirth,
   ) async {
     final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'status': status,
       r'academicYearId': academicYearId,
@@ -169,7 +177,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollments',
+            '/api/v1/enrollment/search/by-date-of-birth',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -192,8 +200,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<EnrollmentDetailModel> getEnrollmentDetail(String enrollmentId) async {
+  Future<EnrollmentDetailModel> getEnrollmentDetail(
+    Map<String, dynamic> extras,
+    String enrollmentId,
+  ) async {
     final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

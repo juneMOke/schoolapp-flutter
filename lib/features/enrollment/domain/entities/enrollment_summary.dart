@@ -1,15 +1,15 @@
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 class EnrollmentSummary {
-  final String id;
+  final String enrollmentId;
   final String enrollmentCode;
   final String status;
-  final List<StudentSummary> students;
+  final StudentSummary student;
 
   EnrollmentSummary({
-    required this.id,
+    required this.enrollmentId,
     required this.enrollmentCode,
     required this.status,
-    required this.students,
+    required this.student,
   });
 }

@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/student/data/models/student_detail_m
 
 class EnrollmentDetailModel {
   final StudentDetailModel studentDetail;
-  final ParentSummaryModel parentDetails;
+  final List<ParentSummaryModel> parentDetails;
   final EnrollmentSchoolDetailModel enrollmentDetail;
 
   EnrollmentDetailModel({
@@ -19,9 +19,9 @@ class EnrollmentDetailModel {
         studentDetail: StudentDetailModel.fromJson(
           json['studentDetail'] as Map<String, dynamic>,
         ),
-        parentDetails: ParentSummaryModel.fromJson(
-          json['parentDetails'] as Map<String, dynamic>,
-        ),
+        parentDetails: (json['parentDetails'] as List<dynamic>)
+            .map((e) => ParentSummaryModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
         enrollmentDetail: EnrollmentSchoolDetailModel.fromJson(
           json['enrollmentDetail'] as Map<String, dynamic>,
         ),
@@ -30,7 +30,7 @@ class EnrollmentDetailModel {
   EnrollmentDetail toEnrollmentDetail() {
     return EnrollmentDetail(
       studentDetail: studentDetail.toStudentDetail(),
-      parentDetails: parentDetails.toParentSummary(),
+      parentDetails: parentDetails.map((e) => e.toParentSummary()).toList(),
       enrollmentDetail: enrollmentDetail.toEntity(),
     );
   }

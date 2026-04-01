@@ -9,7 +9,12 @@ import 'package:school_app_flutter/features/enrollment/domain/repositories/enrol
 class EnrollmentRepositoryImpl implements EnrollmentRepository {
   final EnrollmentRemoteDataSource remoteDataSource;
 
-  const EnrollmentRepositoryImpl({required this.remoteDataSource});
+  final Map<String, dynamic> requiredAuth;
+
+  const EnrollmentRepositoryImpl({
+    required this.remoteDataSource,
+    required this.requiredAuth,
+  });
 
   @override
   Future<Either<Failure, List<EnrollmentSummary>>>
@@ -19,7 +24,11 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }) async {
     try {
       final enrollmentModelList = await remoteDataSource
-          .getEnrollmentSummaryByStatusAndAcademicYear(status, academicYearId);
+          .getEnrollmentSummaryByStatusAndAcademicYear(
+            requiredAuth,
+            status,
+            academicYearId,
+          );
       return Right(
         enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
       );
@@ -45,6 +54,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     try {
       final enrollmentModelList = await remoteDataSource
           .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+            requiredAuth,
             status,
             academicYearId,
             firstName,
@@ -77,6 +87,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     try {
       final enrollmentModelList = await remoteDataSource
           .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+            requiredAuth,
             status,
             academicYearId,
             firstName,
@@ -107,6 +118,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     try {
       final enrollmentModelList = await remoteDataSource
           .searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+            requiredAuth,
             status,
             academicYearId,
             dateOfBirth,
@@ -130,6 +142,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }) async {
     try {
       final enrollmentModel = await remoteDataSource.getEnrollmentDetail(
+        requiredAuth,
         enrollmentId,
       );
       return Right(enrollmentModel.toEnrollmentDetail());

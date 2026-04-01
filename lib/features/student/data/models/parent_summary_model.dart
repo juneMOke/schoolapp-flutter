@@ -29,7 +29,7 @@ class ParentSummaryModel {
         lastName: json['lastName'] as String,
         surname: json['surname'] as String?,
         identificationNumber: json['identificationNumber'] as String,
-        phoneNumber: json['phone'] as String,
+        phoneNumber: json['phoneNumber'] as String,
         email: json['email'] as String,
         relationshipType: json['relationshipType'] as String,
       );

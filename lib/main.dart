@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   runApp(const MyApp());
+}
+
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.unknown,
+  };
 }
 
 class MyApp extends StatefulWidget {
@@ -51,6 +66,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
+        scrollBehavior: const AppScrollBehavior(),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,

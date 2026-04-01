@@ -6,6 +6,10 @@ class AppTheme {
   static const Color backgroundColor = Color(0xFFF7F9FF);
   static const Color surfaceColor = Colors.white;
   static const Color sidebarColor = Color(0xFF2E3B4E);
+  static const Color sidebarGradientTop = Color(0xFF1F2A3D);
+  static const Color sidebarGradientBottom = Color(0xFF253349);
+  static const Color accentBlue = Color(0xFF3B82F6);
+  static const Color accentIndigo = Color(0xFF6366F1);
   static const Color activeMenuColor = Color(0xFF1A73E8);
   static const Color textPrimaryColor = Color(0xFF1F2937);
   static const Color textSecondaryColor = Color(0xFF6B7280);

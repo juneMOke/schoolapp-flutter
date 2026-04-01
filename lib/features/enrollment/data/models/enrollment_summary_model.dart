@@ -2,35 +2,32 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/student/data/models/student_summary_model.dart';
 
 class EnrollmentSummaryModel {
-  final String id;
+  final String enrollmentId;
   final String enrollmentCode;
   final String status;
-  final List<StudentSummaryModel> students;
+  final StudentSummaryModel student;
 
   EnrollmentSummaryModel({
-    required this.id,
+    required this.enrollmentId,
     required this.enrollmentCode,
     required this.status,
-    required this.students,
+    required this.student,
   });
 
   factory EnrollmentSummaryModel.fromJson(Map<String, dynamic> json) =>
       EnrollmentSummaryModel(
-        id: json['id'] as String,
+        enrollmentId: json['enrollmentId'] as String,
         enrollmentCode: json['enrollmentCode'] as String,
         status: json['status'] as String,
-        students: (json['students'] as List<dynamic>)
-            .map(
-              (student) =>
-                  StudentSummaryModel.fromJson(student as Map<String, dynamic>),
-            )
-            .toList(),
+        student: StudentSummaryModel.fromJson(
+          json['studentSummaryDto'] as Map<String, dynamic>,
+        ),
       );
 
   EnrollmentSummary toEnrollmentSummary() => EnrollmentSummary(
-    id: id,
+    enrollmentId: enrollmentId,
     enrollmentCode: enrollmentCode,
     status: status,
-    students: students.map((student) => student.toStudentSummary()).toList(),
+    student: this.student.toStudentSummary(),
   );
 }

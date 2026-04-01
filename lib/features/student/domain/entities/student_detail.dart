@@ -15,7 +15,7 @@ class StudentDetail extends Equatable {
   final String? photoUrl;
   final String city;
   final String district;
-  final String commune;
+  final String municipality;
   final String address;
   final SchoolLevel schoolLevel;
   final SchoolLevelGroup schoolLevelGroup;
@@ -32,7 +32,7 @@ class StudentDetail extends Equatable {
     this.photoUrl,
     required this.city,
     required this.district,
-    required this.commune,
+    required this.municipality,
     required this.address,
     required this.schoolLevel,
     required this.schoolLevelGroup,
@@ -51,7 +51,7 @@ class StudentDetail extends Equatable {
     photoUrl,
     city,
     district,
-    commune,
+    municipality,
     address,
     schoolLevel,
     schoolLevelGroup,

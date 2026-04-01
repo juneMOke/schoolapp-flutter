@@ -382,6 +382,269 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This page is under development'**
   String get pageUnderConstruction;
+
+  /// No description provided for @preRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Registrations'**
+  String get preRegistrations;
+
+  /// No description provided for @searchStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Students'**
+  String get searchStudents;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @surname.
+  ///
+  /// In en, this message translates to:
+  /// **'Surname'**
+  String get surname;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @editEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editEnrollment;
+
+  /// No description provided for @exportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportData;
+
+  /// No description provided for @noResultsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsFound;
+
+  /// No description provided for @loadingStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading students...'**
+  String get loadingStudents;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @statusValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get statusValidated;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get statusRejected;
+
+  /// No description provided for @enrollmentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Code'**
+  String get enrollmentCode;
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @previousYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Year'**
+  String get previousYear;
+
+  /// No description provided for @targetYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Year'**
+  String get targetYear;
+
+  /// No description provided for @guardianInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian Information'**
+  String get guardianInformation;
+
+  /// No description provided for @schoolFees.
+  ///
+  /// In en, this message translates to:
+  /// **'School Fees'**
+  String get schoolFees;
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get next;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finish;
+
+  // ── Personal info step ───────────────────────────────────────
+
+  String get personalInfoSubtitle;
+  String get firstNameHelp;
+  String get lastNameHelp;
+  String get surnameHelp;
+  String get dateOfBirthHelp;
+  String get birthPlace;
+  String get birthPlaceHelp;
+  String get nationality;
+  String get nationalityHelp;
+  String get genderHelp;
+  String get selectDateOfBirthHelpText;
+  String get cancel;
+  String get confirm;
+  String enterFieldHint(String label);
+  String get dateHint;
+  String get genderMale;
+  String get genderFemale;
+
+  // ── Address step ─────────────────────────────────────────────
+  String get city;
+  String get cityHelp;
+  String get district;
+  String get districtHelp;
+  String get municipality;
+  String get municipalityHelp;
+  String get neighborhood;
+  String get neighborhoodHelp;
+  String get fullAddress;
+  String get fullAddressHelp;
+
+  // ── Academic info step ───────────────────────────────────────
+  String get academicYearLabel;
+  String get academicYearLabelHelp;
+  String get schoolLabel;
+  String get schoolLabelHelp;
+  String get schoolCycle;
+  String get schoolCycleHelp;
+  String get schoolLevelLabel;
+  String get schoolLevelLabelHelp;
+  String get averageLabel;
+  String get averageLabelHelp;
+  String get rankingLabel;
+  String get rankingLabelHelp;
+  String get yearValidated;
+  String get yearNotValidated;
+  String get currentAcademicYearLabel;
+  String get currentAcademicYearHelp;
+  String get targetCycleLabel;
+  String get targetCycleLabelHelp;
+  String get targetLevelLabel;
+  String get targetLevelLabelHelp;
+  String get optionLabel;
+  String get optionLabelHelp;
+  String get toDefine;
+
+  // ── Guardian info step ───────────────────────────────────────
+  String get primaryGuardian;
+  String guardianNumber(int number);
+  String get noGuardianInfo;
+  String get identificationNumberLabel;
+  String get identificationNumberHelp;
+  String get phoneNumberLabel;
+  String get phoneNumberHelp;
+  String get emailLabel;
+  String get emailLabelHelp;
+  String get relationshipFather;
+  String get relationshipMother;
+  String get relationshipGuardian;
+  String get relationshipUncle;
+  String get relationshipAunt;
+  String get relationshipGrandparent;
+  String get relationshipOther;
+
+  // ── Enrollment stepper ───────────────────────────────────────
+  String get stepPersonalInfoSubtitle;
+  String get stepAddressSubtitle;
+  String get stepAcademicSubtitle;
+  String get stepGuardianSubtitle;
+  String get stepSummarySubtitle;
+  String stepIndicator(int current, int total);
+  String get stepForwardHint;
+  String get validatePersonalInfoHint;
+  String get validateAddressHint;
+  String get validateAcademicInfoHint;
+  String get validateGuardianInfoHint;
+  String get enrollmentReadyForValidation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
