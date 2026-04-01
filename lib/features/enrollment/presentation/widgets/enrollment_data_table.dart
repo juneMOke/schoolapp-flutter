@@ -73,16 +73,8 @@ class EnrollmentDataTable extends StatefulWidget {
 }
 
 class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
-  final ScrollController _verticalScrollController = ScrollController();
-
   _SortColumn _sortColumn = _SortColumn.nom;
   bool _sortAscending = true;
-
-  @override
-  void dispose() {
-    _verticalScrollController.dispose();
-    super.dispose();
-  }
 
   List<EnrollmentSummary> get _sorted {
     final list = [...widget.enrollments];
@@ -122,54 +114,33 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
 
     final sorted = _sorted;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          children: [
-            // ── Header colonnes ──
-            _SortableHeader(
-              sortColumn: _sortColumn,
-              ascending: _sortAscending,
-              onSort: _onSort,
-              l10n: l10n,
-            ),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
-
-            // ── Lignes scrollables: header/form restent visibles ──
-            Expanded(
-              child: Scrollbar(
-                controller: _verticalScrollController,
-                thumbVisibility: true,
-                child: ListView.builder(
-                  controller: _verticalScrollController,
-                  itemCount: sorted.length,
-                  itemBuilder: (context, index) => _DataRow(
-                    enrollment: sorted[index],
-                    isEven: index.isEven,
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Pied : compteur ──
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
-            _TableFooter(count: sorted.length),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── Header colonnes ──
+        _SortableHeader(
+          sortColumn: _sortColumn,
+          ascending: _sortAscending,
+          onSort: _onSort,
+          l10n: l10n,
         ),
-      ),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+
+        // ── Lignes scrollables: header/form restent visibles ──
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: sorted.length,
+          itemBuilder: (context, index) => _DataRow(
+            enrollment: sorted[index],
+            isEven: index.isEven,
+          ),
+        ),
+
+        // ── Pied : compteur ──
+        const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+        _TableFooter(count: sorted.length),
+      ],
     );
   }
 
@@ -252,12 +223,7 @@ class _StateShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
       child: Center(child: child),
     );

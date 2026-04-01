@@ -31,6 +31,7 @@ class PreRegistrationsPage extends StatelessWidget {
           ),
           child: Stack(
             children: [
+              // ── Cercles décoratifs ────────────────────────────────
               Positioned(
                 top: -60,
                 right: -50,
@@ -55,7 +56,8 @@ class PreRegistrationsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
+              // ── Contenu entièrement scrollable ───────────────────
+              SingleChildScrollView(
                 padding: const EdgeInsets.all(AppTheme.largePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,23 +65,16 @@ class PreRegistrationsPage extends StatelessWidget {
                     const SearchForm(),
                     const SizedBox(height: 12),
                     BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                      builder: (context, state) {
-                        return PreRegistrationsInfoBar(
-                          count: state.summaries.length,
-                          isLoading: isLoading(state),
-                        );
-                      },
+                      builder: (context, state) => PreRegistrationsInfoBar(
+                        count: state.summaries.length,
+                        isLoading: _isLoading(state),
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    Expanded(
-                      child: BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                        builder: (context, state) {
-                          return EnrollmentDataTable(
-                            isLoading:
-                                isLoading(state),
-                            enrollments: state.summaries,
-                          );
-                        },
+                    BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                      builder: (context, state) => EnrollmentDataTable(
+                        isLoading: _isLoading(state),
+                        enrollments: state.summaries,
                       ),
                     ),
                   ],
@@ -92,5 +87,6 @@ class PreRegistrationsPage extends StatelessWidget {
     );
   }
 
-  bool isLoading(EnrollmentState state) => state.summariesStatus == EnrollmentLoadStatus.loading;
+  bool _isLoading(EnrollmentState state) =>
+      state.summariesStatus == EnrollmentLoadStatus.loading;
 }
