@@ -192,7 +192,7 @@ class SummaryStep extends StatelessWidget {
           value: 'À définir selon le niveau',
           action: TextButton(onPressed: () {}, child: const Text('Calculer')),
         ),
-        _SummaryItem(
+        const _SummaryItem(
           label: 'Validation finale',
           value: 'En attente administration',
         ),
@@ -351,7 +351,7 @@ class _SummaryItem extends StatelessWidget {
               ],
             ),
           ),
-          if (action != null) action!,
+          ?action,
         ],
       ),
     );

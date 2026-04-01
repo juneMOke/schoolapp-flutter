@@ -28,6 +28,6 @@ class EnrollmentSummaryModel {
     enrollmentId: enrollmentId,
     enrollmentCode: enrollmentCode,
     status: status,
-    student: this.student.toStudentSummary(),
+    student: student.toStudentSummary(),
   );
 }

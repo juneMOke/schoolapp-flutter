@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/enrollment_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStatusBadge extends StatelessWidget {
   final EnrollmentStatus status;
 
-  const EnrollmentStatusBadge({
-    super.key,
-    required this.status,
-  });
+  const EnrollmentStatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
