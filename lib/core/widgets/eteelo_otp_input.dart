@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_input_decoration.dart';
 
 class EteeloOtpInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final String? helperText;
   final String? Function(String?)? validator;
   final bool enabled;
   final Function(String)? onFieldSubmitted;
@@ -12,6 +14,7 @@ class EteeloOtpInput extends StatelessWidget {
     super.key,
     required this.controller,
     required this.label,
+    this.helperText,
     this.validator,
     this.enabled = true,
     this.onFieldSubmitted,
@@ -28,10 +31,10 @@ class EteeloOtpInput extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(6),
       ],
-      decoration: InputDecoration(
+      decoration: buildEteeloInputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.pin_outlined),
+        prefixIcon: Icons.pin_outlined,
+        helperText: helperText,
         counterText: '',
       ),
       maxLength: 6,

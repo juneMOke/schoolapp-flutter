@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_email_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_password_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
@@ -8,6 +9,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/auth_error_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -46,7 +48,6 @@ class _LoginFormState extends State<LoginForm> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         final isLoading = state.status == AuthStatus.loading;
-
         final l10n = AppLocalizations.of(context)!;
 
         return Form(
@@ -69,22 +70,15 @@ class _LoginFormState extends State<LoginForm> {
                 enabled: !isLoading,
                 onFieldSubmitted: (_) => _submit(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               if (state.status == AuthStatus.failure &&
-                  state.errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    state.errorMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                  state.errorMessage != null) ...[
+                AuthErrorBanner(message: state.errorMessage!),
+                const SizedBox(height: 12),
+              ],
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton(
+                child: TextButton.icon(
                   onPressed: isLoading
                       ? null
                       : () {
@@ -93,7 +87,19 @@ class _LoginFormState extends State<LoginForm> {
                           );
                           context.goNamed(AppRoutesNames.forgotPasswordEmail);
                         },
-                  child: Text(l10n.forgotPassword),
+                  icon: const Icon(Icons.help_outline_rounded, size: 14),
+                  label: Text(l10n.forgotPassword),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.primaryColor,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

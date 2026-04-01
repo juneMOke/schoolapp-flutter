@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
-import 'top_bar_parts/top_bar_notification_button.dart';
-import 'top_bar_parts/top_bar_profile_menu_button.dart';
-import 'top_bar_parts/top_bar_title.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_notification_button.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_profile_menu_button.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_title.dart';
 
 class TopBar extends StatelessWidget implements PreferredSizeWidget {
   const TopBar({super.key});

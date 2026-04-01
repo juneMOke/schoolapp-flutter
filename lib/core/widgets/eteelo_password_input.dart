@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_input_decoration.dart';
 
 class EteeloPasswordInput extends StatefulWidget {
   final TextEditingController controller;
@@ -28,26 +30,23 @@ class _EteeloPasswordInputState extends State<EteeloPasswordInput> {
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscurePassword,
-      decoration: InputDecoration(
+      enabled: widget.enabled,
+      validator: widget.validator,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      decoration: buildEteeloInputDecoration(
         labelText: widget.label,
-        prefixIcon: const Icon(Icons.lock_outlined),
-        border: const OutlineInputBorder(),
+        prefixIcon: Icons.lock_outlined,
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
+            size: 18,
+            color: AppTheme.textSecondaryColor,
           ),
-          onPressed: () {
-            setState(() {
-              _obscurePassword = !_obscurePassword;
-            });
-          },
+          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
         ),
       ),
-      validator: widget.validator,
-      enabled: widget.enabled,
-      onFieldSubmitted: widget.onFieldSubmitted,
     );
   }
 }

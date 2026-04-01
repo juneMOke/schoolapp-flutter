@@ -33,4 +33,32 @@ void main() {
     await tester.pumpWidget(const MyApp());
     expect(find.byType(MyApp), findsOneWidget);
   });
+
+  testWidgets('Login layout stays stable on narrow mobile viewport', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() async => tester.binding.setSurfaceSize(null));
+
+    await configureDependencies();
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MyApp), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Login layout stays stable on desktop with low height', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 420));
+    addTearDown(() async => tester.binding.setSurfaceSize(null));
+
+    await configureDependencies();
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MyApp), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

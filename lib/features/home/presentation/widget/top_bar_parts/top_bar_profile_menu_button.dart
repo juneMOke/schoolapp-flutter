@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarProfileMenuButton extends StatelessWidget {
@@ -10,7 +13,15 @@ class TopBarProfileMenuButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
       onSelected: (value) {
-        // TODO: Handle profile menu actions
+        switch (value) {
+          case 'logout':
+            context.read<AuthBloc>().add(const AuthLogoutRequested());
+            break;
+          case 'profile':
+          case 'settings':
+            // TODO: Handle profile/settings actions
+            break;
+        }
       },
       itemBuilder: (BuildContext context) {
         return [

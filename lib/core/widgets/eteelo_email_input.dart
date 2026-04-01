@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_input_decoration.dart';
 
 class EteeloEmailInput extends StatelessWidget {
   final TextEditingController controller;
@@ -19,13 +20,12 @@ class EteeloEmailInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: const Icon(Icons.email_outlined),
-        border: const OutlineInputBorder(),
-      ),
-      validator: validator,
       enabled: enabled,
+      validator: validator,
+      decoration: buildEteeloInputDecoration(
+        labelText: label,
+        prefixIcon: Icons.email_outlined,
+      ),
     );
   }
 }
