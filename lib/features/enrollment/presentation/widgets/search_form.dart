@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -21,7 +19,6 @@ class _SearchFormState extends State<SearchForm> {
   final _lastNameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _dateOfBirthController = TextEditingController();
-  Timer? _searchDebounce;
 
   static const String _defaultStatus = 'PRE_REGISTERED';
   static const String _defaultAcademicYearId = '';
@@ -99,12 +96,17 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   Widget _buildActionButtons(BuildContext context, AppLocalizations l10n) {
+    final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
+    final hasAllNames = _hasAllNameField();
+    final isSearchEnabled = hasAllNames || hasDate;
+    final isClearEnabled = _hasAnyCriteria();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: 10,
       children: [
         ElevatedButton.icon(
-          onPressed: _performSearch,
+          onPressed: isSearchEnabled ? _performSearch : null,
           icon: const Icon(Icons.search_rounded, size: 14),
           label: Text(l10n.search),
           style: ElevatedButton.styleFrom(
@@ -115,15 +117,20 @@ class _SearchFormState extends State<SearchForm> {
             minimumSize: const Size(112, 40),
             visualDensity: VisualDensity.compact,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(9),
             ),
+            disabledBackgroundColor: Colors.grey[300],
+            disabledForegroundColor: Colors.grey,
           ),
         ),
         const SizedBox(width: 6),
         OutlinedButton.icon(
-          onPressed: _clearSearch,
+          onPressed: isClearEnabled ? _clearSearch : null,
           icon: const Icon(Icons.refresh_rounded, size: 14),
           label: Text(l10n.clear),
           style: OutlinedButton.styleFrom(
@@ -133,7 +140,10 @@ class _SearchFormState extends State<SearchForm> {
             minimumSize: const Size(112, 40),
             visualDensity: VisualDensity.compact,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(9),
             ),
@@ -144,19 +154,18 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   void _onFieldChanged() {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), _performSearch);
+    setState(() {});
   }
 
   void _performSearch() {
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
-    final hasAnyName = _hasAnyNameField();
+    final hasAllNames = _hasAllNameField();
 
-    if (!hasAnyName && !hasDate) {
+    if (!hasAllNames && !hasDate) {
       return;
     }
 
-    if (hasAnyName && hasDate) {
+    if (hasAllNames && hasDate) {
       context.read<EnrollmentBloc>().add(
         EnrollmentSummariesByStudentNamesAndDateOfBirthRequested(
           firstName: _firstNameController.text.trim(),
@@ -170,7 +179,7 @@ class _SearchFormState extends State<SearchForm> {
       return;
     }
 
-    if (hasAnyName) {
+    if (hasAllNames) {
       context.read<EnrollmentBloc>().add(
         EnrollmentSummariesByStudentNameRequested(
           firstName: _firstNameController.text.trim(),
@@ -192,10 +201,17 @@ class _SearchFormState extends State<SearchForm> {
     );
   }
 
-  bool _hasAnyNameField() {
+  bool _hasAllNameField() {
+    return _firstNameController.text.trim().isNotEmpty &&
+        _lastNameController.text.trim().isNotEmpty &&
+        _surnameController.text.trim().isNotEmpty;
+  }
+
+  bool _hasAnyCriteria() {
     return _firstNameController.text.trim().isNotEmpty ||
         _lastNameController.text.trim().isNotEmpty ||
-        _surnameController.text.trim().isNotEmpty;
+        _surnameController.text.trim().isNotEmpty ||
+        _dateOfBirthController.text.trim().isNotEmpty;
   }
 
   void _clearSearch() {
@@ -203,6 +219,7 @@ class _SearchFormState extends State<SearchForm> {
     _lastNameController.clear();
     _surnameController.clear();
     _dateOfBirthController.clear();
+    setState(() {});
 
     context.read<EnrollmentBloc>().add(
       const EnrollmentSummariesRequested(
@@ -222,16 +239,15 @@ class _SearchFormState extends State<SearchForm> {
 
     if (date != null) {
       _dateOfBirthController.text =
-          '${date.day.toString().padLeft(2, '0')}/'
-          '${date.month.toString().padLeft(2, '0')}/'
-          '${date.year}';
+          '${date.year}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.day.toString().padLeft(2, '0')}';
       _onFieldChanged();
     }
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();

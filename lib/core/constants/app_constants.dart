@@ -12,12 +12,12 @@ class AppConstants {
   static const String enrollmentDetailEndpoint =
       '/api/v1/enrollments/{enrollmentId}/detail';
   static const String enrollmentSearchByStudentInfoEndpoint =
-      '/api/v1/enrollment/search/by-names';
+      '/api/v1/enrollments/search/by-names';
   static const String enrollmentSearchByStudentInfoWithDateOfBirthEndpoint =
-      '/api/v1/enrollment/search/by-names-and-dob';
+      '/api/v1/enrollments/search/by-names-and-dob';
 
   static const String enrollmentSearchByDateOfBirthEndpoint =
-      '/api/v1/enrollment/search/by-date-of-birth';
+      '/api/v1/enrollments/search/by-date-of-birth';
 
   static const String accessTokenKey = 'access_token';
   static const String tokenTypeKey = 'token_type';

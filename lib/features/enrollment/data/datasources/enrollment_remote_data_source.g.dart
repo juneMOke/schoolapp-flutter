@@ -85,7 +85,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/search/by-names',
+            '/api/v1/enrollments/search/by-names',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -134,7 +134,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/search/by-names-and-dob',
+            '/api/v1/enrollments/search/by-names-and-dob',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -177,7 +177,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/enrollment/search/by-date-of-birth',
+            '/api/v1/enrollments/search/by-date-of-birth',
             queryParameters: queryParameters,
             data: _data,
           )
