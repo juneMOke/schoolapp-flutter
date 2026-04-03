@@ -14,6 +14,7 @@ void main() {
         'firstName': 'John',
         'lastName': 'Doe',
         'role': 'ADMIN',
+        'schoolId': '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20',
         'createdAt': '2026-03-27T16:57:27.393Z',
       },
     };
@@ -28,6 +29,7 @@ void main() {
       expect(model.user.firstName, 'John');
       expect(model.user.lastName, 'Doe');
       expect(model.user.role, 'ADMIN');
+      expect(model.user.schoolId, '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20');
     });
 
     test('toAuthSession converts model to domain entity', () {
@@ -42,6 +44,7 @@ void main() {
       expect(session.user.firstName, 'John');
       expect(session.user.lastName, 'Doe');
       expect(session.user.role, 'ADMIN');
+      expect(session.user.schoolId, '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20');
     });
   });
 }

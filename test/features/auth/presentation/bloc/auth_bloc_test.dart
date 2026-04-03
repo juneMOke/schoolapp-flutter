@@ -27,6 +27,7 @@ const tUser = AuthenticatedUser(
   firstName: 'John',
   lastName: 'Doe',
   role: 'ADMIN',
+  schoolId: '8a9e5f7b-7f8f-4e39-9f89-c0744c5c9f20',
 );
 
 const tSession = AuthSession(
