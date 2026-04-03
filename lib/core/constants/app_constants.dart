@@ -19,6 +19,15 @@ class AppConstants {
   static const String enrollmentSearchByDateOfBirthEndpoint =
       '/api/v1/enrollments/search/by-date-of-birth';
 
+  static const String academicYearBySchoolEndpoint =
+      '/api/v1/academic-years/current';
+
+  static const String bootstrapEndpoint = '/api/v1/bootstrap';
+  static const String bootstrapPayloadKey = 'bootstrap_payload';
+  static const String bootstrapSchemaVersionKey =
+      'bootstrap_local_schema_version';
+  static const String bootstrapSchemaVersion = '1';
+
   static const String accessTokenKey = 'access_token';
   static const String tokenTypeKey = 'token_type';
   static const String expiresInKey = 'expires_in';
@@ -27,5 +36,6 @@ class AppConstants {
   static const String userFirstNameKey = 'user_first_name';
   static const String userLastNameKey = 'user_last_name';
   static const String userRoleKey = 'user_role';
+  static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
 }
