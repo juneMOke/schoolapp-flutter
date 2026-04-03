@@ -4,11 +4,13 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 class PreRegistrationsInfoBar extends StatelessWidget {
   final int count;
   final bool isLoading;
+  final Future<void> Function()? onRefresh;
 
   const PreRegistrationsInfoBar({
     super.key,
     required this.count,
     required this.isLoading,
+    this.onRefresh,
   });
 
   @override
@@ -23,7 +25,9 @@ class PreRegistrationsInfoBar extends StatelessWidget {
             const Color(0xFF10B981).withValues(alpha: 0.12),
           ],
         ),
-        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.15)),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.15),
+        ),
       ),
       child: Row(
         children: [
@@ -66,6 +70,23 @@ class PreRegistrationsInfoBar extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primaryColor,
               ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Tooltip(
+            message: 'Actualiser',
+            child: IconButton(
+              onPressed: isLoading || onRefresh == null
+                  ? null
+                  : () => onRefresh!(),
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded),
+              color: AppTheme.primaryColor,
             ),
           ),
         ],

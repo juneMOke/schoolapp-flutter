@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_email_page.dart';
@@ -17,15 +19,21 @@ import 'package:school_app_flutter/features/splash/presentation/pages/splash_pag
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
-  late final StreamSubscription<AuthState> _subscription;
+  final BootstrapBloc _bootstrapBloc;
+  late final StreamSubscription<AuthState> _authSubscription;
+  late final StreamSubscription<BootstrapState> _bootstrapSubscription;
 
-  RouterNotifier(this._authBloc) {
-    _subscription = _authBloc.stream.listen((_) => notifyListeners());
+  RouterNotifier(this._authBloc, this._bootstrapBloc) {
+    _authSubscription = _authBloc.stream.listen((_) => notifyListeners());
+    _bootstrapSubscription = _bootstrapBloc.stream.listen(
+      (_) => notifyListeners(),
+    );
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _authSubscription.cancel();
+    _bootstrapSubscription.cancel();
     super.dispose();
   }
 }
@@ -33,26 +41,39 @@ class RouterNotifier extends ChangeNotifier {
 class AppRouter {
   const AppRouter._();
 
-  static GoRouter createRouter(AuthBloc authBloc) {
-    final notifier = RouterNotifier(authBloc);
+  static GoRouter createRouter(AuthBloc authBloc, BootstrapBloc bootstrapBloc) {
+    final notifier = RouterNotifier(authBloc, bootstrapBloc);
 
     return GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/splash',
       refreshListenable: notifier,
       redirect: (context, state) {
         final authState = authBloc.state;
+        final bootstrapState = bootstrapBloc.state;
         final isAuthenticated = authState.status == AuthStatus.authenticated;
-        final isLoading =
+        final isAuthLoading =
             authState.status == AuthStatus.loading ||
             authState.status == AuthStatus.initial;
+        final isBootstrapLoading =
+            bootstrapState.status == BootstrapLoadStatus.loading;
+        final isOnSplash = state.matchedLocation == '/splash';
         final isOnAuthFlow =
             state.matchedLocation == '/login' ||
             state.matchedLocation.startsWith('/forgot-password');
 
-        if (isLoading) return null;
+        if (isAuthLoading) {
+          return isOnSplash ? null : '/splash';
+        }
 
-        if (!isAuthenticated && !isOnAuthFlow) return '/login';
-        if (isAuthenticated && isOnAuthFlow) return '/home';
+        if (!isAuthenticated) {
+          return isOnAuthFlow ? null : '/login';
+        }
+
+        if (isBootstrapLoading) {
+          return isOnSplash ? null : '/splash';
+        }
+
+        if (isOnAuthFlow || isOnSplash) return '/home';
 
         return null;
       },
@@ -87,16 +108,24 @@ class AppRouter {
           name: AppRoutesNames.home,
           builder: (context, state) => const HomePage(),
         ),
-        GoRoute(
-          path: AppRoutesNames.preInscriptions,
-          builder: (context, state) => const PreRegistrationsPage(),
-        ),
-        GoRoute(
-          path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
-          builder: (context, state) {
-            final enrollmentId = state.pathParameters['enrollmentId']!;
-            return EnrollmentDetailPage(enrollmentId: enrollmentId);
+        ShellRoute(
+          builder: (context, state, child) {
+            return EnrollmentFeatureScope(child: child);
           },
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.preInscriptions,
+              builder: (context, state) => const PreRegistrationsPage(),
+            ),
+            GoRoute(
+              path:
+                  '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+              builder: (context, state) {
+                final enrollmentId = state.pathParameters['enrollmentId']!;
+                return EnrollmentDetailPage(enrollmentId: enrollmentId);
+              },
+            ),
+          ],
         ),
       ],
     );

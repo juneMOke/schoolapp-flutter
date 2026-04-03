@@ -198,5 +198,8 @@
   "validateAddressHint": "Veuillez compléter l'adresse de l'élève.",
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
-  "enrollmentReadyForValidation": "Dossier prêt pour validation finale."
+  "enrollmentReadyForValidation": "Dossier prêt pour validation finale.",
+  "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
+  "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
+  "signOutAction": "Se déconnecter"
 }

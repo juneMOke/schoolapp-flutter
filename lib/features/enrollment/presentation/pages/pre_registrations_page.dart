@@ -1,25 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/pre_registrations_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
 
-class PreRegistrationsPage extends StatelessWidget {
+class PreRegistrationsPage extends StatefulWidget {
   const PreRegistrationsPage({super.key});
 
   @override
+  State<PreRegistrationsPage> createState() => _PreRegistrationsPageState();
+}
+
+class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
+  static const String _status = 'PRE_REGISTERED';
+  static const Duration _refreshCooldown = Duration(milliseconds: 700);
+  DateTime? _lastRefreshAt;
+  late final WidgetsBindingObserver _lifecycleObserver =
+      _PreRegistrationsLifecycleObserver(
+        onResume: _requestSummariesIfContextAvailable,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestSummariesIfContextAvailable();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => GetIt.instance<EnrollmentBloc>()
-        ..add(
-          const EnrollmentSummariesRequested(
-            status: 'PRE_REGISTERED',
-            academicYearId: '42c64ea3-89e7-4872-8a1c-757f7add33b4',
-          ),
-        ),
+    return BlocListener<BootstrapBloc, BootstrapState>(
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) => _requestSummariesIfContextAvailable(),
       child: Scaffold(
         body: DecoratedBox(
           decoration: const BoxDecoration(
@@ -57,27 +83,73 @@ class PreRegistrationsPage extends StatelessWidget {
                 ),
               ),
               // ── Contenu entièrement scrollable ───────────────────
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(AppTheme.largePadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SearchForm(),
-                    const SizedBox(height: 12),
-                    BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                      builder: (context, state) => PreRegistrationsInfoBar(
-                        count: state.summaries.length,
-                        isLoading: _isLoading(state),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                      builder: (context, state) => EnrollmentDataTable(
-                        isLoading: _isLoading(state),
-                        enrollments: state.summaries,
-                      ),
-                    ),
-                  ],
+              RefreshIndicator(
+                onRefresh: _requestSummariesIfContextAvailable,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(AppTheme.largePadding),
+                  child: BlocBuilder<BootstrapBloc, BootstrapState>(
+                    builder: (context, bootstrapState) {
+                      final academicYearId =
+                          bootstrapState.bootstrap?.currentAcademicYear.id ??
+                          '';
+                      final schoolId = context.select(
+                        (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
+                      );
+                      final hasBootstrapContext =
+                          bootstrapState.status ==
+                              BootstrapLoadStatus.success &&
+                          academicYearId.isNotEmpty &&
+                          schoolId.isNotEmpty;
+
+                      if (bootstrapState.status ==
+                              BootstrapLoadStatus.loading ||
+                          bootstrapState.status ==
+                              BootstrapLoadStatus.initial) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 48),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (!hasBootstrapContext) {
+                        return BootstrapContextError(
+                          onLogout: () => context.read<AuthBloc>().add(
+                            const AuthLogoutRequested(),
+                          ),
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SearchForm(
+                            academicYearId: academicYearId,
+                            status: _status,
+                          ),
+                          const SizedBox(height: 12),
+                          BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                            builder: (context, state) =>
+                                PreRegistrationsInfoBar(
+                                  count: state.summaries.length,
+                                  isLoading: _isLoading(state),
+                                  onRefresh:
+                                      _requestSummariesIfContextAvailable,
+                                ),
+                          ),
+                          const SizedBox(height: 12),
+                          BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                            builder: (context, state) => EnrollmentDataTable(
+                              isLoading: _isLoading(state),
+                              enrollments: state.summaries,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -87,6 +159,54 @@ class PreRegistrationsPage extends StatelessWidget {
     );
   }
 
+  Future<void> _requestSummariesIfContextAvailable() async {
+    if (!mounted) return;
+
+    final now = DateTime.now();
+    final lastRefreshAt = _lastRefreshAt;
+    if (lastRefreshAt != null &&
+        now.difference(lastRefreshAt) < _refreshCooldown) {
+      return;
+    }
+
+    final bootstrapState = context.read<BootstrapBloc>().state;
+    final academicYearId =
+        bootstrapState.bootstrap?.currentAcademicYear.id ?? '';
+    final schoolId = context.read<AuthBloc>().state.user?.schoolId ?? '';
+    final isSummariesLoading =
+        context.read<EnrollmentBloc>().state.summariesStatus ==
+        EnrollmentLoadStatus.loading;
+
+    if (bootstrapState.status != BootstrapLoadStatus.success ||
+        academicYearId.isEmpty ||
+        schoolId.isEmpty ||
+        isSummariesLoading) {
+      return;
+    }
+
+    _lastRefreshAt = now;
+
+    context.read<EnrollmentBloc>().add(
+      EnrollmentSummariesRequested(
+        status: _status,
+        academicYearId: academicYearId,
+      ),
+    );
+  }
+
   bool _isLoading(EnrollmentState state) =>
       state.summariesStatus == EnrollmentLoadStatus.loading;
+}
+
+class _PreRegistrationsLifecycleObserver with WidgetsBindingObserver {
+  final VoidCallback onResume;
+
+  const _PreRegistrationsLifecycleObserver({required this.onResume});
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      onResume();
+    }
+  }
 }

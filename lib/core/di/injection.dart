@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -20,6 +21,19 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_local_data_source.dart';
+import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_remote_data_source.dart';
+import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_local_repository_impl.dart';
+import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_remote_repository_impl.dart';
+import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_local_migration_service.dart';
+import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_storage_service.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_remote_repository.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/clear_local_bootstrap_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_local_bootstrap_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local_bootstrap_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
@@ -33,8 +47,16 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 final GetIt getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
+  await Hive.initFlutter();
+  final bootstrapBox = await Hive.openBox<String>('bootstrap_box');
+
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
+  );
+
+  getIt.registerLazySingleton<Box<String>>(
+    () => bootstrapBox,
+    instanceName: 'bootstrapBox',
   );
 
   getIt.registerLazySingleton<Dio>(() {
@@ -172,6 +194,67 @@ Future<void> configureDependencies() async {
     () => ForgotPasswordBloc(
       generateOtpUseCase: getIt<GenerateOtpUseCase>(),
       validateOtpUseCase: getIt<ValidateOtpUseCase>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<BootstrapStorageService>(
+    () => BootstrapStorageService(
+      getIt<Box<String>>(instanceName: 'bootstrapBox'),
+    ),
+  );
+
+  getIt.registerLazySingleton<BootstrapLocalMigrationService>(
+    () => BootstrapLocalMigrationService(
+      legacyStorage: getIt<FlutterSecureStorage>(),
+      bootstrapBox: getIt<Box<String>>(instanceName: 'bootstrapBox'),
+    ),
+  );
+
+  await getIt<BootstrapLocalMigrationService>().migrateIfNeeded();
+
+  getIt.registerLazySingleton<BootstrapRemoteDataSource>(
+    () => BootstrapRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<BootstrapLocalDataSource>(
+    () => BootstrapLocalDataSourceImpl(getIt<BootstrapStorageService>()),
+  );
+
+  getIt.registerLazySingleton<BootstrapRemoteRepository>(
+    () => BootstrapRemoteRepositoryImpl(
+      remoteDataSource: getIt<BootstrapRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<BootstrapLocalRepository>(
+    () => BootstrapLocalRepositoryImpl(
+      localDataSource: getIt<BootstrapLocalDataSource>(),
+    ),
+  );
+
+  getIt.registerFactory<GetRemoteBootstrapUseCase>(
+    () => GetRemoteBootstrapUseCase(getIt<BootstrapRemoteRepository>()),
+  );
+
+  getIt.registerFactory<GetLocalBootstrapUseCase>(
+    () => GetLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
+  );
+
+  getIt.registerFactory<SaveLocalBootstrapUseCase>(
+    () => SaveLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
+  );
+
+  getIt.registerFactory<ClearLocalBootstrapUseCase>(
+    () => ClearLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
+  );
+
+  getIt.registerFactory<BootstrapBloc>(
+    () => BootstrapBloc(
+      getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapUseCase>(),
+      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
+      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
+      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
     ),
   );
 

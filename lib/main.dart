@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_router.dart';
 
@@ -39,6 +41,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final AuthBloc _authBloc;
+  late final BootstrapBloc _bootstrapBloc;
   late final ForgotPasswordBloc _forgotPasswordBloc;
   late final GoRouter _router;
 
@@ -46,12 +49,15 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _authBloc = getIt<AuthBloc>()..add(const AuthCheckRequested());
+    _bootstrapBloc = getIt<BootstrapBloc>()
+      ..add(const BootstrapLocalRequested());
     _forgotPasswordBloc = getIt<ForgotPasswordBloc>();
-    _router = AppRouter.createRouter(_authBloc);
+    _router = AppRouter.createRouter(_authBloc, _bootstrapBloc);
   }
 
   @override
   void dispose() {
+    _bootstrapBloc.close();
     _forgotPasswordBloc.close();
     _authBloc.close();
     super.dispose();
@@ -62,24 +68,38 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>.value(value: _authBloc),
+        BlocProvider<BootstrapBloc>.value(value: _bootstrapBloc),
         BlocProvider<ForgotPasswordBloc>.value(value: _forgotPasswordBloc),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        scrollBehavior: const AppScrollBehavior(),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        locale: const Locale('fr'),
-        supportedLocales: AppLocalizations.supportedLocales,
-        title: 'SchoolApp',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (previous, current) => previous.status != current.status,
+        listener: (context, state) {
+          if (state.status == AuthStatus.authenticated) {
+            _bootstrapBloc.add(const BootstrapRemoteRequested());
+            return;
+          }
+
+          if (state.status == AuthStatus.unauthenticated) {
+            _bootstrapBloc.add(const BootstrapResetRequested());
+          }
+        },
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          scrollBehavior: const AppScrollBehavior(),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          locale: const Locale('fr'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          title: 'SchoolApp',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+          ),
+          routerConfig: _router,
         ),
-        routerConfig: _router,
       ),
     );
   }

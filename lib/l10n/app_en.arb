@@ -240,5 +240,8 @@
   "validateAddressHint": "Please complete the student's address.",
   "validateAcademicInfoHint": "Please complete the academic information.",
   "validateGuardianInfoHint": "Please check the guardian information.",
-  "enrollmentReadyForValidation": "File ready for final validation."
+  "enrollmentReadyForValidation": "File ready for final validation.",
+  "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
+  "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
+  "signOutAction": "Sign out"
 }

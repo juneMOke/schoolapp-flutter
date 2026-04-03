@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
@@ -99,7 +100,10 @@ class _HomePageView extends StatelessWidget {
       children: [
         Text(
           l10n.home,
-          style: const TextStyle(color: AppTheme.textSecondaryColor, fontSize: 14),
+          style: const TextStyle(
+            color: AppTheme.textSecondaryColor,
+            fontSize: 14,
+          ),
         ),
         if (state.selectedMenuId != null) ...[
           const Text(
@@ -110,7 +114,10 @@ class _HomePageView extends StatelessWidget {
             state.menuItems
                 .firstWhere((menu) => menu.id == state.selectedMenuId)
                 .title,
-            style: const TextStyle(color: AppTheme.textSecondaryColor, fontSize: 14),
+            style: const TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 14,
+            ),
           ),
         ],
         if (state.selectedSubMenuId != null) ...[
@@ -140,7 +147,7 @@ class _HomePageView extends StatelessWidget {
 
     switch (state.selectedSubMenuId) {
       case MenuConstants.preInscriptionsId:
-        return const PreRegistrationsPage();
+        return const EnrollmentFeatureScope(child: PreRegistrationsPage());
       default:
         return Container(
           width: double.infinity,

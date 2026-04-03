@@ -245,23 +245,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get finish => 'Terminer';
 
-  // ── Personal info step ───────────────────────────────────────
-
   @override
   String get personalInfoSubtitle => 'Informations personnelles modifiables';
 
   @override
-  String get firstNameHelp => "Le prénom officiel de l'élève.";
+  String get firstNameHelp => 'Le prénom officiel de l\'élève.';
 
   @override
-  String get lastNameHelp => "Le nom de famille de l'élève.";
+  String get lastNameHelp => 'Le nom de famille de l\'élève.';
 
   @override
   String get surnameHelp => 'Le postnom ou autre nom usuel.';
 
   @override
-  String get dateOfBirthHelp =>
-      'Utiliser le sélecteur pour choisir la date de naissance.';
+  String get dateOfBirthHelp => 'Utiliser le sélecteur pour choisir la date de naissance.';
 
   @override
   String get birthPlace => 'Lieu de naissance';
@@ -273,7 +270,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get nationality => 'Nationalité';
 
   @override
-  String get nationalityHelp => "Nationalité principale de l'élève.";
+  String get nationalityHelp => 'Nationalité principale de l\'élève.';
 
   @override
   String get genderHelp => 'Sexe renseigné pour le dossier administratif.';
@@ -288,7 +285,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get confirm => 'Confirmer';
 
   @override
-  String enterFieldHint(String label) => 'Saisir $label';
+  String enterFieldHint(String label) {
+    return 'Saisir $label';
+  }
 
   @override
   String get dateHint => 'jj/mm/aaaa';
@@ -299,72 +298,199 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get genderFemale => 'Féminin';
 
-  // ── Address step ─────────────────────────────────────────────
-  @override String get city => 'Ville';
-  @override String get cityHelp => "Ville de résidence de l'élève.";
-  @override String get district => 'District';
-  @override String get districtHelp => 'District ou arrondissement.';
-  @override String get municipality => 'Commune';
-  @override String get municipalityHelp => "Commune de résidence de l'élève.";
-  @override String get neighborhood => 'Quartier';
-  @override String get neighborhoodHelp => 'Quartier ou avenue de résidence.';
-  @override String get fullAddress => 'Adresse complète';
-  @override String get fullAddressHelp => 'Adresse complète de résidence.';
+  @override
+  String get city => 'Ville';
 
-  // ── Academic info step ───────────────────────────────────────
-  @override String get academicYearLabel => 'Année scolaire';
-  @override String get academicYearLabelHelp => 'Année scolaire de référence.';
-  @override String get schoolLabel => 'École';
-  @override String get schoolLabelHelp => "Nom de l'école précédente.";
-  @override String get schoolCycle => 'Cycle';
-  @override String get schoolCycleHelp => "Cycle d'enseignement précédent.";
-  @override String get schoolLevelLabel => 'Niveau';
-  @override String get schoolLevelLabelHelp => "Niveau d'étude précédent.";
-  @override String get averageLabel => 'Moyenne';
-  @override String get averageLabelHelp => 'Moyenne annuelle obtenue.';
-  @override String get rankingLabel => 'Classement';
-  @override String get rankingLabelHelp => 'Classement dans la classe.';
-  @override String get yearValidated => 'Année validée';
-  @override String get yearNotValidated => 'Non validée';
-  @override String get currentAcademicYearLabel => 'Année académique';
-  @override String get currentAcademicYearHelp => 'Année académique cible.';
-  @override String get targetCycleLabel => 'Cycle souhaité';
-  @override String get targetCycleLabelHelp => "Cycle souhaité pour l'inscription.";
-  @override String get targetLevelLabel => 'Niveau souhaité';
-  @override String get targetLevelLabelHelp => "Niveau souhaité pour l'inscription.";
-  @override String get optionLabel => 'Option';
-  @override String get optionLabelHelp => 'Option ou spécialisation souhaitée.';
-  @override String get toDefine => 'À définir';
+  @override
+  String get cityHelp => 'Ville de résidence de l\'élève.';
 
-  // ── Guardian info step ───────────────────────────────────────
-  @override String get primaryGuardian => 'Tuteur Principal';
-  @override String guardianNumber(int number) => 'Tuteur $number';
-  @override String get noGuardianInfo => 'Aucune information de tuteur disponible';
-  @override String get identificationNumberLabel => "Numéro d'identification";
-  @override String get identificationNumberHelp => "Numéro d'identification officiel.";
-  @override String get phoneNumberLabel => 'Téléphone';
-  @override String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
-  @override String get emailLabel => 'Email';
-  @override String get emailLabelHelp => 'Adresse email du tuteur.';
-  @override String get relationshipFather => 'Père';
-  @override String get relationshipMother => 'Mère';
-  @override String get relationshipGuardian => 'Tuteur';
-  @override String get relationshipUncle => 'Oncle';
-  @override String get relationshipAunt => 'Tante';
-  @override String get relationshipGrandparent => 'Grand-parent';
-  @override String get relationshipOther => 'Autre';
+  @override
+  String get district => 'District';
 
-  // ── Enrollment stepper ───────────────────────────────────────
-  @override String get stepPersonalInfoSubtitle => "Informations générales de l'élève";
-  @override String get stepAddressSubtitle => 'Localisation et adresse complète';
-  @override String get stepAcademicSubtitle => 'Historique académique et objectifs';
-  @override String get stepGuardianSubtitle => 'Responsables légaux et contacts';
-  @override String get stepSummarySubtitle => 'Récapitulatif final du dossier';
-  @override String stepIndicator(int current, int total) => 'Étape $current / $total';
-  @override String get stepForwardHint => 'Cliquez sur Continuer pour avancer étape par étape.';
-  @override String get validatePersonalInfoHint => 'Veuillez compléter les informations personnelles.';
-  @override String get validateAddressHint => "Veuillez compléter l'adresse de l'élève.";
-  @override String get validateAcademicInfoHint => 'Veuillez compléter les informations académiques.';
-  @override String get validateGuardianInfoHint => 'Veuillez vérifier les informations du/des tuteur(s).';
-  @override String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
+  @override
+  String get districtHelp => 'District ou arrondissement.';
+
+  @override
+  String get municipality => 'Commune';
+
+  @override
+  String get municipalityHelp => 'Commune de résidence de l\'élève.';
+
+  @override
+  String get neighborhood => 'Quartier';
+
+  @override
+  String get neighborhoodHelp => 'Quartier ou avenue de résidence.';
+
+  @override
+  String get fullAddress => 'Adresse complète';
+
+  @override
+  String get fullAddressHelp => 'Adresse complète de résidence.';
+
+  @override
+  String get academicYearLabel => 'Année scolaire';
+
+  @override
+  String get academicYearLabelHelp => 'Année scolaire de référence.';
+
+  @override
+  String get schoolLabel => 'École';
+
+  @override
+  String get schoolLabelHelp => 'Nom de l\'école précédente.';
+
+  @override
+  String get schoolCycle => 'Cycle';
+
+  @override
+  String get schoolCycleHelp => 'Cycle d\'enseignement précédent.';
+
+  @override
+  String get schoolLevelLabel => 'Niveau';
+
+  @override
+  String get schoolLevelLabelHelp => 'Niveau d\'étude précédent.';
+
+  @override
+  String get averageLabel => 'Moyenne';
+
+  @override
+  String get averageLabelHelp => 'Moyenne annuelle obtenue.';
+
+  @override
+  String get rankingLabel => 'Classement';
+
+  @override
+  String get rankingLabelHelp => 'Classement dans la classe.';
+
+  @override
+  String get yearValidated => 'Année validée';
+
+  @override
+  String get yearNotValidated => 'Non validée';
+
+  @override
+  String get currentAcademicYearLabel => 'Année académique';
+
+  @override
+  String get currentAcademicYearHelp => 'Année académique cible.';
+
+  @override
+  String get targetCycleLabel => 'Cycle souhaité';
+
+  @override
+  String get targetCycleLabelHelp => 'Cycle souhaité pour l\'inscription.';
+
+  @override
+  String get targetLevelLabel => 'Niveau souhaité';
+
+  @override
+  String get targetLevelLabelHelp => 'Niveau souhaité pour l\'inscription.';
+
+  @override
+  String get optionLabel => 'Option';
+
+  @override
+  String get optionLabelHelp => 'Option ou spécialisation souhaitée.';
+
+  @override
+  String get toDefine => 'À définir';
+
+  @override
+  String get primaryGuardian => 'Tuteur Principal';
+
+  @override
+  String guardianNumber(int number) {
+    return 'Tuteur $number';
+  }
+
+  @override
+  String get noGuardianInfo => 'Aucune information de tuteur disponible';
+
+  @override
+  String get identificationNumberLabel => 'Numéro d\'identification';
+
+  @override
+  String get identificationNumberHelp => 'Numéro d\'identification officiel.';
+
+  @override
+  String get phoneNumberLabel => 'Téléphone';
+
+  @override
+  String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get emailLabelHelp => 'Adresse email du tuteur.';
+
+  @override
+  String get relationshipFather => 'Père';
+
+  @override
+  String get relationshipMother => 'Mère';
+
+  @override
+  String get relationshipGuardian => 'Tuteur';
+
+  @override
+  String get relationshipUncle => 'Oncle';
+
+  @override
+  String get relationshipAunt => 'Tante';
+
+  @override
+  String get relationshipGrandparent => 'Grand-parent';
+
+  @override
+  String get relationshipOther => 'Autre';
+
+  @override
+  String get stepPersonalInfoSubtitle => 'Informations générales de l\'élève';
+
+  @override
+  String get stepAddressSubtitle => 'Localisation et adresse complète';
+
+  @override
+  String get stepAcademicSubtitle => 'Historique académique et objectifs';
+
+  @override
+  String get stepGuardianSubtitle => 'Responsables légaux et contacts';
+
+  @override
+  String get stepSummarySubtitle => 'Récapitulatif final du dossier';
+
+  @override
+  String stepIndicator(int current, int total) {
+    return 'Étape $current / $total';
+  }
+
+  @override
+  String get stepForwardHint => 'Cliquez sur Continuer pour avancer étape par étape.';
+
+  @override
+  String get validatePersonalInfoHint => 'Veuillez compléter les informations personnelles.';
+
+  @override
+  String get validateAddressHint => 'Veuillez compléter l\'adresse de l\'élève.';
+
+  @override
+  String get validateAcademicInfoHint => 'Veuillez compléter les informations académiques.';
+
+  @override
+  String get validateGuardianInfoHint => 'Veuillez vérifier les informations du/des tuteur(s).';
+
+  @override
+  String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
+
+  @override
+  String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
+
+  @override
+  String get bootstrapContextUnavailableMessage => 'Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.';
+
+  @override
+  String get signOutAction => 'Se déconnecter';
 }

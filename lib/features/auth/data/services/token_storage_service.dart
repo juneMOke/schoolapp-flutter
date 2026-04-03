@@ -29,6 +29,10 @@ class TokenStorageService {
         value: session.user.lastName,
       ),
       _storage.write(key: AppConstants.userRoleKey, value: session.user.role),
+      _storage.write(
+        key: AppConstants.userSchoolIdKey,
+        value: session.user.schoolId,
+      ),
     ]);
   }
 
@@ -46,6 +50,8 @@ class TokenStorageService {
     final userLastName =
         await _storage.read(key: AppConstants.userLastNameKey) ?? '';
     final userRole = await _storage.read(key: AppConstants.userRoleKey) ?? '';
+    final userSchoolId =
+        await _storage.read(key: AppConstants.userSchoolIdKey) ?? '';
 
     return AuthSession(
       accessToken: accessToken,
@@ -56,6 +62,7 @@ class TokenStorageService {
         firstName: userFirstName,
         lastName: userLastName,
         role: userRole,
+        schoolId: userSchoolId,
       ),
     );
   }
@@ -69,6 +76,7 @@ class TokenStorageService {
       _storage.delete(key: AppConstants.userFirstNameKey),
       _storage.delete(key: AppConstants.userLastNameKey),
       _storage.delete(key: AppConstants.userRoleKey),
+      _storage.delete(key: AppConstants.userSchoolIdKey),
     ]);
   }
 }
