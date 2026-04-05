@@ -51,6 +51,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   DateTime? _selectedDate;
   bool _isDirty = false;
   bool _isValid = false;
+  bool _showValidationHints = false;
 
   bool get canSubmit => _isValid && _isDirty;
   bool get isDirty => _isDirty;
@@ -68,14 +69,25 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
     _initializeFromStudent(widget.studentDetail);
 
-    _firstNameController.addListener(_recomputeFormState);
-    _lastNameController.addListener(_recomputeFormState);
-    _surnameController.addListener(_recomputeFormState);
-    _birthPlaceController.addListener(_recomputeFormState);
-    _nationalityController.addListener(_recomputeFormState);
+    _firstNameController.addListener(_onTextFieldChanged);
+    _lastNameController.addListener(_onTextFieldChanged);
+    _surnameController.addListener(_onTextFieldChanged);
+    _birthPlaceController.addListener(_onTextFieldChanged);
+    _nationalityController.addListener(_onTextFieldChanged);
 
     _recomputeFormState(notifyParent: false);
     _notifyParentFormState();
+  }
+
+  void _onTextFieldChanged() {
+    _recomputeFormState();
+    if (_showValidationHints) {
+      setState(() {
+        if (_isValid) {
+          _showValidationHints = false;
+        }
+      });
+    }
   }
 
   @override
@@ -173,11 +185,11 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   void dispose() {
-    _firstNameController.removeListener(_recomputeFormState);
-    _lastNameController.removeListener(_recomputeFormState);
-    _surnameController.removeListener(_recomputeFormState);
-    _birthPlaceController.removeListener(_recomputeFormState);
-    _nationalityController.removeListener(_recomputeFormState);
+    _firstNameController.removeListener(_onTextFieldChanged);
+    _lastNameController.removeListener(_onTextFieldChanged);
+    _surnameController.removeListener(_onTextFieldChanged);
+    _birthPlaceController.removeListener(_onTextFieldChanged);
+    _nationalityController.removeListener(_onTextFieldChanged);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
@@ -203,7 +215,59 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     if (picked != null) {
       setState(() => _selectedDate = picked);
       _recomputeFormState();
+      if (_showValidationHints && _isValid) {
+        setState(() => _showValidationHints = false);
+      }
     }
+  }
+
+  List<String> _buildValidationErrors(AppLocalizations l10n) {
+    final errors = <String>[];
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final surname = _surnameController.text.trim();
+    final birthPlace = _birthPlaceController.text.trim();
+    final nationality = _nationalityController.text.trim();
+
+    if (firstName.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.firstName));
+    }
+    if (lastName.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.lastName));
+    }
+    if (surname.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.surname));
+    }
+    if (_selectedDate == null) {
+      errors.add(l10n.requiredFieldError(l10n.dateOfBirth));
+    }
+    if (birthPlace.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.birthPlace));
+    }
+    if (nationality.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.nationality));
+    }
+
+    return errors;
+  }
+
+  String? _fieldErrorFor(
+    String value,
+    String fieldLabel,
+    AppLocalizations l10n,
+    bool showValidation,
+  ) {
+    if (!showValidation || value.trim().isNotEmpty) {
+      return null;
+    }
+    return l10n.requiredFieldError(fieldLabel);
+  }
+
+  String? _dateErrorFor(AppLocalizations l10n, bool showValidation) {
+    if (!showValidation || _selectedDate != null) {
+      return null;
+    }
+    return l10n.requiredFieldError(l10n.dateOfBirth);
   }
 
   String _formatDate(DateTime? date) {
@@ -229,9 +293,18 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   void _onSave(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (!_isValid) {
+      final reasons = _buildValidationErrors(l10n);
+      setState(() => _showValidationHints = true);
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.validatePersonalInfoHint)));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              '${l10n.personalInfoValidationReasonsTitle}\n- ${reasons.join('\n- ')}',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       return;
     }
     if (!_isDirty) return;
@@ -252,6 +325,9 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final showValidation = _showValidationHints || (_isDirty && !_isValid);
+
     return BlocProvider<StudentBloc>.value(
       value: _studentBloc,
       child: PersonalInfoStepBody(
@@ -274,10 +350,45 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         formatDate: _formatDate,
         enrollmentId: widget.enrollmentId,
         showInlineSaveButton: widget.showInlineSaveButton,
+        canSave: canSubmit,
+        firstNameError: _fieldErrorFor(
+          _firstNameController.text,
+          l10n.firstName,
+          l10n,
+          showValidation,
+        ),
+        lastNameError: _fieldErrorFor(
+          _lastNameController.text,
+          l10n.lastName,
+          l10n,
+          showValidation,
+        ),
+        surnameError: _fieldErrorFor(
+          _surnameController.text,
+          l10n.surname,
+          l10n,
+          showValidation,
+        ),
+        birthPlaceError: _fieldErrorFor(
+          _birthPlaceController.text,
+          l10n.birthPlace,
+          l10n,
+          showValidation,
+        ),
+        nationalityError: _fieldErrorFor(
+          _nationalityController.text,
+          l10n.nationality,
+          l10n,
+          showValidation,
+        ),
+        dateOfBirthError: _dateErrorFor(l10n, showValidation),
         onSavingChanged: widget.onSavingChanged,
         onSaveSuccess: () {
           _markCurrentAsSavedSnapshot();
           _recomputeFormState();
+          if (_showValidationHints) {
+            setState(() => _showValidationHints = false);
+          }
           widget.onSaveSuccess?.call();
         },
       ),

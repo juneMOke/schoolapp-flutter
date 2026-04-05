@@ -489,6 +489,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get personalInfoSaveHintBeforeContinue => 'Veuillez enregistrer vos modifications avant de continuer.';
 
   @override
+  String get personalInfoValidationReasonsTitle => 'Veuillez corriger les champs suivants :';
+
+  @override
+  String requiredFieldError(String field) {
+    return 'Le champ $field est requis.';
+  }
+
+  @override
   String get savePersonalInfo => 'Enregistrer';
 
   @override

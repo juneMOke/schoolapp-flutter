@@ -1031,6 +1031,18 @@ abstract class AppLocalizations {
   /// **'Please save your changes before continuing.'**
   String get personalInfoSaveHintBeforeContinue;
 
+  /// No description provided for @personalInfoValidationReasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please correct the following fields:'**
+  String get personalInfoValidationReasonsTitle;
+
+  /// No description provided for @requiredFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'The {field} field is required.'**
+  String requiredFieldError(String field);
+
   /// No description provided for @savePersonalInfo.
   ///
   /// In en, this message translates to:

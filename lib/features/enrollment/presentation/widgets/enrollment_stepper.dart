@@ -219,7 +219,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         ? !_personalInfoDirty && _personalInfoValid && !_personalInfoSaving
         : true;
 
-    final canSave = _showSaveAction && !_personalInfoSaving && _personalInfoDirty;
+    final canSave = _showSaveAction &&
+        !_personalInfoSaving &&
+        _personalInfoDirty &&
+        _personalInfoValid;
 
     return Row(
       children: [
@@ -231,7 +234,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           ),
         const Spacer(),
         if (_showSaveAction) ...[
-          OutlinedButton.icon(
+          FilledButton.icon(
             onPressed: canSave ? _onSavePressed : null,
             icon: _personalInfoSaving
                 ? const SizedBox(
@@ -242,6 +245,17 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 : const Icon(Icons.save_outlined, size: 16),
             label: Text(
               _personalInfoSaving ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
+              foregroundColor: Colors.white,
+              elevation: canSave ? 6 : 0,
+              shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(width: 10),

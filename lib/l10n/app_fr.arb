@@ -200,6 +200,15 @@
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
   "enrollmentReadyForValidation": "Dossier prêt pour validation finale.",
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
+  "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
+  "requiredFieldError": "Le champ {field} est requis.",
+  "@requiredFieldError": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
   "savePersonalInfo": "Enregistrer",
   "savingPersonalInfo": "Enregistrement en cours...",
   "personalInfoSaveSuccess": "Informations personnelles mises à jour avec succès.",

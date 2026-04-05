@@ -12,6 +12,7 @@ class DatePickerField extends StatelessWidget {
   final bool requiredField;
   final String helpMessage;
   final VoidCallback onTap;
+  final String? errorText;
 
   const DatePickerField({
     super.key,
@@ -22,6 +23,7 @@ class DatePickerField extends StatelessWidget {
     required this.onTap,
     this.requiredField = false,
     this.helpMessage = '',
+    this.errorText,
   });
 
   @override
@@ -44,6 +46,7 @@ class DatePickerField extends StatelessWidget {
             controller: TextEditingController(text: displayValue),
             decoration: buildInputDecoration(
               hintText: l10n.dateHint,
+              errorText: errorText,
               prefixIcon: const Icon(
                 Icons.calendar_today_outlined,
                 size: 16,

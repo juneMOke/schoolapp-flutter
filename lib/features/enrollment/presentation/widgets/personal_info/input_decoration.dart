@@ -5,6 +5,7 @@ InputDecoration buildInputDecoration({
   String hintText = '',
   Widget? prefixIcon,
   Widget? suffixIcon,
+  String? errorText,
 }) {
   return InputDecoration(
     hintText: hintText,
@@ -13,6 +14,8 @@ InputDecoration buildInputDecoration({
     fillColor: Colors.white,
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
+    errorText: errorText,
+    errorMaxLines: 2,
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(

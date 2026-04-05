@@ -242,6 +242,15 @@
   "validateGuardianInfoHint": "Please check the guardian information.",
   "enrollmentReadyForValidation": "File ready for final validation.",
   "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
+  "personalInfoValidationReasonsTitle": "Please correct the following fields:",
+  "requiredFieldError": "The {field} field is required.",
+  "@requiredFieldError": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
   "savePersonalInfo": "Save",
   "savingPersonalInfo": "Saving...",
   "personalInfoSaveSuccess": "Personal information updated successfully.",

@@ -10,6 +10,7 @@ class EditableField extends StatelessWidget {
   final TextEditingController controller;
   final bool requiredField;
   final String helpMessage;
+  final String? errorText;
 
   const EditableField({
     super.key,
@@ -18,6 +19,7 @@ class EditableField extends StatelessWidget {
     required this.controller,
     this.requiredField = false,
     this.helpMessage = '',
+    this.errorText,
   });
 
   @override
@@ -43,6 +45,7 @@ class EditableField extends StatelessWidget {
                 textInputAction: TextInputAction.next,
                 decoration: buildInputDecoration(
                   hintText: l10n.enterFieldHint(label),
+                  errorText: errorText,
                   prefixIcon: const Icon(
                     Icons.edit_outlined,
                     size: 16,

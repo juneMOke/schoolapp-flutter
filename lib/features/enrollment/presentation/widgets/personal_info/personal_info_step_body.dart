@@ -26,6 +26,13 @@ class PersonalInfoStepBody extends StatelessWidget {
   final String Function(DateTime?) formatDate;
   final String enrollmentId;
   final bool showInlineSaveButton;
+  final bool canSave;
+  final String? firstNameError;
+  final String? lastNameError;
+  final String? surnameError;
+  final String? birthPlaceError;
+  final String? nationalityError;
+  final String? dateOfBirthError;
   final ValueChanged<bool>? onSavingChanged;
   final VoidCallback onSaveSuccess;
 
@@ -45,6 +52,13 @@ class PersonalInfoStepBody extends StatelessWidget {
     required this.formatDate,
     required this.enrollmentId,
     required this.showInlineSaveButton,
+    required this.canSave,
+    this.firstNameError,
+    this.lastNameError,
+    this.surnameError,
+    this.birthPlaceError,
+    this.nationalityError,
+    this.dateOfBirthError,
     required this.onSavingChanged,
     required this.onSaveSuccess,
   });
@@ -148,6 +162,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         controller: firstNameController,
                         requiredField: true,
                         helpMessage: l10n.firstNameHelp,
+                        errorText: firstNameError,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -155,6 +170,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         controller: lastNameController,
                         requiredField: true,
                         helpMessage: l10n.lastNameHelp,
+                        errorText: lastNameError,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -162,6 +178,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         controller: surnameController,
                         requiredField: true,
                         helpMessage: l10n.surnameHelp,
+                        errorText: surnameError,
                       ),
                       DatePickerField(
                         width: fieldWidth,
@@ -170,6 +187,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         displayValue: formatDate(selectedDate),
                         requiredField: true,
                         helpMessage: l10n.dateOfBirthHelp,
+                        errorText: dateOfBirthError,
                         onTap: onPickDate,
                       ),
                       EditableField(
@@ -178,6 +196,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         controller: birthPlaceController,
                         requiredField: true,
                         helpMessage: l10n.birthPlaceHelp,
+                        errorText: birthPlaceError,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -185,6 +204,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         controller: nationalityController,
                         requiredField: true,
                         helpMessage: l10n.nationalityHelp,
+                        errorText: nationalityError,
                       ),
                       GenderSegmentedField(
                         width: fieldWidth,
@@ -201,7 +221,9 @@ class PersonalInfoStepBody extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: FilledButton.icon(
-                        onPressed: isLoading ? null : () => onSave(context),
+                        onPressed: (isLoading || !canSave)
+                            ? null
+                            : () => onSave(context),
                         icon: isLoading
                             ? const SizedBox(
                                 width: 16,
@@ -216,6 +238,24 @@ class PersonalInfoStepBody extends StatelessWidget {
                           isLoading
                               ? l10n.savingPersonalInfo
                               : l10n.savePersonalInfo,
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: canSave
+                              ? const Color(0xFF0EA5E9)
+                              : null,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                          elevation: canSave ? 6 : 0,
+                          shadowColor: const Color(
+                            0xFF0EA5E9,
+                          ).withValues(alpha: 0.45),
                         ),
                       ),
                     ),
