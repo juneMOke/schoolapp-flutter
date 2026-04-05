@@ -13,6 +13,8 @@ class EnrollmentSchoolDetailModel {
   final double previousRate;
   final int? previousRank;
   final bool validatedPreviousYear;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
   final String? transferReason;
   final String? cancellationReason;
 
@@ -28,6 +30,8 @@ class EnrollmentSchoolDetailModel {
     required this.previousRate,
     this.previousRank,
     required this.validatedPreviousYear,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
     this.transferReason,
     this.cancellationReason,
   });
@@ -45,6 +49,8 @@ class EnrollmentSchoolDetailModel {
         previousRate: (json['previousRate'] as num).toDouble(),
         previousRank: json['previousRank'] as int?,
         validatedPreviousYear: json['validatedPreviousYear'] as bool,
+        schoolLevelGroupId: json['schoolLevelGroupId'] as String? ?? '',
+        schoolLevelId: json['schoolLevelId'] as String? ?? '',
         transferReason: json['transferReason'] as String?,
         cancellationReason: json['cancellationReason'] as String?,
       );
@@ -61,6 +67,8 @@ class EnrollmentSchoolDetailModel {
     'previousRate': previousRate,
     'previousRank': previousRank,
     'validatedPreviousYear': validatedPreviousYear,
+    'schoolLevelGroupId': schoolLevelGroupId,
+    'schoolLevelId': schoolLevelId,
     'transferReason': transferReason,
     'cancellationReason': cancellationReason,
   };
@@ -77,6 +85,8 @@ class EnrollmentSchoolDetailModel {
     previousRate: previousRate,
     previousRank: previousRank,
     validatedPreviousYear: validatedPreviousYear,
+    schoolLevelGroupId: schoolLevelGroupId,
+    schoolLevelId: schoolLevelId,
     transferReason: transferReason,
     cancellationReason: cancellationReason,
   );

@@ -9,6 +9,9 @@ class AppConstants {
 
   static const String enrollmentEndpoint = '/api/v1/enrollments';
 
+  static const String studentPersonalInfoEndpoint =
+      '/api/v1/students/{studentId}/personal-info';
+
   static const String enrollmentDetailEndpoint =
       '/api/v1/enrollments/{enrollmentId}/detail';
   static const String enrollmentSearchByStudentInfoEndpoint =

@@ -43,6 +43,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
        super(const EnrollmentState.initial()) {
 
     on<EnrollmentResetRequested>(_onResetRequested);
+    on<EnrollmentSummariesRefreshRequested>(_onSummariesRefreshRequested);
     on<EnrollmentSummariesRequested>(_onSummariesRequested);
     on<EnrollmentSummariesByStudentNameRequested>(
       _onSummariesByStudentNameRequested,
@@ -68,32 +69,12 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentSummariesRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        summariesStatus: EnrollmentLoadStatus.loading,
-        summariesQueryType: EnrollmentSummaryQueryType.byStatus,
-        errorMessage: null,
-      ),
-    );
-
-    final result = await _getEnrollmentSummaryListByStatusUseCase(
-      status: event.status,
-      academicYearId: event.academicYearId,
-    );
-
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.failure,
-          errorMessage: failure.message,
-        ),
-      ),
-      (summaries) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.success,
-          summaries: summaries,
-          errorMessage: null,
-        ),
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: EnrollmentSummaryQueryType.byStatus,
+        status: event.status,
+        academicYearId: event.academicYearId,
       ),
     );
   }
@@ -102,35 +83,15 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentSummariesByStudentNameRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        summariesStatus: EnrollmentLoadStatus.loading,
-        summariesQueryType: EnrollmentSummaryQueryType.byStudentName,
-        errorMessage: null,
-      ),
-    );
-
-    final result = await _searchByStudentNameUseCase(
-      status: event.status,
-      academicYearId: event.academicYearId,
-      firstName: event.firstName,
-      lastName: event.lastName,
-      surname: event.surname,
-    );
-
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.failure,
-          errorMessage: failure.message,
-        ),
-      ),
-      (summaries) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.success,
-          summaries: summaries,
-          errorMessage: null,
-        ),
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: EnrollmentSummaryQueryType.byStudentName,
+        status: event.status,
+        academicYearId: event.academicYearId,
+        firstName: event.firstName,
+        lastName: event.lastName,
+        surname: event.surname,
       ),
     );
   }
@@ -139,37 +100,16 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentSummariesByStudentNamesAndDateOfBirthRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        summariesStatus: EnrollmentLoadStatus.loading,
-        summariesQueryType:
-            EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth,
-        errorMessage: null,
-      ),
-    );
-
-    final result = await _searchByStudentNamesAndDateOfBirthUseCase(
-      status: event.status,
-      academicYearId: event.academicYearId,
-      firstName: event.firstName,
-      lastName: event.lastName,
-      surname: event.surname,
-      dateOfBirth: event.dateOfBirth,
-    );
-
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.failure,
-          errorMessage: failure.message,
-        ),
-      ),
-      (summaries) => emit(
-        state.copyWith(
-          summariesStatus: EnrollmentLoadStatus.success,
-          summaries: summaries,
-          errorMessage: null,
-        ),
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth,
+        status: event.status,
+        academicYearId: event.academicYearId,
+        firstName: event.firstName,
+        lastName: event.lastName,
+        surname: event.surname,
+        dateOfBirth: event.dateOfBirth,
       ),
     );
   }
@@ -178,19 +118,72 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentSummariesByDateOfBirthRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: EnrollmentSummaryQueryType.byDateOfBirth,
+        status: event.status,
+        academicYearId: event.academicYearId,
+        dateOfBirth: event.dateOfBirth,
+      ),
+    );
+  }
+
+  Future<void> _onSummariesRefreshRequested(
+    EnrollmentSummariesRefreshRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    final lastSummariesQuery = state.lastSummariesQuery;
+    if (lastSummariesQuery == null) {
+      return;
+    }
+
+    await _loadSummariesForQuery(emit, lastSummariesQuery);
+  }
+
+  Future<void> _loadSummariesForQuery(
+    Emitter<EnrollmentState> emit,
+    EnrollmentSummariesQuery query,
+  ) async {
     emit(
       state.copyWith(
         summariesStatus: EnrollmentLoadStatus.loading,
-        summariesQueryType: EnrollmentSummaryQueryType.byDateOfBirth,
+        summariesQueryType: query.type,
+        lastSummariesQuery: query,
         errorMessage: null,
       ),
     );
 
-    final result = await _searchByDateOfBirthUseCase(
-      status: event.status,
-      academicYearId: event.academicYearId,
-      dateOfBirth: event.dateOfBirth,
-    );
+    final result = await switch (query.type) {
+      EnrollmentSummaryQueryType.byStatus =>
+        _getEnrollmentSummaryListByStatusUseCase(
+          status: query.status,
+          academicYearId: query.academicYearId,
+        ),
+      EnrollmentSummaryQueryType.byStudentName =>
+        _searchByStudentNameUseCase(
+          status: query.status,
+          academicYearId: query.academicYearId,
+          firstName: query.firstName ?? '',
+          lastName: query.lastName ?? '',
+          surname: query.surname ?? '',
+        ),
+      EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth =>
+        _searchByStudentNamesAndDateOfBirthUseCase(
+          status: query.status,
+          academicYearId: query.academicYearId,
+          firstName: query.firstName ?? '',
+          lastName: query.lastName ?? '',
+          surname: query.surname ?? '',
+          dateOfBirth: query.dateOfBirth ?? '',
+        ),
+      EnrollmentSummaryQueryType.byDateOfBirth =>
+        _searchByDateOfBirthUseCase(
+          status: query.status,
+          academicYearId: query.academicYearId,
+          dateOfBirth: query.dateOfBirth ?? '',
+        ),
+    };
 
     result.fold(
       (failure) => emit(

@@ -1,64 +1,189 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_avatar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PersonalInfoStep extends StatefulWidget {
   final StudentDetail studentDetail;
+  final String enrollmentId;
+  final bool showInlineSaveButton;
+  final ValueChanged<bool>? onDirtyChanged;
+  final ValueChanged<bool>? onValidityChanged;
+  final ValueChanged<bool>? onSavingChanged;
+  final VoidCallback? onSaveSuccess;
 
-  const PersonalInfoStep({super.key, required this.studentDetail});
+  const PersonalInfoStep({
+    super.key,
+    required this.studentDetail,
+    required this.enrollmentId,
+    this.showInlineSaveButton = true,
+    this.onDirtyChanged,
+    this.onValidityChanged,
+    this.onSavingChanged,
+    this.onSaveSuccess,
+  });
 
   @override
-  State<PersonalInfoStep> createState() => _PersonalInfoStepState();
+  State<PersonalInfoStep> createState() => PersonalInfoStepState();
 }
 
-class _PersonalInfoStepState extends State<PersonalInfoStep> {
+class PersonalInfoStepState extends State<PersonalInfoStep> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
   late final TextEditingController _birthPlaceController;
   late final TextEditingController _nationalityController;
+  late final StudentBloc _studentBloc;
+
+  String _initialFirstName = '';
+  String _initialLastName = '';
+  String _initialSurname = '';
+  String _initialBirthPlace = '';
+  String _initialNationality = '';
+  Gender? _initialGender;
+  DateTime? _initialDate;
 
   late Gender _selectedGender;
   DateTime? _selectedDate;
+  bool _isDirty = false;
+  bool _isValid = false;
+
+  bool get canSubmit => _isValid && _isDirty;
+  bool get isDirty => _isDirty;
+  bool get isValid => _isValid;
 
   @override
   void initState() {
     super.initState();
-    final student = widget.studentDetail;
-    _firstNameController = TextEditingController(text: student.firstName);
-    _lastNameController  = TextEditingController(text: student.lastName);
-    _surnameController   = TextEditingController(text: student.surname);
-    _birthPlaceController  = TextEditingController(text: student.birthPlace);
-    _nationalityController = TextEditingController(text: student.nationality);
-    _selectedGender = student.gender;
+    _studentBloc = getIt<StudentBloc>();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _surnameController = TextEditingController();
+    _birthPlaceController = TextEditingController();
+    _nationalityController = TextEditingController();
 
+    _initializeFromStudent(widget.studentDetail);
+
+    _firstNameController.addListener(_recomputeFormState);
+    _lastNameController.addListener(_recomputeFormState);
+    _surnameController.addListener(_recomputeFormState);
+    _birthPlaceController.addListener(_recomputeFormState);
+    _nationalityController.addListener(_recomputeFormState);
+
+    _recomputeFormState(notifyParent: false);
+    _notifyParentFormState();
+  }
+
+  @override
+  void didUpdateWidget(covariant PersonalInfoStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.studentDetail != widget.studentDetail) {
+      _initializeFromStudent(widget.studentDetail);
+      _recomputeFormState(notifyParent: false);
+      _notifyParentFormState();
+    }
+  }
+
+  void _notifyParentFormState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onValidityChanged?.call(_isValid);
+      widget.onDirtyChanged?.call(_isDirty);
+    });
+  }
+
+  void _initializeFromStudent(StudentDetail student) {
+    _firstNameController.text = student.firstName;
+    _lastNameController.text = student.lastName;
+    _surnameController.text = student.surname;
+    _birthPlaceController.text = student.birthPlace;
+    _nationalityController.text = student.nationality;
+    _selectedGender = student.gender;
+    _selectedDate = _formatSelectedDate(student);
+
+    _initialFirstName = student.firstName.trim();
+    _initialLastName = student.lastName.trim();
+    _initialSurname = student.surname.trim();
+    _initialBirthPlace = student.birthPlace.trim();
+    _initialNationality = student.nationality.trim();
+    _initialGender = student.gender;
+    _initialDate = _formatSelectedDate(student);
+  }
+
+  void _markCurrentAsSavedSnapshot() {
+    _initialFirstName = _firstNameController.text.trim();
+    _initialLastName = _lastNameController.text.trim();
+    _initialSurname = _surnameController.text.trim();
+    _initialBirthPlace = _birthPlaceController.text.trim();
+    _initialNationality = _nationalityController.text.trim();
+    _initialGender = _selectedGender;
+    _initialDate = _selectedDate;
+  }
+
+  void _recomputeFormState({bool notifyParent = true}) {
+    final validNow =
+        _firstNameController.text.trim().isNotEmpty &&
+        _lastNameController.text.trim().isNotEmpty &&
+        _surnameController.text.trim().isNotEmpty &&
+        _birthPlaceController.text.trim().isNotEmpty &&
+        _nationalityController.text.trim().isNotEmpty &&
+        _selectedDate != null;
+
+    final dirtyNow =
+        _firstNameController.text.trim() != _initialFirstName ||
+        _lastNameController.text.trim() != _initialLastName ||
+        _surnameController.text.trim() != _initialSurname ||
+        _birthPlaceController.text.trim() != _initialBirthPlace ||
+        _nationalityController.text.trim() != _initialNationality ||
+        _selectedGender != _initialGender ||
+        _selectedDate != _initialDate;
+
+    if (_isValid != validNow) {
+      _isValid = validNow;
+      if (notifyParent) {
+        widget.onValidityChanged?.call(_isValid);
+      }
+    }
+    if (_isDirty != dirtyNow) {
+      _isDirty = dirtyNow;
+      if (notifyParent) {
+        widget.onDirtyChanged?.call(_isDirty);
+      }
+    }
+  }
+
+  DateTime? _formatSelectedDate(StudentDetail student) {
     try {
       final parts = student.dateOfBirth.split('-');
       if (parts.length == 3) {
-        _selectedDate = DateTime(
+        return DateTime(
           int.parse(parts[0]),
           int.parse(parts[1]),
           int.parse(parts[2]),
         );
       }
-    } catch (_) {
-      _selectedDate = null;
-    }
+    } catch (_) {}
+
+    return null;
   }
 
   @override
   void dispose() {
+    _firstNameController.removeListener(_recomputeFormState);
+    _lastNameController.removeListener(_recomputeFormState);
+    _surnameController.removeListener(_recomputeFormState);
+    _birthPlaceController.removeListener(_recomputeFormState);
+    _nationalityController.removeListener(_recomputeFormState);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
     _birthPlaceController.dispose();
     _nationalityController.dispose();
+    _studentBloc.close();
     super.dispose();
   }
 
@@ -75,7 +200,10 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
       cancelText: l10n.cancel,
       confirmText: l10n.confirm,
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+      _recomputeFormState();
+    }
   }
 
   String _formatDate(DateTime? date) {
@@ -86,126 +214,71 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
     return '$d/$m/$y';
   }
 
+  String _toIsoDate(DateTime? date) {
+    if (date == null) return widget.studentDetail.dateOfBirth;
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  void submitForm() {
+    _onSave(context);
+  }
+
+  void _onSave(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (!_isValid) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.validatePersonalInfoHint)));
+      return;
+    }
+    if (!_isDirty) return;
+
+    _studentBloc.add(
+      StudentPersonalInfoUpdateRequested(
+        studentId: widget.studentDetail.id,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        surname: _surnameController.text.trim(),
+        dateOfBirth: _toIsoDate(_selectedDate),
+        gender: _selectedGender.name.toUpperCase(),
+        birthPlace: _birthPlaceController.text.trim(),
+        nationality: _nationalityController.text.trim(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n    = AppLocalizations.of(context)!;
-    final student = widget.studentDetail;
-
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.defaultPadding),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const spacing = 16.0;
-          final columns = constraints.maxWidth >= 980
-              ? 3
-              : constraints.maxWidth >= 640
-              ? 2
-              : 1;
-          final fieldWidth =
-              (constraints.maxWidth - ((columns - 1) * spacing)) / columns;
-
-          final content = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── En-tête ───────────────────────────────────────────────
-              Row(
-                children: [
-                  StudentAvatar(
-                    firstName: student.firstName,
-                    lastName: student.lastName,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${student.firstName} ${student.lastName}',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 2),
-              Text(
-                          l10n.personalInfoSubtitle,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.textSecondaryColor),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              // ── Champs ────────────────────────────────────────────────
-              Wrap(
-                spacing: spacing,
-                runSpacing: 14,
-                children: [
-                  EditableField(
-                    width: fieldWidth,
-                    label: l10n.firstName,
-                    controller: _firstNameController,
-                    requiredField: true,
-                    helpMessage: l10n.firstNameHelp,
-                  ),
-                  EditableField(
-                    width: fieldWidth,
-                    label: l10n.lastName,
-                    controller: _lastNameController,
-                    requiredField: true,
-                    helpMessage: l10n.lastNameHelp,
-                  ),
-                  EditableField(
-                    width: fieldWidth,
-                    label: l10n.surname,
-                    controller: _surnameController,
-                    requiredField: true,
-                    helpMessage: l10n.surnameHelp,
-                  ),
-                  DatePickerField(
-                    width: fieldWidth,
-                    label: l10n.dateOfBirth,
-                    selectedDate: _selectedDate,
-                    displayValue: _formatDate(_selectedDate),
-                    requiredField: true,
-                    helpMessage: l10n.dateOfBirthHelp,
-                    onTap: () => _pickDate(context),
-                  ),
-                  EditableField(
-                    width: fieldWidth,
-                    label: l10n.birthPlace,
-                    controller: _birthPlaceController,
-                    requiredField: true,
-                    helpMessage: l10n.birthPlaceHelp,
-                  ),
-                  EditableField(
-                    width: fieldWidth,
-                    label: l10n.nationality,
-                    controller: _nationalityController,
-                    requiredField: true,
-                    helpMessage: l10n.nationalityHelp,
-                  ),
-                  GenderSegmentedField(
-                    width: fieldWidth,
-                    label: l10n.gender,
-                    selectedGender: _selectedGender,
-                    requiredField: true,
-                    helpMessage: l10n.genderHelp,
-                    onChanged: (gender) {
-                      if (gender != null) {
-                        setState(() => _selectedGender = gender);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          );
-
-          if (constraints.maxHeight < 560) {
-            return SingleChildScrollView(child: content);
+    return BlocProvider<StudentBloc>.value(
+      value: _studentBloc,
+      child: PersonalInfoStepBody(
+        studentDetail: widget.studentDetail,
+        firstNameController: _firstNameController,
+        lastNameController: _lastNameController,
+        surnameController: _surnameController,
+        birthPlaceController: _birthPlaceController,
+        nationalityController: _nationalityController,
+        selectedGender: _selectedGender,
+        selectedDate: _selectedDate,
+        onGenderChanged: (g) {
+          if (g != null) {
+            setState(() => _selectedGender = g);
+            _recomputeFormState();
           }
-          return content;
+        },
+        onPickDate: () => _pickDate(context),
+        onSave: _onSave,
+        formatDate: _formatDate,
+        enrollmentId: widget.enrollmentId,
+        showInlineSaveButton: widget.showInlineSaveButton,
+        onSavingChanged: widget.onSavingChanged,
+        onSaveSuccess: () {
+          _markCurrentAsSavedSnapshot();
+          _recomputeFormState();
+          widget.onSaveSuccess?.call();
         },
       ),
     );

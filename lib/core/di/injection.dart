@@ -43,6 +43,11 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/student/data/datasources/student_remote_data_source.dart';
+import 'package:school_app_flutter/features/student/data/repositories/student_repository_impl.dart';
+import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/update_student_personal_info_use_case.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -320,6 +325,28 @@ Future<void> configureDependencies() async {
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
           >(),
+    ),
+  );
+
+  // ── Student ───────────────────────────────────────────────────────────────
+  getIt.registerLazySingleton<StudentRemoteDataSource>(
+    () => StudentRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<StudentRepository>(
+    () => StudentRepositoryImpl(
+      remoteDataSource: getIt<StudentRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<UpdateStudentPersonalInfoUseCase>(
+    () => UpdateStudentPersonalInfoUseCase(getIt<StudentRepository>()),
+  );
+
+  getIt.registerFactory<StudentBloc>(
+    () => StudentBloc(
+      updatePersonalInfoUseCase: getIt<UpdateStudentPersonalInfoUseCase>(),
     ),
   );
 }

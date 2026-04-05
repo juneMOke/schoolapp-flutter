@@ -486,6 +486,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentReadyForValidation => 'File ready for final validation.';
 
   @override
+  String get personalInfoSaveHintBeforeContinue => 'Please save your changes before continuing.';
+
+  @override
+  String get savePersonalInfo => 'Save';
+
+  @override
+  String get savingPersonalInfo => 'Saving...';
+
+  @override
+  String get personalInfoSaveSuccess => 'Personal information updated successfully.';
+
+  @override
+  String personalInfoSaveError(String message) {
+    return 'Update failed: $message';
+  }
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

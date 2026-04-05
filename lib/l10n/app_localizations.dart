@@ -1025,6 +1025,36 @@ abstract class AppLocalizations {
   /// **'File ready for final validation.'**
   String get enrollmentReadyForValidation;
 
+  /// No description provided for @personalInfoSaveHintBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save your changes before continuing.'**
+  String get personalInfoSaveHintBeforeContinue;
+
+  /// No description provided for @savePersonalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get savePersonalInfo;
+
+  /// No description provided for @savingPersonalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingPersonalInfo;
+
+  /// No description provided for @personalInfoSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal information updated successfully.'**
+  String get personalInfoSaveSuccess;
+
+  /// No description provided for @personalInfoSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed: {message}'**
+  String personalInfoSaveError(String message);
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:

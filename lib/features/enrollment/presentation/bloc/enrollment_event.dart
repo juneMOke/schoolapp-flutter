@@ -11,6 +11,10 @@ class EnrollmentResetRequested extends EnrollmentEvent {
   const EnrollmentResetRequested();
 }
 
+class EnrollmentSummariesRefreshRequested extends EnrollmentEvent {
+  const EnrollmentSummariesRefreshRequested();
+}
+
 class EnrollmentSummariesRequested extends EnrollmentEvent {
   final String status;
   final String academicYearId;

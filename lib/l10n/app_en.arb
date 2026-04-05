@@ -241,6 +241,16 @@
   "validateAcademicInfoHint": "Please complete the academic information.",
   "validateGuardianInfoHint": "Please check the guardian information.",
   "enrollmentReadyForValidation": "File ready for final validation.",
+  "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
+  "savePersonalInfo": "Save",
+  "savingPersonalInfo": "Saving...",
+  "personalInfoSaveSuccess": "Personal information updated successfully.",
+  "personalInfoSaveError": "Update failed: {message}",
+  "@personalInfoSaveError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
   "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
   "signOutAction": "Sign out"

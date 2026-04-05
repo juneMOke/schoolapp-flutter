@@ -20,6 +20,39 @@ class EnrollmentStepper extends StatefulWidget {
 class _EnrollmentStepperState extends State<EnrollmentStepper> {
   int _currentStep = 0;
 
+  final GlobalKey<PersonalInfoStepState> _personalInfoKey =
+      GlobalKey<PersonalInfoStepState>();
+
+  bool _personalInfoDirty = false;
+  bool _personalInfoValid = false;
+  bool _personalInfoSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncPersonalInfoStateFromDetail();
+  }
+
+  @override
+  void didUpdateWidget(covariant EnrollmentStepper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
+      _syncPersonalInfoStateFromDetail();
+    }
+  }
+
+  void _syncPersonalInfoStateFromDetail() {
+    final student = widget.enrollmentDetail.studentDetail;
+    _personalInfoDirty = false;
+    _personalInfoSaving = false;
+    _personalInfoValid = student.firstName.trim().isNotEmpty &&
+        student.lastName.trim().isNotEmpty &&
+        student.surname.trim().isNotEmpty &&
+        student.birthPlace.trim().isNotEmpty &&
+        student.nationality.trim().isNotEmpty &&
+        student.dateOfBirth.trim().isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -80,7 +113,27 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   List<Widget> _stepContents() {
     return [
-      PersonalInfoStep(studentDetail: widget.enrollmentDetail.studentDetail),
+      PersonalInfoStep(
+        key: _personalInfoKey,
+        studentDetail: widget.enrollmentDetail.studentDetail,
+        enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+        onDirtyChanged: (dirty) {
+          if (_personalInfoDirty != dirty && mounted) {
+            setState(() => _personalInfoDirty = dirty);
+          }
+        },
+        onValidityChanged: (valid) {
+          if (_personalInfoValid != valid && mounted) {
+            setState(() => _personalInfoValid = valid);
+          }
+        },
+        onSavingChanged: (saving) {
+          if (_personalInfoSaving != saving && mounted) {
+            setState(() => _personalInfoSaving = saving);
+          }
+        },
+      ),
       AddressStep(studentDetail: widget.enrollmentDetail.studentDetail),
       AcademicInfoStep(enrollmentDetail: widget.enrollmentDetail.enrollmentDetail),
       GuardianInfoStep(parentDetails: widget.enrollmentDetail.parentDetails),
@@ -105,11 +158,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
     switch (_currentStep) {
       case 0:
-        final ok = student.firstName.trim().isNotEmpty &&
-            student.lastName.trim().isNotEmpty &&
-            student.dateOfBirth.toString().trim().isNotEmpty;
-        if (!ok) _showHint(l10n.validatePersonalInfoHint);
-        return ok;
+        if (!_personalInfoValid) {
+          _showHint(l10n.validatePersonalInfoHint);
+          return false;
+        }
+        if (_personalInfoDirty) {
+          _showHint(l10n.personalInfoSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
       case 1:
         final ok = student.city.trim().isNotEmpty &&
             student.district.trim().isNotEmpty &&
@@ -145,9 +202,24 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  bool get _showSaveAction => _currentStep == 0;
+
+  void _onSavePressed() {
+    if (_personalInfoSaving) return;
+    final formState = _personalInfoKey.currentState;
+    if (formState == null) return;
+    formState.submitForm();
+  }
+
   Widget _buildControls(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isLast = _currentStep == 4;
+
+    final canContinue = _currentStep == 0
+        ? !_personalInfoDirty && _personalInfoValid && !_personalInfoSaving
+        : true;
+
+    final canSave = _showSaveAction && !_personalInfoSaving && _personalInfoDirty;
 
     return Row(
       children: [
@@ -158,18 +230,36 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
             label: Text(l10n.previous),
           ),
         const Spacer(),
+        if (_showSaveAction) ...[
+          OutlinedButton.icon(
+            onPressed: canSave ? _onSavePressed : null,
+            icon: _personalInfoSaving
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_outlined, size: 16),
+            label: Text(
+              _personalInfoSaving ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
         ElevatedButton.icon(
-          onPressed: () {
-            if (!_validateCurrentStep()) return;
+          onPressed: canContinue
+              ? () {
+                  if (!_validateCurrentStep()) return;
 
-            if (isLast) {
-              _showHint(l10n.enrollmentReadyForValidation);
-              return;
-            }
+                  if (isLast) {
+                    _showHint(l10n.enrollmentReadyForValidation);
+                    return;
+                  }
 
-            setState(() => _currentStep += 1);
-            _resetContentScroll();
-          },
+                  setState(() => _currentStep += 1);
+                  _resetContentScroll();
+                }
+              : null,
           icon: Icon(
             isLast ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
             size: 16,
@@ -417,9 +507,9 @@ class _StepPageCard extends StatelessWidget {
             ),
           ),
           Padding(
-              padding: const EdgeInsets.all(12),
-              child: child,
-            ),
+            padding: const EdgeInsets.all(12),
+            child: child,
+          ),
         ],
       ),
     );

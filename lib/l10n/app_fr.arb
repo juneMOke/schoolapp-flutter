@@ -199,6 +199,16 @@
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
   "enrollmentReadyForValidation": "Dossier prêt pour validation finale.",
+  "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
+  "savePersonalInfo": "Enregistrer",
+  "savingPersonalInfo": "Enregistrement en cours...",
+  "personalInfoSaveSuccess": "Informations personnelles mises à jour avec succès.",
+  "personalInfoSaveError": "Erreur lors de la mise à jour : {message}",
+  "@personalInfoSaveError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
   "signOutAction": "Se déconnecter"

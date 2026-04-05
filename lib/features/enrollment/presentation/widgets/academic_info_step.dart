@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validation_badge.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AcademicInfoStep extends StatefulWidget {
@@ -24,9 +26,11 @@ class _AcademicInfoStepState extends State<AcademicInfoStep> {
   late final TextEditingController _prevRankController;
   // Target year controllers
   late final TextEditingController _currYearController;
-  late final TextEditingController _targetCycleController;
-  late final TextEditingController _targetLevelController;
   late final TextEditingController _targetOptionController;
+  late bool _validatedPreviousYear;
+  late String _selectedSchoolLevelGroupId;
+  late String _selectedSchoolLevelId;
+  bool _bootstrapDefaultsApplied = false;
 
   @override
   void initState() {
@@ -41,9 +45,10 @@ class _AcademicInfoStepState extends State<AcademicInfoStep> {
       text: e.previousRank?.toString() ?? '',
     );
     _currYearController    = TextEditingController(text: e.academicYearId);
-    _targetCycleController = TextEditingController();
-    _targetLevelController = TextEditingController();
     _targetOptionController = TextEditingController();
+    _validatedPreviousYear = e.validatedPreviousYear;
+    _selectedSchoolLevelGroupId = e.schoolLevelGroupId;
+    _selectedSchoolLevelId = e.schoolLevelId;
   }
 
   @override
@@ -55,8 +60,6 @@ class _AcademicInfoStepState extends State<AcademicInfoStep> {
     _prevRateController.dispose();
     _prevRankController.dispose();
     _currYearController.dispose();
-    _targetCycleController.dispose();
-    _targetLevelController.dispose();
     _targetOptionController.dispose();
     super.dispose();
   }
@@ -65,27 +68,91 @@ class _AcademicInfoStepState extends State<AcademicInfoStep> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      children: [
-        _buildCard(
-          context,
-          icon: Icons.school_outlined,
-          iconColor: AppTheme.primaryColor,
-          title: l10n.previousYear,
-          titleColor: AppTheme.primaryColor,
-          child: _buildPreviousYearFields(l10n),
-        ),
-        const SizedBox(height: 20),
-        _buildCard(
-          context,
-          icon: Icons.flag_outlined,
-          iconColor: Colors.green[600]!,
-          title: l10n.targetYear,
-          titleColor: Colors.green[600]!,
-          child: _buildTargetYearFields(l10n),
-        ),
-      ],
+    return BlocBuilder<BootstrapBloc, BootstrapState>(
+      builder: (context, bootstrapState) {
+        final bootstrap = bootstrapState.bootstrap;
+        if (bootstrap != null) {
+          _applyBootstrapDefaults(bootstrap);
+        }
+
+        return Column(
+          children: [
+            _buildCard(
+              context,
+              icon: Icons.school_outlined,
+              iconColor: AppTheme.primaryColor,
+              title: l10n.previousYear,
+              titleColor: AppTheme.primaryColor,
+              child: PreviousYearFields(
+                l10n: l10n,
+                prevYearController: _prevYearController,
+                prevSchoolController: _prevSchoolController,
+                prevCycleController: _prevCycleController,
+                prevLevelController: _prevLevelController,
+                prevRateController: _prevRateController,
+                prevRankController: _prevRankController,
+                validatedPreviousYear: _validatedPreviousYear,
+                onValidatedChanged: (value) {
+                  setState(() => _validatedPreviousYear = value);
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildCard(
+              context,
+              icon: Icons.flag_outlined,
+              iconColor: Colors.green[600]!,
+              title: l10n.targetYear,
+              titleColor: Colors.green[600]!,
+              child: TargetYearFields(
+                l10n: l10n,
+                bootstrap: bootstrap,
+                currYearController: _currYearController,
+                targetOptionController: _targetOptionController,
+                selectedSchoolLevelGroupId: _selectedSchoolLevelGroupId,
+                selectedSchoolLevelId: _selectedSchoolLevelId,
+                onGroupChanged: (groupId, firstLevelId) {
+                  setState(() {
+                    _selectedSchoolLevelGroupId = groupId;
+                    _selectedSchoolLevelId = firstLevelId;
+                  });
+                },
+                onLevelChanged: (levelId) {
+                  setState(() => _selectedSchoolLevelId = levelId);
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _applyBootstrapDefaults(Bootstrap bootstrap) {
+    _currYearController.text = bootstrap.currentAcademicYear.name;
+    if (_bootstrapDefaultsApplied) return;
+
+    final groupBundles = bootstrap.schoolLevelGroups;
+    final selectedGroupBundle = groupBundles
+        .where((g) => g.schoolLevelGroup.id == _selectedSchoolLevelGroupId)
+        .firstOrNull;
+
+    if (selectedGroupBundle == null && groupBundles.isNotEmpty) {
+      _selectedSchoolLevelGroupId = groupBundles.first.schoolLevelGroup.id;
+    }
+
+    final resolvedGroupBundle = groupBundles
+        .where((g) => g.schoolLevelGroup.id == _selectedSchoolLevelGroupId)
+        .firstOrNull;
+    if (resolvedGroupBundle != null &&
+        resolvedGroupBundle.schoolLevels
+            .every((l) => l.schoolLevel.id != _selectedSchoolLevelId)) {
+      _selectedSchoolLevelId = resolvedGroupBundle.schoolLevels.isNotEmpty
+          ? resolvedGroupBundle.schoolLevels.first.schoolLevel.id
+          : '';
+    }
+
+    _bootstrapDefaultsApplied = true;
   }
 
   Widget _buildCard(
@@ -141,112 +208,6 @@ class _AcademicInfoStepState extends State<AcademicInfoStep> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPreviousYearFields(AppLocalizations l10n) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 16.0;
-        final w2 = (constraints.maxWidth - spacing) / 2;
-        final w3 = constraints.maxWidth >= 700
-            ? (constraints.maxWidth - spacing * 2) / 3
-            : w2;
-
-        return Wrap(
-          spacing: spacing,
-          runSpacing: 14,
-          children: [
-            EditableField(
-              width: w2,
-              label: l10n.academicYearLabel,
-              controller: _prevYearController,
-              requiredField: true,
-              helpMessage: l10n.academicYearLabelHelp,
-            ),
-            EditableField(
-              width: w2,
-              label: l10n.schoolLabel,
-              controller: _prevSchoolController,
-              requiredField: true,
-              helpMessage: l10n.schoolLabelHelp,
-            ),
-            EditableField(
-              width: w2,
-              label: l10n.schoolCycle,
-              controller: _prevCycleController,
-              requiredField: true,
-              helpMessage: l10n.schoolCycleHelp,
-            ),
-            EditableField(
-              width: w2,
-              label: l10n.schoolLevelLabel,
-              controller: _prevLevelController,
-              requiredField: true,
-              helpMessage: l10n.schoolLevelLabelHelp,
-            ),
-            EditableField(
-              width: w3,
-              label: l10n.averageLabel,
-              controller: _prevRateController,
-              helpMessage: l10n.averageLabelHelp,
-            ),
-            EditableField(
-              width: w3,
-              label: l10n.rankingLabel,
-              controller: _prevRankController,
-              helpMessage: l10n.rankingLabelHelp,
-            ),
-            SizedBox(
-              width: w3,
-              child: ValidationBadge(
-                isValidated: widget.enrollmentDetail.validatedPreviousYear,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildTargetYearFields(AppLocalizations l10n) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 16.0;
-        final w = (constraints.maxWidth - spacing) / 2;
-
-        return Wrap(
-          spacing: spacing,
-          runSpacing: 14,
-          children: [
-            EditableField(
-              width: w,
-              label: l10n.currentAcademicYearLabel,
-              controller: _currYearController,
-              requiredField: true,
-              helpMessage: l10n.currentAcademicYearHelp,
-            ),
-            EditableField(
-              width: w,
-              label: l10n.targetCycleLabel,
-              controller: _targetCycleController,
-              helpMessage: l10n.targetCycleLabelHelp,
-            ),
-            EditableField(
-              width: w,
-              label: l10n.targetLevelLabel,
-              controller: _targetLevelController,
-              helpMessage: l10n.targetLevelLabelHelp,
-            ),
-            EditableField(
-              width: w,
-              label: l10n.optionLabel,
-              controller: _targetOptionController,
-              helpMessage: l10n.optionLabelHelp,
-            ),
-          ],
-        );
-      },
     );
   }
 }

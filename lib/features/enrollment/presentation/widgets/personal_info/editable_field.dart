@@ -34,22 +34,44 @@ class EditableField extends StatelessWidget {
             helpMessage: helpMessage,
           ),
           const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            textInputAction: TextInputAction.next,
-            decoration: buildInputDecoration(
-              hintText: l10n.enterFieldHint(label),
-              prefixIcon: const Icon(
-                Icons.edit_outlined,
-                size: 16,
-                color: AppTheme.textSecondaryColor,
-              ),
-              suffixIcon: const Icon(
-                Icons.mode_edit_outline_rounded,
-                size: 16,
-                color: AppTheme.primaryColor,
-              ),
-            ),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              final hasText = value.text.trim().isNotEmpty;
+              return TextFormField(
+                controller: controller,
+                textInputAction: TextInputAction.next,
+                decoration: buildInputDecoration(
+                  hintText: l10n.enterFieldHint(label),
+                  prefixIcon: const Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (hasText)
+                        IconButton(
+                          tooltip: l10n.clear,
+                          onPressed: controller.clear,
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: AppTheme.textSecondaryColor,
+                          ),
+                        ),
+                      const Icon(
+                        Icons.mode_edit_outline_rounded,
+                        size: 16,
+                        color: AppTheme.primaryColor,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

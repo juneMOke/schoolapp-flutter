@@ -486,6 +486,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
 
   @override
+  String get personalInfoSaveHintBeforeContinue => 'Veuillez enregistrer vos modifications avant de continuer.';
+
+  @override
+  String get savePersonalInfo => 'Enregistrer';
+
+  @override
+  String get savingPersonalInfo => 'Enregistrement en cours...';
+
+  @override
+  String get personalInfoSaveSuccess => 'Informations personnelles mises à jour avec succès.';
+
+  @override
+  String personalInfoSaveError(String message) {
+    return 'Erreur lors de la mise à jour : $message';
+  }
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override

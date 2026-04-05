@@ -173,9 +173,10 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
     final academicYearId =
         bootstrapState.bootstrap?.currentAcademicYear.id ?? '';
     final schoolId = context.read<AuthBloc>().state.user?.schoolId ?? '';
+    final enrollmentBloc = context.read<EnrollmentBloc>();
+    final lastSummariesQuery = enrollmentBloc.state.lastSummariesQuery;
     final isSummariesLoading =
-        context.read<EnrollmentBloc>().state.summariesStatus ==
-        EnrollmentLoadStatus.loading;
+        enrollmentBloc.state.summariesStatus == EnrollmentLoadStatus.loading;
 
     if (bootstrapState.status != BootstrapLoadStatus.success ||
         academicYearId.isEmpty ||
@@ -186,7 +187,12 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
 
     _lastRefreshAt = now;
 
-    context.read<EnrollmentBloc>().add(
+    if (lastSummariesQuery != null) {
+      enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
+      return;
+    }
+
+    enrollmentBloc.add(
       EnrollmentSummariesRequested(
         status: _status,
         academicYearId: academicYearId,

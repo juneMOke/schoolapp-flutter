@@ -13,6 +13,8 @@ class EnrollmentSchoolDetail extends Equatable {
   final double previousRate;
   final int? previousRank;
   final bool validatedPreviousYear;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
   final String? transferReason;
   final String? cancellationReason;
 
@@ -28,6 +30,8 @@ class EnrollmentSchoolDetail extends Equatable {
     required this.previousRate,
     this.previousRank,
     required this.validatedPreviousYear,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
     this.transferReason,
     this.cancellationReason,
   });
@@ -45,6 +49,8 @@ class EnrollmentSchoolDetail extends Equatable {
     previousRate,
     previousRank,
     validatedPreviousYear,
+    schoolLevelGroupId,
+    schoolLevelId,
     transferReason,
     cancellationReason,
   ];
