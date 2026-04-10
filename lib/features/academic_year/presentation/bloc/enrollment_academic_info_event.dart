@@ -24,8 +24,6 @@ class EnrollmentAcademicInfoUpdateRequested
   final bool validatedPreviousYear;
   final String? transferReason;
   final String? cancellationReason;
-  final String schoolLevelId;
-  final String schoolLevelGroupId;
 
   const EnrollmentAcademicInfoUpdateRequested({
     required this.enrollmentId,
@@ -38,9 +36,7 @@ class EnrollmentAcademicInfoUpdateRequested
     this.previousRank,
     required this.validatedPreviousYear,
     this.transferReason,
-    this.cancellationReason,
-    required this.schoolLevelId,
-    required this.schoolLevelGroupId,
+    this.cancellationReason
   });
 
   @override
@@ -55,8 +51,6 @@ class EnrollmentAcademicInfoUpdateRequested
     previousRank,
     validatedPreviousYear,
     transferReason,
-    cancellationReason,
-    schoolLevelId,
-    schoolLevelGroupId,
+    cancellationReason
   ];
 }

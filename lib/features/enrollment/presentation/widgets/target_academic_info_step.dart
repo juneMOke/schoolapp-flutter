@@ -292,7 +292,7 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
                 _applyBootstrapDefaults(bootstrap);
               }
 
-              return AcademicInfoStepBody(
+              return TargetAcademicInfoStepBody(
                 bootstrap: bootstrap,
                 currYearController: _currYearController,
                 targetOptionController: _targetOptionController,
@@ -302,8 +302,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
                 isLoading: isLoading,
                 canSave: _canSave,
                 showInlineSaveButton: widget.showInlineSaveButton,
-                showPreviousSection: false,
-                showTargetSection: true,
                 onSave: _onSave,
                 onGroupChanged: (groupId, firstLevelId) {
                   setState(() {

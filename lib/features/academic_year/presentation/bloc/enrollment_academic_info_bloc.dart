@@ -48,8 +48,6 @@ class EnrollmentAcademicInfoBloc
       validatedPreviousYear: event.validatedPreviousYear,
       transferReason: event.transferReason,
       cancellationReason: event.cancellationReason,
-      schoolLevelId: event.schoolLevelId,
-      schoolLevelGroupId: event.schoolLevelGroupId,
     );
 
     result.fold(

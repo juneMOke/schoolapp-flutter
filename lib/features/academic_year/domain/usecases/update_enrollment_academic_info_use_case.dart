@@ -19,9 +19,7 @@ class UpdateEnrollmentAcademicInfoUseCase {
     int? previousRank,
     required bool validatedPreviousYear,
     String? transferReason,
-    String? cancellationReason,
-    required String schoolLevelId,
-    required String schoolLevelGroupId,
+    String? cancellationReason
   }) {
     return _repository.updateEnrollmentAcademicInfo(
       enrollmentId: studentId,
@@ -34,9 +32,7 @@ class UpdateEnrollmentAcademicInfoUseCase {
       previousRank: previousRank,
       validatedPreviousYear: validatedPreviousYear,
       transferReason: transferReason,
-      cancellationReason: cancellationReason,
-      schoolLevelId: schoolLevelId,
-      schoolLevelGroupId: schoolLevelGroupId,
+      cancellationReason: cancellationReason
     );
   }
 }

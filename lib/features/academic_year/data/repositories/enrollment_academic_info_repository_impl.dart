@@ -28,9 +28,7 @@ class EnrollmentAcademicInfoRepositoryImpl
     int? previousRank,
     required bool validatedPreviousYear,
     String? transferReason,
-    String? cancellationReason,
-    required String schoolLevelId,
-    required String schoolLevelGroupId,
+    String? cancellationReason
   }) async {
     try {
       final model = await remoteDataSource.updateEnrollmentAcademicInfo(
@@ -46,9 +44,7 @@ class EnrollmentAcademicInfoRepositoryImpl
           previousRank: previousRank,
           validatedPreviousYear: validatedPreviousYear,
           transferReason: transferReason,
-          cancellationReason: cancellationReason,
-          schoolLevelId: schoolLevelId,
-          schoolLevelGroupId: schoolLevelGroupId,
+          cancellationReason: cancellationReason
         ),
       );
       return Right(model.toEntity());

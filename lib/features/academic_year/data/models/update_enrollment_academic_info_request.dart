@@ -9,8 +9,6 @@ class UpdateEnrollmentAcademicInfoRequest {
   final bool validatedPreviousYear;
   final String? transferReason;
   final String? cancellationReason;
-  final String schoolLevelId;
-  final String schoolLevelGroupId;
 
   const UpdateEnrollmentAcademicInfoRequest({
     required this.academicYearId,
@@ -23,8 +21,6 @@ class UpdateEnrollmentAcademicInfoRequest {
     required this.validatedPreviousYear,
     this.transferReason,
     this.cancellationReason,
-    required this.schoolLevelId,
-    required this.schoolLevelGroupId,
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -38,7 +34,5 @@ class UpdateEnrollmentAcademicInfoRequest {
     'validatedPreviousYear': validatedPreviousYear,
     'transferReason': transferReason,
     'cancellationReason': cancellationReason,
-    'schoolLevelId': schoolLevelId,
-    'schoolLevelGroupId': schoolLevelGroupId,
   };
 }

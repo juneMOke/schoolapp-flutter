@@ -14,8 +14,6 @@ abstract class EnrollmentAcademicInfoRepository {
     int? previousRank,
     required bool validatedPreviousYear,
     String? transferReason,
-    String? cancellationReason,
-    required String schoolLevelId,
-    required String schoolLevelGroupId,
+    String? cancellationReason
   });
 }
