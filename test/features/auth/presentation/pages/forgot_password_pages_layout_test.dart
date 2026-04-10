@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/auth/presentation/pages/forgot_passw
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_otp_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import '../../../../test_helpers/widget_test_utils.dart';
 
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
 
@@ -44,6 +45,10 @@ void main() {
     );
   }
 
+  Future<void> pumpPage(WidgetTester tester, Widget page) async {
+    await pumpBounded(tester, buildHarness(page));
+  }
+
   void stubBlocs({
     required AuthState authState,
     required ForgotPasswordState forgotState,
@@ -69,8 +74,7 @@ void main() {
       forgotState: const ForgotPasswordState.initial(),
     );
 
-    await tester.pumpWidget(buildHarness(const ForgotPasswordEmailPage()));
-    await tester.pumpAndSettle();
+    await pumpPage(tester, const ForgotPasswordEmailPage());
 
     expect(find.byType(ForgotPasswordEmailPage), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsWidgets);
@@ -88,8 +92,7 @@ void main() {
       forgotState: const ForgotPasswordState.initial(),
     );
 
-    await tester.pumpWidget(buildHarness(const ForgotPasswordEmailPage()));
-    await tester.pumpAndSettle();
+    await pumpPage(tester, const ForgotPasswordEmailPage());
 
     expect(find.byType(ForgotPasswordEmailPage), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -109,8 +112,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(buildHarness(const ForgotPasswordOtpPage()));
-    await tester.pumpAndSettle();
+    await pumpPage(tester, const ForgotPasswordOtpPage());
 
     expect(find.byType(ForgotPasswordOtpPage), findsOneWidget);
     expect(find.textContaining('test@example.com'), findsWidgets);
@@ -132,8 +134,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(buildHarness(const ResetPasswordPage()));
-    await tester.pumpAndSettle();
+    await pumpPage(tester, const ResetPasswordPage());
 
     expect(find.byType(ResetPasswordPage), findsOneWidget);
     expect(find.textContaining('test@example.com'), findsWidgets);
