@@ -457,6 +457,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepAcademicSubtitle => 'Academic history and goals';
 
   @override
+  String get stepAcademicPreviousSubtitle => 'Previous year academic history';
+
+  @override
+  String get stepAcademicTargetSubtitle => 'Target year academic objectives';
+
+  @override
   String get stepGuardianSubtitle => 'Legal guardians and contacts';
 
   @override
@@ -497,6 +503,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String invalidNumberFieldError(String field) {
+    return 'The $field field must be a valid number.';
+  }
+
+  @override
   String get savePersonalInfo => 'Save';
 
   @override
@@ -508,6 +519,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String personalInfoSaveError(String message) {
     return 'Update failed: $message';
+  }
+
+  @override
+  String get saveAddress => 'Save address';
+
+  @override
+  String get savingAddress => 'Saving address...';
+
+  @override
+  String get saveAcademicInfo => 'Save academic info';
+
+  @override
+  String get savingAcademicInfo => 'Saving...';
+
+  @override
+  String get academicInfoValidationReasonsTitle => 'Please correct the following academic fields:';
+
+  @override
+  String get academicInfoSaveHintBeforeContinue => 'Please save academic changes before continuing.';
+
+  @override
+  String get academicInfoSaveSuccess => 'Academic information updated successfully.';
+
+  @override
+  String academicInfoSaveError(String message) {
+    return 'Academic info update failed: $message';
+  }
+
+  @override
+  String get addressValidationReasonsTitle => 'Please correct the following address fields:';
+
+  @override
+  String get addressSaveHintBeforeContinue => 'Please save address changes before continuing.';
+
+  @override
+  String get addressSaveSuccess => 'Address updated successfully.';
+
+  @override
+  String addressSaveError(String message) {
+    return 'Address update failed: $message';
   }
 
   @override

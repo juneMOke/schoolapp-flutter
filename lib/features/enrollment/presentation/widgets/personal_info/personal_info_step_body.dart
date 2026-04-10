@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
@@ -74,33 +75,21 @@ class PersonalInfoStepBody extends StatelessWidget {
 
         if (state.status == StudentUpdateStatus.success) {
           context.read<EnrollmentBloc>().add(
-            EnrollmentDetailRequested(enrollmentId: enrollmentId),
+            EnrollmentDetailRequested(
+              enrollmentId: enrollmentId,
+              silent: true,
+            ),
           );
           context.read<EnrollmentBloc>().add(
             const EnrollmentSummariesRefreshRequested(),
           );
           onSaveSuccess();
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(l10n.personalInfoSaveSuccess),
-                backgroundColor: Colors.green.shade600,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+          AppSnackBar.showSuccess(context, l10n.personalInfoSaveSuccess);
         } else if (state.status == StudentUpdateStatus.failure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  l10n.personalInfoSaveError(state.errorMessage ?? ''),
-                ),
-                backgroundColor: Colors.red.shade600,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+          AppSnackBar.showError(
+            context,
+            l10n.personalInfoSaveError(state.errorMessage ?? ''),
+          );
         }
       },
       builder: (context, state) {

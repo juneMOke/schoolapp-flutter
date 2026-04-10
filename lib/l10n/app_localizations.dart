@@ -971,6 +971,18 @@ abstract class AppLocalizations {
   /// **'Academic history and goals'**
   String get stepAcademicSubtitle;
 
+  /// No description provided for @stepAcademicPreviousSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year academic history'**
+  String get stepAcademicPreviousSubtitle => stepAcademicSubtitle;
+
+  /// No description provided for @stepAcademicTargetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Target year academic objectives'**
+  String get stepAcademicTargetSubtitle => stepAcademicSubtitle;
+
   /// No description provided for @stepGuardianSubtitle.
   ///
   /// In en, this message translates to:
@@ -1043,6 +1055,12 @@ abstract class AppLocalizations {
   /// **'The {field} field is required.'**
   String requiredFieldError(String field);
 
+  /// No description provided for @invalidNumberFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'The {field} field must be a valid number.'**
+  String invalidNumberFieldError(String field);
+
   /// No description provided for @savePersonalInfo.
   ///
   /// In en, this message translates to:
@@ -1066,6 +1084,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update failed: {message}'**
   String personalInfoSaveError(String message);
+
+  /// No description provided for @saveAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Save address'**
+  String get saveAddress;
+
+  /// No description provided for @savingAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving address...'**
+  String get savingAddress;
+
+  /// No description provided for @saveAcademicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save academic info'**
+  String get saveAcademicInfo;
+
+  /// No description provided for @savingAcademicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingAcademicInfo;
+
+  /// No description provided for @academicInfoValidationReasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please correct the following academic fields:'**
+  String get academicInfoValidationReasonsTitle;
+
+  /// No description provided for @academicInfoSaveHintBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save academic changes before continuing.'**
+  String get academicInfoSaveHintBeforeContinue;
+
+  /// No description provided for @academicInfoSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic information updated successfully.'**
+  String get academicInfoSaveSuccess;
+
+  /// No description provided for @academicInfoSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic info update failed: {message}'**
+  String academicInfoSaveError(String message);
+
+  /// No description provided for @addressValidationReasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please correct the following address fields:'**
+  String get addressValidationReasonsTitle;
+
+  /// No description provided for @addressSaveHintBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save address changes before continuing.'**
+  String get addressSaveHintBeforeContinue;
+
+  /// No description provided for @addressSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Address updated successfully.'**
+  String get addressSaveSuccess;
+
+  /// No description provided for @addressSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Address update failed: {message}'**
+  String addressSaveError(String message);
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

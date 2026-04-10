@@ -10,6 +10,8 @@ class DropdownField extends StatelessWidget {
   final List<DropdownMenuItem<String>> items;
   final ValueChanged<String?> onChanged;
   final String? value;
+  final String? errorText;
+  final bool isChanged;
 
   const DropdownField({
     super.key,
@@ -19,6 +21,8 @@ class DropdownField extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.value,
+    this.errorText,
+    this.isChanged = false,
   });
 
   @override
@@ -28,7 +32,11 @@ class DropdownField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FormFieldLabel(label: label, helpMessage: helpMessage),
+          FormFieldLabel(
+            label: label,
+            helpMessage: helpMessage,
+            labelColor: isChanged ? const Color(0xFF15803D) : null,
+          ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
             initialValue: value,
@@ -37,11 +45,13 @@ class DropdownField extends StatelessWidget {
             onChanged: items.isEmpty ? null : onChanged,
             decoration: buildInputDecoration(
               hintText: label,
+              isChanged: isChanged,
               prefixIcon: const Icon(
                 Icons.arrow_drop_down_circle_outlined,
                 size: 16,
                 color: AppTheme.textSecondaryColor,
               ),
+              errorText: errorText,
             ),
           ),
         ],

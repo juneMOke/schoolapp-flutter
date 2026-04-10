@@ -100,8 +100,15 @@ class EnrollmentSummariesByDateOfBirthRequested extends EnrollmentEvent {
 class EnrollmentDetailRequested extends EnrollmentEvent {
   final String enrollmentId;
 
-  const EnrollmentDetailRequested({required this.enrollmentId});
+  /// Lorsque [silent] est vrai, le bloc ne passe pas par l'état [loading],
+  /// ce qui évite de détruire le stepper (et de perdre l'étape courante).
+  final bool silent;
+
+  const EnrollmentDetailRequested({
+    required this.enrollmentId,
+    this.silent = false,
+  });
 
   @override
-  List<Object?> get props => [enrollmentId];
+  List<Object?> get props => [enrollmentId, silent];
 }

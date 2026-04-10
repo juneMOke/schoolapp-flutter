@@ -6,12 +6,14 @@ InputDecoration buildInputDecoration({
   Widget? prefixIcon,
   Widget? suffixIcon,
   String? errorText,
+  bool isChanged = false,
 }) {
+  final changedColor = const Color(0xFF16A34A);
   return InputDecoration(
     hintText: hintText,
     isDense: true,
     filled: true,
-    fillColor: Colors.white,
+    fillColor: isChanged ? const Color(0xFFF0FDF4) : Colors.white,
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
     errorText: errorText,
@@ -19,13 +21,22 @@ InputDecoration buildInputDecoration({
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(
-        color: AppTheme.primaryColor.withValues(alpha: 0.25),
+        color: isChanged
+            ? changedColor.withValues(alpha: 0.55)
+            : AppTheme.primaryColor.withValues(alpha: 0.25),
+      ),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(
+        color: Color(0xFFEF4444),
+        width: 1.4,
       ),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(
-        color: AppTheme.primaryColor,
+      borderSide: BorderSide(
+        color: isChanged ? changedColor : AppTheme.primaryColor,
         width: 1.4,
       ),
     ),

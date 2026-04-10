@@ -12,6 +12,17 @@ class AppConstants {
   static const String studentPersonalInfoEndpoint =
       '/api/v1/students/{studentId}/personal-info';
 
+  static const String studentAddressEndpoint =
+      '/api/v1/students/{studentId}/address';
+
+  static const String studentAcademicInfoEndpoint =
+      '/api/v1/students/{studentId}/academic-info';
+
+  static const String parentUpdateEndpoint = '/api/v1/parents/{parentId}';
+
+  static const String enrollmentAcademicInfoEndpoint =
+      '/api/v1/enrollments/{enrollmentId}/previous-school-info';
+
   static const String enrollmentDetailEndpoint =
       '/api/v1/enrollments/{enrollmentId}/detail';
   static const String enrollmentSearchByStudentInfoEndpoint =

@@ -16,6 +16,10 @@ class TargetYearFields extends StatelessWidget {
   final String selectedSchoolLevelId;
   final OnTargetGroupChanged onGroupChanged;
   final ValueChanged<String> onLevelChanged;
+  final String? groupError;
+  final String? levelError;
+  final bool groupChanged;
+  final bool levelChanged;
 
   const TargetYearFields({
     super.key,
@@ -27,6 +31,10 @@ class TargetYearFields extends StatelessWidget {
     required this.selectedSchoolLevelId,
     required this.onGroupChanged,
     required this.onLevelChanged,
+    this.groupError,
+    this.levelError,
+    this.groupChanged = false,
+    this.levelChanged = false,
   });
 
   @override
@@ -87,6 +95,8 @@ class TargetYearFields extends StatelessWidget {
                 );
               },
               helpMessage: l10n.targetCycleLabelHelp,
+              errorText: groupError,
+              isChanged: groupChanged,
             ),
             DropdownField(
               width: w,
@@ -100,6 +110,8 @@ class TargetYearFields extends StatelessWidget {
                 onLevelChanged(value);
               },
               helpMessage: l10n.targetLevelLabelHelp,
+              errorText: levelError,
+              isChanged: levelChanged,
             ),
             EditableField(
               width: w,

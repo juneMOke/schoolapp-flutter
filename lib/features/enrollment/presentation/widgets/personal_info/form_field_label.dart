@@ -5,12 +5,14 @@ class FormFieldLabel extends StatefulWidget {
   final String label;
   final bool requiredField;
   final String helpMessage;
+  final Color? labelColor;
 
   const FormFieldLabel({
     super.key,
     required this.label,
     this.requiredField = false,
     this.helpMessage = '',
+    this.labelColor,
   });
 
   @override
@@ -18,10 +20,6 @@ class FormFieldLabel extends StatefulWidget {
 }
 
 class _FormFieldLabelState extends State<FormFieldLabel> {
-  final GlobalKey<TooltipState> _tooltipKey = GlobalKey<TooltipState>();
-
-  void _showTooltip() => _tooltipKey.currentState?.ensureTooltipVisible();
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -30,10 +28,10 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
           child: RichText(
             text: TextSpan(
               text: widget.label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimaryColor,
+                color: widget.labelColor ?? AppTheme.textPrimaryColor,
               ),
               children: [
                 if (widget.requiredField)
@@ -47,7 +45,6 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
         ),
         if (widget.helpMessage.isNotEmpty)
           Tooltip(
-            key: _tooltipKey,
             message: widget.helpMessage,
             showDuration: const Duration(seconds: 3),
             preferBelow: true,
@@ -56,18 +53,14 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
               borderRadius: BorderRadius.circular(6),
             ),
             textStyle: const TextStyle(color: Colors.white, fontSize: 12),
-            child: MouseRegion(
+            child: const MouseRegion(
               cursor: SystemMouseCursors.help,
-              onEnter: (_) => _showTooltip(),
-              child: GestureDetector(
-                onTap: _showTooltip,
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(
-                    Icons.help_outline_rounded,
-                    size: 16,
-                    color: AppTheme.textSecondaryColor,
-                  ),
+              child: Padding(
+                padding: EdgeInsets.all(4),
+                child: Icon(
+                  Icons.help_outline_rounded,
+                  size: 16,
+                  color: AppTheme.textSecondaryColor,
                 ),
               ),
             ),

@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 
 class PersonalInfoStep extends StatefulWidget {
   final StudentDetail studentDetail;
   final String enrollmentId;
   final bool showInlineSaveButton;
-  final ValueChanged<bool>? onDirtyChanged;
-  final ValueChanged<bool>? onValidityChanged;
-  final ValueChanged<bool>? onSavingChanged;
-  final VoidCallback? onSaveSuccess;
+  final int? flowStepIndex;
 
   const PersonalInfoStep({
     super.key,
     required this.studentDetail,
     required this.enrollmentId,
     this.showInlineSaveButton = true,
-    this.onDirtyChanged,
-    this.onValidityChanged,
-    this.onSavingChanged,
-    this.onSaveSuccess,
+    this.flowStepIndex,
   });
 
   @override
@@ -52,10 +50,30 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   bool _isDirty = false;
   bool _isValid = false;
   bool _showValidationHints = false;
+  bool _isSaving = false;
+  bool _isHydratingFromDetail = false;
 
   bool get canSubmit => _isValid && _isDirty;
   bool get isDirty => _isDirty;
   bool get isValid => _isValid;
+  StepFormState get _stepState => StepFormState(
+    dirty: _isDirty,
+    valid: _isValid,
+    saving: _isSaving,
+  );
+
+  void _emitStepState() {
+    final state = _stepState;
+    final flowStepIndex = widget.flowStepIndex;
+    if (flowStepIndex != null && mounted) {
+      context.read<EnrollmentStepperFlowBloc>().add(
+        EnrollmentStepperStepStateReported(
+          step: flowStepIndex,
+          stepState: state,
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -76,10 +94,14 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _nationalityController.addListener(_onTextFieldChanged);
 
     _recomputeFormState(notifyParent: false);
-    _notifyParentFormState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _emitStepState();
+    });
   }
 
   void _onTextFieldChanged() {
+    if (_isHydratingFromDetail) return;
     _recomputeFormState();
     if (_showValidationHints) {
       setState(() {
@@ -95,27 +117,28 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.studentDetail != widget.studentDetail) {
       _initializeFromStudent(widget.studentDetail);
+      _isSaving = false;
       _recomputeFormState(notifyParent: false);
-      _notifyParentFormState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _emitStepState();
+      });
     }
   }
 
-  void _notifyParentFormState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      widget.onValidityChanged?.call(_isValid);
-      widget.onDirtyChanged?.call(_isDirty);
-    });
-  }
-
   void _initializeFromStudent(StudentDetail student) {
-    _firstNameController.text = student.firstName;
-    _lastNameController.text = student.lastName;
-    _surnameController.text = student.surname;
-    _birthPlaceController.text = student.birthPlace;
-    _nationalityController.text = student.nationality;
-    _selectedGender = student.gender;
-    _selectedDate = _formatSelectedDate(student);
+    _isHydratingFromDetail = true;
+    try {
+      _firstNameController.text = student.firstName;
+      _lastNameController.text = student.lastName;
+      _surnameController.text = student.surname;
+      _birthPlaceController.text = student.birthPlace;
+      _nationalityController.text = student.nationality;
+      _selectedGender = student.gender;
+      _selectedDate = _formatSelectedDate(student);
+    } finally {
+      _isHydratingFromDetail = false;
+    }
 
     _initialFirstName = student.firstName.trim();
     _initialLastName = student.lastName.trim();
@@ -156,16 +179,19 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
     if (_isValid != validNow) {
       _isValid = validNow;
-      if (notifyParent) {
-        widget.onValidityChanged?.call(_isValid);
-      }
     }
     if (_isDirty != dirtyNow) {
       _isDirty = dirtyNow;
-      if (notifyParent) {
-        widget.onDirtyChanged?.call(_isDirty);
-      }
     }
+    if (notifyParent) {
+      _emitStepState();
+    }
+  }
+
+  void _onSavingChanged(bool saving) {
+    if (_isSaving == saving) return;
+    _isSaving = saving;
+    _emitStepState();
   }
 
   DateTime? _formatSelectedDate(StudentDetail student) {
@@ -295,16 +321,11 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     if (!_isValid) {
       final reasons = _buildValidationErrors(l10n);
       setState(() => _showValidationHints = true);
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              '${l10n.personalInfoValidationReasonsTitle}\n- ${reasons.join('\n- ')}',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      AppSnackBar.showValidationErrors(
+        context,
+        title: l10n.personalInfoValidationReasonsTitle,
+        reasons: reasons,
+      );
       return;
     }
     if (!_isDirty) return;
@@ -382,14 +403,14 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
           showValidation,
         ),
         dateOfBirthError: _dateErrorFor(l10n, showValidation),
-        onSavingChanged: widget.onSavingChanged,
+        onSavingChanged: _onSavingChanged,
         onSaveSuccess: () {
           _markCurrentAsSavedSnapshot();
           _recomputeFormState();
+          _onSavingChanged(false);
           if (_showValidationHints) {
             setState(() => _showValidationHints = false);
           }
-          widget.onSaveSuccess?.call();
         },
       ),
     );

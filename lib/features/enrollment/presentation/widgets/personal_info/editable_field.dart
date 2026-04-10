@@ -11,6 +11,8 @@ class EditableField extends StatelessWidget {
   final bool requiredField;
   final String helpMessage;
   final String? errorText;
+  final bool isChanged;
+  final bool readOnly;
 
   const EditableField({
     super.key,
@@ -20,6 +22,8 @@ class EditableField extends StatelessWidget {
     this.requiredField = false,
     this.helpMessage = '',
     this.errorText,
+    this.isChanged = false,
+    this.readOnly = false,
   });
 
   @override
@@ -34,6 +38,7 @@ class EditableField extends StatelessWidget {
             label: label,
             requiredField: requiredField,
             helpMessage: helpMessage,
+            labelColor: isChanged ? const Color(0xFF15803D) : null,
           ),
           const SizedBox(height: 6),
           ValueListenableBuilder<TextEditingValue>(
@@ -43,9 +48,11 @@ class EditableField extends StatelessWidget {
               return TextFormField(
                 controller: controller,
                 textInputAction: TextInputAction.next,
+                readOnly: readOnly,
                 decoration: buildInputDecoration(
                   hintText: l10n.enterFieldHint(label),
                   errorText: errorText,
+                  isChanged: isChanged,
                   prefixIcon: const Icon(
                     Icons.edit_outlined,
                     size: 16,
@@ -54,7 +61,7 @@ class EditableField extends StatelessWidget {
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (hasText)
+                      if (hasText && !readOnly)
                         IconButton(
                           tooltip: l10n.clear,
                           onPressed: controller.clear,
@@ -64,10 +71,14 @@ class EditableField extends StatelessWidget {
                             color: AppTheme.textSecondaryColor,
                           ),
                         ),
-                      const Icon(
-                        Icons.mode_edit_outline_rounded,
+                      Icon(
+                        readOnly
+                            ? Icons.lock_outline_rounded
+                            : Icons.mode_edit_outline_rounded,
                         size: 16,
-                        color: AppTheme.primaryColor,
+                        color: readOnly
+                            ? AppTheme.textSecondaryColor
+                            : AppTheme.primaryColor,
                       ),
                       const SizedBox(width: 8),
                     ],

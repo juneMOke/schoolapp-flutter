@@ -226,6 +226,8 @@
   "stepPersonalInfoSubtitle": "General student information",
   "stepAddressSubtitle": "Location and full address",
   "stepAcademicSubtitle": "Academic history and goals",
+  "stepAcademicPreviousSubtitle": "Previous year academic history",
+  "stepAcademicTargetSubtitle": "Target year academic objectives",
   "stepGuardianSubtitle": "Legal guardians and contacts",
   "stepSummarySubtitle": "Final enrollment summary",
   "stepIndicator": "Step {current} / {total}",
@@ -255,6 +257,32 @@
   "savingPersonalInfo": "Saving...",
   "personalInfoSaveSuccess": "Personal information updated successfully.",
   "personalInfoSaveError": "Update failed: {message}",
+  "saveAddress": "Save address",
+  "savingAddress": "Saving address...",
+  "saveAcademicInfo": "Save academic info",
+  "savingAcademicInfo": "Saving...",
+  "academicInfoValidationReasonsTitle": "Please correct the following academic fields:",
+  "academicInfoSaveHintBeforeContinue": "Please save academic changes before continuing.",
+  "academicInfoSaveSuccess": "Academic information updated successfully.",
+  "academicInfoSaveError": "Academic info update failed: {message}",
+  "@academicInfoSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "addressValidationReasonsTitle": "Please correct the following address fields:",
+  "addressSaveHintBeforeContinue": "Please save address changes before continuing.",
+  "addressSaveSuccess": "Address updated successfully.",
+  "addressSaveError": "Address update failed: {message}",
+  "@addressSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "@personalInfoSaveError": {
     "placeholders": {
       "message": { "type": "String" }

@@ -44,3 +44,47 @@ class StudentPersonalInfoUpdateRequested extends StudentEvent {
         nationality,
       ];
 }
+
+class StudentAddressUpdateRequested extends StudentEvent {
+  final String studentId;
+  final String city;
+  final String district;
+  final String municipality;
+  final String address;
+
+  const StudentAddressUpdateRequested({
+    required this.studentId,
+    required this.city,
+    required this.district,
+    required this.municipality,
+    required this.address,
+  });
+
+  @override
+  List<Object?> get props => [
+    studentId,
+    city,
+    district,
+    municipality,
+    address,
+  ];
+}
+
+class StudentAcademicInfoUpdateRequested extends StudentEvent {
+  final String studentId;
+  final String schoolLevelId;
+  final String schoolLevelGroupId;
+
+  const StudentAcademicInfoUpdateRequested({
+    required this.studentId,
+    required this.schoolLevelId,
+    required this.schoolLevelGroupId,
+  });
+
+  @override
+  List<Object?> get props => <Object?>[
+    studentId,
+    schoolLevelId,
+    schoolLevelGroupId,
+  ];
+}

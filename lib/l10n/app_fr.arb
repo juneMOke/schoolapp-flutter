@@ -184,6 +184,8 @@
   "stepPersonalInfoSubtitle": "Informations générales de l'élève",
   "stepAddressSubtitle": "Localisation et adresse complète",
   "stepAcademicSubtitle": "Historique académique et objectifs",
+  "stepAcademicPreviousSubtitle": "Historique académique de l'année précédente",
+  "stepAcademicTargetSubtitle": "Objectifs académiques pour l'année cible",
   "stepGuardianSubtitle": "Responsables légaux et contacts",
   "stepSummarySubtitle": "Récapitulatif final du dossier",
   "stepIndicator": "Étape {current} / {total}",
@@ -213,6 +215,32 @@
   "savingPersonalInfo": "Enregistrement en cours...",
   "personalInfoSaveSuccess": "Informations personnelles mises à jour avec succès.",
   "personalInfoSaveError": "Erreur lors de la mise à jour : {message}",
+  "saveAddress": "Enregistrer l'adresse",
+  "savingAddress": "Enregistrement de l'adresse...",
+  "saveAcademicInfo": "Enregistrer les infos académiques",
+  "savingAcademicInfo": "Enregistrement en cours...",
+  "academicInfoValidationReasonsTitle": "Veuillez corriger les champs académiques suivants :",
+  "academicInfoSaveHintBeforeContinue": "Veuillez enregistrer les modifications académiques avant de continuer.",
+  "academicInfoSaveSuccess": "Informations académiques mises à jour avec succès.",
+  "academicInfoSaveError": "Erreur lors de la mise à jour des infos académiques : {message}",
+  "@academicInfoSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "addressValidationReasonsTitle": "Veuillez corriger les informations d'adresse suivantes :",
+  "addressSaveHintBeforeContinue": "Veuillez enregistrer les modifications d'adresse avant de continuer.",
+  "addressSaveSuccess": "Adresse mise à jour avec succès.",
+  "addressSaveError": "Erreur lors de la mise à jour de l'adresse : {message}",
+  "@addressSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "@personalInfoSaveError": {
     "placeholders": {
       "message": { "type": "String" }

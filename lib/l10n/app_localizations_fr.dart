@@ -457,6 +457,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepAcademicSubtitle => 'Historique académique et objectifs';
 
   @override
+  String get stepAcademicPreviousSubtitle => 'Historique académique de l\'année précédente';
+
+  @override
+  String get stepAcademicTargetSubtitle => 'Objectifs académiques pour l\'année cible';
+
+  @override
   String get stepGuardianSubtitle => 'Responsables légaux et contacts';
 
   @override
@@ -497,6 +503,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String invalidNumberFieldError(String field) {
+    return 'Le champ $field doit contenir un nombre valide.';
+  }
+
+  @override
   String get savePersonalInfo => 'Enregistrer';
 
   @override
@@ -508,6 +519,46 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String personalInfoSaveError(String message) {
     return 'Erreur lors de la mise à jour : $message';
+  }
+
+  @override
+  String get saveAddress => 'Enregistrer l\'adresse';
+
+  @override
+  String get savingAddress => 'Enregistrement de l\'adresse...';
+
+  @override
+  String get saveAcademicInfo => 'Enregistrer les infos académiques';
+
+  @override
+  String get savingAcademicInfo => 'Enregistrement en cours...';
+
+  @override
+  String get academicInfoValidationReasonsTitle => 'Veuillez corriger les champs académiques suivants :';
+
+  @override
+  String get academicInfoSaveHintBeforeContinue => 'Veuillez enregistrer les modifications académiques avant de continuer.';
+
+  @override
+  String get academicInfoSaveSuccess => 'Informations académiques mises à jour avec succès.';
+
+  @override
+  String academicInfoSaveError(String message) {
+    return 'Erreur lors de la mise à jour des infos académiques : $message';
+  }
+
+  @override
+  String get addressValidationReasonsTitle => 'Veuillez corriger les informations d\'adresse suivantes :';
+
+  @override
+  String get addressSaveHintBeforeContinue => 'Veuillez enregistrer les modifications d\'adresse avant de continuer.';
+
+  @override
+  String get addressSaveSuccess => 'Adresse mise à jour avec succès.';
+
+  @override
+  String addressSaveError(String message) {
+    return 'Erreur lors de la mise à jour de l\'adresse : $message';
   }
 
   @override

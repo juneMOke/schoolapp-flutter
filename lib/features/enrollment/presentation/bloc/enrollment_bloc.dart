@@ -206,12 +206,16 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentDetailRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        detailStatus: EnrollmentLoadStatus.loading,
-        errorMessage: null,
-      ),
-    );
+    // En mode silencieux (refresh après sauvegarde), on ne repasse pas par
+    // l'état loading pour ne pas détruire le stepper et perdre l'étape courante.
+    if (!event.silent) {
+      emit(
+        state.copyWith(
+          detailStatus: EnrollmentLoadStatus.loading,
+          errorMessage: null,
+        ),
+      );
+    }
 
     final result = await _getEnrollmentDetailUseCase(
       enrollmentId: event.enrollmentId,

@@ -7,6 +7,7 @@ class ValidatedYearSelector extends StatelessWidget {
   final double width;
   final bool validatedPreviousYear;
   final ValueChanged<bool> onChanged;
+  final bool isChanged;
 
   const ValidatedYearSelector({
     super.key,
@@ -14,10 +15,12 @@ class ValidatedYearSelector extends StatelessWidget {
     required this.width,
     required this.validatedPreviousYear,
     required this.onChanged,
+    this.isChanged = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final highlightColor = const Color(0xFF16A34A);
     return SizedBox(
       width: width,
       child: Column(
@@ -27,6 +30,7 @@ class ValidatedYearSelector extends StatelessWidget {
             l10n.yearValidated,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
+              color: isChanged ? highlightColor : null,
             ),
           ),
           const SizedBox(height: 8),
@@ -37,11 +41,17 @@ class ValidatedYearSelector extends StatelessWidget {
               ChoiceChip(
                 label: Text(l10n.yearValidated),
                 selected: validatedPreviousYear,
+                selectedColor: isChanged
+                    ? highlightColor.withValues(alpha: 0.18)
+                    : null,
                 onSelected: (_) => onChanged(true),
               ),
               ChoiceChip(
                 label: Text(l10n.yearNotValidated),
                 selected: !validatedPreviousYear,
+                selectedColor: isChanged
+                    ? highlightColor.withValues(alpha: 0.18)
+                    : null,
                 onSelected: (_) => onChanged(false),
               ),
             ],

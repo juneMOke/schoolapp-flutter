@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_tep.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/previous_academic_info_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/step_page_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/summary_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/target_academic_info_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepper extends StatefulWidget {
@@ -18,39 +27,96 @@ class EnrollmentStepper extends StatefulWidget {
 }
 
 class _EnrollmentStepperState extends State<EnrollmentStepper> {
-  int _currentStep = 0;
+  static const int _totalSteps = 6;
 
   final GlobalKey<PersonalInfoStepState> _personalInfoKey =
       GlobalKey<PersonalInfoStepState>();
+  final GlobalKey<AddressStepState> _addressKey = GlobalKey<AddressStepState>();
+  final GlobalKey<PreviousAcademicInfoStepState> _academicInfoKey =
+      GlobalKey<PreviousAcademicInfoStepState>();
+  final GlobalKey<TargetAcademicInfoStepState> _academicTargetInfoKey =
+      GlobalKey<TargetAcademicInfoStepState>();
+  final GlobalKey<GuardianInfoStepState> _guardianInfoKey =
+      GlobalKey<GuardianInfoStepState>();
 
-  bool _personalInfoDirty = false;
-  bool _personalInfoValid = false;
-  bool _personalInfoSaving = false;
+  late final EnrollmentStepperFlowBloc _flowBloc;
 
   @override
   void initState() {
     super.initState();
-    _syncPersonalInfoStateFromDetail();
+    _flowBloc = EnrollmentStepperFlowBloc(
+      totalSteps: _totalSteps,
+      initialStepStates: _buildInitialStepStates(widget.enrollmentDetail),
+    );
   }
 
   @override
   void didUpdateWidget(covariant EnrollmentStepper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
-      _syncPersonalInfoStateFromDetail();
+      _flowBloc.add(
+        EnrollmentStepperStatesSynced(
+          _buildInitialStepStates(widget.enrollmentDetail),
+        ),
+      );
     }
   }
 
-  void _syncPersonalInfoStateFromDetail() {
-    final student = widget.enrollmentDetail.studentDetail;
-    _personalInfoDirty = false;
-    _personalInfoSaving = false;
-    _personalInfoValid = student.firstName.trim().isNotEmpty &&
-        student.lastName.trim().isNotEmpty &&
-        student.surname.trim().isNotEmpty &&
-        student.birthPlace.trim().isNotEmpty &&
-        student.nationality.trim().isNotEmpty &&
-        student.dateOfBirth.trim().isNotEmpty;
+  @override
+  void dispose() {
+    _flowBloc.close();
+    super.dispose();
+  }
+
+  Map<int, StepFormState> _buildInitialStepStates(EnrollmentDetail detail) {
+    return <int, StepFormState>{
+      0: StepFormState(
+        dirty: false,
+        saving: false,
+        valid: EnrollmentStepperStateHelper.isPersonalInfoValid(
+          detail.studentDetail,
+        ),
+      ),
+      1: StepFormState(
+        dirty: false,
+        saving: false,
+        valid: EnrollmentStepperStateHelper.isAddressValid(
+          detail.studentDetail,
+        ),
+      ),
+      2: StepFormState(
+        dirty: false,
+        saving: false,
+        valid: EnrollmentStepperStateHelper.isAcademicPreviousInfoValid(
+          detail.enrollmentDetail,
+        ),
+      ),
+      3: StepFormState(
+        dirty: false,
+        saving: false,
+        valid: EnrollmentStepperStateHelper.isAcademicTargetInfoValid(
+          detail.enrollmentDetail,
+        ),
+      ),
+      4: StepFormState(
+        dirty: false,
+        saving: false,
+        valid: EnrollmentStepperStateHelper.isGuardianInfoValid(
+          detail.parentDetails,
+        ),
+      ),
+    };
+  }
+
+  String _saveLabelForStep(AppLocalizations l10n, int step, bool savingNow) {
+    return switch (step) {
+      0 => savingNow ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
+      1 => savingNow ? l10n.savingAddress : l10n.saveAddress,
+      2 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
+      3 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
+      4 => savingNow ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
+      _ => '',
+    };
   }
 
   @override
@@ -59,34 +125,69 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     final stepTitles = _stepTitles(l10n);
     final stepSubtitles = _stepSubtitles(l10n);
     final steps = _stepContents();
-    final progress = (_currentStep + 1) / stepTitles.length;
 
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _WizardBreadcrumb(
-            titles: stepTitles,
-            currentStep: _currentStep,
-            progress: progress,
-            onStepTap: _onBreadcrumbStepTap,
-          ),
-          const SizedBox(height: 12),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            child: _StepPageCard(
-              key: ValueKey(_currentStep),
-              title: stepTitles[_currentStep],
-              subtitle: stepSubtitles[_currentStep],
-              child: _buildStepContent(steps[_currentStep]),
+    return BlocProvider<EnrollmentStepperFlowBloc>.value(
+      value: _flowBloc,
+      child: BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
+        builder: (context, flowState) {
+          final currentStep = flowState.currentStep;
+          final progress = (currentStep + 1) / stepTitles.length;
+          final currentStepState = flowState.stateOf(currentStep);
+
+          return Padding(
+            padding: const EdgeInsets.all(AppTheme.defaultPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                WizardBreadcrumb(
+                  titles: stepTitles,
+                  currentStep: currentStep,
+                  progress: progress,
+                  onStepTap: (target) =>
+                      _onBreadcrumbStepTap(target, currentStep),
+                ),
+                const SizedBox(height: 12),
+                StepPageCard(
+                  key: ValueKey(currentStep),
+                  title: stepTitles[currentStep],
+                  subtitle: stepSubtitles[currentStep],
+                  child: _buildStepContent(steps[currentStep]),
+                ),
+                const SizedBox(height: 12),
+                EnrollmentStepperControls(
+                  currentStep: currentStep,
+                  isLast: flowState.isLast,
+                  canSave: flowState.canSave,
+                  canContinue: flowState.canContinue,
+                  showSaveAction: flowState.showSaveAction,
+                  savingNow: currentStepState.saving,
+                  saveLabel: _saveLabelForStep(
+                    l10n,
+                    currentStep,
+                    currentStepState.saving,
+                  ),
+                  onPrevious: () {
+                    _flowBloc.add(
+                      EnrollmentStepperCurrentStepChanged(currentStep - 1),
+                    );
+                  },
+                  onSave: () => _onSavePressed(currentStep, flowState),
+                  onContinue: () {
+                    if (!_validateCurrentStep(currentStep, flowState)) return;
+                    if (flowState.isLast) {
+                      _showHint(l10n.enrollmentReadyForValidation);
+                      return;
+                    }
+                    _flowBloc.add(
+                      EnrollmentStepperCurrentStepChanged(currentStep + 1),
+                    );
+                    _resetContentScroll();
+                  },
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildControls(context),
-        ],
+          );
+        },
       ),
     );
   }
@@ -95,7 +196,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     return [
       l10n.personalInformation,
       l10n.address,
-      '${l10n.previousYear} / ${l10n.targetYear}',
+      l10n.previousYear,
+      l10n.targetYear,
       l10n.guardianInformation,
       l10n.summary,
     ];
@@ -105,7 +207,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     return [
       l10n.stepPersonalInfoSubtitle,
       l10n.stepAddressSubtitle,
-      l10n.stepAcademicSubtitle,
+      l10n.stepAcademicPreviousSubtitle,
+      l10n.stepAcademicTargetSubtitle,
       l10n.stepGuardianSubtitle,
       l10n.stepSummarySubtitle,
     ];
@@ -118,78 +221,109 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         studentDetail: widget.enrollmentDetail.studentDetail,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
-        onDirtyChanged: (dirty) {
-          if (_personalInfoDirty != dirty && mounted) {
-            setState(() => _personalInfoDirty = dirty);
-          }
-        },
-        onValidityChanged: (valid) {
-          if (_personalInfoValid != valid && mounted) {
-            setState(() => _personalInfoValid = valid);
-          }
-        },
-        onSavingChanged: (saving) {
-          if (_personalInfoSaving != saving && mounted) {
-            setState(() => _personalInfoSaving = saving);
-          }
-        },
+        flowStepIndex: 0,
       ),
-      AddressStep(studentDetail: widget.enrollmentDetail.studentDetail),
-      AcademicInfoStep(enrollmentDetail: widget.enrollmentDetail.enrollmentDetail),
-      GuardianInfoStep(parentDetails: widget.enrollmentDetail.parentDetails),
+      AddressStep(
+        key: _addressKey,
+        studentDetail: widget.enrollmentDetail.studentDetail,
+        enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+        flowStepIndex: 1,
+      ),
+      PreviousAcademicInfoStep(
+        key: _academicInfoKey,
+        enrollmentDetail: widget.enrollmentDetail.enrollmentDetail,
+        enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+        flowStepIndex: 2,
+      ),
+      TargetAcademicInfoStep(
+        key: _academicTargetInfoKey,
+        studentDetail: widget.enrollmentDetail.studentDetail,
+        studentId: widget.enrollmentDetail.studentDetail.id,
+        enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+        flowStepIndex: 3,
+      ),
+      GuardianInfoStep(
+        key: _guardianInfoKey,
+        parentDetails: widget.enrollmentDetail.parentDetails,
+        flowStepIndex: 4,
+        enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        showInlineSaveButton: false,
+      ),
       SummaryStep(enrollmentDetail: widget.enrollmentDetail),
     ];
   }
 
-  void _onBreadcrumbStepTap(int targetStep) {
-    if (targetStep <= _currentStep) {
-      setState(() => _currentStep = targetStep);
+  void _onBreadcrumbStepTap(int targetStep, int currentStep) {
+    if (targetStep <= currentStep) {
+      _flowBloc.add(EnrollmentStepperCurrentStepChanged(targetStep));
       _resetContentScroll();
       return;
     }
     _showHint(AppLocalizations.of(context)!.stepForwardHint);
   }
 
-  bool _validateCurrentStep() {
+  bool _validateCurrentStep(
+    int currentStep,
+    EnrollmentStepperFlowState flowState,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    final student = widget.enrollmentDetail.studentDetail;
-    final enrollment = widget.enrollmentDetail.enrollmentDetail;
-    final parents = widget.enrollmentDetail.parentDetails;
+    final currentState = flowState.stateOf(currentStep);
 
-    switch (_currentStep) {
+    switch (currentStep) {
       case 0:
-        if (!_personalInfoValid) {
+        if (!currentState.valid) {
           _showHint(l10n.validatePersonalInfoHint);
           return false;
         }
-        if (_personalInfoDirty) {
+        if (currentState.dirty) {
           _showHint(l10n.personalInfoSaveHintBeforeContinue);
           return false;
         }
         return true;
       case 1:
-        final ok = student.city.trim().isNotEmpty &&
-            student.district.trim().isNotEmpty &&
-            student.municipality.trim().isNotEmpty &&
-            student.address.trim().isNotEmpty;
-        if (!ok) _showHint(l10n.validateAddressHint);
-        return ok;
+        if (!currentState.valid) {
+          _showHint(l10n.validateAddressHint);
+          return false;
+        }
+        if (currentState.dirty) {
+          _showHint(l10n.addressSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
       case 2:
-        final ok = enrollment.previousAcademicYear.trim().isNotEmpty &&
-            enrollment.previousSchoolName.trim().isNotEmpty &&
-            enrollment.previousSchoolLevel.trim().isNotEmpty;
-        if (!ok) _showHint(l10n.validateAcademicInfoHint);
-        return ok;
+        if (!currentState.valid) {
+          _showHint(l10n.validateAcademicInfoHint);
+          return false;
+        }
+        if (currentState.dirty) {
+          _showHint(l10n.academicInfoSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
       case 3:
-        final ok = parents.isNotEmpty &&
-            parents.every(
-              (p) => p.firstName.trim().isNotEmpty &&
-                  p.lastName.trim().isNotEmpty &&
-                  p.phoneNumber.trim().isNotEmpty,
-            );
-        if (!ok) _showHint(l10n.validateGuardianInfoHint);
-        return ok;
+        if (!currentState.valid) {
+          _showHint(l10n.validateAcademicInfoHint);
+          return false;
+        }
+        if (currentState.dirty) {
+          _showHint(l10n.academicInfoSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
       case 4:
+        if (!currentState.valid) {
+          _showHint(l10n.validateGuardianInfoHint);
+          return false;
+        }
+        if (currentState.dirty) {
+          _showHint(l10n.personalInfoSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
+      case 5:
         return true;
       default:
         return false;
@@ -202,91 +336,41 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  bool get _showSaveAction => _currentStep == 0;
-
-  void _onSavePressed() {
-    if (_personalInfoSaving) return;
-    final formState = _personalInfoKey.currentState;
-    if (formState == null) return;
-    formState.submitForm();
-  }
-
-  Widget _buildControls(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isLast = _currentStep == 4;
-
-    final canContinue = _currentStep == 0
-        ? !_personalInfoDirty && _personalInfoValid && !_personalInfoSaving
-        : true;
-
-    final canSave = _showSaveAction &&
-        !_personalInfoSaving &&
-        _personalInfoDirty &&
-        _personalInfoValid;
-
-    return Row(
-      children: [
-        if (_currentStep > 0)
-          OutlinedButton.icon(
-            onPressed: () => setState(() => _currentStep -= 1),
-            icon: const Icon(Icons.arrow_back_rounded, size: 16),
-            label: Text(l10n.previous),
-          ),
-        const Spacer(),
-        if (_showSaveAction) ...[
-          FilledButton.icon(
-            onPressed: canSave ? _onSavePressed : null,
-            icon: _personalInfoSaving
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save_outlined, size: 16),
-            label: Text(
-              _personalInfoSaving ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-              foregroundColor: Colors.white,
-              elevation: canSave ? 6 : 0,
-              shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-        ],
-        ElevatedButton.icon(
-          onPressed: canContinue
-              ? () {
-                  if (!_validateCurrentStep()) return;
-
-                  if (isLast) {
-                    _showHint(l10n.enrollmentReadyForValidation);
-                    return;
-                  }
-
-                  setState(() => _currentStep += 1);
-                  _resetContentScroll();
-                }
-              : null,
-          icon: Icon(
-            isLast ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
-            size: 16,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          ),
-          label: Text(isLast ? l10n.finish : l10n.next),
-        ),
-      ],
-    );
+  void _onSavePressed(int currentStep, EnrollmentStepperFlowState flowState) {
+    if (currentStep == 0) {
+      if (flowState.stateOf(0).saving) return;
+      final formState = _personalInfoKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+      return;
+    }
+    if (currentStep == 1) {
+      if (flowState.stateOf(1).saving) return;
+      final formState = _addressKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+      return;
+    }
+    if (currentStep == 2) {
+      if (flowState.stateOf(2).saving) return;
+      final formState = _academicInfoKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+      return;
+    }
+    if (currentStep == 3) {
+      if (flowState.stateOf(3).saving) return;
+      final formState = _academicTargetInfoKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+    }
+    if (currentStep == 4) {
+      if (flowState.stateOf(4).saving) return;
+      final formState = _guardianInfoKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+      return;
+    }
   }
 
   void _resetContentScroll() {
@@ -295,237 +379,5 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   Widget _buildStepContent(Widget stepContent) {
     return stepContent;
-  }
-}
-
-class _WizardBreadcrumb extends StatelessWidget {
-  final List<String> titles;
-  final int currentStep;
-  final double progress;
-  final ValueChanged<int> onStepTap;
-
-  const _WizardBreadcrumb({
-    required this.titles,
-    required this.currentStep,
-    required this.progress,
-    required this.onStepTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                AppLocalizations.of(context)!.stepIndicator(
-                  currentStep + 1,
-                  titles.length,
-                ),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimaryColor,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: const Color(0xFFE5E7EB),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppTheme.primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 6,
-            runSpacing: 8,
-            children: List.generate(titles.length, (index) {
-              final isDone = index < currentStep;
-              final isCurrent = index == currentStep;
-              final isFuture = index > currentStep;
-              final canTap = !isFuture;
-
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MouseRegion(
-                    cursor: canTap
-                        ? SystemMouseCursors.click
-                        : SystemMouseCursors.forbidden,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 160),
-                      opacity: isFuture ? 0.55 : 1,
-                      child: InkWell(
-                        onTap: canTap ? () => onStepTap(index) : null,
-                        borderRadius: BorderRadius.circular(18),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isCurrent
-                                ? AppTheme.primaryColor
-                                : isDone
-                                ? AppTheme.primaryColor.withValues(alpha: 0.14)
-                                : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 16,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isCurrent
-                                      ? Colors.white.withValues(alpha: 0.22)
-                                      : isDone
-                                      ? AppTheme.primaryColor.withValues(
-                                          alpha: 0.18,
-                                        )
-                                      : const Color(0xFFE5E7EB),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  isDone ? '✓' : '${index + 1}',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: isCurrent
-                                        ? Colors.white
-                                        : isDone
-                                        ? AppTheme.primaryColor
-                                        : const Color(0xFF6B7280),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                titles[index],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isCurrent
-                                      ? Colors.white
-                                      : isDone
-                                      ? AppTheme.primaryColor
-                                      : const Color(0xFF6B7280),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (index < titles.length - 1)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 16,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
-                ],
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StepPageCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget child;
-
-  const _StepPageCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.primaryColor.withValues(alpha: 0.1),
-                  const Color(0xFF10B981).withValues(alpha: 0.08),
-                ],
-              ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimaryColor,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: child,
-          ),
-        ],
-      ),
-    );
   }
 }

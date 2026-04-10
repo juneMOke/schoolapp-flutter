@@ -5,6 +5,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
+import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
+import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
+import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/enrollment_academic_info_bloc.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/forgot_password_remote_data_source.dart';
@@ -43,10 +48,17 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
 import 'package:school_app_flutter/features/student/data/datasources/student_remote_data_source.dart';
+import 'package:school_app_flutter/features/student/data/repositories/parent_repository_impl.dart';
 import 'package:school_app_flutter/features/student/data/repositories/student_repository_impl.dart';
+import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/update_student_address_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_personal_info_use_case.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/parent_bloc.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
@@ -344,9 +356,64 @@ Future<void> configureDependencies() async {
     () => UpdateStudentPersonalInfoUseCase(getIt<StudentRepository>()),
   );
 
+  getIt.registerFactory<UpdateStudentAddressUseCase>(
+    () => UpdateStudentAddressUseCase(getIt<StudentRepository>()),
+  );
+
+  getIt.registerLazySingleton<UpdateStudentAcademicInfoUseCase>(
+    () => UpdateStudentAcademicInfoUseCase(getIt<StudentRepository>()),
+  );
   getIt.registerFactory<StudentBloc>(
     () => StudentBloc(
       updatePersonalInfoUseCase: getIt<UpdateStudentPersonalInfoUseCase>(),
+      updateAddressUseCase: getIt<UpdateStudentAddressUseCase>(),
+      updateAcademicInfoUseCase: getIt<UpdateStudentAcademicInfoUseCase>(),
+    ),
+  );
+
+  // ── Parent ───────────────────────────────────────────────────────────────
+  getIt.registerLazySingleton<ParentRemoteDataSource>(
+    () => ParentRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ParentRepository>(
+    () =>
+        ParentRepositoryImpl(
+              remoteDataSource: getIt<ParentRemoteDataSource>(),
+              requiredAuth: getIt<Map<String, dynamic>>(),
+            )
+            as ParentRepository,
+  );
+
+  getIt.registerFactory<UpdateParentUseCase>(
+    () => UpdateParentUseCase(getIt<ParentRepository>()),
+  );
+
+  getIt.registerFactory<ParentBloc>(
+    () => ParentBloc(updateParentUseCase: getIt<UpdateParentUseCase>()),
+  );
+
+  // ── Enrollment Academic Info ───────────────────────────────────────────────
+  getIt.registerLazySingleton<EnrollmentAcademicInfoRemoteDataSource>(
+    () => EnrollmentAcademicInfoRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<EnrollmentAcademicInfoRepository>(
+    () => EnrollmentAcademicInfoRepositoryImpl(
+      remoteDataSource: getIt<EnrollmentAcademicInfoRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<UpdateEnrollmentAcademicInfoUseCase>(
+    () => UpdateEnrollmentAcademicInfoUseCase(
+      getIt<EnrollmentAcademicInfoRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<EnrollmentAcademicInfoBloc>(
+    () => EnrollmentAcademicInfoBloc(
+      updateUseCase: getIt<UpdateEnrollmentAcademicInfoUseCase>(),
     ),
   );
 }
