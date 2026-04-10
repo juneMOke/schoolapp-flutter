@@ -29,18 +29,18 @@ class $AssetsDataGen {
 class $AssetsDatasourcesGen {
   const $AssetsDatasourcesGen();
 
-  final String authLocalDataSource =
-      'lib/features/auth/data/datasources/auth_local_data_source.dart';
-  final String authRemoteDataSource =
-      'lib/features/auth/data/datasources/auth_remote_data_source.dart';
-  final String forgotPasswordRemoteDataSource =
-      'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+  final String authLocalDataSource = 'lib/features/auth/data/datasources/auth_local_data_source.dart';
+  final String authRemoteDataSource = 'lib/features/auth/data/datasources/auth_remote_data_source.dart';
+  final String authRemoteDataSourceG = 'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
+  final String forgotPasswordRemoteDataSource = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+  final String forgotPasswordRemoteDataSourceG = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
 }
 
 class AssetGenImage {
   const AssetGenImage(this._assetName, {this.size, this.flavors = const {}});
 
   final String _assetName;
+
 
   final Size? size;
   final Set<String> flavors;
@@ -98,8 +98,15 @@ class AssetGenImage {
     );
   }
 
-  ImageProvider provider({AssetBundle? bundle, String? package}) {
-    return AssetImage(_assetName, bundle: bundle, package: package);
+  ImageProvider provider({
+    AssetBundle? bundle,
+    String? package,
+  }) {
+    return AssetImage(
+      _assetName,
+      bundle: bundle,
+      package: package,
+    );
   }
 
   Widget custom({
@@ -116,3 +123,4 @@ class AssetGenImage {
 
   String get keyName => _assetName;
 }
+

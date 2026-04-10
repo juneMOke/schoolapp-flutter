@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -45,7 +47,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, bool>> isAuthenticated() async {
     try {
       final session = await localDataSource.getSession();
-      return Right(session != null && session.accessToken.isNotEmpty);
+      return Right(
+        session != null &&
+            session.accessToken.isNotEmpty &&
+            isTokenValid(session.accessToken),
+      );
     } catch (_) {
       return const Left(StorageFailure('Failed to read session'));
     }
@@ -91,5 +97,19 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
+  }
+
+  bool isTokenValid(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) return false;
+
+    final payload = jsonDecode(
+      utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+    );
+
+    final exp = payload['exp'];
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+
+    return exp != null && exp > now;
   }
 }

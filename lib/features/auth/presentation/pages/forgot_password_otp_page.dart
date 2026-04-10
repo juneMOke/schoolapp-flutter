@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/app_title.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_otp_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/auth_error_banner.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/auth_flow_shell.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -54,87 +55,59 @@ class _ForgotPasswordOtpPageState extends State<ForgotPasswordOtpPage> {
           context.goNamed(AppRoutesNames.forgotPasswordReset);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: const BackButton(color: Colors.indigo),
-        ),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
-                  builder: (context, state) {
-                    final isLoading =
-                        state.status == ForgotPasswordStatus.loading;
-                    final email = state.userEmail;
-                    final l10n = AppLocalizations.of(context)!;
+      child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
+        builder: (context, state) {
+          final isLoading = state.status == ForgotPasswordStatus.loading;
+          final email = state.userEmail;
+          final l10n = AppLocalizations.of(context)!;
 
-                    if (email == null || email.isEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        context.goNamed(AppRoutesNames.forgotPasswordEmail);
-                      });
-                    }
+          if (email == null || email.isEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!context.mounted) return;
+              context.goNamed(AppRoutesNames.forgotPasswordEmail);
+            });
+          }
 
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        EteeloAppTitle(
-                          subTitle: email == null ? '' : l10n.codeSentTo(email),
-                        ),
-                        Card(
-                          elevation: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  EteeloOtpInput(
-                                    controller: _otpController,
-                                    label: l10n.otpCodeLabel,
-                                    enabled: !isLoading,
-                                    validator: (value) => _validateOtp(context, value),
-                                    onFieldSubmitted: (_) => _submit(),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  if (state.status == ForgotPasswordStatus.failure &&
-                                      state.errorMessage != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: Text(
-                                        state.errorMessage!,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.error,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  EteeloValidationButton(
-                                    onPressed: _submit,
-                                    label: l10n.validateCode,
-                                    isLoading: isLoading,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+          return AuthFlowShell(
+            title: l10n.otpValidation,
+            subtitle: l10n.enterSixDigitCode,
+            icon: Icons.password_rounded,
+            topAccessory: email == null || email.isEmpty
+                ? null
+                : AuthInfoPill(
+                    icon: Icons.mark_email_unread_outlined,
+                    label: l10n.codeSentTo(email),
+                  ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  EteeloOtpInput(
+                    controller: _otpController,
+                    label: l10n.otpCodeLabel,
+                    helperText: l10n.enterSixDigitCode,
+                    enabled: !isLoading,
+                    validator: (value) => _validateOtp(context, value),
+                    onFieldSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 16),
+                  if (state.status == ForgotPasswordStatus.failure &&
+                      state.errorMessage != null) ...[
+                    AuthErrorBanner(message: state.errorMessage!),
+                    const SizedBox(height: 16),
+                  ],
+                  EteeloValidationButton(
+                    onPressed: _submit,
+                    label: l10n.validateCode,
+                    isLoading: isLoading,
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

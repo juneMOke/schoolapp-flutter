@@ -157,4 +157,416 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pageUnderConstruction => 'This page is under development';
+
+  @override
+  String get preRegistrations => 'Pre-Registrations';
+
+  @override
+  String get searchStudents => 'Search Students';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get surname => 'Surname';
+
+  @override
+  String get dateOfBirth => 'Date of Birth';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get editEnrollment => 'Edit';
+
+  @override
+  String get exportData => 'Export';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get loadingStudents => 'Loading students...';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusValidated => 'Validated';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get enrollmentCode => 'Enrollment Code';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get actions => 'Actions';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get previousYear => 'Previous Year';
+
+  @override
+  String get targetYear => 'Target Year';
+
+  @override
+  String get guardianInformation => 'Guardian Information';
+
+  @override
+  String get schoolFees => 'School Fees';
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get next => 'Continue';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get finish => 'Finish';
+
+  @override
+  String get personalInfoSubtitle => 'Editable personal information';
+
+  @override
+  String get firstNameHelp => 'The student\'s official first name.';
+
+  @override
+  String get lastNameHelp => 'The student\'s family name.';
+
+  @override
+  String get surnameHelp => 'The middle name or other common name.';
+
+  @override
+  String get dateOfBirthHelp => 'Use the selector to choose the date of birth.';
+
+  @override
+  String get birthPlace => 'Place of birth';
+
+  @override
+  String get birthPlaceHelp => 'City or locality of birth.';
+
+  @override
+  String get nationality => 'Nationality';
+
+  @override
+  String get nationalityHelp => 'The student\'s main nationality.';
+
+  @override
+  String get genderHelp => 'Gender recorded in the administrative file.';
+
+  @override
+  String get selectDateOfBirthHelpText => 'Select a date of birth';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String enterFieldHint(String label) {
+    return 'Enter $label';
+  }
+
+  @override
+  String get dateHint => 'dd/mm/yyyy';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get cityHelp => 'Student\'s city of residence.';
+
+  @override
+  String get district => 'District';
+
+  @override
+  String get districtHelp => 'District or borough.';
+
+  @override
+  String get municipality => 'Municipality';
+
+  @override
+  String get municipalityHelp => 'Municipality of residence.';
+
+  @override
+  String get neighborhood => 'Neighborhood';
+
+  @override
+  String get neighborhoodHelp => 'Neighborhood or street of residence.';
+
+  @override
+  String get fullAddress => 'Full address';
+
+  @override
+  String get fullAddressHelp => 'Full residential address.';
+
+  @override
+  String get academicYearLabel => 'Academic year';
+
+  @override
+  String get academicYearLabelHelp => 'Reference academic year.';
+
+  @override
+  String get schoolLabel => 'School';
+
+  @override
+  String get schoolLabelHelp => 'Name of the previous school.';
+
+  @override
+  String get schoolCycle => 'Cycle';
+
+  @override
+  String get schoolCycleHelp => 'Previous teaching cycle.';
+
+  @override
+  String get schoolLevelLabel => 'Level';
+
+  @override
+  String get schoolLevelLabelHelp => 'Previous study level.';
+
+  @override
+  String get averageLabel => 'Average';
+
+  @override
+  String get averageLabelHelp => 'Annual average obtained.';
+
+  @override
+  String get rankingLabel => 'Ranking';
+
+  @override
+  String get rankingLabelHelp => 'Class ranking.';
+
+  @override
+  String get yearValidated => 'Year validated';
+
+  @override
+  String get yearNotValidated => 'Not validated';
+
+  @override
+  String get currentAcademicYearLabel => 'Academic year';
+
+  @override
+  String get currentAcademicYearHelp => 'Target academic year.';
+
+  @override
+  String get targetCycleLabel => 'Target cycle';
+
+  @override
+  String get targetCycleLabelHelp => 'Target cycle for this enrollment.';
+
+  @override
+  String get targetLevelLabel => 'Target level';
+
+  @override
+  String get targetLevelLabelHelp => 'Target level for this enrollment.';
+
+  @override
+  String get optionLabel => 'Option';
+
+  @override
+  String get optionLabelHelp => 'Desired option or specialization.';
+
+  @override
+  String get toDefine => 'To be defined';
+
+  @override
+  String get primaryGuardian => 'Primary Guardian';
+
+  @override
+  String guardianNumber(int number) {
+    return 'Guardian $number';
+  }
+
+  @override
+  String get noGuardianInfo => 'No guardian information available';
+
+  @override
+  String get identificationNumberLabel => 'Identification number';
+
+  @override
+  String get identificationNumberHelp => 'Official identification number.';
+
+  @override
+  String get phoneNumberLabel => 'Phone';
+
+  @override
+  String get phoneNumberHelp => 'Guardian\'s phone number.';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get emailLabelHelp => 'Guardian\'s email address.';
+
+  @override
+  String get relationshipFather => 'Father';
+
+  @override
+  String get relationshipMother => 'Mother';
+
+  @override
+  String get relationshipGuardian => 'Guardian';
+
+  @override
+  String get relationshipUncle => 'Uncle';
+
+  @override
+  String get relationshipAunt => 'Aunt';
+
+  @override
+  String get relationshipGrandparent => 'Grandparent';
+
+  @override
+  String get relationshipOther => 'Other';
+
+  @override
+  String get stepPersonalInfoSubtitle => 'General student information';
+
+  @override
+  String get stepAddressSubtitle => 'Location and full address';
+
+  @override
+  String get stepAcademicSubtitle => 'Academic history and goals';
+
+  @override
+  String get stepAcademicPreviousSubtitle => 'Previous year academic history';
+
+  @override
+  String get stepAcademicTargetSubtitle => 'Target year academic objectives';
+
+  @override
+  String get stepGuardianSubtitle => 'Legal guardians and contacts';
+
+  @override
+  String get stepSummarySubtitle => 'Final enrollment summary';
+
+  @override
+  String stepIndicator(int current, int total) {
+    return 'Step $current / $total';
+  }
+
+  @override
+  String get stepForwardHint => 'Click Continue to advance step by step.';
+
+  @override
+  String get validatePersonalInfoHint => 'Please complete the personal information.';
+
+  @override
+  String get validateAddressHint => 'Please complete the student\'s address.';
+
+  @override
+  String get validateAcademicInfoHint => 'Please complete the academic information.';
+
+  @override
+  String get validateGuardianInfoHint => 'Please check the guardian information.';
+
+  @override
+  String get enrollmentReadyForValidation => 'File ready for final validation.';
+
+  @override
+  String get personalInfoSaveHintBeforeContinue => 'Please save your changes before continuing.';
+
+  @override
+  String get personalInfoValidationReasonsTitle => 'Please correct the following fields:';
+
+  @override
+  String requiredFieldError(String field) {
+    return 'The $field field is required.';
+  }
+
+  @override
+  String invalidNumberFieldError(String field) {
+    return 'The $field field must be a valid number.';
+  }
+
+  @override
+  String get savePersonalInfo => 'Save';
+
+  @override
+  String get savingPersonalInfo => 'Saving...';
+
+  @override
+  String get personalInfoSaveSuccess => 'Personal information updated successfully.';
+
+  @override
+  String personalInfoSaveError(String message) {
+    return 'Update failed: $message';
+  }
+
+  @override
+  String get saveAddress => 'Save address';
+
+  @override
+  String get savingAddress => 'Saving address...';
+
+  @override
+  String get saveAcademicInfo => 'Save academic info';
+
+  @override
+  String get savingAcademicInfo => 'Saving...';
+
+  @override
+  String get academicInfoValidationReasonsTitle => 'Please correct the following academic fields:';
+
+  @override
+  String get academicInfoSaveHintBeforeContinue => 'Please save academic changes before continuing.';
+
+  @override
+  String get academicInfoSaveSuccess => 'Academic information updated successfully.';
+
+  @override
+  String academicInfoSaveError(String message) {
+    return 'Academic info update failed: $message';
+  }
+
+  @override
+  String get addressValidationReasonsTitle => 'Please correct the following address fields:';
+
+  @override
+  String get addressSaveHintBeforeContinue => 'Please save address changes before continuing.';
+
+  @override
+  String get addressSaveSuccess => 'Address updated successfully.';
+
+  @override
+  String addressSaveError(String message) {
+    return 'Address update failed: $message';
+  }
+
+  @override
+  String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
+
+  @override
+  String get bootstrapContextUnavailableMessage => 'Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.';
+
+  @override
+  String get signOutAction => 'Sign out';
 }

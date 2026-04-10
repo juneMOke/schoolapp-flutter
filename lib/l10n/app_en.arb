@@ -110,5 +110,185 @@
   "profile": "Profile",
   "settings": "Settings",
   "home": "Home",
-  "pageUnderConstruction": "This page is under development"
+  "pageUnderConstruction": "This page is under development",
+  "preRegistrations": "Pre-Registrations",
+  "searchStudents": "Search Students",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "surname": "Surname",
+  "dateOfBirth": "Date of Birth",
+  "search": "Search",
+  "clear": "Clear",
+  "viewDetails": "View Details",
+  "editEnrollment": "Edit",
+  "exportData": "Export",
+  "noResultsFound": "No results found",
+  "loadingStudents": "Loading students...",
+  "statusPending": "Pending",
+  "statusValidated": "Validated",
+  "statusRejected": "Rejected",
+  "enrollmentCode": "Enrollment Code",
+  "gender": "Gender",
+  "actions": "Actions",
+  "personalInformation": "Personal Information",
+  "address": "Address",
+  "previousYear": "Previous Year",
+  "targetYear": "Target Year",
+  "guardianInformation": "Guardian Information",
+  "schoolFees": "School Fees",
+  "summary": "Summary",
+  "next": "Continue",
+  "previous": "Previous",
+  "finish": "Finish",
+
+  "personalInfoSubtitle": "Editable personal information",
+  "firstNameHelp": "The student's official first name.",
+  "lastNameHelp": "The student's family name.",
+  "surnameHelp": "The middle name or other common name.",
+  "dateOfBirthHelp": "Use the selector to choose the date of birth.",
+  "birthPlace": "Place of birth",
+  "birthPlaceHelp": "City or locality of birth.",
+  "nationality": "Nationality",
+  "nationalityHelp": "The student's main nationality.",
+  "genderHelp": "Gender recorded in the administrative file.",
+  "selectDateOfBirthHelpText": "Select a date of birth",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "enterFieldHint": "Enter {label}",
+  "@enterFieldHint": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "dateHint": "dd/mm/yyyy",
+  "genderMale": "Male",
+  "genderFemale": "Female",
+
+  "city": "City",
+  "cityHelp": "Student's city of residence.",
+  "district": "District",
+  "districtHelp": "District or borough.",
+  "municipality": "Municipality",
+  "municipalityHelp": "Municipality of residence.",
+  "neighborhood": "Neighborhood",
+  "neighborhoodHelp": "Neighborhood or street of residence.",
+  "fullAddress": "Full address",
+  "fullAddressHelp": "Full residential address.",
+
+  "academicYearLabel": "Academic year",
+  "academicYearLabelHelp": "Reference academic year.",
+  "schoolLabel": "School",
+  "schoolLabelHelp": "Name of the previous school.",
+  "schoolCycle": "Cycle",
+  "schoolCycleHelp": "Previous teaching cycle.",
+  "schoolLevelLabel": "Level",
+  "schoolLevelLabelHelp": "Previous study level.",
+  "averageLabel": "Average",
+  "averageLabelHelp": "Annual average obtained.",
+  "rankingLabel": "Ranking",
+  "rankingLabelHelp": "Class ranking.",
+  "yearValidated": "Year validated",
+  "yearNotValidated": "Not validated",
+  "currentAcademicYearLabel": "Academic year",
+  "currentAcademicYearHelp": "Target academic year.",
+  "targetCycleLabel": "Target cycle",
+  "targetCycleLabelHelp": "Target cycle for this enrollment.",
+  "targetLevelLabel": "Target level",
+  "targetLevelLabelHelp": "Target level for this enrollment.",
+  "optionLabel": "Option",
+  "optionLabelHelp": "Desired option or specialization.",
+  "toDefine": "To be defined",
+
+  "primaryGuardian": "Primary Guardian",
+  "guardianNumber": "Guardian {number}",
+  "@guardianNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "noGuardianInfo": "No guardian information available",
+  "identificationNumberLabel": "Identification number",
+  "identificationNumberHelp": "Official identification number.",
+  "phoneNumberLabel": "Phone",
+  "phoneNumberHelp": "Guardian's phone number.",
+  "emailLabel": "Email",
+  "emailLabelHelp": "Guardian's email address.",
+  "relationshipFather": "Father",
+  "relationshipMother": "Mother",
+  "relationshipGuardian": "Guardian",
+  "relationshipUncle": "Uncle",
+  "relationshipAunt": "Aunt",
+  "relationshipGrandparent": "Grandparent",
+  "relationshipOther": "Other",
+
+  "stepPersonalInfoSubtitle": "General student information",
+  "stepAddressSubtitle": "Location and full address",
+  "stepAcademicSubtitle": "Academic history and goals",
+  "stepAcademicPreviousSubtitle": "Previous year academic history",
+  "stepAcademicTargetSubtitle": "Target year academic objectives",
+  "stepGuardianSubtitle": "Legal guardians and contacts",
+  "stepSummarySubtitle": "Final enrollment summary",
+  "stepIndicator": "Step {current} / {total}",
+  "@stepIndicator": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "stepForwardHint": "Click Continue to advance step by step.",
+  "validatePersonalInfoHint": "Please complete the personal information.",
+  "validateAddressHint": "Please complete the student's address.",
+  "validateAcademicInfoHint": "Please complete the academic information.",
+  "validateGuardianInfoHint": "Please check the guardian information.",
+  "enrollmentReadyForValidation": "File ready for final validation.",
+  "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
+  "personalInfoValidationReasonsTitle": "Please correct the following fields:",
+  "requiredFieldError": "The {field} field is required.",
+  "@requiredFieldError": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "savePersonalInfo": "Save",
+  "savingPersonalInfo": "Saving...",
+  "personalInfoSaveSuccess": "Personal information updated successfully.",
+  "personalInfoSaveError": "Update failed: {message}",
+  "saveAddress": "Save address",
+  "savingAddress": "Saving address...",
+  "saveAcademicInfo": "Save academic info",
+  "savingAcademicInfo": "Saving...",
+  "academicInfoValidationReasonsTitle": "Please correct the following academic fields:",
+  "academicInfoSaveHintBeforeContinue": "Please save academic changes before continuing.",
+  "academicInfoSaveSuccess": "Academic information updated successfully.",
+  "academicInfoSaveError": "Academic info update failed: {message}",
+  "@academicInfoSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "addressValidationReasonsTitle": "Please correct the following address fields:",
+  "addressSaveHintBeforeContinue": "Please save address changes before continuing.",
+  "addressSaveSuccess": "Address updated successfully.",
+  "addressSaveError": "Address update failed: {message}",
+  "@addressSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "@personalInfoSaveError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
+  "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
+  "signOutAction": "Sign out"
 }

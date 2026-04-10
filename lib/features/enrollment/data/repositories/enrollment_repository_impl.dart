@@ -1,0 +1,158 @@
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+
+class EnrollmentRepositoryImpl implements EnrollmentRepository {
+  final EnrollmentRemoteDataSource remoteDataSource;
+
+  final Map<String, dynamic> requiredAuth;
+
+  const EnrollmentRepositoryImpl({
+    required this.remoteDataSource,
+    required this.requiredAuth,
+  });
+
+  @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  getEnrollmentSummaryListByStatus({
+    required String status,
+    required String academicYearId,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .getEnrollmentSummaryByStatusAndAcademicYear(
+            requiredAuth,
+            status,
+            academicYearId,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName({
+    required String status,
+    required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
+            requiredAuth,
+            status,
+            academicYearId,
+            firstName,
+            lastName,
+            surname,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String dateOfBirth,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
+            requiredAuth,
+            status,
+            academicYearId,
+            firstName,
+            lastName,
+            surname,
+            dateOfBirth,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth({
+    required String status,
+    required String academicYearId,
+    required String dateOfBirth,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
+            requiredAuth,
+            status,
+            academicYearId,
+            dateOfBirth,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
+    required String enrollmentId,
+  }) async {
+    try {
+      final enrollmentModel = await remoteDataSource.getEnrollmentDetail(
+        requiredAuth,
+        enrollmentId,
+      );
+      return Right(enrollmentModel.toEnrollmentDetail());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+}

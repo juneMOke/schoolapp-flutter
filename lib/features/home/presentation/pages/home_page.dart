@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -72,14 +75,19 @@ class _HomePageView extends StatelessWidget {
   }
 
   Widget _buildMainContent(BuildContext context, NavigationState state) {
+    final hideBreadcrumbForEnrollment =
+        state.selectedSubMenuId == MenuConstants.preInscriptionsId;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.largePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildBreadcrumb(context, state),
-          const SizedBox(height: AppTheme.largePadding),
+          if (!hideBreadcrumbForEnrollment) ...[
+            _buildBreadcrumb(context, state),
+            const SizedBox(height: AppTheme.largePadding),
+          ],
           Expanded(child: _buildContentArea(context, state)),
         ],
       ),
@@ -92,7 +100,10 @@ class _HomePageView extends StatelessWidget {
       children: [
         Text(
           l10n.home,
-          style: const TextStyle(color: AppTheme.textSecondaryColor, fontSize: 14),
+          style: const TextStyle(
+            color: AppTheme.textSecondaryColor,
+            fontSize: 14,
+          ),
         ),
         if (state.selectedMenuId != null) ...[
           const Text(
@@ -103,7 +114,10 @@ class _HomePageView extends StatelessWidget {
             state.menuItems
                 .firstWhere((menu) => menu.id == state.selectedMenuId)
                 .title,
-            style: const TextStyle(color: AppTheme.textSecondaryColor, fontSize: 14),
+            style: const TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 14,
+            ),
           ),
         ],
         if (state.selectedSubMenuId != null) ...[
@@ -125,52 +139,60 @@ class _HomePageView extends StatelessWidget {
   }
 
   Widget _buildContentArea(BuildContext context, NavigationState state) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppTheme.largePadding),
-      child: _getContentForRoute(context, state),
-    );
+    return _getContentForRoute(context, state);
   }
 
   Widget _getContentForRoute(BuildContext context, NavigationState state) {
     final l10n = AppLocalizations.of(context)!;
-    // Contenu temporaire - à remplacer par les vraies pages
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.construction,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
+
+    switch (state.selectedSubMenuId) {
+      case MenuConstants.preInscriptionsId:
+        return const EnrollmentFeatureScope(child: PreRegistrationsPage());
+      default:
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            state.currentTitle,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
+          padding: const EdgeInsets.all(AppTheme.largePadding),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.construction,
+                  size: 64,
+                  color: AppTheme.textSecondaryColor,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  state.currentTitle,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.pageUnderConstruction,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.pageUnderConstruction,
-            style: const TextStyle(fontSize: 16, color: AppTheme.textSecondaryColor),
-          ),
-        ],
-      ),
-    );
+        );
+    }
   }
 }
