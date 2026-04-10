@@ -44,6 +44,7 @@ import 'package:school_app_flutter/features/enrollment/data/repositories/enrollm
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
@@ -320,6 +321,12 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerFactory<SearchEnrollmentSummaryByAcademicInfoUseCase>(
+    () => SearchEnrollmentSummaryByAcademicInfoUseCase(
+      getIt<EnrollmentRepository>(),
+    ),
+  );
+
   getIt.registerFactory<EnrollmentBloc>(
     () => EnrollmentBloc(
       getEnrollmentSummariesUseCase:
@@ -337,6 +344,8 @@ Future<void> configureDependencies() async {
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
           >(),
+      searchByAcademicInfoUseCase:
+          getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
     ),
   );
 

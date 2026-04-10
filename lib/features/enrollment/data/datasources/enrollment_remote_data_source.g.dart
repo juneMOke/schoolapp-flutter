@@ -200,6 +200,52 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
+  Future<List<EnrollmentSummaryModel>> searchEnrollmentSummaryByAcademicInfo(
+    Map<String, dynamic> extras,
+    String firstName,
+    String lastName,
+    String surname,
+    String schoolLevelGroupId,
+    String schoolLevelId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{
+      r'firstName': firstName,
+      r'lastName': lastName,
+      r'surname': surname,
+      r'schoolLevelGroupId': schoolLevelGroupId,
+      r'schoolLevelId': schoolLevelId,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments/search/by-academic-info',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<EnrollmentSummaryModel> _value;
+    try {
+      _value = _result.data!
+          .map(
+            (dynamic i) =>
+                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
+          )
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<EnrollmentDetailModel> getEnrollmentDetail(
     Map<String, dynamic> extras,
     String enrollmentId,

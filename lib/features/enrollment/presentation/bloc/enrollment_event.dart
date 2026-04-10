@@ -97,6 +97,31 @@ class EnrollmentSummariesByDateOfBirthRequested extends EnrollmentEvent {
   List<Object?> get props => [status, academicYearId, dateOfBirth];
 }
 
+class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
+  final String firstName;
+  final String lastName;
+  final String surname;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
+
+  const EnrollmentSummariesByAcademicInfoRequested({
+    required this.firstName,
+    required this.lastName,
+    required this.surname,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
+  });
+
+  @override
+  List<Object?> get props => [
+    firstName,
+    lastName,
+    surname,
+    schoolLevelGroupId,
+    schoolLevelId,
+  ];
+}
+
 class EnrollmentDetailRequested extends EnrollmentEvent {
   final String enrollmentId;
 

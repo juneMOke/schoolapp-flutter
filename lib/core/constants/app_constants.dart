@@ -33,6 +33,9 @@ class AppConstants {
   static const String enrollmentSearchByDateOfBirthEndpoint =
       '/api/v1/enrollments/search/by-date-of-birth';
 
+  static const String enrollmentSearchByAcademicInfoEndpoint =
+      '/api/v1/enrollments/search/by-academic-info';
+
   static const String academicYearBySchoolEndpoint =
       '/api/v1/academic-years/current';
 

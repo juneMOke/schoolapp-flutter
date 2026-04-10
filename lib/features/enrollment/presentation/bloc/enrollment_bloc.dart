@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
@@ -23,6 +24,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
   _searchByStudentNamesAndDateOfBirthUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
   _searchByDateOfBirthUseCase;
+  final SearchEnrollmentSummaryByAcademicInfoUseCase
+  _searchByAcademicInfoUseCase;
 
   EnrollmentBloc({
     required GetEnrollmentSummaryListByStatusUseCase
@@ -34,14 +37,16 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     searchByStudentNamesAndDateOfBirthUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
     searchByDateOfBirthUseCase,
+    required SearchEnrollmentSummaryByAcademicInfoUseCase
+    searchByAcademicInfoUseCase,
   }) : _getEnrollmentSummaryListByStatusUseCase = getEnrollmentSummariesUseCase,
        _getEnrollmentDetailUseCase = getEnrollmentDetailUseCase,
        _searchByStudentNameUseCase = searchByStudentNameUseCase,
        _searchByStudentNamesAndDateOfBirthUseCase =
            searchByStudentNamesAndDateOfBirthUseCase,
        _searchByDateOfBirthUseCase = searchByDateOfBirthUseCase,
+       _searchByAcademicInfoUseCase = searchByAcademicInfoUseCase,
        super(const EnrollmentState.initial()) {
-
     on<EnrollmentResetRequested>(_onResetRequested);
     on<EnrollmentSummariesRefreshRequested>(_onSummariesRefreshRequested);
     on<EnrollmentSummariesRequested>(_onSummariesRequested);
@@ -54,8 +59,10 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     on<EnrollmentSummariesByDateOfBirthRequested>(
       _onSummariesByDateOfBirthRequested,
     );
+    on<EnrollmentSummariesByAcademicInfoRequested>(
+      _onSummariesByAcademicInfoRequested,
+    );
     on<EnrollmentDetailRequested>(_onDetailRequested);
-
   }
 
   FutureOr<void> _onResetRequested(
@@ -129,6 +136,25 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     );
   }
 
+  Future<void> _onSummariesByAcademicInfoRequested(
+    EnrollmentSummariesByAcademicInfoRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: EnrollmentSummaryQueryType.byAcademicInfo,
+        status: '',
+        academicYearId: '',
+        firstName: event.firstName,
+        lastName: event.lastName,
+        surname: event.surname,
+        schoolLevelGroupId: event.schoolLevelGroupId,
+        schoolLevelId: event.schoolLevelId,
+      ),
+    );
+  }
+
   Future<void> _onSummariesRefreshRequested(
     EnrollmentSummariesRefreshRequested event,
     Emitter<EnrollmentState> emit,
@@ -160,14 +186,13 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           status: query.status,
           academicYearId: query.academicYearId,
         ),
-      EnrollmentSummaryQueryType.byStudentName =>
-        _searchByStudentNameUseCase(
-          status: query.status,
-          academicYearId: query.academicYearId,
-          firstName: query.firstName ?? '',
-          lastName: query.lastName ?? '',
-          surname: query.surname ?? '',
-        ),
+      EnrollmentSummaryQueryType.byStudentName => _searchByStudentNameUseCase(
+        status: query.status,
+        academicYearId: query.academicYearId,
+        firstName: query.firstName ?? '',
+        lastName: query.lastName ?? '',
+        surname: query.surname ?? '',
+      ),
       EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth =>
         _searchByStudentNamesAndDateOfBirthUseCase(
           status: query.status,
@@ -177,12 +202,18 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           surname: query.surname ?? '',
           dateOfBirth: query.dateOfBirth ?? '',
         ),
-      EnrollmentSummaryQueryType.byDateOfBirth =>
-        _searchByDateOfBirthUseCase(
-          status: query.status,
-          academicYearId: query.academicYearId,
-          dateOfBirth: query.dateOfBirth ?? '',
-        ),
+      EnrollmentSummaryQueryType.byDateOfBirth => _searchByDateOfBirthUseCase(
+        status: query.status,
+        academicYearId: query.academicYearId,
+        dateOfBirth: query.dateOfBirth ?? '',
+      ),
+      EnrollmentSummaryQueryType.byAcademicInfo => _searchByAcademicInfoUseCase(
+        firstName: query.firstName ?? '',
+        lastName: query.lastName ?? '',
+        surname: query.surname ?? '',
+        schoolLevelGroupId: query.schoolLevelGroupId ?? '',
+        schoolLevelId: query.schoolLevelId ?? '',
+      ),
     };
 
     result.fold(

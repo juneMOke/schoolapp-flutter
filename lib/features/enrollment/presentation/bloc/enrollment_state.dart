@@ -9,6 +9,7 @@ enum EnrollmentSummaryQueryType {
   byStudentName,
   byStudentNamesAndDateOfBirth,
   byDateOfBirth,
+  byAcademicInfo,
 }
 
 class EnrollmentSummariesQuery extends Equatable {
@@ -19,6 +20,8 @@ class EnrollmentSummariesQuery extends Equatable {
   final String? lastName;
   final String? surname;
   final String? dateOfBirth;
+  final String? schoolLevelGroupId;
+  final String? schoolLevelId;
 
   const EnrollmentSummariesQuery({
     required this.type,
@@ -28,6 +31,8 @@ class EnrollmentSummariesQuery extends Equatable {
     this.lastName,
     this.surname,
     this.dateOfBirth,
+    this.schoolLevelGroupId,
+    this.schoolLevelId,
   });
 
   @override
@@ -39,6 +44,8 @@ class EnrollmentSummariesQuery extends Equatable {
     lastName,
     surname,
     dateOfBirth,
+    schoolLevelGroupId,
+    schoolLevelId,
   ];
 }
 

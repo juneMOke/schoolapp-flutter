@@ -51,6 +51,16 @@ abstract class EnrollmentRemoteDataSource {
     @Query('dateOfBirth') String dateOfBirth,
   );
 
+  @PUT(AppConstants.enrollmentSearchByAcademicInfoEndpoint)
+  Future<List<EnrollmentSummaryModel>> searchEnrollmentSummaryByAcademicInfo(
+    @Extras() Map<String, dynamic> extras,
+    @Query('firstName') String firstName,
+    @Query('lastName') String lastName,
+    @Query('surname') String surname,
+    @Query('schoolLevelGroupId') String schoolLevelGroupId,
+    @Query('schoolLevelId') String schoolLevelId,
+  );
+
   @GET(AppConstants.enrollmentDetailEndpoint)
   Future<EnrollmentDetailModel> getEnrollmentDetail(
     @Extras() Map<String, dynamic> extras,

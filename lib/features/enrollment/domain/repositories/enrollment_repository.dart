@@ -36,6 +36,15 @@ abstract class EnrollmentRepository {
     required String dateOfBirth,
   });
 
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByAcademicInfo({
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String schoolLevelGroupId,
+    required String schoolLevelId,
+  });
+
   Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   });
