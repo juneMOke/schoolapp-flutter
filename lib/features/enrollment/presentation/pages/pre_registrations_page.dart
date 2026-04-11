@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -31,6 +32,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
     super.initState();
     WidgetsBinding.instance.addObserver(_lifecycleObserver);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emitBootstrapCurrentYear();
       _requestSummariesIfContextAvailable();
     });
   }
@@ -91,8 +93,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
                   child: BlocBuilder<BootstrapBloc, BootstrapState>(
                     builder: (context, bootstrapState) {
                       final academicYearId =
-                          bootstrapState.bootstrap?.currentAcademicYear.id ??
-                          '';
+                          bootstrapState.bootstrap?.academicYear.id ?? '';
                       final schoolId = context.select(
                         (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
                       );
@@ -170,8 +171,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
     }
 
     final bootstrapState = context.read<BootstrapBloc>().state;
-    final academicYearId =
-        bootstrapState.bootstrap?.currentAcademicYear.id ?? '';
+    final academicYearId = bootstrapState.bootstrap?.academicYear.id ?? '';
     final schoolId = context.read<AuthBloc>().state.user?.schoolId ?? '';
     final enrollmentBloc = context.read<EnrollmentBloc>();
     final lastSummariesQuery = enrollmentBloc.state.lastSummariesQuery;
@@ -197,6 +197,12 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
         status: _status,
         academicYearId: academicYearId,
       ),
+    );
+  }
+
+  void _emitBootstrapCurrentYear() {
+    context.read<BootstrapBloc>().add(
+      const BootstrapLocalRequested(key: AppConstants.bootstrapPayloadKey),
     );
   }
 

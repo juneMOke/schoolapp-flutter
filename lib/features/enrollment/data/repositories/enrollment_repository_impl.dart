@@ -187,4 +187,22 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
+
+  @override
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentPreviewByStudentId({
+    required String studentId,
+  }) async {
+    try {
+      final enrollmentModel = await remoteDataSource
+          .getEnrollmentPreviewByStudentId(requiredAuth, studentId);
+      return Right(enrollmentModel.toEnrollmentDetail());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
 }

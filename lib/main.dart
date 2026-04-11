@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -50,7 +51,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _authBloc = getIt<AuthBloc>()..add(const AuthCheckRequested());
     _bootstrapBloc = getIt<BootstrapBloc>()
-      ..add(const BootstrapLocalRequested());
+      ..add(
+        const BootstrapLocalRequested(key: AppConstants.bootstrapPayloadKey),
+      );
     _forgotPasswordBloc = getIt<ForgotPasswordBloc>();
     _router = AppRouter.createRouter(_authBloc, _bootstrapBloc);
   }
@@ -75,7 +78,8 @@ class _MyAppState extends State<MyApp> {
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {
           if (state.status == AuthStatus.authenticated) {
-            _bootstrapBloc.add(const BootstrapRemoteRequested());
+            _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());
+            _bootstrapBloc.add(const BootstrapRemotePreviousYearRequested());
             return;
           }
 

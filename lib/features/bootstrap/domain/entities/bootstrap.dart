@@ -4,15 +4,15 @@ import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_
 
 class Bootstrap extends Equatable {
   final String schoolId;
-  final BootstrapAcademicYear currentAcademicYear;
+  final BootstrapAcademicYear academicYear;
   final List<BootstrapSchoolLevelGroupBundle> schoolLevelGroups;
 
   const Bootstrap({
     required this.schoolId,
-    required this.currentAcademicYear,
+    required this.academicYear,
     required this.schoolLevelGroups,
   });
 
   @override
-  List<Object?> get props => [schoolId, currentAcademicYear, schoolLevelGroups];
+  List<Object?> get props => [schoolId, academicYear, schoolLevelGroups];
 }

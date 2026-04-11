@@ -200,7 +200,7 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   void _applyBootstrapDefaults(Bootstrap bootstrap) {
     bool bootstrapChanged = false;
     final previousCurrentYear = _currYearController.text;
-    _currYearController.text = bootstrap.currentAcademicYear.name;
+    _currYearController.text = bootstrap.academicYear.name;
     if (previousCurrentYear != _currYearController.text) {
       bootstrapChanged = true;
     }

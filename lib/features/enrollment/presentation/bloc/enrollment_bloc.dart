@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
@@ -18,6 +19,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
   final GetEnrollmentSummaryListByStatusUseCase
   _getEnrollmentSummaryListByStatusUseCase;
   final GetEnrollmentDetailUseCase _getEnrollmentDetailUseCase;
+  final GetEnrollmentPreviewByStudentIdUseCase
+  _getEnrollmentPreviewByStudentIdUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   _searchByStudentNameUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -31,6 +34,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     required GetEnrollmentSummaryListByStatusUseCase
     getEnrollmentSummariesUseCase,
     required GetEnrollmentDetailUseCase getEnrollmentDetailUseCase,
+    required GetEnrollmentPreviewByStudentIdUseCase
+    getEnrollmentPreviewByStudentIdUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
     searchByStudentNameUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -41,6 +46,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     searchByAcademicInfoUseCase,
   }) : _getEnrollmentSummaryListByStatusUseCase = getEnrollmentSummariesUseCase,
        _getEnrollmentDetailUseCase = getEnrollmentDetailUseCase,
+       _getEnrollmentPreviewByStudentIdUseCase =
+           getEnrollmentPreviewByStudentIdUseCase,
        _searchByStudentNameUseCase = searchByStudentNameUseCase,
        _searchByStudentNamesAndDateOfBirthUseCase =
            searchByStudentNamesAndDateOfBirthUseCase,
@@ -63,6 +70,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
       _onSummariesByAcademicInfoRequested,
     );
     on<EnrollmentDetailRequested>(_onDetailRequested);
+    on<EnrollmentPreviewByStudentIdRequested>(_onPreviewByStudentIdRequested);
   }
 
   FutureOr<void> _onResetRequested(
@@ -263,6 +271,38 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         state.copyWith(
           detailStatus: EnrollmentLoadStatus.success,
           detail: detail,
+          errorMessage: null,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onPreviewByStudentIdRequested(
+    EnrollmentPreviewByStudentIdRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        previewStatus: EnrollmentLoadStatus.loading,
+        errorMessage: null,
+      ),
+    );
+
+    final result = await _getEnrollmentPreviewByStudentIdUseCase(
+      studentId: event.studentId,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          previewStatus: EnrollmentLoadStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (preview) => emit(
+        state.copyWith(
+          previewStatus: EnrollmentLoadStatus.success,
+          preview: preview,
           errorMessage: null,
         ),
       ),

@@ -48,4 +48,8 @@ abstract class EnrollmentRepository {
   Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   });
+
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentPreviewByStudentId({
+    required String studentId,
+  });
 }

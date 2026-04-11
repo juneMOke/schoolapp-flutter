@@ -11,14 +11,28 @@ class BootstrapResetRequested extends BootstrapEvent {
   const BootstrapResetRequested();
 }
 
-class BootstrapRemoteRequested extends BootstrapEvent {
-  const BootstrapRemoteRequested();
+class BootstrapRemoteCurrentYearRequested extends BootstrapEvent {
+  const BootstrapRemoteCurrentYearRequested();
+}
+
+class BootstrapRemotePreviousYearRequested extends BootstrapEvent {
+  const BootstrapRemotePreviousYearRequested();
 }
 
 class BootstrapLocalRequested extends BootstrapEvent {
-  const BootstrapLocalRequested();
+  final String key;
+
+  const BootstrapLocalRequested({required this.key});
+
+  @override
+  List<Object?> get props => [key];
 }
 
 class BootstrapClearLocalRequested extends BootstrapEvent {
-  const BootstrapClearLocalRequested();
+  final String key;
+
+  const BootstrapClearLocalRequested({required this.key});
+
+  @override
+  List<Object?> get props => [key];
 }

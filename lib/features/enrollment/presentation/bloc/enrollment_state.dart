@@ -52,43 +52,52 @@ class EnrollmentSummariesQuery extends Equatable {
 class EnrollmentState extends Equatable {
   final EnrollmentLoadStatus summariesStatus;
   final EnrollmentLoadStatus detailStatus;
+  final EnrollmentLoadStatus previewStatus;
   final List<EnrollmentSummary> summaries;
   final EnrollmentSummaryQueryType? summariesQueryType;
   final EnrollmentSummariesQuery? lastSummariesQuery;
   final EnrollmentDetail? detail;
+  final EnrollmentDetail? preview;
   final String? errorMessage;
 
   const EnrollmentState({
     required this.summariesStatus,
     required this.detailStatus,
+    required this.previewStatus,
     required this.summaries,
     required this.summariesQueryType,
     required this.lastSummariesQuery,
     required this.detail,
+    required this.preview,
     required this.errorMessage,
   });
 
   const EnrollmentState.initial()
     : summariesStatus = EnrollmentLoadStatus.initial,
       detailStatus = EnrollmentLoadStatus.initial,
+      previewStatus = EnrollmentLoadStatus.initial,
       summaries = const <EnrollmentSummary>[],
       summariesQueryType = null,
       lastSummariesQuery = null,
       detail = null,
+      preview = null,
       errorMessage = null;
 
   EnrollmentState copyWith({
     EnrollmentLoadStatus? summariesStatus,
     EnrollmentLoadStatus? detailStatus,
+    EnrollmentLoadStatus? previewStatus,
     List<EnrollmentSummary>? summaries,
     Object? summariesQueryType = _undefined,
     Object? lastSummariesQuery = _undefined,
     Object? detail = _undefined,
+    Object? preview = _undefined,
     Object? errorMessage = _undefined,
   }) {
     return EnrollmentState(
       summariesStatus: summariesStatus ?? this.summariesStatus,
       detailStatus: detailStatus ?? this.detailStatus,
+      previewStatus: previewStatus ?? this.previewStatus,
       summaries: summaries ?? this.summaries,
       summariesQueryType: identical(summariesQueryType, _undefined)
           ? this.summariesQueryType
@@ -99,6 +108,9 @@ class EnrollmentState extends Equatable {
       detail: identical(detail, _undefined)
           ? this.detail
           : detail as EnrollmentDetail?,
+      preview: identical(preview, _undefined)
+          ? this.preview
+          : preview as EnrollmentDetail?,
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,
@@ -109,10 +121,12 @@ class EnrollmentState extends Equatable {
   List<Object?> get props => [
     summariesStatus,
     detailStatus,
+    previewStatus,
     summaries,
     summariesQueryType,
     lastSummariesQuery,
     detail,
+    preview,
     errorMessage,
   ];
 }

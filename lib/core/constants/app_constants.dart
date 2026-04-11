@@ -36,10 +36,17 @@ class AppConstants {
   static const String enrollmentSearchByAcademicInfoEndpoint =
       '/api/v1/enrollments/search/by-academic-info';
 
+  static const String enrollmentPreviewByStudentEndpoint =
+      '/api/v1/enrollments/students/{studentId}/preview';
+
   static const String academicYearBySchoolEndpoint =
       '/api/v1/academic-years/current';
 
   static const String bootstrapEndpoint = '/api/v1/bootstrap';
+  static const String bootstrapCurrentYearEndpoint =
+      '/api/v1/bootstrap/current-year';
+  static const String bootstrapPreviousYearEndpoint =
+      '/api/v1/bootstrap/previous-year';
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =
       'bootstrap_local_schema_version';
@@ -55,4 +62,7 @@ class AppConstants {
   static const String userRoleKey = 'user_role';
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
+
+  static String bootstrapPreviousYearPayloadKey =
+      'bootstrap_previous_year_payload';
 }

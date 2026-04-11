@@ -8,7 +8,10 @@ class SaveLocalBootstrapUseCase {
 
   const SaveLocalBootstrapUseCase(this._repository);
 
-  Future<Either<Failure, void>> call({required Bootstrap bootstrap}) {
-    return _repository.saveBootstrap(bootstrap: bootstrap);
+  Future<Either<Failure, void>> call({
+    required Bootstrap bootstrap,
+    required String key,
+  }) {
+    return _repository.saveBootstrap(bootstrap: bootstrap, key: key);
   }
 }
