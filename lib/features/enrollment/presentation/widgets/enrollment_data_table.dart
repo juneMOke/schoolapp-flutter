@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
@@ -11,43 +9,70 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 extension EnrollmentStatusColor on EnrollmentStatus {
   Color get backgroundColor {
     switch (this) {
-      case EnrollmentStatus.preRegistered:     return const Color(0xFFEFF6FF);
-      case EnrollmentStatus.inProgress:        return const Color(0xFFFFFBEB);
-      case EnrollmentStatus.adminCompleted:    return const Color(0xFFF5F3FF);
-      case EnrollmentStatus.financialCompleted:return const Color(0xFFECFDF5);
-      case EnrollmentStatus.completed:         return const Color(0xFFD1FAE5);
-      case EnrollmentStatus.validated:         return const Color(0xFFDCFCE7);
-      case EnrollmentStatus.cancelled:         return const Color(0xFFFEF2F2);
-      case EnrollmentStatus.rejected:          return const Color(0xFFFFEDE8);
-      case EnrollmentStatus.pending:           return const Color(0xFFF3F4F6);
+      case EnrollmentStatus.preRegistered:
+        return const Color(0xFFEFF6FF);
+      case EnrollmentStatus.inProgress:
+        return const Color(0xFFFFFBEB);
+      case EnrollmentStatus.adminCompleted:
+        return const Color(0xFFF5F3FF);
+      case EnrollmentStatus.financialCompleted:
+        return const Color(0xFFECFDF5);
+      case EnrollmentStatus.completed:
+        return const Color(0xFFD1FAE5);
+      case EnrollmentStatus.validated:
+        return const Color(0xFFDCFCE7);
+      case EnrollmentStatus.cancelled:
+        return const Color(0xFFFEF2F2);
+      case EnrollmentStatus.rejected:
+        return const Color(0xFFFFEDE8);
+      case EnrollmentStatus.pending:
+        return const Color(0xFFF3F4F6);
     }
   }
 
   Color get foregroundColor {
     switch (this) {
-      case EnrollmentStatus.preRegistered:     return const Color(0xFF1D4ED8);
-      case EnrollmentStatus.inProgress:        return const Color(0xFFB45309);
-      case EnrollmentStatus.adminCompleted:    return const Color(0xFF6D28D9);
-      case EnrollmentStatus.financialCompleted:return const Color(0xFF0D9488);
-      case EnrollmentStatus.completed:         return const Color(0xFF059669);
-      case EnrollmentStatus.validated:         return const Color(0xFF16A34A);
-      case EnrollmentStatus.cancelled:         return const Color(0xFFDC2626);
-      case EnrollmentStatus.rejected:          return const Color(0xFFEA580C);
-      case EnrollmentStatus.pending:           return const Color(0xFF6B7280);
+      case EnrollmentStatus.preRegistered:
+        return const Color(0xFF1D4ED8);
+      case EnrollmentStatus.inProgress:
+        return const Color(0xFFB45309);
+      case EnrollmentStatus.adminCompleted:
+        return const Color(0xFF6D28D9);
+      case EnrollmentStatus.financialCompleted:
+        return const Color(0xFF0D9488);
+      case EnrollmentStatus.completed:
+        return const Color(0xFF059669);
+      case EnrollmentStatus.validated:
+        return const Color(0xFF16A34A);
+      case EnrollmentStatus.cancelled:
+        return const Color(0xFFDC2626);
+      case EnrollmentStatus.rejected:
+        return const Color(0xFFEA580C);
+      case EnrollmentStatus.pending:
+        return const Color(0xFF6B7280);
     }
   }
 
   String get label {
     switch (this) {
-      case EnrollmentStatus.preRegistered:     return 'Pré-inscrit';
-      case EnrollmentStatus.inProgress:        return 'En cours';
-      case EnrollmentStatus.adminCompleted:    return 'Admin complété';
-      case EnrollmentStatus.financialCompleted:return 'Finance complétée';
-      case EnrollmentStatus.completed:         return 'Complété';
-      case EnrollmentStatus.validated:         return 'Validé';
-      case EnrollmentStatus.cancelled:         return 'Annulé';
-      case EnrollmentStatus.rejected:          return 'Rejeté';
-      case EnrollmentStatus.pending:           return 'En attente';
+      case EnrollmentStatus.preRegistered:
+        return 'Pré-inscrit';
+      case EnrollmentStatus.inProgress:
+        return 'En cours';
+      case EnrollmentStatus.adminCompleted:
+        return 'Admin complété';
+      case EnrollmentStatus.financialCompleted:
+        return 'Finance complétée';
+      case EnrollmentStatus.completed:
+        return 'Complété';
+      case EnrollmentStatus.validated:
+        return 'Validé';
+      case EnrollmentStatus.cancelled:
+        return 'Annulé';
+      case EnrollmentStatus.rejected:
+        return 'Rejeté';
+      case EnrollmentStatus.pending:
+        return 'En attente';
     }
   }
 }
@@ -61,10 +86,12 @@ enum _SortColumn { nom, postnom, prenom, dateNaissance }
 class EnrollmentDataTable extends StatefulWidget {
   final List<EnrollmentSummary> enrollments;
   final bool isLoading;
+  final ValueChanged<EnrollmentSummary> onViewRequested;
 
   const EnrollmentDataTable({
     super.key,
     required this.enrollments,
+    required this.onViewRequested,
     this.isLoading = false,
   });
 
@@ -83,10 +110,18 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       final t = b.student;
       String valA, valB;
       switch (_sortColumn) {
-        case _SortColumn.nom:          valA = s.lastName;     valB = t.lastName;
-        case _SortColumn.postnom:      valA = s.surname;      valB = t.surname;
-        case _SortColumn.prenom:       valA = s.firstName;    valB = t.firstName;
-        case _SortColumn.dateNaissance:valA = s.dateOfBirth;  valB = t.dateOfBirth;
+        case _SortColumn.nom:
+          valA = s.lastName;
+          valB = t.lastName;
+        case _SortColumn.postnom:
+          valA = s.surname;
+          valB = t.surname;
+        case _SortColumn.prenom:
+          valA = s.firstName;
+          valB = t.firstName;
+        case _SortColumn.dateNaissance:
+          valA = s.dateOfBirth;
+          valB = t.dateOfBirth;
       }
       final cmp = valA.compareTo(valB);
       return _sortAscending ? cmp : -cmp;
@@ -134,6 +169,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           itemBuilder: (context, index) => _DataRow(
             enrollment: sorted[index],
             isEven: index.isEven,
+            onViewRequested: widget.onViewRequested,
           ),
         ),
 
@@ -262,10 +298,38 @@ class _SortableHeader extends StatelessWidget {
           // Avatar placeholder
           const SizedBox(width: 30),
           const SizedBox(width: 8),
-          _SortCell('Nom',        _SortColumn.nom,          flex: 3, sortColumn: sortColumn, ascending: ascending, onSort: onSort),
-          _SortCell('Postnom',    _SortColumn.postnom,      flex: 3, sortColumn: sortColumn, ascending: ascending, onSort: onSort),
-          _SortCell('Prénom',     _SortColumn.prenom,       flex: 3, sortColumn: sortColumn, ascending: ascending, onSort: onSort),
-          _SortCell(l10n.dateOfBirth, _SortColumn.dateNaissance, flex: 2, sortColumn: sortColumn, ascending: ascending, onSort: onSort),
+          _SortCell(
+            'Nom',
+            _SortColumn.nom,
+            flex: 3,
+            sortColumn: sortColumn,
+            ascending: ascending,
+            onSort: onSort,
+          ),
+          _SortCell(
+            'Postnom',
+            _SortColumn.postnom,
+            flex: 3,
+            sortColumn: sortColumn,
+            ascending: ascending,
+            onSort: onSort,
+          ),
+          _SortCell(
+            'Prénom',
+            _SortColumn.prenom,
+            flex: 3,
+            sortColumn: sortColumn,
+            ascending: ascending,
+            onSort: onSort,
+          ),
+          _SortCell(
+            l10n.dateOfBirth,
+            _SortColumn.dateNaissance,
+            flex: 2,
+            sortColumn: sortColumn,
+            ascending: ascending,
+            onSort: onSort,
+          ),
           const Expanded(flex: 2, child: _HeaderLabel('Statut')),
           const SizedBox(width: 32),
         ],
@@ -280,15 +344,15 @@ class _HeaderLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text.toUpperCase(),
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF94A3B8),
-          letterSpacing: 0.9,
-        ),
-      );
+    text.toUpperCase(),
+    overflow: TextOverflow.ellipsis,
+    style: const TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      color: Color(0xFF94A3B8),
+      letterSpacing: 0.9,
+    ),
+  );
 }
 
 class _SortCell extends StatelessWidget {
@@ -342,8 +406,8 @@ class _SortCell extends StatelessWidget {
                   key: ValueKey('${column.name}_$ascending'),
                   isActive
                       ? (ascending
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded)
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded)
                       : Icons.unfold_more_rounded,
                   size: 12,
                   color: isActive
@@ -364,8 +428,13 @@ class _SortCell extends StatelessWidget {
 class _DataRow extends StatefulWidget {
   final EnrollmentSummary enrollment;
   final bool isEven;
+  final ValueChanged<EnrollmentSummary> onViewRequested;
 
-  const _DataRow({required this.enrollment, required this.isEven});
+  const _DataRow({
+    required this.enrollment,
+    required this.isEven,
+    required this.onViewRequested,
+  });
 
   @override
   State<_DataRow> createState() => _DataRowState();
@@ -411,11 +480,8 @@ class _DataRowState extends State<_DataRow> {
             _Cell(student.surname, flex: 3),
             _Cell(student.firstName, flex: 3),
             _Cell(_formatDate(student.dateOfBirth), flex: 2, mono: true),
-            Expanded(
-              flex: 2,
-              child: _StatusChip(status: status),
-            ),
-            _EyeButton(enrollmentId: widget.enrollment.enrollmentId),
+            Expanded(flex: 2, child: _StatusChip(status: status)),
+            _EyeButton(onTap: () => widget.onViewRequested(widget.enrollment)),
           ],
         ),
       ),
@@ -430,9 +496,14 @@ class _DataRowState extends State<_DataRow> {
 
   Color _avatarColor(String seed) {
     const palette = [
-      Color(0xFF3B82F6), Color(0xFF10B981), Color(0xFF8B5CF6),
-      Color(0xFFF59E0B), Color(0xFFEF4444), Color(0xFF06B6D4),
-      Color(0xFFEC4899), Color(0xFF84CC16),
+      Color(0xFF3B82F6),
+      Color(0xFF10B981),
+      Color(0xFF8B5CF6),
+      Color(0xFFF59E0B),
+      Color(0xFFEF4444),
+      Color(0xFF06B6D4),
+      Color(0xFFEC4899),
+      Color(0xFF84CC16),
     ];
     final idx = seed.isNotEmpty ? seed.codeUnitAt(0) % palette.length : 0;
     return palette[idx];
@@ -485,7 +556,12 @@ class _Cell extends StatelessWidget {
   final bool bold;
   final bool mono;
 
-  const _Cell(this.text, {required this.flex, this.bold = false, this.mono = false});
+  const _Cell(
+    this.text, {
+    required this.flex,
+    this.bold = false,
+    this.mono = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -498,9 +574,7 @@ class _Cell extends StatelessWidget {
           fontSize: 12,
           fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
           fontFamily: mono ? 'monospace' : null,
-          color: bold
-              ? AppTheme.textPrimaryColor
-              : const Color(0xFF4B5563),
+          color: bold ? AppTheme.textPrimaryColor : const Color(0xFF4B5563),
           letterSpacing: mono ? 0.3 : 0,
         ),
       ),
@@ -569,8 +643,8 @@ class _StatusChip extends StatelessWidget {
 // ─── Bouton œil ───────────────────────────────────────────────────────────────
 
 class _EyeButton extends StatefulWidget {
-  final String enrollmentId;
-  const _EyeButton({required this.enrollmentId});
+  final VoidCallback onTap;
+  const _EyeButton({required this.onTap});
 
   @override
   State<_EyeButton> createState() => _EyeButtonState();
@@ -588,9 +662,7 @@ class _EyeButtonState extends State<_EyeButton> {
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
         child: GestureDetector(
-          onTap: () => context.push(
-            '${EnrollmentConstants.enrollmentDetailRoute}/${widget.enrollmentId}',
-          ),
+          onTap: widget.onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             width: 30,
@@ -624,9 +696,7 @@ class _TableFooter extends StatelessWidget {
     return Container(
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFFF8FAFC)),
       child: Row(
         children: [
           Container(

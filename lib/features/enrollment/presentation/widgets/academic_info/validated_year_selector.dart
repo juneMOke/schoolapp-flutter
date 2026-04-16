@@ -8,6 +8,7 @@ class ValidatedYearSelector extends StatelessWidget {
   final bool validatedPreviousYear;
   final ValueChanged<bool> onChanged;
   final bool isChanged;
+  final bool enabled;
 
   const ValidatedYearSelector({
     super.key,
@@ -16,6 +17,7 @@ class ValidatedYearSelector extends StatelessWidget {
     required this.validatedPreviousYear,
     required this.onChanged,
     this.isChanged = false,
+    this.enabled = true,
   });
 
   @override
@@ -44,7 +46,7 @@ class ValidatedYearSelector extends StatelessWidget {
                 selectedColor: isChanged
                     ? highlightColor.withValues(alpha: 0.18)
                     : null,
-                onSelected: (_) => onChanged(true),
+                onSelected: enabled ? (_) => onChanged(true) : null,
               ),
               ChoiceChip(
                 label: Text(l10n.yearNotValidated),
@@ -52,7 +54,7 @@ class ValidatedYearSelector extends StatelessWidget {
                 selectedColor: isChanged
                     ? highlightColor.withValues(alpha: 0.18)
                     : null,
-                onSelected: (_) => onChanged(false),
+                onSelected: enabled ? (_) => onChanged(false) : null,
               ),
             ],
           ),

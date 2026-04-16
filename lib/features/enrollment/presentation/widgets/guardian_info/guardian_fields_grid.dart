@@ -20,6 +20,7 @@ class GuardianFieldsGrid extends StatelessWidget {
   final RelationshipType selectedRelationshipType;
   final ValueChanged<RelationshipType> onRelationshipTypeChanged;
   final bool relationshipChanged;
+  final bool isEditable;
 
   const GuardianFieldsGrid({
     super.key,
@@ -39,6 +40,7 @@ class GuardianFieldsGrid extends StatelessWidget {
     required this.selectedRelationshipType,
     required this.onRelationshipTypeChanged,
     this.relationshipChanged = false,
+    this.isEditable = true,
   });
 
   String _relationshipLabel(RelationshipType type) {
@@ -75,6 +77,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               requiredField: true,
               helpMessage: l10n.firstNameHelp,
               isChanged: firstNameChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: width,
@@ -83,6 +86,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               requiredField: true,
               helpMessage: l10n.lastNameHelp,
               isChanged: lastNameChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: width,
@@ -90,6 +94,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               controller: surnameController,
               helpMessage: l10n.surnameHelp,
               isChanged: surnameChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: width,
@@ -98,7 +103,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               requiredField: true,
               helpMessage: l10n.identificationNumberHelp,
               isChanged: idChanged,
-              readOnly: idReadOnly,
+              readOnly: idReadOnly || !isEditable,
             ),
             EditableField(
               width: width,
@@ -107,6 +112,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               requiredField: true,
               helpMessage: l10n.phoneNumberHelp,
               isChanged: phoneChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: width,
@@ -115,6 +121,7 @@ class GuardianFieldsGrid extends StatelessWidget {
               requiredField: true,
               helpMessage: l10n.emailLabelHelp,
               isChanged: emailChanged,
+              readOnly: !isEditable,
             ),
             SizedBox(
               width: width,
@@ -124,10 +131,11 @@ class GuardianFieldsGrid extends StatelessWidget {
                   Text(
                     'Relation',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color:
-                              relationshipChanged ? const Color(0xFF15803D) : null,
-                        ),
+                      fontWeight: FontWeight.w600,
+                      color: relationshipChanged
+                          ? const Color(0xFF15803D)
+                          : null,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<RelationshipType>(
@@ -169,10 +177,12 @@ class GuardianFieldsGrid extends StatelessWidget {
                           ),
                         )
                         .toList(growable: false),
-                    onChanged: (value) {
-                      if (value == null) return;
-                      onRelationshipTypeChanged(value);
-                    },
+                    onChanged: isEditable
+                        ? (value) {
+                            if (value == null) return;
+                            onRelationshipTypeChanged(value);
+                          }
+                        : null,
                   ),
                 ],
               ),

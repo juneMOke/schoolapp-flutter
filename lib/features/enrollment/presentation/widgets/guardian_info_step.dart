@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
@@ -16,6 +16,8 @@ class GuardianInfoStep extends StatefulWidget {
   final String enrollmentId;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
+  final VoidCallback? onRefreshRequested;
+  final bool isEditable;
 
   const GuardianInfoStep({
     super.key,
@@ -23,6 +25,8 @@ class GuardianInfoStep extends StatefulWidget {
     required this.enrollmentId,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
+    this.onRefreshRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -30,6 +34,9 @@ class GuardianInfoStep extends StatefulWidget {
 }
 
 class GuardianInfoStepState extends State<GuardianInfoStep> {
+  static const String _draftParentIdPrefix = 'draft-parent-';
+
+  late List<ParentSummary> _editableParentDetails;
   late Map<String, ParentItemValue> _currentValuesByParentId;
   late Map<String, ParentItemValue> _initialValuesByParentId;
   late Map<String, ParentItemFormState> _itemStatesByParentId;
@@ -70,12 +77,14 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }) {
     _isHydratingFromDetail = true;
     try {
+      _editableParentDetails = List<ParentSummary>.from(parents);
       _currentValuesByParentId = <String, ParentItemValue>{
-        for (final parent in parents) parent.id: ParentItemValue.fromParent(parent),
+        for (final parent in _editableParentDetails)
+          parent.id: ParentItemValue.fromParent(parent),
       };
 
       _itemStatesByParentId = <String, ParentItemFormState>{
-        for (final parent in parents)
+        for (final parent in _editableParentDetails)
           parent.id: ParentItemFormState(
             valid: ParentItemValue.fromParent(parent).isValid,
             dirty: false,
@@ -85,7 +94,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
       if (resetSnapshot) {
         _initialValuesByParentId = <String, ParentItemValue>{
-          for (final parent in parents)
+          for (final parent in _editableParentDetails)
             parent.id: ParentItemValue.fromParent(parent),
         };
       }
@@ -132,14 +141,17 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   void _recomputeFormState({bool notifyParent = true}) {
     if (_isHydratingFromDetail) return;
 
-    final parentIds = widget.parentDetails.map((p) => p.id).toList(growable: false);
+    final parentIds = _editableParentDetails
+        .map((p) => p.id)
+        .toList(growable: false);
 
     final validNow =
         parentIds.isNotEmpty &&
         parentIds.every((id) => _itemStatesByParentId[id]?.valid == true);
 
-    final dirtyNow =
-        parentIds.any((id) => _itemStatesByParentId[id]?.dirty == true);
+    final dirtyNow = parentIds.any(
+      (id) => _itemStatesByParentId[id]?.dirty == true,
+    );
 
     if (_isValid != validNow || _isDirty != dirtyNow) {
       setState(() {
@@ -173,21 +185,25 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   List<String> _buildValidationErrors(AppLocalizations l10n) {
     final errors = <String>[];
 
-    if (widget.parentDetails.isEmpty) {
+    if (_editableParentDetails.isEmpty) {
       errors.add(l10n.requiredFieldError('Gardien'));
       return errors;
     }
 
-    for (var i = 0; i < widget.parentDetails.length; i++) {
-      final parent = widget.parentDetails[i];
+    for (var i = 0; i < _editableParentDetails.length; i++) {
+      final parent = _editableParentDetails[i];
       final value = _currentValuesByParentId[parent.id];
       if (value == null) continue;
 
       if (value.firstName.trim().isEmpty) {
-        errors.add('Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.firstName)}');
+        errors.add(
+          'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.firstName)}',
+        );
       }
       if (value.lastName.trim().isEmpty) {
-        errors.add('Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.lastName)}');
+        errors.add(
+          'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.lastName)}',
+        );
       }
       if (value.phoneNumber.trim().isEmpty) {
         errors.add(
@@ -195,7 +211,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         );
       }
       if (value.email.trim().isEmpty) {
-        errors.add('Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.emailLabel)}');
+        errors.add(
+          'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.emailLabel)}',
+        );
       }
     }
 
@@ -206,8 +224,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _pendingParentIds
       ..clear()
       ..addAll(
-        widget.parentDetails
+        _editableParentDetails
             .where((parent) => _itemStatesByParentId[parent.id]?.dirty == true)
+            .where((parent) => !_isDraftParentId(parent.id))
             .map((parent) => parent.id),
       );
 
@@ -231,7 +250,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     }
 
     final changed = current.changedComparedTo(initial);
-    final hasUpdatableChanges = (changed['firstName'] ?? false) ||
+    final hasUpdatableChanges =
+        (changed['firstName'] ?? false) ||
         (changed['lastName'] ?? false) ||
         (changed['surname'] ?? false) ||
         (changed['phoneNumber'] ?? false) ||
@@ -271,6 +291,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   void _onSave() {
+    if (!widget.isEditable) return;
     final l10n = AppLocalizations.of(context)!;
 
     if (!_isValid) {
@@ -289,12 +310,70 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _queueAndStartSave();
   }
 
+  bool _isDraftParentId(String parentId) {
+    return parentId.startsWith(_draftParentIdPrefix);
+  }
+
+  void _onAddGuardian() {
+    if (!widget.isEditable || _isBatchSaving) return;
+
+    final draftId =
+        '$_draftParentIdPrefix${DateTime.now().microsecondsSinceEpoch}';
+    final draftParent = ParentSummary(
+      id: draftId,
+      firstName: '',
+      lastName: '',
+      surname: null,
+      identificationNumber: '',
+      phoneNumber: '',
+      email: '',
+      relationshipType: RelationshipType.guardian,
+    );
+
+    setState(() {
+      _editableParentDetails = <ParentSummary>[
+        ..._editableParentDetails,
+        draftParent,
+      ];
+      _currentValuesByParentId[draftId] = ParentItemValue.fromParent(
+        draftParent,
+      );
+      _initialValuesByParentId[draftId] = ParentItemValue.fromParent(
+        draftParent,
+      );
+      _itemStatesByParentId[draftId] = const ParentItemFormState(
+        valid: false,
+        dirty: false,
+        changedFields: <String, bool>{},
+      );
+    });
+
+    _recomputeFormState();
+  }
+
+  void _onRemoveGuardian(String parentId) {
+    if (!widget.isEditable || _isBatchSaving) return;
+
+    final exists = _editableParentDetails.any(
+      (parent) => parent.id == parentId,
+    );
+    if (!exists) return;
+
+    setState(() {
+      _editableParentDetails = _editableParentDetails
+          .where((parent) => parent.id != parentId)
+          .toList(growable: false);
+      _currentValuesByParentId.remove(parentId);
+      _initialValuesByParentId.remove(parentId);
+      _itemStatesByParentId.remove(parentId);
+      _pendingParentIds.removeWhere((id) => id == parentId);
+    });
+
+    _recomputeFormState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (widget.parentDetails.isEmpty) {
-      return const GuardianEmptyState();
-    }
-
     return BlocProvider<ParentBloc>.value(
       value: _parentBloc,
       child: BlocConsumer<ParentBloc, ParentState>(
@@ -322,13 +401,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             if (_showValidationHints) {
               setState(() => _showValidationHints = false);
             }
-
-            context.read<EnrollmentBloc>().add(
-              EnrollmentDetailRequested(
-                enrollmentId: widget.enrollmentId,
-                silent: true,
-              ),
-            );
+            widget.onRefreshRequested?.call();
 
             final l10n = AppLocalizations.of(context)!;
             AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
@@ -349,13 +422,16 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
               _isBatchSaving || state.status == ParentUpdateStatus.loading;
 
           return GuardianInfoStepBody(
-            parentDetails: widget.parentDetails,
+            parentDetails: _editableParentDetails,
             onItemStateChanged: _onParentItemStateChanged,
             onItemValueChanged: _onParentItemValueChanged,
+            onAddParent: _onAddGuardian,
+            onRemoveParent: _onRemoveGuardian,
             isLoading: isLoading,
             canSave: _canSave,
             showInlineSaveButton: widget.showInlineSaveButton,
             onSave: _onSave,
+            isEditable: widget.isEditable,
           );
         },
       ),

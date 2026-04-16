@@ -5,7 +5,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/acad
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-typedef OnTargetGroupChanged = void Function(String groupId, String firstLevelId);
+typedef OnTargetGroupChanged =
+    void Function(String groupId, String firstLevelId);
 
 class TargetYearFields extends StatelessWidget {
   final AppLocalizations l10n;
@@ -20,6 +21,7 @@ class TargetYearFields extends StatelessWidget {
   final String? levelError;
   final bool groupChanged;
   final bool levelChanged;
+  final bool isEditable;
 
   const TargetYearFields({
     super.key,
@@ -35,6 +37,7 @@ class TargetYearFields extends StatelessWidget {
     this.levelError,
     this.groupChanged = false,
     this.levelChanged = false,
+    this.isEditable = true,
   });
 
   @override
@@ -80,7 +83,10 @@ class TargetYearFields extends StatelessWidget {
             DropdownField(
               width: w,
               label: l10n.targetCycleLabel,
-              value: groupItems.any((item) => item.value == selectedSchoolLevelGroupId)
+              value:
+                  groupItems.any(
+                    (item) => item.value == selectedSchoolLevelGroupId,
+                  )
                   ? selectedSchoolLevelGroupId
                   : null,
               items: groupItems,
@@ -97,11 +103,13 @@ class TargetYearFields extends StatelessWidget {
               helpMessage: l10n.targetCycleLabelHelp,
               errorText: groupError,
               isChanged: groupChanged,
+              enabled: isEditable,
             ),
             DropdownField(
               width: w,
               label: l10n.targetLevelLabel,
-              value: levelItems.any((item) => item.value == selectedSchoolLevelId)
+              value:
+                  levelItems.any((item) => item.value == selectedSchoolLevelId)
                   ? selectedSchoolLevelId
                   : null,
               items: levelItems,
@@ -112,12 +120,14 @@ class TargetYearFields extends StatelessWidget {
               helpMessage: l10n.targetLevelLabelHelp,
               errorText: levelError,
               isChanged: levelChanged,
+              enabled: isEditable,
             ),
             EditableField(
               width: w,
               label: l10n.optionLabel,
               controller: targetOptionController,
               helpMessage: l10n.optionLabelHelp,
+              readOnly: !isEditable,
             ),
           ],
         );

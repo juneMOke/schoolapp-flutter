@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
@@ -24,8 +28,10 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<BootstrapBloc>().add(
-        BootstrapLocalRequested(key: AppConstants.bootstrapPreviousYearPayloadKey),
+      context.read<BootstrapPreviousYearBloc>().add(
+        BootstrapContextLocalRequested(
+          key: AppConstants.bootstrapPreviousYearPayloadKey,
+        ),
       );
     });
   }
@@ -43,14 +49,14 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppTheme.largePadding),
-          child: BlocBuilder<BootstrapBloc, BootstrapState>(
+          child: BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
             builder: (context, bootstrapState) {
               final schoolId = context.select(
                 (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
               );
 
-              if (bootstrapState.status == BootstrapLoadStatus.loading ||
-                  bootstrapState.status == BootstrapLoadStatus.initial) {
+              if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+                  bootstrapState.status == BootstrapContextLoadStatus.initial) {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 48),
@@ -59,7 +65,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                 );
               }
 
-              if (bootstrapState.status != BootstrapLoadStatus.success ||
+              if (bootstrapState.status != BootstrapContextLoadStatus.success ||
                   schoolId.isEmpty) {
                 return BootstrapContextError(
                   onLogout: () =>
@@ -115,6 +121,20 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                             state.summariesStatus ==
                             EnrollmentLoadStatus.loading,
                         enrollments: state.summaries,
+                        onViewRequested: (summary) {
+                          final intent = EnrollmentDetailIntent.reRegistration(
+                            enrollmentId: summary.enrollmentId,
+                            studentId: summary.student.id,
+                          );
+                          context.push(
+                            Uri(
+                              path:
+                                  '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
+                              queryParameters: intent.toQueryParameters(),
+                            ).toString(),
+                            extra: intent,
+                          );
+                        },
                       );
                     },
                   ),
@@ -131,6 +151,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     List<BootstrapSchoolLevelGroupBundle> bundles,
   ) {
     final options = <ReRegistrationAcademicOption>[];
+    final seenKeys = <String>{};
 
     final sortedBundles = [...bundles]
       ..sort(
@@ -147,13 +168,16 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         );
 
       for (final levelBundle in sortedLevels) {
-        options.add(
-          ReRegistrationAcademicOption(
-            schoolLevelGroupId: bundle.schoolLevelGroup.id,
-            schoolLevelId: levelBundle.schoolLevel.id,
-            label: '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
-          ),
+        final option = ReRegistrationAcademicOption(
+          schoolLevelGroupId: bundle.schoolLevelGroup.id,
+          schoolLevelId: levelBundle.schoolLevel.id,
+          label:
+              '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
         );
+
+        if (seenKeys.add(option.key)) {
+          options.add(option);
+        }
       }
     }
 

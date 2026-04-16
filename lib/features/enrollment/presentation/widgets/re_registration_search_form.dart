@@ -57,9 +57,20 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
   String? _selectedAcademicOptionKey;
 
   @override
+  void didUpdateWidget(covariant ReRegistrationSearchForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sanitizeSelectedKey();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final hasOptions = widget.options.isNotEmpty;
+    final uniqueOptions = _buildUniqueOptions();
+    final hasOptions = uniqueOptions.isNotEmpty;
+    final selectedKey =
+        uniqueOptions.any((option) => option.key == _selectedAcademicOptionKey)
+        ? _selectedAcademicOptionKey
+        : null;
 
     return Container(
       width: double.infinity,
@@ -109,13 +120,17 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
                 SizedBox(
                   width: 260,
                   child: DropdownButtonFormField<String>(
-                    value: _selectedAcademicOptionKey,
+                    key: ValueKey<String>(
+                      'academic-option-${selectedKey ?? 'none'}-${uniqueOptions.length}',
+                    ),
+                    initialValue: selectedKey,
                     decoration: InputDecoration(
-                      labelText: '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
+                      labelText:
+                          '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),
-                    items: widget.options
+                    items: uniqueOptions
                         .map(
                           (option) => DropdownMenuItem<String>(
                             value: option.key,
@@ -201,15 +216,37 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     );
   }
 
+  List<ReRegistrationAcademicOption> _buildUniqueOptions() {
+    final byKey = <String, ReRegistrationAcademicOption>{};
+    for (final option in widget.options) {
+      byKey.putIfAbsent(option.key, () => option);
+    }
+    return byKey.values.toList(growable: false);
+  }
+
+  void _sanitizeSelectedKey() {
+    final selectedKey = _selectedAcademicOptionKey;
+    if (selectedKey == null) return;
+
+    final stillExists = _buildUniqueOptions().any(
+      (option) => option.key == selectedKey,
+    );
+
+    if (!stillExists && mounted) {
+      setState(() => _selectedAcademicOptionKey = null);
+    }
+  }
+
   void _submit() {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
 
     final selectedKey = _selectedAcademicOptionKey;
     if (selectedKey == null) return;
-    final selectedOption = widget.options.firstWhere(
-      (option) => option.key == selectedKey,
-    );
+    final selectedOption = _buildUniqueOptions()
+        .where((option) => option.key == selectedKey)
+        .firstOrNull;
+    if (selectedOption == null) return;
 
     widget.onSearch(
       ReRegistrationSearchRequest(

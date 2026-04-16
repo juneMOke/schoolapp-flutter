@@ -17,6 +17,8 @@ class ParentItem extends StatefulWidget {
   final int number;
   final ParentItemStateChanged? onFormStateChanged;
   final ParentItemValueChanged? onValueChanged;
+  final VoidCallback? onRemoveRequested;
+  final bool isEditable;
 
   const ParentItem({
     super.key,
@@ -25,6 +27,8 @@ class ParentItem extends StatefulWidget {
     required this.number,
     this.onFormStateChanged,
     this.onValueChanged,
+    this.onRemoveRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -124,7 +128,8 @@ class _ParentItemState extends State<ParentItem> {
     final changed = value.changedComparedTo(_initialValue);
 
     // Parent update endpoint does not persist identificationNumber.
-    final dirty = (changed['firstName'] ?? false) ||
+    final dirty =
+        (changed['firstName'] ?? false) ||
         (changed['lastName'] ?? false) ||
         (changed['surname'] ?? false) ||
         (changed['phoneNumber'] ?? false) ||
@@ -155,8 +160,12 @@ class _ParentItemState extends State<ParentItem> {
   }
 
   String _getInitials() {
-    final f = widget.parent.firstName.isNotEmpty ? widget.parent.firstName[0] : '';
-    final l = widget.parent.lastName.isNotEmpty ? widget.parent.lastName[0] : '';
+    final f = widget.parent.firstName.isNotEmpty
+        ? widget.parent.firstName[0]
+        : '';
+    final l = widget.parent.lastName.isNotEmpty
+        ? widget.parent.lastName[0]
+        : '';
     return '$f$l'.toUpperCase();
   }
 
@@ -199,6 +208,16 @@ class _ParentItemState extends State<ParentItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            if (widget.onRemoveRequested != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: widget.onRemoveRequested,
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: const Text('Supprimer ce tuteur'),
+                ),
+              ),
+            if (widget.onRemoveRequested != null) const SizedBox(height: 8),
             GuardianCardHeader(
               parent: widget.parent,
               isPrimary: widget.isPrimary,
@@ -223,6 +242,7 @@ class _ParentItemState extends State<ParentItem> {
               selectedRelationshipType: _selectedRelationshipType,
               onRelationshipTypeChanged: _onRelationshipChanged,
               relationshipChanged: changed['relationshipType'] ?? false,
+              isEditable: widget.isEditable,
             ),
           ],
         ),

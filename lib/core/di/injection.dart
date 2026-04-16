@@ -40,6 +40,8 @@ import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_previous_year_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local_bootstrap_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
@@ -254,11 +256,15 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerFactory<GetRemoteBootstrapCurrentYearUseCase>(
-    () => GetRemoteBootstrapCurrentYearUseCase(getIt<BootstrapRemoteRepository>()),
+    () => GetRemoteBootstrapCurrentYearUseCase(
+      getIt<BootstrapRemoteRepository>(),
+    ),
   );
 
   getIt.registerFactory<GetRemoteBootstrapPreviousYearUseCase>(
-    () => GetRemoteBootstrapPreviousYearUseCase(getIt<BootstrapRemoteRepository>()),
+    () => GetRemoteBootstrapPreviousYearUseCase(
+      getIt<BootstrapRemoteRepository>(),
+    ),
   );
 
   getIt.registerFactory<GetLocalBootstrapUseCase>(
@@ -276,7 +282,28 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<BootstrapBloc>(
     () => BootstrapBloc(
       getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapCurrentYearUseCase>(),
-      getRemoteBootstrapPreviousYearUseCase: getIt<GetRemoteBootstrapPreviousYearUseCase>(),
+      getRemoteBootstrapPreviousYearUseCase:
+          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
+      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
+      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
+      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<BootstrapCurrentYearBloc>(
+    () => BootstrapCurrentYearBloc(
+      getRemoteBootstrapCurrentYearUseCase:
+          getIt<GetRemoteBootstrapCurrentYearUseCase>(),
+      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
+      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
+      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<BootstrapPreviousYearBloc>(
+    () => BootstrapPreviousYearBloc(
+      getRemoteBootstrapPreviousYearUseCase:
+          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
       getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
       saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
       clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),

@@ -5,6 +5,9 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_tep.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
@@ -19,8 +22,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepper extends StatefulWidget {
   final EnrollmentDetail enrollmentDetail;
+  final EnrollmentDetailIntent detailIntent;
+  final EnrollmentDetailPolicy detailPolicy;
 
-  const EnrollmentStepper({super.key, required this.enrollmentDetail});
+  const EnrollmentStepper({
+    super.key,
+    required this.enrollmentDetail,
+    required this.detailIntent,
+    required this.detailPolicy,
+  });
 
   @override
   State<EnrollmentStepper> createState() => _EnrollmentStepperState();
@@ -133,6 +143,18 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           final currentStep = flowState.currentStep;
           final progress = (currentStep + 1) / stepTitles.length;
           final currentStepState = flowState.stateOf(currentStep);
+          final currentWizardStep = EnrollmentWizardStepX.fromIndex(
+            currentStep,
+          );
+          final stepIsEditable = widget.detailPolicy.isStepEditable(
+            currentWizardStep,
+          );
+          final canSaveCurrentStep =
+              flowState.canSave &&
+              widget.detailPolicy.canSaveStep(currentWizardStep);
+          final showSaveAction =
+              flowState.showSaveAction &&
+              widget.detailPolicy.canSaveStep(currentWizardStep);
 
           return Padding(
             padding: const EdgeInsets.all(AppTheme.defaultPadding),
@@ -157,9 +179,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 EnrollmentStepperControls(
                   currentStep: currentStep,
                   isLast: flowState.isLast,
-                  canSave: flowState.canSave,
+                  canSave: canSaveCurrentStep,
                   canContinue: flowState.canContinue,
-                  showSaveAction: flowState.showSaveAction,
+                  showSaveAction: showSaveAction,
                   savingNow: currentStepState.saving,
                   saveLabel: _saveLabelForStep(
                     l10n,
@@ -173,7 +195,13 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                   },
                   onSave: () => _onSavePressed(currentStep, flowState),
                   onContinue: () {
-                    if (!_validateCurrentStep(currentStep, flowState)) return;
+                    if (!_validateCurrentStep(
+                      currentStep,
+                      flowState,
+                      isEditable: stepIsEditable,
+                    )) {
+                      return;
+                    }
                     if (flowState.isLast) {
                       _showHint(l10n.enrollmentReadyForValidation);
                       return;
@@ -215,6 +243,22 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   }
 
   List<Widget> _stepContents() {
+    final canEditPersonal = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.personalInfo,
+    );
+    final canEditAddress = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.address,
+    );
+    final canEditPreviousAcademic = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.previousAcademic,
+    );
+    final canEditTargetAcademic = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.targetAcademic,
+    );
+    final canEditGuardian = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.guardian,
+    );
+
     return [
       PersonalInfoStep(
         key: _personalInfoKey,
@@ -222,6 +266,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         flowStepIndex: 0,
+        onRefreshRequested: _refreshAfterSave,
+        isEditable: canEditPersonal,
       ),
       AddressStep(
         key: _addressKey,
@@ -229,6 +275,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         flowStepIndex: 1,
+        onRefreshRequested: _refreshAfterSave,
+        isEditable: canEditAddress,
       ),
       PreviousAcademicInfoStep(
         key: _academicInfoKey,
@@ -236,6 +284,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         flowStepIndex: 2,
+        onRefreshRequested: _refreshAfterSave,
+        isEditable: canEditPreviousAcademic,
       ),
       TargetAcademicInfoStep(
         key: _academicTargetInfoKey,
@@ -244,6 +294,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         flowStepIndex: 3,
+        onRefreshRequested: _refreshAfterSave,
+        isEditable: canEditTargetAcademic,
       ),
       GuardianInfoStep(
         key: _guardianInfoKey,
@@ -251,6 +303,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         flowStepIndex: 4,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
+        onRefreshRequested: _refreshAfterSave,
+        isEditable: canEditGuardian,
       ),
       SummaryStep(enrollmentDetail: widget.enrollmentDetail),
     ];
@@ -267,8 +321,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   bool _validateCurrentStep(
     int currentStep,
-    EnrollmentStepperFlowState flowState,
-  ) {
+    EnrollmentStepperFlowState flowState, {
+    required bool isEditable,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final currentState = flowState.stateOf(currentStep);
 
@@ -278,7 +333,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           _showHint(l10n.validatePersonalInfoHint);
           return false;
         }
-        if (currentState.dirty) {
+        if (isEditable && currentState.dirty) {
           _showHint(l10n.personalInfoSaveHintBeforeContinue);
           return false;
         }
@@ -288,7 +343,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           _showHint(l10n.validateAddressHint);
           return false;
         }
-        if (currentState.dirty) {
+        if (isEditable && currentState.dirty) {
           _showHint(l10n.addressSaveHintBeforeContinue);
           return false;
         }
@@ -298,7 +353,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           _showHint(l10n.validateAcademicInfoHint);
           return false;
         }
-        if (currentState.dirty) {
+        if (isEditable && currentState.dirty) {
           _showHint(l10n.academicInfoSaveHintBeforeContinue);
           return false;
         }
@@ -308,7 +363,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           _showHint(l10n.validateAcademicInfoHint);
           return false;
         }
-        if (currentState.dirty) {
+        if (isEditable && currentState.dirty) {
           _showHint(l10n.academicInfoSaveHintBeforeContinue);
           return false;
         }
@@ -318,7 +373,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           _showHint(l10n.validateGuardianInfoHint);
           return false;
         }
-        if (currentState.dirty) {
+        if (isEditable && currentState.dirty) {
           _showHint(l10n.personalInfoSaveHintBeforeContinue);
           return false;
         }
@@ -375,6 +430,13 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   void _resetContentScroll() {
     // Le scroll est maintenant géré par le SingleChildScrollView parent.
+  }
+
+  void _refreshAfterSave() {
+    if (!mounted) return;
+    final enrollmentBloc = context.read<EnrollmentBloc>();
+    widget.detailPolicy.requestLoad(enrollmentBloc, widget.detailIntent);
+    enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
   }
 
   Widget _buildStepContent(Widget stepContent) {

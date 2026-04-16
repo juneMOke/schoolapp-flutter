@@ -15,6 +15,7 @@ class AddressFormContent extends StatelessWidget {
   final bool isLoading;
   final bool canSave;
   final VoidCallback onSave;
+  final bool isEditable;
 
   const AddressFormContent({
     super.key,
@@ -30,6 +31,7 @@ class AddressFormContent extends StatelessWidget {
     required this.isLoading,
     required this.canSave,
     required this.onSave,
+    this.isEditable = true,
   });
 
   @override
@@ -57,6 +59,7 @@ class AddressFormContent extends StatelessWidget {
                   requiredField: true,
                   helpMessage: l10n.cityHelp,
                   errorText: cityErrorText,
+                  readOnly: !isEditable,
                 ),
                 EditableField(
                   width: fieldWidth,
@@ -65,6 +68,7 @@ class AddressFormContent extends StatelessWidget {
                   requiredField: true,
                   helpMessage: l10n.districtHelp,
                   errorText: districtErrorText,
+                  readOnly: !isEditable,
                 ),
                 EditableField(
                   width: fieldWidth,
@@ -73,6 +77,7 @@ class AddressFormContent extends StatelessWidget {
                   requiredField: true,
                   helpMessage: l10n.municipalityHelp,
                   errorText: municipalityErrorText,
+                  readOnly: !isEditable,
                 ),
               ],
             ),
@@ -91,6 +96,7 @@ class AddressFormContent extends StatelessWidget {
                 requiredField: true,
                 helpMessage: l10n.fullAddressHelp,
                 errorText: addressErrorText,
+                readOnly: !isEditable,
               ),
             ),
             if (showInlineSaveButton) ...[
@@ -109,12 +115,16 @@ class AddressFormContent extends StatelessWidget {
                           ),
                         )
                       : const Icon(Icons.save_outlined),
-                  label: Text(isLoading ? l10n.savingAddress : l10n.saveAddress),
+                  label: Text(
+                    isLoading ? l10n.savingAddress : l10n.saveAddress,
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
                     foregroundColor: Colors.white,
                     elevation: canSave ? 6 : 0,
-                    shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
+                    shadowColor: const Color(
+                      0xFF0EA5E9,
+                    ).withValues(alpha: 0.45),
                     minimumSize: const Size(164, 44),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

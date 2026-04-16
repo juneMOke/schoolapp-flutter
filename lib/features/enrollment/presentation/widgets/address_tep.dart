@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_form_content.dart';
@@ -17,6 +16,8 @@ class AddressStep extends StatefulWidget {
   final String enrollmentId;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
+  final VoidCallback? onRefreshRequested;
+  final bool isEditable;
 
   const AddressStep({
     super.key,
@@ -24,6 +25,8 @@ class AddressStep extends StatefulWidget {
     required this.enrollmentId,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
+    this.onRefreshRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -141,8 +144,6 @@ class AddressStepState extends State<AddressStep> {
     super.dispose();
   }
 
-
-
   void _onFieldChanged() {
     if (_isHydratingFromDetail) return;
     _recomputeFormState();
@@ -221,6 +222,7 @@ class AddressStepState extends State<AddressStep> {
   }
 
   void _onSave() {
+    if (!widget.isEditable) return;
     final l10n = AppLocalizations.of(context)!;
 
     if (!_isValid) {
@@ -271,13 +273,7 @@ class AddressStepState extends State<AddressStep> {
             if (_showValidationHints) {
               setState(() => _showValidationHints = false);
             }
-
-            context.read<EnrollmentBloc>().add(
-              EnrollmentDetailRequested(
-                enrollmentId: widget.enrollmentId,
-                silent: true,
-              ),
-            );
+            widget.onRefreshRequested?.call();
 
             AppSnackBar.showSuccess(context, l10n.addressSaveSuccess);
           } else if (state.status == StudentUpdateStatus.failure) {
@@ -328,6 +324,7 @@ class AddressStepState extends State<AddressStep> {
               isLoading: isLoading,
               canSave: _canSave,
               onSave: _onSave,
+              isEditable: widget.isEditable,
             ),
           );
         },
