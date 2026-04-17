@@ -10,8 +10,13 @@ abstract class BootstrapRemoteDataSource {
   factory BootstrapRemoteDataSource(Dio dio, {String baseUrl}) =
       _BootstrapRemoteDataSource;
 
-  @GET(AppConstants.bootstrapEndpoint)
-  Future<BootstrapModel> getBootstrap(
+  @GET(AppConstants.bootstrapCurrentYearEndpoint)
+  Future<BootstrapModel> getBootstrapCurrentYear(
+    @Extras() Map<String, dynamic> extras
+  );
+
+  @GET(AppConstants.bootstrapPreviousYearEndpoint)
+  Future<BootstrapModel> getBootstrapPreviousYear(
     @Extras() Map<String, dynamic> extras
   );
 }

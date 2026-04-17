@@ -11,6 +11,7 @@ class GenderSegmentedField extends StatelessWidget {
   final bool requiredField;
   final String helpMessage;
   final ValueChanged<Gender?> onChanged;
+  final bool enabled;
 
   const GenderSegmentedField({
     super.key,
@@ -20,6 +21,7 @@ class GenderSegmentedField extends StatelessWidget {
     required this.onChanged,
     this.requiredField = false,
     this.helpMessage = '',
+    this.enabled = true,
   });
 
   @override
@@ -52,7 +54,9 @@ class GenderSegmentedField extends StatelessWidget {
                 ),
               ],
               selected: {selectedGender},
-              onSelectionChanged: (selection) => onChanged(selection.firstOrNull),
+              onSelectionChanged: enabled
+                  ? (selection) => onChanged(selection.firstOrNull)
+                  : null,
               style: SegmentedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppTheme.textSecondaryColor,

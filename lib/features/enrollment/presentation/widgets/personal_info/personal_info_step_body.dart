@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
@@ -28,6 +27,7 @@ class PersonalInfoStepBody extends StatelessWidget {
   final String enrollmentId;
   final bool showInlineSaveButton;
   final bool canSave;
+  final bool isEditable;
   final String? firstNameError;
   final String? lastNameError;
   final String? surnameError;
@@ -36,6 +36,7 @@ class PersonalInfoStepBody extends StatelessWidget {
   final String? dateOfBirthError;
   final ValueChanged<bool>? onSavingChanged;
   final VoidCallback onSaveSuccess;
+  final VoidCallback? onRefreshRequested;
 
   const PersonalInfoStepBody({
     super.key,
@@ -54,6 +55,7 @@ class PersonalInfoStepBody extends StatelessWidget {
     required this.enrollmentId,
     required this.showInlineSaveButton,
     required this.canSave,
+    this.isEditable = true,
     this.firstNameError,
     this.lastNameError,
     this.surnameError,
@@ -62,6 +64,7 @@ class PersonalInfoStepBody extends StatelessWidget {
     this.dateOfBirthError,
     required this.onSavingChanged,
     required this.onSaveSuccess,
+    this.onRefreshRequested,
   });
 
   @override
@@ -74,15 +77,7 @@ class PersonalInfoStepBody extends StatelessWidget {
         onSavingChanged?.call(state.status == StudentUpdateStatus.loading);
 
         if (state.status == StudentUpdateStatus.success) {
-          context.read<EnrollmentBloc>().add(
-            EnrollmentDetailRequested(
-              enrollmentId: enrollmentId,
-              silent: true,
-            ),
-          );
-          context.read<EnrollmentBloc>().add(
-            const EnrollmentSummariesRefreshRequested(),
-          );
+          onRefreshRequested?.call();
           onSaveSuccess();
           AppSnackBar.showSuccess(context, l10n.personalInfoSaveSuccess);
         } else if (state.status == StudentUpdateStatus.failure) {
@@ -103,8 +98,8 @@ class PersonalInfoStepBody extends StatelessWidget {
               final columns = constraints.maxWidth >= 980
                   ? 3
                   : constraints.maxWidth >= 640
-                        ? 2
-                        : 1;
+                  ? 2
+                  : 1;
               final fieldWidth =
                   (constraints.maxWidth - ((columns - 1) * spacing)) / columns;
 
@@ -152,6 +147,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.firstNameHelp,
                         errorText: firstNameError,
+                        readOnly: !isEditable,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -160,6 +156,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.lastNameHelp,
                         errorText: lastNameError,
+                        readOnly: !isEditable,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -168,6 +165,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.surnameHelp,
                         errorText: surnameError,
+                        readOnly: !isEditable,
                       ),
                       DatePickerField(
                         width: fieldWidth,
@@ -178,6 +176,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         helpMessage: l10n.dateOfBirthHelp,
                         errorText: dateOfBirthError,
                         onTap: onPickDate,
+                        enabled: isEditable,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -186,6 +185,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.birthPlaceHelp,
                         errorText: birthPlaceError,
+                        readOnly: !isEditable,
                       ),
                       EditableField(
                         width: fieldWidth,
@@ -194,6 +194,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.nationalityHelp,
                         errorText: nationalityError,
+                        readOnly: !isEditable,
                       ),
                       GenderSegmentedField(
                         width: fieldWidth,
@@ -202,6 +203,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                         requiredField: true,
                         helpMessage: l10n.genderHelp,
                         onChanged: onGenderChanged,
+                        enabled: isEditable,
                       ),
                     ],
                   ),

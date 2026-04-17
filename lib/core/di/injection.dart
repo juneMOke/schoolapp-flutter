@@ -36,14 +36,19 @@ import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootst
 import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_remote_repository.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/clear_local_bootstrap_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_current_year_use_case.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_previous_year_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local_bootstrap_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
@@ -250,8 +255,16 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  getIt.registerFactory<GetRemoteBootstrapUseCase>(
-    () => GetRemoteBootstrapUseCase(getIt<BootstrapRemoteRepository>()),
+  getIt.registerFactory<GetRemoteBootstrapCurrentYearUseCase>(
+    () => GetRemoteBootstrapCurrentYearUseCase(
+      getIt<BootstrapRemoteRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<GetRemoteBootstrapPreviousYearUseCase>(
+    () => GetRemoteBootstrapPreviousYearUseCase(
+      getIt<BootstrapRemoteRepository>(),
+    ),
   );
 
   getIt.registerFactory<GetLocalBootstrapUseCase>(
@@ -268,7 +281,29 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<BootstrapBloc>(
     () => BootstrapBloc(
-      getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapUseCase>(),
+      getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapCurrentYearUseCase>(),
+      getRemoteBootstrapPreviousYearUseCase:
+          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
+      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
+      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
+      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<BootstrapCurrentYearBloc>(
+    () => BootstrapCurrentYearBloc(
+      getRemoteBootstrapCurrentYearUseCase:
+          getIt<GetRemoteBootstrapCurrentYearUseCase>(),
+      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
+      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
+      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<BootstrapPreviousYearBloc>(
+    () => BootstrapPreviousYearBloc(
+      getRemoteBootstrapPreviousYearUseCase:
+          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
       getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
       saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
       clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
@@ -293,6 +328,10 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<GetEnrollmentDetailUseCase>(
     () => GetEnrollmentDetailUseCase(getIt<EnrollmentRepository>()),
+  );
+
+  getIt.registerFactory<GetEnrollmentPreviewByStudentIdUseCase>(
+    () => GetEnrollmentPreviewByStudentIdUseCase(getIt<EnrollmentRepository>()),
   );
 
   getIt.registerFactory<
@@ -320,11 +359,19 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerFactory<SearchEnrollmentSummaryByAcademicInfoUseCase>(
+    () => SearchEnrollmentSummaryByAcademicInfoUseCase(
+      getIt<EnrollmentRepository>(),
+    ),
+  );
+
   getIt.registerFactory<EnrollmentBloc>(
     () => EnrollmentBloc(
       getEnrollmentSummariesUseCase:
           getIt<GetEnrollmentSummaryListByStatusUseCase>(),
       getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
+      getEnrollmentPreviewByStudentIdUseCase:
+          getIt<GetEnrollmentPreviewByStudentIdUseCase>(),
       searchByStudentNameUseCase:
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
@@ -337,6 +384,8 @@ Future<void> configureDependencies() async {
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirthUseCase
           >(),
+      searchByAcademicInfoUseCase:
+          getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
     ),
   );
 

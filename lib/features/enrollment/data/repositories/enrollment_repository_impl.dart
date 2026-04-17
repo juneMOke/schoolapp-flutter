@@ -137,6 +137,38 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }
 
   @override
+  Future<Either<Failure, List<EnrollmentSummary>>>
+  searchEnrollmentSummaryByAcademicInfo({
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String schoolLevelGroupId,
+    required String schoolLevelId,
+  }) async {
+    try {
+      final enrollmentModelList = await remoteDataSource
+          .searchEnrollmentSummaryByAcademicInfo(
+            requiredAuth,
+            firstName,
+            lastName,
+            surname,
+            schoolLevelGroupId,
+            schoolLevelId,
+          );
+      return Right(
+        enrollmentModelList.map((m) => m.toEnrollmentSummary()).toList(),
+      );
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
   Future<Either<Failure, EnrollmentDetail>> getEnrollmentDetail({
     required String enrollmentId,
   }) async {
@@ -145,6 +177,24 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
         requiredAuth,
         enrollmentId,
       );
+      return Right(enrollmentModel.toEnrollmentDetail());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, EnrollmentDetail>> getEnrollmentPreviewByStudentId({
+    required String studentId,
+  }) async {
+    try {
+      final enrollmentModel = await remoteDataSource
+          .getEnrollmentPreviewByStudentId(requiredAuth, studentId);
       return Right(enrollmentModel.toEnrollmentDetail());
     } on DioException catch (e) {
       if (e.error is Failure) {

@@ -14,6 +14,7 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
   final bool canSave;
   final bool showInlineSaveButton;
   final VoidCallback onSave;
+  final bool isEditable;
   final void Function(String groupId, String firstLevelId) onGroupChanged;
   final ValueChanged<String> onLevelChanged;
   final String? groupError;
@@ -33,6 +34,7 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
     required this.canSave,
     required this.showInlineSaveButton,
     required this.onSave,
+    this.isEditable = true,
     required this.onGroupChanged,
     required this.onLevelChanged,
     this.groupError,
@@ -65,6 +67,7 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
             levelChanged: levelChanged,
             onGroupChanged: onGroupChanged,
             onLevelChanged: onLevelChanged,
+            isEditable: isEditable,
           ),
         ),
         if (showInlineSaveButton) ...<Widget>[

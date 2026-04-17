@@ -6,7 +6,6 @@ class ParentItemValue extends Equatable {
   final String firstName;
   final String lastName;
   final String surname;
-  final String identificationNumber;
   final String phoneNumber;
   final String email;
   final RelationshipType relationshipType;
@@ -15,7 +14,6 @@ class ParentItemValue extends Equatable {
     required this.firstName,
     required this.lastName,
     required this.surname,
-    required this.identificationNumber,
     required this.phoneNumber,
     required this.email,
     required this.relationshipType,
@@ -26,7 +24,6 @@ class ParentItemValue extends Equatable {
       firstName: parent.firstName,
       lastName: parent.lastName,
       surname: parent.surname ?? '',
-      identificationNumber: parent.identificationNumber,
       phoneNumber: parent.phoneNumber,
       email: parent.email,
       relationshipType: parent.relationshipType,
@@ -37,7 +34,6 @@ class ParentItemValue extends Equatable {
     String? firstName,
     String? lastName,
     String? surname,
-    String? identificationNumber,
     String? phoneNumber,
     String? email,
     RelationshipType? relationshipType,
@@ -46,7 +42,6 @@ class ParentItemValue extends Equatable {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       surname: surname ?? this.surname,
-      identificationNumber: identificationNumber ?? this.identificationNumber,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       email: email ?? this.email,
       relationshipType: relationshipType ?? this.relationshipType,
@@ -56,7 +51,6 @@ class ParentItemValue extends Equatable {
   bool get isValid {
     return firstName.trim().isNotEmpty &&
         lastName.trim().isNotEmpty &&
-        identificationNumber.trim().isNotEmpty &&
         phoneNumber.trim().isNotEmpty &&
         email.trim().isNotEmpty;
   }
@@ -66,8 +60,6 @@ class ParentItemValue extends Equatable {
       'firstName': firstName.trim() != initial.firstName.trim(),
       'lastName': lastName.trim() != initial.lastName.trim(),
       'surname': surname.trim() != initial.surname.trim(),
-      'identificationNumber':
-          identificationNumber.trim() != initial.identificationNumber.trim(),
       'phoneNumber': phoneNumber.trim() != initial.phoneNumber.trim(),
       'email': email.trim() != initial.email.trim(),
       'relationshipType': relationshipType != initial.relationshipType,
@@ -79,7 +71,6 @@ class ParentItemValue extends Equatable {
         firstName,
         lastName,
         surname,
-        identificationNumber,
         phoneNumber,
         email,
         relationshipType,

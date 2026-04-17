@@ -15,9 +15,24 @@ class BootstrapRemoteRepositoryImpl implements BootstrapRemoteRepository {
   });
 
   @override
-  Future<Either<Failure, Bootstrap>> getBootstrap() async {
+  Future<Either<Failure, Bootstrap>> getBootstrapCurrentYear() async {
     try {
-      final model = await remoteDataSource.getBootstrap(requiredAuth);
+      final model = await remoteDataSource.getBootstrapCurrentYear(requiredAuth);
+      return Right(model.toEntity());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Bootstrap>> getBootstrapPreviousYear() async {
+    try {
+      final model = await remoteDataSource.getBootstrapPreviousYear(requiredAuth);
       return Right(model.toEntity());
     } on DioException catch (e) {
       if (e.error is Failure) {

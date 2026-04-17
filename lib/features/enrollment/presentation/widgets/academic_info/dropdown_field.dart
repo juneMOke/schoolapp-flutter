@@ -12,6 +12,7 @@ class DropdownField extends StatelessWidget {
   final String? value;
   final String? errorText;
   final bool isChanged;
+  final bool enabled;
 
   const DropdownField({
     super.key,
@@ -23,6 +24,7 @@ class DropdownField extends StatelessWidget {
     this.value,
     this.errorText,
     this.isChanged = false,
+    this.enabled = true,
   });
 
   @override
@@ -42,7 +44,7 @@ class DropdownField extends StatelessWidget {
             initialValue: value,
             isExpanded: true,
             items: items,
-            onChanged: items.isEmpty ? null : onChanged,
+            onChanged: (!enabled || items.isEmpty) ? null : onChanged,
             decoration: buildInputDecoration(
               hintText: label,
               isChanged: isChanged,

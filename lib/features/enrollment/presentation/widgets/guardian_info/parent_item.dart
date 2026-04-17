@@ -17,6 +17,8 @@ class ParentItem extends StatefulWidget {
   final int number;
   final ParentItemStateChanged? onFormStateChanged;
   final ParentItemValueChanged? onValueChanged;
+  final VoidCallback? onRemoveRequested;
+  final bool isEditable;
 
   const ParentItem({
     super.key,
@@ -25,6 +27,8 @@ class ParentItem extends StatefulWidget {
     required this.number,
     this.onFormStateChanged,
     this.onValueChanged,
+    this.onRemoveRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -35,7 +39,6 @@ class _ParentItemState extends State<ParentItem> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
-  late final TextEditingController _idController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
 
@@ -51,7 +54,6 @@ class _ParentItemState extends State<ParentItem> {
     _firstNameController.addListener(_onFieldChanged);
     _lastNameController.addListener(_onFieldChanged);
     _surnameController.addListener(_onFieldChanged);
-    _idController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
 
@@ -80,14 +82,12 @@ class _ParentItemState extends State<ParentItem> {
       _firstNameController = TextEditingController(text: initial.firstName);
       _lastNameController = TextEditingController(text: initial.lastName);
       _surnameController = TextEditingController(text: initial.surname);
-      _idController = TextEditingController(text: initial.identificationNumber);
       _phoneController = TextEditingController(text: initial.phoneNumber);
       _emailController = TextEditingController(text: initial.email);
     } else {
       _firstNameController.text = initial.firstName;
       _lastNameController.text = initial.lastName;
       _surnameController.text = initial.surname;
-      _idController.text = initial.identificationNumber;
       _phoneController.text = initial.phoneNumber;
       _emailController.text = initial.email;
     }
@@ -112,7 +112,6 @@ class _ParentItemState extends State<ParentItem> {
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,
       surname: _surnameController.text,
-      identificationNumber: _idController.text,
       phoneNumber: _phoneController.text,
       email: _emailController.text,
       relationshipType: _selectedRelationshipType,
@@ -124,7 +123,8 @@ class _ParentItemState extends State<ParentItem> {
     final changed = value.changedComparedTo(_initialValue);
 
     // Parent update endpoint does not persist identificationNumber.
-    final dirty = (changed['firstName'] ?? false) ||
+    final dirty =
+        (changed['firstName'] ?? false) ||
         (changed['lastName'] ?? false) ||
         (changed['surname'] ?? false) ||
         (changed['phoneNumber'] ?? false) ||
@@ -155,8 +155,12 @@ class _ParentItemState extends State<ParentItem> {
   }
 
   String _getInitials() {
-    final f = widget.parent.firstName.isNotEmpty ? widget.parent.firstName[0] : '';
-    final l = widget.parent.lastName.isNotEmpty ? widget.parent.lastName[0] : '';
+    final f = widget.parent.firstName.isNotEmpty
+        ? widget.parent.firstName[0]
+        : '';
+    final l = widget.parent.lastName.isNotEmpty
+        ? widget.parent.lastName[0]
+        : '';
     return '$f$l'.toUpperCase();
   }
 
@@ -165,14 +169,12 @@ class _ParentItemState extends State<ParentItem> {
     _firstNameController.removeListener(_onFieldChanged);
     _lastNameController.removeListener(_onFieldChanged);
     _surnameController.removeListener(_onFieldChanged);
-    _idController.removeListener(_onFieldChanged);
     _phoneController.removeListener(_onFieldChanged);
     _emailController.removeListener(_onFieldChanged);
 
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
-    _idController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -199,6 +201,16 @@ class _ParentItemState extends State<ParentItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            if (widget.onRemoveRequested != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: widget.onRemoveRequested,
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: const Text('Supprimer ce tuteur'),
+                ),
+              ),
+            if (widget.onRemoveRequested != null) const SizedBox(height: 8),
             GuardianCardHeader(
               parent: widget.parent,
               isPrimary: widget.isPrimary,
@@ -210,19 +222,17 @@ class _ParentItemState extends State<ParentItem> {
               firstNameController: _firstNameController,
               lastNameController: _lastNameController,
               surnameController: _surnameController,
-              idController: _idController,
               phoneController: _phoneController,
               emailController: _emailController,
               firstNameChanged: changed['firstName'] ?? false,
               lastNameChanged: changed['lastName'] ?? false,
               surnameChanged: changed['surname'] ?? false,
-              idChanged: changed['identificationNumber'] ?? false,
               phoneChanged: changed['phoneNumber'] ?? false,
               emailChanged: changed['email'] ?? false,
-              idReadOnly: true,
               selectedRelationshipType: _selectedRelationshipType,
               onRelationshipTypeChanged: _onRelationshipChanged,
               relationshipChanged: changed['relationshipType'] ?? false,
+              isEditable: widget.isEditable,
             ),
           ],
         ),

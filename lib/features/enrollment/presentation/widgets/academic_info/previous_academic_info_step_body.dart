@@ -16,6 +16,7 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
   final bool canSave;
   final bool showInlineSaveButton;
   final VoidCallback onSave;
+  final bool isEditable;
   final ValueChanged<bool> onValidatedChanged;
   final String? prevYearError;
   final String? prevSchoolError;
@@ -45,6 +46,7 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
     required this.canSave,
     required this.showInlineSaveButton,
     required this.onSave,
+    this.isEditable = true,
     required this.onValidatedChanged,
     this.prevYearError,
     this.prevSchoolError,
@@ -96,6 +98,7 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
             prevRateChanged: prevRateChanged,
             prevRankChanged: prevRankChanged,
             validatedPreviousYearChanged: validatedPreviousYearChanged,
+            isEditable: isEditable,
           ),
         ),
         if (showInlineSaveButton) ...<Widget>[

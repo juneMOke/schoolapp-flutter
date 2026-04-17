@@ -165,6 +165,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchStudents => 'Rechercher des Étudiants';
 
   @override
+  String get reRegistrationSearchHint => 'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
+
+  @override
+  String get reRegistrationAcademicInfoHelp => 'Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.';
+
+  @override
+  String get reRegistrationSearchNoOptions => 'Aucun niveau/cycle disponible pour la recherche.';
+
+  @override
+  String get reRegistrationSearchNeedCriteria => 'Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.';
+
+  @override
+  String get reRegistrationSearchReady => 'Critères valides, vous pouvez lancer la recherche.';
+
+  @override
   String get firstName => 'Prénom';
 
   @override

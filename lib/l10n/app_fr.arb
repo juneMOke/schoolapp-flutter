@@ -71,6 +71,11 @@
   "pageUnderConstruction": "Cette page est en cours de développement",
   "preRegistrations": "Pré-Inscriptions",
   "searchStudents": "Rechercher des Étudiants",
+  "reRegistrationSearchHint": "Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.",
+  "reRegistrationAcademicInfoHelp": "Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.",
+  "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
+  "reRegistrationSearchNeedCriteria": "Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.",
+  "reRegistrationSearchReady": "Critères valides, vous pouvez lancer la recherche.",
   "firstName": "Prénom",
   "lastName": "Nom",
   "surname": "Post-nom",
@@ -173,6 +178,7 @@
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
   "emailLabel": "Email",
   "emailLabelHelp": "Adresse email du tuteur.",
+  "relationshipLabel": "Relation",
   "relationshipFather": "Père",
   "relationshipMother": "Mère",
   "relationshipGuardian": "Tuteur",
@@ -205,6 +211,14 @@
   "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
   "requiredFieldError": "Le champ {field} est requis.",
   "@requiredFieldError": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidNumberFieldError": "Le champ {field} doit contenir un nombre valide.",
+  "@invalidNumberFieldError": {
     "placeholders": {
       "field": {
         "type": "String"

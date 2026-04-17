@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/bootstrap/data/models/bootstrap_model.dart';
 
 class BootstrapStorageService {
@@ -9,15 +8,12 @@ class BootstrapStorageService {
 
   const BootstrapStorageService(this._box);
 
-  Future<void> saveBootstrap(BootstrapModel model) async {
-    await _box.put(
-      AppConstants.bootstrapPayloadKey,
-      jsonEncode(model.toJson()),
-    );
+  Future<void> saveBootstrap(BootstrapModel model, String key) async {
+    await _box.put(key, jsonEncode(model.toJson()));
   }
 
-  Future<BootstrapModel?> readBootstrap() async {
-    final value = _box.get(AppConstants.bootstrapPayloadKey);
+  Future<BootstrapModel?> readBootstrap(String key) async {
+    final value = _box.get(key);
     if (value == null) {
       return null;
     }
@@ -30,7 +26,7 @@ class BootstrapStorageService {
     }
   }
 
-  Future<void> clearBootstrap() async {
-    await _box.delete(AppConstants.bootstrapPayloadKey);
+  Future<void> clearBootstrap(String key) async {
+    await _box.delete(key);
   }
 }

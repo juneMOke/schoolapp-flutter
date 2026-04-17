@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validation_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ValidatedYearSelector extends StatelessWidget {
@@ -8,6 +7,7 @@ class ValidatedYearSelector extends StatelessWidget {
   final bool validatedPreviousYear;
   final ValueChanged<bool> onChanged;
   final bool isChanged;
+  final bool enabled;
 
   const ValidatedYearSelector({
     super.key,
@@ -16,11 +16,14 @@ class ValidatedYearSelector extends StatelessWidget {
     required this.validatedPreviousYear,
     required this.onChanged,
     this.isChanged = false,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final highlightColor = const Color(0xFF16A34A);
+    final successColor = const Color(0xFF16A34A);
+    final errorColor = const Color(0xFFDC2626);
+
     return SizedBox(
       width: width,
       child: Column(
@@ -29,37 +32,76 @@ class ValidatedYearSelector extends StatelessWidget {
           Text(
             l10n.yearValidated,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isChanged ? highlightColor : null,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: isChanged ? successColor : null,
+                ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              ChoiceChip(
-                label: Text(l10n.yearValidated),
-                selected: validatedPreviousYear,
-                selectedColor: isChanged
-                    ? highlightColor.withValues(alpha: 0.18)
-                    : null,
-                onSelected: (_) => onChanged(true),
+              _ValidationChip(
+                label: l10n.yearValidated,
+                isSelected: validatedPreviousYear,
+                activeColor: successColor,
+                icon: Icons.check_circle_rounded,
+                onSelected: enabled ? () => onChanged(true) : null,
               ),
-              ChoiceChip(
-                label: Text(l10n.yearNotValidated),
-                selected: !validatedPreviousYear,
-                selectedColor: isChanged
-                    ? highlightColor.withValues(alpha: 0.18)
-                    : null,
-                onSelected: (_) => onChanged(false),
+              _ValidationChip(
+                label: l10n.yearNotValidated,
+                isSelected: !validatedPreviousYear,
+                activeColor: errorColor,
+                icon: Icons.cancel_rounded,
+                onSelected: enabled ? () => onChanged(false) : null,
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ValidationBadge(isValidated: validatedPreviousYear),
         ],
       ),
+    );
+  }
+}
+
+class _ValidationChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final Color activeColor;
+  final IconData icon;
+  final VoidCallback? onSelected;
+
+  const _ValidationChip({
+    required this.label,
+    required this.isSelected,
+    required this.activeColor,
+    required this.icon,
+    this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      avatar: isSelected
+          ? Icon(
+              icon,
+              size: 18,
+              color: activeColor,
+            )
+          : null,
+      label: Text(label),
+      selected: isSelected,
+      onSelected: onSelected != null ? (_) => onSelected!() : null,
+      selectedColor: activeColor.withValues(alpha: 0.12),
+      checkmarkColor: activeColor,
+      labelStyle: TextStyle(
+        color: isSelected ? activeColor : null,
+        fontWeight: isSelected ? FontWeight.bold : null,
+      ),
+      side: BorderSide(
+        color: isSelected ? activeColor : Colors.grey.shade300,
+        width: isSelected ? 1.5 : 1.0,
+      ),
+      showCheckmark: false,
     );
   }
 }

@@ -8,7 +8,7 @@ class GetLocalBootstrapUseCase {
 
   const GetLocalBootstrapUseCase(this._repository);
 
-  Future<Either<Failure, Bootstrap>> call() {
-    return _repository.getStoredBootstrap();
+  Future<Either<Failure, Bootstrap>> call(String key) {
+    return _repository.getStoredBootstrap(key);
   }
 }

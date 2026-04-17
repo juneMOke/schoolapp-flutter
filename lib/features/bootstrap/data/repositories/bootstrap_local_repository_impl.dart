@@ -18,9 +18,9 @@ class BootstrapLocalRepositoryImpl implements BootstrapLocalRepository {
   const BootstrapLocalRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, Bootstrap>> getStoredBootstrap() async {
+  Future<Either<Failure, Bootstrap>> getStoredBootstrap(String key) async {
     try {
-      final model = await localDataSource.readBootstrap();
+      final model = await localDataSource.readBootstrap(key);
       if (model == null) {
         return const Left(StorageFailure('No stored bootstrap found'));
       }
@@ -33,9 +33,10 @@ class BootstrapLocalRepositoryImpl implements BootstrapLocalRepository {
   @override
   Future<Either<Failure, void>> saveBootstrap({
     required Bootstrap bootstrap,
+    required String key,
   }) async {
     try {
-      await localDataSource.saveBootstrap(_toModel(bootstrap));
+      await localDataSource.saveBootstrap(_toModel(bootstrap), key);
       return const Right(null);
     } catch (_) {
       return const Left(StorageFailure('Failed to save bootstrap'));
@@ -43,9 +44,9 @@ class BootstrapLocalRepositoryImpl implements BootstrapLocalRepository {
   }
 
   @override
-  Future<Either<Failure, void>> clearBootstrap() async {
+  Future<Either<Failure, void>> clearBootstrap(String key) async {
     try {
-      await localDataSource.clearBootstrap();
+      await localDataSource.clearBootstrap(key);
       return const Right(null);
     } catch (_) {
       return const Left(StorageFailure('Failed to clear bootstrap'));
@@ -55,12 +56,12 @@ class BootstrapLocalRepositoryImpl implements BootstrapLocalRepository {
   BootstrapModel _toModel(Bootstrap bootstrap) {
     return BootstrapModel(
       schoolId: bootstrap.schoolId,
-      currentAcademicYear: BootstrapAcademicYearModel(
-        id: bootstrap.currentAcademicYear.id,
-        name: bootstrap.currentAcademicYear.name,
-        startDate: bootstrap.currentAcademicYear.startDate,
-        endDate: bootstrap.currentAcademicYear.endDate,
-        current: bootstrap.currentAcademicYear.current,
+      academicYear: BootstrapAcademicYearModel(
+        id: bootstrap.academicYear.id,
+        name: bootstrap.academicYear.name,
+        startDate: bootstrap.academicYear.startDate,
+        endDate: bootstrap.academicYear.endDate,
+        current: bootstrap.academicYear.current,
       ),
       schoolLevelGroups: bootstrap.schoolLevelGroups
           .map(

@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/enrollment_academic_info_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
@@ -16,6 +15,8 @@ class PreviousAcademicInfoStep extends StatefulWidget {
   final String enrollmentId;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
+  final VoidCallback? onRefreshRequested;
+  final bool isEditable;
 
   const PreviousAcademicInfoStep({
     super.key,
@@ -23,6 +24,8 @@ class PreviousAcademicInfoStep extends StatefulWidget {
     required this.enrollmentId,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
+    this.onRefreshRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -295,6 +298,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }
 
   void _onSave() {
+    if (!widget.isEditable) return;
     final l10n = AppLocalizations.of(context)!;
     if (!_isValid) {
       final reasons = _buildValidationErrors(l10n);
@@ -345,12 +349,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                 if (_showValidationHints) {
                   setState(() => _showValidationHints = false);
                 }
-                context.read<EnrollmentBloc>().add(
-                  EnrollmentDetailRequested(
-                    enrollmentId: widget.enrollmentId,
-                    silent: true,
-                  ),
-                );
+                widget.onRefreshRequested?.call();
                 AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
               } else if (state.status == EnrollmentAcademicInfoStatus.failure) {
                 _onSavingChanged(false);
@@ -376,6 +375,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                 canSave: _canSave,
                 showInlineSaveButton: widget.showInlineSaveButton,
                 onSave: _onSave,
+                isEditable: widget.isEditable,
                 onValidatedChanged: (value) {
                   setState(() => _validatedPreviousYear = value);
                   _recomputeFormState();

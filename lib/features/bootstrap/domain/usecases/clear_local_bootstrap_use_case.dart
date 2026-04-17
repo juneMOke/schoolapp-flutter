@@ -7,7 +7,7 @@ class ClearLocalBootstrapUseCase {
 
   const ClearLocalBootstrapUseCase(this._repository);
 
-  Future<Either<Failure, void>> call() {
-    return _repository.clearBootstrap();
+  Future<Either<Failure, void>> call(String key) {
+    return _repository.clearBootstrap(key);
   }
 }

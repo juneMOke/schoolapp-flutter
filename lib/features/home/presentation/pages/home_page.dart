@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -76,7 +77,8 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildMainContent(BuildContext context, NavigationState state) {
     final hideBreadcrumbForEnrollment =
-        state.selectedSubMenuId == MenuConstants.preInscriptionsId;
+        state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
+        state.selectedSubMenuId == MenuConstants.reInscriptionsId;
 
     return Container(
       width: double.infinity,
@@ -148,6 +150,8 @@ class _HomePageView extends StatelessWidget {
     switch (state.selectedSubMenuId) {
       case MenuConstants.preInscriptionsId:
         return const EnrollmentFeatureScope(child: PreRegistrationsPage());
+      case MenuConstants.reInscriptionsId:
+        return const EnrollmentFeatureScope(child: ReRegistrationsPage());
       default:
         return Container(
           width: double.infinity,

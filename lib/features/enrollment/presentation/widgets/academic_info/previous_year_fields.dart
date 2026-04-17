@@ -27,6 +27,7 @@ class PreviousYearFields extends StatelessWidget {
   final bool prevRateChanged;
   final bool prevRankChanged;
   final bool validatedPreviousYearChanged;
+  final bool isEditable;
 
   const PreviousYearFields({
     super.key,
@@ -53,6 +54,7 @@ class PreviousYearFields extends StatelessWidget {
     this.prevRateChanged = false,
     this.prevRankChanged = false,
     this.validatedPreviousYearChanged = false,
+    this.isEditable = true,
   });
 
   @override
@@ -77,6 +79,7 @@ class PreviousYearFields extends StatelessWidget {
               helpMessage: l10n.academicYearLabelHelp,
               errorText: prevYearError,
               isChanged: prevYearChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: w2,
@@ -86,6 +89,7 @@ class PreviousYearFields extends StatelessWidget {
               helpMessage: l10n.schoolLabelHelp,
               errorText: prevSchoolError,
               isChanged: prevSchoolChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: w2,
@@ -95,6 +99,7 @@ class PreviousYearFields extends StatelessWidget {
               helpMessage: l10n.schoolCycleHelp,
               errorText: prevCycleError,
               isChanged: prevCycleChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: w2,
@@ -104,6 +109,7 @@ class PreviousYearFields extends StatelessWidget {
               helpMessage: l10n.schoolLevelLabelHelp,
               errorText: prevLevelError,
               isChanged: prevLevelChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: w3,
@@ -113,6 +119,7 @@ class PreviousYearFields extends StatelessWidget {
               requiredField: true,
               errorText: prevRateError,
               isChanged: prevRateChanged,
+              readOnly: !isEditable,
             ),
             EditableField(
               width: w3,
@@ -122,6 +129,7 @@ class PreviousYearFields extends StatelessWidget {
               requiredField: true,
               errorText: prevRankError,
               isChanged: prevRankChanged,
+              readOnly: !isEditable,
             ),
             ValidatedYearSelector(
               l10n: l10n,
@@ -129,6 +137,7 @@ class PreviousYearFields extends StatelessWidget {
               validatedPreviousYear: validatedPreviousYear,
               onChanged: onValidatedChanged,
               isChanged: validatedPreviousYearChanged,
+              enabled: isEditable,
             ),
           ],
         );

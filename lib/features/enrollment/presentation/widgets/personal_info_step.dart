@@ -16,6 +16,8 @@ class PersonalInfoStep extends StatefulWidget {
   final String enrollmentId;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
+  final VoidCallback? onRefreshRequested;
+  final bool isEditable;
 
   const PersonalInfoStep({
     super.key,
@@ -23,6 +25,8 @@ class PersonalInfoStep extends StatefulWidget {
     required this.enrollmentId,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
+    this.onRefreshRequested,
+    this.isEditable = true,
   });
 
   @override
@@ -56,11 +60,8 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   bool get canSubmit => _isValid && _isDirty;
   bool get isDirty => _isDirty;
   bool get isValid => _isValid;
-  StepFormState get _stepState => StepFormState(
-    dirty: _isDirty,
-    valid: _isValid,
-    saving: _isSaving,
-  );
+  StepFormState get _stepState =>
+      StepFormState(dirty: _isDirty, valid: _isValid, saving: _isSaving);
 
   void _emitStepState() {
     final state = _stepState;
@@ -317,6 +318,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   }
 
   void _onSave(BuildContext context) {
+    if (!widget.isEditable) return;
     final l10n = AppLocalizations.of(context)!;
     if (!_isValid) {
       final reasons = _buildValidationErrors(l10n);
@@ -372,6 +374,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         enrollmentId: widget.enrollmentId,
         showInlineSaveButton: widget.showInlineSaveButton,
         canSave: canSubmit,
+        isEditable: widget.isEditable,
         firstNameError: _fieldErrorFor(
           _firstNameController.text,
           l10n.firstName,
@@ -408,10 +411,12 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
           _markCurrentAsSavedSnapshot();
           _recomputeFormState();
           _onSavingChanged(false);
+          widget.onRefreshRequested?.call();
           if (_showValidationHints) {
             setState(() => _showValidationHints = false);
           }
         },
+        onRefreshRequested: widget.onRefreshRequested,
       ),
     );
   }
