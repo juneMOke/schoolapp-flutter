@@ -165,6 +165,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchStudents => 'Search Students';
 
   @override
+  String get reRegistrationSearchHint => 'Enter either First name, Last name and Surname, or the target cycle/level to start the search.';
+
+  @override
+  String get reRegistrationAcademicInfoHelp => 'Select the target cycle and level to filter results.';
+
+  @override
+  String get reRegistrationSearchNoOptions => 'No cycle/level is available for this search.';
+
+  @override
+  String get reRegistrationSearchNeedCriteria => 'Provide either First name, Last name and Surname, or Cycle/Level.';
+
+  @override
+  String get reRegistrationSearchReady => 'Valid criteria, you can run the search.';
+
+  @override
   String get firstName => 'First Name';
 
   @override
@@ -504,7 +519,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String invalidNumberFieldError(String field) {
-    return 'The $field field must be a valid number.';
+    return 'The $field field must contain a valid number.';
   }
 
   @override

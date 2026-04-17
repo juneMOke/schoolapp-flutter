@@ -341,10 +341,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       _initialValuesByParentId[draftId] = ParentItemValue.fromParent(
         draftParent,
       );
-      _itemStatesByParentId[draftId] = const ParentItemFormState(
-        valid: false,
+      _itemStatesByParentId[draftId] = ParentItemFormState(
+        valid: ParentItemValue.fromParent(draftParent).isValid,
         dirty: false,
-        changedFields: <String, bool>{},
+        changedFields: const <String, bool>{},
       );
     });
 

@@ -435,7 +435,11 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   void _refreshAfterSave() {
     if (!mounted) return;
     final enrollmentBloc = context.read<EnrollmentBloc>();
-    widget.detailPolicy.requestLoad(enrollmentBloc, widget.detailIntent);
+    widget.detailPolicy.requestLoad(
+      enrollmentBloc,
+      widget.detailIntent,
+      silent: true,
+    );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
   }
 

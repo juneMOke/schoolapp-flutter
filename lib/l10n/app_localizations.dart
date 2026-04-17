@@ -395,6 +395,36 @@ abstract class AppLocalizations {
   /// **'Search Students'**
   String get searchStudents;
 
+  /// No description provided for @reRegistrationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter either First name, Last name and Surname, or the target cycle/level to start the search.'**
+  String get reRegistrationSearchHint;
+
+  /// No description provided for @reRegistrationAcademicInfoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the target cycle and level to filter results.'**
+  String get reRegistrationAcademicInfoHelp;
+
+  /// No description provided for @reRegistrationSearchNoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'No cycle/level is available for this search.'**
+  String get reRegistrationSearchNoOptions;
+
+  /// No description provided for @reRegistrationSearchNeedCriteria.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide either First name, Last name and Surname, or Cycle/Level.'**
+  String get reRegistrationSearchNeedCriteria;
+
+  /// No description provided for @reRegistrationSearchReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid criteria, you can run the search.'**
+  String get reRegistrationSearchReady;
+
   /// No description provided for @firstName.
   ///
   /// In en, this message translates to:
@@ -975,13 +1005,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Previous year academic history'**
-  String get stepAcademicPreviousSubtitle => stepAcademicSubtitle;
+  String get stepAcademicPreviousSubtitle;
 
   /// No description provided for @stepAcademicTargetSubtitle.
   ///
   /// In en, this message translates to:
   /// **'Target year academic objectives'**
-  String get stepAcademicTargetSubtitle => stepAcademicSubtitle;
+  String get stepAcademicTargetSubtitle;
 
   /// No description provided for @stepGuardianSubtitle.
   ///
@@ -1058,7 +1088,7 @@ abstract class AppLocalizations {
   /// No description provided for @invalidNumberFieldError.
   ///
   /// In en, this message translates to:
-  /// **'The {field} field must be a valid number.'**
+  /// **'The {field} field must contain a valid number.'**
   String invalidNumberFieldError(String field);
 
   /// No description provided for @savePersonalInfo.

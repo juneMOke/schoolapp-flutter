@@ -113,6 +113,11 @@
   "pageUnderConstruction": "This page is under development",
   "preRegistrations": "Pre-Registrations",
   "searchStudents": "Search Students",
+  "reRegistrationSearchHint": "Enter either First name, Last name and Surname, or the target cycle/level to start the search.",
+  "reRegistrationAcademicInfoHelp": "Select the target cycle and level to filter results.",
+  "reRegistrationSearchNoOptions": "No cycle/level is available for this search.",
+  "reRegistrationSearchNeedCriteria": "Provide either First name, Last name and Surname, or Cycle/Level.",
+  "reRegistrationSearchReady": "Valid criteria, you can run the search.",
   "firstName": "First Name",
   "lastName": "Last Name",
   "surname": "Surname",
@@ -215,6 +220,7 @@
   "phoneNumberHelp": "Guardian's phone number.",
   "emailLabel": "Email",
   "emailLabelHelp": "Guardian's email address.",
+  "relationshipLabel": "Relationship",
   "relationshipFather": "Father",
   "relationshipMother": "Mother",
   "relationshipGuardian": "Guardian",
@@ -247,6 +253,14 @@
   "personalInfoValidationReasonsTitle": "Please correct the following fields:",
   "requiredFieldError": "The {field} field is required.",
   "@requiredFieldError": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidNumberFieldError": "The {field} field must contain a valid number.",
+  "@invalidNumberFieldError": {
     "placeholders": {
       "field": {
         "type": "String"

@@ -37,7 +37,11 @@ extension EnrollmentWizardStepX on EnrollmentWizardStep {
 abstract class EnrollmentDetailPolicy {
   const EnrollmentDetailPolicy();
 
-  void requestLoad(EnrollmentBloc bloc, EnrollmentDetailIntent intent);
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  });
 
   EnrollmentLoadStatus loadStatus(EnrollmentState state);
 
@@ -79,8 +83,17 @@ class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
 
   @override
-  void requestLoad(EnrollmentBloc bloc, EnrollmentDetailIntent intent) {
-    bloc.add(EnrollmentDetailRequested(enrollmentId: intent.enrollmentId));
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {
+    bloc.add(
+      EnrollmentDetailRequested(
+        enrollmentId: intent.enrollmentId,
+        silent: silent,
+      ),
+    );
   }
 
   @override
@@ -101,13 +114,27 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.previewStatus;
 
   @override
-  void requestLoad(EnrollmentBloc bloc, EnrollmentDetailIntent intent) {
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {
     final studentId = intent.studentId;
     if (studentId == null || studentId.isEmpty) {
-      bloc.add(EnrollmentDetailRequested(enrollmentId: intent.enrollmentId));
+      bloc.add(
+        EnrollmentDetailRequested(
+          enrollmentId: intent.enrollmentId,
+          silent: silent,
+        ),
+      );
       return;
     }
-    bloc.add(EnrollmentPreviewByStudentIdRequested(studentId: studentId));
+    bloc.add(
+      EnrollmentPreviewByStudentIdRequested(
+        studentId: studentId,
+        silent: silent,
+      ),
+    );
   }
 
   @override
@@ -134,8 +161,17 @@ class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
 
   @override
-  void requestLoad(EnrollmentBloc bloc, EnrollmentDetailIntent intent) {
-    bloc.add(EnrollmentDetailRequested(enrollmentId: intent.enrollmentId));
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {
+    bloc.add(
+      EnrollmentDetailRequested(
+        enrollmentId: intent.enrollmentId,
+        silent: silent,
+      ),
+    );
   }
 
   @override

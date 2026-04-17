@@ -281,12 +281,14 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     EnrollmentPreviewByStudentIdRequested event,
     Emitter<EnrollmentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        previewStatus: EnrollmentLoadStatus.loading,
-        errorMessage: null,
-      ),
-    );
+    if (!event.silent) {
+      emit(
+        state.copyWith(
+          previewStatus: EnrollmentLoadStatus.loading,
+          errorMessage: null,
+        ),
+      );
+    }
 
     final result = await _getEnrollmentPreviewByStudentIdUseCase(
       studentId: event.studentId,

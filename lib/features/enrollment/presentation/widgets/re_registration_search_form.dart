@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/dropdown_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ReRegistrationAcademicOption {
@@ -50,11 +55,11 @@ class ReRegistrationSearchForm extends StatefulWidget {
 }
 
 class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
-  final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _surnameController = TextEditingController();
   String? _selectedAcademicOptionKey;
+  bool _showValidationHints = false;
 
   @override
   void didUpdateWidget(covariant ReRegistrationSearchForm oldWidget) {
@@ -71,6 +76,10 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         uniqueOptions.any((option) => option.key == _selectedAcademicOptionKey)
         ? _selectedAcademicOptionKey
         : null;
+    final canSearch = _canSearch(
+      hasOptions: hasOptions,
+      selectedKey: selectedKey,
+    );
 
     return Container(
       width: double.infinity,
@@ -87,106 +96,101 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         ],
       ),
       padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.subMenuReRegistrations,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimaryColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SearchFormTitle(label: l10n.subMenuReRegistrations),
+          const SizedBox(height: 6),
+          Text(
+            l10n.reRegistrationSearchHint,
+            style: const TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _buildTextField(
+                controller: _firstNameController,
+                label: l10n.firstName,
+                icon: Icons.person_outline_rounded,
               ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildTextField(
-                  controller: _firstNameController,
-                  label: l10n.firstName,
+              _buildTextField(
+                controller: _lastNameController,
+                label: l10n.lastName,
+                icon: Icons.badge_outlined,
+              ),
+              _buildTextField(
+                controller: _surnameController,
+                label: l10n.surname,
+                icon: Icons.account_circle_outlined,
+              ),
+              DropdownField(
+                key: ValueKey<String>(
+                  'academic-option-${selectedKey ?? 'none'}-${uniqueOptions.length}',
                 ),
-                _buildTextField(
-                  controller: _lastNameController,
-                  label: l10n.lastName,
-                ),
-                _buildTextField(
-                  controller: _surnameController,
-                  label: l10n.surname,
-                ),
-                SizedBox(
-                  width: 260,
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey<String>(
-                      'academic-option-${selectedKey ?? 'none'}-${uniqueOptions.length}',
-                    ),
-                    initialValue: selectedKey,
-                    decoration: InputDecoration(
-                      labelText:
-                          '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: uniqueOptions
-                        .map(
-                          (option) => DropdownMenuItem<String>(
-                            value: option.key,
-                            child: Text(
-                              option.label,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: widget.isLoading
-                        ? null
-                        : (value) {
-                            setState(() => _selectedAcademicOptionKey = value);
-                          },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return l10n.requiredFieldError(
-                          '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
-                        );
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: (!widget.isLoading && hasOptions) ? _submit : null,
-                  icon: const Icon(Icons.search_rounded, size: 16),
-                  label: Text(l10n.search),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(140, 42),
-                  ),
-                ),
-                if (!hasOptions) ...[
-                  const SizedBox(width: 10),
-                  const Flexible(
-                    child: Text(
-                      'Aucun niveau/cycle disponible pour la recherche.',
-                      style: TextStyle(
-                        color: AppTheme.textSecondaryColor,
-                        fontSize: 12,
+                width: 290,
+                label: '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
+                helpMessage: l10n.reRegistrationAcademicInfoHelp,
+                value: selectedKey,
+                enabled: !widget.isLoading,
+                errorText:
+                    _showValidationHints &&
+                        !_hasRequiredNames() &&
+                        selectedKey == null
+                    ? l10n.requiredFieldError(
+                        '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
+                      )
+                    : null,
+                items: uniqueOptions
+                    .map(
+                      (option) => DropdownMenuItem<String>(
+                        value: option.key,
+                        child: Text(
+                          option.label,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
+                    )
+                    .toList(growable: false),
+                onChanged: (value) {
+                  setState(() => _selectedAcademicOptionKey = value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              SizedBox(
+                width: 170,
+                child: EteeloValidationButton(
+                  onPressed: canSearch ? _submit : null,
+                  label: l10n.search,
+                  isLoading: widget.isLoading,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _searchAvailabilityMessage(
+                    l10n: l10n,
+                    hasOptions: hasOptions,
+                    selectedKey: selectedKey,
                   ),
-                ],
-              ],
-            ),
-          ],
-        ),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondaryColor,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -194,24 +198,42 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    required IconData icon,
   }) {
     final l10n = AppLocalizations.of(context)!;
+
     return SizedBox(
-      width: 220,
-      child: TextFormField(
-        controller: controller,
-        enabled: !widget.isLoading,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return l10n.requiredFieldError(label);
-          }
-          return null;
-        },
+      width: 240,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FormFieldLabel(
+            label: label,
+            requiredField: false,
+            helpMessage: l10n.enterFieldHint(label),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            enabled: !widget.isLoading,
+            textInputAction: TextInputAction.next,
+            onChanged: (_) => _onFieldChanged(),
+            decoration: buildInputDecoration(
+              hintText: l10n.enterFieldHint(label),
+              errorText:
+                  _showValidationHints &&
+                      !_hasAcademicCriteria() &&
+                      controller.text.trim().isEmpty
+                  ? l10n.requiredFieldError(label)
+                  : null,
+              prefixIcon: Icon(
+                icon,
+                size: 16,
+                color: AppTheme.textSecondaryColor,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -237,24 +259,73 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     }
   }
 
-  void _submit() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
+  void _onFieldChanged() {
+    if (_showValidationHints) {
+      setState(() {
+        _showValidationHints = false;
+      });
+    }
+  }
 
-    final selectedKey = _selectedAcademicOptionKey;
-    if (selectedKey == null) return;
-    final selectedOption = _buildUniqueOptions()
+  bool _hasRequiredNames() {
+    return _firstNameController.text.trim().isNotEmpty &&
+        _lastNameController.text.trim().isNotEmpty &&
+        _surnameController.text.trim().isNotEmpty;
+  }
+
+  bool _hasAcademicCriteria() {
+    return _selectedAcademicOptionKey != null;
+  }
+
+  bool _canSearch({required bool hasOptions, required String? selectedKey}) {
+    final hasAcademicCriteria = selectedKey != null;
+    final hasNameCriteria = _hasRequiredNames();
+    return !widget.isLoading && (hasNameCriteria || hasAcademicCriteria);
+  }
+
+  String _searchAvailabilityMessage({
+    required AppLocalizations l10n,
+    required bool hasOptions,
+    required String? selectedKey,
+  }) {
+    if (widget.isLoading) {
+      return '${l10n.search}...';
+    }
+    if (!hasOptions && !_hasRequiredNames()) {
+      return l10n.reRegistrationSearchNoOptions;
+    }
+    if (!_hasRequiredNames() && selectedKey == null) {
+      return l10n.reRegistrationSearchNeedCriteria;
+    }
+    return l10n.reRegistrationSearchReady;
+  }
+
+  void _submit() {
+    final uniqueOptions = _buildUniqueOptions();
+    final selectedKey =
+        uniqueOptions.any((option) => option.key == _selectedAcademicOptionKey)
+        ? _selectedAcademicOptionKey
+        : null;
+
+    if (!_canSearch(
+      hasOptions: uniqueOptions.isNotEmpty,
+      selectedKey: selectedKey,
+    )) {
+      setState(() => _showValidationHints = true);
+      return;
+    }
+
+    final selectedOption = uniqueOptions
         .where((option) => option.key == selectedKey)
         .firstOrNull;
-    if (selectedOption == null) return;
 
     widget.onSearch(
       ReRegistrationSearchRequest(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         surname: _surnameController.text.trim(),
-        schoolLevelGroupId: selectedOption.schoolLevelGroupId,
-        schoolLevelId: selectedOption.schoolLevelId,
+        schoolLevelGroupId: selectedOption?.schoolLevelGroupId ?? '',
+        schoolLevelId: selectedOption?.schoolLevelId ?? '',
       ),
     );
   }

@@ -85,6 +85,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
         backgroundColor: AppTheme.surfaceColor,
       ),
       body: BlocBuilder<EnrollmentBloc, EnrollmentState>(
+        buildWhen: (previous, current) =>
+            _policy.loadStatus(previous) != _policy.loadStatus(current) ||
+            _policy.detail(previous) != _policy.detail(current) ||
+            previous.errorMessage != current.errorMessage,
         builder: (context, state) {
           final loadStatus = _policy.loadStatus(state);
           final detail = _policy.detail(state);

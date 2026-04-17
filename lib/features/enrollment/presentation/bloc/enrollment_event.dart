@@ -140,9 +140,13 @@ class EnrollmentDetailRequested extends EnrollmentEvent {
 
 class EnrollmentPreviewByStudentIdRequested extends EnrollmentEvent {
   final String studentId;
+  final bool silent;
 
-  const EnrollmentPreviewByStudentIdRequested({required this.studentId});
+  const EnrollmentPreviewByStudentIdRequested({
+    required this.studentId,
+    this.silent = false,
+  });
 
   @override
-  List<Object?> get props => [studentId];
+  List<Object?> get props => [studentId, silent];
 }

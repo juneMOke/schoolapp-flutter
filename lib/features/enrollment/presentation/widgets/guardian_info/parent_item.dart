@@ -39,7 +39,6 @@ class _ParentItemState extends State<ParentItem> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
-  late final TextEditingController _idController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
 
@@ -55,7 +54,6 @@ class _ParentItemState extends State<ParentItem> {
     _firstNameController.addListener(_onFieldChanged);
     _lastNameController.addListener(_onFieldChanged);
     _surnameController.addListener(_onFieldChanged);
-    _idController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
 
@@ -84,14 +82,12 @@ class _ParentItemState extends State<ParentItem> {
       _firstNameController = TextEditingController(text: initial.firstName);
       _lastNameController = TextEditingController(text: initial.lastName);
       _surnameController = TextEditingController(text: initial.surname);
-      _idController = TextEditingController(text: initial.identificationNumber);
       _phoneController = TextEditingController(text: initial.phoneNumber);
       _emailController = TextEditingController(text: initial.email);
     } else {
       _firstNameController.text = initial.firstName;
       _lastNameController.text = initial.lastName;
       _surnameController.text = initial.surname;
-      _idController.text = initial.identificationNumber;
       _phoneController.text = initial.phoneNumber;
       _emailController.text = initial.email;
     }
@@ -116,7 +112,6 @@ class _ParentItemState extends State<ParentItem> {
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,
       surname: _surnameController.text,
-      identificationNumber: _idController.text,
       phoneNumber: _phoneController.text,
       email: _emailController.text,
       relationshipType: _selectedRelationshipType,
@@ -174,14 +169,12 @@ class _ParentItemState extends State<ParentItem> {
     _firstNameController.removeListener(_onFieldChanged);
     _lastNameController.removeListener(_onFieldChanged);
     _surnameController.removeListener(_onFieldChanged);
-    _idController.removeListener(_onFieldChanged);
     _phoneController.removeListener(_onFieldChanged);
     _emailController.removeListener(_onFieldChanged);
 
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
-    _idController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -229,16 +222,13 @@ class _ParentItemState extends State<ParentItem> {
               firstNameController: _firstNameController,
               lastNameController: _lastNameController,
               surnameController: _surnameController,
-              idController: _idController,
               phoneController: _phoneController,
               emailController: _emailController,
               firstNameChanged: changed['firstName'] ?? false,
               lastNameChanged: changed['lastName'] ?? false,
               surnameChanged: changed['surname'] ?? false,
-              idChanged: changed['identificationNumber'] ?? false,
               phoneChanged: changed['phoneNumber'] ?? false,
               emailChanged: changed['email'] ?? false,
-              idReadOnly: true,
               selectedRelationshipType: _selectedRelationshipType,
               onRelationshipTypeChanged: _onRelationshipChanged,
               relationshipChanged: changed['relationshipType'] ?? false,

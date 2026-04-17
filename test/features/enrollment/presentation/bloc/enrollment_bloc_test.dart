@@ -351,6 +351,41 @@ void main() {
     );
   });
 
+  group('EnrollmentDetailRequested', () {
+    const enrollmentId = 'enrollment-1';
+
+    blocTest<EnrollmentBloc, EnrollmentState>(
+      'emet uniquement [success] en mode silent pour préserver le stepper',
+      setUp: () {
+        when(
+          () => mockGetEnrollmentDetailUseCase(enrollmentId: enrollmentId),
+        ).thenAnswer((_) async => Right(_tEnrollmentDetail));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const EnrollmentDetailRequested(
+          enrollmentId: enrollmentId,
+          silent: true,
+        ),
+      ),
+      expect: () => [
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.detailStatus,
+              'detailStatus',
+              EnrollmentLoadStatus.success,
+            )
+            .having((s) => s.detail, 'detail', isNotNull)
+            .having((s) => s.errorMessage, 'errorMessage', isNull),
+      ],
+      verify: (_) {
+        verify(
+          () => mockGetEnrollmentDetailUseCase(enrollmentId: enrollmentId),
+        ).called(1);
+      },
+    );
+  });
+
   group('EnrollmentPreviewByStudentIdRequested', () {
     const studentId = 'student-1';
 
@@ -358,9 +393,8 @@ void main() {
       'emet [previewLoading, previewSuccess] avec le détail pré-rempli',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -386,9 +420,8 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).called(1);
       },
     );
@@ -397,9 +430,8 @@ void main() {
       'emet [previewLoading, previewFailure] quand le use case renvoie une erreur',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer(
           (_) async => const Left(ServerFailure('Preview unavailable')),
         );
@@ -429,9 +461,8 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).called(1);
       },
     );
@@ -440,9 +471,8 @@ void main() {
       'ne modifie pas summariesStatus ni detail lors du chargement du preview',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -473,6 +503,39 @@ void main() {
               EnrollmentLoadStatus.initial,
             ),
       ],
+    );
+
+    blocTest<EnrollmentBloc, EnrollmentState>(
+      'emet uniquement [previewSuccess] en mode silent pour préserver le stepper',
+      setUp: () {
+        when(
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+        ).thenAnswer((_) async => Right(_tEnrollmentDetail));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const EnrollmentPreviewByStudentIdRequested(
+          studentId: studentId,
+          silent: true,
+        ),
+      ),
+      expect: () => [
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.previewStatus,
+              'previewStatus',
+              EnrollmentLoadStatus.success,
+            )
+            .having((s) => s.preview, 'preview', isNotNull)
+            .having((s) => s.errorMessage, 'errorMessage', isNull),
+      ],
+      verify: (_) {
+        verify(
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+        ).called(1);
+      },
     );
   });
 }
