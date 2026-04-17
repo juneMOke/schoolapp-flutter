@@ -5,12 +5,18 @@ class PreRegistrationsInfoBar extends StatelessWidget {
   final int count;
   final bool isLoading;
   final Future<void> Function()? onRefresh;
+  final String? statusLabel;
+  final bool showStatusBadge;
+  final Widget? action;
 
   const PreRegistrationsInfoBar({
     super.key,
     required this.count,
     required this.isLoading,
     this.onRefresh,
+    this.statusLabel,
+    this.showStatusBadge = true,
+    this.action,
   });
 
   @override
@@ -48,7 +54,7 @@ class PreRegistrationsInfoBar extends StatelessWidget {
           Expanded(
             child: Text(
               isLoading
-                  ? 'Chargement des pré-inscriptions...'
+                  ? 'Chargement...'
                   : '$count dossier${count > 1 ? 's' : ''} trouvé${count > 1 ? 's' : ''}',
               style: const TextStyle(
                 fontSize: 13,
@@ -57,35 +63,41 @@ class PreRegistrationsInfoBar extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'PRE_REGISTERED',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
+          if (showStatusBadge) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                statusLabel ?? 'PRE_REGISTERED',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.primaryColor,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 6),
+            const SizedBox(width: 6),
+          ],
+          if (action != null) ...[
+            action!,
+            const SizedBox(width: 6),
+          ],
           Tooltip(
             message: 'Actualiser',
             child: IconButton(
-              onPressed: isLoading || onRefresh == null
-                  ? null
-                  : () => onRefresh!(),
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded),
+              onPressed:
+                  isLoading || onRefresh == null ? null : () => onRefresh!(),
+              icon:
+                  isLoading
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Icon(Icons.refresh_rounded),
               color: AppTheme.primaryColor,
             ),
           ),
