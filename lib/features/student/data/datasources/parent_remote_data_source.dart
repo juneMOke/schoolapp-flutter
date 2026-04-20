@@ -25,4 +25,11 @@ abstract class ParentRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Body() CreateParentRequest request,
   );
+
+  @DELETE(AppConstants.parentUnlinkEndpoint)
+  Future<void> unlinkParent(
+    @Extras() Map<String, dynamic> extras,
+    @Path('studentId') String studentId,
+    @Path('parentId') String parentId,
+  );
 }

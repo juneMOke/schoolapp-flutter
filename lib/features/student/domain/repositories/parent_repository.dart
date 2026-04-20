@@ -21,4 +21,9 @@ abstract class ParentRepository {
     required String phoneNumber,
     required String relationshipType,
   });
+
+  Future<Either<Failure, void>> unlinkParent({
+    required String studentId,
+    required String parentId,
+  });
 }

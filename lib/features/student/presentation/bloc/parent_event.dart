@@ -69,3 +69,16 @@ class ParentCreateRequested extends ParentEvent {
     relationshipType,
   ];
 }
+
+class ParentUnlinkRequested extends ParentEvent {
+  final String studentId;
+  final String parentId;
+
+  const ParentUnlinkRequested({
+    required this.studentId,
+    required this.parentId,
+  });
+
+  @override
+  List<Object?> get props => [studentId, parentId];
+}

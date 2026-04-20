@@ -4,7 +4,7 @@ const _undefinedParent = Object();
 
 enum ParentUpdateStatus { initial, loading, success, failure }
 
-enum ParentOperation { none, update, create }
+enum ParentOperation { none, update, create, unlink }
 
 class ParentState extends Equatable {
   final ParentUpdateStatus status;

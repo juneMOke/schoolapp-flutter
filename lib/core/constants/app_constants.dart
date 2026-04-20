@@ -21,6 +21,8 @@ class AppConstants {
 
   static const String parentUpdateEndpoint = '/api/v1/parents/{parentId}';
   static const String parentCreateEndpoint = '/api/v1/parents';
+  static const String parentUnlinkEndpoint =
+      '/api/v1/parents/students/{studentId}/{parentId}';
 
   static const String enrollmentAcademicInfoEndpoint =
       '/api/v1/enrollments/{enrollmentId}/previous-school-info';

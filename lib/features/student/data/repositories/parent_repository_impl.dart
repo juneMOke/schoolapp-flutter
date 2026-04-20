@@ -77,4 +77,20 @@ class ParentRepositoryImpl implements ParentRepository {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> unlinkParent({
+    required String studentId,
+    required String parentId,
+  }) async {
+    try {
+      await remoteDataSource.unlinkParent(requiredAuth, studentId, parentId);
+      return const Right(null);
+    } on DioException catch (e) {
+      if (e.error is Failure) return Left(e.error as Failure);
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
 }

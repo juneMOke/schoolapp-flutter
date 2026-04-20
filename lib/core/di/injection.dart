@@ -61,6 +61,7 @@ import 'package:school_app_flutter/features/student/data/repositories/student_re
 import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/create_parent_use_case.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/unlink_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_address_use_case.dart';
@@ -449,10 +450,15 @@ Future<void> configureDependencies() async {
     () => CreateParentUseCase(getIt<ParentRepository>()),
   );
 
+  getIt.registerFactory<UnlinkParentUseCase>(
+    () => UnlinkParentUseCase(getIt<ParentRepository>()),
+  );
+
   getIt.registerFactory<ParentBloc>(
     () => ParentBloc(
       updateParentUseCase: getIt<UpdateParentUseCase>(),
       createParentUseCase: getIt<CreateParentUseCase>(),
+      unlinkParentUseCase: getIt<UnlinkParentUseCase>(),
     ),
   );
 
