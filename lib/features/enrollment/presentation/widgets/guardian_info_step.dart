@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class GuardianInfoStep extends StatefulWidget {
   final List<ParentSummary> parentDetails;
+  final String studentId;
   final String enrollmentId;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
@@ -22,6 +25,7 @@ class GuardianInfoStep extends StatefulWidget {
   const GuardianInfoStep({
     super.key,
     required this.parentDetails,
+    required this.studentId,
     required this.enrollmentId,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
@@ -71,13 +75,31 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     });
   }
 
+  ParentSummary _buildDraftParent() {
+    final draftId =
+        '$_draftParentIdPrefix${DateTime.now().microsecondsSinceEpoch}';
+    return ParentSummary(
+      id: draftId,
+      firstName: '',
+      lastName: '',
+      surname: null,
+      identificationNumber: '',
+      phoneNumber: '',
+      email: '',
+      relationshipType: RelationshipType.guardian,
+    );
+  }
+
   void _syncFromParentDetails(
     List<ParentSummary> parents, {
     required bool resetSnapshot,
   }) {
     _isHydratingFromDetail = true;
     try {
-      _editableParentDetails = List<ParentSummary>.from(parents);
+      final effectiveParents = parents.isEmpty
+          ? [_buildDraftParent()]
+          : List<ParentSummary>.from(parents);
+      _editableParentDetails = effectiveParents;
       _currentValuesByParentId = <String, ParentItemValue>{
         for (final parent in _editableParentDetails)
           parent.id: ParentItemValue.fromParent(parent),
@@ -140,6 +162,16 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   void _recomputeFormState({bool notifyParent = true}) {
     if (_isHydratingFromDetail) return;
+
+    // Défensif: éviter setState pendant la phase de build.
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _recomputeFormState(notifyParent: notifyParent);
+      });
+      return;
+    }
 
     final parentIds = _editableParentDetails
         .map((p) => p.id)
@@ -226,7 +258,6 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       ..addAll(
         _editableParentDetails
             .where((parent) => _itemStatesByParentId[parent.id]?.dirty == true)
-            .where((parent) => !_isDraftParentId(parent.id))
             .map((parent) => parent.id),
       );
 
@@ -265,17 +296,69 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
-    _parentBloc.add(
-      ParentUpdateRequested(
-        parentId: parentId,
-        firstName: current.firstName.trim(),
-        lastName: current.lastName.trim(),
-        surname: current.surname.trim().isEmpty ? null : current.surname.trim(),
-        email: current.email.trim(),
-        phoneNumber: current.phoneNumber.trim(),
-        relationshipType: current.relationshipType.name.toUpperCase(),
-      ),
-    );
+    if (_isDraftParentId(parentId)) {
+      final studentId = widget.studentId.trim();
+      if (studentId.isEmpty) {
+        _pendingParentIds.clear();
+        _isBatchSaving = false;
+        _onSavingChanged(false);
+
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackBar.showError(context, l10n.validatePersonalInfoHint);
+        return;
+      }
+
+      _parentBloc.add(
+        ParentCreateRequested(
+          studentId: studentId,
+          firstName: current.firstName.trim(),
+          lastName: current.lastName.trim(),
+          surname: current.surname.trim().isEmpty
+              ? null
+              : current.surname.trim(),
+          phoneNumber: current.phoneNumber.trim(),
+          relationshipType: current.relationshipType.name.toUpperCase(),
+        ),
+      );
+    } else {
+      _parentBloc.add(
+        ParentUpdateRequested(
+          parentId: parentId,
+          firstName: current.firstName.trim(),
+          lastName: current.lastName.trim(),
+          surname: current.surname.trim().isEmpty
+              ? null
+              : current.surname.trim(),
+          email: current.email.trim(),
+          phoneNumber: current.phoneNumber.trim(),
+          relationshipType: current.relationshipType.name.toUpperCase(),
+        ),
+      );
+    }
+  }
+
+  /// Remplace un parent draft par le vrai parent retourné par l'API après création.
+  void _replaceDraftWithCreated(String draftId, ParentSummary created) {
+    final currentValue = _currentValuesByParentId[draftId];
+
+    setState(() {
+      _editableParentDetails = _editableParentDetails
+          .map((p) => p.id == draftId ? created : p)
+          .toList(growable: false);
+
+      _currentValuesByParentId.remove(draftId);
+      _initialValuesByParentId.remove(draftId);
+      _itemStatesByParentId.remove(draftId);
+
+      final savedValue = currentValue ?? ParentItemValue.fromParent(created);
+      _currentValuesByParentId[created.id] = savedValue;
+      _initialValuesByParentId[created.id] = savedValue;
+      _itemStatesByParentId[created.id] = ParentItemFormState(
+        valid: savedValue.isValid,
+        dirty: false,
+        changedFields: const <String, bool>{},
+      );
+    });
   }
 
   void _markParentAsSaved(String parentId) {
@@ -372,6 +455,23 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
+  Future<void> _onRemoveGuardianRequested(String parentId) async {
+    if (!widget.isEditable || _isBatchSaving) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: l10n.guardianDeleteConfirmTitle,
+      message: l10n.guardianDeleteConfirmMessage,
+      confirmLabel: l10n.guardianDeleteConfirmAction,
+      cancelLabel: l10n.cancel,
+      isDestructive: true,
+    );
+
+    if (!mounted || !confirmed) return;
+    _onRemoveGuardian(parentId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ParentBloc>.value(
@@ -386,7 +486,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           if (state.status == ParentUpdateStatus.success) {
             if (_pendingParentIds.isNotEmpty) {
               final savedParentId = _pendingParentIds.removeAt(0);
-              _markParentAsSaved(savedParentId);
+
+              if (state.operation == ParentOperation.create &&
+                  state.updatedParent != null) {
+                _replaceDraftWithCreated(savedParentId, state.updatedParent!);
+              } else {
+                _markParentAsSaved(savedParentId);
+              }
             }
 
             if (_pendingParentIds.isNotEmpty) {
@@ -426,7 +532,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             onItemStateChanged: _onParentItemStateChanged,
             onItemValueChanged: _onParentItemValueChanged,
             onAddParent: _onAddGuardian,
-            onRemoveParent: _onRemoveGuardian,
+            onRemoveParent: _onRemoveGuardianRequested,
             isLoading: isLoading,
             canSave: _canSave,
             showInlineSaveButton: widget.showInlineSaveButton,

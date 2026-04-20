@@ -218,7 +218,9 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
 
     if (selectedGroupBundle == null && groupBundles.isNotEmpty) {
       _selectedSchoolLevelGroupId = groupBundles.first.schoolLevelGroup.id;
-      _initialSchoolLevelGroupId = _selectedSchoolLevelGroupId;
+      // Ne pas réinitialiser _initialSchoolLevelGroupId : le snapshot initial
+      // représente l'état serveur. Pour newFirstRegistration, _initial* reste ''
+      // → formulaire dirty après application des defaults bootstrap.
       bootstrapChanged = true;
     }
 
@@ -232,7 +234,7 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
       _selectedSchoolLevelId = resolvedGroupBundle.schoolLevels.isNotEmpty
           ? resolvedGroupBundle.schoolLevels.first.schoolLevel.id
           : '';
-      _initialSchoolLevelId = _selectedSchoolLevelId;
+      // Idem : ne pas écraser _initialSchoolLevelId.
       bootstrapChanged = true;
     }
 

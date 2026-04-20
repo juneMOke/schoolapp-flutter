@@ -7,6 +7,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_avatar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+const double _summaryCompactBreakpoint = 760;
+
 class SummaryStep extends StatelessWidget {
   final enrollment.EnrollmentDetail enrollmentDetail;
 
@@ -30,82 +32,141 @@ class SummaryStep extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final student = enrollmentDetail.studentDetail;
+    final enrollmentCode = enrollmentDetail.enrollmentDetail.enrollmentCode;
 
     return Card(
       elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.largePadding),
-        child: Row(
-          children: [
-            StudentAvatar(
-              firstName: student.firstName,
-              lastName: student.lastName,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${student.firstName} ${student.lastName}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 760;
+
+            final identityInfo = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${student.firstName} ${student.lastName}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  if (student.surname.isNotEmpty)
-                    Text(
-                      student.surname,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                    ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.badge, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        enrollmentDetail.enrollmentDetail.enrollmentCode,
+                ),
+                if (student.surname.isNotEmpty)
+                  Text(
+                    student.surname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.badge, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        enrollmentCode,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontFamily: 'monospace',
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+
+            final statusBadge = EnrollmentStatusBadge(
+              status: enrollmentDetail.enrollmentDetail.status,
+            );
+
+            if (isCompact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      StudentAvatar(
+                        firstName: student.firstName,
+                        lastName: student.lastName,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: identityInfo),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  statusBadge,
                 ],
-              ),
-            ),
-            EnrollmentStatusBadge(
-              status: enrollmentDetail.enrollmentDetail.status,
-            ),
-          ],
+              );
+            }
+
+            return Row(
+              children: [
+                StudentAvatar(
+                  firstName: student.firstName,
+                  lastName: student.lastName,
+                ),
+                const SizedBox(width: 16),
+                Expanded(child: identityInfo),
+                const SizedBox(width: 16),
+                statusBadge,
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
   Widget _buildSummaryCards(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < _summaryCompactBreakpoint;
+
+        if (isCompact) {
+          return Column(
+            children: [
+              _buildPersonalInfoCard(context, l10n),
+              const SizedBox(height: 16),
+              _buildAcademicInfoCard(context, l10n),
+              const SizedBox(height: 16),
+              _buildGuardianInfoCard(context, l10n),
+              const SizedBox(height: 16),
+              _buildNextStepsCard(context, l10n),
+            ],
+          );
+        }
+
+        return Column(
           children: [
-            Expanded(child: _buildPersonalInfoCard(context, l10n)),
-            const SizedBox(width: 16),
-            Expanded(child: _buildAcademicInfoCard(context, l10n)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _buildPersonalInfoCard(context, l10n)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildAcademicInfoCard(context, l10n)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _buildGuardianInfoCard(context, l10n)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildNextStepsCard(context, l10n)),
+              ],
+            ),
           ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: _buildGuardianInfoCard(context, l10n)),
-            const SizedBox(width: 16),
-            Expanded(child: _buildNextStepsCard(context, l10n)),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -204,32 +265,49 @@ class SummaryStep extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.largePadding),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _exportToPdf(),
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Exporter PDF'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < _summaryCompactBreakpoint;
+
+            final exportButton = OutlinedButton.icon(
+              onPressed: () => _exportToPdf(),
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Exporter PDF'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _validateEnrollment(),
-                icon: const Icon(Icons.check_circle),
-                label: const Text('Valider l\'inscription'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+            );
+
+            final validateButton = ElevatedButton.icon(
+              onPressed: () => _validateEnrollment(),
+              icon: const Icon(Icons.check_circle),
+              label: const Text('Valider l\'inscription'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-            ),
-          ],
+            );
+
+            if (isCompact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  exportButton,
+                  const SizedBox(height: 12),
+                  validateButton,
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                Expanded(child: exportButton),
+                const SizedBox(width: 16),
+                Expanded(child: validateButton),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -241,12 +319,9 @@ class SummaryStep extends StatelessWidget {
       RelationshipType.mother => 'Mère',
       RelationshipType.guardian => 'Tuteur',
       RelationshipType.other => 'Autre',
-      // TODO: Handle this case.
-      RelationshipType.uncle => throw UnimplementedError(),
-      // TODO: Handle this case.
-      RelationshipType.aunt => throw UnimplementedError(),
-      // TODO: Handle this case.
-      RelationshipType.grandparent => throw UnimplementedError(),
+      RelationshipType.uncle => 'Oncle',
+      RelationshipType.aunt => 'Tante',
+      RelationshipType.grandparent => 'Grand-parent',
     };
   }
 
@@ -284,11 +359,15 @@ class _SummaryCard extends StatelessWidget {
               children: [
                 Icon(icon, color: color, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: color,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
                   ),
                 ),
               ],
@@ -351,7 +430,10 @@ class _SummaryItem extends StatelessWidget {
               ],
             ),
           ),
-          ?action,
+          if (action != null) ...[
+            const SizedBox(width: 8),
+            Flexible(child: action!),
+          ],
         ],
       ),
     );

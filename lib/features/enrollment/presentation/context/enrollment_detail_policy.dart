@@ -1,7 +1,30 @@
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
+import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
+
+class EnrollmentPersonalInfoPayload {
+  final String firstName;
+  final String lastName;
+  final String surname;
+  final String dateOfBirth;
+  final String birthPlace;
+  final String nationality;
+  final String gender;
+
+  const EnrollmentPersonalInfoPayload({
+    required this.firstName,
+    required this.lastName,
+    required this.surname,
+    required this.dateOfBirth,
+    required this.birthPlace,
+    required this.nationality,
+    required this.gender,
+  });
+}
 
 enum EnrollmentWizardStep {
   personalInfo,
@@ -53,22 +76,39 @@ abstract class EnrollmentDetailPolicy {
     return isStepEditable(step) && step != EnrollmentWizardStep.summary;
   }
 
+  EnrollmentDetailIntent resolveEffectiveIntent({
+    required EnrollmentDetailIntent baseIntent,
+    EnrollmentSummary? createdEnrollmentSummary,
+  }) {
+    return baseIntent;
+  }
+
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => false;
 
   bool requiresPreviousYearBootstrap(EnrollmentDetailIntent intent) => false;
+
+  void savePersonalInfo({
+    required EnrollmentBloc enrollmentBloc,
+    required StudentBloc studentBloc,
+    required EnrollmentDetailIntent intent,
+    required StudentDetail currentStudent,
+    required EnrollmentPersonalInfoPayload payload,
+  });
 }
 
 class EnrollmentDetailPolicyResolver {
   const EnrollmentDetailPolicyResolver._();
 
-  static EnrollmentDetailPolicy fromOrigin(EnrollmentDetailOrigin origin) {
-    return switch (origin) {
+  static EnrollmentDetailPolicy fromIntent(EnrollmentDetailIntent intent) {
+    return switch (intent.origin) {
       EnrollmentDetailOrigin.preRegistration =>
         const PreRegistrationDetailPolicy(),
       EnrollmentDetailOrigin.reRegistration =>
         const ReRegistrationDetailPolicy(),
       EnrollmentDetailOrigin.firstRegistration =>
-        const FirstRegistrationDetailPolicy(),
+        FirstRegistrationDetailPolicy(status: intent.status),
+      EnrollmentDetailOrigin.newFirstRegistration =>
+        const NewFirstRegistrationDetailPolicy(),
     };
   }
 }
@@ -102,6 +142,28 @@ class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
+
+  @override
+  void savePersonalInfo({
+    required EnrollmentBloc enrollmentBloc,
+    required StudentBloc studentBloc,
+    required EnrollmentDetailIntent intent,
+    required StudentDetail currentStudent,
+    required EnrollmentPersonalInfoPayload payload,
+  }) {
+    studentBloc.add(
+      StudentPersonalInfoUpdateRequested(
+        studentId: currentStudent.id,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        surname: payload.surname,
+        dateOfBirth: payload.dateOfBirth,
+        gender: payload.gender,
+        birthPlace: payload.birthPlace,
+        nationality: payload.nationality,
+      ),
+    );
+  }
 }
 
 class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
@@ -149,10 +211,34 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool requiresPreviousYearBootstrap(EnrollmentDetailIntent intent) => true;
+
+  @override
+  void savePersonalInfo({
+    required EnrollmentBloc enrollmentBloc,
+    required StudentBloc studentBloc,
+    required EnrollmentDetailIntent intent,
+    required StudentDetail currentStudent,
+    required EnrollmentPersonalInfoPayload payload,
+  }) {
+    studentBloc.add(
+      StudentPersonalInfoUpdateRequested(
+        studentId: currentStudent.id,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        surname: payload.surname,
+        dateOfBirth: payload.dateOfBirth,
+        gender: payload.gender,
+        birthPlace: payload.birthPlace,
+        nationality: payload.nationality,
+      ),
+    );
+  }
 }
 
 class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
-  const FirstRegistrationDetailPolicy();
+  final String? status;
+
+  const FirstRegistrationDetailPolicy({this.status});
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.detail;
@@ -176,6 +262,107 @@ class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool isStepEditable(EnrollmentWizardStep step) {
-    return false;
+    final normalizedStatus = status?.trim().toUpperCase();
+    if (normalizedStatus != 'IN_PROGRESS') {
+      return false;
+    }
+
+    return step != EnrollmentWizardStep.summary;
+  }
+
+  @override
+  bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
+
+  @override
+  void savePersonalInfo({
+    required EnrollmentBloc enrollmentBloc,
+    required StudentBloc studentBloc,
+    required EnrollmentDetailIntent intent,
+    required StudentDetail currentStudent,
+    required EnrollmentPersonalInfoPayload payload,
+  }) {
+    studentBloc.add(
+      StudentPersonalInfoUpdateRequested(
+        studentId: currentStudent.id,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        surname: payload.surname,
+        dateOfBirth: payload.dateOfBirth,
+        gender: payload.gender,
+        birthPlace: payload.birthPlace,
+        nationality: payload.nationality,
+      ),
+    );
+  }
+}
+
+class NewFirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
+  const NewFirstRegistrationDetailPolicy();
+
+  @override
+  EnrollmentDetail? detail(EnrollmentState state) => state.detail;
+
+  @override
+  EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
+
+  @override
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {
+    if (intent.enrollmentId == 'new') {
+      if (!silent) {
+        bloc.add(const EnrollmentNewDetailInitialized());
+      }
+      return;
+    }
+
+    bloc.add(
+      EnrollmentDetailRequested(
+        enrollmentId: intent.enrollmentId,
+        silent: silent,
+      ),
+    );
+  }
+
+  @override
+  EnrollmentDetailIntent resolveEffectiveIntent({
+    required EnrollmentDetailIntent baseIntent,
+    EnrollmentSummary? createdEnrollmentSummary,
+  }) {
+    if (createdEnrollmentSummary == null) {
+      return baseIntent;
+    }
+
+    return baseIntent.withEnrollmentId(createdEnrollmentSummary.enrollmentId);
+  }
+
+  @override
+  bool isStepEditable(EnrollmentWizardStep step) =>
+      step != EnrollmentWizardStep.summary;
+
+  @override
+  bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
+
+  @override
+  void savePersonalInfo({
+    required EnrollmentBloc enrollmentBloc,
+    required StudentBloc studentBloc,
+    required EnrollmentDetailIntent intent,
+    required StudentDetail currentStudent,
+    required EnrollmentPersonalInfoPayload payload,
+  }) {
+    enrollmentBloc.add(
+      EnrollmentCreateRequested(
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        surname: payload.surname,
+        dateOfBirth: payload.dateOfBirth,
+        birthPlace: payload.birthPlace,
+        nationality: payload.nationality,
+        gender: payload.gender,
+      ),
+    );
   }
 }

@@ -246,6 +246,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianInformation => 'Informations Tuteurs';
 
   @override
+  String get guardianAddAction => 'Ajouter un tuteur/responsable';
+
+  @override
+  String get guardianSaveAction => 'Enregistrer';
+
+  @override
+  String get guardianRelationshipLabel => 'Relation';
+
+  @override
+  String get guardianDeleteAction => 'Supprimer ce tuteur';
+
+  @override
+  String get guardianDeleteConfirmTitle => 'Confirmer la suppression';
+
+  @override
+  String get guardianDeleteConfirmMessage => 'Voulez-vous vraiment supprimer ce tuteur ? Cette action est irréversible.';
+
+  @override
+  String get guardianDeleteConfirmAction => 'Supprimer';
+
+  @override
   String get schoolFees => 'Frais Scolaires';
 
   @override
@@ -575,6 +596,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Erreur lors de la mise à jour de l\'adresse : $message';
   }
+
+  @override
+  String get enrollmentStatusFilterLabel => 'Statut';
+
+  @override
+  String get enrollmentStatusInProgress => 'En cours';
+
+  @override
+  String get enrollmentStatusAdminCompleted => 'Complété (Administratif)';
+
+  @override
+  String get enrollmentStatusFinancialCompleted => 'Complété (Financier)';
+
+  @override
+  String get enrollmentStatusCompleted => 'Complété';
+
+  @override
+  String get enrollmentStatusValidated => 'Validé';
+
+  @override
+  String get enrollmentStatusRejected => 'Rejeté';
+
+  @override
+  String get enrollmentStatusCancelled => 'Annulé';
+
+  @override
+  String get enrollmentReadOnlyTitle => 'Mode consultation';
+
+  @override
+  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
+
+  @override
+  String get enrollmentEditableTitle => 'Mode édition';
+
+  @override
+  String get enrollmentEditableMessage => 'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';

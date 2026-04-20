@@ -4,6 +4,16 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 
 abstract class EnrollmentRepository {
+  Future<Either<Failure, EnrollmentSummary>> createEnrollment({
+    required String firstName,
+    required String lastName,
+    required String surname,
+    required String dateOfBirth,
+    required String birthPlace,
+    required String nationality,
+    required String gender,
+  });
+
   Future<Either<Failure, List<EnrollmentSummary>>>
   getEnrollmentSummaryListByStatus({
     required String status,

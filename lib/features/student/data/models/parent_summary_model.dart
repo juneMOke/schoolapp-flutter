@@ -24,15 +24,17 @@ class ParentSummaryModel {
 
   factory ParentSummaryModel.fromJson(Map<String, dynamic> json) =>
       ParentSummaryModel(
-        id: json['id'] as String,
-        firstName: json['firstName'] as String,
-        lastName: json['lastName'] as String,
-        surname: json['surname'] as String?,
-        identificationNumber: json['identificationNumber'] as String,
-        phoneNumber: json['phoneNumber'] as String,
-        email: json['email'] as String,
-        relationshipType: json['relationshipType'] as String,
+        id: _readString(json['id']),
+        firstName: _readString(json['firstName']),
+        lastName: _readString(json['lastName']),
+        surname: _readString(json['surname']),
+        identificationNumber: _readString(json['identificationNumber']),
+        phoneNumber: _readString(json['phoneNumber']),
+        email: _readString(json['email']),
+        relationshipType: _readString(json['relationshipType']),
       );
+
+  static String _readString(dynamic value) => value?.toString() ?? '';
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,

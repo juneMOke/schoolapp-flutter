@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/sear
 class EnrollmentSummariesWidget extends StatefulWidget {
   final String status;
   final bool showStatusBadge;
+  final bool showStatusFilter;
   final Widget? action;
   final EnrollmentDetailIntent Function(EnrollmentSummary summary)
   intentFactory;
@@ -27,6 +28,7 @@ class EnrollmentSummariesWidget extends StatefulWidget {
     super.key,
     required this.status,
     this.showStatusBadge = true,
+    this.showStatusFilter = false,
     this.action,
     required this.intentFactory,
   });
@@ -40,9 +42,15 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
   static const Duration _refreshCooldown = Duration(milliseconds: 700);
   DateTime? _lastRefreshAt;
 
+  /// Effective status used for queries. When [showStatusFilter] is true,
+  /// this is managed locally (starts at IN_PROGRESS). Otherwise it mirrors
+  /// the fixed [widget.status] supplied by the parent page.
+  late String _effectiveStatus;
+
   @override
   void initState() {
     super.initState();
+    _effectiveStatus = widget.showStatusFilter ? 'IN_PROGRESS' : widget.status;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _emitBootstrapCurrentYear();
       _requestSummariesIfContextAvailable();
@@ -131,7 +139,12 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
                       children: [
                         SearchForm(
                           academicYearId: academicYearId,
-                          status: widget.status,
+                          status: _effectiveStatus,
+                          showStatusFilter: widget.showStatusFilter,
+                          onStatusChanged: (newStatus) {
+                            setState(() => _effectiveStatus = newStatus);
+                            _requestSummariesIfContextAvailable();
+                          },
                         ),
                         const SizedBox(height: 12),
                         BlocBuilder<EnrollmentBloc, EnrollmentState>(
@@ -201,14 +214,14 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
 
     _lastRefreshAt = now;
 
-    if (lastSummariesQuery != null && lastSummariesQuery.status == widget.status) {
+    if (lastSummariesQuery != null && lastSummariesQuery.status == _effectiveStatus) {
       enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
       return;
     }
 
     enrollmentBloc.add(
       EnrollmentSummariesRequested(
-        status: widget.status,
+        status: _effectiveStatus,
         academicYearId: academicYearId,
       ),
     );

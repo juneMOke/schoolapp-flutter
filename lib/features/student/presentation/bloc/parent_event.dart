@@ -41,3 +41,31 @@ class ParentUpdateRequested extends ParentEvent {
     relationshipType,
   ];
 }
+
+class ParentCreateRequested extends ParentEvent {
+  final String studentId;
+  final String firstName;
+  final String lastName;
+  final String? surname;
+  final String phoneNumber;
+  final String relationshipType;
+
+  const ParentCreateRequested({
+    required this.studentId,
+    required this.firstName,
+    required this.lastName,
+    this.surname,
+    required this.phoneNumber,
+    required this.relationshipType,
+  });
+
+  @override
+  List<Object?> get props => [
+    studentId,
+    firstName,
+    lastName,
+    surname,
+    phoneNumber,
+    relationshipType,
+  ];
+}

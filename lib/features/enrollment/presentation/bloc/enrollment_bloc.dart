@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
@@ -21,6 +22,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
   final GetEnrollmentDetailUseCase _getEnrollmentDetailUseCase;
   final GetEnrollmentPreviewByStudentIdUseCase
   _getEnrollmentPreviewByStudentIdUseCase;
+  final CreateEnrollmentUseCase _createEnrollmentUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   _searchByStudentNameUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -36,6 +38,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     required GetEnrollmentDetailUseCase getEnrollmentDetailUseCase,
     required GetEnrollmentPreviewByStudentIdUseCase
     getEnrollmentPreviewByStudentIdUseCase,
+    required CreateEnrollmentUseCase createEnrollmentUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
     searchByStudentNameUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -48,6 +51,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
        _getEnrollmentDetailUseCase = getEnrollmentDetailUseCase,
        _getEnrollmentPreviewByStudentIdUseCase =
            getEnrollmentPreviewByStudentIdUseCase,
+       _createEnrollmentUseCase = createEnrollmentUseCase,
        _searchByStudentNameUseCase = searchByStudentNameUseCase,
        _searchByStudentNamesAndDateOfBirthUseCase =
            searchByStudentNamesAndDateOfBirthUseCase,
@@ -70,6 +74,9 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
       _onSummariesByAcademicInfoRequested,
     );
     on<EnrollmentDetailRequested>(_onDetailRequested);
+    on<EnrollmentNewDetailInitialized>(_onNewDetailInitialized);
+    on<EnrollmentCreateRequested>(_onCreateRequested);
+    on<EnrollmentCreateResultConsumed>(_onCreateResultConsumed);
     on<EnrollmentPreviewByStudentIdRequested>(_onPreviewByStudentIdRequested);
   }
 
@@ -277,6 +284,19 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     );
   }
 
+  Future<void> _onNewDetailInitialized(
+    EnrollmentNewDetailInitialized event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        detailStatus: EnrollmentLoadStatus.success,
+        detail: EnrollmentDetail.empty(),
+        errorMessage: null,
+      ),
+    );
+  }
+
   Future<void> _onPreviewByStudentIdRequested(
     EnrollmentPreviewByStudentIdRequested event,
     Emitter<EnrollmentState> emit,
@@ -307,6 +327,58 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           preview: preview,
           errorMessage: null,
         ),
+      ),
+    );
+  }
+
+  Future<void> _onCreateRequested(
+    EnrollmentCreateRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        createStatus: EnrollmentLoadStatus.loading,
+        createdEnrollmentSummary: null,
+        errorMessage: null,
+      ),
+    );
+
+    final result = await _createEnrollmentUseCase(
+      firstName: event.firstName,
+      lastName: event.lastName,
+      surname: event.surname,
+      dateOfBirth: event.dateOfBirth,
+      birthPlace: event.birthPlace,
+      nationality: event.nationality,
+      gender: event.gender,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          createStatus: EnrollmentLoadStatus.failure,
+          createdEnrollmentSummary: null,
+          errorMessage: failure.message,
+        ),
+      ),
+      (createdEnrollmentSummary) => emit(
+        state.copyWith(
+          createStatus: EnrollmentLoadStatus.success,
+          createdEnrollmentSummary: createdEnrollmentSummary,
+          errorMessage: null,
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onCreateResultConsumed(
+    EnrollmentCreateResultConsumed event,
+    Emitter<EnrollmentState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        createStatus: EnrollmentLoadStatus.initial,
+        createdEnrollmentSummary: null,
       ),
     );
   }

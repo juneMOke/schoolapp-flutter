@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
@@ -18,6 +21,8 @@ class PersonalInfoStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+  final EnrollmentDetailIntent detailIntent;
+  final EnrollmentDetailPolicy detailPolicy;
 
   const PersonalInfoStep({
     super.key,
@@ -27,6 +32,8 @@ class PersonalInfoStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    required this.detailIntent,
+    required this.detailPolicy,
   });
 
   @override
@@ -332,9 +339,12 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     }
     if (!_isDirty) return;
 
-    _studentBloc.add(
-      StudentPersonalInfoUpdateRequested(
-        studentId: widget.studentDetail.id,
+    widget.detailPolicy.savePersonalInfo(
+      enrollmentBloc: context.read<EnrollmentBloc>(),
+      studentBloc: _studentBloc,
+      intent: widget.detailIntent,
+      currentStudent: widget.studentDetail,
+      payload: EnrollmentPersonalInfoPayload(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         surname: _surnameController.text.trim(),
@@ -353,70 +363,96 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
     return BlocProvider<StudentBloc>.value(
       value: _studentBloc,
-      child: PersonalInfoStepBody(
-        studentDetail: widget.studentDetail,
-        firstNameController: _firstNameController,
-        lastNameController: _lastNameController,
-        surnameController: _surnameController,
-        birthPlaceController: _birthPlaceController,
-        nationalityController: _nationalityController,
-        selectedGender: _selectedGender,
-        selectedDate: _selectedDate,
-        onGenderChanged: (g) {
-          if (g != null) {
-            setState(() => _selectedGender = g);
+      child: BlocListener<EnrollmentBloc, EnrollmentState>(
+        listenWhen: (previous, current) =>
+            previous.createStatus != current.createStatus,
+        listener: (context, state) {
+          _onSavingChanged(state.createStatus == EnrollmentLoadStatus.loading);
+
+          if (state.createStatus == EnrollmentLoadStatus.success) {
+            _markCurrentAsSavedSnapshot();
             _recomputeFormState();
+            _onSavingChanged(false);
+            if (_showValidationHints) {
+              setState(() => _showValidationHints = false);
+            }
+            AppSnackBar.showSuccess(context, l10n.personalInfoSaveSuccess);
+            return;
+          }
+
+          if (state.createStatus == EnrollmentLoadStatus.failure) {
+            _onSavingChanged(false);
+            AppSnackBar.showError(
+              context,
+              l10n.personalInfoSaveError(state.errorMessage ?? ''),
+            );
           }
         },
-        onPickDate: () => _pickDate(context),
-        onSave: _onSave,
-        formatDate: _formatDate,
-        enrollmentId: widget.enrollmentId,
-        showInlineSaveButton: widget.showInlineSaveButton,
-        canSave: canSubmit,
-        isEditable: widget.isEditable,
-        firstNameError: _fieldErrorFor(
-          _firstNameController.text,
-          l10n.firstName,
-          l10n,
-          showValidation,
+        child: PersonalInfoStepBody(
+          studentDetail: widget.studentDetail,
+          firstNameController: _firstNameController,
+          lastNameController: _lastNameController,
+          surnameController: _surnameController,
+          birthPlaceController: _birthPlaceController,
+          nationalityController: _nationalityController,
+          selectedGender: _selectedGender,
+          selectedDate: _selectedDate,
+          onGenderChanged: (g) {
+            if (g != null) {
+              setState(() => _selectedGender = g);
+              _recomputeFormState();
+            }
+          },
+          onPickDate: () => _pickDate(context),
+          onSave: _onSave,
+          formatDate: _formatDate,
+          enrollmentId: widget.enrollmentId,
+          showInlineSaveButton: widget.showInlineSaveButton,
+          canSave: canSubmit,
+          isEditable: widget.isEditable,
+          firstNameError: _fieldErrorFor(
+            _firstNameController.text,
+            l10n.firstName,
+            l10n,
+            showValidation,
+          ),
+          lastNameError: _fieldErrorFor(
+            _lastNameController.text,
+            l10n.lastName,
+            l10n,
+            showValidation,
+          ),
+          surnameError: _fieldErrorFor(
+            _surnameController.text,
+            l10n.surname,
+            l10n,
+            showValidation,
+          ),
+          birthPlaceError: _fieldErrorFor(
+            _birthPlaceController.text,
+            l10n.birthPlace,
+            l10n,
+            showValidation,
+          ),
+          nationalityError: _fieldErrorFor(
+            _nationalityController.text,
+            l10n.nationality,
+            l10n,
+            showValidation,
+          ),
+          dateOfBirthError: _dateErrorFor(l10n, showValidation),
+          onSavingChanged: _onSavingChanged,
+          onSaveSuccess: () {
+            _markCurrentAsSavedSnapshot();
+            _recomputeFormState();
+            _onSavingChanged(false);
+            widget.onRefreshRequested?.call();
+            if (_showValidationHints) {
+              setState(() => _showValidationHints = false);
+            }
+          },
+          onRefreshRequested: widget.onRefreshRequested,
         ),
-        lastNameError: _fieldErrorFor(
-          _lastNameController.text,
-          l10n.lastName,
-          l10n,
-          showValidation,
-        ),
-        surnameError: _fieldErrorFor(
-          _surnameController.text,
-          l10n.surname,
-          l10n,
-          showValidation,
-        ),
-        birthPlaceError: _fieldErrorFor(
-          _birthPlaceController.text,
-          l10n.birthPlace,
-          l10n,
-          showValidation,
-        ),
-        nationalityError: _fieldErrorFor(
-          _nationalityController.text,
-          l10n.nationality,
-          l10n,
-          showValidation,
-        ),
-        dateOfBirthError: _dateErrorFor(l10n, showValidation),
-        onSavingChanged: _onSavingChanged,
-        onSaveSuccess: () {
-          _markCurrentAsSavedSnapshot();
-          _recomputeFormState();
-          _onSavingChanged(false);
-          widget.onRefreshRequested?.call();
-          if (_showValidationHints) {
-            setState(() => _showValidationHints = false);
-          }
-        },
-        onRefreshRequested: widget.onRefreshRequested,
       ),
     );
   }

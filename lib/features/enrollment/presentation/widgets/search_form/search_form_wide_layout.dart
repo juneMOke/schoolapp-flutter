@@ -15,6 +15,7 @@ class SearchFormWideLayout extends StatelessWidget {
   final ValueChanged<String> onFieldChanged;
   final VoidCallback onDateTap;
   final Widget actions;
+  final Widget? statusDropdown;
 
   const SearchFormWideLayout({
     super.key,
@@ -31,6 +32,7 @@ class SearchFormWideLayout extends StatelessWidget {
     required this.onFieldChanged,
     required this.onDateTap,
     required this.actions,
+    this.statusDropdown,
   });
 
   @override
@@ -42,6 +44,10 @@ class SearchFormWideLayout extends StatelessWidget {
         const SizedBox(height: 10),
         Row(
           children: [
+            if (statusDropdown != null) ...[
+              Expanded(child: statusDropdown!),
+              SizedBox(width: spacing),
+            ],
             Expanded(
               child: SearchFormInput(
                 controller: firstNameController,

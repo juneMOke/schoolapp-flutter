@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/guar
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_fields_grid.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item_models.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 typedef ParentItemStateChanged =
     void Function(String parentId, ParentItemFormState state);
@@ -45,6 +46,7 @@ class _ParentItemState extends State<ParentItem> {
   late RelationshipType _selectedRelationshipType;
 
   late ParentItemValue _initialValue;
+  bool _isHydratingFromParent = false;
 
   @override
   void initState() {
@@ -76,26 +78,31 @@ class _ParentItemState extends State<ParentItem> {
   }
 
   void _hydrateFromParent(ParentSummary parent, {required bool resetSnapshot}) {
-    final initial = ParentItemValue.fromParent(parent);
+    _isHydratingFromParent = true;
+    try {
+      final initial = ParentItemValue.fromParent(parent);
 
-    if (!(_isControllerReady)) {
-      _firstNameController = TextEditingController(text: initial.firstName);
-      _lastNameController = TextEditingController(text: initial.lastName);
-      _surnameController = TextEditingController(text: initial.surname);
-      _phoneController = TextEditingController(text: initial.phoneNumber);
-      _emailController = TextEditingController(text: initial.email);
-    } else {
-      _firstNameController.text = initial.firstName;
-      _lastNameController.text = initial.lastName;
-      _surnameController.text = initial.surname;
-      _phoneController.text = initial.phoneNumber;
-      _emailController.text = initial.email;
-    }
+      if (!(_isControllerReady)) {
+        _firstNameController = TextEditingController(text: initial.firstName);
+        _lastNameController = TextEditingController(text: initial.lastName);
+        _surnameController = TextEditingController(text: initial.surname);
+        _phoneController = TextEditingController(text: initial.phoneNumber);
+        _emailController = TextEditingController(text: initial.email);
+      } else {
+        _firstNameController.text = initial.firstName;
+        _lastNameController.text = initial.lastName;
+        _surnameController.text = initial.surname;
+        _phoneController.text = initial.phoneNumber;
+        _emailController.text = initial.email;
+      }
 
-    if (resetSnapshot) {
-      _initialValue = initial;
+      if (resetSnapshot) {
+        _initialValue = initial;
+      }
+      _selectedRelationshipType = initial.relationshipType;
+    } finally {
+      _isHydratingFromParent = false;
     }
-    _selectedRelationshipType = initial.relationshipType;
   }
 
   bool get _isControllerReady {
@@ -145,6 +152,7 @@ class _ParentItemState extends State<ParentItem> {
   }
 
   void _onFieldChanged() {
+    if (_isHydratingFromParent) return;
     _emitAll();
   }
 
@@ -182,43 +190,79 @@ class _ParentItemState extends State<ParentItem> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final state = _currentState();
     final changed = state.changedFields;
+    const deleteColor = Color(0xFFDC2626); // rouge sémantique, constant
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: widget.isPrimary
               ? AppTheme.primaryColor.withValues(alpha: 0.35)
               : const Color(0xFFE5E7EB),
           width: widget.isPrimary ? 1.5 : 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.largePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (widget.onRemoveRequested != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: widget.onRemoveRequested,
-                  icon: const Icon(Icons.delete_outline_rounded),
-                  label: const Text('Supprimer ce tuteur'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // ── Header compact ──────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 8, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GuardianCardHeader(
+                    parent: widget.parent,
+                    isPrimary: widget.isPrimary,
+                    number: widget.number,
+                    initials: _getInitials(),
+                  ),
                 ),
-              ),
-            if (widget.onRemoveRequested != null) const SizedBox(height: 8),
-            GuardianCardHeader(
-              parent: widget.parent,
-              isPrimary: widget.isPrimary,
-              number: widget.number,
-              initials: _getInitials(),
+                if (widget.onRemoveRequested != null)
+                  TextButton.icon(
+                    onPressed: widget.onRemoveRequested,
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      size: 16,
+                      color: deleteColor,
+                    ),
+                    label: Text(
+                      l10n.guardianDeleteAction,
+                      style: const TextStyle(
+                        color: deleteColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: deleteColor,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 20),
-            GuardianFieldsGrid(
+          ),
+          const Divider(height: 20, thickness: 1, indent: 14, endIndent: 14),
+          // ── Champs ──────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: GuardianFieldsGrid(
               firstNameController: _firstNameController,
               lastNameController: _lastNameController,
               surnameController: _surnameController,
@@ -234,8 +278,8 @@ class _ParentItemState extends State<ParentItem> {
               relationshipChanged: changed['relationshipType'] ?? false,
               isEditable: widget.isEditable,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

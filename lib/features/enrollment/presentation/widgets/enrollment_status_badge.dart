@@ -11,18 +11,19 @@ class EnrollmentStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final statusColor = _getStatusColor();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor().withValues(alpha: 0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getStatusColor().withValues(alpha: 0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Text(
         _getStatusText(l10n),
         style: TextStyle(
-          color: _getStatusColor(),
+          color: statusColor,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -33,40 +34,29 @@ class EnrollmentStatusBadge extends StatelessWidget {
   Color _getStatusColor() {
     return switch (status) {
       EnrollmentStatus.preRegistered => EnrollmentTheme.pendingColor,
+      EnrollmentStatus.inProgress => Colors.blue,
+      EnrollmentStatus.adminCompleted => Colors.indigo,
+      EnrollmentStatus.financialCompleted => Colors.teal,
+      EnrollmentStatus.completed => EnrollmentTheme.validatedColor,
+      EnrollmentStatus.cancelled => EnrollmentTheme.rejectedColor,
       EnrollmentStatus.validated => EnrollmentTheme.validatedColor,
       EnrollmentStatus.rejected => EnrollmentTheme.rejectedColor,
-      // TODO: Handle this case.
-      EnrollmentStatus.inProgress => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.adminCompleted => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.financialCompleted => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.completed => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.cancelled => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.pending => throw UnimplementedError(),
+      EnrollmentStatus.pending => EnrollmentTheme.pendingColor,
     };
   }
 
   String _getStatusText(AppLocalizations l10n) {
     return switch (status) {
       EnrollmentStatus.preRegistered => l10n.statusPending,
+      EnrollmentStatus.inProgress => l10n.enrollmentStatusInProgress,
+      EnrollmentStatus.adminCompleted => l10n.enrollmentStatusAdminCompleted,
+      EnrollmentStatus.financialCompleted =>
+        l10n.enrollmentStatusFinancialCompleted,
+      EnrollmentStatus.completed => l10n.enrollmentStatusCompleted,
+      EnrollmentStatus.cancelled => l10n.enrollmentStatusCancelled,
       EnrollmentStatus.validated => l10n.statusValidated,
       EnrollmentStatus.rejected => l10n.statusRejected,
-      // TODO: Handle this case.
-      EnrollmentStatus.inProgress => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.adminCompleted => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.financialCompleted => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.completed => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.cancelled => throw UnimplementedError(),
-      // TODO: Handle this case.
-      EnrollmentStatus.pending => throw UnimplementedError(),
+      EnrollmentStatus.pending => l10n.statusPending,
     };
   }
 }

@@ -45,6 +45,7 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
@@ -59,6 +60,7 @@ import 'package:school_app_flutter/features/student/data/repositories/parent_rep
 import 'package:school_app_flutter/features/student/data/repositories/student_repository_impl.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/create_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_address_use_case.dart';
@@ -334,6 +336,10 @@ Future<void> configureDependencies() async {
     () => GetEnrollmentPreviewByStudentIdUseCase(getIt<EnrollmentRepository>()),
   );
 
+  getIt.registerFactory<CreateEnrollmentUseCase>(
+    () => CreateEnrollmentUseCase(getIt<EnrollmentRepository>()),
+  );
+
   getIt.registerFactory<
     SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   >(
@@ -372,6 +378,7 @@ Future<void> configureDependencies() async {
       getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
       getEnrollmentPreviewByStudentIdUseCase:
           getIt<GetEnrollmentPreviewByStudentIdUseCase>(),
+      createEnrollmentUseCase: getIt<CreateEnrollmentUseCase>(),
       searchByStudentNameUseCase:
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
@@ -438,8 +445,15 @@ Future<void> configureDependencies() async {
     () => UpdateParentUseCase(getIt<ParentRepository>()),
   );
 
+  getIt.registerFactory<CreateParentUseCase>(
+    () => CreateParentUseCase(getIt<ParentRepository>()),
+  );
+
   getIt.registerFactory<ParentBloc>(
-    () => ParentBloc(updateParentUseCase: getIt<UpdateParentUseCase>()),
+    () => ParentBloc(
+      updateParentUseCase: getIt<UpdateParentUseCase>(),
+      createParentUseCase: getIt<CreateParentUseCase>(),
+    ),
   );
 
   // ── Enrollment Academic Info ───────────────────────────────────────────────

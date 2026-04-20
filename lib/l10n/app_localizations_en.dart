@@ -246,6 +246,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianInformation => 'Guardian Information';
 
   @override
+  String get guardianAddAction => 'Add guardian/contact';
+
+  @override
+  String get guardianSaveAction => 'Save';
+
+  @override
+  String get guardianRelationshipLabel => 'Relationship';
+
+  @override
+  String get guardianDeleteAction => 'Remove this guardian';
+
+  @override
+  String get guardianDeleteConfirmTitle => 'Confirm removal';
+
+  @override
+  String get guardianDeleteConfirmMessage => 'Do you really want to remove this guardian? This action cannot be undone.';
+
+  @override
+  String get guardianDeleteConfirmAction => 'Remove';
+
+  @override
   String get schoolFees => 'School Fees';
 
   @override
@@ -575,6 +596,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Address update failed: $message';
   }
+
+  @override
+  String get enrollmentStatusFilterLabel => 'Status';
+
+  @override
+  String get enrollmentStatusInProgress => 'In Progress';
+
+  @override
+  String get enrollmentStatusAdminCompleted => 'Admin Completed';
+
+  @override
+  String get enrollmentStatusFinancialCompleted => 'Financial Completed';
+
+  @override
+  String get enrollmentStatusCompleted => 'Completed';
+
+  @override
+  String get enrollmentStatusValidated => 'Validated';
+
+  @override
+  String get enrollmentStatusRejected => 'Rejected';
+
+  @override
+  String get enrollmentStatusCancelled => 'Cancelled';
+
+  @override
+  String get enrollmentReadOnlyTitle => 'View-only mode';
+
+  @override
+  String get enrollmentReadOnlyMessage => 'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.';
+
+  @override
+  String get enrollmentEditableTitle => 'Edit mode';
+
+  @override
+  String get enrollmentEditableMessage => 'This enrollment is in progress (IN_PROGRESS). Information can be updated.';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';

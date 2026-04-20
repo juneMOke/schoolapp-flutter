@@ -8,6 +8,7 @@ class AppConstants {
   static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
 
   static const String enrollmentEndpoint = '/api/v1/enrollments';
+  static const String enrollmentStudentSummaryEndpoint = '/api/v1/enrollments/student-summary';
 
   static const String studentPersonalInfoEndpoint =
       '/api/v1/students/{studentId}/personal-info';
@@ -19,6 +20,7 @@ class AppConstants {
       '/api/v1/students/{studentId}/academic-info';
 
   static const String parentUpdateEndpoint = '/api/v1/parents/{parentId}';
+  static const String parentCreateEndpoint = '/api/v1/parents';
 
   static const String enrollmentAcademicInfoEndpoint =
       '/api/v1/enrollments/{enrollmentId}/previous-school-info';

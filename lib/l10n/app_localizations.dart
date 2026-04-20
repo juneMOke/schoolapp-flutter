@@ -557,6 +557,48 @@ abstract class AppLocalizations {
   /// **'Guardian Information'**
   String get guardianInformation;
 
+  /// No description provided for @guardianAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add guardian/contact'**
+  String get guardianAddAction;
+
+  /// No description provided for @guardianSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get guardianSaveAction;
+
+  /// No description provided for @guardianRelationshipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get guardianRelationshipLabel;
+
+  /// No description provided for @guardianDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this guardian'**
+  String get guardianDeleteAction;
+
+  /// No description provided for @guardianDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm removal'**
+  String get guardianDeleteConfirmTitle;
+
+  /// No description provided for @guardianDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to remove this guardian? This action cannot be undone.'**
+  String get guardianDeleteConfirmMessage;
+
+  /// No description provided for @guardianDeleteConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get guardianDeleteConfirmAction;
+
   /// No description provided for @schoolFees.
   ///
   /// In en, this message translates to:
@@ -1186,6 +1228,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Address update failed: {message}'**
   String addressSaveError(String message);
+
+  /// No description provided for @enrollmentStatusFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get enrollmentStatusFilterLabel;
+
+  /// No description provided for @enrollmentStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get enrollmentStatusInProgress;
+
+  /// No description provided for @enrollmentStatusAdminCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Completed'**
+  String get enrollmentStatusAdminCompleted;
+
+  /// No description provided for @enrollmentStatusFinancialCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Completed'**
+  String get enrollmentStatusFinancialCompleted;
+
+  /// No description provided for @enrollmentStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get enrollmentStatusCompleted;
+
+  /// No description provided for @enrollmentStatusValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get enrollmentStatusValidated;
+
+  /// No description provided for @enrollmentStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get enrollmentStatusRejected;
+
+  /// No description provided for @enrollmentStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get enrollmentStatusCancelled;
+
+  /// No description provided for @enrollmentReadOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View-only mode'**
+  String get enrollmentReadOnlyTitle;
+
+  /// No description provided for @enrollmentReadOnlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.'**
+  String get enrollmentReadOnlyMessage;
+
+  /// No description provided for @enrollmentEditableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mode'**
+  String get enrollmentEditableTitle;
+
+  /// No description provided for @enrollmentEditableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is in progress (IN_PROGRESS). Information can be updated.'**
+  String get enrollmentEditableMessage;
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

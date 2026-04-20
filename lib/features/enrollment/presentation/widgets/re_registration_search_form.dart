@@ -76,10 +76,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         uniqueOptions.any((option) => option.key == _selectedAcademicOptionKey)
         ? _selectedAcademicOptionKey
         : null;
-    final canSearch = _canSearch(
-      hasOptions: hasOptions,
-      selectedKey: selectedKey,
-    );
+    final canSearch = _canSearch(hasOptions: hasOptions, selectedKey: selectedKey);
 
     return Container(
       width: double.infinity,
@@ -139,9 +136,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
                 value: selectedKey,
                 enabled: !widget.isLoading,
                 errorText:
-                    _showValidationHints &&
-                        !_hasRequiredNames() &&
-                        selectedKey == null
+                    _showValidationHints && !_hasRequiredNames() && selectedKey == null
                     ? l10n.requiredFieldError(
                         '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
                       )
@@ -307,10 +302,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         ? _selectedAcademicOptionKey
         : null;
 
-    if (!_canSearch(
-      hasOptions: uniqueOptions.isNotEmpty,
-      selectedKey: selectedKey,
-    )) {
+    if (!_canSearch(hasOptions: uniqueOptions.isNotEmpty, selectedKey: selectedKey)) {
       setState(() => _showValidationHints = true);
       return;
     }

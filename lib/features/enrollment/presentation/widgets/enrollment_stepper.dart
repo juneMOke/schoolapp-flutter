@@ -243,6 +243,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   }
 
   List<Widget> _stepContents() {
+    final effectiveStudentId = _resolveStudentId();
     final canEditPersonal = widget.detailPolicy.isStepEditable(
       EnrollmentWizardStep.personalInfo,
     );
@@ -264,6 +265,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         key: _personalInfoKey,
         studentDetail: widget.enrollmentDetail.studentDetail,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
+        detailIntent: widget.detailIntent,
+        detailPolicy: widget.detailPolicy,
         showInlineSaveButton: false,
         flowStepIndex: 0,
         onRefreshRequested: _refreshAfterSave,
@@ -290,7 +293,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       TargetAcademicInfoStep(
         key: _academicTargetInfoKey,
         studentDetail: widget.enrollmentDetail.studentDetail,
-        studentId: widget.enrollmentDetail.studentDetail.id,
+        studentId: effectiveStudentId,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         flowStepIndex: 3,
@@ -300,6 +303,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       GuardianInfoStep(
         key: _guardianInfoKey,
         parentDetails: widget.enrollmentDetail.parentDetails,
+        studentId: effectiveStudentId,
         flowStepIndex: 4,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
@@ -308,6 +312,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       ),
       SummaryStep(enrollmentDetail: widget.enrollmentDetail),
     ];
+  }
+
+  String _resolveStudentId() {
+    final detailStudentId = widget.enrollmentDetail.studentDetail.id.trim();
+    if (detailStudentId.isNotEmpty) {
+      return detailStudentId;
+    }
+
+    return widget.detailIntent.studentId?.trim() ?? '';
   }
 
   void _onBreadcrumbStepTap(int targetStep, int currentStep) {

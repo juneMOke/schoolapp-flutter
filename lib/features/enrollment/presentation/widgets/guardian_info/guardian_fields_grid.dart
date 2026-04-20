@@ -81,7 +81,7 @@ class GuardianFieldsGrid extends StatelessWidget {
 
         return Wrap(
           spacing: spacing,
-          runSpacing: 20,
+          runSpacing: 14,
           children: [
             EditableField(
               width: width,
@@ -129,66 +129,108 @@ class GuardianFieldsGrid extends StatelessWidget {
             ),
             SizedBox(
               width: constraints.maxWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Relation',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: relationshipChanged ? successColor : textSecondaryColor,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: relationshipChanged
+                        ? successColor.withValues(alpha: 0.35)
+                        : Colors.grey.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.guardianRelationshipLabel,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: relationshipChanged
+                            ? successColor
+                            : textSecondaryColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 10,
-                    children: RelationshipType.values.map((type) {
-                      final isSelected = selectedRelationshipType == type;
-                      final activeColor = relationshipChanged ? successColor : primaryColor;
+                    const SizedBox(height: 10),
+                    LayoutBuilder(
+                      builder: (context, chipConstraints) {
+                        final itemsPerRow = chipConstraints.maxWidth < 400
+                            ? 4
+                            : RelationshipType.values.length;
+                        final chipWidth =
+                            (chipConstraints.maxWidth -
+                                    (itemsPerRow - 1) * 6.0) /
+                                itemsPerRow;
 
-                      return ChoiceChip(
-                        avatar: Icon(
-                          _relationshipIcon(type),
-                          size: 18,
-                          color: isSelected ? activeColor : textSecondaryColor,
-                        ),
-                        label: Text(_relationshipLabel(context, type)),
-                        selected: isSelected,
-                        onSelected: isEditable
-                            ? (selected) {
-                                if (selected) onRelationshipTypeChanged(type);
-                              }
-                            : null,
-                        backgroundColor: surfaceColor,
-                        selectedColor: activeColor.withValues(alpha: 0.1),
-                        checkmarkColor: activeColor,
-                        showCheckmark: false,
-                        labelStyle: TextStyle(
-                          color: isSelected ? activeColor : AppTheme.textPrimaryColor,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          fontSize: 13,
-                        ),
-                        side: BorderSide(
-                          color: isSelected
-                              ? activeColor
-                              : Colors.grey.withValues(alpha: 0.2),
-                          width: isSelected ? 1.5 : 1.0,
-                        ),
-                        elevation: isSelected ? 0 : 0,
-                        pressElevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
+                        return Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: RelationshipType.values.map((type) {
+                            final isSelected = selectedRelationshipType == type;
+                            final activeColor = relationshipChanged
+                                ? successColor
+                                : primaryColor;
+
+                            return GestureDetector(
+                              onTap: isEditable
+                                  ? () => onRelationshipTypeChanged(type)
+                                  : null,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 160),
+                                width: chipWidth,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? activeColor.withValues(alpha: 0.1)
+                                      : AppTheme.backgroundColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? activeColor
+                                        : Colors.grey.withValues(alpha: 0.2),
+                                    width: isSelected ? 1.5 : 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _relationshipIcon(type),
+                                      size: 20,
+                                      color: isSelected
+                                          ? activeColor
+                                          : textSecondaryColor,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _relationshipLabel(context, type),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? activeColor
+                                            : AppTheme.textPrimaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

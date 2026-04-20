@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
@@ -31,6 +32,9 @@ class MockGetEnrollmentDetailUseCase extends Mock
 
 class MockGetEnrollmentPreviewByStudentIdUseCase extends Mock
     implements GetEnrollmentPreviewByStudentIdUseCase {}
+
+class MockCreateEnrollmentUseCase extends Mock
+    implements CreateEnrollmentUseCase {}
 
 class MockSearchByStudentNameUseCase extends Mock
     implements
@@ -116,6 +120,7 @@ void main() {
   late MockGetEnrollmentDetailUseCase mockGetEnrollmentDetailUseCase;
   late MockGetEnrollmentPreviewByStudentIdUseCase
   mockGetEnrollmentPreviewByStudentIdUseCase;
+  late MockCreateEnrollmentUseCase mockCreateEnrollmentUseCase;
   late MockSearchByStudentNameUseCase mockSearchByStudentNameUseCase;
   late MockSearchByStudentNamesAndDateOfBirthUseCase
   mockSearchByStudentNamesAndDateOfBirthUseCase;
@@ -128,6 +133,7 @@ void main() {
     mockGetEnrollmentDetailUseCase = MockGetEnrollmentDetailUseCase();
     mockGetEnrollmentPreviewByStudentIdUseCase =
         MockGetEnrollmentPreviewByStudentIdUseCase();
+    mockCreateEnrollmentUseCase = MockCreateEnrollmentUseCase();
     mockSearchByStudentNameUseCase = MockSearchByStudentNameUseCase();
     mockSearchByStudentNamesAndDateOfBirthUseCase =
         MockSearchByStudentNamesAndDateOfBirthUseCase();
@@ -140,6 +146,7 @@ void main() {
     getEnrollmentDetailUseCase: mockGetEnrollmentDetailUseCase,
     getEnrollmentPreviewByStudentIdUseCase:
         mockGetEnrollmentPreviewByStudentIdUseCase,
+    createEnrollmentUseCase: mockCreateEnrollmentUseCase,
     searchByStudentNameUseCase: mockSearchByStudentNameUseCase,
     searchByStudentNamesAndDateOfBirthUseCase:
         mockSearchByStudentNamesAndDateOfBirthUseCase,
@@ -393,8 +400,9 @@ void main() {
       'emet [previewLoading, previewSuccess] avec le détail pré-rempli',
       setUp: () {
         when(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -420,8 +428,9 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).called(1);
       },
     );
@@ -430,8 +439,9 @@ void main() {
       'emet [previewLoading, previewFailure] quand le use case renvoie une erreur',
       setUp: () {
         when(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).thenAnswer(
           (_) async => const Left(ServerFailure('Preview unavailable')),
         );
@@ -461,8 +471,9 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).called(1);
       },
     );
@@ -471,8 +482,9 @@ void main() {
       'ne modifie pas summariesStatus ni detail lors du chargement du preview',
       setUp: () {
         when(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -509,8 +521,9 @@ void main() {
       'emet uniquement [previewSuccess] en mode silent pour préserver le stepper',
       setUp: () {
         when(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -532,10 +545,177 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () =>
-              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
+          () => mockGetEnrollmentPreviewByStudentIdUseCase(
+            studentId: studentId,
+          ),
         ).called(1);
       },
+    );
+  });
+
+  group('EnrollmentCreateRequested', () {
+    const firstName = 'John';
+    const lastName = 'Doe';
+    const surname = 'Smith';
+    const dateOfBirth = '2010-01-01';
+    const birthPlace = 'Kinshasa';
+    const nationality = 'Congolaise';
+    const gender = 'MALE';
+
+    blocTest<EnrollmentBloc, EnrollmentState>(
+      'emet [createLoading, createSuccess] quand la creation reussit',
+      setUp: () {
+        when(
+          () => mockCreateEnrollmentUseCase(
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+            dateOfBirth: dateOfBirth,
+            birthPlace: birthPlace,
+            nationality: nationality,
+            gender: gender,
+          ),
+        ).thenAnswer((_) async => Right(_tEnrollmentSummary));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const EnrollmentCreateRequested(
+          firstName: firstName,
+          lastName: lastName,
+          surname: surname,
+          dateOfBirth: dateOfBirth,
+          birthPlace: birthPlace,
+          nationality: nationality,
+          gender: gender,
+        ),
+      ),
+      expect: () => [
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.createStatus,
+              'createStatus',
+              EnrollmentLoadStatus.loading,
+            )
+            .having(
+              (s) => s.createdEnrollmentSummary,
+              'createdEnrollmentSummary',
+              isNull,
+            )
+            .having((s) => s.errorMessage, 'errorMessage', isNull),
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.createStatus,
+              'createStatus',
+              EnrollmentLoadStatus.success,
+            )
+            .having(
+              (s) => s.createdEnrollmentSummary,
+              'createdEnrollmentSummary',
+              _tEnrollmentSummary,
+            )
+            .having((s) => s.errorMessage, 'errorMessage', isNull),
+      ],
+      verify: (_) {
+        verify(
+          () => mockCreateEnrollmentUseCase(
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+            dateOfBirth: dateOfBirth,
+            birthPlace: birthPlace,
+            nationality: nationality,
+            gender: gender,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<EnrollmentBloc, EnrollmentState>(
+      'emet [createLoading, createFailure] quand la creation echoue',
+      setUp: () {
+        when(
+          () => mockCreateEnrollmentUseCase(
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+            dateOfBirth: dateOfBirth,
+            birthPlace: birthPlace,
+            nationality: nationality,
+            gender: gender,
+          ),
+        ).thenAnswer(
+          (_) async => const Left(ServerFailure('Creation failed')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const EnrollmentCreateRequested(
+          firstName: firstName,
+          lastName: lastName,
+          surname: surname,
+          dateOfBirth: dateOfBirth,
+          birthPlace: birthPlace,
+          nationality: nationality,
+          gender: gender,
+        ),
+      ),
+      expect: () => [
+        isA<EnrollmentState>().having(
+          (s) => s.createStatus,
+          'createStatus',
+          EnrollmentLoadStatus.loading,
+        ),
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.createStatus,
+              'createStatus',
+              EnrollmentLoadStatus.failure,
+            )
+            .having(
+              (s) => s.createdEnrollmentSummary,
+              'createdEnrollmentSummary',
+              isNull,
+            )
+            .having((s) => s.errorMessage, 'errorMessage', 'Creation failed'),
+      ],
+      verify: (_) {
+        verify(
+          () => mockCreateEnrollmentUseCase(
+            firstName: firstName,
+            lastName: lastName,
+            surname: surname,
+            dateOfBirth: dateOfBirth,
+            birthPlace: birthPlace,
+            nationality: nationality,
+            gender: gender,
+          ),
+        ).called(1);
+      },
+    );
+  });
+
+  group('EnrollmentCreateResultConsumed', () {
+    blocTest<EnrollmentBloc, EnrollmentState>(
+      'reinitialise le statut et vide le resultat de creation transient',
+      seed: () => const EnrollmentState.initial().copyWith(
+        createStatus: EnrollmentLoadStatus.success,
+        createdEnrollmentSummary: _tEnrollmentSummary,
+      ),
+      build: buildBloc,
+      act: (bloc) => bloc.add(const EnrollmentCreateResultConsumed()),
+      expect: () => [
+        isA<EnrollmentState>()
+            .having(
+              (s) => s.createStatus,
+              'createStatus',
+              EnrollmentLoadStatus.initial,
+            )
+            .having(
+              (s) => s.createdEnrollmentSummary,
+              'createdEnrollmentSummary',
+              isNull,
+            ),
+      ],
     );
   });
 }
