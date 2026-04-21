@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/enrollment_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_color_extension.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_l10n_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -12,7 +12,7 @@ class EnrollmentStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final statusColor = _getStatusColor();
+    final statusColor = status.badgeColor;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -30,19 +30,5 @@ class EnrollmentStatusBadge extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor() {
-    return switch (status) {
-      EnrollmentStatus.preRegistered => EnrollmentTheme.pendingColor,
-      EnrollmentStatus.inProgress => Colors.blue,
-      EnrollmentStatus.adminCompleted => Colors.indigo,
-      EnrollmentStatus.financialCompleted => Colors.teal,
-      EnrollmentStatus.completed => EnrollmentTheme.validatedColor,
-      EnrollmentStatus.cancelled => EnrollmentTheme.rejectedColor,
-      EnrollmentStatus.validated => EnrollmentTheme.validatedColor,
-      EnrollmentStatus.rejected => EnrollmentTheme.rejectedColor,
-      EnrollmentStatus.pending => EnrollmentTheme.pendingColor,
-    };
   }
 }

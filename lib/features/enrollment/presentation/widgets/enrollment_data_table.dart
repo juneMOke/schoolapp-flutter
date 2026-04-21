@@ -259,10 +259,7 @@ class _SortableHeader extends StatelessWidget {
             ascending: ascending,
             onSort: onSort,
           ),
-          Expanded(
-            flex: 2,
-            child: _HeaderLabel(l10n.enrollmentStatusFilterLabel),
-          ),
+          Expanded(flex: 2, child: _HeaderLabel(l10n.enrollmentStatusFilterLabel)),
           const SizedBox(width: 32),
         ],
       ),

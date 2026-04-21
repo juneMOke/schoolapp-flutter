@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
@@ -45,7 +46,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
   late final TextEditingController _birthPlaceController;
-  late final TextEditingController _nationalityController;
   late final StudentBloc _studentBloc;
 
   String _initialFirstName = '';
@@ -57,6 +57,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   DateTime? _initialDate;
 
   late Gender _selectedGender;
+  late String _selectedNationality;
   DateTime? _selectedDate;
   bool _isDirty = false;
   bool _isValid = false;
@@ -91,7 +92,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController = TextEditingController();
     _surnameController = TextEditingController();
     _birthPlaceController = TextEditingController();
-    _nationalityController = TextEditingController();
 
     _initializeFromStudent(widget.studentDetail);
 
@@ -99,7 +99,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController.addListener(_onTextFieldChanged);
     _surnameController.addListener(_onTextFieldChanged);
     _birthPlaceController.addListener(_onTextFieldChanged);
-    _nationalityController.addListener(_onTextFieldChanged);
 
     _recomputeFormState(notifyParent: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -141,7 +140,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
       _lastNameController.text = student.lastName;
       _surnameController.text = student.surname;
       _birthPlaceController.text = student.birthPlace;
-      _nationalityController.text = student.nationality;
+      _selectedNationality = _resolveNationalityOrDefault(student.nationality);
       _selectedGender = student.gender;
       _selectedDate = _formatSelectedDate(student);
     } finally {
@@ -152,9 +151,17 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _initialLastName = student.lastName.trim();
     _initialSurname = student.surname.trim();
     _initialBirthPlace = student.birthPlace.trim();
-    _initialNationality = student.nationality.trim();
+    _initialNationality = _selectedNationality.trim();
     _initialGender = student.gender;
     _initialDate = _formatSelectedDate(student);
+  }
+
+  String _resolveNationalityOrDefault(String? rawNationality) {
+    final trimmed = rawNationality?.trim() ?? '';
+    if (trimmed.isNotEmpty) {
+      return trimmed;
+    }
+    return NationalityCatalog.defaultNationality;
   }
 
   void _markCurrentAsSavedSnapshot() {
@@ -162,7 +169,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _initialLastName = _lastNameController.text.trim();
     _initialSurname = _surnameController.text.trim();
     _initialBirthPlace = _birthPlaceController.text.trim();
-    _initialNationality = _nationalityController.text.trim();
+    _initialNationality = _selectedNationality.trim();
     _initialGender = _selectedGender;
     _initialDate = _selectedDate;
   }
@@ -173,7 +180,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         _lastNameController.text.trim().isNotEmpty &&
         _surnameController.text.trim().isNotEmpty &&
         _birthPlaceController.text.trim().isNotEmpty &&
-        _nationalityController.text.trim().isNotEmpty &&
+        _selectedNationality.trim().isNotEmpty &&
         _selectedDate != null;
 
     final dirtyNow =
@@ -181,7 +188,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         _lastNameController.text.trim() != _initialLastName ||
         _surnameController.text.trim() != _initialSurname ||
         _birthPlaceController.text.trim() != _initialBirthPlace ||
-        _nationalityController.text.trim() != _initialNationality ||
+        _selectedNationality.trim() != _initialNationality ||
         _selectedGender != _initialGender ||
         _selectedDate != _initialDate;
 
@@ -223,12 +230,10 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController.removeListener(_onTextFieldChanged);
     _surnameController.removeListener(_onTextFieldChanged);
     _birthPlaceController.removeListener(_onTextFieldChanged);
-    _nationalityController.removeListener(_onTextFieldChanged);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
     _birthPlaceController.dispose();
-    _nationalityController.dispose();
     _studentBloc.close();
     super.dispose();
   }
@@ -261,7 +266,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     final lastName = _lastNameController.text.trim();
     final surname = _surnameController.text.trim();
     final birthPlace = _birthPlaceController.text.trim();
-    final nationality = _nationalityController.text.trim();
+    final nationality = _selectedNationality.trim();
 
     if (firstName.isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.firstName));
@@ -302,6 +307,18 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
       return null;
     }
     return l10n.requiredFieldError(l10n.dateOfBirth);
+  }
+
+  void _onNationalityChanged(String? value) {
+    final nextValue = value?.trim() ?? '';
+    if (nextValue.isEmpty || nextValue == _selectedNationality) {
+      return;
+    }
+    setState(() => _selectedNationality = nextValue);
+    _recomputeFormState();
+    if (_showValidationHints && _isValid) {
+      setState(() => _showValidationHints = false);
+    }
   }
 
   String _formatDate(DateTime? date) {
@@ -351,7 +368,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         dateOfBirth: _toIsoDate(_selectedDate),
         gender: _selectedGender.name.toUpperCase(),
         birthPlace: _birthPlaceController.text.trim(),
-        nationality: _nationalityController.text.trim(),
+        nationality: _selectedNationality.trim(),
       ),
     );
   }
@@ -394,9 +411,13 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
           lastNameController: _lastNameController,
           surnameController: _surnameController,
           birthPlaceController: _birthPlaceController,
-          nationalityController: _nationalityController,
+          selectedNationality: _selectedNationality,
+          nationalityOptions: NationalityCatalog.withOptionalSelection(
+            _selectedNationality,
+          ),
           selectedGender: _selectedGender,
           selectedDate: _selectedDate,
+          onNationalityChanged: _onNationalityChanged,
           onGenderChanged: (g) {
             if (g != null) {
               setState(() => _selectedGender = g);
@@ -434,12 +455,10 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
             l10n,
             showValidation,
           ),
-          nationalityError: _fieldErrorFor(
-            _nationalityController.text,
-            l10n.nationality,
-            l10n,
-            showValidation,
-          ),
+          nationalityError:
+              showValidation && _selectedNationality.trim().isEmpty
+              ? l10n.requiredFieldError(l10n.nationality)
+              : null,
           dateOfBirthError: _dateErrorFor(l10n, showValidation),
           onSavingChanged: _onSavingChanged,
           onSaveSuccess: () {

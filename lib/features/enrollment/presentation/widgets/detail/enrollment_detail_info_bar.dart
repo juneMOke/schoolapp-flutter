@@ -101,4 +101,5 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
       ),
     );
   }
+
 }

@@ -5,6 +5,7 @@ class SearchFormInput extends StatelessWidget {
   final String label;
   final Widget prefixIcon;
   final Widget? suffixIcon;
+  final TextCapitalization textCapitalization;
   final bool readOnly;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
@@ -15,6 +16,7 @@ class SearchFormInput extends StatelessWidget {
     required this.label,
     required this.prefixIcon,
     this.suffixIcon,
+    this.textCapitalization = TextCapitalization.words,
     this.readOnly = false,
     this.onChanged,
     this.onTap,
@@ -24,6 +26,7 @@ class SearchFormInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      textCapitalization: textCapitalization,
       readOnly: readOnly,
       onChanged: onChanged,
       onTap: onTap,

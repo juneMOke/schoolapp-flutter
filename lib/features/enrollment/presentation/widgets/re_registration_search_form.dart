@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/dropdown_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
@@ -212,6 +213,8 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
             controller: controller,
             enabled: !widget.isLoading,
             textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.words,
+            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
             onChanged: (_) => _onFieldChanged(),
             decoration: buildInputDecoration(
               hintText: l10n.enterFieldHint(label),

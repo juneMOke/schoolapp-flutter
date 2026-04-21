@@ -293,9 +293,9 @@
   "enrollmentStatusRejected": "Rejeté",
   "enrollmentStatusCancelled": "Annulé",
   "enrollmentReadOnlyTitle": "Mode consultation",
-  "enrollmentReadOnlyMessage": "Ce dossier est finalisé. Les informations sont affichées en lecture seule.",
+  "enrollmentReadOnlyMessage": "Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.",
   "enrollmentEditableTitle": "Mode édition",
-  "enrollmentEditableMessage": "Ce dossier est en cours. Les informations peuvent être modifiées.",
+  "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
 
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
