@@ -85,6 +85,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       city: event.city,
       district: event.district,
       municipality: event.municipality,
+      neighborhood: event.neighborhood,
       address: event.address,
     );
     result.fold(

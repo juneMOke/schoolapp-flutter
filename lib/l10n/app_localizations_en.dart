@@ -388,6 +388,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get neighborhoodHelp => 'Neighborhood or street of residence.';
 
   @override
+  String get addressComplementary => 'Additional address';
+
+  @override
+  String get addressComplementaryHelp => 'Add street, avenue and number when needed.';
+
+  @override
+  String get addressComplementaryPlaceholder => 'Ex: 10, Avenue La source';
+
+  @override
   String get fullAddress => 'Full address';
 
   @override
@@ -614,6 +623,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addressValidationReasonsTitle => 'Please correct the following address fields:';
+
+  @override
+  String get addressNoCityAvailable => 'No city is available in the catalog.';
+
+  @override
+  String get addressSelectCityFirst => 'Select a city first.';
+
+  @override
+  String get addressNoDistrictAvailable => 'No district is available for this city.';
+
+  @override
+  String get addressSelectDistrictFirst => 'Select a district first.';
+
+  @override
+  String get addressNoMunicipalityAvailable => 'No municipality is available for this district.';
+
+  @override
+  String get addressSelectMunicipalityFirst => 'Select a municipality first.';
+
+  @override
+  String get addressNoNeighborhoodAvailable => 'No neighborhood is available for this municipality.';
 
   @override
   String get addressSaveHintBeforeContinue => 'Please save address changes before continuing.';

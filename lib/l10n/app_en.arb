@@ -204,6 +204,9 @@
   "municipalityHelp": "Municipality of residence.",
   "neighborhood": "Neighborhood",
   "neighborhoodHelp": "Neighborhood or street of residence.",
+  "addressComplementary": "Additional address",
+  "addressComplementaryHelp": "Add street, avenue and number when needed.",
+  "addressComplementaryPlaceholder": "Ex: 10, Avenue La source",
   "fullAddress": "Full address",
   "fullAddressHelp": "Full residential address.",
 
@@ -311,6 +314,13 @@
     }
   },
   "addressValidationReasonsTitle": "Please correct the following address fields:",
+  "addressNoCityAvailable": "No city is available in the catalog.",
+  "addressSelectCityFirst": "Select a city first.",
+  "addressNoDistrictAvailable": "No district is available for this city.",
+  "addressSelectDistrictFirst": "Select a district first.",
+  "addressNoMunicipalityAvailable": "No municipality is available for this district.",
+  "addressSelectMunicipalityFirst": "Select a municipality first.",
+  "addressNoNeighborhoodAvailable": "No neighborhood is available for this municipality.",
   "addressSaveHintBeforeContinue": "Please save address changes before continuing.",
   "addressSaveSuccess": "Address updated successfully.",
   "addressSaveError": "Address update failed: {message}",

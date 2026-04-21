@@ -31,6 +31,7 @@ class EnrollmentDetail {
       city: '',
       district: '',
       municipality: '',
+      neighborhood: '',
       address: '',
       schoolLevel: SchoolLevel(id: '', name: '', code: '', displayOrder: 0),
       schoolLevelGroup: SchoolLevelGroup(id: '', name: '', code: ''),

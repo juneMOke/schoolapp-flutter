@@ -16,6 +16,7 @@ class StudentDetailModel {
   final String city;
   final String district;
   final String municipality;
+  final String neighborhood;
   final String address;
 
   final String schoolLevelId;
@@ -35,6 +36,7 @@ class StudentDetailModel {
     required this.city,
     required this.district,
     required this.municipality,
+    required this.neighborhood,
     required this.address,
     required this.parentIds,
     required this.schoolLevelId,
@@ -55,6 +57,7 @@ class StudentDetailModel {
         city: _readString(json['city']),
         district: _readString(json['district']),
         municipality: _readString(json['municipality']),
+        neighborhood: _readString(json['neighborhood']),
         address: _readString(json['address']),
         schoolLevelId: _readString(json['schoolLevelId']),
         schoolLevelGroupId: _readString(json['schoolLevelGroupId']),
@@ -85,6 +88,7 @@ class StudentDetailModel {
     'city': city,
     'district': district,
     'commune': municipality,
+    'neighborhood': neighborhood,
     'address': address,
   };
 
@@ -101,6 +105,7 @@ class StudentDetailModel {
     city: city,
     district: district,
     municipality: municipality,
+    neighborhood: neighborhood,
     address: address,
     schoolLevel: SchoolLevel(
       id: schoolLevelId,

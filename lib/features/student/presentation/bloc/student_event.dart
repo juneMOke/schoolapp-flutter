@@ -50,6 +50,7 @@ class StudentAddressUpdateRequested extends StudentEvent {
   final String city;
   final String district;
   final String municipality;
+  final String neighborhood;
   final String address;
 
   const StudentAddressUpdateRequested({
@@ -57,6 +58,7 @@ class StudentAddressUpdateRequested extends StudentEvent {
     required this.city,
     required this.district,
     required this.municipality,
+    required this.neighborhood,
     required this.address,
   });
 
@@ -66,6 +68,7 @@ class StudentAddressUpdateRequested extends StudentEvent {
     city,
     district,
     municipality,
+    neighborhood,
     address,
   ];
 }

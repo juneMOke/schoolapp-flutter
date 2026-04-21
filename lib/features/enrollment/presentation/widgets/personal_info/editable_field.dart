@@ -15,6 +15,7 @@ class EditableField extends StatelessWidget {
   final String? errorText;
   final bool isChanged;
   final bool readOnly;
+  final String? hintText;
 
   const EditableField({
     super.key,
@@ -27,6 +28,7 @@ class EditableField extends StatelessWidget {
     this.errorText,
     this.isChanged = false,
     this.readOnly = false,
+    this.hintText,
   });
 
   @override
@@ -57,7 +59,7 @@ class EditableField extends StatelessWidget {
                 ],
                 readOnly: readOnly,
                 decoration: buildInputDecoration(
-                  hintText: l10n.enterFieldHint(label),
+                  hintText: hintText ?? l10n.enterFieldHint(label),
                   errorText: errorText,
                   isChanged: isChanged,
                   prefixIcon: const Icon(

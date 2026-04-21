@@ -1,0 +1,2191 @@
+{
+  "ville": "Kinshasa",
+  "code_ville": "10",
+  "pays": "République Démocratique du Congo",
+  "districts": [
+    {
+      "nom": "Lukunga",
+      "communes": [
+        {
+          "nom": "Barumbu",
+          "code": "21",
+          "quartiers": [
+            {
+              "nom": "Bitshaku-Tshaku",
+              "code": "010",
+              "code_postal": "1021010"
+            },
+            {
+              "nom": "Camp Pilote Mbaki",
+              "code": "020",
+              "code_postal": "1021020"
+            },
+            {
+              "nom": "Camp Ndolo",
+              "code": "030",
+              "code_postal": "1021030"
+            },
+            {
+              "nom": "Funa I",
+              "code": "040",
+              "code_postal": "1021040"
+            },
+            {
+              "nom": "Funa II",
+              "code": "050",
+              "code_postal": "1021050"
+            },
+            {
+              "nom": "Kapinga Bapo",
+              "code": "060",
+              "code_postal": "1021060"
+            },
+            {
+              "nom": "Kasai",
+              "code": "070",
+              "code_postal": "1021070"
+            },
+            {
+              "nom": "Libulu Kinshasa 4",
+              "code": "081",
+              "code_postal": "1021081"
+            },
+            {
+              "nom": "Mozindo",
+              "code": "090",
+              "code_postal": "1021090"
+            },
+            {
+              "nom": "Ndolo Kinshasa 31",
+              "code": "101",
+              "code_postal": "1021101"
+            },
+            {
+              "nom": "Tshimanga",
+              "code": "110",
+              "code_postal": "1021110"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Gombe",
+          "code": "03",
+          "quartiers": [
+            {
+              "nom": "2ème Région Navale",
+              "code": "010",
+              "code_postal": "1003010"
+            },
+            {
+              "nom": "Batetela",
+              "code": "020",
+              "code_postal": "1003020"
+            },
+            {
+              "nom": "Clinique",
+              "code": "030",
+              "code_postal": "1003030"
+            },
+            {
+              "nom": "Commerce",
+              "code": "040",
+              "code_postal": "1003040"
+            },
+            {
+              "nom": "Croix Rouge",
+              "code": "050",
+              "code_postal": "1003050"
+            },
+            {
+              "nom": "Fleuve",
+              "code": "060",
+              "code_postal": "1003060"
+            },
+            {
+              "nom": "Gare Kinshasa 1",
+              "code": "071",
+              "code_postal": "1003071"
+            },
+            {
+              "nom": "Golf",
+              "code": "080",
+              "code_postal": "1003080"
+            },
+            {
+              "nom": "Haut Commandement Kinshasa 10",
+              "code": "091",
+              "code_postal": "1003091"
+            },
+            {
+              "nom": "Lemera Kinshasa Gombe",
+              "code": "101",
+              "code_postal": "1003101"
+            },
+            {
+              "nom": "Révolution",
+              "code": "110",
+              "code_postal": "1003110"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Kinshasa",
+          "code": "20",
+          "quartiers": [
+            {
+              "nom": "Aketi",
+              "code": "010",
+              "code_postal": "1020010"
+            },
+            {
+              "nom": "Boyoma",
+              "code": "020",
+              "code_postal": "1020020"
+            },
+            {
+              "nom": "Djalo",
+              "code": "030",
+              "code_postal": "1020030"
+            },
+            {
+              "nom": "Madimba",
+              "code": "040",
+              "code_postal": "1020040"
+            },
+            {
+              "nom": "Mongala",
+              "code": "050",
+              "code_postal": "1020050"
+            },
+            {
+              "nom": "Ngbaka Kinshasa 3",
+              "code": "061",
+              "code_postal": "1020061"
+            },
+            {
+              "nom": "Pende",
+              "code": "070",
+              "code_postal": "1020070"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Kintambo",
+          "code": "17",
+          "quartiers": [
+            {
+              "nom": "Itimbiri",
+              "code": "010",
+              "code_postal": "1017010"
+            },
+            {
+              "nom": "Kilimani Kinshasa 12",
+              "code": "021",
+              "code_postal": "1017021"
+            },
+            {
+              "nom": "Lisala I",
+              "code": "030",
+              "code_postal": "1017030"
+            },
+            {
+              "nom": "Lisala II",
+              "code": "040",
+              "code_postal": "1017040"
+            },
+            {
+              "nom": "Lubudi Luka",
+              "code": "050",
+              "code_postal": "1017050"
+            },
+            {
+              "nom": "Lubudi Ngandu",
+              "code": "060",
+              "code_postal": "1017060"
+            },
+            {
+              "nom": "Salongo",
+              "code": "070",
+              "code_postal": "1017070"
+            },
+            {
+              "nom": "Tshinkela",
+              "code": "080",
+              "code_postal": "1017080"
+            },
+            {
+              "nom": "Wenze",
+              "code": "090",
+              "code_postal": "1017090"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Lingwala",
+          "code": "19",
+          "quartiers": [
+            {
+              "nom": "30 Juin",
+              "code": "010",
+              "code_postal": "1019010"
+            },
+            {
+              "nom": "Camp Lufungula",
+              "code": "020",
+              "code_postal": "1019020"
+            },
+            {
+              "nom": "CNECI",
+              "code": "030",
+              "code_postal": "1019030"
+            },
+            {
+              "nom": "La Voix du Peuple",
+              "code": "040",
+              "code_postal": "1019040"
+            },
+            {
+              "nom": "Lokole",
+              "code": "050",
+              "code_postal": "1019050"
+            },
+            {
+              "nom": "Ngunda Lokombe Kinshasa 8",
+              "code": "061",
+              "code_postal": "1019061"
+            },
+            {
+              "nom": "Pakadjuma",
+              "code": "070",
+              "code_postal": "1019070"
+            },
+            {
+              "nom": "Singa Mopepe",
+              "code": "080",
+              "code_postal": "1019080"
+            },
+            {
+              "nom": "Wenze Lufungula",
+              "code": "090",
+              "code_postal": "1019090"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Ngaliema",
+          "code": "02",
+          "quartiers": [
+            {
+              "nom": "Anciens-Combatants",
+              "code": "010",
+              "code_postal": "1002010"
+            },
+            {
+              "nom": "Bangu",
+              "code": "020",
+              "code_postal": "1002020"
+            },
+            {
+              "nom": "Basoko",
+              "code": "030",
+              "code_postal": "1002030"
+            },
+            {
+              "nom": "Binza Pigeon",
+              "code": "040",
+              "code_postal": "1002040"
+            },
+            {
+              "nom": "Bumba",
+              "code": "050",
+              "code_postal": "1002050"
+            },
+            {
+              "nom": "Camp Badiadingi",
+              "code": "060",
+              "code_postal": "1002060"
+            },
+            {
+              "nom": "Camp Colonel Ebeya",
+              "code": "070",
+              "code_postal": "1002070"
+            },
+            {
+              "nom": "Camp Loano",
+              "code": "080",
+              "code_postal": "1002080"
+            },
+            {
+              "nom": "Camp Mobile Basoko",
+              "code": "090",
+              "code_postal": "1002090"
+            },
+            {
+              "nom": "Camp OUA",
+              "code": "100",
+              "code_postal": "1002100"
+            },
+            {
+              "nom": "Camp Tshatshi",
+              "code": "110",
+              "code_postal": "1002110"
+            },
+            {
+              "nom": "Congo",
+              "code": "120",
+              "code_postal": "1002120"
+            },
+            {
+              "nom": "Djelo Binza",
+              "code": "130",
+              "code_postal": "1002130"
+            },
+            {
+              "nom": "Joli Parc Kinshasa 2",
+              "code": "141",
+              "code_postal": "1002141"
+            },
+            {
+              "nom": "Kimpe",
+              "code": "150",
+              "code_postal": "1002150"
+            },
+            {
+              "nom": "Kinkenda",
+              "code": "160",
+              "code_postal": "1002160"
+            },
+            {
+              "nom": "Kinsuka Pêcheurs",
+              "code": "170",
+              "code_postal": "1002170"
+            },
+            {
+              "nom": "Lonzo",
+              "code": "180",
+              "code_postal": "1002180"
+            },
+            {
+              "nom": "Lubudi",
+              "code": "190",
+              "code_postal": "1002190"
+            },
+            {
+              "nom": "Lukunga",
+              "code": "200",
+              "code_postal": "1002200"
+            },
+            {
+              "nom": "Mama Yemo",
+              "code": "210",
+              "code_postal": "1002210"
+            },
+            {
+              "nom": "Mamenga",
+              "code": "220",
+              "code_postal": "1002220"
+            },
+            {
+              "nom": "Mfinga",
+              "code": "230",
+              "code_postal": "1002230"
+            },
+            {
+              "nom": "Munganga",
+              "code": "240",
+              "code_postal": "1002240"
+            },
+            {
+              "nom": "Museyi",
+              "code": "250",
+              "code_postal": "1002250"
+            },
+            {
+              "nom": "Ngomba Kikusa",
+              "code": "260",
+              "code_postal": "1002260"
+            },
+            {
+              "nom": "Punda",
+              "code": "270",
+              "code_postal": "1002270"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nom": "Funa",
+      "communes": [
+        {
+          "nom": "Kalamu",
+          "code": "22",
+          "quartiers": [
+            {
+              "nom": "Immo-Congo",
+              "code": "010",
+              "code_postal": "1022010"
+            },
+            {
+              "nom": "Kauka I",
+              "code": "020",
+              "code_postal": "1022020"
+            },
+            {
+              "nom": "Kauka II",
+              "code": "030",
+              "code_postal": "1022030"
+            },
+            {
+              "nom": "Kauka III",
+              "code": "040",
+              "code_postal": "1022040"
+            },
+            {
+              "nom": "Kimbangu I",
+              "code": "050",
+              "code_postal": "1022050"
+            },
+            {
+              "nom": "Kimbangu II",
+              "code": "060",
+              "code_postal": "1022060"
+            },
+            {
+              "nom": "Kimbangu III",
+              "code": "070",
+              "code_postal": "1022070"
+            },
+            {
+              "nom": "Matonge I",
+              "code": "080",
+              "code_postal": "1022080"
+            },
+            {
+              "nom": "Matonge II Kinshasa 6",
+              "code": "091",
+              "code_postal": "1022091"
+            },
+            {
+              "nom": "Matonge III",
+              "code": "100",
+              "code_postal": "1022100"
+            },
+            {
+              "nom": "Pinzi",
+              "code": "110",
+              "code_postal": "1022110"
+            },
+            {
+              "nom": "Yolo-Nord I",
+              "code": "120",
+              "code_postal": "1022120"
+            },
+            {
+              "nom": "Yolo-Nord II",
+              "code": "130",
+              "code_postal": "1022130"
+            },
+            {
+              "nom": "Yolo-Nord III",
+              "code": "140",
+              "code_postal": "1022140"
+            },
+            {
+              "nom": "Yolo-Sud I",
+              "code": "150",
+              "code_postal": "1022150"
+            },
+            {
+              "nom": "Yolo-Sud II",
+              "code": "160",
+              "code_postal": "1022160"
+            },
+            {
+              "nom": "Yolo-Sud III",
+              "code": "170",
+              "code_postal": "1022170"
+            },
+            {
+              "nom": "Yolo-Sud IV",
+              "code": "180",
+              "code_postal": "1022180"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Kasa-Vubu",
+          "code": "24",
+          "quartiers": [
+            {
+              "nom": "Anciens Combatants",
+              "code": "010",
+              "code_postal": "1024010"
+            },
+            {
+              "nom": "Assosa Kinshasa BT",
+              "code": "021",
+              "code_postal": "1024021"
+            },
+            {
+              "nom": "Katanga Shaba",
+              "code": "030",
+              "code_postal": "1024030"
+            },
+            {
+              "nom": "Lodja",
+              "code": "040",
+              "code_postal": "1024040"
+            },
+            {
+              "nom": "Lubumbashi Kinshasa 7",
+              "code": "051",
+              "code_postal": "1024051"
+            },
+            {
+              "nom": "ONL",
+              "code": "060",
+              "code_postal": "1024060"
+            },
+            {
+              "nom": "Salongo",
+              "code": "070",
+              "code_postal": "1024070"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Ngiri-Ngiri",
+          "code": "23",
+          "quartiers": [
+            {
+              "nom": "24 Novembre",
+              "code": "010",
+              "code_postal": "1023010"
+            },
+            {
+              "nom": "Assossa Kinshasa 9",
+              "code": "021",
+              "code_postal": "1023021"
+            },
+            {
+              "nom": "Carthoums",
+              "code": "030",
+              "code_postal": "1023030"
+            },
+            {
+              "nom": "Diangenda",
+              "code": "040",
+              "code_postal": "1023040"
+            },
+            {
+              "nom": "Diomi",
+              "code": "050",
+              "code_postal": "1023050"
+            },
+            {
+              "nom": "Elengesa",
+              "code": "060",
+              "code_postal": "1023060"
+            },
+            {
+              "nom": "Petit-Petit",
+              "code": "070",
+              "code_postal": "1023070"
+            },
+            {
+              "nom": "Saio",
+              "code": "080",
+              "code_postal": "1023080"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Bandalungwa",
+          "code": "18",
+          "quartiers": [
+            {
+              "nom": "Adoula Kinshasa 13",
+              "code": "011",
+              "code_postal": "1018011"
+            },
+            {
+              "nom": "Bisengo",
+              "code": "020",
+              "code_postal": "1018020"
+            },
+            {
+              "nom": "Camp Kokolo",
+              "code": "030",
+              "code_postal": "1018030"
+            },
+            {
+              "nom": "Kasa-Vubu",
+              "code": "040",
+              "code_postal": "1018040"
+            },
+            {
+              "nom": "Lingwala",
+              "code": "050",
+              "code_postal": "1018050"
+            },
+            {
+              "nom": "Lubudi",
+              "code": "060",
+              "code_postal": "1018060"
+            },
+            {
+              "nom": "Lumumba",
+              "code": "070",
+              "code_postal": "1018070"
+            },
+            {
+              "nom": "Makelele",
+              "code": "080",
+              "code_postal": "1018080"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Bumbu",
+          "code": "15",
+          "quartiers": [
+            {
+              "nom": "Camp Lieutenant Mbaki",
+              "code": "010",
+              "code_postal": "1015010"
+            },
+            {
+              "nom": "Dipiya",
+              "code": "020",
+              "code_postal": "1015020"
+            },
+            {
+              "nom": "Kasai",
+              "code": "030",
+              "code_postal": "1015030"
+            },
+            {
+              "nom": "Kwango",
+              "code": "040",
+              "code_postal": "1015040"
+            },
+            {
+              "nom": "Lokoro",
+              "code": "050",
+              "code_postal": "1015050"
+            },
+            {
+              "nom": "Lukeni",
+              "code": "060",
+              "code_postal": "1015060"
+            },
+            {
+              "nom": "Mai-Ndombe",
+              "code": "070",
+              "code_postal": "1015070"
+            },
+            {
+              "nom": "Matadi",
+              "code": "080",
+              "code_postal": "1015080"
+            },
+            {
+              "nom": "Mbandaka",
+              "code": "090",
+              "code_postal": "1015090"
+            },
+            {
+              "nom": "Mfimi",
+              "code": "100",
+              "code_postal": "1015100"
+            },
+            {
+              "nom": "Mongala",
+              "code": "110",
+              "code_postal": "1015110"
+            },
+            {
+              "nom": "Ntomba",
+              "code": "120",
+              "code_postal": "1015120"
+            },
+            {
+              "nom": "Ubangi",
+              "code": "130",
+              "code_postal": "1015130"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Makala",
+          "code": "14",
+          "quartiers": [
+            {
+              "nom": "Bahumbu",
+              "code": "010",
+              "code_postal": "1014010"
+            },
+            {
+              "nom": "Bagata",
+              "code": "020",
+              "code_postal": "1014020"
+            },
+            {
+              "nom": "Bolima",
+              "code": "030",
+              "code_postal": "1014030"
+            },
+            {
+              "nom": "Kabila",
+              "code": "040",
+              "code_postal": "1014040"
+            },
+            {
+              "nom": "Kisantu",
+              "code": "050",
+              "code_postal": "1014050"
+            },
+            {
+              "nom": "Kwango",
+              "code": "060",
+              "code_postal": "1014060"
+            },
+            {
+              "nom": "Lemba-Village",
+              "code": "070",
+              "code_postal": "1014070"
+            },
+            {
+              "nom": "Mabulu I",
+              "code": "080",
+              "code_postal": "1014080"
+            },
+            {
+              "nom": "Mabulu II",
+              "code": "090",
+              "code_postal": "1014090"
+            },
+            {
+              "nom": "Malola",
+              "code": "100",
+              "code_postal": "1014100"
+            },
+            {
+              "nom": "Mawanga",
+              "code": "110",
+              "code_postal": "1014110"
+            },
+            {
+              "nom": "Mfidi",
+              "code": "120",
+              "code_postal": "1014120"
+            },
+            {
+              "nom": "Mikasi",
+              "code": "130",
+              "code_postal": "1014130"
+            },
+            {
+              "nom": "Salongo",
+              "code": "140",
+              "code_postal": "1014140"
+            },
+            {
+              "nom": "Selo",
+              "code": "150",
+              "code_postal": "1014150"
+            },
+            {
+              "nom": "Tampa",
+              "code": "160",
+              "code_postal": "1014160"
+            },
+            {
+              "nom": "Vele",
+              "code": "170",
+              "code_postal": "1014170"
+            },
+            {
+              "nom": "Wamba",
+              "code": "180",
+              "code_postal": "1014180"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Selembao",
+          "code": "16",
+          "quartiers": [
+            {
+              "nom": "Badiadingi",
+              "code": "010",
+              "code_postal": "1016010"
+            },
+            {
+              "nom": "Cité-Verte",
+              "code": "020",
+              "code_postal": "1016020"
+            },
+            {
+              "nom": "Herady",
+              "code": "030",
+              "code_postal": "1016030"
+            },
+            {
+              "nom": "Inga",
+              "code": "040",
+              "code_postal": "1016040"
+            },
+            {
+              "nom": "Kalunga",
+              "code": "050",
+              "code_postal": "1016050"
+            },
+            {
+              "nom": "Konde",
+              "code": "060",
+              "code_postal": "1016060"
+            },
+            {
+              "nom": "Libération",
+              "code": "070",
+              "code_postal": "1016070"
+            },
+            {
+              "nom": "Lubudi",
+              "code": "080",
+              "code_postal": "1016080"
+            },
+            {
+              "nom": "Madiata",
+              "code": "090",
+              "code_postal": "1016090"
+            },
+            {
+              "nom": "Mbala",
+              "code": "100",
+              "code_postal": "1016100"
+            },
+            {
+              "nom": "Molende",
+              "code": "110",
+              "code_postal": "1016110"
+            },
+            {
+              "nom": "Mpululu Mbambu",
+              "code": "120",
+              "code_postal": "1016120"
+            },
+            {
+              "nom": "Mwna Ntunu",
+              "code": "130",
+              "code_postal": "1016130"
+            },
+            {
+              "nom": "Ndobe",
+              "code": "140",
+              "code_postal": "1016140"
+            },
+            {
+              "nom": "Ngafani",
+              "code": "150",
+              "code_postal": "1016150"
+            },
+            {
+              "nom": "Nkombe",
+              "code": "160",
+              "code_postal": "1016160"
+            },
+            {
+              "nom": "Nkingu",
+              "code": "170",
+              "code_postal": "1016170"
+            },
+            {
+              "nom": "Nkulu",
+              "code": "180",
+              "code_postal": "1016180"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nom": "Mont-Amba",
+      "communes": [
+        {
+          "nom": "Mont-Ngafula",
+          "code": "01",
+          "quartiers": [
+            {
+              "nom": "Camp Singa Boyenge",
+              "code": "010",
+              "code_postal": "1001010"
+            },
+            {
+              "nom": "CPA Mushie",
+              "code": "020",
+              "code_postal": "1001020"
+            },
+            {
+              "nom": "Kimbwala",
+              "code": "030",
+              "code_postal": "1001030"
+            },
+            {
+              "nom": "Kimbondo",
+              "code": "040",
+              "code_postal": "1001040"
+            },
+            {
+              "nom": "Kimwenza",
+              "code": "050",
+              "code_postal": "1001050"
+            },
+            {
+              "nom": "Kindele",
+              "code": "060",
+              "code_postal": "1001060"
+            },
+            {
+              "nom": "Mamayemo",
+              "code": "070",
+              "code_postal": "1001070"
+            },
+            {
+              "nom": "Mama Mobutu",
+              "code": "080",
+              "code_postal": "1001080"
+            },
+            {
+              "nom": "Masanga Mbila",
+              "code": "090",
+              "code_postal": "1001090"
+            },
+            {
+              "nom": "Masumu",
+              "code": "100",
+              "code_postal": "1001100"
+            },
+            {
+              "nom": "Matadi Kibala",
+              "code": "110",
+              "code_postal": "1001110"
+            },
+            {
+              "nom": "Matadi Mayo",
+              "code": "120",
+              "code_postal": "1001120"
+            },
+            {
+              "nom": "Mazamba",
+              "code": "130",
+              "code_postal": "1001130"
+            },
+            {
+              "nom": "Mitendi",
+              "code": "140",
+              "code_postal": "1001140"
+            },
+            {
+              "nom": "Musangu",
+              "code": "150",
+              "code_postal": "1001150"
+            },
+            {
+              "nom": "Mbuki",
+              "code": "160",
+              "code_postal": "1001160"
+            },
+            {
+              "nom": "N'Djili Kilambu",
+              "code": "170",
+              "code_postal": "1001170"
+            },
+            {
+              "nom": "Ngansele",
+              "code": "180",
+              "code_postal": "1001180"
+            },
+            {
+              "nom": "Ngombe Lutendele",
+              "code": "190",
+              "code_postal": "1001190"
+            },
+            {
+              "nom": "Plateau",
+              "code": "200",
+              "code_postal": "1001200"
+            },
+            {
+              "nom": "Vundamanenga",
+              "code": "210",
+              "code_postal": "1001210"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Lemba",
+          "code": "12",
+          "quartiers": [
+            {
+              "nom": "Camp Kabila",
+              "code": "010",
+              "code_postal": "1012010"
+            },
+            {
+              "nom": "Camp OSS",
+              "code": "020",
+              "code_postal": "1012020"
+            },
+            {
+              "nom": "Commercial",
+              "code": "030",
+              "code_postal": "1012030"
+            },
+            {
+              "nom": "Echangeur",
+              "code": "040",
+              "code_postal": "1012040"
+            },
+            {
+              "nom": "Ecole",
+              "code": "050",
+              "code_postal": "1012050"
+            },
+            {
+              "nom": "Foire",
+              "code": "060",
+              "code_postal": "1012060"
+            },
+            {
+              "nom": "Gombele",
+              "code": "070",
+              "code_postal": "1012070"
+            },
+            {
+              "nom": "Kimi Righini",
+              "code": "080",
+              "code_postal": "1012080"
+            },
+            {
+              "nom": "Kimpwanza",
+              "code": "090",
+              "code_postal": "1012090"
+            },
+            {
+              "nom": "Livulu",
+              "code": "100",
+              "code_postal": "1012100"
+            },
+            {
+              "nom": "Madrandele Kinshasa 21",
+              "code": "111",
+              "code_postal": "1012111"
+            },
+            {
+              "nom": "Masano",
+              "code": "120",
+              "code_postal": "1012120"
+            },
+            {
+              "nom": "Mbanza Lemba Kinshasa 11",
+              "code": "131",
+              "code_postal": "1012131"
+            },
+            {
+              "nom": "Molo",
+              "code": "140",
+              "code_postal": "1012140"
+            },
+            {
+              "nom": "Salongo",
+              "code": "150",
+              "code_postal": "1012150"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Kisenso",
+          "code": "11",
+          "quartiers": [
+            {
+              "nom": "17 Mai",
+              "code": "010",
+              "code_postal": "1011010"
+            },
+            {
+              "nom": "Amba",
+              "code": "020",
+              "code_postal": "1011020"
+            },
+            {
+              "nom": "Bikanga",
+              "code": "030",
+              "code_postal": "1011030"
+            },
+            {
+              "nom": "Dingi-Dingi",
+              "code": "040",
+              "code_postal": "1011040"
+            },
+            {
+              "nom": "De la Paix",
+              "code": "050",
+              "code_postal": "1011050"
+            },
+            {
+              "nom": "Kitomesa",
+              "code": "060",
+              "code_postal": "1011060"
+            },
+            {
+              "nom": "Kisenso Gare",
+              "code": "070",
+              "code_postal": "1011070"
+            },
+            {
+              "nom": "Kabila",
+              "code": "080",
+              "code_postal": "1011080"
+            },
+            {
+              "nom": "Libération",
+              "code": "090",
+              "code_postal": "1011090"
+            },
+            {
+              "nom": "Kumbu",
+              "code": "100",
+              "code_postal": "1011100"
+            },
+            {
+              "nom": "Mbuku",
+              "code": "110",
+              "code_postal": "1011110"
+            },
+            {
+              "nom": "Mission",
+              "code": "120",
+              "code_postal": "1011120"
+            },
+            {
+              "nom": "Mujinga",
+              "code": "130",
+              "code_postal": "1011130"
+            },
+            {
+              "nom": "Ngomba",
+              "code": "140",
+              "code_postal": "1011140"
+            },
+            {
+              "nom": "Nsola",
+              "code": "150",
+              "code_postal": "1011150"
+            },
+            {
+              "nom": "Regideso Kinshasa 22",
+              "code": "161",
+              "code_postal": "1011161"
+            },
+            {
+              "nom": "Révolution",
+              "code": "170",
+              "code_postal": "1011170"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Limete",
+          "code": "04",
+          "quartiers": [
+            {
+              "nom": "Agricole",
+              "code": "010",
+              "code_postal": "1004010"
+            },
+            {
+              "nom": "Industriel",
+              "code": "020",
+              "code_postal": "1004020"
+            },
+            {
+              "nom": "Kingabwa",
+              "code": "030",
+              "code_postal": "1004030"
+            },
+            {
+              "nom": "Mateba",
+              "code": "040",
+              "code_postal": "1004040"
+            },
+            {
+              "nom": "Masiala",
+              "code": "050",
+              "code_postal": "1004050"
+            },
+            {
+              "nom": "Mayulu",
+              "code": "060",
+              "code_postal": "1004060"
+            },
+            {
+              "nom": "Mbambu",
+              "code": "070",
+              "code_postal": "1004070"
+            },
+            {
+              "nom": "Mfumu Mvula",
+              "code": "080",
+              "code_postal": "1004080"
+            },
+            {
+              "nom": "Mombele",
+              "code": "090",
+              "code_postal": "1004090"
+            },
+            {
+              "nom": "Mososo",
+              "code": "100",
+              "code_postal": "1004100"
+            },
+            {
+              "nom": "Ndanu",
+              "code": "110",
+              "code_postal": "1004110"
+            },
+            {
+              "nom": "Nzadi",
+              "code": "120",
+              "code_postal": "1004120"
+            },
+            {
+              "nom": "Résidentiel Kinshasa Limete",
+              "code": "131",
+              "code_postal": "1004131"
+            },
+            {
+              "nom": "Salongo",
+              "code": "140",
+              "code_postal": "1004140"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Matete",
+          "code": "10",
+          "quartiers": [
+            {
+              "nom": "Dondo",
+              "code": "010",
+              "code_postal": "1010010"
+            },
+            {
+              "nom": "Loeka",
+              "code": "020",
+              "code_postal": "1010020"
+            },
+            {
+              "nom": "Lubefu",
+              "code": "030",
+              "code_postal": "1010030"
+            },
+            {
+              "nom": "Lukunga",
+              "code": "040",
+              "code_postal": "1010040"
+            },
+            {
+              "nom": "Lumumba",
+              "code": "050",
+              "code_postal": "1010050"
+            },
+            {
+              "nom": "Lunionzo",
+              "code": "060",
+              "code_postal": "1010060"
+            },
+            {
+              "nom": "Malemba",
+              "code": "070",
+              "code_postal": "1010070"
+            },
+            {
+              "nom": "Maziba",
+              "code": "080",
+              "code_postal": "1010080"
+            },
+            {
+              "nom": "Mbamb Ipoku Kinshasa 23",
+              "code": "091",
+              "code_postal": "1010091"
+            },
+            {
+              "nom": "Sankuru",
+              "code": "100",
+              "code_postal": "1010100"
+            },
+            {
+              "nom": "Sumbuka",
+              "code": "110",
+              "code_postal": "1010110"
+            },
+            {
+              "nom": "Totaka",
+              "code": "120",
+              "code_postal": "1010120"
+            },
+            {
+              "nom": "Vivi",
+              "code": "130",
+              "code_postal": "1010130"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Ngaba",
+          "code": "13",
+          "quartiers": [
+            {
+              "nom": "Baobab Kinshasa 16",
+              "code": "011",
+              "code_postal": "1013011"
+            },
+            {
+              "nom": "Bulambemba",
+              "code": "020",
+              "code_postal": "1013020"
+            },
+            {
+              "nom": "Luyi",
+              "code": "030",
+              "code_postal": "1013030"
+            },
+            {
+              "nom": "Mateba",
+              "code": "040",
+              "code_postal": "1013040"
+            },
+            {
+              "nom": "Mpila",
+              "code": "050",
+              "code_postal": "1013050"
+            },
+            {
+              "nom": "Mukulua",
+              "code": "060",
+              "code_postal": "1013060"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nom": "Tshangu",
+      "communes": [
+        {
+          "nom": "N'Djili",
+          "code": "09",
+          "quartiers": [
+            {
+              "nom": "Bandundu",
+              "code": "010",
+              "code_postal": "1009010"
+            },
+            {
+              "nom": "Bilombe",
+              "code": "020",
+              "code_postal": "1009020"
+            },
+            {
+              "nom": "Equateur",
+              "code": "030",
+              "code_postal": "1009030"
+            },
+            {
+              "nom": "Goma",
+              "code": "040",
+              "code_postal": "1009040"
+            },
+            {
+              "nom": "Inga",
+              "code": "050",
+              "code_postal": "1009050"
+            },
+            {
+              "nom": "Kasai",
+              "code": "060",
+              "code_postal": "1009060"
+            },
+            {
+              "nom": "Kasai Oriental Kinshasa 20",
+              "code": "071",
+              "code_postal": "1009071"
+            },
+            {
+              "nom": "Katanga",
+              "code": "080",
+              "code_postal": "1009080"
+            },
+            {
+              "nom": "Kivu",
+              "code": "090",
+              "code_postal": "1009090"
+            },
+            {
+              "nom": "Makasi",
+              "code": "100",
+              "code_postal": "1009100"
+            },
+            {
+              "nom": "Mongala",
+              "code": "110",
+              "code_postal": "1009110"
+            },
+            {
+              "nom": "Tshuapa",
+              "code": "120",
+              "code_postal": "1009120"
+            },
+            {
+              "nom": "Ubangi",
+              "code": "130",
+              "code_postal": "1009130"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Kimbanseke",
+          "code": "08",
+          "quartiers": [
+            {
+              "nom": "Bahumbu",
+              "code": "010",
+              "code_postal": "1008010"
+            },
+            {
+              "nom": "Bamboma",
+              "code": "020",
+              "code_postal": "1008020"
+            },
+            {
+              "nom": "Batumona",
+              "code": "030",
+              "code_postal": "1008030"
+            },
+            {
+              "nom": "Bikuku",
+              "code": "040",
+              "code_postal": "1008040"
+            },
+            {
+              "nom": "Biyela",
+              "code": "050",
+              "code_postal": "1008050"
+            },
+            {
+              "nom": "Boma",
+              "code": "060",
+              "code_postal": "1008060"
+            },
+            {
+              "nom": "Disasi",
+              "code": "070",
+              "code_postal": "1008070"
+            },
+            {
+              "nom": "Esanga",
+              "code": "080",
+              "code_postal": "1008080"
+            },
+            {
+              "nom": "Kabila",
+              "code": "090",
+              "code_postal": "1008090"
+            },
+            {
+              "nom": "Kakudji",
+              "code": "100",
+              "code_postal": "1008100"
+            },
+            {
+              "nom": "Kamba Mulumba",
+              "code": "110",
+              "code_postal": "1008110"
+            },
+            {
+              "nom": "Kamboko",
+              "code": "120",
+              "code_postal": "1008120"
+            },
+            {
+              "nom": "Kasa-Vubu",
+              "code": "130",
+              "code_postal": "1008130"
+            },
+            {
+              "nom": "Kayolo",
+              "code": "140",
+              "code_postal": "1008140"
+            },
+            {
+              "nom": "Kikimi",
+              "code": "150",
+              "code_postal": "1008150"
+            },
+            {
+              "nom": "Kimbundi",
+              "code": "160",
+              "code_postal": "1008160"
+            },
+            {
+              "nom": "Kingasani",
+              "code": "170",
+              "code_postal": "1008170"
+            },
+            {
+              "nom": "Kisantu",
+              "code": "180",
+              "code_postal": "1008180"
+            },
+            {
+              "nom": "Kutu",
+              "code": "190",
+              "code_postal": "1008190"
+            },
+            {
+              "nom": "Luebo",
+              "code": "200",
+              "code_postal": "1008200"
+            },
+            {
+              "nom": "Mabinda",
+              "code": "210",
+              "code_postal": "1008210"
+            },
+            {
+              "nom": "Malonda",
+              "code": "220",
+              "code_postal": "1008220"
+            },
+            {
+              "nom": "Maréchal 17 Mai",
+              "code": "230",
+              "code_postal": "1008230"
+            },
+            {
+              "nom": "Mongana",
+              "code": "240",
+              "code_postal": "1008240"
+            },
+            {
+              "nom": "Maviokele",
+              "code": "250",
+              "code_postal": "1008250"
+            },
+            {
+              "nom": "Mayengele",
+              "code": "260",
+              "code_postal": "1008260"
+            },
+            {
+              "nom": "Mbemba Fundu",
+              "code": "270",
+              "code_postal": "1008270"
+            },
+            {
+              "nom": "Mbwala",
+              "code": "280",
+              "code_postal": "1008280"
+            },
+            {
+              "nom": "Mfumu Nketo",
+              "code": "290",
+              "code_postal": "1008290"
+            },
+            {
+              "nom": "Mikondo",
+              "code": "300",
+              "code_postal": "1008300"
+            },
+            {
+              "nom": "Mokali",
+              "code": "310",
+              "code_postal": "1008310"
+            },
+            {
+              "nom": "Mulie",
+              "code": "320",
+              "code_postal": "1008320"
+            },
+            {
+              "nom": "Munkanka",
+              "code": "330",
+              "code_postal": "1008330"
+            },
+            {
+              "nom": "Ngama Yama",
+              "code": "340",
+              "code_postal": "1008340"
+            },
+            {
+              "nom": "Ngamazita",
+              "code": "350",
+              "code_postal": "1008350"
+            },
+            {
+              "nom": "Ngampani",
+              "code": "360",
+              "code_postal": "1008360"
+            },
+            {
+              "nom": "Ngandu",
+              "code": "370",
+              "code_postal": "1008370"
+            },
+            {
+              "nom": "Ngiesi",
+              "code": "380",
+              "code_postal": "1008380"
+            },
+            {
+              "nom": "Nsanga",
+              "code": "390",
+              "code_postal": "1008390"
+            },
+            {
+              "nom": "Nzumbwa",
+              "code": "400",
+              "code_postal": "1008400"
+            },
+            {
+              "nom": "Panda-Nzila",
+              "code": "410",
+              "code_postal": "1008410"
+            },
+            {
+              "nom": "Pierre Mfokom",
+              "code": "420",
+              "code_postal": "1008420"
+            },
+            {
+              "nom": "Révolution",
+              "code": "430",
+              "code_postal": "1008430"
+            },
+            {
+              "nom": "Sakombi",
+              "code": "440",
+              "code_postal": "1008440"
+            },
+            {
+              "nom": "Salongo",
+              "code": "450",
+              "code_postal": "1008450"
+            },
+            {
+              "nom": "Waya-Waya",
+              "code": "460",
+              "code_postal": "1008460"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Masina",
+          "code": "05",
+          "quartiers": [
+            {
+              "nom": "Abattoire",
+              "code": "010",
+              "code_postal": "1005010"
+            },
+            {
+              "nom": "Boba",
+              "code": "020",
+              "code_postal": "1005020"
+            },
+            {
+              "nom": "Congo",
+              "code": "030",
+              "code_postal": "1005030"
+            },
+            {
+              "nom": "Efoloko",
+              "code": "040",
+              "code_postal": "1005040"
+            },
+            {
+              "nom": "Imbali",
+              "code": "050",
+              "code_postal": "1005050"
+            },
+            {
+              "nom": "Kasai",
+              "code": "060",
+              "code_postal": "1005060"
+            },
+            {
+              "nom": "Kimbangu",
+              "code": "070",
+              "code_postal": "1005070"
+            },
+            {
+              "nom": "Kivu",
+              "code": "080",
+              "code_postal": "1005080"
+            },
+            {
+              "nom": "Lokari",
+              "code": "090",
+              "code_postal": "1005090"
+            },
+            {
+              "nom": "Lubamba",
+              "code": "100",
+              "code_postal": "1005100"
+            },
+            {
+              "nom": "Mafuta-Kizola",
+              "code": "110",
+              "code_postal": "1005110"
+            },
+            {
+              "nom": "Madiangu",
+              "code": "120",
+              "code_postal": "1005120"
+            },
+            {
+              "nom": "Mapela",
+              "code": "130",
+              "code_postal": "1005130"
+            },
+            {
+              "nom": "Matadi",
+              "code": "140",
+              "code_postal": "1005140"
+            },
+            {
+              "nom": "Mfumu-Nsuka",
+              "code": "150",
+              "code_postal": "1005150"
+            },
+            {
+              "nom": "Nzuzi wa Mbombo",
+              "code": "160",
+              "code_postal": "1005160"
+            },
+            {
+              "nom": "Pelende",
+              "code": "170",
+              "code_postal": "1005170"
+            },
+            {
+              "nom": "Sans-Fil",
+              "code": "180",
+              "code_postal": "1005180"
+            },
+            {
+              "nom": "Télévision",
+              "code": "190",
+              "code_postal": "1005190"
+            },
+            {
+              "nom": "Tshangu",
+              "code": "200",
+              "code_postal": "1005200"
+            },
+            {
+              "nom": "Tshwenge",
+              "code": "210",
+              "code_postal": "1005210"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Nsele",
+          "code": "06",
+          "quartiers": [
+            {
+              "nom": "Bibwa",
+              "code": "010",
+              "code_postal": "1006010"
+            },
+            {
+              "nom": "Buma",
+              "code": "020",
+              "code_postal": "1006020"
+            },
+            {
+              "nom": "Camp Badara",
+              "code": "030",
+              "code_postal": "1006030"
+            },
+            {
+              "nom": "Camp Ceta",
+              "code": "040",
+              "code_postal": "1006040"
+            },
+            {
+              "nom": "Camp Kibomango",
+              "code": "050",
+              "code_postal": "1006050"
+            },
+            {
+              "nom": "Camp Mikondo",
+              "code": "060",
+              "code_postal": "1006060"
+            },
+            {
+              "nom": "Dingi-Dingi",
+              "code": "070",
+              "code_postal": "1006070"
+            },
+            {
+              "nom": "Domaine",
+              "code": "080",
+              "code_postal": "1006080"
+            },
+            {
+              "nom": "Fleuve",
+              "code": "090",
+              "code_postal": "1006090"
+            },
+            {
+              "nom": "Kikimi",
+              "code": "100",
+              "code_postal": "1006100"
+            },
+            {
+              "nom": "Kindobo",
+              "code": "110",
+              "code_postal": "1006110"
+            },
+            {
+              "nom": "Kinkole Bahumbu",
+              "code": "120",
+              "code_postal": "1006120"
+            },
+            {
+              "nom": "Kinkole Mikala I Kinshasa 24",
+              "code": "131",
+              "code_postal": "1006131"
+            },
+            {
+              "nom": "Kinkole Mikala II",
+              "code": "140",
+              "code_postal": "1006140"
+            },
+            {
+              "nom": "Kinkole Pêcheurs Kinshasa 33",
+              "code": "151",
+              "code_postal": "1006151"
+            },
+            {
+              "nom": "Mangengenge",
+              "code": "160",
+              "code_postal": "1006160"
+            },
+            {
+              "nom": "Mibo",
+              "code": "170",
+              "code_postal": "1006170"
+            },
+            {
+              "nom": "Mikondo",
+              "code": "180",
+              "code_postal": "1006180"
+            },
+            {
+              "nom": "Mikonga I",
+              "code": "190",
+              "code_postal": "1006190"
+            },
+            {
+              "nom": "Mikonga II",
+              "code": "200",
+              "code_postal": "1006200"
+            },
+            {
+              "nom": "Mpasa I",
+              "code": "210",
+              "code_postal": "1006210"
+            },
+            {
+              "nom": "Mpasa II",
+              "code": "220",
+              "code_postal": "1006220"
+            },
+            {
+              "nom": "Mpasa Maba",
+              "code": "230",
+              "code_postal": "1006230"
+            },
+            {
+              "nom": "Munke",
+              "code": "240",
+              "code_postal": "1006240"
+            },
+            {
+              "nom": "Munziami",
+              "code": "250",
+              "code_postal": "1006250"
+            },
+            {
+              "nom": "Nganzi",
+              "code": "260",
+              "code_postal": "1006260"
+            },
+            {
+              "nom": "Ngapana",
+              "code": "270",
+              "code_postal": "1006270"
+            },
+            {
+              "nom": "Nginga",
+              "code": "280",
+              "code_postal": "1006280"
+            },
+            {
+              "nom": "Sicotra Lokali",
+              "code": "290",
+              "code_postal": "1006290"
+            },
+            {
+              "nom": "Talangay",
+              "code": "300",
+              "code_postal": "1006300"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        },
+        {
+          "nom": "Maluku",
+          "code": "07",
+          "quartiers": [
+            {
+              "nom": "Dumi",
+              "code": "010",
+              "code_postal": "1007010"
+            },
+            {
+              "nom": "Camp Monako Kinshasa 34",
+              "code": "021",
+              "code_postal": "1007021"
+            },
+            {
+              "nom": "Kikimi",
+              "code": "030",
+              "code_postal": "1007030"
+            },
+            {
+              "nom": "Kimpoko",
+              "code": "040",
+              "code_postal": "1007040"
+            },
+            {
+              "nom": "Kingakati",
+              "code": "050",
+              "code_postal": "1007050"
+            },
+            {
+              "nom": "Kingunu",
+              "code": "060",
+              "code_postal": "1007060"
+            },
+            {
+              "nom": "Kinzono",
+              "code": "070",
+              "code_postal": "1007070"
+            },
+            {
+              "nom": "Mayi-Ndombe",
+              "code": "080",
+              "code_postal": "1007080"
+            },
+            {
+              "nom": "Maluku",
+              "code": "090",
+              "code_postal": "1007090"
+            },
+            {
+              "nom": "Mangengenge",
+              "code": "100",
+              "code_postal": "1007100"
+            },
+            {
+              "nom": "Mbakana",
+              "code": "110",
+              "code_postal": "1007110"
+            },
+            {
+              "nom": "Menkao",
+              "code": "120",
+              "code_postal": "1007120"
+            },
+            {
+              "nom": "Monako",
+              "code": "130",
+              "code_postal": "1007130"
+            },
+            {
+              "nom": "Mongata",
+              "code": "140",
+              "code_postal": "1007140"
+            },
+            {
+              "nom": "Mwe",
+              "code": "150",
+              "code_postal": "1007150"
+            },
+            {
+              "nom": "Ngana",
+              "code": "160",
+              "code_postal": "1007160"
+            },
+            {
+              "nom": "Nguma",
+              "code": "170",
+              "code_postal": "1007170"
+            },
+            {
+              "nom": "Ru",
+              "code": "180",
+              "code_postal": "1007180"
+            },
+            {
+              "nom": "Yosso",
+              "code": "190",
+              "code_postal": "1007190"
+            },
+            {
+              "nom": "Yuo",
+              "code": "200",
+              "code_postal": "1007200"
+            },
+            {
+              "nom": "autres",
+              "code": null,
+              "code_postal": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

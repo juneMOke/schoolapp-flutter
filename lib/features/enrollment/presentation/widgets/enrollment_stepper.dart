@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_tep.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info_step.dart';

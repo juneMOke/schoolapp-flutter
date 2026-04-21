@@ -114,6 +114,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   assets:
     - lib/features/auth/data/datasources/
+    - assets/catalogs/address_geo_catalog.json
 
 
 flutter_native_splash:

@@ -388,6 +388,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get neighborhoodHelp => 'Quartier ou avenue de résidence.';
 
   @override
+  String get addressComplementary => 'Adresse complémentaire';
+
+  @override
+  String get addressComplementaryHelp => 'Précisez rue, avenue et numéro si nécessaire.';
+
+  @override
+  String get addressComplementaryPlaceholder => 'Ex: 10, Avenue La source';
+
+  @override
   String get fullAddress => 'Adresse complète';
 
   @override
@@ -616,6 +625,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addressValidationReasonsTitle => 'Veuillez corriger les informations d\'adresse suivantes :';
 
   @override
+  String get addressNoCityAvailable => 'Aucune ville disponible dans le catalogue.';
+
+  @override
+  String get addressSelectCityFirst => 'Sélectionnez d\'abord une ville.';
+
+  @override
+  String get addressNoDistrictAvailable => 'Aucun district disponible pour cette ville.';
+
+  @override
+  String get addressSelectDistrictFirst => 'Sélectionnez d\'abord un district.';
+
+  @override
+  String get addressNoMunicipalityAvailable => 'Aucune commune disponible pour ce district.';
+
+  @override
+  String get addressSelectMunicipalityFirst => 'Sélectionnez d\'abord une commune.';
+
+  @override
+  String get addressNoNeighborhoodAvailable => 'Aucun quartier disponible pour cette commune.';
+
+  @override
   String get addressSaveHintBeforeContinue => 'Veuillez enregistrer les modifications d\'adresse avant de continuer.';
 
   @override
@@ -654,13 +684,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentReadOnlyTitle => 'Mode consultation';
 
   @override
-  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé. Les informations sont affichées en lecture seule.';
+  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
 
   @override
   String get enrollmentEditableTitle => 'Mode édition';
 
   @override
-  String get enrollmentEditableMessage => 'Ce dossier est en cours. Les informations peuvent être modifiées.';
+  String get enrollmentEditableMessage => 'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';

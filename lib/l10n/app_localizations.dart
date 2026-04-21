@@ -815,6 +815,24 @@ abstract class AppLocalizations {
   /// **'Neighborhood or street of residence.'**
   String get neighborhoodHelp;
 
+  /// No description provided for @addressComplementary.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional address'**
+  String get addressComplementary;
+
+  /// No description provided for @addressComplementaryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add street, avenue and number when needed.'**
+  String get addressComplementaryHelp;
+
+  /// No description provided for @addressComplementaryPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 10, Avenue La source'**
+  String get addressComplementaryPlaceholder;
+
   /// No description provided for @fullAddress.
   ///
   /// In en, this message translates to:
@@ -1246,6 +1264,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please correct the following address fields:'**
   String get addressValidationReasonsTitle;
+
+  /// No description provided for @addressNoCityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No city is available in the catalog.'**
+  String get addressNoCityAvailable;
+
+  /// No description provided for @addressSelectCityFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a city first.'**
+  String get addressSelectCityFirst;
+
+  /// No description provided for @addressNoDistrictAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No district is available for this city.'**
+  String get addressNoDistrictAvailable;
+
+  /// No description provided for @addressSelectDistrictFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a district first.'**
+  String get addressSelectDistrictFirst;
+
+  /// No description provided for @addressNoMunicipalityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No municipality is available for this district.'**
+  String get addressNoMunicipalityAvailable;
+
+  /// No description provided for @addressSelectMunicipalityFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a municipality first.'**
+  String get addressSelectMunicipalityFirst;
+
+  /// No description provided for @addressNoNeighborhoodAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No neighborhood is available for this municipality.'**
+  String get addressNoNeighborhoodAvailable;
 
   /// No description provided for @addressSaveHintBeforeContinue.
   ///

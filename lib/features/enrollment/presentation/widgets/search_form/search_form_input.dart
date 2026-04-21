@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
 class SearchFormInput extends StatelessWidget {
   final TextEditingController controller;
@@ -27,6 +28,7 @@ class SearchFormInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       textCapitalization: textCapitalization,
+      inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
       readOnly: readOnly,
       onChanged: onChanged,
       onTap: onTap,

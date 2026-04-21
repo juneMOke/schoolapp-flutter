@@ -162,6 +162,9 @@
   "municipalityHelp": "Commune de résidence de l'élève.",
   "neighborhood": "Quartier",
   "neighborhoodHelp": "Quartier ou avenue de résidence.",
+  "addressComplementary": "Adresse complémentaire",
+  "addressComplementaryHelp": "Précisez rue, avenue et numéro si nécessaire.",
+  "addressComplementaryPlaceholder": "Ex: 10, Avenue La source",
   "fullAddress": "Adresse complète",
   "fullAddressHelp": "Adresse complète de résidence.",
 
@@ -269,6 +272,13 @@
     }
   },
   "addressValidationReasonsTitle": "Veuillez corriger les informations d'adresse suivantes :",
+  "addressNoCityAvailable": "Aucune ville disponible dans le catalogue.",
+  "addressSelectCityFirst": "Sélectionnez d'abord une ville.",
+  "addressNoDistrictAvailable": "Aucun district disponible pour cette ville.",
+  "addressSelectDistrictFirst": "Sélectionnez d'abord un district.",
+  "addressNoMunicipalityAvailable": "Aucune commune disponible pour ce district.",
+  "addressSelectMunicipalityFirst": "Sélectionnez d'abord une commune.",
+  "addressNoNeighborhoodAvailable": "Aucun quartier disponible pour cette commune.",
   "addressSaveHintBeforeContinue": "Veuillez enregistrer les modifications d'adresse avant de continuer.",
   "addressSaveSuccess": "Adresse mise à jour avec succès.",
   "addressSaveError": "Erreur lors de la mise à jour de l'adresse : {message}",

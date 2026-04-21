@@ -20,6 +20,7 @@ abstract class StudentRepository {
     required String city,
     required String district,
     required String municipality,
+    required String neighborhood,
     required String address,
   });
 
