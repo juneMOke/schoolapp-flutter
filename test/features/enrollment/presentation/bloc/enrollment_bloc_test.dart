@@ -94,6 +94,7 @@ final _tEnrollmentDetail = EnrollmentDetail(
       name: 'Primaire',
       code: 'PRI',
     ),
+    neighborhood: 'Test Neighborhood',
   ),
   parentDetails: const [],
   enrollmentDetail: const EnrollmentSchoolDetail(
@@ -400,9 +401,8 @@ void main() {
       'emet [previewLoading, previewSuccess] avec le détail pré-rempli',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -428,9 +428,8 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).called(1);
       },
     );
@@ -439,9 +438,8 @@ void main() {
       'emet [previewLoading, previewFailure] quand le use case renvoie une erreur',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer(
           (_) async => const Left(ServerFailure('Preview unavailable')),
         );
@@ -471,9 +469,8 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).called(1);
       },
     );
@@ -482,9 +479,8 @@ void main() {
       'ne modifie pas summariesStatus ni detail lors du chargement du preview',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -521,9 +517,8 @@ void main() {
       'emet uniquement [previewSuccess] en mode silent pour préserver le stepper',
       setUp: () {
         when(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).thenAnswer((_) async => Right(_tEnrollmentDetail));
       },
       build: buildBloc,
@@ -545,9 +540,8 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockGetEnrollmentPreviewByStudentIdUseCase(
-            studentId: studentId,
-          ),
+          () =>
+              mockGetEnrollmentPreviewByStudentIdUseCase(studentId: studentId),
         ).called(1);
       },
     );
@@ -643,9 +637,7 @@ void main() {
             nationality: nationality,
             gender: gender,
           ),
-        ).thenAnswer(
-          (_) async => const Left(ServerFailure('Creation failed')),
-        );
+        ).thenAnswer((_) async => const Left(ServerFailure('Creation failed')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(

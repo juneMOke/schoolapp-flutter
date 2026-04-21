@@ -7,15 +7,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Couples each API status value with its localized label.
 class _StatusOption {
   const _StatusOption(this.value, this.label);
+
   final String value;
   final String label;
 }
 
 class _StatusVisual {
-  const _StatusVisual({
-    required this.icon,
-    required this.base,
-  });
+  const _StatusVisual({required this.icon, required this.base});
 
   final IconData icon;
   final Color base;
@@ -136,7 +134,9 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusItem(_StatusOption option, ColorScheme colorScheme, {
+  Widget _buildStatusItem(
+    _StatusOption option,
+    ColorScheme colorScheme, {
     required bool isSelected,
   }) {
     final visual = _visualForStatus(option.value, colorScheme);
@@ -179,7 +179,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13,
-                  height: 1.2,
+                height: 1.2,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: textColor,
               ),
@@ -246,45 +246,42 @@ class SearchFormStatusDropdown extends StatelessWidget {
   _StatusVisual _visualForStatus(String status, ColorScheme scheme) {
     switch (status) {
       case 'IN_PROGRESS':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.autorenew_rounded,
-          base: const Color(0xFFB45309),
+          base: Color(0xFFB45309),
         );
       case 'ADMIN_COMPLETED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.assignment_turned_in_rounded,
-          base: const Color(0xFF6D28D9),
+          base: Color(0xFF6D28D9),
         );
       case 'FINANCIAL_COMPLETED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.account_balance_wallet_rounded,
-          base: const Color(0xFF0D9488),
+          base: Color(0xFF0D9488),
         );
       case 'COMPLETED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.task_alt_rounded,
-          base: const Color(0xFF059669),
+          base: Color(0xFF059669),
         );
       case 'VALIDATED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.verified_rounded,
-          base: const Color(0xFF16A34A),
+          base: Color(0xFF16A34A),
         );
       case 'REJECTED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.gpp_bad_rounded,
-          base: const Color(0xFFEA580C),
+          base: Color(0xFFEA580C),
         );
       case 'CANCELLED':
-        return _StatusVisual(
+        return const _StatusVisual(
           icon: Icons.cancel_rounded,
-          base: const Color(0xFFDC2626),
+          base: Color(0xFFDC2626),
         );
       default:
-        return _StatusVisual(
-          icon: Icons.label_rounded,
-          base: scheme.outline,
-        );
+        return _StatusVisual(icon: Icons.label_rounded, base: scheme.outline);
     }
   }
 }
