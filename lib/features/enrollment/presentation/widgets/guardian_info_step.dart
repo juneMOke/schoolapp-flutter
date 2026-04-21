@@ -61,6 +61,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   late final ParentBloc _parentBloc;
 
+  String _normalizeEmailForApi(String rawEmail) {
+    return rawEmail.trim().toLowerCase();
+  }
+
   void submitForm() => _onSave();
 
   @override
@@ -247,6 +251,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         errors.add(
           'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.emailLabel)}',
         );
+      } else if (!ParentItemValue.isEmailValid(value.email)) {
+        errors.add('Gardien ${i + 1}: ${l10n.pleaseEnterValidEmail}');
       }
     }
 
@@ -317,6 +323,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           surname: current.surname.trim().isEmpty
               ? null
               : current.surname.trim(),
+          email: _normalizeEmailForApi(current.email),
           phoneNumber: current.phoneNumber.trim(),
           relationshipType: current.relationshipType.name.toUpperCase(),
         ),
@@ -330,7 +337,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           surname: current.surname.trim().isEmpty
               ? null
               : current.surname.trim(),
-          email: current.email.trim(),
+          email: _normalizeEmailForApi(current.email),
           phoneNumber: current.phoneNumber.trim(),
           relationshipType: current.relationshipType.name.toUpperCase(),
         ),

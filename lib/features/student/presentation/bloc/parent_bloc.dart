@@ -84,6 +84,7 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
       firstName: event.firstName,
       lastName: event.lastName,
       surname: event.surname,
+      email: event.email,
       phoneNumber: event.phoneNumber,
       relationshipType: event.relationshipType,
     );

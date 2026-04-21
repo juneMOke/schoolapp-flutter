@@ -13,6 +13,7 @@ class CreateParentUseCase {
     required String firstName,
     required String lastName,
     required String? surname,
+    required String email,
     required String phoneNumber,
     required String relationshipType,
   }) =>
@@ -21,6 +22,7 @@ class CreateParentUseCase {
         firstName: firstName,
         lastName: lastName,
         surname: surname,
+        email: email,
         phoneNumber: phoneNumber,
         relationshipType: relationshipType,
       );

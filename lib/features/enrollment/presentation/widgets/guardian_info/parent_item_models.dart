@@ -3,6 +3,10 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/relations
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 
 class ParentItemValue extends Equatable {
+  static final RegExp _emailRegExp = RegExp(
+    r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+  );
+
   final String firstName;
   final String lastName;
   final String surname;
@@ -49,10 +53,18 @@ class ParentItemValue extends Equatable {
   }
 
   bool get isValid {
+    final normalizedEmail = email.trim();
     return firstName.trim().isNotEmpty &&
         lastName.trim().isNotEmpty &&
         phoneNumber.trim().isNotEmpty &&
-        email.trim().isNotEmpty;
+        normalizedEmail.isNotEmpty &&
+        isEmailValid(normalizedEmail);
+  }
+
+  static bool isEmailValid(String rawEmail) {
+    final normalized = rawEmail.trim();
+    if (normalized.isEmpty) return false;
+    return _emailRegExp.hasMatch(normalized);
   }
 
   Map<String, bool> changedComparedTo(ParentItemValue initial) {
