@@ -47,6 +47,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   final List<String> _pendingParentIds = <String>[];
   bool _isBatchSaving = false;
+  String? _pendingUnlinkParentId;
 
   bool _isDirty = false;
   bool _isValid = false;
@@ -469,7 +470,25 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     );
 
     if (!mounted || !confirmed) return;
-    _onRemoveGuardian(parentId);
+
+    // Draft : suppression locale uniquement (pas encore persisté en base).
+    if (_isDraftParentId(parentId)) {
+      _onRemoveGuardian(parentId);
+      return;
+    }
+
+    // Parent réel : appel API via ParentBloc.
+    final studentId = widget.studentId.trim();
+    if (studentId.isEmpty) {
+      AppSnackBar.showError(context, l10n.validatePersonalInfoHint);
+      return;
+    }
+
+    _pendingUnlinkParentId = parentId;
+    _onSavingChanged(true);
+    _parentBloc.add(
+      ParentUnlinkRequested(studentId: studentId, parentId: parentId),
+    );
   }
 
   @override
@@ -520,6 +539,35 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             AppSnackBar.showError(
               context,
               l10n.academicInfoSaveError(state.errorMessage ?? ''),
+            );
+          } else if (state.status == ParentUpdateStatus.unlinkSuccess) {
+            final pendingId = _pendingUnlinkParentId;
+            if (pendingId != null) {
+              setState(() {
+                _editableParentDetails = _editableParentDetails
+                    .where((parent) => parent.id != pendingId)
+                    .toList(growable: false);
+                _currentValuesByParentId.remove(pendingId);
+                _initialValuesByParentId.remove(pendingId);
+                _itemStatesByParentId.remove(pendingId);
+                _pendingParentIds.removeWhere((id) => id == pendingId);
+              });
+
+              _recomputeFormState();
+              _onSavingChanged(false);
+              _pendingUnlinkParentId = null;
+
+              final l10n = AppLocalizations.of(context)!;
+              AppSnackBar.showSuccess(context, l10n.guardianUnlinkSuccess);
+            }
+          } else if (state.status == ParentUpdateStatus.unlinkFailure) {
+            _pendingUnlinkParentId = null;
+            _onSavingChanged(false);
+
+            final l10n = AppLocalizations.of(context)!;
+            AppSnackBar.showError(
+              context,
+              l10n.guardianUnlinkError(state.errorMessage ?? ''),
             );
           }
         },

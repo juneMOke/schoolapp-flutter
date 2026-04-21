@@ -12,11 +12,13 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_app_bar_title.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_back_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_content_shell.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_read_only_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailPage extends StatefulWidget {
   final EnrollmentDetailIntent intent;
@@ -76,55 +78,88 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     }
   }
 
+  /// Handle side effects after a successful enrollment creation:
+  /// resolve next intent, refresh detail/summaries, sync route, then consume result.
+  void _onEnrollmentCreated(BuildContext context, EnrollmentState state) {
+    final createdEnrollmentSummary = state.createdEnrollmentSummary;
+    final nextIntent = _policy.resolveEffectiveIntent(
+      baseIntent: _effectiveIntent,
+      createdEnrollmentSummary: createdEnrollmentSummary,
+    );
+
+    if (nextIntent != _effectiveIntent) {
+      setState(() => _effectiveIntent = nextIntent);
+    }
+
+    final enrollmentBloc = context.read<EnrollmentBloc>();
+    _policy.requestLoad(enrollmentBloc, nextIntent, silent: true);
+    enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
+
+    if (widget.intent != nextIntent) {
+      context.replace(nextIntent.toLocation(), extra: nextIntent);
+    }
+
+    enrollmentBloc.add(const EnrollmentCreateResultConsumed());
+  }
+
+  /// Resolve detail access mode from enrollment status for first-registration flow.
+  EnrollmentDetailAccessMode? _resolveAccessMode(EnrollmentStatus status) {
+    return switch (status) {
+      EnrollmentStatus.completed => EnrollmentDetailAccessMode.readOnly,
+      EnrollmentStatus.inProgress => EnrollmentDetailAccessMode.editable,
+      _ => null,
+    };
+  }
+
+  /// Show access banner only in first-registration view when an access mode exists.
+  bool _shouldShowAccessBanner({
+    required EnrollmentDetailOrigin origin,
+    required EnrollmentDetailAccessMode? accessMode,
+  }) {
+    return origin == EnrollmentDetailOrigin.firstRegistration &&
+        accessMode != null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
         titleSpacing: 18,
-        leading: _BackButton(),
-        title: EnrollmentDetailAppBarTitle(
-          enrollmentId: _effectiveIntent.enrollmentId,
+        leading: const EnrollmentDetailBackButton(),
+        title: BlocSelector<EnrollmentBloc, EnrollmentState, String>(
+          selector: (state) {
+            final detail = _policy.detail(state);
+            if (detail == null) {
+              return '';
+            }
+
+            return [
+              detail.studentDetail.firstName,
+              detail.studentDetail.lastName,
+              detail.studentDetail.surname,
+            ].where((part) => part.trim().isNotEmpty).join(' ');
+          },
+          builder: (context, studentDisplayName) {
+            return EnrollmentDetailAppBarTitle(
+              titleLabel: l10n.enrollmentDetailTitle,
+              titleValue: studentDisplayName.isNotEmpty
+                  ? studentDisplayName
+                  : l10n.enrollmentUnknownStudent,
+            );
+          },
         ),
         backgroundColor: AppTheme.surfaceColor,
       ),
       body: BlocListener<EnrollmentBloc, EnrollmentState>(
-        listenWhen: (previous, current) =>
-            previous.createStatus != current.createStatus &&
-            current.createStatus == EnrollmentLoadStatus.success,
-        listener: (context, state) {
-          final createdEnrollmentSummary = state.createdEnrollmentSummary;
-          final nextIntent = _policy.resolveEffectiveIntent(
-            baseIntent: _effectiveIntent,
-            createdEnrollmentSummary: createdEnrollmentSummary,
-          );
-
-          if (nextIntent != _effectiveIntent) {
-            setState(() => _effectiveIntent = nextIntent);
-          }
-
-          _policy.requestLoad(
-            context.read<EnrollmentBloc>(),
-            nextIntent,
-            silent: true,
-          );
-          context.read<EnrollmentBloc>().add(
-            const EnrollmentSummariesRefreshRequested(),
-          );
-          if (widget.intent != nextIntent) {
-            context.replace(nextIntent.toLocation(), extra: nextIntent);
-          }
-          context.read<EnrollmentBloc>().add(
-            const EnrollmentCreateResultConsumed(),
-          );
-        },
+        listenWhen: _isEnrollmentCreated,
+        listener: _onEnrollmentCreated,
         child: BlocBuilder<EnrollmentBloc, EnrollmentState>(
-          buildWhen: (previous, current) =>
-              _policy.loadStatus(previous) != _policy.loadStatus(current) ||
-              _policy.detail(previous) != _policy.detail(current) ||
-              previous.errorMessage != current.errorMessage,
+          buildWhen: _shouldRebuildEnrollmentDetail,
           builder: (context, state) {
             final loadStatus = _policy.loadStatus(state);
             final detail = _policy.detail(state);
@@ -153,27 +188,29 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
             }
 
             final enrollment = detail.enrollmentDetail;
-            final isFirstRegistrationView =
-                _effectiveIntent.origin ==
-                EnrollmentDetailOrigin.firstRegistration;
-            final accessMode = switch (enrollment.status) {
-              EnrollmentStatus.completed => EnrollmentDetailAccessMode.readOnly,
-              EnrollmentStatus.inProgress =>
-                EnrollmentDetailAccessMode.editable,
-              _ => null,
-            };
-            final showAccessBanner =
-                isFirstRegistrationView && accessMode != null;
+            final studentDisplayName = [
+              detail.studentDetail.firstName,
+              detail.studentDetail.lastName,
+              detail.studentDetail.surname,
+            ].where((part) => part.trim().isNotEmpty).join(' ');
+            final accessMode = _resolveAccessMode(enrollment.status);
+            final showAccessBanner = _shouldShowAccessBanner(
+              origin: _effectiveIntent.origin,
+              accessMode: accessMode,
+            );
 
             return EnrollmentDetailContentShell(
               infoBar: EnrollmentDetailInfoBar(
-                enrollmentCode: enrollment.enrollmentCode,
+                studentDisplayName: studentDisplayName.isNotEmpty
+                    ? studentDisplayName
+                    : enrollment.enrollmentCode,
                 status: enrollment.status,
+                isPreviousYearValidated: enrollment.validatedPreviousYear,
               ),
               child: Column(
                 children: [
                   if (showAccessBanner) ...[
-                    EnrollmentReadOnlyBanner(mode: accessMode),
+                    EnrollmentReadOnlyBanner(mode: accessMode!),
                     const SizedBox(height: 12),
                   ],
                   EnrollmentStepper(
@@ -189,63 +226,19 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
       ),
     );
   }
-}
 
-// ─── Bouton retour ────────────────────────────────────────────────────────────
+  bool _isEnrollmentCreated(EnrollmentState previous, EnrollmentState current) {
+    return previous.createStatus != current.createStatus &&
+        current.createStatus == EnrollmentLoadStatus.success;
+  }
 
-class _BackButton extends StatefulWidget {
-  @override
-  State<_BackButton> createState() => _BackButtonState();
-}
-
-class _BackButtonState extends State<_BackButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: Tooltip(
-          message: 'Retour',
-          preferBelow: false,
-          child: GestureDetector(
-            onTap: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/home');
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _hovered
-                    ? AppTheme.primaryColor.withValues(alpha: 0.10)
-                    : AppTheme.primaryColor.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: _hovered
-                      ? AppTheme.primaryColor.withValues(alpha: 0.30)
-                      : AppTheme.primaryColor.withValues(alpha: 0.12),
-                ),
-              ),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                size: 18,
-                color: _hovered
-                    ? AppTheme.primaryColor
-                    : AppTheme.textSecondaryColor,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  /// Rebuild detail UI only when fields used by the screen rendering changed.
+  bool _shouldRebuildEnrollmentDetail(
+    EnrollmentState previous,
+    EnrollmentState current,
+  ) {
+    return _policy.loadStatus(previous) != _policy.loadStatus(current) ||
+        _policy.detail(previous) != _policy.detail(current) ||
+        previous.errorMessage != current.errorMessage;
   }
 }

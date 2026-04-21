@@ -94,6 +94,18 @@ void main() {
   });
 
   testWidgets('clic supprimer puis confirmer retire le tuteur', (tester) async {
+    // Prépare un StreamController pour simuler la réponse API du bloc.
+    final controller = StreamController<ParentState>();
+
+    final unlinkBloc = MockParentBloc();
+    when(() => unlinkBloc.state).thenReturn(const ParentState.initial());
+    whenListen(unlinkBloc, controller.stream,
+        initialState: const ParentState.initial());
+
+    // Redirige l'injection vers ce bloc.
+    await getIt.reset();
+    getIt.registerFactory<ParentBloc>(() => unlinkBloc);
+
     await pumpGuardianStep(tester);
 
     const parentItemKey = ValueKey<String>('parent-item-parent-1');
@@ -107,11 +119,20 @@ void main() {
     await tester.tap(find.text('Supprimer'));
     await tester.pumpAndSettle();
 
+    // Simule la réponse succès de l'API.
+    controller.add(
+      const ParentState.initial()
+          .copyWith(status: ParentUpdateStatus.unlinkSuccess),
+    );
+    await tester.pumpAndSettle();
+
     expect(find.byKey(parentItemKey), findsNothing);
     expect(
       find.text('Aucune information de tuteur disponible'),
       findsOneWidget,
     );
+
+    await controller.close();
   });
 
   testWidgets(

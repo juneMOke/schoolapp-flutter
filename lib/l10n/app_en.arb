@@ -128,11 +128,22 @@
   "editEnrollment": "Edit",
   "exportData": "Export",
   "noResultsFound": "No results found",
+  "enrollmentNoResultsDescription": "No student matches your search criteria.",
   "loadingStudents": "Loading students...",
+  "enrollmentResultsCount": "{count, plural, =0{0 result} =1{1 result} other{{count} results}}",
+  "@enrollmentResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "statusPending": "Pending",
   "statusValidated": "Validated",
   "statusRejected": "Rejected",
   "enrollmentCode": "Enrollment Code",
+  "enrollmentDetailTitle": "Enrollment file",
+  "enrollmentUnknownStudent": "Student not specified",
   "gender": "Gender",
   "actions": "Actions",
   "personalInformation": "Personal Information",
@@ -147,6 +158,13 @@
   "guardianDeleteConfirmTitle": "Confirm removal",
   "guardianDeleteConfirmMessage": "Do you really want to remove this guardian? This action cannot be undone.",
   "guardianDeleteConfirmAction": "Remove",
+  "guardianUnlinkSuccess": "Guardian removed successfully.",
+  "guardianUnlinkError": "Failed to remove guardian: {message}",
+  "@guardianUnlinkError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "schoolFees": "School Fees",
   "summary": "Summary",
   "next": "Continue",

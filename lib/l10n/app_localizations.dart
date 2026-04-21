@@ -485,11 +485,23 @@ abstract class AppLocalizations {
   /// **'No results found'**
   String get noResultsFound;
 
+  /// No description provided for @enrollmentNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches your search criteria.'**
+  String get enrollmentNoResultsDescription;
+
   /// No description provided for @loadingStudents.
   ///
   /// In en, this message translates to:
   /// **'Loading students...'**
   String get loadingStudents;
+
+  /// No description provided for @enrollmentResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
+  String enrollmentResultsCount(int count);
 
   /// No description provided for @statusPending.
   ///
@@ -514,6 +526,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enrollment Code'**
   String get enrollmentCode;
+
+  /// No description provided for @enrollmentDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment file'**
+  String get enrollmentDetailTitle;
+
+  /// No description provided for @enrollmentUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not specified'**
+  String get enrollmentUnknownStudent;
 
   /// No description provided for @gender.
   ///
@@ -598,6 +622,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get guardianDeleteConfirmAction;
+
+  /// No description provided for @guardianUnlinkSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian removed successfully.'**
+  String get guardianUnlinkSuccess;
+
+  /// No description provided for @guardianUnlinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove guardian: {message}'**
+  String guardianUnlinkError(String message);
 
   /// No description provided for @schoolFees.
   ///

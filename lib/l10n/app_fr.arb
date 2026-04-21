@@ -86,11 +86,22 @@
   "editEnrollment": "Modifier",
   "exportData": "Exporter",
   "noResultsFound": "Aucun résultat trouvé",
+  "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
   "loadingStudents": "Chargement des étudiants...",
+  "enrollmentResultsCount": "{count, plural, =0{0 résultat} =1{1 résultat} other{{count} résultats}}",
+  "@enrollmentResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "statusPending": "En Attente",
   "statusValidated": "Validé",
   "statusRejected": "Rejeté",
   "enrollmentCode": "Code d'Inscription",
+  "enrollmentDetailTitle": "Dossier d'inscription",
+  "enrollmentUnknownStudent": "Élève non renseigné",
   "gender": "Genre",
   "actions": "Actions",
   "personalInformation": "Informations Personnelles",
@@ -105,6 +116,13 @@
   "guardianDeleteConfirmTitle": "Confirmer la suppression",
   "guardianDeleteConfirmMessage": "Voulez-vous vraiment supprimer ce tuteur ? Cette action est irréversible.",
   "guardianDeleteConfirmAction": "Supprimer",
+  "guardianUnlinkSuccess": "Tuteur supprimé avec succès.",
+  "guardianUnlinkError": "Erreur lors de la suppression du tuteur : {message}",
+  "@guardianUnlinkError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "next": "Continuer",
@@ -275,9 +293,9 @@
   "enrollmentStatusRejected": "Rejeté",
   "enrollmentStatusCancelled": "Annulé",
   "enrollmentReadOnlyTitle": "Mode consultation",
-  "enrollmentReadOnlyMessage": "Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.",
+  "enrollmentReadOnlyMessage": "Ce dossier est finalisé. Les informations sont affichées en lecture seule.",
   "enrollmentEditableTitle": "Mode édition",
-  "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
+  "enrollmentEditableMessage": "Ce dossier est en cours. Les informations peuvent être modifiées.",
 
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",

@@ -210,7 +210,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResultsFound => 'No results found';
 
   @override
+  String get enrollmentNoResultsDescription => 'No student matches your search criteria.';
+
+  @override
   String get loadingStudents => 'Loading students...';
+
+  @override
+  String enrollmentResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: '0 result',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get statusPending => 'Pending';
@@ -223,6 +238,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentCode => 'Enrollment Code';
+
+  @override
+  String get enrollmentDetailTitle => 'Enrollment file';
+
+  @override
+  String get enrollmentUnknownStudent => 'Student not specified';
 
   @override
   String get gender => 'Gender';
@@ -265,6 +286,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianDeleteConfirmAction => 'Remove';
+
+  @override
+  String get guardianUnlinkSuccess => 'Guardian removed successfully.';
+
+  @override
+  String guardianUnlinkError(String message) {
+    return 'Failed to remove guardian: $message';
+  }
 
   @override
   String get schoolFees => 'School Fees';

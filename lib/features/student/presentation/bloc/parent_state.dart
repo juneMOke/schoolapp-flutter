@@ -2,7 +2,7 @@ part of 'parent_bloc.dart';
 
 const _undefinedParent = Object();
 
-enum ParentUpdateStatus { initial, loading, success, failure }
+enum ParentUpdateStatus { initial, loading, success, failure, unlinkSuccess, unlinkFailure }
 
 enum ParentOperation { none, update, create, unlink }
 

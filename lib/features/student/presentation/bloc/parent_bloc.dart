@@ -118,11 +118,11 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
 
     result.fold(
       (failure) => emit(state.copyWith(
-        status: ParentUpdateStatus.failure,
+        status: ParentUpdateStatus.unlinkFailure,
         errorMessage: failure.message,
       )),
       (_) => emit(state.copyWith(
-        status: ParentUpdateStatus.success,
+        status: ParentUpdateStatus.unlinkSuccess,
         updatedParent: null,
         errorMessage: null,
       )),

@@ -7,17 +7,18 @@ enum EnrollmentDetailAccessMode { readOnly, editable }
 class EnrollmentReadOnlyBanner extends StatelessWidget {
   final EnrollmentDetailAccessMode mode;
 
-  const EnrollmentReadOnlyBanner({
-    super.key,
-    required this.mode,
-  });
+  const EnrollmentReadOnlyBanner({super.key, required this.mode});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isEditable = mode == EnrollmentDetailAccessMode.editable;
-    final accentColor = isEditable ? const Color(0xFF059669) : const Color(0xFFEA580C);
-    final iconColor = isEditable ? const Color(0xFF047857) : const Color(0xFFB45309);
+    final accentColor = isEditable
+        ? const Color(0xFF059669)
+        : const Color(0xFFEA580C);
+    final iconColor = isEditable
+        ? const Color(0xFF047857)
+        : const Color(0xFFB45309);
     final title = isEditable
         ? l10n.enrollmentEditableTitle
         : l10n.enrollmentReadOnlyTitle;

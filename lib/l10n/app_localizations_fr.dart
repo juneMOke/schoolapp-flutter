@@ -210,7 +210,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noResultsFound => 'Aucun résultat trouvé';
 
   @override
+  String get enrollmentNoResultsDescription => 'Aucun élève ne correspond à vos critères de recherche.';
+
+  @override
   String get loadingStudents => 'Chargement des étudiants...';
+
+  @override
+  String enrollmentResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count résultats',
+      one: '1 résultat',
+      zero: '0 résultat',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get statusPending => 'En Attente';
@@ -223,6 +238,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentCode => 'Code d\'Inscription';
+
+  @override
+  String get enrollmentDetailTitle => 'Dossier d\'inscription';
+
+  @override
+  String get enrollmentUnknownStudent => 'Élève non renseigné';
 
   @override
   String get gender => 'Genre';
@@ -265,6 +286,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianDeleteConfirmAction => 'Supprimer';
+
+  @override
+  String get guardianUnlinkSuccess => 'Tuteur supprimé avec succès.';
+
+  @override
+  String guardianUnlinkError(String message) {
+    return 'Erreur lors de la suppression du tuteur : $message';
+  }
 
   @override
   String get schoolFees => 'Frais Scolaires';
@@ -625,13 +654,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentReadOnlyTitle => 'Mode consultation';
 
   @override
-  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
+  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé. Les informations sont affichées en lecture seule.';
 
   @override
   String get enrollmentEditableTitle => 'Mode édition';
 
   @override
-  String get enrollmentEditableMessage => 'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
+  String get enrollmentEditableMessage => 'Ce dossier est en cours. Les informations peuvent être modifiées.';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
