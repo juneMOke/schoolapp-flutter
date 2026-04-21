@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_email_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_phone_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -109,21 +111,21 @@ class GuardianFieldsGrid extends StatelessWidget {
               isChanged: surnameChanged,
               readOnly: !isEditable,
             ),
-            EditableField(
+            GuardianPhoneField(
               width: width,
               label: l10n.phoneNumberLabel,
+              helpMessage: l10n.phoneNumberHelp,
               controller: phoneController,
               requiredField: true,
-              helpMessage: l10n.phoneNumberHelp,
               isChanged: phoneChanged,
               readOnly: !isEditable,
             ),
-            EditableField(
+            GuardianEmailField(
               width: width,
               label: l10n.emailLabel,
+              helpMessage: l10n.emailLabelHelp,
               controller: emailController,
               requiredField: true,
-              helpMessage: l10n.emailLabelHelp,
               isChanged: emailChanged,
               readOnly: !isEditable,
             ),

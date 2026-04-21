@@ -19,14 +19,68 @@ class AppConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = theme.textTheme;
+    final iconColor = isDestructive
+        ? colorScheme.error
+        : colorScheme.primary;
+    final iconBackgroundColor = isDestructive
+        ? colorScheme.errorContainer
+        : colorScheme.primaryContainer;
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingL,
+        vertical: AppDimensions.spacingL,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
       ),
-      title: Text(title),
-      content: Text(message),
+      titlePadding: const EdgeInsets.fromLTRB(
+        AppDimensions.spacingL,
+        AppDimensions.spacingL,
+        AppDimensions.spacingL,
+        AppDimensions.spacingS,
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(
+        AppDimensions.spacingL,
+        0,
+        AppDimensions.spacingL,
+        AppDimensions.spacingM,
+      ),
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: AppDimensions.spacingM,
+            backgroundColor: iconBackgroundColor,
+            child: Icon(
+              isDestructive
+                  ? Icons.warning_amber_rounded
+                  : Icons.help_outline_rounded,
+              size: AppDimensions.spacingM,
+              color: iconColor,
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingM),
+          Expanded(
+            child: Text(
+              title,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Text(
+        message,
+        style: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.end,
+      actionsOverflowButtonSpacing: AppDimensions.spacingS,
       actionsPadding: const EdgeInsets.fromLTRB(
         AppDimensions.spacingM,
         0,
@@ -34,11 +88,12 @@ class AppConfirmationDialog extends StatelessWidget {
         AppDimensions.spacingM,
       ),
       actions: [
-        TextButton(
+        TextButton.icon(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(cancelLabel),
+          icon: const Icon(Icons.close_rounded, size: AppDimensions.spacingM),
+          label: Text(cancelLabel),
         ),
-        FilledButton(
+        FilledButton.icon(
           style: isDestructive
               ? FilledButton.styleFrom(
                   backgroundColor: colorScheme.error,
@@ -46,7 +101,11 @@ class AppConfirmationDialog extends StatelessWidget {
                 )
               : null,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(confirmLabel),
+          icon: Icon(
+            isDestructive ? Icons.delete_outline_rounded : Icons.check_rounded,
+            size: AppDimensions.spacingM,
+          ),
+          label: Text(confirmLabel),
         ),
       ],
     );
