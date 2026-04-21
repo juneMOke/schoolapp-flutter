@@ -1,0 +1,55 @@
+{
+  "pays": "République Démocratique du Congo",
+  "systeme_educatif": {
+    "nom": "Enseignement Primaire, Secondaire et Professionnel (EPSP)",
+    "cycles": [
+      {
+        "id": 1,
+        "nom": "Cycle Maternel",
+        "code": "MATERNELLE",
+        "description": "Éducation préscolaire",
+        "annees": [
+          { "id": 1, "nom": "1ère Maternelle", "ordre": 1 },
+          { "id": 2, "nom": "2ème Maternelle", "ordre": 2 },
+          { "id": 3, "nom": "3ème Maternelle", "ordre": 3 }
+        ]
+      },
+      {
+        "id": 2,
+        "nom": "Cycle Primaire",
+        "code": "PRIMAIRE",
+        "description": "Enseignement primaire de base",
+        "annees": [
+          { "id": 1, "nom": "1ère Année Primaire", "ordre": 1 },
+          { "id": 2, "nom": "2ème Année Primaire", "ordre": 2 },
+          { "id": 3, "nom": "3ème Année Primaire", "ordre": 3 },
+          { "id": 4, "nom": "4ème Année Primaire", "ordre": 4 },
+          { "id": 5, "nom": "5ème Année Primaire", "ordre": 5 },
+          { "id": 6, "nom": "6ème Année Primaire", "ordre": 6 }
+        ]
+      },
+      {
+        "id": 3,
+        "nom": "Cycle Terminal de l'Éducation de Base",
+        "code": "CTEB",
+        "description": "Cycle terminal complétant l'éducation de base obligatoire",
+        "annees": [
+          { "id": 1, "nom": "7ème Année", "ordre": 7 },
+          { "id": 2, "nom": "8ème Année", "ordre": 8 }
+        ]
+      },
+      {
+        "id": 4,
+        "nom": "Humanités Générales",
+        "code": "HG",
+        "description": "Enseignement secondaire général menant au diplôme d'État",
+        "annees": [
+          { "id": 1, "nom": "1ère Année Humanités", "ordre": 1 },
+          { "id": 2, "nom": "2ème Année Humanités", "ordre": 2 },
+          { "id": 3, "nom": "3ème Année Humanités", "ordre": 3 },
+          { "id": 4, "nom": "4ème Année Humanités", "ordre": 4 }
+        ]
+      }
+    ]
+  }
+}

@@ -115,6 +115,7 @@ flutter:
   assets:
     - lib/features/auth/data/datasources/
     - assets/catalogs/address_geo_catalog.json
+    - assets/catalogs/education_cycles_catalog.json
 
 
 flutter_native_splash:

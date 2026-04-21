@@ -5,7 +5,15 @@ import 'package:flutter/widgets.dart';
 class Assets {
   Assets._();
 
-  static const $AssetsFeaturesGen features = $AssetsFeaturesGen();
+  static const String addressGeoCatalog = 'assets/catalogs/address_geo_catalog.json';
+  static const String educationCyclesCatalog = 'assets/catalogs/education_cycles_catalog.json';
+  static const $AssetsLibGen lib = $AssetsLibGen();
+}
+
+class $AssetsLibGen {
+  const $AssetsLibGen();
+
+  final $AssetsFeaturesGen features = const $AssetsFeaturesGen();
 }
 
 class $AssetsFeaturesGen {
@@ -29,22 +37,18 @@ class $AssetsDataGen {
 class $AssetsDatasourcesGen {
   const $AssetsDatasourcesGen();
 
-  final String authLocalDataSource =
-      'lib/features/auth/data/datasources/auth_local_data_source.dart';
-  final String authRemoteDataSource =
-      'lib/features/auth/data/datasources/auth_remote_data_source.dart';
-  final String authRemoteDataSourceG =
-      'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
-  final String forgotPasswordRemoteDataSource =
-      'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
-  final String forgotPasswordRemoteDataSourceG =
-      'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
+  final String authLocalDataSource = 'lib/features/auth/data/datasources/auth_local_data_source.dart';
+  final String authRemoteDataSource = 'lib/features/auth/data/datasources/auth_remote_data_source.dart';
+  final String authRemoteDataSourceG = 'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
+  final String forgotPasswordRemoteDataSource = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+  final String forgotPasswordRemoteDataSourceG = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
 }
 
 class AssetGenImage {
   const AssetGenImage(this._assetName, {this.size, this.flavors = const {}});
 
   final String _assetName;
+
 
   final Size? size;
   final Set<String> flavors;
@@ -102,8 +106,15 @@ class AssetGenImage {
     );
   }
 
-  ImageProvider provider({AssetBundle? bundle, String? package}) {
-    return AssetImage(_assetName, bundle: bundle, package: package);
+  ImageProvider provider({
+    AssetBundle? bundle,
+    String? package,
+  }) {
+    return AssetImage(
+      _assetName,
+      bundle: bundle,
+      package: package,
+    );
   }
 
   Widget custom({
@@ -120,3 +131,4 @@ class AssetGenImage {
 
   String get keyName => _assetName;
 }
+
