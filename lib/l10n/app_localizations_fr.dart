@@ -563,7 +563,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validateGuardianInfoHint => 'Veuillez vérifier les informations du/des tuteur(s).';
 
   @override
-  String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
+  String get enrollmentReadyForValidation => 'Dossier prt pour validation finale.';
+
+  @override
+  String get validateEnrollment => 'Valider l\'inscription';
+
+  @override
+  String get validatingEnrollment => 'Validation en cours...';
+
+  @override
+  String get enrollmentStatusUpdateSuccess => 'Statut mis à jour avec succès.';
+
+  @override
+  String enrollmentStatusUpdateError(String message) {
+    return 'Erreur lors de la mise à jour du statut : $message';
+  }
 
   @override
   String get personalInfoSaveHintBeforeContinue => 'Veuillez enregistrer vos modifications avant de continuer.';
@@ -602,10 +616,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get savingAddress => 'Enregistrement de l\'adresse...';
 
   @override
-  String get saveAcademicInfo => 'Enregistrer les infos académiques';
+  String get saveAcademicInfo => 'Enregistrer les infos acadmiques';
 
   @override
   String get savingAcademicInfo => 'Enregistrement en cours...';
+
+  @override
+  String get saveGuardianInfo => 'Enregistrer le tuteur';
+
+  @override
+  String get savingGuardianInfo => 'Enregistrement du tuteur...';
 
   @override
   String get academicInfoValidationReasonsTitle => 'Veuillez corriger les champs académiques suivants :';

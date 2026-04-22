@@ -53,6 +53,7 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
 import 'package:school_app_flutter/features/student/data/datasources/student_remote_data_source.dart';
@@ -372,6 +373,10 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerFactory<UpdateEnrollmentStatusUseCase>(
+    () => UpdateEnrollmentStatusUseCase(getIt<EnrollmentRepository>()),
+  );
+
   getIt.registerFactory<EnrollmentBloc>(
     () => EnrollmentBloc(
       getEnrollmentSummariesUseCase:
@@ -394,6 +399,7 @@ Future<void> configureDependencies() async {
           >(),
       searchByAcademicInfoUseCase:
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
+      updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
     ),
   );
 

@@ -51,6 +51,7 @@ class EnrollmentSummariesQuery extends Equatable {
 
 class EnrollmentState extends Equatable {
   final EnrollmentLoadStatus createStatus;
+  final EnrollmentLoadStatus statusUpdateStatus;
   final EnrollmentLoadStatus summariesStatus;
   final EnrollmentLoadStatus detailStatus;
   final EnrollmentLoadStatus previewStatus;
@@ -60,10 +61,12 @@ class EnrollmentState extends Equatable {
   final EnrollmentDetail? detail;
   final EnrollmentDetail? preview;
   final EnrollmentSummary? createdEnrollmentSummary;
+  final EnrollmentSummary? updatedEnrollmentSummary;
   final String? errorMessage;
 
   const EnrollmentState({
     required this.createStatus,
+    required this.statusUpdateStatus,
     required this.summariesStatus,
     required this.detailStatus,
     required this.previewStatus,
@@ -73,11 +76,13 @@ class EnrollmentState extends Equatable {
     required this.detail,
     required this.preview,
     required this.createdEnrollmentSummary,
+    required this.updatedEnrollmentSummary,
     required this.errorMessage,
   });
 
   const EnrollmentState.initial()
     : createStatus = EnrollmentLoadStatus.initial,
+      statusUpdateStatus = EnrollmentLoadStatus.initial,
       summariesStatus = EnrollmentLoadStatus.initial,
       detailStatus = EnrollmentLoadStatus.initial,
       previewStatus = EnrollmentLoadStatus.initial,
@@ -87,10 +92,12 @@ class EnrollmentState extends Equatable {
       detail = null,
       preview = null,
       createdEnrollmentSummary = null,
+      updatedEnrollmentSummary = null,
       errorMessage = null;
 
   EnrollmentState copyWith({
     EnrollmentLoadStatus? createStatus,
+    EnrollmentLoadStatus? statusUpdateStatus,
     EnrollmentLoadStatus? summariesStatus,
     EnrollmentLoadStatus? detailStatus,
     EnrollmentLoadStatus? previewStatus,
@@ -100,10 +107,12 @@ class EnrollmentState extends Equatable {
     Object? detail = _undefined,
     Object? preview = _undefined,
     Object? createdEnrollmentSummary = _undefined,
+    Object? updatedEnrollmentSummary = _undefined,
     Object? errorMessage = _undefined,
   }) {
     return EnrollmentState(
       createStatus: createStatus ?? this.createStatus,
+      statusUpdateStatus: statusUpdateStatus ?? this.statusUpdateStatus,
       summariesStatus: summariesStatus ?? this.summariesStatus,
       detailStatus: detailStatus ?? this.detailStatus,
       previewStatus: previewStatus ?? this.previewStatus,
@@ -124,6 +133,10 @@ class EnrollmentState extends Equatable {
           identical(createdEnrollmentSummary, _undefined)
           ? this.createdEnrollmentSummary
           : createdEnrollmentSummary as EnrollmentSummary?,
+      updatedEnrollmentSummary:
+          identical(updatedEnrollmentSummary, _undefined)
+          ? this.updatedEnrollmentSummary
+          : updatedEnrollmentSummary as EnrollmentSummary?,
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,
@@ -133,6 +146,7 @@ class EnrollmentState extends Equatable {
   @override
   List<Object?> get props => [
     createStatus,
+    statusUpdateStatus,
     summariesStatus,
     detailStatus,
     previewStatus,
@@ -142,6 +156,7 @@ class EnrollmentState extends Equatable {
     detail,
     preview,
     createdEnrollmentSummary,
+    updatedEnrollmentSummary,
     errorMessage,
   ];
 }

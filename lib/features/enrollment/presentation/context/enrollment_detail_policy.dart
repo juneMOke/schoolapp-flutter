@@ -73,7 +73,10 @@ abstract class EnrollmentDetailPolicy {
   bool isStepEditable(EnrollmentWizardStep step);
 
   bool canSaveStep(EnrollmentWizardStep step) {
-    return isStepEditable(step) && step != EnrollmentWizardStep.summary;
+    // Le step récapitulatif déclenche la validation du dossier :
+    // il est toujours actionnable (l'enrollment ID est vérifié au dispatch).
+    if (step == EnrollmentWizardStep.summary) return true;
+    return isStepEditable(step);
   }
 
   EnrollmentDetailIntent resolveEffectiveIntent({

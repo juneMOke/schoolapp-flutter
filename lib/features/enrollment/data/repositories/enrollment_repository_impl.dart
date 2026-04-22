@@ -52,6 +52,25 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   }
 
   @override
+  Future<Either<Failure, EnrollmentSummary>> updateEnrollmentStatus({
+    required String enrollmentId,
+    required String status,
+  }) async {
+    try {
+      final enrollmentSummaryModel = await remoteDataSource
+          .updateEnrollmentStatus(requiredAuth, enrollmentId, status);
+      return Right(enrollmentSummaryModel.toEnrollmentSummary());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<EnrollmentSummary>>>
   getEnrollmentSummaryListByStatus({
     required String status,

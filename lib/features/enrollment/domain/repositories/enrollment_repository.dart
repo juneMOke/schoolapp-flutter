@@ -14,6 +14,11 @@ abstract class EnrollmentRepository {
     required String gender,
   });
 
+  Future<Either<Failure, EnrollmentSummary>> updateEnrollmentStatus({
+    required String enrollmentId,
+    required String status,
+  });
+
   Future<Either<Failure, List<EnrollmentSummary>>>
   getEnrollmentSummaryListByStatus({
     required String status,

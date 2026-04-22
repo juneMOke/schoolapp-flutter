@@ -16,6 +16,20 @@ class $LibGen {
   $LibFeaturesGen get features => const $LibFeaturesGen();
 }
 
+class $AssetsCatalogsGen {
+  const $AssetsCatalogsGen();
+
+  /// File path: assets/catalogs/address_geo_catalog.json
+  String get addressGeoCatalog => 'assets/catalogs/address_geo_catalog.json';
+
+  /// File path: assets/catalogs/education_cycles_catalog.json
+  String get educationCyclesCatalog =>
+      'assets/catalogs/education_cycles_catalog.json';
+
+  /// List of all assets
+  List<String> get values => [addressGeoCatalog, educationCyclesCatalog];
+}
+
 class $LibFeaturesGen {
   const $LibFeaturesGen();
 
@@ -49,20 +63,31 @@ class $LibFeaturesAuthDataDatasourcesGen {
   String get authRemoteDataSource =>
       'lib/features/auth/data/datasources/auth_remote_data_source.dart';
 
+  /// File path: lib/features/auth/data/datasources/auth_remote_data_source.g.dart
+  String get authRemoteDataSourceG =>
+      'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
+
   /// File path: lib/features/auth/data/datasources/forgot_password_remote_data_source.dart
   String get forgotPasswordRemoteDataSource =>
       'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+
+  /// File path: lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart
+  String get forgotPasswordRemoteDataSourceG =>
+      'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
 
   /// List of all assets
   List<String> get values => [
     authLocalDataSource,
     authRemoteDataSource,
+    authRemoteDataSourceG,
     forgotPasswordRemoteDataSource,
+    forgotPasswordRemoteDataSourceG,
   ];
 }
 
 class Assets {
   const Assets._();
 
+  static const $AssetsCatalogsGen catalogs = $AssetsCatalogsGen();
   static const $LibGen lib = $LibGen();
 }

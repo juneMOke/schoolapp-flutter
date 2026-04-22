@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/create_enrollment_request_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_detail_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/update_enrollment_status_request_model.dart';
 
 part 'enrollment_remote_data_source.g.dart';
 
@@ -16,6 +17,13 @@ abstract class EnrollmentRemoteDataSource {
   Future<EnrollmentSummaryModel> createEnrollment(
     @Extras() Map<String, dynamic> extras,
     @Body() CreateEnrollmentRequestModel request,
+  );
+
+  @PUT(AppConstants.enrollmentStatusUpdateEndpoint)
+  Future<EnrollmentSummaryModel> updateEnrollmentStatus(
+    @Extras() Map<String, dynamic> extras,
+    @Path('enrollmentId') String enrollmentId,
+    @Query('status') String status,
   );
 
   @GET(AppConstants.enrollmentEndpoint)

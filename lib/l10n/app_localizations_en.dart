@@ -566,6 +566,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentReadyForValidation => 'File ready for final validation.';
 
   @override
+  String get validateEnrollment => 'Validate enrollment';
+
+  @override
+  String get validatingEnrollment => 'Validating...';
+
+  @override
+  String get enrollmentStatusUpdateSuccess => 'Status updated successfully.';
+
+  @override
+  String enrollmentStatusUpdateError(String message) {
+    return 'Failed to update status: $message';
+  }
+
+  @override
   String get personalInfoSaveHintBeforeContinue => 'Please save your changes before continuing.';
 
   @override
@@ -606,6 +620,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savingAcademicInfo => 'Saving...';
+
+  @override
+  String get saveGuardianInfo => 'Save guardian';
+
+  @override
+  String get savingGuardianInfo => 'Saving guardian...';
 
   @override
   String get academicInfoValidationReasonsTitle => 'Please correct the following academic fields:';

@@ -84,7 +84,11 @@ class EnrollmentStepperStateHelper {
         );
   }
 
-  static bool isSaveEnabledStep(int step) => step >= 0 && step <= 4;
+  static bool isSaveEnabledStep(int step) => step >= 0 && step <= 5;
+
+  // Le step 5 (récapitulatif) n'a pas d'état de formulaire local —
+  // il est toujours "prêt à valider".
+  static bool _isSummaryStep(int step) => step == 5;
 
   static StepFormState stateForStep(
     Map<int, StepFormState> stepStates,
@@ -113,6 +117,10 @@ class EnrollmentStepperStateHelper {
   }) {
     if (!isSaveEnabledStep(currentStep)) {
       return false;
+    }
+    // Le step récapitulatif (5) est toujours actionnable.
+    if (_isSummaryStep(currentStep)) {
+      return true;
     }
     return stateForStep(stepStates, currentStep).canSave;
   }

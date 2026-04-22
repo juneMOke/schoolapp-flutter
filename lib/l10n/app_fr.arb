@@ -233,7 +233,16 @@
   "validateAddressHint": "Veuillez compléter l'adresse de l'élève.",
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
-  "enrollmentReadyForValidation": "Dossier prêt pour validation finale.",
+  "enrollmentReadyForValidation": "Dossier prt pour validation finale.",
+  "validateEnrollment": "Valider l'inscription",
+  "validatingEnrollment": "Validation en cours...",
+  "enrollmentStatusUpdateSuccess": "Statut mis à jour avec succès.",
+  "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
+  "@enrollmentStatusUpdateError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
   "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
   "requiredFieldError": "Le champ {field} est requis.",
@@ -258,8 +267,10 @@
   "personalInfoSaveError": "Erreur lors de la mise à jour : {message}",
   "saveAddress": "Enregistrer l'adresse",
   "savingAddress": "Enregistrement de l'adresse...",
-  "saveAcademicInfo": "Enregistrer les infos académiques",
+  "saveAcademicInfo": "Enregistrer les infos acadmiques",
   "savingAcademicInfo": "Enregistrement en cours...",
+  "saveGuardianInfo": "Enregistrer le tuteur",
+  "savingGuardianInfo": "Enregistrement du tuteur...",
   "academicInfoValidationReasonsTitle": "Veuillez corriger les champs académiques suivants :",
   "academicInfoSaveHintBeforeContinue": "Veuillez enregistrer les modifications académiques avant de continuer.",
   "academicInfoSaveSuccess": "Informations académiques mises à jour avec succès.",

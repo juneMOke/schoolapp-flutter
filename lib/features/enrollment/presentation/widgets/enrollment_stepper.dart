@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
@@ -19,6 +20,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/step
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/summary_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/target_academic_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepper extends StatefulWidget {
@@ -125,7 +127,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       1 => savingNow ? l10n.savingAddress : l10n.saveAddress,
       2 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
       3 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
-      4 => savingNow ? l10n.savingPersonalInfo : l10n.savePersonalInfo,
+      4 => savingNow ? l10n.savingGuardianInfo : l10n.saveGuardianInfo,
+      5 => savingNow ? l10n.validatingEnrollment : l10n.validateEnrollment,
       _ => '',
     };
   }
@@ -139,7 +142,22 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
     return BlocProvider<EnrollmentStepperFlowBloc>.value(
       value: _flowBloc,
-      child: BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
+      child: BlocListener<EnrollmentBloc, EnrollmentState>(
+        listenWhen: (prev, curr) =>
+            prev.statusUpdateStatus != curr.statusUpdateStatus,
+        listener: (context, state) {
+          final l10n = AppLocalizations.of(context)!;
+          if (state.statusUpdateStatus == EnrollmentLoadStatus.success) {
+            AppSnackBar.showSuccess(context, l10n.enrollmentStatusUpdateSuccess);
+            context.go(AppRoutesNames.premiereInscription);
+          } else if (state.statusUpdateStatus == EnrollmentLoadStatus.failure) {
+            AppSnackBar.showError(
+              context,
+              l10n.enrollmentStatusUpdateError(state.errorMessage ?? ''),
+            );
+          }
+        },
+        child: BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
         builder: (context, flowState) {
           final currentStep = flowState.currentStep;
           final progress = (currentStep + 1) / stepTitles.length;
@@ -217,6 +235,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
             ),
           );
         },
+      ),
       ),
     );
   }
@@ -437,6 +456,17 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       if (formState == null) return;
       formState.submitForm();
       return;
+    }
+    if (currentStep == 5) {
+      final enrollmentId =
+          widget.enrollmentDetail.enrollmentDetail.id.trim();
+      if (enrollmentId.isEmpty) return;
+      context.read<EnrollmentBloc>().add(
+        EnrollmentStatusUpdateRequested(
+          enrollmentId: enrollmentId,
+          status: 'COMPLETED',
+        ),
+      );
     }
   }
 

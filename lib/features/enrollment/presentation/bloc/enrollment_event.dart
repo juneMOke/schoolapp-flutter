@@ -177,6 +177,23 @@ class EnrollmentCreateResultConsumed extends EnrollmentEvent {
   const EnrollmentCreateResultConsumed();
 }
 
+class EnrollmentStatusUpdateRequested extends EnrollmentEvent {
+  final String enrollmentId;
+  final String status;
+
+  const EnrollmentStatusUpdateRequested({
+    required this.enrollmentId,
+    required this.status,
+  });
+
+  @override
+  List<Object?> get props => [enrollmentId, status];
+}
+
+class EnrollmentStatusUpdateResultConsumed extends EnrollmentEvent {
+  const EnrollmentStatusUpdateResultConsumed();
+}
+
 class EnrollmentPreviewByStudentIdRequested extends EnrollmentEvent {
   final String studentId;
   final bool silent;

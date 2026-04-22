@@ -276,6 +276,15 @@
   "validateAcademicInfoHint": "Please complete the academic information.",
   "validateGuardianInfoHint": "Please check the guardian information.",
   "enrollmentReadyForValidation": "File ready for final validation.",
+  "validateEnrollment": "Validate enrollment",
+  "validatingEnrollment": "Validating...",
+  "enrollmentStatusUpdateSuccess": "Status updated successfully.",
+  "enrollmentStatusUpdateError": "Failed to update status: {message}",
+  "@enrollmentStatusUpdateError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
   "personalInfoValidationReasonsTitle": "Please correct the following fields:",
   "requiredFieldError": "The {field} field is required.",
@@ -302,6 +311,8 @@
   "savingAddress": "Saving address...",
   "saveAcademicInfo": "Save academic info",
   "savingAcademicInfo": "Saving...",
+  "saveGuardianInfo": "Save guardian",
+  "savingGuardianInfo": "Saving guardian...",
   "academicInfoValidationReasonsTitle": "Please correct the following academic fields:",
   "academicInfoSaveHintBeforeContinue": "Please save academic changes before continuing.",
   "academicInfoSaveSuccess": "Academic information updated successfully.",

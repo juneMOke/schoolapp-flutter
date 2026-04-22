@@ -52,6 +52,38 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
+  Future<EnrollmentSummaryModel> updateEnrollmentStatus(
+    Map<String, dynamic> extras,
+    String enrollmentId,
+    String status,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{r'status': status};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<EnrollmentSummaryModel>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments/${enrollmentId}/status',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryModel _value;
+    try {
+      _value = EnrollmentSummaryModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<List<EnrollmentSummaryModel>>
   getEnrollmentSummaryByStatusAndAcademicYear(
     Map<String, dynamic> extras,

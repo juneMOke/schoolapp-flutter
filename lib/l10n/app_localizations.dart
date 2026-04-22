@@ -1163,6 +1163,30 @@ abstract class AppLocalizations {
   /// **'File ready for final validation.'**
   String get enrollmentReadyForValidation;
 
+  /// No description provided for @validateEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate enrollment'**
+  String get validateEnrollment;
+
+  /// No description provided for @validatingEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating...'**
+  String get validatingEnrollment;
+
+  /// No description provided for @enrollmentStatusUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Status updated successfully.'**
+  String get enrollmentStatusUpdateSuccess;
+
+  /// No description provided for @enrollmentStatusUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update status: {message}'**
+  String enrollmentStatusUpdateError(String message);
+
   /// No description provided for @personalInfoSaveHintBeforeContinue.
   ///
   /// In en, this message translates to:
@@ -1234,6 +1258,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saving...'**
   String get savingAcademicInfo;
+
+  /// No description provided for @saveGuardianInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save guardian'**
+  String get saveGuardianInfo;
+
+  /// No description provided for @savingGuardianInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving guardian...'**
+  String get savingGuardianInfo;
 
   /// No description provided for @academicInfoValidationReasonsTitle.
   ///
