@@ -403,6 +403,11 @@ class AddressStepState extends State<AddressStep> {
     }
   }
 
+  // Force un rebuild immédiat pour recalculer les listes dépendantes.
+  void _refreshDependentDropdowns() {
+    setState(() {});
+  }
+
   void _onCityChanged(String? city) {
     final value = city?.trim() ?? '';
     _setAddressFields(
@@ -411,18 +416,21 @@ class AddressStepState extends State<AddressStep> {
       municipality: '',
       neighborhood: '',
     );
+    _refreshDependentDropdowns();
     _recomputeFormState();
   }
 
   void _onDistrictChanged(String? district) {
     final value = district?.trim() ?? '';
     _setAddressFields(district: value, municipality: '', neighborhood: '');
+    _refreshDependentDropdowns();
     _recomputeFormState();
   }
 
   void _onMunicipalityChanged(String? municipality) {
     final value = municipality?.trim() ?? '';
     _setAddressFields(municipality: value, neighborhood: '');
+    _refreshDependentDropdowns();
     _recomputeFormState();
   }
 
@@ -447,6 +455,7 @@ class AddressStepState extends State<AddressStep> {
           );
 
     _setAddressFields(neighborhood: canonicalValue);
+    _refreshDependentDropdowns();
     _recomputeFormState();
   }
 
