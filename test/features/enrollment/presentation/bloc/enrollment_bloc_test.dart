@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary_page.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
@@ -71,6 +72,14 @@ final _tEnrollmentSummary = EnrollmentSummary(
   enrollmentCode: 'ENR-001',
   status: 'PENDING',
   student: _tStudentSummary,
+);
+
+final _tEnrollmentSummaryPage = EnrollmentSummaryPage(
+  content: [_tEnrollmentSummary],
+  page: 0,
+  size: 10,
+  totalElements: 1,
+  totalPages: 1,
 );
 
 final _tEnrollmentDetail = EnrollmentDetail(
@@ -179,8 +188,10 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
-        ).thenAnswer((_) async => Right([_tEnrollmentSummary]));
+        ).thenAnswer((_) async => Right(_tEnrollmentSummaryPage));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -236,6 +247,8 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
         ).called(1);
       },
@@ -251,6 +264,8 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
         ).thenAnswer(
           (_) async => const Left(ServerFailure('Server unavailable')),
@@ -298,6 +313,8 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
         ).called(1);
       },
@@ -313,8 +330,10 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
-        ).thenAnswer((_) async => Right([_tEnrollmentSummary]));
+        ).thenAnswer((_) async => Right(_tEnrollmentSummaryPage));
       },
       build: buildBloc,
       act: (bloc) async {
@@ -360,6 +379,8 @@ void main() {
             surname: surname,
             schoolLevelGroupId: schoolLevelGroupId,
             schoolLevelId: schoolLevelId,
+            page: 0,
+            size: 10,
           ),
         ).called(2);
       },

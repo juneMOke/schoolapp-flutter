@@ -149,11 +149,23 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
                         const SizedBox(height: 12),
                         BlocBuilder<EnrollmentBloc, EnrollmentState>(
                           builder: (context, state) => PreRegistrationsInfoBar(
-                            count: state.summaries.length,
+                            count: state.summariesTotalElements,
                             isLoading: _isLoading(state),
                             onRefresh: _requestSummariesIfContextAvailable,
                             statusLabel: widget.status,
                             showStatusBadge: widget.showStatusBadge,
+                            currentPage: state.summariesPage,
+                            totalPages: state.summariesTotalPages,
+                            onPreviousPage: () => context.read<EnrollmentBloc>().add(
+                              EnrollmentSummariesPageRequested(
+                                page: state.summariesPage - 1,
+                              ),
+                            ),
+                            onNextPage: () => context.read<EnrollmentBloc>().add(
+                              EnrollmentSummariesPageRequested(
+                                page: state.summariesPage + 1,
+                              ),
+                            ),
                             action: widget.action,
                           ),
                         ),
@@ -162,6 +174,7 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
                           builder: (context, state) => EnrollmentDataTable(
                             isLoading: _isLoading(state),
                             enrollments: state.summaries,
+                            totalCount: state.summariesTotalElements,
                             onViewRequested: (summary) {
                               final intent = widget.intentFactory(summary);
                               context.push(
@@ -223,6 +236,7 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
       EnrollmentSummariesRequested(
         status: _effectiveStatus,
         academicYearId: academicYearId,
+        page: 0,
       ),
     );
   }

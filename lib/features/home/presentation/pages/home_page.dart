@@ -12,13 +12,38 @@ import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dar
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String? initialSubMenuId;
+
+  const HomePage({super.key, this.initialSubMenuId});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (context) => NavigationBloc(l10n),
+      create: (context) {
+        final bloc = NavigationBloc(l10n);
+        final initialSubMenuId = this.initialSubMenuId?.trim();
+        if (initialSubMenuId == null || initialSubMenuId.isEmpty) {
+          return bloc;
+        }
+
+        for (final menu in bloc.state.menuItems) {
+          for (final subMenu in menu.subMenus) {
+            if (subMenu.id == initialSubMenuId) {
+              bloc.add(
+                SubMenuItemSelected(
+                  menuId: menu.id,
+                  subMenuId: subMenu.id,
+                  title: subMenu.title,
+                ),
+              );
+              return bloc;
+            }
+          }
+        }
+
+        return bloc;
+      },
       child: const _HomePageView(),
     );
   }

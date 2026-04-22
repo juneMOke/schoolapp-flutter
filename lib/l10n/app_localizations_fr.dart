@@ -180,6 +180,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reRegistrationSearchReady => 'Critères valides, vous pouvez lancer la recherche.';
 
   @override
+  String get reRegistrationSearchInvitationTitle => 'Lancez une recherche de re-inscription';
+
+  @override
+  String get reRegistrationSearchInvitationMessage => 'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.';
+
+  @override
   String get firstName => 'Prénom';
 
   @override
@@ -226,6 +232,25 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String enrollmentPageFooter(int pageCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pageCount,
+      locale: localeName,
+      other: 'résultats',
+      one: 'résultat',
+    );
+    return '$pageCount $_temp0 sur $totalCount';
+  }
+
+  @override
+  String enrollmentPageIndicator(int current, int total) {
+    return 'Page $current / $total';
+  }
+
+  @override
+  String get refresh => 'Actualiser';
 
   @override
   String get statusPending => 'En Attente';
@@ -306,6 +331,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get previous => 'Précédent';
+
+  @override
+  String get nextPage => 'Page suivante';
+
+  @override
+  String get previousPage => 'Page précédente';
 
   @override
   String get finish => 'Terminer';
@@ -566,10 +597,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentReadyForValidation => 'Dossier prt pour validation finale.';
 
   @override
+  String get completedEnrollmentRedirecting => 'Ce dossier est deja complete. Redirection vers Premiere Inscription.';
+
+  @override
   String get validateEnrollment => 'Valider l\'inscription';
 
   @override
   String get validatingEnrollment => 'Validation en cours...';
+
+  @override
+  String get goToFirstRegistration => 'Retourner a la premiere inscription';
 
   @override
   String get enrollmentStatusUpdateSuccess => 'Statut mis à jour avec succès.';

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
@@ -53,6 +55,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       GlobalKey<GuardianInfoStepState>();
 
   late final EnrollmentStepperFlowBloc _flowBloc;
+
+  bool get _isEnrollmentAlreadyCompleted =>
+      widget.enrollmentDetail.enrollmentDetail.status ==
+      EnrollmentStatus.completed;
 
   @override
   void initState() {
@@ -128,9 +134,20 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       2 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
       3 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
       4 => savingNow ? l10n.savingGuardianInfo : l10n.saveGuardianInfo,
-      5 => savingNow ? l10n.validatingEnrollment : l10n.validateEnrollment,
+      5 => _isEnrollmentAlreadyCompleted
+          ? l10n.goToFirstRegistration
+          : (savingNow ? l10n.validatingEnrollment : l10n.validateEnrollment),
       _ => '',
     };
+  }
+
+  void _redirectToFirstRegistrationFromHome() {
+    context.goNamed(
+      AppRoutesNames.home,
+      queryParameters: {
+        'subMenuId': MenuConstants.premiereInscriptionId,
+      },
+    );
   }
 
   @override
@@ -147,95 +164,111 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
             prev.statusUpdateStatus != curr.statusUpdateStatus,
         listener: (context, state) {
           final l10n = AppLocalizations.of(context)!;
+          final enrollmentBloc = context.read<EnrollmentBloc>();
           if (state.statusUpdateStatus == EnrollmentLoadStatus.success) {
             AppSnackBar.showSuccess(context, l10n.enrollmentStatusUpdateSuccess);
-            context.go(AppRoutesNames.premiereInscription);
+            enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
+            _redirectToFirstRegistrationFromHome();
           } else if (state.statusUpdateStatus == EnrollmentLoadStatus.failure) {
             AppSnackBar.showError(
               context,
               l10n.enrollmentStatusUpdateError(state.errorMessage ?? ''),
             );
+            enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
           }
         },
-        child: BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
-        builder: (context, flowState) {
-          final currentStep = flowState.currentStep;
-          final progress = (currentStep + 1) / stepTitles.length;
-          final currentStepState = flowState.stateOf(currentStep);
-          final currentWizardStep = EnrollmentWizardStepX.fromIndex(
-            currentStep,
-          );
-          final stepIsEditable = widget.detailPolicy.isStepEditable(
-            currentWizardStep,
-          );
-          final canSaveCurrentStep =
-              flowState.canSave &&
-              widget.detailPolicy.canSaveStep(currentWizardStep);
-          final showSaveAction =
-              flowState.showSaveAction &&
-              widget.detailPolicy.canSaveStep(currentWizardStep);
+        child: BlocBuilder<EnrollmentBloc, EnrollmentState>(
+          buildWhen: (prev, curr) =>
+              prev.statusUpdateStatus != curr.statusUpdateStatus,
+          builder: (context, enrollmentState) {
+            final isStatusUpdateLoading =
+                enrollmentState.statusUpdateStatus ==
+                EnrollmentLoadStatus.loading;
 
-          return Padding(
-            padding: const EdgeInsets.all(AppTheme.defaultPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                WizardBreadcrumb(
-                  titles: stepTitles,
-                  currentStep: currentStep,
-                  progress: progress,
-                  onStepTap: (target) =>
-                      _onBreadcrumbStepTap(target, currentStep),
-                ),
-                const SizedBox(height: 12),
-                StepPageCard(
-                  key: ValueKey(currentStep),
-                  title: stepTitles[currentStep],
-                  subtitle: stepSubtitles[currentStep],
-                  child: _buildStepContent(steps[currentStep]),
-                ),
-                const SizedBox(height: 12),
-                EnrollmentStepperControls(
-                  currentStep: currentStep,
-                  isLast: flowState.isLast,
-                  canSave: canSaveCurrentStep,
-                  canContinue: flowState.canContinue,
-                  showSaveAction: showSaveAction,
-                  savingNow: currentStepState.saving,
-                  saveLabel: _saveLabelForStep(
-                    l10n,
-                    currentStep,
-                    currentStepState.saving,
+            return BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
+              builder: (context, flowState) {
+                final currentStep = flowState.currentStep;
+                final progress = (currentStep + 1) / stepTitles.length;
+                final currentStepState = flowState.stateOf(currentStep);
+                final currentWizardStep = EnrollmentWizardStepX.fromIndex(
+                  currentStep,
+                );
+                final stepIsEditable = widget.detailPolicy.isStepEditable(
+                  currentWizardStep,
+                );
+                final isFinalStep = currentStep == _totalSteps - 1;
+                final effectiveSavingNow =
+                    isFinalStep ? isStatusUpdateLoading : currentStepState.saving;
+                final canSaveCurrentStep =
+                    (isFinalStep ? !isStatusUpdateLoading : flowState.canSave) &&
+                    widget.detailPolicy.canSaveStep(currentWizardStep);
+                final showSaveAction =
+                    flowState.showSaveAction &&
+                    widget.detailPolicy.canSaveStep(currentWizardStep);
+
+                return Padding(
+                  padding: const EdgeInsets.all(AppTheme.defaultPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      WizardBreadcrumb(
+                        titles: stepTitles,
+                        currentStep: currentStep,
+                        progress: progress,
+                        onStepTap: (target) =>
+                            _onBreadcrumbStepTap(target, currentStep),
+                      ),
+                      const SizedBox(height: 12),
+                      StepPageCard(
+                        key: ValueKey(currentStep),
+                        title: stepTitles[currentStep],
+                        subtitle: stepSubtitles[currentStep],
+                        child: _buildStepContent(steps[currentStep]),
+                      ),
+                      const SizedBox(height: 12),
+                      EnrollmentStepperControls(
+                        currentStep: currentStep,
+                        isLast: flowState.isLast,
+                        canSave: canSaveCurrentStep,
+                        canContinue: flowState.canContinue,
+                        showSaveAction: showSaveAction,
+                        savingNow: effectiveSavingNow,
+                        saveLabel: _saveLabelForStep(
+                          l10n,
+                          currentStep,
+                          effectiveSavingNow,
+                        ),
+                        onPrevious: () {
+                          _flowBloc.add(
+                            EnrollmentStepperCurrentStepChanged(currentStep - 1),
+                          );
+                        },
+                        onSave: () => _onSavePressed(currentStep, flowState),
+                        onContinue: () {
+                          if (!_validateCurrentStep(
+                            currentStep,
+                            flowState,
+                            isEditable: stepIsEditable,
+                          )) {
+                            return;
+                          }
+                          if (flowState.isLast) {
+                            _showHint(l10n.enrollmentReadyForValidation);
+                            return;
+                          }
+                          _flowBloc.add(
+                            EnrollmentStepperCurrentStepChanged(currentStep + 1),
+                          );
+                          _resetContentScroll();
+                        },
+                      ),
+                    ],
                   ),
-                  onPrevious: () {
-                    _flowBloc.add(
-                      EnrollmentStepperCurrentStepChanged(currentStep - 1),
-                    );
-                  },
-                  onSave: () => _onSavePressed(currentStep, flowState),
-                  onContinue: () {
-                    if (!_validateCurrentStep(
-                      currentStep,
-                      flowState,
-                      isEditable: stepIsEditable,
-                    )) {
-                      return;
-                    }
-                    if (flowState.isLast) {
-                      _showHint(l10n.enrollmentReadyForValidation);
-                      return;
-                    }
-                    _flowBloc.add(
-                      EnrollmentStepperCurrentStepChanged(currentStep + 1),
-                    );
-                    _resetContentScroll();
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -458,10 +491,23 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       return;
     }
     if (currentStep == 5) {
-      final enrollmentId =
-          widget.enrollmentDetail.enrollmentDetail.id.trim();
+      if (_isEnrollmentAlreadyCompleted) {
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackBar.showInfo(context, l10n.completedEnrollmentRedirecting);
+        _redirectToFirstRegistrationFromHome();
+        return;
+      }
+
+      final enrollmentBloc = context.read<EnrollmentBloc>();
+      if (enrollmentBloc.state.statusUpdateStatus ==
+          EnrollmentLoadStatus.loading) {
+        return;
+      }
+
+      final enrollmentId = widget.enrollmentDetail.enrollmentDetail.id.trim();
       if (enrollmentId.isEmpty) return;
-      context.read<EnrollmentBloc>().add(
+
+      enrollmentBloc.add(
         EnrollmentStatusUpdateRequested(
           enrollmentId: enrollmentId,
           status: 'COMPLETED',

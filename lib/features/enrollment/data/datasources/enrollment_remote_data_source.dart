@@ -3,8 +3,8 @@ import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/create_enrollment_request_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_detail_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_model.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/update_enrollment_status_request_model.dart';
 
 part 'enrollment_remote_data_source.g.dart';
 
@@ -27,15 +27,17 @@ abstract class EnrollmentRemoteDataSource {
   );
 
   @GET(AppConstants.enrollmentEndpoint)
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   getEnrollmentSummaryByStatusAndAcademicYear(
     @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
+    @Query('page') int page,
+    @Query('size') int size,
   );
 
   @GET(AppConstants.enrollmentSearchByStudentInfoEndpoint)
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
     @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
@@ -43,10 +45,12 @@ abstract class EnrollmentRemoteDataSource {
     @Query('firstName') String firstName,
     @Query('lastName') String lastName,
     @Query('surname') String surname,
+    @Query('page') int page,
+    @Query('size') int size,
   );
 
   @GET(AppConstants.enrollmentSearchByStudentInfoWithDateOfBirthEndpoint)
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
     @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
@@ -55,25 +59,31 @@ abstract class EnrollmentRemoteDataSource {
     @Query('lastName') String lastName,
     @Query('surname') String surname,
     @Query('dateOfBirth') String dateOfBirth,
+    @Query('page') int page,
+    @Query('size') int size,
   );
 
   @GET(AppConstants.enrollmentSearchByDateOfBirthEndpoint)
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
     @Extras() Map<String, dynamic> extras,
     @Query('status') String status,
     @Query('academicYearId') String academicYearId,
     @Query('dateOfBirth') String dateOfBirth,
+    @Query('page') int page,
+    @Query('size') int size,
   );
 
   @GET(AppConstants.enrollmentSearchByAcademicInfoEndpoint)
-  Future<List<EnrollmentSummaryModel>> searchEnrollmentSummaryByAcademicInfo(
+  Future<EnrollmentSummaryPageModel> searchEnrollmentSummaryByAcademicInfo(
     @Extras() Map<String, dynamic> extras,
     @Query('firstName') String firstName,
     @Query('lastName') String lastName,
     @Query('surname') String surname,
     @Query('schoolLevelGroupId') String schoolLevelGroupId,
     @Query('schoolLevelId') String schoolLevelId,
+    @Query('page') int page,
+    @Query('size') int size,
   );
 
   @GET(AppConstants.enrollmentPreviewByStudentEndpoint)

@@ -16,6 +16,8 @@ class EnrollmentSummariesQuery extends Equatable {
   final EnrollmentSummaryQueryType type;
   final String status;
   final String academicYearId;
+  final int page;
+  final int size;
   final String? firstName;
   final String? lastName;
   final String? surname;
@@ -27,6 +29,8 @@ class EnrollmentSummariesQuery extends Equatable {
     required this.type,
     required this.status,
     required this.academicYearId,
+    required this.page,
+    required this.size,
     this.firstName,
     this.lastName,
     this.surname,
@@ -40,6 +44,8 @@ class EnrollmentSummariesQuery extends Equatable {
     type,
     status,
     academicYearId,
+    page,
+    size,
     firstName,
     lastName,
     surname,
@@ -56,6 +62,10 @@ class EnrollmentState extends Equatable {
   final EnrollmentLoadStatus detailStatus;
   final EnrollmentLoadStatus previewStatus;
   final List<EnrollmentSummary> summaries;
+  final int summariesPage;
+  final int summariesSize;
+  final int summariesTotalElements;
+  final int summariesTotalPages;
   final EnrollmentSummaryQueryType? summariesQueryType;
   final EnrollmentSummariesQuery? lastSummariesQuery;
   final EnrollmentDetail? detail;
@@ -71,6 +81,10 @@ class EnrollmentState extends Equatable {
     required this.detailStatus,
     required this.previewStatus,
     required this.summaries,
+    required this.summariesPage,
+    required this.summariesSize,
+    required this.summariesTotalElements,
+    required this.summariesTotalPages,
     required this.summariesQueryType,
     required this.lastSummariesQuery,
     required this.detail,
@@ -87,6 +101,10 @@ class EnrollmentState extends Equatable {
       detailStatus = EnrollmentLoadStatus.initial,
       previewStatus = EnrollmentLoadStatus.initial,
       summaries = const <EnrollmentSummary>[],
+      summariesPage = 0,
+      summariesSize = 20,
+      summariesTotalElements = 0,
+      summariesTotalPages = 0,
       summariesQueryType = null,
       lastSummariesQuery = null,
       detail = null,
@@ -102,6 +120,10 @@ class EnrollmentState extends Equatable {
     EnrollmentLoadStatus? detailStatus,
     EnrollmentLoadStatus? previewStatus,
     List<EnrollmentSummary>? summaries,
+    int? summariesPage,
+    int? summariesSize,
+    int? summariesTotalElements,
+    int? summariesTotalPages,
     Object? summariesQueryType = _undefined,
     Object? lastSummariesQuery = _undefined,
     Object? detail = _undefined,
@@ -117,6 +139,11 @@ class EnrollmentState extends Equatable {
       detailStatus: detailStatus ?? this.detailStatus,
       previewStatus: previewStatus ?? this.previewStatus,
       summaries: summaries ?? this.summaries,
+      summariesPage: summariesPage ?? this.summariesPage,
+      summariesSize: summariesSize ?? this.summariesSize,
+      summariesTotalElements:
+          summariesTotalElements ?? this.summariesTotalElements,
+      summariesTotalPages: summariesTotalPages ?? this.summariesTotalPages,
       summariesQueryType: identical(summariesQueryType, _undefined)
           ? this.summariesQueryType
           : summariesQueryType as EnrollmentSummaryQueryType?,
@@ -151,6 +178,10 @@ class EnrollmentState extends Equatable {
     detailStatus,
     previewStatus,
     summaries,
+    summariesPage,
+    summariesSize,
+    summariesTotalElements,
+    summariesTotalPages,
     summariesQueryType,
     lastSummariesQuery,
     detail,

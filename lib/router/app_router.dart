@@ -147,7 +147,9 @@ class AppRouter {
         GoRoute(
           path: '/home',
           name: AppRoutesNames.home,
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => HomePage(
+            initialSubMenuId: state.uri.queryParameters['subMenuId'],
+          ),
         ),
         ShellRoute(
           builder: (context, state, child) {

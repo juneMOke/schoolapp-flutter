@@ -425,6 +425,18 @@ abstract class AppLocalizations {
   /// **'Valid criteria, you can run the search.'**
   String get reRegistrationSearchReady;
 
+  /// No description provided for @reRegistrationSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a re-registration search'**
+  String get reRegistrationSearchInvitationTitle;
+
+  /// No description provided for @reRegistrationSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the form above then click Search to display enrollment files.'**
+  String get reRegistrationSearchInvitationMessage;
+
   /// No description provided for @firstName.
   ///
   /// In en, this message translates to:
@@ -502,6 +514,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
   String enrollmentResultsCount(int count);
+
+  /// No description provided for @enrollmentPageFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}'**
+  String enrollmentPageFooter(int pageCount, int totalCount);
+
+  /// No description provided for @enrollmentPageIndicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} / {total}'**
+  String enrollmentPageIndicator(int current, int total);
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
 
   /// No description provided for @statusPending.
   ///
@@ -658,6 +688,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Previous'**
   String get previous;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get nextPage;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get previousPage;
 
   /// No description provided for @finish.
   ///
@@ -1163,6 +1205,12 @@ abstract class AppLocalizations {
   /// **'File ready for final validation.'**
   String get enrollmentReadyForValidation;
 
+  /// No description provided for @completedEnrollmentRedirecting.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is already completed. Redirecting to First Registration.'**
+  String get completedEnrollmentRedirecting;
+
   /// No description provided for @validateEnrollment.
   ///
   /// In en, this message translates to:
@@ -1174,6 +1222,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Validating...'**
   String get validatingEnrollment;
+
+  /// No description provided for @goToFirstRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to First Registration'**
+  String get goToFirstRegistration;
 
   /// No description provided for @enrollmentStatusUpdateSuccess.
   ///

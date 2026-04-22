@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary_page.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 
 class SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase {
@@ -10,13 +11,15 @@ class SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirt
     this._repository,
   );
 
-  Future<Either<Failure, List<EnrollmentSummary>>> call({
+  Future<Either<Failure, EnrollmentSummaryPage>> call({
     required String status,
     required String academicYearId,
     required String firstName,
     required String lastName,
     required String surname,
     required String dateOfBirth,
+    int page = 0,
+    int size = AppConstants.enrollmentDefaultPageSize,
   }) {
     return _repository
         .searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
@@ -26,6 +29,8 @@ class SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirt
           lastName: lastName,
           surname: surname,
           dateOfBirth: dateOfBirth,
+          page: page,
+          size: size,
         );
   }
 }

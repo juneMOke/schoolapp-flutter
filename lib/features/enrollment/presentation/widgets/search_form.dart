@@ -208,6 +208,7 @@ class _SearchFormState extends State<SearchForm> {
           dateOfBirth: _dateOfBirthController.text.trim(),
           status: widget.status,
           academicYearId: widget.academicYearId,
+          page: 0,
         ),
       );
       return;
@@ -222,6 +223,7 @@ class _SearchFormState extends State<SearchForm> {
           surname: _surnameController.text.trim(),
           status: widget.status,
           academicYearId: widget.academicYearId,
+          page: 0,
         ),
       );
       return;
@@ -233,6 +235,7 @@ class _SearchFormState extends State<SearchForm> {
         dateOfBirth: _dateOfBirthController.text.trim(),
         status: widget.status,
         academicYearId: widget.academicYearId,
+        page: 0,
       ),
     );
   }
@@ -268,6 +271,7 @@ class _SearchFormState extends State<SearchForm> {
       EnrollmentSummariesRequested(
         status: widget.status,
         academicYearId: widget.academicYearId,
+        page: 0,
       ),
     );
   }

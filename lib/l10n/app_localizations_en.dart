@@ -180,6 +180,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reRegistrationSearchReady => 'Valid criteria, you can run the search.';
 
   @override
+  String get reRegistrationSearchInvitationTitle => 'Start a re-registration search';
+
+  @override
+  String get reRegistrationSearchInvitationMessage => 'Fill the form above then click Search to display enrollment files.';
+
+  @override
   String get firstName => 'First Name';
 
   @override
@@ -226,6 +232,25 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String enrollmentPageFooter(int pageCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pageCount,
+      locale: localeName,
+      other: 'results',
+      one: 'result',
+    );
+    return '$pageCount $_temp0 of $totalCount';
+  }
+
+  @override
+  String enrollmentPageIndicator(int current, int total) {
+    return 'Page $current / $total';
+  }
+
+  @override
+  String get refresh => 'Refresh';
 
   @override
   String get statusPending => 'Pending';
@@ -306,6 +331,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previous => 'Previous';
+
+  @override
+  String get nextPage => 'Next page';
+
+  @override
+  String get previousPage => 'Previous page';
 
   @override
   String get finish => 'Finish';
@@ -566,10 +597,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentReadyForValidation => 'File ready for final validation.';
 
   @override
+  String get completedEnrollmentRedirecting => 'This enrollment is already completed. Redirecting to First Registration.';
+
+  @override
   String get validateEnrollment => 'Validate enrollment';
 
   @override
   String get validatingEnrollment => 'Validating...';
+
+  @override
+  String get goToFirstRegistration => 'Go to First Registration';
 
   @override
   String get enrollmentStatusUpdateSuccess => 'Status updated successfully.';

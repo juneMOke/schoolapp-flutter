@@ -76,6 +76,8 @@
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
   "reRegistrationSearchNeedCriteria": "Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.",
   "reRegistrationSearchReady": "Critères valides, vous pouvez lancer la recherche.",
+  "reRegistrationSearchInvitationTitle": "Lancez une recherche de re-inscription",
+  "reRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.",
   "firstName": "Prénom",
   "lastName": "Nom",
   "surname": "Post-nom",
@@ -96,6 +98,21 @@
       }
     }
   },
+  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{résultat} other{résultats}} sur {totalCount}",
+  "@enrollmentPageFooter": {
+    "placeholders": {
+      "pageCount": { "type": "int" },
+      "totalCount": { "type": "int" }
+    }
+  },
+  "enrollmentPageIndicator": "Page {current} / {total}",
+  "@enrollmentPageIndicator": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "refresh": "Actualiser",
   "statusPending": "En Attente",
   "statusValidated": "Validé",
   "statusRejected": "Rejeté",
@@ -127,6 +144,8 @@
   "summary": "Résumé",
   "next": "Continuer",
   "previous": "Précédent",
+  "nextPage": "Page suivante",
+  "previousPage": "Page précédente",
   "finish": "Terminer",
 
   "personalInfoSubtitle": "Informations personnelles modifiables",
@@ -234,8 +253,10 @@
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
   "enrollmentReadyForValidation": "Dossier prt pour validation finale.",
+  "completedEnrollmentRedirecting": "Ce dossier est deja complete. Redirection vers Premiere Inscription.",
   "validateEnrollment": "Valider l'inscription",
   "validatingEnrollment": "Validation en cours...",
+  "goToFirstRegistration": "Retourner a la premiere inscription",
   "enrollmentStatusUpdateSuccess": "Statut mis à jour avec succès.",
   "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
   "@enrollmentStatusUpdateError": {

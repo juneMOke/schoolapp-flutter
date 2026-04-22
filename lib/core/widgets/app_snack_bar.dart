@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
 /// Helpers centralisés pour afficher des [SnackBar] cohérents dans l'application.
@@ -59,8 +60,8 @@ abstract final class AppSnackBar {
     final style = switch (variant) {
       _AppSnackBarVariant.success => (
         icon: Icons.check_circle_rounded,
-        background: colors.secondaryContainer,
-        foreground: colors.onSecondaryContainer,
+        background: AppColors.green,
+        foreground: AppColors.surface,
       ),
       _AppSnackBarVariant.error => (
         icon: Icons.error_rounded,

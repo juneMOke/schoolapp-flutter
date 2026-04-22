@@ -118,6 +118,8 @@
   "reRegistrationSearchNoOptions": "No cycle/level is available for this search.",
   "reRegistrationSearchNeedCriteria": "Provide either First name, Last name and Surname, or Cycle/Level.",
   "reRegistrationSearchReady": "Valid criteria, you can run the search.",
+  "reRegistrationSearchInvitationTitle": "Start a re-registration search",
+  "reRegistrationSearchInvitationMessage": "Fill the form above then click Search to display enrollment files.",
   "firstName": "First Name",
   "lastName": "Last Name",
   "surname": "Surname",
@@ -138,6 +140,21 @@
       }
     }
   },
+  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}",
+  "@enrollmentPageFooter": {
+    "placeholders": {
+      "pageCount": { "type": "int" },
+      "totalCount": { "type": "int" }
+    }
+  },
+  "enrollmentPageIndicator": "Page {current} / {total}",
+  "@enrollmentPageIndicator": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "refresh": "Refresh",
   "statusPending": "Pending",
   "statusValidated": "Validated",
   "statusRejected": "Rejected",
@@ -169,6 +186,8 @@
   "summary": "Summary",
   "next": "Continue",
   "previous": "Previous",
+  "nextPage": "Next page",
+  "previousPage": "Previous page",
   "finish": "Finish",
 
   "personalInfoSubtitle": "Editable personal information",
@@ -276,8 +295,10 @@
   "validateAcademicInfoHint": "Please complete the academic information.",
   "validateGuardianInfoHint": "Please check the guardian information.",
   "enrollmentReadyForValidation": "File ready for final validation.",
+  "completedEnrollmentRedirecting": "This enrollment is already completed. Redirecting to First Registration.",
   "validateEnrollment": "Validate enrollment",
   "validatingEnrollment": "Validating...",
+  "goToFirstRegistration": "Go to First Registration",
   "enrollmentStatusUpdateSuccess": "Status updated successfully.",
   "enrollmentStatusUpdateError": "Failed to update status: {message}",
   "@enrollmentStatusUpdateError": {

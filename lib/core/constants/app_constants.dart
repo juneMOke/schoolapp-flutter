@@ -69,6 +69,10 @@ class AppConstants {
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
 
-  static String bootstrapPreviousYearPayloadKey =
+  static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
+
+  // ─── Pagination ────────────────────────────────────────────────────────────
+  /// Taille de page par défaut pour les listes d'enrollments.
+  static const int enrollmentDefaultPageSize = 10;
 }

@@ -18,14 +18,18 @@ class EnrollmentSummariesRefreshRequested extends EnrollmentEvent {
 class EnrollmentSummariesRequested extends EnrollmentEvent {
   final String status;
   final String academicYearId;
+  final int page;
+  final int size;
 
   const EnrollmentSummariesRequested({
     required this.status,
     required this.academicYearId,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
-  List<Object?> get props => [status, academicYearId];
+  List<Object?> get props => [status, academicYearId, page, size];
 }
 
 class EnrollmentSummariesByStudentNameRequested extends EnrollmentEvent {
@@ -34,6 +38,8 @@ class EnrollmentSummariesByStudentNameRequested extends EnrollmentEvent {
   final String firstName;
   final String lastName;
   final String surname;
+  final int page;
+  final int size;
 
   const EnrollmentSummariesByStudentNameRequested({
     required this.status,
@@ -41,6 +47,8 @@ class EnrollmentSummariesByStudentNameRequested extends EnrollmentEvent {
     required this.firstName,
     required this.lastName,
     required this.surname,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -50,6 +58,8 @@ class EnrollmentSummariesByStudentNameRequested extends EnrollmentEvent {
     firstName,
     lastName,
     surname,
+    page,
+    size,
   ];
 }
 
@@ -61,6 +71,8 @@ class EnrollmentSummariesByStudentNamesAndDateOfBirthRequested
   final String lastName;
   final String surname;
   final String dateOfBirth;
+  final int page;
+  final int size;
 
   const EnrollmentSummariesByStudentNamesAndDateOfBirthRequested({
     required this.status,
@@ -69,6 +81,8 @@ class EnrollmentSummariesByStudentNamesAndDateOfBirthRequested
     required this.lastName,
     required this.surname,
     required this.dateOfBirth,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -79,6 +93,8 @@ class EnrollmentSummariesByStudentNamesAndDateOfBirthRequested
     lastName,
     surname,
     dateOfBirth,
+    page,
+    size,
   ];
 }
 
@@ -86,15 +102,19 @@ class EnrollmentSummariesByDateOfBirthRequested extends EnrollmentEvent {
   final String status;
   final String academicYearId;
   final String dateOfBirth;
+  final int page;
+  final int size;
 
   const EnrollmentSummariesByDateOfBirthRequested({
     required this.status,
     required this.academicYearId,
     required this.dateOfBirth,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
-  List<Object?> get props => [status, academicYearId, dateOfBirth];
+  List<Object?> get props => [status, academicYearId, dateOfBirth, page, size];
 }
 
 class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
@@ -103,6 +123,8 @@ class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
   final String surname;
   final String schoolLevelGroupId;
   final String schoolLevelId;
+  final int page;
+  final int size;
 
   const EnrollmentSummariesByAcademicInfoRequested({
     required this.firstName,
@@ -110,6 +132,8 @@ class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
     required this.surname,
     required this.schoolLevelGroupId,
     required this.schoolLevelId,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -119,7 +143,18 @@ class EnrollmentSummariesByAcademicInfoRequested extends EnrollmentEvent {
     surname,
     schoolLevelGroupId,
     schoolLevelId,
+    page,
+    size,
   ];
+}
+
+class EnrollmentSummariesPageRequested extends EnrollmentEvent {
+  final int page;
+
+  const EnrollmentSummariesPageRequested({required this.page});
+
+  @override
+  List<Object?> get props => [page];
 }
 
 class EnrollmentDetailRequested extends EnrollmentEvent {

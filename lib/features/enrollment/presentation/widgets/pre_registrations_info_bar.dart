@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PreRegistrationsInfoBar extends StatelessWidget {
   final int count;
@@ -8,6 +9,10 @@ class PreRegistrationsInfoBar extends StatelessWidget {
   final String? statusLabel;
   final bool showStatusBadge;
   final Widget? action;
+  final int currentPage;
+  final int totalPages;
+  final VoidCallback? onPreviousPage;
+  final VoidCallback? onNextPage;
 
   const PreRegistrationsInfoBar({
     super.key,
@@ -17,10 +22,19 @@ class PreRegistrationsInfoBar extends StatelessWidget {
     this.statusLabel,
     this.showStatusBadge = true,
     this.action,
+    this.currentPage = 0,
+    this.totalPages = 0,
+    this.onPreviousPage,
+    this.onNextPage,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final canGoPrevious = !isLoading && onPreviousPage != null && currentPage > 0;
+    final canGoNext =
+        !isLoading && onNextPage != null && currentPage + 1 < totalPages;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -54,8 +68,8 @@ class PreRegistrationsInfoBar extends StatelessWidget {
           Expanded(
             child: Text(
               isLoading
-                  ? 'Chargement...'
-                  : '$count dossier${count > 1 ? 's' : ''} trouvé${count > 1 ? 's' : ''}',
+                  ? l10n.loadingStudents
+                  : l10n.enrollmentResultsCount(count),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -71,7 +85,7 @@ class PreRegistrationsInfoBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                statusLabel ?? 'PRE_REGISTERED',
+                statusLabel ?? '',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -81,12 +95,34 @@ class PreRegistrationsInfoBar extends StatelessWidget {
             ),
             const SizedBox(width: 6),
           ],
+          if (totalPages > 0) ...[
+            Text(
+              l10n.enrollmentPageIndicator(currentPage + 1, totalPages),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondaryColor,
+              ),
+            ),
+            IconButton(
+              onPressed: canGoPrevious ? onPreviousPage : null,
+              icon: const Icon(Icons.chevron_left_rounded),
+              tooltip: l10n.previousPage,
+              color: AppTheme.primaryColor,
+            ),
+            IconButton(
+              onPressed: canGoNext ? onNextPage : null,
+              icon: const Icon(Icons.chevron_right_rounded),
+              tooltip: l10n.nextPage,
+              color: AppTheme.primaryColor,
+            ),
+          ],
           if (action != null) ...[
             action!,
             const SizedBox(width: 6),
           ],
           Tooltip(
-            message: 'Actualiser',
+            message: l10n.refresh,
             child: IconButton(
               onPressed:
                   isLoading || onRefresh == null ? null : () => onRefresh!(),

@@ -15,6 +15,7 @@ enum _SortColumn { nom, postnom, prenom, dateNaissance }
 class EnrollmentDataTable extends StatefulWidget {
   final List<EnrollmentSummary> enrollments;
   final bool isLoading;
+  final int? totalCount;
   final ValueChanged<EnrollmentSummary> onViewRequested;
 
   const EnrollmentDataTable({
@@ -22,6 +23,7 @@ class EnrollmentDataTable extends StatefulWidget {
     required this.enrollments,
     required this.onViewRequested,
     this.isLoading = false,
+    this.totalCount,
   });
 
   @override
@@ -102,9 +104,12 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           ),
         ),
 
-        // ── Pied : compteur ──
+        // ── Pied : compteur page courante / total ──
         const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
-        _TableFooter(count: sorted.length),
+        _TableFooter(
+          pageCount: sorted.length,
+          totalCount: widget.totalCount,
+        ),
       ],
     );
   }
@@ -619,11 +624,18 @@ class _EyeButtonState extends State<_EyeButton> {
 // ─── Pied de tableau ──────────────────────────────────────────────────────────
 
 class _TableFooter extends StatelessWidget {
-  final int count;
-  const _TableFooter({required this.count});
+  final int pageCount;
+  final int? totalCount;
+  const _TableFooter({required this.pageCount, this.totalCount});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final total = totalCount;
+    final label = (total != null && total > pageCount)
+        ? l10n.enrollmentPageFooter(pageCount, total)
+        : l10n.enrollmentResultsCount(pageCount);
+
     return Container(
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -637,7 +649,7 @@ class _TableFooter extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              AppLocalizations.of(context)!.enrollmentResultsCount(count),
+              label,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
