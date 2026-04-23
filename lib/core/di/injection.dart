@@ -6,6 +6,11 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
@@ -489,6 +494,28 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<EnrollmentAcademicInfoBloc>(
     () => EnrollmentAcademicInfoBloc(
       updateUseCase: getIt<UpdateEnrollmentAcademicInfoUseCase>(),
+    ),
+  );
+
+  // ── Finance ───────────────────────────────────────────────────────────────
+  getIt.registerLazySingleton<FinanceRemoteDataSource>(
+    () => FinanceRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<FinanceRepository>(
+    () => FinanceRepositoryImpl(
+      remoteDataSource: getIt<FinanceRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetFeeTariffsUseCase>(
+    () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
+  );
+
+  getIt.registerFactory<FinanceBloc>(
+    () => FinanceBloc(
+      getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>(),
     ),
   );
 }
