@@ -71,7 +71,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
 
     if (_policy.requiresPreviousYearBootstrap(_effectiveIntent)) {
       context.read<BootstrapPreviousYearBloc>().add(
-        BootstrapContextLocalRequested(
+        const BootstrapContextLocalRequested(
           key: AppConstants.bootstrapPreviousYearPayloadKey,
         ),
       );

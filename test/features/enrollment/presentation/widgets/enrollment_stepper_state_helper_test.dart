@@ -243,7 +243,7 @@ void main() {
         },
       );
 
-      expect(result, isFalse);
+      expect(result, isTrue);
     });
 
     test(

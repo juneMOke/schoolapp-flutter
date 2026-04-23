@@ -30,7 +30,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<BootstrapPreviousYearBloc>().add(
-        BootstrapContextLocalRequested(
+        const BootstrapContextLocalRequested(
           key: AppConstants.bootstrapPreviousYearPayloadKey,
         ),
       );
