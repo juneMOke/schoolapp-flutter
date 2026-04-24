@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -102,10 +104,11 @@ class _HomePageView extends StatelessWidget {
   }
 
   Widget _buildMainContent(BuildContext context, NavigationState state) {
-    final hideBreadcrumbForEnrollment =
+    final hidePageBreadcrumb =
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
-        state.selectedSubMenuId == MenuConstants.premiereInscriptionId;
+        state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
+        state.selectedSubMenuId == MenuConstants.facturationsId;
 
     return Container(
       width: double.infinity,
@@ -113,7 +116,7 @@ class _HomePageView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!hideBreadcrumbForEnrollment) ...[
+          if (!hidePageBreadcrumb) ...[
             _buildBreadcrumb(context, state),
             const SizedBox(height: AppTheme.largePadding),
           ],
@@ -181,6 +184,8 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentFeatureScope(child: ReRegistrationsPage());
       case MenuConstants.premiereInscriptionId:
         return const EnrollmentFeatureScope(child: FirstRegistrationPage());
+      case MenuConstants.facturationsId:
+        return const FinanceFeatureScope(child: FacturationPage());
       default:
         return Container(
           width: double.infinity,

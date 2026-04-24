@@ -1631,6 +1631,78 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get studentChargeStatusPaid;
 
+  /// No description provided for @facturationPageHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Billing'**
+  String get facturationPageHeaderTitle;
+
+  /// No description provided for @facturationPageHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student by name or class level to view and manage their school fees.'**
+  String get facturationPageHeaderSubtitle;
+
+  /// No description provided for @facturationPageHeaderChipByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get facturationPageHeaderChipByName;
+
+  /// No description provided for @facturationPageHeaderChipByLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by level'**
+  String get facturationPageHeaderChipByLevel;
+
+  /// No description provided for @facturationPageHeaderChipViewCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'View charges'**
+  String get facturationPageHeaderChipViewCharges;
+
+  /// No description provided for @facturationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Students'**
+  String get facturationSearchTitle;
+
+  /// No description provided for @facturationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter First name, Last name, Surname and/or Cycle/Level to filter results.'**
+  String get facturationSearchHint;
+
+  /// No description provided for @facturationSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a billing search'**
+  String get facturationSearchInvitationTitle;
+
+  /// No description provided for @facturationSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a level or enter a student name then click Search to display records.'**
+  String get facturationSearchInvitationMessage;
+
+  /// No description provided for @facturationViewChargesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View charges'**
+  String get facturationViewChargesLabel;
+
+  /// No description provided for @facturationActionsColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get facturationActionsColumnLabel;
+
+  /// No description provided for @facturationNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches these criteria. Update the form and try again.'**
+  String get facturationNoResultsDescription;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:

@@ -822,6 +822,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargeStatusPaid => 'Paid';
 
   @override
+  String get facturationPageHeaderTitle => 'Student Billing';
+
+  @override
+  String get facturationPageHeaderSubtitle => 'Search a student by name or class level to view and manage their school fees.';
+
+  @override
+  String get facturationPageHeaderChipByName => 'Search by name';
+
+  @override
+  String get facturationPageHeaderChipByLevel => 'Filter by level';
+
+  @override
+  String get facturationPageHeaderChipViewCharges => 'View charges';
+
+  @override
+  String get facturationSearchTitle => 'Search Students';
+
+  @override
+  String get facturationSearchHint => 'Enter First name, Last name, Surname and/or Cycle/Level to filter results.';
+
+  @override
+  String get facturationSearchInvitationTitle => 'Start a billing search';
+
+  @override
+  String get facturationSearchInvitationMessage => 'Select a level or enter a student name then click Search to display records.';
+
+  @override
+  String get facturationViewChargesLabel => 'View charges';
+
+  @override
+  String get facturationActionsColumnLabel => 'Actions';
+
+  @override
+  String get facturationNoResultsDescription => 'No student matches these criteria. Update the form and try again.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

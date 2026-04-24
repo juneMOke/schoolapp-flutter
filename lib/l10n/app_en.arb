@@ -406,6 +406,20 @@
   "studentChargeStatusPartial": "Partial",
   "studentChargeStatusPaid": "Paid",
 
+  "facturationPageHeaderTitle": "Student Billing",
+  "facturationPageHeaderSubtitle": "Search a student by name or class level to view and manage their school fees.",
+  "facturationPageHeaderChipByName": "Search by name",
+  "facturationPageHeaderChipByLevel": "Filter by level",
+  "facturationPageHeaderChipViewCharges": "View charges",
+
+  "facturationSearchTitle": "Search Students",
+  "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",
+  "facturationSearchInvitationTitle": "Start a billing search",
+  "facturationSearchInvitationMessage": "Select a level or enter a student name then click Search to display records.",
+  "facturationViewChargesLabel": "View charges",
+  "facturationActionsColumnLabel": "Actions",
+  "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
+
   "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
   "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
   "signOutAction": "Sign out"

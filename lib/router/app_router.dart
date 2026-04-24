@@ -15,6 +15,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -165,8 +167,7 @@ class AppRouter {
               builder: (context, state) => const FirstRegistrationPage(),
             ),
             GoRoute(
-              path:
-                  '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+              path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
               builder: (context, state) {
                 final enrollmentId = state.pathParameters['enrollmentId']!;
                 final intent = EnrollmentDetailIntent.fromRouteContext(
@@ -177,6 +178,15 @@ class AppRouter {
 
                 return EnrollmentDetailPage(intent: intent);
               },
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) => FinanceFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.facturations,
+              builder: (context, state) => const FacturationPage(),
             ),
           ],
         ),

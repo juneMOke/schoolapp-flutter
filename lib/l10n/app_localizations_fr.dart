@@ -822,6 +822,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargeStatusPaid => 'Payé';
 
   @override
+  String get facturationPageHeaderTitle => 'Facturation des élèves';
+
+  @override
+  String get facturationPageHeaderSubtitle => 'Recherchez un élève par nom ou par niveau de classe pour consulter ses charges de scolarité.';
+
+  @override
+  String get facturationPageHeaderChipByName => 'Recherche par nom';
+
+  @override
+  String get facturationPageHeaderChipByLevel => 'Filtrer par niveau';
+
+  @override
+  String get facturationPageHeaderChipViewCharges => 'Voir les charges';
+
+  @override
+  String get facturationSearchTitle => 'Rechercher les élèves';
+
+  @override
+  String get facturationSearchHint => 'Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.';
+
+  @override
+  String get facturationSearchInvitationTitle => 'Lancez une recherche de facturation';
+
+  @override
+  String get facturationSearchInvitationMessage => 'Sélectionnez un niveau ou renseignez le nom d\'un élève puis cliquez sur Rechercher pour afficher les dossiers.';
+
+  @override
+  String get facturationViewChargesLabel => 'Voir les charges';
+
+  @override
+  String get facturationActionsColumnLabel => 'Actions';
+
+  @override
+  String get facturationNoResultsDescription => 'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override
