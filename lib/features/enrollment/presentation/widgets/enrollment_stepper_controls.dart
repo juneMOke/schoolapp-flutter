@@ -66,19 +66,22 @@ class EnrollmentStepperControls extends StatelessWidget {
           ),
           const SizedBox(width: 10),
         ],
-        ElevatedButton.icon(
-          onPressed: canContinue ? onContinue : null,
-          icon: Icon(
-            isLast ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
-            size: 16,
+        // Au dernier step, le bouton "Valider l'inscription" (Save) remplace
+        // le bouton "Terminer" — on ne l'affiche donc pas en doublon.
+        if (!(isLast && showSaveAction))
+          ElevatedButton.icon(
+            onPressed: canContinue ? onContinue : null,
+            icon: Icon(
+              isLast ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
+              size: 16,
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            ),
+            label: Text(isLast ? l10n.finish : l10n.next),
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          ),
-          label: Text(isLast ? l10n.finish : l10n.next),
-        ),
       ],
     );
   }

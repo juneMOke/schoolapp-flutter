@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_wide_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -10,11 +11,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SearchForm extends StatefulWidget {
   final String academicYearId;
   final String status;
+  final bool showStatusFilter;
+  final ValueChanged<String>? onStatusChanged;
 
   const SearchForm({
     super.key,
     required this.academicYearId,
     required this.status,
+    this.showStatusFilter = false,
+    this.onStatusChanged,
   });
 
   @override
@@ -57,6 +62,12 @@ class _SearchFormState extends State<SearchForm> {
           final columns = isMedium ? 3 : 1;
           final title = SearchFormTitle(label: l10n.searchStudents);
           final actions = _buildActionButtons(context, l10n);
+          final statusDropdown = widget.showStatusFilter
+              ? SearchFormStatusDropdown(
+                  selectedStatus: widget.status,
+                  onChanged: (value) => widget.onStatusChanged?.call(value),
+                )
+              : null;
 
           if (isWide) {
             return SearchFormWideLayout(
@@ -73,6 +84,7 @@ class _SearchFormState extends State<SearchForm> {
               onFieldChanged: (_) => _onFieldChanged(),
               onDateTap: () => _selectDate(context),
               actions: actions,
+              statusDropdown: statusDropdown,
             );
           }
 
@@ -96,6 +108,7 @@ class _SearchFormState extends State<SearchForm> {
             onFieldChanged: (_) => _onFieldChanged(),
             onDateTap: () => _selectDate(context),
             actions: actions,
+            statusDropdown: statusDropdown,
           );
         },
       ),
@@ -195,6 +208,7 @@ class _SearchFormState extends State<SearchForm> {
           dateOfBirth: _dateOfBirthController.text.trim(),
           status: widget.status,
           academicYearId: widget.academicYearId,
+          page: 0,
         ),
       );
       return;
@@ -209,6 +223,7 @@ class _SearchFormState extends State<SearchForm> {
           surname: _surnameController.text.trim(),
           status: widget.status,
           academicYearId: widget.academicYearId,
+          page: 0,
         ),
       );
       return;
@@ -220,6 +235,7 @@ class _SearchFormState extends State<SearchForm> {
         dateOfBirth: _dateOfBirthController.text.trim(),
         status: widget.status,
         academicYearId: widget.academicYearId,
+        page: 0,
       ),
     );
   }
@@ -255,6 +271,7 @@ class _SearchFormState extends State<SearchForm> {
       EnrollmentSummariesRequested(
         status: widget.status,
         academicYearId: widget.academicYearId,
+        page: 0,
       ),
     );
   }

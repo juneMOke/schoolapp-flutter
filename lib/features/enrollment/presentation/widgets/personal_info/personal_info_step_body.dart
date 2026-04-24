@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_avatar.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
@@ -17,9 +18,11 @@ class PersonalInfoStepBody extends StatelessWidget {
   final TextEditingController lastNameController;
   final TextEditingController surnameController;
   final TextEditingController birthPlaceController;
-  final TextEditingController nationalityController;
+  final String selectedNationality;
+  final List<String> nationalityOptions;
   final Gender selectedGender;
   final DateTime? selectedDate;
+  final ValueChanged<String?> onNationalityChanged;
   final ValueChanged<Gender?> onGenderChanged;
   final VoidCallback onPickDate;
   final void Function(BuildContext) onSave;
@@ -45,9 +48,11 @@ class PersonalInfoStepBody extends StatelessWidget {
     required this.lastNameController,
     required this.surnameController,
     required this.birthPlaceController,
-    required this.nationalityController,
+    required this.selectedNationality,
+    required this.nationalityOptions,
     required this.selectedGender,
     required this.selectedDate,
+    required this.onNationalityChanged,
     required this.onGenderChanged,
     required this.onPickDate,
     required this.onSave,
@@ -187,14 +192,16 @@ class PersonalInfoStepBody extends StatelessWidget {
                         errorText: birthPlaceError,
                         readOnly: !isEditable,
                       ),
-                      EditableField(
+                      NationalityDropdownField(
                         width: fieldWidth,
                         label: l10n.nationality,
-                        controller: nationalityController,
+                        value: selectedNationality,
+                        options: nationalityOptions,
+                        onChanged: onNationalityChanged,
                         requiredField: true,
                         helpMessage: l10n.nationalityHelp,
                         errorText: nationalityError,
-                        readOnly: !isEditable,
+                        enabled: isEditable,
                       ),
                       GenderSegmentedField(
                         width: fieldWidth,

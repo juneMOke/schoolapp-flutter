@@ -13,6 +13,7 @@ class UpdateStudentAddressUseCase {
     required String city,
     required String district,
     required String municipality,
+    required String neighborhood,
     required String address,
   }) {
     return _repository.updateStudentAddress(
@@ -20,6 +21,7 @@ class UpdateStudentAddressUseCase {
       city: city,
       district: district,
       municipality: municipality,
+      neighborhood: neighborhood,
       address: address,
     );
   }

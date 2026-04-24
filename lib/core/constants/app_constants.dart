@@ -8,6 +8,10 @@ class AppConstants {
   static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
 
   static const String enrollmentEndpoint = '/api/v1/enrollments';
+  static const String enrollmentStudentSummaryEndpoint =
+      '/api/v1/enrollments/student-summary';
+  static const String enrollmentStatusUpdateEndpoint =
+      '/api/v1/enrollments/{enrollmentId}/status';
 
   static const String studentPersonalInfoEndpoint =
       '/api/v1/students/{studentId}/personal-info';
@@ -19,6 +23,9 @@ class AppConstants {
       '/api/v1/students/{studentId}/academic-info';
 
   static const String parentUpdateEndpoint = '/api/v1/parents/{parentId}';
+  static const String parentCreateEndpoint = '/api/v1/parents';
+  static const String parentUnlinkEndpoint =
+      '/api/v1/parents/students/{studentId}/{parentId}';
 
   static const String enrollmentAcademicInfoEndpoint =
       '/api/v1/enrollments/{enrollmentId}/previous-school-info';
@@ -47,6 +54,12 @@ class AppConstants {
       '/api/v1/bootstrap/current-year';
   static const String bootstrapPreviousYearEndpoint =
       '/api/v1/bootstrap/previous-year';
+  static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
+  static const String initializeStudentChargesEndpoint =
+      '/api/v1/finance/student-charges/{studentId}/initialize-charges';
+  static const String updateStudentChargeExpectedAmountEndpoint =
+      '/api/v1/finance/student-charges/{studentChargeId}';
+
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =
       'bootstrap_local_schema_version';
@@ -63,6 +76,10 @@ class AppConstants {
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
 
-  static String bootstrapPreviousYearPayloadKey =
+  static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
+
+  // ─── Pagination ────────────────────────────────────────────────────────────
+  /// Taille de page par défaut pour les listes d'enrollments.
+  static const int enrollmentDefaultPageSize = 10;
 }

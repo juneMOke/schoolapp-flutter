@@ -76,6 +76,8 @@
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
   "reRegistrationSearchNeedCriteria": "Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.",
   "reRegistrationSearchReady": "Critères valides, vous pouvez lancer la recherche.",
+  "reRegistrationSearchInvitationTitle": "Lancez une recherche de re-inscription",
+  "reRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.",
   "firstName": "Prénom",
   "lastName": "Nom",
   "surname": "Post-nom",
@@ -86,11 +88,37 @@
   "editEnrollment": "Modifier",
   "exportData": "Exporter",
   "noResultsFound": "Aucun résultat trouvé",
+  "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
   "loadingStudents": "Chargement des étudiants...",
+  "enrollmentResultsCount": "{count, plural, =0{0 résultat} =1{1 résultat} other{{count} résultats}}",
+  "@enrollmentResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{résultat} other{résultats}} sur {totalCount}",
+  "@enrollmentPageFooter": {
+    "placeholders": {
+      "pageCount": { "type": "int" },
+      "totalCount": { "type": "int" }
+    }
+  },
+  "enrollmentPageIndicator": "Page {current} / {total}",
+  "@enrollmentPageIndicator": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "refresh": "Actualiser",
   "statusPending": "En Attente",
   "statusValidated": "Validé",
   "statusRejected": "Rejeté",
   "enrollmentCode": "Code d'Inscription",
+  "enrollmentDetailTitle": "Dossier d'inscription",
+  "enrollmentUnknownStudent": "Élève non renseigné",
   "gender": "Genre",
   "actions": "Actions",
   "personalInformation": "Informations Personnelles",
@@ -98,10 +126,26 @@
   "previousYear": "Année Précédente",
   "targetYear": "Année Cible",
   "guardianInformation": "Informations Tuteurs",
+  "guardianAddAction": "Ajouter un tuteur/responsable",
+  "guardianSaveAction": "Enregistrer",
+  "guardianRelationshipLabel": "Relation",
+  "guardianDeleteAction": "Supprimer ce tuteur",
+  "guardianDeleteConfirmTitle": "Confirmer la suppression",
+  "guardianDeleteConfirmMessage": "Voulez-vous vraiment supprimer ce tuteur ? Cette action est irréversible.",
+  "guardianDeleteConfirmAction": "Supprimer",
+  "guardianUnlinkSuccess": "Tuteur supprimé avec succès.",
+  "guardianUnlinkError": "Erreur lors de la suppression du tuteur : {message}",
+  "@guardianUnlinkError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "next": "Continuer",
   "previous": "Précédent",
+  "nextPage": "Page suivante",
+  "previousPage": "Page précédente",
   "finish": "Terminer",
 
   "personalInfoSubtitle": "Informations personnelles modifiables",
@@ -137,6 +181,9 @@
   "municipalityHelp": "Commune de résidence de l'élève.",
   "neighborhood": "Quartier",
   "neighborhoodHelp": "Quartier ou avenue de résidence.",
+  "addressComplementary": "Adresse complémentaire",
+  "addressComplementaryHelp": "Précisez rue, avenue et numéro si nécessaire.",
+  "addressComplementaryPlaceholder": "Ex: 10, Avenue La source",
   "fullAddress": "Adresse complète",
   "fullAddressHelp": "Adresse complète de résidence.",
 
@@ -178,7 +225,6 @@
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
   "emailLabel": "Email",
   "emailLabelHelp": "Adresse email du tuteur.",
-  "relationshipLabel": "Relation",
   "relationshipFather": "Père",
   "relationshipMother": "Mère",
   "relationshipGuardian": "Tuteur",
@@ -206,7 +252,18 @@
   "validateAddressHint": "Veuillez compléter l'adresse de l'élève.",
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
   "validateGuardianInfoHint": "Veuillez vérifier les informations du/des tuteur(s).",
-  "enrollmentReadyForValidation": "Dossier prêt pour validation finale.",
+  "enrollmentReadyForValidation": "Dossier prt pour validation finale.",
+  "completedEnrollmentRedirecting": "Ce dossier est deja complete. Redirection vers Premiere Inscription.",
+  "validateEnrollment": "Valider l'inscription",
+  "validatingEnrollment": "Validation en cours...",
+  "goToFirstRegistration": "Retourner a la premiere inscription",
+  "enrollmentStatusUpdateSuccess": "Statut mis à jour avec succès.",
+  "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
+  "@enrollmentStatusUpdateError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
   "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
   "requiredFieldError": "Le champ {field} est requis.",
@@ -231,8 +288,10 @@
   "personalInfoSaveError": "Erreur lors de la mise à jour : {message}",
   "saveAddress": "Enregistrer l'adresse",
   "savingAddress": "Enregistrement de l'adresse...",
-  "saveAcademicInfo": "Enregistrer les infos académiques",
+  "saveAcademicInfo": "Enregistrer les infos acadmiques",
   "savingAcademicInfo": "Enregistrement en cours...",
+  "saveGuardianInfo": "Enregistrer le tuteur",
+  "savingGuardianInfo": "Enregistrement du tuteur...",
   "academicInfoValidationReasonsTitle": "Veuillez corriger les champs académiques suivants :",
   "academicInfoSaveHintBeforeContinue": "Veuillez enregistrer les modifications académiques avant de continuer.",
   "academicInfoSaveSuccess": "Informations académiques mises à jour avec succès.",
@@ -245,6 +304,13 @@
     }
   },
   "addressValidationReasonsTitle": "Veuillez corriger les informations d'adresse suivantes :",
+  "addressNoCityAvailable": "Aucune ville disponible dans le catalogue.",
+  "addressSelectCityFirst": "Sélectionnez d'abord une ville.",
+  "addressNoDistrictAvailable": "Aucun district disponible pour cette ville.",
+  "addressSelectDistrictFirst": "Sélectionnez d'abord un district.",
+  "addressNoMunicipalityAvailable": "Aucune commune disponible pour ce district.",
+  "addressSelectMunicipalityFirst": "Sélectionnez d'abord une commune.",
+  "addressNoNeighborhoodAvailable": "Aucun quartier disponible pour cette commune.",
   "addressSaveHintBeforeContinue": "Veuillez enregistrer les modifications d'adresse avant de continuer.",
   "addressSaveSuccess": "Adresse mise à jour avec succès.",
   "addressSaveError": "Erreur lors de la mise à jour de l'adresse : {message}",
@@ -260,6 +326,44 @@
       "message": { "type": "String" }
     }
   },
+  "enrollmentStatusFilterLabel": "Statut",
+  "enrollmentStatusInProgress": "En cours",
+  "enrollmentStatusAdminCompleted": "Complété (Administratif)",
+  "enrollmentStatusFinancialCompleted": "Complété (Financier)",
+  "enrollmentStatusCompleted": "Complété",
+  "enrollmentStatusValidated": "Validé",
+  "enrollmentStatusRejected": "Rejeté",
+  "enrollmentStatusCancelled": "Annulé",
+  "enrollmentReadOnlyTitle": "Mode consultation",
+  "enrollmentReadOnlyMessage": "Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.",
+  "enrollmentEditableTitle": "Mode édition",
+  "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
+
+  "studentChargesStepTitle": "Charges de l'élève",
+  "studentChargesStepSubtitle": "Montants financiers appliqués à l'élève",
+  "studentChargesLoading": "Chargement des charges de l'élève...",
+  "studentChargesRetry": "Réessayer",
+  "studentChargesEmpty": "Aucune charge disponible pour cet élève.",
+  "studentChargesUnavailable": "Impossible de charger les charges sans élève ou niveau cible.",
+  "studentChargesAmountColumn": "Montant",
+  "studentChargesAmountPaidLabel": "Montant payé",
+  "studentChargesSaveAction": "Enregistrer les charges",
+  "studentChargesSavingAction": "Enregistrement des charges...",
+  "studentChargesSaveSuccess": "Charges enregistrées avec succès.",
+  "studentChargesSaveHintBeforeContinue": "Veuillez enregistrer les modifications des charges avant de continuer.",
+  "studentChargesNetworkError": "Impossible de charger les charges. Vérifiez votre connexion internet.",
+  "studentChargesNotFound": "Aucune charge trouvée pour cet élève.",
+  "studentChargesValidationError": "Les informations de charges demandées sont invalides.",
+  "studentChargesUnauthorizedError": "Vous n'êtes pas autorisé à consulter ces charges.",
+  "studentChargesInvalidCredentialsError": "Vos identifiants ne permettent pas d'accéder aux charges.",
+  "studentChargesServerError": "Le serveur est indisponible pour le moment.",
+  "studentChargesStorageError": "Une erreur locale empêche l'affichage des charges.",
+  "studentChargesAuthError": "Une erreur d'authentification empêche le chargement des charges.",
+  "studentChargesUnknownError": "Une erreur inattendue est survenue lors du chargement des charges.",
+  "studentChargeStatusDue": "Dû",
+  "studentChargeStatusPartial": "Partiel",
+  "studentChargeStatusPaid": "Payé",
+
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
   "signOutAction": "Se déconnecter"

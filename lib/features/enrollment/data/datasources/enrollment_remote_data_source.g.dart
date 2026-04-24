@@ -20,21 +20,89 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryModel> createEnrollment(
+    Map<String, dynamic> extras,
+    CreateEnrollmentRequestModel request,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<EnrollmentSummaryModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments/student-summary',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryModel _value;
+    try {
+      _value = EnrollmentSummaryModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<EnrollmentSummaryModel> updateEnrollmentStatus(
+    Map<String, dynamic> extras,
+    String enrollmentId,
+    String status,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{r'status': status};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<EnrollmentSummaryModel>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/enrollments/${enrollmentId}/status',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryModel _value;
+    try {
+      _value = EnrollmentSummaryModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<EnrollmentSummaryPageModel>
   getEnrollmentSummaryByStatusAndAcademicYear(
     Map<String, dynamic> extras,
     String status,
     String academicYearId,
+    int page,
+    int size,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
       r'status': status,
       r'academicYearId': academicYearId,
+      r'page': page,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+    final _options = _setStreamType<EnrollmentSummaryPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -44,15 +112,10 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<EnrollmentSummaryModel> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryPageModel _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = EnrollmentSummaryPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -61,7 +124,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentName(
     Map<String, dynamic> extras,
     String status,
@@ -69,6 +132,8 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
     String firstName,
     String lastName,
     String surname,
+    int page,
+    int size,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
@@ -78,10 +143,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       r'firstName': firstName,
       r'lastName': lastName,
       r'surname': surname,
+      r'page': page,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+    final _options = _setStreamType<EnrollmentSummaryPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -91,15 +158,10 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<EnrollmentSummaryModel> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryPageModel _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = EnrollmentSummaryPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -108,7 +170,7 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirth(
     Map<String, dynamic> extras,
     String status,
@@ -117,6 +179,8 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
     String lastName,
     String surname,
     String dateOfBirth,
+    int page,
+    int size,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
@@ -127,10 +191,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       r'lastName': lastName,
       r'surname': surname,
       r'dateOfBirth': dateOfBirth,
+      r'page': page,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+    final _options = _setStreamType<EnrollmentSummaryPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -140,15 +206,10 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<EnrollmentSummaryModel> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryPageModel _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = EnrollmentSummaryPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -157,12 +218,14 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<EnrollmentSummaryModel>>
+  Future<EnrollmentSummaryPageModel>
   searchEnrollmentSummaryByStatusAndAcademicYearAndDateOfBirth(
     Map<String, dynamic> extras,
     String status,
     String academicYearId,
     String dateOfBirth,
+    int page,
+    int size,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
@@ -170,10 +233,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       r'status': status,
       r'academicYearId': academicYearId,
       r'dateOfBirth': dateOfBirth,
+      r'page': page,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+    final _options = _setStreamType<EnrollmentSummaryPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -183,15 +248,10 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<EnrollmentSummaryModel> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryPageModel _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = EnrollmentSummaryPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -200,13 +260,15 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<EnrollmentSummaryModel>> searchEnrollmentSummaryByAcademicInfo(
+  Future<EnrollmentSummaryPageModel> searchEnrollmentSummaryByAcademicInfo(
     Map<String, dynamic> extras,
     String firstName,
     String lastName,
     String surname,
     String schoolLevelGroupId,
     String schoolLevelId,
+    int page,
+    int size,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
@@ -216,10 +278,12 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
       r'surname': surname,
       r'schoolLevelGroupId': schoolLevelGroupId,
       r'schoolLevelId': schoolLevelId,
+      r'page': page,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<EnrollmentSummaryModel>>(
+    final _options = _setStreamType<EnrollmentSummaryPageModel>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -229,15 +293,10 @@ class _EnrollmentRemoteDataSource implements EnrollmentRemoteDataSource {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<EnrollmentSummaryModel> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late EnrollmentSummaryPageModel _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                EnrollmentSummaryModel.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = EnrollmentSummaryPageModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -11,13 +12,38 @@ import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dar
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String? initialSubMenuId;
+
+  const HomePage({super.key, this.initialSubMenuId});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (context) => NavigationBloc(l10n),
+      create: (context) {
+        final bloc = NavigationBloc(l10n);
+        final initialSubMenuId = this.initialSubMenuId?.trim();
+        if (initialSubMenuId == null || initialSubMenuId.isEmpty) {
+          return bloc;
+        }
+
+        for (final menu in bloc.state.menuItems) {
+          for (final subMenu in menu.subMenus) {
+            if (subMenu.id == initialSubMenuId) {
+              bloc.add(
+                SubMenuItemSelected(
+                  menuId: menu.id,
+                  subMenuId: subMenu.id,
+                  title: subMenu.title,
+                ),
+              );
+              return bloc;
+            }
+          }
+        }
+
+        return bloc;
+      },
       child: const _HomePageView(),
     );
   }
@@ -78,7 +104,8 @@ class _HomePageView extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, NavigationState state) {
     final hideBreadcrumbForEnrollment =
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
-        state.selectedSubMenuId == MenuConstants.reInscriptionsId;
+        state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
+        state.selectedSubMenuId == MenuConstants.premiereInscriptionId;
 
     return Container(
       width: double.infinity,
@@ -152,6 +179,8 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentFeatureScope(child: PreRegistrationsPage());
       case MenuConstants.reInscriptionsId:
         return const EnrollmentFeatureScope(child: ReRegistrationsPage());
+      case MenuConstants.premiereInscriptionId:
+        return const EnrollmentFeatureScope(child: FirstRegistrationPage());
       default:
         return Container(
           width: double.infinity,

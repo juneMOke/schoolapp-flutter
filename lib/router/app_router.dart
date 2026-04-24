@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
@@ -146,7 +147,9 @@ class AppRouter {
         GoRoute(
           path: '/home',
           name: AppRoutesNames.home,
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => HomePage(
+            initialSubMenuId: state.uri.queryParameters['subMenuId'],
+          ),
         ),
         ShellRoute(
           builder: (context, state, child) {
@@ -156,6 +159,10 @@ class AppRouter {
             GoRoute(
               path: AppRoutesNames.preInscriptions,
               builder: (context, state) => const PreRegistrationsPage(),
+            ),
+            GoRoute(
+              path: AppRoutesNames.premiereInscription,
+              builder: (context, state) => const FirstRegistrationPage(),
             ),
             GoRoute(
               path:

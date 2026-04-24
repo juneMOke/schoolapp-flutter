@@ -2,80 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_color_extension.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_l10n_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-// ─── Couleurs & labels par statut ─────────────────────────────────────────────
-
-extension EnrollmentStatusColor on EnrollmentStatus {
-  Color get backgroundColor {
-    switch (this) {
-      case EnrollmentStatus.preRegistered:
-        return const Color(0xFFEFF6FF);
-      case EnrollmentStatus.inProgress:
-        return const Color(0xFFFFFBEB);
-      case EnrollmentStatus.adminCompleted:
-        return const Color(0xFFF5F3FF);
-      case EnrollmentStatus.financialCompleted:
-        return const Color(0xFFECFDF5);
-      case EnrollmentStatus.completed:
-        return const Color(0xFFD1FAE5);
-      case EnrollmentStatus.validated:
-        return const Color(0xFFDCFCE7);
-      case EnrollmentStatus.cancelled:
-        return const Color(0xFFFEF2F2);
-      case EnrollmentStatus.rejected:
-        return const Color(0xFFFFEDE8);
-      case EnrollmentStatus.pending:
-        return const Color(0xFFF3F4F6);
-    }
-  }
-
-  Color get foregroundColor {
-    switch (this) {
-      case EnrollmentStatus.preRegistered:
-        return const Color(0xFF1D4ED8);
-      case EnrollmentStatus.inProgress:
-        return const Color(0xFFB45309);
-      case EnrollmentStatus.adminCompleted:
-        return const Color(0xFF6D28D9);
-      case EnrollmentStatus.financialCompleted:
-        return const Color(0xFF0D9488);
-      case EnrollmentStatus.completed:
-        return const Color(0xFF059669);
-      case EnrollmentStatus.validated:
-        return const Color(0xFF16A34A);
-      case EnrollmentStatus.cancelled:
-        return const Color(0xFFDC2626);
-      case EnrollmentStatus.rejected:
-        return const Color(0xFFEA580C);
-      case EnrollmentStatus.pending:
-        return const Color(0xFF6B7280);
-    }
-  }
-
-  String get label {
-    switch (this) {
-      case EnrollmentStatus.preRegistered:
-        return 'Pré-inscrit';
-      case EnrollmentStatus.inProgress:
-        return 'En cours';
-      case EnrollmentStatus.adminCompleted:
-        return 'Admin complété';
-      case EnrollmentStatus.financialCompleted:
-        return 'Finance complétée';
-      case EnrollmentStatus.completed:
-        return 'Complété';
-      case EnrollmentStatus.validated:
-        return 'Validé';
-      case EnrollmentStatus.cancelled:
-        return 'Annulé';
-      case EnrollmentStatus.rejected:
-        return 'Rejeté';
-      case EnrollmentStatus.pending:
-        return 'En attente';
-    }
-  }
-}
 
 // ─── Colonnes triables ────────────────────────────────────────────────────────
 
@@ -86,6 +15,7 @@ enum _SortColumn { nom, postnom, prenom, dateNaissance }
 class EnrollmentDataTable extends StatefulWidget {
   final List<EnrollmentSummary> enrollments;
   final bool isLoading;
+  final int? totalCount;
   final ValueChanged<EnrollmentSummary> onViewRequested;
 
   const EnrollmentDataTable({
@@ -93,6 +23,7 @@ class EnrollmentDataTable extends StatefulWidget {
     required this.enrollments,
     required this.onViewRequested,
     this.isLoading = false,
+    this.totalCount,
   });
 
   @override
@@ -173,9 +104,12 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           ),
         ),
 
-        // ── Pied : compteur ──
+        // ── Pied : compteur page courante / total ──
         const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
-        _TableFooter(count: sorted.length),
+        _TableFooter(
+          pageCount: sorted.length,
+          totalCount: widget.totalCount,
+        ),
       ],
     );
   }
@@ -236,10 +170,10 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Aucun élève ne correspond à vos critères de recherche.',
+          Text(
+            l10n.enrollmentNoResultsDescription,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: AppTheme.textSecondaryColor,
               height: 1.5,
@@ -299,7 +233,7 @@ class _SortableHeader extends StatelessWidget {
           const SizedBox(width: 30),
           const SizedBox(width: 8),
           _SortCell(
-            'Nom',
+            l10n.lastName,
             _SortColumn.nom,
             flex: 3,
             sortColumn: sortColumn,
@@ -307,7 +241,7 @@ class _SortableHeader extends StatelessWidget {
             onSort: onSort,
           ),
           _SortCell(
-            'Postnom',
+            l10n.surname,
             _SortColumn.postnom,
             flex: 3,
             sortColumn: sortColumn,
@@ -315,7 +249,7 @@ class _SortableHeader extends StatelessWidget {
             onSort: onSort,
           ),
           _SortCell(
-            'Prénom',
+            l10n.firstName,
             _SortColumn.prenom,
             flex: 3,
             sortColumn: sortColumn,
@@ -330,7 +264,7 @@ class _SortableHeader extends StatelessWidget {
             ascending: ascending,
             onSort: onSort,
           ),
-          const Expanded(flex: 2, child: _HeaderLabel('Statut')),
+          Expanded(flex: 2, child: _HeaderLabel(l10n.enrollmentStatusFilterLabel)),
           const SizedBox(width: 32),
         ],
       ),
@@ -591,16 +525,18 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         constraints: const BoxConstraints(maxWidth: 122),
         decoration: BoxDecoration(
-          color: status.backgroundColor,
+          color: status.tableBackgroundColor,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: status.foregroundColor.withValues(alpha: 0.25),
+            color: status.tableForegroundColor.withValues(alpha: 0.25),
           ),
         ),
         child: Row(
@@ -610,11 +546,11 @@ class _StatusChip extends StatelessWidget {
               width: 6,
               height: 6,
               decoration: BoxDecoration(
-                color: status.foregroundColor,
+                color: status.tableForegroundColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: status.foregroundColor.withValues(alpha: 0.4),
+                    color: status.tableForegroundColor.withValues(alpha: 0.4),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -624,12 +560,12 @@ class _StatusChip extends StatelessWidget {
             const SizedBox(width: 5),
             Flexible(
               child: Text(
-                status.label,
+                status.localizedLabel(l10n),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: status.foregroundColor,
+                  color: status.tableForegroundColor,
                 ),
               ),
             ),
@@ -688,11 +624,18 @@ class _EyeButtonState extends State<_EyeButton> {
 // ─── Pied de tableau ──────────────────────────────────────────────────────────
 
 class _TableFooter extends StatelessWidget {
-  final int count;
-  const _TableFooter({required this.count});
+  final int pageCount;
+  final int? totalCount;
+  const _TableFooter({required this.pageCount, this.totalCount});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final total = totalCount;
+    final label = (total != null && total > pageCount)
+        ? l10n.enrollmentPageFooter(pageCount, total)
+        : l10n.enrollmentResultsCount(pageCount);
+
     return Container(
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -706,7 +649,7 @@ class _TableFooter extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '$count résultat${count > 1 ? 's' : ''}',
+              label,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

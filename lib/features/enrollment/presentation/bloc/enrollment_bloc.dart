@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:school_app_flutter/core/constants/app_constants.dart';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
@@ -11,16 +14,20 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 
 part 'enrollment_event.dart';
 part 'enrollment_state.dart';
 
 class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
+  static const int _defaultSummariesPageSize = AppConstants.enrollmentDefaultPageSize;
+
   final GetEnrollmentSummaryListByStatusUseCase
   _getEnrollmentSummaryListByStatusUseCase;
   final GetEnrollmentDetailUseCase _getEnrollmentDetailUseCase;
   final GetEnrollmentPreviewByStudentIdUseCase
   _getEnrollmentPreviewByStudentIdUseCase;
+  final CreateEnrollmentUseCase _createEnrollmentUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   _searchByStudentNameUseCase;
   final SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -29,6 +36,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
   _searchByDateOfBirthUseCase;
   final SearchEnrollmentSummaryByAcademicInfoUseCase
   _searchByAcademicInfoUseCase;
+  final UpdateEnrollmentStatusUseCase _updateEnrollmentStatusUseCase;
 
   EnrollmentBloc({
     required GetEnrollmentSummaryListByStatusUseCase
@@ -36,6 +44,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     required GetEnrollmentDetailUseCase getEnrollmentDetailUseCase,
     required GetEnrollmentPreviewByStudentIdUseCase
     getEnrollmentPreviewByStudentIdUseCase,
+    required CreateEnrollmentUseCase createEnrollmentUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
     searchByStudentNameUseCase,
     required SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNamesAndDateOfBirthUseCase
@@ -44,15 +53,18 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     searchByDateOfBirthUseCase,
     required SearchEnrollmentSummaryByAcademicInfoUseCase
     searchByAcademicInfoUseCase,
+    required UpdateEnrollmentStatusUseCase updateEnrollmentStatusUseCase,
   }) : _getEnrollmentSummaryListByStatusUseCase = getEnrollmentSummariesUseCase,
        _getEnrollmentDetailUseCase = getEnrollmentDetailUseCase,
        _getEnrollmentPreviewByStudentIdUseCase =
            getEnrollmentPreviewByStudentIdUseCase,
+       _createEnrollmentUseCase = createEnrollmentUseCase,
        _searchByStudentNameUseCase = searchByStudentNameUseCase,
        _searchByStudentNamesAndDateOfBirthUseCase =
            searchByStudentNamesAndDateOfBirthUseCase,
        _searchByDateOfBirthUseCase = searchByDateOfBirthUseCase,
        _searchByAcademicInfoUseCase = searchByAcademicInfoUseCase,
+       _updateEnrollmentStatusUseCase = updateEnrollmentStatusUseCase,
        super(const EnrollmentState.initial()) {
     on<EnrollmentResetRequested>(_onResetRequested);
     on<EnrollmentSummariesRefreshRequested>(_onSummariesRefreshRequested);
@@ -69,7 +81,13 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     on<EnrollmentSummariesByAcademicInfoRequested>(
       _onSummariesByAcademicInfoRequested,
     );
+    on<EnrollmentSummariesPageRequested>(_onSummariesPageRequested);
     on<EnrollmentDetailRequested>(_onDetailRequested);
+    on<EnrollmentNewDetailInitialized>(_onNewDetailInitialized);
+    on<EnrollmentCreateRequested>(_onCreateRequested);
+    on<EnrollmentCreateResultConsumed>(_onCreateResultConsumed);
+    on<EnrollmentStatusUpdateRequested>(_onStatusUpdateRequested);
+    on<EnrollmentStatusUpdateResultConsumed>(_onStatusUpdateResultConsumed);
     on<EnrollmentPreviewByStudentIdRequested>(_onPreviewByStudentIdRequested);
   }
 
@@ -90,6 +108,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         type: EnrollmentSummaryQueryType.byStatus,
         status: event.status,
         academicYearId: event.academicYearId,
+        page: event.page,
+        size: event.size,
       ),
     );
   }
@@ -104,6 +124,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         type: EnrollmentSummaryQueryType.byStudentName,
         status: event.status,
         academicYearId: event.academicYearId,
+        page: event.page,
+        size: event.size,
         firstName: event.firstName,
         lastName: event.lastName,
         surname: event.surname,
@@ -121,6 +143,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         type: EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth,
         status: event.status,
         academicYearId: event.academicYearId,
+        page: event.page,
+        size: event.size,
         firstName: event.firstName,
         lastName: event.lastName,
         surname: event.surname,
@@ -139,6 +163,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         type: EnrollmentSummaryQueryType.byDateOfBirth,
         status: event.status,
         academicYearId: event.academicYearId,
+        page: event.page,
+        size: event.size,
         dateOfBirth: event.dateOfBirth,
       ),
     );
@@ -154,6 +180,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         type: EnrollmentSummaryQueryType.byAcademicInfo,
         status: '',
         academicYearId: '',
+        page: event.page,
+        size: event.size,
         firstName: event.firstName,
         lastName: event.lastName,
         surname: event.surname,
@@ -175,6 +203,37 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     await _loadSummariesForQuery(emit, lastSummariesQuery);
   }
 
+  Future<void> _onSummariesPageRequested(
+    EnrollmentSummariesPageRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    final lastSummariesQuery = state.lastSummariesQuery;
+    if (lastSummariesQuery == null) {
+      return;
+    }
+
+    final totalPages = state.summariesTotalPages;
+    final maxPage = totalPages > 0 ? totalPages - 1 : event.page;
+    final nextPage = event.page.clamp(0, maxPage);
+
+    await _loadSummariesForQuery(
+      emit,
+      EnrollmentSummariesQuery(
+        type: lastSummariesQuery.type,
+        status: lastSummariesQuery.status,
+        academicYearId: lastSummariesQuery.academicYearId,
+        page: nextPage,
+        size: lastSummariesQuery.size,
+        firstName: lastSummariesQuery.firstName,
+        lastName: lastSummariesQuery.lastName,
+        surname: lastSummariesQuery.surname,
+        dateOfBirth: lastSummariesQuery.dateOfBirth,
+        schoolLevelGroupId: lastSummariesQuery.schoolLevelGroupId,
+        schoolLevelId: lastSummariesQuery.schoolLevelId,
+      ),
+    );
+  }
+
   Future<void> _loadSummariesForQuery(
     Emitter<EnrollmentState> emit,
     EnrollmentSummariesQuery query,
@@ -193,6 +252,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         _getEnrollmentSummaryListByStatusUseCase(
           status: query.status,
           academicYearId: query.academicYearId,
+          page: query.page,
+          size: query.size,
         ),
       EnrollmentSummaryQueryType.byStudentName => _searchByStudentNameUseCase(
         status: query.status,
@@ -200,6 +261,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         firstName: query.firstName ?? '',
         lastName: query.lastName ?? '',
         surname: query.surname ?? '',
+        page: query.page,
+        size: query.size,
       ),
       EnrollmentSummaryQueryType.byStudentNamesAndDateOfBirth =>
         _searchByStudentNamesAndDateOfBirthUseCase(
@@ -209,11 +272,15 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           lastName: query.lastName ?? '',
           surname: query.surname ?? '',
           dateOfBirth: query.dateOfBirth ?? '',
+          page: query.page,
+          size: query.size,
         ),
       EnrollmentSummaryQueryType.byDateOfBirth => _searchByDateOfBirthUseCase(
         status: query.status,
         academicYearId: query.academicYearId,
         dateOfBirth: query.dateOfBirth ?? '',
+        page: query.page,
+        size: query.size,
       ),
       EnrollmentSummaryQueryType.byAcademicInfo => _searchByAcademicInfoUseCase(
         firstName: query.firstName ?? '',
@@ -221,6 +288,8 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         surname: query.surname ?? '',
         schoolLevelGroupId: query.schoolLevelGroupId ?? '',
         schoolLevelId: query.schoolLevelId ?? '',
+        page: query.page,
+        size: query.size,
       ),
     };
 
@@ -231,10 +300,18 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           errorMessage: failure.message,
         ),
       ),
-      (summaries) => emit(
+      (summaryPage) => emit(
         state.copyWith(
           summariesStatus: EnrollmentLoadStatus.success,
-          summaries: summaries,
+          summaries: summaryPage.content,
+          // Utilise la page demandée (query.page) plutôt que celle renvoyée
+          // par le backend, qui peut être incohérente selon les implémentations.
+          summariesPage: query.page,
+          summariesSize: summaryPage.size > 0
+              ? summaryPage.size
+              : _defaultSummariesPageSize,
+          summariesTotalElements: summaryPage.totalElements,
+          summariesTotalPages: summaryPage.totalPages,
           errorMessage: null,
         ),
       ),
@@ -277,6 +354,19 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
     );
   }
 
+  Future<void> _onNewDetailInitialized(
+    EnrollmentNewDetailInitialized event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        detailStatus: EnrollmentLoadStatus.success,
+        detail: EnrollmentDetail.empty(),
+        errorMessage: null,
+      ),
+    );
+  }
+
   Future<void> _onPreviewByStudentIdRequested(
     EnrollmentPreviewByStudentIdRequested event,
     Emitter<EnrollmentState> emit,
@@ -307,6 +397,117 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
           preview: preview,
           errorMessage: null,
         ),
+      ),
+    );
+  }
+
+  Future<void> _onCreateRequested(
+    EnrollmentCreateRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        createStatus: EnrollmentLoadStatus.loading,
+        createdEnrollmentSummary: null,
+        errorMessage: null,
+      ),
+    );
+
+    final result = await _createEnrollmentUseCase(
+      firstName: event.firstName,
+      lastName: event.lastName,
+      surname: event.surname,
+      dateOfBirth: event.dateOfBirth,
+      birthPlace: event.birthPlace,
+      nationality: event.nationality,
+      gender: event.gender,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          createStatus: EnrollmentLoadStatus.failure,
+          createdEnrollmentSummary: null,
+          errorMessage: failure.message,
+        ),
+      ),
+      (createdEnrollmentSummary) => emit(
+        state.copyWith(
+          createStatus: EnrollmentLoadStatus.success,
+          createdEnrollmentSummary: createdEnrollmentSummary,
+          errorMessage: null,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onStatusUpdateRequested(
+    EnrollmentStatusUpdateRequested event,
+    Emitter<EnrollmentState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        statusUpdateStatus: EnrollmentLoadStatus.loading,
+        updatedEnrollmentSummary: null,
+        errorMessage: null,
+      ),
+    );
+
+    final result = await _updateEnrollmentStatusUseCase(
+      enrollmentId: event.enrollmentId,
+      status: event.status,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          statusUpdateStatus: EnrollmentLoadStatus.failure,
+          updatedEnrollmentSummary: null,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedEnrollmentSummary) {
+        final updatedSummaries = state.summaries
+            .map(
+              (summary) =>
+                  summary.enrollmentId == updatedEnrollmentSummary.enrollmentId
+                  ? updatedEnrollmentSummary
+                  : summary,
+            )
+            .toList(growable: false);
+
+        emit(
+          state.copyWith(
+            statusUpdateStatus: EnrollmentLoadStatus.success,
+            updatedEnrollmentSummary: updatedEnrollmentSummary,
+            summaries: updatedSummaries,
+            errorMessage: null,
+          ),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _onCreateResultConsumed(
+    EnrollmentCreateResultConsumed event,
+    Emitter<EnrollmentState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        createStatus: EnrollmentLoadStatus.initial,
+        createdEnrollmentSummary: null,
+      ),
+    );
+  }
+
+  FutureOr<void> _onStatusUpdateResultConsumed(
+    EnrollmentStatusUpdateResultConsumed event,
+    Emitter<EnrollmentState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        statusUpdateStatus: EnrollmentLoadStatus.initial,
+        updatedEnrollmentSummary: null,
       ),
     );
   }

@@ -1,34 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AddressFormContent extends StatelessWidget {
-  final TextEditingController cityController;
-  final TextEditingController districtController;
-  final TextEditingController municipalityController;
-  final TextEditingController addressController;
+  final String? cityValue;
+  final String? districtValue;
+  final String? municipalityValue;
+  final String? neighborhoodValue;
+  final List<String> cityOptions;
+  final List<String> districtOptions;
+  final List<String> municipalityOptions;
+  final List<String> neighborhoodOptions;
+  final ValueChanged<String?> onCityChanged;
+  final ValueChanged<String?> onDistrictChanged;
+  final ValueChanged<String?> onMunicipalityChanged;
+  final ValueChanged<String?> onNeighborhoodChanged;
   final String? cityErrorText;
   final String? districtErrorText;
   final String? municipalityErrorText;
   final String? addressErrorText;
+  final TextEditingController additionalAddressController;
   final bool showInlineSaveButton;
   final bool isLoading;
+  final bool isCatalogLoading;
   final bool canSave;
   final VoidCallback onSave;
   final bool isEditable;
 
   const AddressFormContent({
     super.key,
-    required this.cityController,
-    required this.districtController,
-    required this.municipalityController,
-    required this.addressController,
+    required this.cityValue,
+    required this.districtValue,
+    required this.municipalityValue,
+    required this.neighborhoodValue,
+    required this.cityOptions,
+    required this.districtOptions,
+    required this.municipalityOptions,
+    required this.neighborhoodOptions,
+    required this.onCityChanged,
+    required this.onDistrictChanged,
+    required this.onMunicipalityChanged,
+    required this.onNeighborhoodChanged,
     required this.cityErrorText,
     required this.districtErrorText,
     required this.municipalityErrorText,
     required this.addressErrorText,
+    required this.additionalAddressController,
     required this.showInlineSaveButton,
     required this.isLoading,
+    required this.isCatalogLoading,
     required this.canSave,
     required this.onSave,
     this.isEditable = true,
@@ -37,6 +58,22 @@ class AddressFormContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final cityHint = cityOptions.isEmpty ? l10n.addressNoCityAvailable : null;
+    final districtHint = districtOptions.isEmpty
+        ? (cityValue == null
+              ? l10n.addressSelectCityFirst
+              : l10n.addressNoDistrictAvailable)
+        : null;
+    final municipalityHint = municipalityOptions.isEmpty
+        ? (districtValue == null
+              ? l10n.addressSelectDistrictFirst
+              : l10n.addressNoMunicipalityAvailable)
+        : null;
+    final neighborhoodHint = neighborhoodOptions.isEmpty
+        ? (municipalityValue == null
+              ? l10n.addressSelectMunicipalityFirst
+              : l10n.addressNoNeighborhoodAvailable)
+        : null;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -52,52 +89,77 @@ class AddressFormContent extends StatelessWidget {
               spacing: spacing,
               runSpacing: 14,
               children: [
-                EditableField(
+                AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.city,
-                  controller: cityController,
-                  requiredField: true,
                   helpMessage: l10n.cityHelp,
+                  options: cityOptions,
+                  value: cityValue,
                   errorText: cityErrorText,
-                  readOnly: !isEditable,
+                  requiredField: true,
+                  enabled: isEditable && !isCatalogLoading,
+                  icon: Icons.location_city_outlined,
+                  emptyOptionsHint: cityHint,
+                  onChanged: onCityChanged,
                 ),
-                EditableField(
+                AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.district,
-                  controller: districtController,
-                  requiredField: true,
                   helpMessage: l10n.districtHelp,
+                  options: districtOptions,
+                  value: districtValue,
                   errorText: districtErrorText,
-                  readOnly: !isEditable,
+                  requiredField: true,
+                  enabled: isEditable && !isCatalogLoading && cityValue != null,
+                  icon: Icons.map_outlined,
+                  emptyOptionsHint: districtHint,
+                  onChanged: onDistrictChanged,
                 ),
-                EditableField(
+                AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.municipality,
-                  controller: municipalityController,
-                  requiredField: true,
                   helpMessage: l10n.municipalityHelp,
+                  options: municipalityOptions,
+                  value: municipalityValue,
                   errorText: municipalityErrorText,
-                  readOnly: !isEditable,
+                  requiredField: true,
+                  enabled:
+                      isEditable && !isCatalogLoading && districtValue != null,
+                  icon: Icons.apartment_outlined,
+                  emptyOptionsHint: municipalityHint,
+                  onChanged: onMunicipalityChanged,
+                ),
+                AddressDropdownField(
+                  width: fieldWidth,
+                  label: l10n.neighborhood,
+                  helpMessage: l10n.neighborhoodHelp,
+                  options: neighborhoodOptions,
+                  value: neighborhoodValue,
+                  errorText: addressErrorText,
+                  requiredField: true,
+                  enabled:
+                      isEditable &&
+                      !isCatalogLoading &&
+                      municipalityValue != null,
+                  icon: Icons.home_work_outlined,
+                  emptyOptionsHint: neighborhoodHint,
+                  onChanged: onNeighborhoodChanged,
                 ),
               ],
             ),
+            if (isCatalogLoading) ...[
+              const SizedBox(height: 10),
+              const LinearProgressIndicator(minHeight: 2),
+            ],
             const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: EditableField(
-                width: constraints.maxWidth,
-                label: l10n.fullAddress,
-                controller: addressController,
-                requiredField: true,
-                helpMessage: l10n.fullAddressHelp,
-                errorText: addressErrorText,
-                readOnly: !isEditable,
-              ),
+            EditableField(
+              width: constraints.maxWidth,
+              label: l10n.addressComplementary,
+              controller: additionalAddressController,
+              requiredField: false,
+              helpMessage: l10n.addressComplementaryHelp,
+              hintText: l10n.addressComplementaryPlaceholder,
+              readOnly: !isEditable,
             ),
             if (showInlineSaveButton) ...[
               const SizedBox(height: 22),

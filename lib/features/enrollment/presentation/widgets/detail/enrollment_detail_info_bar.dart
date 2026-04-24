@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_l10n_extension.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailInfoBar extends StatelessWidget {
-  final String enrollmentCode;
+  final String studentDisplayName;
   final EnrollmentStatus status;
+  final bool isPreviousYearValidated;
 
   const EnrollmentDetailInfoBar({
     super.key,
-    required this.enrollmentCode,
+    required this.studentDisplayName,
     required this.status,
+    required this.isPreviousYearValidated,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -24,7 +30,9 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
             const Color(0xFF10B981).withValues(alpha: 0.12),
           ],
         ),
-        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.15)),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.15),
+        ),
       ),
       child: Row(
         children: [
@@ -43,15 +51,37 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              enrollmentCode,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimaryColor,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  studentDisplayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isPreviousYearValidated
+                      ? l10n.yearValidated
+                      : l10n.yearNotValidated,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
@@ -59,7 +89,7 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              _statusLabel(status),
+              status.localizedLabel(l10n),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -72,26 +102,4 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
     );
   }
 
-  String _statusLabel(EnrollmentStatus status) {
-    switch (status) {
-      case EnrollmentStatus.preRegistered:
-        return 'PRE_REGISTERED';
-      case EnrollmentStatus.inProgress:
-        return 'IN_PROGRESS';
-      case EnrollmentStatus.adminCompleted:
-        return 'ADMIN_COMPLETED';
-      case EnrollmentStatus.financialCompleted:
-        return 'FINANCIAL_COMPLETED';
-      case EnrollmentStatus.completed:
-        return 'COMPLETED';
-      case EnrollmentStatus.cancelled:
-        return 'CANCELLED';
-      case EnrollmentStatus.validated:
-        return 'VALIDATED';
-      case EnrollmentStatus.rejected:
-        return 'REJECTED';
-      case EnrollmentStatus.pending:
-        return 'PENDING';
-    }
-  }
 }

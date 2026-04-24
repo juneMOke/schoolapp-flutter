@@ -9,11 +9,21 @@ abstract class Failure extends Equatable {
 }
 
 class InvalidCredentialsFailure extends Failure {
-  const InvalidCredentialsFailure([super.message = 'Invalid email or password']);
+  const InvalidCredentialsFailure([
+    super.message = 'Invalid email or password',
+  ]);
 }
 
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure([super.message = 'Unauthorized']);
+}
+
+class NotFoundFailure extends Failure {
+  const NotFoundFailure([super.message = 'Resource not found']);
+}
+
+class ValidationFailure extends Failure {
+  const ValidationFailure([super.message = 'Invalid request data']);
 }
 
 class ServerFailure extends Failure {

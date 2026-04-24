@@ -21,58 +21,69 @@ class GuardianCardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final badgeText = isPrimary
+        ? l10n.primaryGuardian
+        : l10n.guardianNumber(number);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: isPrimary ? AppTheme.primaryColor : Colors.grey[600],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                isPrimary ? l10n.primaryGuardian : l10n.guardianNumber(number),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        CircleAvatar(
+          radius: 20,
+          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+          child: Text(
+            initials,
+            style: const TextStyle(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
-            const Spacer(),
-            RelationshipChip(relationshipType: parent.relationshipType),
-          ],
+          ),
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
-              child: Text(
-                initials,
-                style: const TextStyle(
-                  color: AppTheme.primaryColor,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isPrimary
+                          ? AppTheme.primaryColor
+                          : Colors.grey[600],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  RelationshipChip(relationshipType: parent.relationshipType),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${parent.firstName} ${parent.lastName}'.trim().isEmpty
+                    ? '—'
+                    : '${parent.firstName} ${parent.lastName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimaryColor,
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '${parent.firstName} ${parent.lastName}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

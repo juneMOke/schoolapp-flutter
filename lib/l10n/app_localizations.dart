@@ -425,6 +425,18 @@ abstract class AppLocalizations {
   /// **'Valid criteria, you can run the search.'**
   String get reRegistrationSearchReady;
 
+  /// No description provided for @reRegistrationSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a re-registration search'**
+  String get reRegistrationSearchInvitationTitle;
+
+  /// No description provided for @reRegistrationSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the form above then click Search to display enrollment files.'**
+  String get reRegistrationSearchInvitationMessage;
+
   /// No description provided for @firstName.
   ///
   /// In en, this message translates to:
@@ -485,11 +497,41 @@ abstract class AppLocalizations {
   /// **'No results found'**
   String get noResultsFound;
 
+  /// No description provided for @enrollmentNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches your search criteria.'**
+  String get enrollmentNoResultsDescription;
+
   /// No description provided for @loadingStudents.
   ///
   /// In en, this message translates to:
   /// **'Loading students...'**
   String get loadingStudents;
+
+  /// No description provided for @enrollmentResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
+  String enrollmentResultsCount(int count);
+
+  /// No description provided for @enrollmentPageFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}'**
+  String enrollmentPageFooter(int pageCount, int totalCount);
+
+  /// No description provided for @enrollmentPageIndicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} / {total}'**
+  String enrollmentPageIndicator(int current, int total);
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
 
   /// No description provided for @statusPending.
   ///
@@ -514,6 +556,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enrollment Code'**
   String get enrollmentCode;
+
+  /// No description provided for @enrollmentDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment file'**
+  String get enrollmentDetailTitle;
+
+  /// No description provided for @enrollmentUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not specified'**
+  String get enrollmentUnknownStudent;
 
   /// No description provided for @gender.
   ///
@@ -557,6 +611,60 @@ abstract class AppLocalizations {
   /// **'Guardian Information'**
   String get guardianInformation;
 
+  /// No description provided for @guardianAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add guardian/contact'**
+  String get guardianAddAction;
+
+  /// No description provided for @guardianSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get guardianSaveAction;
+
+  /// No description provided for @guardianRelationshipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get guardianRelationshipLabel;
+
+  /// No description provided for @guardianDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this guardian'**
+  String get guardianDeleteAction;
+
+  /// No description provided for @guardianDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm removal'**
+  String get guardianDeleteConfirmTitle;
+
+  /// No description provided for @guardianDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to remove this guardian? This action cannot be undone.'**
+  String get guardianDeleteConfirmMessage;
+
+  /// No description provided for @guardianDeleteConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get guardianDeleteConfirmAction;
+
+  /// No description provided for @guardianUnlinkSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian removed successfully.'**
+  String get guardianUnlinkSuccess;
+
+  /// No description provided for @guardianUnlinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove guardian: {message}'**
+  String guardianUnlinkError(String message);
+
   /// No description provided for @schoolFees.
   ///
   /// In en, this message translates to:
@@ -580,6 +688,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Previous'**
   String get previous;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get nextPage;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get previousPage;
 
   /// No description provided for @finish.
   ///
@@ -736,6 +856,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Neighborhood or street of residence.'**
   String get neighborhoodHelp;
+
+  /// No description provided for @addressComplementary.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional address'**
+  String get addressComplementary;
+
+  /// No description provided for @addressComplementaryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add street, avenue and number when needed.'**
+  String get addressComplementaryHelp;
+
+  /// No description provided for @addressComplementaryPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 10, Avenue La source'**
+  String get addressComplementaryPlaceholder;
 
   /// No description provided for @fullAddress.
   ///
@@ -1067,6 +1205,42 @@ abstract class AppLocalizations {
   /// **'File ready for final validation.'**
   String get enrollmentReadyForValidation;
 
+  /// No description provided for @completedEnrollmentRedirecting.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is already completed. Redirecting to First Registration.'**
+  String get completedEnrollmentRedirecting;
+
+  /// No description provided for @validateEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate enrollment'**
+  String get validateEnrollment;
+
+  /// No description provided for @validatingEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating...'**
+  String get validatingEnrollment;
+
+  /// No description provided for @goToFirstRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to First Registration'**
+  String get goToFirstRegistration;
+
+  /// No description provided for @enrollmentStatusUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Status updated successfully.'**
+  String get enrollmentStatusUpdateSuccess;
+
+  /// No description provided for @enrollmentStatusUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update status: {message}'**
+  String enrollmentStatusUpdateError(String message);
+
   /// No description provided for @personalInfoSaveHintBeforeContinue.
   ///
   /// In en, this message translates to:
@@ -1139,6 +1313,18 @@ abstract class AppLocalizations {
   /// **'Saving...'**
   String get savingAcademicInfo;
 
+  /// No description provided for @saveGuardianInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save guardian'**
+  String get saveGuardianInfo;
+
+  /// No description provided for @savingGuardianInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving guardian...'**
+  String get savingGuardianInfo;
+
   /// No description provided for @academicInfoValidationReasonsTitle.
   ///
   /// In en, this message translates to:
@@ -1169,6 +1355,48 @@ abstract class AppLocalizations {
   /// **'Please correct the following address fields:'**
   String get addressValidationReasonsTitle;
 
+  /// No description provided for @addressNoCityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No city is available in the catalog.'**
+  String get addressNoCityAvailable;
+
+  /// No description provided for @addressSelectCityFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a city first.'**
+  String get addressSelectCityFirst;
+
+  /// No description provided for @addressNoDistrictAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No district is available for this city.'**
+  String get addressNoDistrictAvailable;
+
+  /// No description provided for @addressSelectDistrictFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a district first.'**
+  String get addressSelectDistrictFirst;
+
+  /// No description provided for @addressNoMunicipalityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No municipality is available for this district.'**
+  String get addressNoMunicipalityAvailable;
+
+  /// No description provided for @addressSelectMunicipalityFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a municipality first.'**
+  String get addressSelectMunicipalityFirst;
+
+  /// No description provided for @addressNoNeighborhoodAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No neighborhood is available for this municipality.'**
+  String get addressNoNeighborhoodAvailable;
+
   /// No description provided for @addressSaveHintBeforeContinue.
   ///
   /// In en, this message translates to:
@@ -1186,6 +1414,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Address update failed: {message}'**
   String addressSaveError(String message);
+
+  /// No description provided for @enrollmentStatusFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get enrollmentStatusFilterLabel;
+
+  /// No description provided for @enrollmentStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get enrollmentStatusInProgress;
+
+  /// No description provided for @enrollmentStatusAdminCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Completed'**
+  String get enrollmentStatusAdminCompleted;
+
+  /// No description provided for @enrollmentStatusFinancialCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Completed'**
+  String get enrollmentStatusFinancialCompleted;
+
+  /// No description provided for @enrollmentStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get enrollmentStatusCompleted;
+
+  /// No description provided for @enrollmentStatusValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get enrollmentStatusValidated;
+
+  /// No description provided for @enrollmentStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get enrollmentStatusRejected;
+
+  /// No description provided for @enrollmentStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get enrollmentStatusCancelled;
+
+  /// No description provided for @enrollmentReadOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View-only mode'**
+  String get enrollmentReadOnlyTitle;
+
+  /// No description provided for @enrollmentReadOnlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.'**
+  String get enrollmentReadOnlyMessage;
+
+  /// No description provided for @enrollmentEditableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mode'**
+  String get enrollmentEditableTitle;
+
+  /// No description provided for @enrollmentEditableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment is in progress (IN_PROGRESS). Information can be updated.'**
+  String get enrollmentEditableMessage;
+
+  /// No description provided for @studentChargesStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student charges'**
+  String get studentChargesStepTitle;
+
+  /// No description provided for @studentChargesStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial charges applied to the student'**
+  String get studentChargesStepSubtitle;
+
+  /// No description provided for @studentChargesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading student charges...'**
+  String get studentChargesLoading;
+
+  /// No description provided for @studentChargesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get studentChargesRetry;
+
+  /// No description provided for @studentChargesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No charges are available for this student.'**
+  String get studentChargesEmpty;
+
+  /// No description provided for @studentChargesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Student charges cannot be loaded without a student or target level.'**
+  String get studentChargesUnavailable;
+
+  /// No description provided for @studentChargesAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get studentChargesAmountColumn;
+
+  /// No description provided for @studentChargesAmountPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid amount'**
+  String get studentChargesAmountPaidLabel;
+
+  /// No description provided for @studentChargesSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save charges'**
+  String get studentChargesSaveAction;
+
+  /// No description provided for @studentChargesSavingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving charges...'**
+  String get studentChargesSavingAction;
+
+  /// No description provided for @studentChargesSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges saved successfully.'**
+  String get studentChargesSaveSuccess;
+
+  /// No description provided for @studentChargesSaveHintBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save charge changes before continuing.'**
+  String get studentChargesSaveHintBeforeContinue;
+
+  /// No description provided for @studentChargesNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load charges. Please check your internet connection.'**
+  String get studentChargesNetworkError;
+
+  /// No description provided for @studentChargesNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No charges were found for this student.'**
+  String get studentChargesNotFound;
+
+  /// No description provided for @studentChargesValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested charge data is invalid.'**
+  String get studentChargesValidationError;
+
+  /// No description provided for @studentChargesUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to access these charges.'**
+  String get studentChargesUnauthorizedError;
+
+  /// No description provided for @studentChargesInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to these charges.'**
+  String get studentChargesInvalidCredentialsError;
+
+  /// No description provided for @studentChargesServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get studentChargesServerError;
+
+  /// No description provided for @studentChargesStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents charges from being displayed.'**
+  String get studentChargesStorageError;
+
+  /// No description provided for @studentChargesAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents charges from loading.'**
+  String get studentChargesAuthError;
+
+  /// No description provided for @studentChargesUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading charges.'**
+  String get studentChargesUnknownError;
+
+  /// No description provided for @studentChargeStatusDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get studentChargeStatusDue;
+
+  /// No description provided for @studentChargeStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get studentChargeStatusPartial;
+
+  /// No description provided for @studentChargeStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get studentChargeStatusPaid;
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

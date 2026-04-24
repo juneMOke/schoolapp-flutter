@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailAppBarTitle extends StatelessWidget {
-  final String enrollmentId;
+  final String titleLabel;
+  final String titleValue;
 
   const EnrollmentDetailAppBarTitle({
     super.key,
-    required this.enrollmentId,
+    required this.titleLabel,
+    required this.titleValue,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Row(
       children: [
         Container(
@@ -47,7 +46,7 @@ class EnrollmentDetailAppBarTitle extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.enrollmentCode,
+              titleLabel,
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
@@ -55,7 +54,7 @@ class EnrollmentDetailAppBarTitle extends StatelessWidget {
               ),
             ),
             Text(
-              enrollmentId,
+              titleValue,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

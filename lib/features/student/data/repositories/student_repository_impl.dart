@@ -58,6 +58,7 @@ class StudentRepositoryImpl implements StudentRepository {
     required String city,
     required String district,
     required String municipality,
+    required String neighborhood,
     required String address,
   }) async {
     try {
@@ -68,6 +69,7 @@ class StudentRepositoryImpl implements StudentRepository {
           city: city,
           district: district,
           municipality: municipality,
+          neighborhood: neighborhood,
           address: address,
         ),
       );

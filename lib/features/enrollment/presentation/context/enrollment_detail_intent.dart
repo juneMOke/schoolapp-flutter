@@ -1,24 +1,34 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 
 class EnrollmentDetailIntent extends Equatable {
   static const String originQueryParameter = 'origin';
   static const String studentIdQueryParameter = 'studentId';
+  static const String statusQueryParameter = 'status';
 
   final EnrollmentDetailOrigin origin;
   final String enrollmentId;
   final String? studentId;
+  final String? status;
 
   const EnrollmentDetailIntent({
     required this.origin,
     required this.enrollmentId,
     this.studentId,
+    this.status,
   });
 
   const EnrollmentDetailIntent.preRegistration({required String enrollmentId})
     : this(
         origin: EnrollmentDetailOrigin.preRegistration,
         enrollmentId: enrollmentId,
+      );
+
+  const EnrollmentDetailIntent.newFirstRegistration()
+    : this(
+        origin: EnrollmentDetailOrigin.newFirstRegistration,
+        enrollmentId: 'new',
       );
 
   const EnrollmentDetailIntent.reRegistration({
@@ -35,6 +45,7 @@ class EnrollmentDetailIntent extends Equatable {
       origin: origin,
       enrollmentId: enrollmentId,
       studentId: studentId,
+      status: status,
     );
   }
 
@@ -43,7 +54,15 @@ class EnrollmentDetailIntent extends Equatable {
       originQueryParameter: origin.name,
       if (studentId != null && studentId!.isNotEmpty)
         studentIdQueryParameter: studentId!,
+      if (status != null && status!.isNotEmpty) statusQueryParameter: status!,
     };
+  }
+
+  String toLocation() {
+    return Uri(
+      path: '${EnrollmentConstants.enrollmentDetailRoute}/$enrollmentId',
+      queryParameters: toQueryParameters(),
+    ).toString();
   }
 
   static EnrollmentDetailIntent fromRouteContext({
@@ -62,6 +81,7 @@ class EnrollmentDetailIntent extends Equatable {
     }
 
     final studentId = queryParameters[studentIdQueryParameter]?.trim();
+    final status = queryParameters[statusQueryParameter]?.trim();
 
     return switch (origin) {
       EnrollmentDetailOrigin.preRegistration =>
@@ -80,6 +100,13 @@ class EnrollmentDetailIntent extends Equatable {
         origin: EnrollmentDetailOrigin.firstRegistration,
         enrollmentId: enrollmentId,
         studentId: studentId,
+        status: status,
+      ),
+      EnrollmentDetailOrigin.newFirstRegistration => EnrollmentDetailIntent(
+        origin: EnrollmentDetailOrigin.newFirstRegistration,
+        enrollmentId: enrollmentId,
+        studentId: studentId,
+        status: status,
       ),
     };
   }
@@ -91,5 +118,5 @@ class EnrollmentDetailIntent extends Equatable {
   }
 
   @override
-  List<Object?> get props => [origin, enrollmentId, studentId];
+  List<Object?> get props => [origin, enrollmentId, studentId, status];
 }

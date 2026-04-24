@@ -17,6 +17,7 @@ class SearchFormCompactLayout extends StatelessWidget {
   final ValueChanged<String> onFieldChanged;
   final VoidCallback onDateTap;
   final Widget actions;
+  final Widget? statusDropdown;
 
   const SearchFormCompactLayout({
     super.key,
@@ -35,6 +36,7 @@ class SearchFormCompactLayout extends StatelessWidget {
     required this.onFieldChanged,
     required this.onDateTap,
     required this.actions,
+    this.statusDropdown,
   });
 
   @override
@@ -49,6 +51,8 @@ class SearchFormCompactLayout extends StatelessWidget {
           runSpacing: spacing,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            if (statusDropdown != null)
+              SizedBox(width: fieldWidth, child: statusDropdown!),
             SizedBox(
               width: fieldWidth,
               child: SearchFormInput(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -8,22 +9,26 @@ class EditableField extends StatelessWidget {
   final double width;
   final String label;
   final TextEditingController controller;
+  final TextCapitalization textCapitalization;
   final bool requiredField;
   final String helpMessage;
   final String? errorText;
   final bool isChanged;
   final bool readOnly;
+  final String? hintText;
 
   const EditableField({
     super.key,
     required this.width,
     required this.label,
     required this.controller,
+    this.textCapitalization = TextCapitalization.words,
     this.requiredField = false,
     this.helpMessage = '',
     this.errorText,
     this.isChanged = false,
     this.readOnly = false,
+    this.hintText,
   });
 
   @override
@@ -48,9 +53,13 @@ class EditableField extends StatelessWidget {
               return TextFormField(
                 controller: controller,
                 textInputAction: TextInputAction.next,
+                textCapitalization: textCapitalization,
+                inputFormatters: const [
+                  FirstLetterUppercaseTextInputFormatter(),
+                ],
                 readOnly: readOnly,
                 decoration: buildInputDecoration(
-                  hintText: l10n.enterFieldHint(label),
+                  hintText: hintText ?? l10n.enterFieldHint(label),
                   errorText: errorText,
                   isChanged: isChanged,
                   prefixIcon: const Icon(

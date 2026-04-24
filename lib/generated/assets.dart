@@ -5,7 +5,15 @@ import 'package:flutter/widgets.dart';
 class Assets {
   Assets._();
 
-  static const $AssetsFeaturesGen features = $AssetsFeaturesGen();
+  static const String addressGeoCatalog = 'assets/catalogs/address_geo_catalog.json';
+  static const String educationCyclesCatalog = 'assets/catalogs/education_cycles_catalog.json';
+  static const $AssetsLibGen lib = $AssetsLibGen();
+}
+
+class $AssetsLibGen {
+  const $AssetsLibGen();
+
+  final $AssetsFeaturesGen features = const $AssetsFeaturesGen();
 }
 
 class $AssetsFeaturesGen {

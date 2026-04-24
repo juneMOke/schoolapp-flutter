@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ReRegistrationsPage extends StatefulWidget {
   const ReRegistrationsPage({super.key});
@@ -29,7 +30,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<BootstrapPreviousYearBloc>().add(
-        BootstrapContextLocalRequested(
+        const BootstrapContextLocalRequested(
           key: AppConstants.bootstrapPreviousYearPayloadKey,
         ),
       );
@@ -99,6 +100,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                               surname: request.surname,
                               schoolLevelGroupId: request.schoolLevelGroupId,
                               schoolLevelId: request.schoolLevelId,
+                              page: 0,
                             ),
                           );
                         },
@@ -121,6 +123,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                             state.summariesStatus ==
                             EnrollmentLoadStatus.loading,
                         enrollments: state.summaries,
+                        totalCount: state.summariesTotalElements,
                         onViewRequested: (summary) {
                           final intent = EnrollmentDetailIntent.reRegistration(
                             enrollmentId: summary.enrollmentId,
@@ -135,6 +138,35 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                             extra: intent,
                           );
                         },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                    buildWhen: (previous, current) =>
+                        previous.summariesPage != current.summariesPage ||
+                        previous.summariesTotalPages != current.summariesTotalPages ||
+                        previous.summariesStatus != current.summariesStatus,
+                    builder: (context, state) {
+                      if (state.summariesTotalPages <= 1) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return _PaginationBar(
+                        currentPage: state.summariesPage,
+                        totalPages: state.summariesTotalPages,
+                        isLoading:
+                            state.summariesStatus == EnrollmentLoadStatus.loading,
+                        onPrevious: () => context.read<EnrollmentBloc>().add(
+                          EnrollmentSummariesPageRequested(
+                            page: state.summariesPage - 1,
+                          ),
+                        ),
+                        onNext: () => context.read<EnrollmentBloc>().add(
+                          EnrollmentSummariesPageRequested(
+                            page: state.summariesPage + 1,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -190,6 +222,8 @@ class _SearchInvitationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 24),
@@ -198,28 +232,28 @@ class _SearchInvitationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: const Column(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.manage_search_rounded,
             size: 44,
             color: AppTheme.primaryColor,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
-            'Lancez une recherche de re-inscription',
-            style: TextStyle(
+            l10n.reRegistrationSearchInvitationTitle,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimaryColor,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
-            'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.',
+            l10n.reRegistrationSearchInvitationMessage,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: AppTheme.textSecondaryColor,
               height: 1.4,
@@ -227,6 +261,52 @@ class _SearchInvitationCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PaginationBar extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final bool isLoading;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  const _PaginationBar({
+    required this.currentPage,
+    required this.totalPages,
+    required this.isLoading,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          l10n.enrollmentPageIndicator(currentPage + 1, totalPages),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textSecondaryColor,
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          onPressed: !isLoading && currentPage > 0 ? onPrevious : null,
+          icon: const Icon(Icons.chevron_left_rounded),
+          tooltip: l10n.previous,
+        ),
+        IconButton(
+          onPressed: !isLoading && currentPage + 1 < totalPages ? onNext : null,
+          icon: const Icon(Icons.chevron_right_rounded),
+          tooltip: l10n.next,
+        ),
+      ],
     );
   }
 }

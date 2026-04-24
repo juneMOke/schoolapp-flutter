@@ -79,7 +79,9 @@ void main() {
     test(
       'isAcademicPreviousInfoValid retourne false quand previousSchoolName est vide',
       () {
-        final enrollment = _buildEnrollmentSchoolDetail(previousSchoolName: ' ');
+        final enrollment = _buildEnrollmentSchoolDetail(
+          previousSchoolName: ' ',
+        );
 
         final result = EnrollmentStepperStateHelper.isAcademicPreviousInfoValid(
           enrollment,
@@ -92,7 +94,9 @@ void main() {
     test(
       'isAcademicTargetInfoValid retourne false quand schoolLevelGroupId est vide',
       () {
-        final enrollment = _buildEnrollmentSchoolDetail(schoolLevelGroupId: ' ');
+        final enrollment = _buildEnrollmentSchoolDetail(
+          schoolLevelGroupId: ' ',
+        );
 
         final result = EnrollmentStepperStateHelper.isAcademicTargetInfoValid(
           enrollment,
@@ -153,18 +157,21 @@ void main() {
       },
     );
 
-    test('canContinueForStep retourne false pour un step sans etat explicite', () {
-      final result = EnrollmentStepperStateHelper.canContinueForStep(
-        currentStep: 4,
-        stepStates: <int, StepFormState>{
-          0: const StepFormState(dirty: true, valid: false, saving: true),
-          1: const StepFormState(dirty: true, valid: false, saving: true),
-          2: const StepFormState(dirty: true, valid: false, saving: true),
-        },
-      );
+    test(
+      'canContinueForStep retourne false pour un step sans etat explicite',
+      () {
+        final result = EnrollmentStepperStateHelper.canContinueForStep(
+          currentStep: 4,
+          stepStates: <int, StepFormState>{
+            0: const StepFormState(dirty: true, valid: false, saving: true),
+            1: const StepFormState(dirty: true, valid: false, saving: true),
+            2: const StepFormState(dirty: true, valid: false, saving: true),
+          },
+        );
 
-      expect(result, isFalse);
-    });
+        expect(result, isFalse);
+      },
+    );
 
     test(
       'canContinueForStep step 4 retourne false quand guardian est valid mais dirty',
@@ -226,19 +233,6 @@ void main() {
       },
     );
 
-    test('canSaveForStep retourne false pour un step non sauvegardable', () {
-      final result = EnrollmentStepperStateHelper.canSaveForStep(
-        currentStep: 5,
-        stepStates: <int, StepFormState>{
-          0: const StepFormState(dirty: true, valid: true, saving: false),
-          1: const StepFormState(dirty: true, valid: true, saving: false),
-          2: const StepFormState(dirty: true, valid: true, saving: false),
-        },
-      );
-
-      expect(result, isFalse);
-    });
-
     test(
       'canSaveForStep step 4 retourne true quand guardian est dirty, valid et non saving',
       () {
@@ -291,6 +285,7 @@ StudentDetail _buildStudentDetail({
       name: 'College',
       code: 'COL',
     ),
+    neighborhood: 'Riviera',
   );
 }
 

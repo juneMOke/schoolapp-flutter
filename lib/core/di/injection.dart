@@ -6,6 +6,17 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
@@ -45,6 +56,7 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
@@ -52,6 +64,7 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
 import 'package:school_app_flutter/features/student/data/datasources/student_remote_data_source.dart';
@@ -59,6 +72,8 @@ import 'package:school_app_flutter/features/student/data/repositories/parent_rep
 import 'package:school_app_flutter/features/student/data/repositories/student_repository_impl.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/parent_repository.dart';
 import 'package:school_app_flutter/features/student/domain/repositories/student_repository.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/create_parent_use_case.dart';
+import 'package:school_app_flutter/features/student/domain/usecases/unlink_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_parent_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/student/domain/usecases/update_student_address_use_case.dart';
@@ -124,6 +139,24 @@ Future<void> configureDependencies() async {
                 requestOptions: e.requestOptions,
                 response: e.response,
                 error: const UnauthorizedFailure('Access forbidden'),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 404) {
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: const NotFoundFailure('Resource not found'),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 422) {
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: const ValidationFailure('Invalid request data'),
                 type: e.type,
               ),
             );
@@ -334,6 +367,10 @@ Future<void> configureDependencies() async {
     () => GetEnrollmentPreviewByStudentIdUseCase(getIt<EnrollmentRepository>()),
   );
 
+  getIt.registerFactory<CreateEnrollmentUseCase>(
+    () => CreateEnrollmentUseCase(getIt<EnrollmentRepository>()),
+  );
+
   getIt.registerFactory<
     SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   >(
@@ -365,6 +402,10 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerFactory<UpdateEnrollmentStatusUseCase>(
+    () => UpdateEnrollmentStatusUseCase(getIt<EnrollmentRepository>()),
+  );
+
   getIt.registerFactory<EnrollmentBloc>(
     () => EnrollmentBloc(
       getEnrollmentSummariesUseCase:
@@ -372,6 +413,7 @@ Future<void> configureDependencies() async {
       getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
       getEnrollmentPreviewByStudentIdUseCase:
           getIt<GetEnrollmentPreviewByStudentIdUseCase>(),
+      createEnrollmentUseCase: getIt<CreateEnrollmentUseCase>(),
       searchByStudentNameUseCase:
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
@@ -386,6 +428,7 @@ Future<void> configureDependencies() async {
           >(),
       searchByAcademicInfoUseCase:
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
+      updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
     ),
   );
 
@@ -438,8 +481,20 @@ Future<void> configureDependencies() async {
     () => UpdateParentUseCase(getIt<ParentRepository>()),
   );
 
+  getIt.registerFactory<CreateParentUseCase>(
+    () => CreateParentUseCase(getIt<ParentRepository>()),
+  );
+
+  getIt.registerFactory<UnlinkParentUseCase>(
+    () => UnlinkParentUseCase(getIt<ParentRepository>()),
+  );
+
   getIt.registerFactory<ParentBloc>(
-    () => ParentBloc(updateParentUseCase: getIt<UpdateParentUseCase>()),
+    () => ParentBloc(
+      updateParentUseCase: getIt<UpdateParentUseCase>(),
+      createParentUseCase: getIt<CreateParentUseCase>(),
+      unlinkParentUseCase: getIt<UnlinkParentUseCase>(),
+    ),
   );
 
   // ── Enrollment Academic Info ───────────────────────────────────────────────
@@ -463,6 +518,55 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<EnrollmentAcademicInfoBloc>(
     () => EnrollmentAcademicInfoBloc(
       updateUseCase: getIt<UpdateEnrollmentAcademicInfoUseCase>(),
+    ),
+  );
+
+  // ── Finance ───────────────────────────────────────────────────────────────
+  getIt.registerLazySingleton<FinanceRemoteDataSource>(
+    () => FinanceRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<FinanceRepository>(
+    () => FinanceRepositoryImpl(
+      remoteDataSource: getIt<FinanceRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<StudentChargesRemoteDataSource>(
+    () => StudentChargesRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<StudentChargesRepository>(
+    () => StudentChargesRepositoryImpl(
+      remoteDataSource: getIt<StudentChargesRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetFeeTariffsUseCase>(
+    () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
+  );
+
+  getIt.registerFactory<GetStudentChargesUseCase>(
+    () => GetStudentChargesUseCase(getIt<StudentChargesRepository>()),
+  );
+
+  getIt.registerFactory<UpdateStudentChargeExpectedAmountUseCase>(
+    () => UpdateStudentChargeExpectedAmountUseCase(
+      getIt<StudentChargesRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<FinanceBloc>(
+    () => FinanceBloc(getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>()),
+  );
+
+  getIt.registerFactory<StudentChargesBloc>(
+    () => StudentChargesBloc(
+      getStudentChargesUseCase: getIt<GetStudentChargesUseCase>(),
+      updateStudentChargeExpectedAmountUseCase:
+          getIt<UpdateStudentChargeExpectedAmountUseCase>(),
     ),
   );
 }

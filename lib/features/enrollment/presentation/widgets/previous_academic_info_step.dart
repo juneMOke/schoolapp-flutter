@@ -34,12 +34,14 @@ class PreviousAcademicInfoStep extends StatefulWidget {
 }
 
 class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
-  late final TextEditingController _prevYearController;
   late final TextEditingController _prevSchoolController;
-  late final TextEditingController _prevCycleController;
-  late final TextEditingController _prevLevelController;
   late final TextEditingController _prevRateController;
   late final TextEditingController _prevRankController;
+
+  // Année scolaire, cycle & niveau : valeurs sélectionnées dans les dropdowns
+  String? _selectedYear;
+  String? _selectedCycle;
+  String? _selectedLevel;
 
   late bool _validatedPreviousYear;
 
@@ -59,12 +61,72 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   bool _isSaving = false;
   bool _isHydratingFromDetail = false;
 
+  // Catalogue des cycles d'éducation
+  EducationCyclesCatalog? _cyclesCatalog;
+  bool _isCatalogLoading = true;
+
   bool get _canSave => _stepState.canSave;
 
   StepFormState get _stepState =>
       StepFormState(dirty: _isDirty, valid: _isValid, saving: _isSaving);
 
   late final EnrollmentAcademicInfoBloc _academicInfoBloc;
+
+  // ---------------------------------------------------------------------------
+  // Dropdown options
+  // ---------------------------------------------------------------------------
+
+  /// Génère les 3 années scolaires les plus récentes selon l'année en cours.
+  /// Format : "YYYY-YYYY" (ex. "2025-2026").
+  static List<String> _buildYearOptions() {
+    final currentYear = DateTime.now().year;
+    return List<String>.unmodifiable([
+      '${currentYear - 1}-$currentYear',
+      '${currentYear - 2}-${currentYear - 1}',
+      '${currentYear - 3}-${currentYear - 2}',
+    ]);
+  }
+
+  /// Résout [rawYear] parmi [options] en comparaison normalisée (ignore espaces
+  /// et tirets multiples). Retourne le premier élément si aucune correspondance.
+  static String _resolveYear(String? rawYear, List<String> options) {
+    if (options.isEmpty) return '';
+    if (rawYear == null || rawYear.trim().isEmpty) return options.first;
+
+    final candidate = _normalizeYearKey(rawYear);
+    for (final opt in options) {
+      if (_normalizeYearKey(opt) == candidate) return opt;
+    }
+    return options.first;
+  }
+
+  static String _normalizeYearKey(String value) =>
+      value.replaceAll(RegExp(r'[\s\-–]+'), '-').trim();
+
+  List<String> get _yearOptions => _buildYearOptions();
+
+  List<String> get _cycleOptions {
+    final catalog = _cyclesCatalog;
+    if (catalog == null) {
+      final c = _selectedCycle;
+      return c != null && c.isNotEmpty ? [c] : const [];
+    }
+    return catalog.cycleNames;
+  }
+
+  List<String> get _levelOptions {
+    final catalog = _cyclesCatalog;
+    final cycle = _selectedCycle;
+    if (catalog == null || cycle == null || cycle.isEmpty) {
+      final l = _selectedLevel;
+      return l != null && l.isNotEmpty ? [l] : const [];
+    }
+    return catalog.yearsForCycle(cycle);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Normalisation helpers (rate & rank)
+  // ---------------------------------------------------------------------------
 
   String _normalizeRate(String rawValue) {
     final trimmed = rawValue.trim();
@@ -96,10 +158,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     return value.toString();
   }
 
-  bool _isChanged(String currentValue, String initialValue) {
-    return currentValue.trim() != initialValue;
-  }
-
   void submitForm() => _onSave();
 
   void _emitStepState() {
@@ -114,26 +172,26 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
+
   @override
   void initState() {
     super.initState();
     _academicInfoBloc = getIt<EnrollmentAcademicInfoBloc>();
 
-    _prevYearController = TextEditingController();
     _prevSchoolController = TextEditingController();
-    _prevCycleController = TextEditingController();
-    _prevLevelController = TextEditingController();
     _prevRateController = TextEditingController();
     _prevRankController = TextEditingController();
 
     _syncFromEnrollmentDetail(widget.enrollmentDetail, resetSnapshot: true);
 
-    _prevYearController.addListener(_onFieldChanged);
     _prevSchoolController.addListener(_onFieldChanged);
-    _prevCycleController.addListener(_onFieldChanged);
-    _prevLevelController.addListener(_onFieldChanged);
     _prevRateController.addListener(_onFieldChanged);
     _prevRankController.addListener(_onFieldChanged);
+
+    _loadCyclesCatalog();
 
     _recomputeFormState(notifyParent: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -142,16 +200,59 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     });
   }
 
+  Future<void> _loadCyclesCatalog() async {
+    try {
+      final catalog = await EducationCyclesCatalog.load();
+      if (!mounted) return;
+      setState(() {
+        _cyclesCatalog = catalog;
+        _isCatalogLoading = false;
+      });
+      _syncCycleAndLevelWithCatalog(catalog);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isCatalogLoading = false);
+    }
+  }
+
+  /// Résout cycle & niveau depuis le catalogue une fois chargé.
+  /// Si aucune correspondance, sélectionne le premier élément.
+  void _syncCycleAndLevelWithCatalog(EducationCyclesCatalog catalog) {
+    final rawCycle = _selectedCycle ?? '';
+    final rawLevel = _selectedLevel ?? '';
+
+    final resolvedCycle =
+        catalog.resolveCycle(rawCycle)?.nom ?? catalog.firstCycle?.nom;
+
+    final resolvedLevel = resolvedCycle == null
+        ? null
+        : catalog.resolveLevel(resolvedCycle, rawLevel) ??
+              catalog.firstLevelForCycle(resolvedCycle);
+
+    if (_selectedCycle != resolvedCycle || _selectedLevel != resolvedLevel) {
+      setState(() {
+        _selectedCycle = resolvedCycle;
+        _selectedLevel = resolvedLevel;
+      });
+      _recomputeFormState();
+    }
+  }
+
   void _syncFromEnrollmentDetail(
     EnrollmentSchoolDetail detail, {
     required bool resetSnapshot,
   }) {
     _isHydratingFromDetail = true;
     try {
-      _prevYearController.text = detail.previousAcademicYear;
+      _selectedYear =
+          _resolveYear(detail.previousAcademicYear, _buildYearOptions());
       _prevSchoolController.text = detail.previousSchoolName;
-      _prevCycleController.text = detail.previousSchoolLevelGroup;
-      _prevLevelController.text = detail.previousSchoolLevel;
+      _selectedCycle = detail.previousSchoolLevelGroup.isNotEmpty
+          ? detail.previousSchoolLevelGroup
+          : null;
+      _selectedLevel = detail.previousSchoolLevel.isNotEmpty
+          ? detail.previousSchoolLevel
+          : null;
       _prevRateController.text = _normalizeRateFromDouble(detail.previousRate);
       _prevRankController.text = _normalizeRankFromInt(detail.previousRank);
       _academicYearId = detail.academicYearId;
@@ -161,7 +262,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     }
 
     if (resetSnapshot) {
-      _initialPrevYear = detail.previousAcademicYear.trim();
+      _initialPrevYear = _selectedYear ?? '';
       _initialPrevSchool = detail.previousSchoolName.trim();
       _initialPrevCycle = detail.previousSchoolLevelGroup.trim();
       _initialPrevLevel = detail.previousSchoolLevel.trim();
@@ -172,10 +273,10 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }
 
   void _markCurrentAsSavedSnapshot() {
-    _initialPrevYear = _prevYearController.text.trim();
+    _initialPrevYear = _selectedYear ?? '';
     _initialPrevSchool = _prevSchoolController.text.trim();
-    _initialPrevCycle = _prevCycleController.text.trim();
-    _initialPrevLevel = _prevLevelController.text.trim();
+    _initialPrevCycle = _selectedCycle?.trim() ?? '';
+    _initialPrevLevel = _selectedLevel?.trim() ?? '';
     _initialPrevRate = _normalizeRate(_prevRateController.text);
     _initialPrevRank = _normalizeRank(_prevRankController.text);
     _initialValidatedPreviousYear = _validatedPreviousYear;
@@ -186,6 +287,10 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
       _syncFromEnrollmentDetail(widget.enrollmentDetail, resetSnapshot: true);
+      final catalog = _cyclesCatalog;
+      if (catalog != null) {
+        _syncCycleAndLevelWithCatalog(catalog);
+      }
       _showValidationHints = false;
       _isSaving = false;
       _recomputeFormState(notifyParent: false);
@@ -198,21 +303,19 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   @override
   void dispose() {
-    _prevYearController.removeListener(_onFieldChanged);
     _prevSchoolController.removeListener(_onFieldChanged);
-    _prevCycleController.removeListener(_onFieldChanged);
-    _prevLevelController.removeListener(_onFieldChanged);
     _prevRateController.removeListener(_onFieldChanged);
     _prevRankController.removeListener(_onFieldChanged);
-    _prevYearController.dispose();
     _prevSchoolController.dispose();
-    _prevCycleController.dispose();
-    _prevLevelController.dispose();
     _prevRateController.dispose();
     _prevRankController.dispose();
     _academicInfoBloc.close();
     super.dispose();
   }
+
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
 
   void _onFieldChanged() {
     if (_isHydratingFromDetail) return;
@@ -222,11 +325,37 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     }
   }
 
+  void _onYearChanged(String? year) {
+    setState(() => _selectedYear = year);
+    _recomputeFormState();
+  }
+
+  void _onCycleChanged(String? cycle) {
+    final catalog = _cyclesCatalog;
+    final newLevel = catalog?.firstLevelForCycle(cycle ?? '');
+    setState(() {
+      _selectedCycle = cycle;
+      _selectedLevel = newLevel;
+    });
+    _recomputeFormState();
+    if (_showValidationHints && _isValid) {
+      setState(() => _showValidationHints = false);
+    }
+  }
+
+  void _onLevelChanged(String? level) {
+    setState(() => _selectedLevel = level);
+    _recomputeFormState();
+    if (_showValidationHints && _isValid) {
+      setState(() => _showValidationHints = false);
+    }
+  }
+
   void _recomputeFormState({bool notifyParent = true}) {
-    final prevYear = _prevYearController.text.trim();
+    final prevYear = _selectedYear?.trim() ?? '';
     final prevSchool = _prevSchoolController.text.trim();
-    final prevCycle = _prevCycleController.text.trim();
-    final prevLevel = _prevLevelController.text.trim();
+    final prevCycle = _selectedCycle?.trim() ?? '';
+    final prevLevel = _selectedLevel?.trim() ?? '';
     final prevRate = _normalizeRate(_prevRateController.text);
     final prevRank = _normalizeRank(_prevRankController.text);
     final parsedRate = double.tryParse(prevRate);
@@ -256,9 +385,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
         _isValid = validNow;
         _isDirty = dirtyNow;
       });
-      if (notifyParent) {
-        _emitStepState();
-      }
+      if (notifyParent) _emitStepState();
     } else if (notifyParent) {
       _emitStepState();
     }
@@ -272,16 +399,16 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   List<String> _buildValidationErrors(AppLocalizations l10n) {
     final errors = <String>[];
-    if (_prevYearController.text.trim().isEmpty) {
+    if ((_selectedYear ?? '').isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.academicYearLabel));
     }
     if (_prevSchoolController.text.trim().isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.schoolLabel));
     }
-    if (_prevCycleController.text.trim().isEmpty) {
+    if ((_selectedCycle ?? '').isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.schoolCycle));
     }
-    if (_prevLevelController.text.trim().isEmpty) {
+    if ((_selectedLevel ?? '').isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.schoolLevelLabel));
     }
     if (_prevRateController.text.trim().isEmpty) {
@@ -317,9 +444,9 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
         enrollmentId: widget.enrollmentId,
         academicYearId: _academicYearId,
         previousSchoolName: _prevSchoolController.text.trim(),
-        previousAcademicYear: _prevYearController.text.trim(),
-        previousSchoolLevelGroup: _prevCycleController.text.trim(),
-        previousSchoolLevel: _prevLevelController.text.trim(),
+        previousAcademicYear: _selectedYear ?? '',
+        previousSchoolLevelGroup: _selectedCycle ?? '',
+        previousSchoolLevel: _selectedLevel ?? '',
         previousRate: double.tryParse(_prevRateController.text.trim()) ?? 0.0,
         previousRank: int.tryParse(_prevRankController.text.trim()),
         validatedPreviousYear: _validatedPreviousYear,
@@ -327,10 +454,18 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final showValidation = _showValidationHints || (_isDirty && !_isValid);
+
+    final year = _selectedYear;
+    final cycle = _selectedCycle;
+    final level = _selectedLevel;
 
     return BlocProvider<EnrollmentAcademicInfoBloc>.value(
       value: _academicInfoBloc,
@@ -363,10 +498,17 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
               final isLoading =
                   state.status == EnrollmentAcademicInfoStatus.loading;
               return PreviousAcademicInfoStepBody(
-                prevYearController: _prevYearController,
+                yearOptions: _yearOptions,
+                selectedYear: year,
+                onYearChanged: _onYearChanged,
                 prevSchoolController: _prevSchoolController,
-                prevCycleController: _prevCycleController,
-                prevLevelController: _prevLevelController,
+                cycleOptions: _cycleOptions,
+                levelOptions: _levelOptions,
+                selectedCycle: cycle,
+                selectedLevel: level,
+                onCycleChanged: _onCycleChanged,
+                onLevelChanged: _onLevelChanged,
+                isCatalogLoading: _isCatalogLoading,
                 prevRateController: _prevRateController,
                 prevRankController: _prevRankController,
                 validatedPreviousYear: _validatedPreviousYear,
@@ -381,25 +523,28 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                   _recomputeFormState();
                 },
                 prevYearError:
-                    showValidation && _prevYearController.text.trim().isEmpty
+                    showValidation && (year ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.academicYearLabel)
                     : null,
                 prevSchoolError:
-                    showValidation && _prevSchoolController.text.trim().isEmpty
+                    showValidation &&
+                        _prevSchoolController.text.trim().isEmpty
                     ? l10n.requiredFieldError(l10n.schoolLabel)
                     : null,
                 prevCycleError:
-                    showValidation && _prevCycleController.text.trim().isEmpty
+                    showValidation && (cycle ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.schoolCycle)
                     : null,
                 prevLevelError:
-                    showValidation && _prevLevelController.text.trim().isEmpty
+                    showValidation && (level ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.schoolLevelLabel)
                     : null,
                 prevRateError:
                     showValidation &&
                         (_prevRateController.text.trim().isEmpty ||
-                            double.tryParse(_prevRateController.text.trim()) ==
+                            double.tryParse(
+                                  _prevRateController.text.trim(),
+                                ) ==
                                 null)
                     ? (_prevRateController.text.trim().isEmpty
                           ? l10n.requiredFieldError(l10n.averageLabel)
@@ -414,22 +559,14 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                           ? l10n.requiredFieldError(l10n.rankingLabel)
                           : l10n.invalidNumberFieldError(l10n.rankingLabel))
                     : null,
-                prevYearChanged: _isChanged(
-                  _prevYearController.text,
-                  _initialPrevYear,
-                ),
-                prevSchoolChanged: _isChanged(
-                  _prevSchoolController.text,
-                  _initialPrevSchool,
-                ),
-                prevCycleChanged: _isChanged(
-                  _prevCycleController.text,
-                  _initialPrevCycle,
-                ),
-                prevLevelChanged: _isChanged(
-                  _prevLevelController.text,
-                  _initialPrevLevel,
-                ),
+                prevYearChanged:
+                    (_selectedYear ?? '') != _initialPrevYear,
+                prevSchoolChanged:
+                    _prevSchoolController.text.trim() != _initialPrevSchool,
+                prevCycleChanged:
+                    (_selectedCycle?.trim() ?? '') != _initialPrevCycle,
+                prevLevelChanged:
+                    (_selectedLevel?.trim() ?? '') != _initialPrevLevel,
                 prevRateChanged:
                     _normalizeRate(_prevRateController.text) !=
                     _initialPrevRate,

@@ -4,10 +4,19 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/acad
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PreviousAcademicInfoStepBody extends StatelessWidget {
-  final TextEditingController prevYearController;
+  // Année scolaire — dropdown
+  final List<String> yearOptions;
+  final String? selectedYear;
+  final ValueChanged<String?> onYearChanged;
   final TextEditingController prevSchoolController;
-  final TextEditingController prevCycleController;
-  final TextEditingController prevLevelController;
+  // Cycle & niveau remplacés par dropdowns
+  final List<String> cycleOptions;
+  final List<String> levelOptions;
+  final String? selectedCycle;
+  final String? selectedLevel;
+  final ValueChanged<String?> onCycleChanged;
+  final ValueChanged<String?> onLevelChanged;
+  final bool isCatalogLoading;
   final TextEditingController prevRateController;
   final TextEditingController prevRankController;
   final bool validatedPreviousYear;
@@ -34,10 +43,17 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
 
   const PreviousAcademicInfoStepBody({
     super.key,
-    required this.prevYearController,
+    required this.yearOptions,
+    required this.selectedYear,
+    required this.onYearChanged,
     required this.prevSchoolController,
-    required this.prevCycleController,
-    required this.prevLevelController,
+    required this.cycleOptions,
+    required this.levelOptions,
+    required this.selectedCycle,
+    required this.selectedLevel,
+    required this.onCycleChanged,
+    required this.onLevelChanged,
+    this.isCatalogLoading = false,
     required this.prevRateController,
     required this.prevRankController,
     required this.validatedPreviousYear,
@@ -76,10 +92,17 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
           titleColor: AppTheme.primaryColor,
           child: PreviousYearFields(
             l10n: l10n,
-            prevYearController: prevYearController,
+            yearOptions: yearOptions,
+            selectedYear: selectedYear,
+            onYearChanged: onYearChanged,
             prevSchoolController: prevSchoolController,
-            prevCycleController: prevCycleController,
-            prevLevelController: prevLevelController,
+            cycleOptions: cycleOptions,
+            levelOptions: levelOptions,
+            selectedCycle: selectedCycle,
+            selectedLevel: selectedLevel,
+            onCycleChanged: onCycleChanged,
+            onLevelChanged: onLevelChanged,
+            isCatalogLoading: isCatalogLoading,
             prevRateController: prevRateController,
             prevRankController: prevRankController,
             validatedPreviousYear: validatedPreviousYear,

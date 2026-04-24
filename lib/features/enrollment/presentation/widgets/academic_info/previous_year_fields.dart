@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validated_year_selector.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PreviousYearFields extends StatelessWidget {
   final AppLocalizations l10n;
-  final TextEditingController prevYearController;
+  // Année scolaire — dropdown
+  final List<String> yearOptions;
+  final String? selectedYear;
+  final ValueChanged<String?> onYearChanged;
   final TextEditingController prevSchoolController;
-  final TextEditingController prevCycleController;
-  final TextEditingController prevLevelController;
+  // Cycle & niveau — dropdowns
+  final List<String> cycleOptions;
+  final List<String> levelOptions;
+  final String? selectedCycle;
+  final String? selectedLevel;
+  final ValueChanged<String?> onCycleChanged;
+  final ValueChanged<String?> onLevelChanged;
+  final bool isCatalogLoading;
   final TextEditingController prevRateController;
   final TextEditingController prevRankController;
   final bool validatedPreviousYear;
@@ -32,10 +42,17 @@ class PreviousYearFields extends StatelessWidget {
   const PreviousYearFields({
     super.key,
     required this.l10n,
-    required this.prevYearController,
+    required this.yearOptions,
+    required this.selectedYear,
+    required this.onYearChanged,
     required this.prevSchoolController,
-    required this.prevCycleController,
-    required this.prevLevelController,
+    required this.cycleOptions,
+    required this.levelOptions,
+    required this.selectedCycle,
+    required this.selectedLevel,
+    required this.onCycleChanged,
+    required this.onLevelChanged,
+    this.isCatalogLoading = false,
     required this.prevRateController,
     required this.prevRankController,
     required this.validatedPreviousYear,
@@ -71,15 +88,31 @@ class PreviousYearFields extends StatelessWidget {
           spacing: spacing,
           runSpacing: 14,
           children: [
-            EditableField(
+            // Année scolaire — liste déroulante
+            DropdownField(
               width: w2,
               label: l10n.academicYearLabel,
-              controller: prevYearController,
-              requiredField: true,
               helpMessage: l10n.academicYearLabelHelp,
+              items: yearOptions
+                  .map(
+                    (opt) => DropdownMenuItem<String>(
+                      value: opt,
+                      child: Text(
+                        opt,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+              value: selectedYear,
+              onChanged: onYearChanged,
               errorText: prevYearError,
               isChanged: prevYearChanged,
-              readOnly: !isEditable,
+              enabled: isEditable,
             ),
             EditableField(
               width: w2,
@@ -91,25 +124,57 @@ class PreviousYearFields extends StatelessWidget {
               isChanged: prevSchoolChanged,
               readOnly: !isEditable,
             ),
-            EditableField(
+            // Cycle — liste déroulante
+            DropdownField(
               width: w2,
               label: l10n.schoolCycle,
-              controller: prevCycleController,
-              requiredField: true,
               helpMessage: l10n.schoolCycleHelp,
+              items: cycleOptions
+                  .map(
+                    (opt) => DropdownMenuItem<String>(
+                      value: opt,
+                      child: Text(
+                        opt,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+              value: selectedCycle,
+              onChanged: onCycleChanged,
               errorText: prevCycleError,
               isChanged: prevCycleChanged,
-              readOnly: !isEditable,
+              enabled: isEditable && !isCatalogLoading,
             ),
-            EditableField(
+            // Niveau — liste déroulante (dépend du cycle)
+            DropdownField(
               width: w2,
               label: l10n.schoolLevelLabel,
-              controller: prevLevelController,
-              requiredField: true,
               helpMessage: l10n.schoolLevelLabelHelp,
+              items: levelOptions
+                  .map(
+                    (opt) => DropdownMenuItem<String>(
+                      value: opt,
+                      child: Text(
+                        opt,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+              value: selectedLevel,
+              onChanged: onLevelChanged,
               errorText: prevLevelError,
               isChanged: prevLevelChanged,
-              readOnly: !isEditable,
+              enabled: isEditable && !isCatalogLoading && selectedCycle != null,
             ),
             EditableField(
               width: w3,

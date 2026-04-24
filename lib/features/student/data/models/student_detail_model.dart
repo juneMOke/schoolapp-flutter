@@ -16,6 +16,7 @@ class StudentDetailModel {
   final String city;
   final String district;
   final String municipality;
+  final String neighborhood;
   final String address;
 
   final String schoolLevelId;
@@ -35,6 +36,7 @@ class StudentDetailModel {
     required this.city,
     required this.district,
     required this.municipality,
+    required this.neighborhood,
     required this.address,
     required this.parentIds,
     required this.schoolLevelId,
@@ -43,29 +45,34 @@ class StudentDetailModel {
 
   factory StudentDetailModel.fromJson(Map<String, dynamic> json) =>
       StudentDetailModel(
-        id: json['id'] as String,
-        firstName: json['firstName'] as String,
-        lastName: json['lastName'] as String,
-        surname: json['surname'] as String,
-        dateOfBirth: json['dateOfBirth'] as String,
-        gender: json['gender'] as String,
-        birthPlace: json['birthPlace'] as String,
-        nationality: json['nationality'] as String,
-        photoUrl: json['photoUrl'] as String?,
-        city: json['city'] as String,
-        district: json['district'] as String,
-        municipality: json['municipality'] as String,
-        address: json['address'] as String,
-        schoolLevelId: json['schoolLevelId'] as String? ?? '',
-        schoolLevelGroupId: json['schoolLevelGroupId'] as String? ?? '',
+        id: _readString(json['id']),
+        firstName: _readString(json['firstName']),
+        lastName: _readString(json['lastName']),
+        surname: _readString(json['surname']),
+        dateOfBirth: _readString(json['dateOfBirth']),
+        gender: _readString(json['gender']),
+        birthPlace: _readString(json['birthPlace']),
+        nationality: _readString(json['nationality']),
+        photoUrl: _readString(json['photoUrl']),
+        city: _readString(json['city']),
+        district: _readString(json['district']),
+        municipality: _readString(json['municipality']),
+        neighborhood: _readString(json['neighborhood']),
+        address: _readString(json['address']),
+        schoolLevelId: _readString(json['schoolLevelId']),
+        schoolLevelGroupId: _readString(json['schoolLevelGroupId']),
         parentIds: getParentIds(json),
       );
 
+  static String _readString(dynamic value) => value?.toString() ?? '';
+
   static List<String> getParentIds(Map<String, dynamic> json) {
-    return (json['parentIds'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList() ??
-        [];
+    final parentIds = json['parentIds'];
+    if (parentIds is! List) {
+      return [];
+    }
+
+    return parentIds.map((e) => _readString(e)).toList();
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -81,6 +88,7 @@ class StudentDetailModel {
     'city': city,
     'district': district,
     'commune': municipality,
+    'neighborhood': neighborhood,
     'address': address,
   };
 
@@ -97,6 +105,7 @@ class StudentDetailModel {
     city: city,
     district: district,
     municipality: municipality,
+    neighborhood: neighborhood,
     address: address,
     schoolLevel: SchoolLevel(
       id: schoolLevelId,

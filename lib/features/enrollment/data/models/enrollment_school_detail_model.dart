@@ -38,22 +38,73 @@ class EnrollmentSchoolDetailModel {
 
   factory EnrollmentSchoolDetailModel.fromJson(Map<String, dynamic> json) =>
       EnrollmentSchoolDetailModel(
-        id: json['id'] as String,
-        status: EnrollmentStatus.fromString(json['status'] as String),
-        academicYearId: json['academicYearId'] as String,
-        enrollmentCode: json['enrollmentCode'] as String,
-        previousSchoolName: json['previousSchoolName'] as String,
-        previousAcademicYear: json['previousAcademicYear'] as String,
-        previousSchoolLevelGroup: json['previousSchoolLevelGroup'] as String,
-        previousSchoolLevel: json['previousSchoolLevel'] as String,
-        previousRate: (json['previousRate'] as num).toDouble(),
-        previousRank: json['previousRank'] as int?,
-        validatedPreviousYear: json['validatedPreviousYear'] as bool,
-        schoolLevelGroupId: json['schoolLevelGroupId'] as String? ?? '',
-        schoolLevelId: json['schoolLevelId'] as String? ?? '',
-        transferReason: json['transferReason'] as String?,
-        cancellationReason: json['cancellationReason'] as String?,
+        id: _readString(json['id']),
+        status: EnrollmentStatus.fromString(_readString(json['status'])),
+        academicYearId: _readString(json['academicYearId']),
+        enrollmentCode: _readString(json['enrollmentCode']),
+        previousSchoolName: _readString(json['previousSchoolName']),
+        previousAcademicYear: _readString(json['previousAcademicYear']),
+        previousSchoolLevelGroup: _readString(json['previousSchoolLevelGroup']),
+        previousSchoolLevel: _readString(json['previousSchoolLevel']),
+        previousRate: _readDouble(json['previousRate']),
+        previousRank: _readNullableInt(json['previousRank']),
+        validatedPreviousYear: _readBool(json['validatedPreviousYear']),
+        schoolLevelGroupId: _readString(json['schoolLevelGroupId']),
+        schoolLevelId: _readString(json['schoolLevelId']),
+        transferReason: _readString(json['transferReason']),
+        cancellationReason: _readString(json['cancellationReason']),
       );
+
+  static String _readString(dynamic value) => value?.toString() ?? '';
+
+  static double _readDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    if (value is String) {
+      return double.tryParse(value) ?? 0;
+    }
+
+    return 0;
+  }
+
+  static int? _readNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is int) {
+      return value;
+    }
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    if (value is String) {
+      return int.tryParse(value);
+    }
+
+    return null;
+  }
+
+  static bool _readBool(dynamic value) {
+    if (value is bool) {
+      return value;
+    }
+
+    if (value is num) {
+      return value != 0;
+    }
+
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      return normalized == 'true' || normalized == '1' || normalized == 'yes';
+    }
+
+    return false;
+  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,

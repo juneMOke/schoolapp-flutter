@@ -180,6 +180,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reRegistrationSearchReady => 'Valid criteria, you can run the search.';
 
   @override
+  String get reRegistrationSearchInvitationTitle => 'Start a re-registration search';
+
+  @override
+  String get reRegistrationSearchInvitationMessage => 'Fill the form above then click Search to display enrollment files.';
+
+  @override
   String get firstName => 'First Name';
 
   @override
@@ -210,7 +216,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResultsFound => 'No results found';
 
   @override
+  String get enrollmentNoResultsDescription => 'No student matches your search criteria.';
+
+  @override
   String get loadingStudents => 'Loading students...';
+
+  @override
+  String enrollmentResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: '0 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String enrollmentPageFooter(int pageCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pageCount,
+      locale: localeName,
+      other: 'results',
+      one: 'result',
+    );
+    return '$pageCount $_temp0 of $totalCount';
+  }
+
+  @override
+  String enrollmentPageIndicator(int current, int total) {
+    return 'Page $current / $total';
+  }
+
+  @override
+  String get refresh => 'Refresh';
 
   @override
   String get statusPending => 'Pending';
@@ -223,6 +263,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentCode => 'Enrollment Code';
+
+  @override
+  String get enrollmentDetailTitle => 'Enrollment file';
+
+  @override
+  String get enrollmentUnknownStudent => 'Student not specified';
 
   @override
   String get gender => 'Gender';
@@ -246,6 +292,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianInformation => 'Guardian Information';
 
   @override
+  String get guardianAddAction => 'Add guardian/contact';
+
+  @override
+  String get guardianSaveAction => 'Save';
+
+  @override
+  String get guardianRelationshipLabel => 'Relationship';
+
+  @override
+  String get guardianDeleteAction => 'Remove this guardian';
+
+  @override
+  String get guardianDeleteConfirmTitle => 'Confirm removal';
+
+  @override
+  String get guardianDeleteConfirmMessage => 'Do you really want to remove this guardian? This action cannot be undone.';
+
+  @override
+  String get guardianDeleteConfirmAction => 'Remove';
+
+  @override
+  String get guardianUnlinkSuccess => 'Guardian removed successfully.';
+
+  @override
+  String guardianUnlinkError(String message) {
+    return 'Failed to remove guardian: $message';
+  }
+
+  @override
   String get schoolFees => 'School Fees';
 
   @override
@@ -256,6 +331,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previous => 'Previous';
+
+  @override
+  String get nextPage => 'Next page';
+
+  @override
+  String get previousPage => 'Previous page';
 
   @override
   String get finish => 'Finish';
@@ -336,6 +417,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get neighborhoodHelp => 'Neighborhood or street of residence.';
+
+  @override
+  String get addressComplementary => 'Additional address';
+
+  @override
+  String get addressComplementaryHelp => 'Add street, avenue and number when needed.';
+
+  @override
+  String get addressComplementaryPlaceholder => 'Ex: 10, Avenue La source';
 
   @override
   String get fullAddress => 'Full address';
@@ -507,6 +597,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentReadyForValidation => 'File ready for final validation.';
 
   @override
+  String get completedEnrollmentRedirecting => 'This enrollment is already completed. Redirecting to First Registration.';
+
+  @override
+  String get validateEnrollment => 'Validate enrollment';
+
+  @override
+  String get validatingEnrollment => 'Validating...';
+
+  @override
+  String get goToFirstRegistration => 'Go to First Registration';
+
+  @override
+  String get enrollmentStatusUpdateSuccess => 'Status updated successfully.';
+
+  @override
+  String enrollmentStatusUpdateError(String message) {
+    return 'Failed to update status: $message';
+  }
+
+  @override
   String get personalInfoSaveHintBeforeContinue => 'Please save your changes before continuing.';
 
   @override
@@ -549,6 +659,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingAcademicInfo => 'Saving...';
 
   @override
+  String get saveGuardianInfo => 'Save guardian';
+
+  @override
+  String get savingGuardianInfo => 'Saving guardian...';
+
+  @override
   String get academicInfoValidationReasonsTitle => 'Please correct the following academic fields:';
 
   @override
@@ -566,6 +682,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressValidationReasonsTitle => 'Please correct the following address fields:';
 
   @override
+  String get addressNoCityAvailable => 'No city is available in the catalog.';
+
+  @override
+  String get addressSelectCityFirst => 'Select a city first.';
+
+  @override
+  String get addressNoDistrictAvailable => 'No district is available for this city.';
+
+  @override
+  String get addressSelectDistrictFirst => 'Select a district first.';
+
+  @override
+  String get addressNoMunicipalityAvailable => 'No municipality is available for this district.';
+
+  @override
+  String get addressSelectMunicipalityFirst => 'Select a municipality first.';
+
+  @override
+  String get addressNoNeighborhoodAvailable => 'No neighborhood is available for this municipality.';
+
+  @override
   String get addressSaveHintBeforeContinue => 'Please save address changes before continuing.';
 
   @override
@@ -575,6 +712,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Address update failed: $message';
   }
+
+  @override
+  String get enrollmentStatusFilterLabel => 'Status';
+
+  @override
+  String get enrollmentStatusInProgress => 'In Progress';
+
+  @override
+  String get enrollmentStatusAdminCompleted => 'Admin Completed';
+
+  @override
+  String get enrollmentStatusFinancialCompleted => 'Financial Completed';
+
+  @override
+  String get enrollmentStatusCompleted => 'Completed';
+
+  @override
+  String get enrollmentStatusValidated => 'Validated';
+
+  @override
+  String get enrollmentStatusRejected => 'Rejected';
+
+  @override
+  String get enrollmentStatusCancelled => 'Cancelled';
+
+  @override
+  String get enrollmentReadOnlyTitle => 'View-only mode';
+
+  @override
+  String get enrollmentReadOnlyMessage => 'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.';
+
+  @override
+  String get enrollmentEditableTitle => 'Edit mode';
+
+  @override
+  String get enrollmentEditableMessage => 'This enrollment is in progress (IN_PROGRESS). Information can be updated.';
+
+  @override
+  String get studentChargesStepTitle => 'Student charges';
+
+  @override
+  String get studentChargesStepSubtitle => 'Financial charges applied to the student';
+
+  @override
+  String get studentChargesLoading => 'Loading student charges...';
+
+  @override
+  String get studentChargesRetry => 'Retry';
+
+  @override
+  String get studentChargesEmpty => 'No charges are available for this student.';
+
+  @override
+  String get studentChargesUnavailable => 'Student charges cannot be loaded without a student or target level.';
+
+  @override
+  String get studentChargesAmountColumn => 'Amount';
+
+  @override
+  String get studentChargesAmountPaidLabel => 'Paid amount';
+
+  @override
+  String get studentChargesSaveAction => 'Save charges';
+
+  @override
+  String get studentChargesSavingAction => 'Saving charges...';
+
+  @override
+  String get studentChargesSaveSuccess => 'Charges saved successfully.';
+
+  @override
+  String get studentChargesSaveHintBeforeContinue => 'Please save charge changes before continuing.';
+
+  @override
+  String get studentChargesNetworkError => 'Unable to load charges. Please check your internet connection.';
+
+  @override
+  String get studentChargesNotFound => 'No charges were found for this student.';
+
+  @override
+  String get studentChargesValidationError => 'The requested charge data is invalid.';
+
+  @override
+  String get studentChargesUnauthorizedError => 'You are not allowed to access these charges.';
+
+  @override
+  String get studentChargesInvalidCredentialsError => 'Your credentials do not allow access to these charges.';
+
+  @override
+  String get studentChargesServerError => 'The server is currently unavailable.';
+
+  @override
+  String get studentChargesStorageError => 'A local error prevents charges from being displayed.';
+
+  @override
+  String get studentChargesAuthError => 'An authentication error prevents charges from loading.';
+
+  @override
+  String get studentChargesUnknownError => 'An unexpected error occurred while loading charges.';
+
+  @override
+  String get studentChargeStatusDue => 'Due';
+
+  @override
+  String get studentChargeStatusPartial => 'Partial';
+
+  @override
+  String get studentChargeStatusPaid => 'Paid';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';

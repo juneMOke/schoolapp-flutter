@@ -31,9 +31,9 @@ class MenuFactory {
           route: AppRoutesNames.inscriptionsDashboard,
         ),
         SubMenuItem(
-          id: MenuConstants.preInscriptionsId,
-          title: l10n.subMenuPreRegistrations,
-          route: AppRoutesNames.preInscriptions,
+          id: MenuConstants.premiereInscriptionId,
+          title: l10n.subMenuFirstRegistration,
+          route: AppRoutesNames.premiereInscription,
         ),
         SubMenuItem(
           id: MenuConstants.reInscriptionsId,
@@ -41,10 +41,11 @@ class MenuFactory {
           route: AppRoutesNames.reInscriptions,
         ),
         SubMenuItem(
-          id: MenuConstants.premiereInscriptionId,
-          title: l10n.subMenuFirstRegistration,
-          route: AppRoutesNames.premiereInscription,
+          id: MenuConstants.preInscriptionsId,
+          title: l10n.subMenuPreRegistrations,
+          route: AppRoutesNames.preInscriptions,
         ),
+
       ],
     );
   }

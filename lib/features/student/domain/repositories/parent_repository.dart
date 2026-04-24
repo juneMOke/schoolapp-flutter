@@ -12,4 +12,19 @@ abstract class ParentRepository {
     required String phoneNumber,
     required String relationshipType,
   });
+
+  Future<Either<Failure, ParentSummary>> createParent({
+    required String studentId,
+    required String firstName,
+    required String lastName,
+    required String? surname,
+    required String email,
+    required String phoneNumber,
+    required String relationshipType,
+  });
+
+  Future<Either<Failure, void>> unlinkParent({
+    required String studentId,
+    required String parentId,
+  });
 }

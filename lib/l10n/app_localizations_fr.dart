@@ -180,6 +180,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reRegistrationSearchReady => 'Critères valides, vous pouvez lancer la recherche.';
 
   @override
+  String get reRegistrationSearchInvitationTitle => 'Lancez une recherche de re-inscription';
+
+  @override
+  String get reRegistrationSearchInvitationMessage => 'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.';
+
+  @override
   String get firstName => 'Prénom';
 
   @override
@@ -210,7 +216,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noResultsFound => 'Aucun résultat trouvé';
 
   @override
+  String get enrollmentNoResultsDescription => 'Aucun élève ne correspond à vos critères de recherche.';
+
+  @override
   String get loadingStudents => 'Chargement des étudiants...';
+
+  @override
+  String enrollmentResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count résultats',
+      one: '1 résultat',
+      zero: '0 résultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String enrollmentPageFooter(int pageCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pageCount,
+      locale: localeName,
+      other: 'résultats',
+      one: 'résultat',
+    );
+    return '$pageCount $_temp0 sur $totalCount';
+  }
+
+  @override
+  String enrollmentPageIndicator(int current, int total) {
+    return 'Page $current / $total';
+  }
+
+  @override
+  String get refresh => 'Actualiser';
 
   @override
   String get statusPending => 'En Attente';
@@ -223,6 +263,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentCode => 'Code d\'Inscription';
+
+  @override
+  String get enrollmentDetailTitle => 'Dossier d\'inscription';
+
+  @override
+  String get enrollmentUnknownStudent => 'Élève non renseigné';
 
   @override
   String get gender => 'Genre';
@@ -246,6 +292,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianInformation => 'Informations Tuteurs';
 
   @override
+  String get guardianAddAction => 'Ajouter un tuteur/responsable';
+
+  @override
+  String get guardianSaveAction => 'Enregistrer';
+
+  @override
+  String get guardianRelationshipLabel => 'Relation';
+
+  @override
+  String get guardianDeleteAction => 'Supprimer ce tuteur';
+
+  @override
+  String get guardianDeleteConfirmTitle => 'Confirmer la suppression';
+
+  @override
+  String get guardianDeleteConfirmMessage => 'Voulez-vous vraiment supprimer ce tuteur ? Cette action est irréversible.';
+
+  @override
+  String get guardianDeleteConfirmAction => 'Supprimer';
+
+  @override
+  String get guardianUnlinkSuccess => 'Tuteur supprimé avec succès.';
+
+  @override
+  String guardianUnlinkError(String message) {
+    return 'Erreur lors de la suppression du tuteur : $message';
+  }
+
+  @override
   String get schoolFees => 'Frais Scolaires';
 
   @override
@@ -256,6 +331,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get previous => 'Précédent';
+
+  @override
+  String get nextPage => 'Page suivante';
+
+  @override
+  String get previousPage => 'Page précédente';
 
   @override
   String get finish => 'Terminer';
@@ -336,6 +417,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get neighborhoodHelp => 'Quartier ou avenue de résidence.';
+
+  @override
+  String get addressComplementary => 'Adresse complémentaire';
+
+  @override
+  String get addressComplementaryHelp => 'Précisez rue, avenue et numéro si nécessaire.';
+
+  @override
+  String get addressComplementaryPlaceholder => 'Ex: 10, Avenue La source';
 
   @override
   String get fullAddress => 'Adresse complète';
@@ -504,7 +594,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validateGuardianInfoHint => 'Veuillez vérifier les informations du/des tuteur(s).';
 
   @override
-  String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
+  String get enrollmentReadyForValidation => 'Dossier prt pour validation finale.';
+
+  @override
+  String get completedEnrollmentRedirecting => 'Ce dossier est deja complete. Redirection vers Premiere Inscription.';
+
+  @override
+  String get validateEnrollment => 'Valider l\'inscription';
+
+  @override
+  String get validatingEnrollment => 'Validation en cours...';
+
+  @override
+  String get goToFirstRegistration => 'Retourner a la premiere inscription';
+
+  @override
+  String get enrollmentStatusUpdateSuccess => 'Statut mis à jour avec succès.';
+
+  @override
+  String enrollmentStatusUpdateError(String message) {
+    return 'Erreur lors de la mise à jour du statut : $message';
+  }
 
   @override
   String get personalInfoSaveHintBeforeContinue => 'Veuillez enregistrer vos modifications avant de continuer.';
@@ -543,10 +653,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get savingAddress => 'Enregistrement de l\'adresse...';
 
   @override
-  String get saveAcademicInfo => 'Enregistrer les infos académiques';
+  String get saveAcademicInfo => 'Enregistrer les infos acadmiques';
 
   @override
   String get savingAcademicInfo => 'Enregistrement en cours...';
+
+  @override
+  String get saveGuardianInfo => 'Enregistrer le tuteur';
+
+  @override
+  String get savingGuardianInfo => 'Enregistrement du tuteur...';
 
   @override
   String get academicInfoValidationReasonsTitle => 'Veuillez corriger les champs académiques suivants :';
@@ -566,6 +682,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addressValidationReasonsTitle => 'Veuillez corriger les informations d\'adresse suivantes :';
 
   @override
+  String get addressNoCityAvailable => 'Aucune ville disponible dans le catalogue.';
+
+  @override
+  String get addressSelectCityFirst => 'Sélectionnez d\'abord une ville.';
+
+  @override
+  String get addressNoDistrictAvailable => 'Aucun district disponible pour cette ville.';
+
+  @override
+  String get addressSelectDistrictFirst => 'Sélectionnez d\'abord un district.';
+
+  @override
+  String get addressNoMunicipalityAvailable => 'Aucune commune disponible pour ce district.';
+
+  @override
+  String get addressSelectMunicipalityFirst => 'Sélectionnez d\'abord une commune.';
+
+  @override
+  String get addressNoNeighborhoodAvailable => 'Aucun quartier disponible pour cette commune.';
+
+  @override
   String get addressSaveHintBeforeContinue => 'Veuillez enregistrer les modifications d\'adresse avant de continuer.';
 
   @override
@@ -575,6 +712,114 @@ class AppLocalizationsFr extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Erreur lors de la mise à jour de l\'adresse : $message';
   }
+
+  @override
+  String get enrollmentStatusFilterLabel => 'Statut';
+
+  @override
+  String get enrollmentStatusInProgress => 'En cours';
+
+  @override
+  String get enrollmentStatusAdminCompleted => 'Complété (Administratif)';
+
+  @override
+  String get enrollmentStatusFinancialCompleted => 'Complété (Financier)';
+
+  @override
+  String get enrollmentStatusCompleted => 'Complété';
+
+  @override
+  String get enrollmentStatusValidated => 'Validé';
+
+  @override
+  String get enrollmentStatusRejected => 'Rejeté';
+
+  @override
+  String get enrollmentStatusCancelled => 'Annulé';
+
+  @override
+  String get enrollmentReadOnlyTitle => 'Mode consultation';
+
+  @override
+  String get enrollmentReadOnlyMessage => 'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
+
+  @override
+  String get enrollmentEditableTitle => 'Mode édition';
+
+  @override
+  String get enrollmentEditableMessage => 'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
+
+  @override
+  String get studentChargesStepTitle => 'Charges de l\'élève';
+
+  @override
+  String get studentChargesStepSubtitle => 'Montants financiers appliqués à l\'élève';
+
+  @override
+  String get studentChargesLoading => 'Chargement des charges de l\'élève...';
+
+  @override
+  String get studentChargesRetry => 'Réessayer';
+
+  @override
+  String get studentChargesEmpty => 'Aucune charge disponible pour cet élève.';
+
+  @override
+  String get studentChargesUnavailable => 'Impossible de charger les charges sans élève ou niveau cible.';
+
+  @override
+  String get studentChargesAmountColumn => 'Montant';
+
+  @override
+  String get studentChargesAmountPaidLabel => 'Montant payé';
+
+  @override
+  String get studentChargesSaveAction => 'Enregistrer les charges';
+
+  @override
+  String get studentChargesSavingAction => 'Enregistrement des charges...';
+
+  @override
+  String get studentChargesSaveSuccess => 'Charges enregistrées avec succès.';
+
+  @override
+  String get studentChargesSaveHintBeforeContinue => 'Veuillez enregistrer les modifications des charges avant de continuer.';
+
+  @override
+  String get studentChargesNetworkError => 'Impossible de charger les charges. Vérifiez votre connexion internet.';
+
+  @override
+  String get studentChargesNotFound => 'Aucune charge trouvée pour cet élève.';
+
+  @override
+  String get studentChargesValidationError => 'Les informations de charges demandées sont invalides.';
+
+  @override
+  String get studentChargesUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter ces charges.';
+
+  @override
+  String get studentChargesInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux charges.';
+
+  @override
+  String get studentChargesServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get studentChargesStorageError => 'Une erreur locale empêche l\'affichage des charges.';
+
+  @override
+  String get studentChargesAuthError => 'Une erreur d\'authentification empêche le chargement des charges.';
+
+  @override
+  String get studentChargesUnknownError => 'Une erreur inattendue est survenue lors du chargement des charges.';
+
+  @override
+  String get studentChargeStatusDue => 'Dû';
+
+  @override
+  String get studentChargeStatusPartial => 'Partiel';
+
+  @override
+  String get studentChargeStatusPaid => 'Payé';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
