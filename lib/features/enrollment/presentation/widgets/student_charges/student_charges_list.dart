@@ -25,7 +25,7 @@ class StudentChargesList extends StatelessWidget {
       itemCount: studentCharges.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      separatorBuilder: (_, __) =>
+      separatorBuilder: (_, _) =>
           const SizedBox(height: AppDimensions.spacingM),
       itemBuilder: (context, index) {
         final charge = studentCharges[index];

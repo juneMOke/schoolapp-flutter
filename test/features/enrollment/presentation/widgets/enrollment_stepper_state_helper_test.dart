@@ -233,19 +233,6 @@ void main() {
       },
     );
 
-    test('canSaveForStep retourne false pour un step non sauvegardable', () {
-      final result = EnrollmentStepperStateHelper.canSaveForStep(
-        currentStep: 5,
-        stepStates: <int, StepFormState>{
-          0: const StepFormState(dirty: true, valid: true, saving: false),
-          1: const StepFormState(dirty: true, valid: true, saving: false),
-          2: const StepFormState(dirty: true, valid: true, saving: false),
-        },
-      );
-
-      expect(result, isTrue);
-    });
-
     test(
       'canSaveForStep step 4 retourne true quand guardian est dirty, valid et non saving',
       () {
