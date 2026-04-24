@@ -31,6 +31,7 @@ enum EnrollmentWizardStep {
   address,
   previousAcademic,
   targetAcademic,
+  studentCharges,
   guardian,
   summary,
 }
@@ -41,8 +42,9 @@ extension EnrollmentWizardStepX on EnrollmentWizardStep {
     EnrollmentWizardStep.address => 1,
     EnrollmentWizardStep.previousAcademic => 2,
     EnrollmentWizardStep.targetAcademic => 3,
-    EnrollmentWizardStep.guardian => 4,
-    EnrollmentWizardStep.summary => 5,
+    EnrollmentWizardStep.studentCharges => 4,
+    EnrollmentWizardStep.guardian => 5,
+    EnrollmentWizardStep.summary => 6,
   };
 
   static EnrollmentWizardStep fromIndex(int index) {
@@ -51,7 +53,8 @@ extension EnrollmentWizardStepX on EnrollmentWizardStep {
       1 => EnrollmentWizardStep.address,
       2 => EnrollmentWizardStep.previousAcademic,
       3 => EnrollmentWizardStep.targetAcademic,
-      4 => EnrollmentWizardStep.guardian,
+      4 => EnrollmentWizardStep.studentCharges,
+      5 => EnrollmentWizardStep.guardian,
       _ => EnrollmentWizardStep.summary,
     };
   }
@@ -108,8 +111,9 @@ class EnrollmentDetailPolicyResolver {
         const PreRegistrationDetailPolicy(),
       EnrollmentDetailOrigin.reRegistration =>
         const ReRegistrationDetailPolicy(),
-      EnrollmentDetailOrigin.firstRegistration =>
-        FirstRegistrationDetailPolicy(status: intent.status),
+      EnrollmentDetailOrigin.firstRegistration => FirstRegistrationDetailPolicy(
+        status: intent.status,
+      ),
       EnrollmentDetailOrigin.newFirstRegistration =>
         const NewFirstRegistrationDetailPolicy(),
     };

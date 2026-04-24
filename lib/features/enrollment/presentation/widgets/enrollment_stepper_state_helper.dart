@@ -18,11 +18,7 @@ class StepFormState extends Equatable {
 
   bool get canContinue => !dirty && valid && !saving;
 
-  StepFormState copyWith({
-    bool? dirty,
-    bool? valid,
-    bool? saving,
-  }) {
+  StepFormState copyWith({bool? dirty, bool? valid, bool? saving}) {
     return StepFormState(
       dirty: dirty ?? this.dirty,
       valid: valid ?? this.valid,
@@ -76,7 +72,8 @@ class EnrollmentStepperStateHelper {
   static bool isGuardianInfoValid(List<ParentSummary> parents) {
     return parents.isNotEmpty &&
         parents.every(
-          (parent) => parent.firstName.trim().isNotEmpty &&
+          (parent) =>
+              parent.firstName.trim().isNotEmpty &&
               parent.lastName.trim().isNotEmpty &&
               parent.identificationNumber.trim().isNotEmpty &&
               parent.phoneNumber.trim().isNotEmpty &&
@@ -84,11 +81,11 @@ class EnrollmentStepperStateHelper {
         );
   }
 
-  static bool isSaveEnabledStep(int step) => step >= 0 && step <= 5;
+  static bool isSaveEnabledStep(int step) => step >= 0 && step <= 6;
 
-  // Le step 5 (récapitulatif) n'a pas d'état de formulaire local —
+  // Le step 6 (récapitulatif) n'a pas d'état de formulaire local —
   // il est toujours "prêt à valider".
-  static bool _isSummaryStep(int step) => step == 5;
+  static bool _isSummaryStep(int step) => step == 6;
 
   static StepFormState stateForStep(
     Map<int, StepFormState> stepStates,

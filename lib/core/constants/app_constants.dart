@@ -8,7 +8,8 @@ class AppConstants {
   static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
 
   static const String enrollmentEndpoint = '/api/v1/enrollments';
-  static const String enrollmentStudentSummaryEndpoint = '/api/v1/enrollments/student-summary';
+  static const String enrollmentStudentSummaryEndpoint =
+      '/api/v1/enrollments/student-summary';
   static const String enrollmentStatusUpdateEndpoint =
       '/api/v1/enrollments/{enrollmentId}/status';
 
@@ -53,6 +54,12 @@ class AppConstants {
       '/api/v1/bootstrap/current-year';
   static const String bootstrapPreviousYearEndpoint =
       '/api/v1/bootstrap/previous-year';
+  static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
+  static const String initializeStudentChargesEndpoint =
+      '/api/v1/finance/student-charges/{studentId}/initialize-charges';
+  static const String updateStudentChargeExpectedAmountEndpoint =
+      '/api/v1/finance/student-charges/{studentChargeId}';
+
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =
       'bootstrap_local_schema_version';

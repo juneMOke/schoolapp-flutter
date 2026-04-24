@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/guar
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/previous_academic_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/step_page_card.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/summary_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/target_academic_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
@@ -42,7 +43,7 @@ class EnrollmentStepper extends StatefulWidget {
 }
 
 class _EnrollmentStepperState extends State<EnrollmentStepper> {
-  static const int _totalSteps = 6;
+  static const int _totalSteps = 7;
 
   final GlobalKey<PersonalInfoStepState> _personalInfoKey =
       GlobalKey<PersonalInfoStepState>();
@@ -51,6 +52,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       GlobalKey<PreviousAcademicInfoStepState>();
   final GlobalKey<TargetAcademicInfoStepState> _academicTargetInfoKey =
       GlobalKey<TargetAcademicInfoStepState>();
+  final GlobalKey<StudentChargesStepState> _studentChargesKey =
+      GlobalKey<StudentChargesStepState>();
   final GlobalKey<GuardianInfoStepState> _guardianInfoKey =
       GlobalKey<GuardianInfoStepState>();
 
@@ -117,7 +120,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           detail.enrollmentDetail,
         ),
       ),
-      4: StepFormState(
+      4: const StepFormState(dirty: false, saving: false, valid: false),
+      5: StepFormState(
         dirty: false,
         saving: false,
         valid: EnrollmentStepperStateHelper.isGuardianInfoValid(
@@ -133,10 +137,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       1 => savingNow ? l10n.savingAddress : l10n.saveAddress,
       2 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
       3 => savingNow ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
-      4 => savingNow ? l10n.savingGuardianInfo : l10n.saveGuardianInfo,
-      5 => _isEnrollmentAlreadyCompleted
-          ? l10n.goToFirstRegistration
-          : (savingNow ? l10n.validatingEnrollment : l10n.validateEnrollment),
+      4 =>
+        savingNow
+            ? l10n.studentChargesSavingAction
+            : l10n.studentChargesSaveAction,
+      5 => savingNow ? l10n.savingGuardianInfo : l10n.saveGuardianInfo,
+      6 =>
+        _isEnrollmentAlreadyCompleted
+            ? l10n.goToFirstRegistration
+            : (savingNow ? l10n.validatingEnrollment : l10n.validateEnrollment),
       _ => '',
     };
   }
@@ -144,9 +153,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   void _redirectToFirstRegistrationFromHome() {
     context.goNamed(
       AppRoutesNames.home,
-      queryParameters: {
-        'subMenuId': MenuConstants.premiereInscriptionId,
-      },
+      queryParameters: {'subMenuId': MenuConstants.premiereInscriptionId},
     );
   }
 
@@ -166,7 +173,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           final l10n = AppLocalizations.of(context)!;
           final enrollmentBloc = context.read<EnrollmentBloc>();
           if (state.statusUpdateStatus == EnrollmentLoadStatus.success) {
-            AppSnackBar.showSuccess(context, l10n.enrollmentStatusUpdateSuccess);
+            AppSnackBar.showSuccess(
+              context,
+              l10n.enrollmentStatusUpdateSuccess,
+            );
             enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
             _redirectToFirstRegistrationFromHome();
           } else if (state.statusUpdateStatus == EnrollmentLoadStatus.failure) {
@@ -185,7 +195,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 enrollmentState.statusUpdateStatus ==
                 EnrollmentLoadStatus.loading;
 
-            return BlocBuilder<EnrollmentStepperFlowBloc, EnrollmentStepperFlowState>(
+            return BlocBuilder<
+              EnrollmentStepperFlowBloc,
+              EnrollmentStepperFlowState
+            >(
               builder: (context, flowState) {
                 final currentStep = flowState.currentStep;
                 final progress = (currentStep + 1) / stepTitles.length;
@@ -197,10 +210,13 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                   currentWizardStep,
                 );
                 final isFinalStep = currentStep == _totalSteps - 1;
-                final effectiveSavingNow =
-                    isFinalStep ? isStatusUpdateLoading : currentStepState.saving;
+                final effectiveSavingNow = isFinalStep
+                    ? isStatusUpdateLoading
+                    : currentStepState.saving;
                 final canSaveCurrentStep =
-                    (isFinalStep ? !isStatusUpdateLoading : flowState.canSave) &&
+                    (isFinalStep
+                        ? !isStatusUpdateLoading
+                        : flowState.canSave) &&
                     widget.detailPolicy.canSaveStep(currentWizardStep);
                 final showSaveAction =
                     flowState.showSaveAction &&
@@ -240,7 +256,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                         ),
                         onPrevious: () {
                           _flowBloc.add(
-                            EnrollmentStepperCurrentStepChanged(currentStep - 1),
+                            EnrollmentStepperCurrentStepChanged(
+                              currentStep - 1,
+                            ),
                           );
                         },
                         onSave: () => _onSavePressed(currentStep, flowState),
@@ -257,7 +275,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                             return;
                           }
                           _flowBloc.add(
-                            EnrollmentStepperCurrentStepChanged(currentStep + 1),
+                            EnrollmentStepperCurrentStepChanged(
+                              currentStep + 1,
+                            ),
                           );
                           _resetContentScroll();
                         },
@@ -279,6 +299,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       l10n.address,
       l10n.previousYear,
       l10n.targetYear,
+      l10n.studentChargesStepTitle,
       l10n.guardianInformation,
       l10n.summary,
     ];
@@ -290,6 +311,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       l10n.stepAddressSubtitle,
       l10n.stepAcademicPreviousSubtitle,
       l10n.stepAcademicTargetSubtitle,
+      l10n.studentChargesStepSubtitle,
       l10n.stepGuardianSubtitle,
       l10n.stepSummarySubtitle,
     ];
@@ -297,6 +319,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   List<Widget> _stepContents() {
     final effectiveStudentId = _resolveStudentId();
+    final effectiveLevelId = _resolveLevelId();
     final canEditPersonal = widget.detailPolicy.isStepEditable(
       EnrollmentWizardStep.personalInfo,
     );
@@ -308,6 +331,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     );
     final canEditTargetAcademic = widget.detailPolicy.isStepEditable(
       EnrollmentWizardStep.targetAcademic,
+    );
+    final canEditStudentCharges = widget.detailPolicy.isStepEditable(
+      EnrollmentWizardStep.studentCharges,
     );
     final canEditGuardian = widget.detailPolicy.isStepEditable(
       EnrollmentWizardStep.guardian,
@@ -353,11 +379,20 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         onRefreshRequested: _refreshAfterSave,
         isEditable: canEditTargetAcademic,
       ),
+      StudentChargesStep(
+        key: _studentChargesKey,
+        studentId: effectiveStudentId,
+        levelId: effectiveLevelId,
+        enrollmentStatus: widget.enrollmentDetail.enrollmentDetail.status,
+        showInlineSaveButton: false,
+        flowStepIndex: 4,
+        isEditable: canEditStudentCharges,
+      ),
       GuardianInfoStep(
         key: _guardianInfoKey,
         parentDetails: widget.enrollmentDetail.parentDetails,
         studentId: effectiveStudentId,
-        flowStepIndex: 4,
+        flowStepIndex: 5,
         enrollmentId: widget.enrollmentDetail.enrollmentDetail.id,
         showInlineSaveButton: false,
         onRefreshRequested: _refreshAfterSave,
@@ -374,6 +409,19 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     }
 
     return widget.detailIntent.studentId?.trim() ?? '';
+  }
+
+  String _resolveLevelId() {
+    final enrollmentLevelId = widget
+        .enrollmentDetail
+        .enrollmentDetail
+        .schoolLevelId
+        .trim();
+    if (enrollmentLevelId.isNotEmpty) {
+      return enrollmentLevelId;
+    }
+
+    return widget.enrollmentDetail.studentDetail.schoolLevel.id.trim();
   }
 
   void _onBreadcrumbStepTap(int targetStep, int currentStep) {
@@ -436,6 +484,16 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         return true;
       case 4:
         if (!currentState.valid) {
+          _showHint(l10n.studentChargesSaveHintBeforeContinue);
+          return false;
+        }
+        if (isEditable && currentState.dirty) {
+          _showHint(l10n.studentChargesSaveHintBeforeContinue);
+          return false;
+        }
+        return true;
+      case 5:
+        if (!currentState.valid) {
           _showHint(l10n.validateGuardianInfoHint);
           return false;
         }
@@ -444,7 +502,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           return false;
         }
         return true;
-      case 5:
+      case 6:
         return true;
       default:
         return false;
@@ -482,15 +540,23 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       final formState = _academicTargetInfoKey.currentState;
       if (formState == null) return;
       formState.submitForm();
+      return;
     }
     if (currentStep == 4) {
       if (flowState.stateOf(4).saving) return;
-      final formState = _guardianInfoKey.currentState;
+      final formState = _studentChargesKey.currentState;
       if (formState == null) return;
       formState.submitForm();
       return;
     }
     if (currentStep == 5) {
+      if (flowState.stateOf(5).saving) return;
+      final formState = _guardianInfoKey.currentState;
+      if (formState == null) return;
+      formState.submitForm();
+      return;
+    }
+    if (currentStep == 6) {
       if (_isEnrollmentAlreadyCompleted) {
         final l10n = AppLocalizations.of(context)!;
         AppSnackBar.showInfo(context, l10n.completedEnrollmentRedirecting);

@@ -7,10 +7,16 @@ import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
@@ -133,6 +139,24 @@ Future<void> configureDependencies() async {
                 requestOptions: e.requestOptions,
                 response: e.response,
                 error: const UnauthorizedFailure('Access forbidden'),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 404) {
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: const NotFoundFailure('Resource not found'),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 422) {
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: const ValidationFailure('Invalid request data'),
                 type: e.type,
               ),
             );
@@ -509,13 +533,40 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerLazySingleton<StudentChargesRemoteDataSource>(
+    () => StudentChargesRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<StudentChargesRepository>(
+    () => StudentChargesRepositoryImpl(
+      remoteDataSource: getIt<StudentChargesRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
   getIt.registerFactory<GetFeeTariffsUseCase>(
     () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
   );
 
+  getIt.registerFactory<GetStudentChargesUseCase>(
+    () => GetStudentChargesUseCase(getIt<StudentChargesRepository>()),
+  );
+
+  getIt.registerFactory<UpdateStudentChargeExpectedAmountUseCase>(
+    () => UpdateStudentChargeExpectedAmountUseCase(
+      getIt<StudentChargesRepository>(),
+    ),
+  );
+
   getIt.registerFactory<FinanceBloc>(
-    () => FinanceBloc(
-      getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>(),
+    () => FinanceBloc(getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>()),
+  );
+
+  getIt.registerFactory<StudentChargesBloc>(
+    () => StudentChargesBloc(
+      getStudentChargesUseCase: getIt<GetStudentChargesUseCase>(),
+      updateStudentChargeExpectedAmountUseCase:
+          getIt<UpdateStudentChargeExpectedAmountUseCase>(),
     ),
   );
 }

@@ -1487,6 +1487,150 @@ abstract class AppLocalizations {
   /// **'This enrollment is in progress (IN_PROGRESS). Information can be updated.'**
   String get enrollmentEditableMessage;
 
+  /// No description provided for @studentChargesStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student charges'**
+  String get studentChargesStepTitle;
+
+  /// No description provided for @studentChargesStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial charges applied to the student'**
+  String get studentChargesStepSubtitle;
+
+  /// No description provided for @studentChargesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading student charges...'**
+  String get studentChargesLoading;
+
+  /// No description provided for @studentChargesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get studentChargesRetry;
+
+  /// No description provided for @studentChargesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No charges are available for this student.'**
+  String get studentChargesEmpty;
+
+  /// No description provided for @studentChargesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Student charges cannot be loaded without a student or target level.'**
+  String get studentChargesUnavailable;
+
+  /// No description provided for @studentChargesAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get studentChargesAmountColumn;
+
+  /// No description provided for @studentChargesAmountPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid amount'**
+  String get studentChargesAmountPaidLabel;
+
+  /// No description provided for @studentChargesSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save charges'**
+  String get studentChargesSaveAction;
+
+  /// No description provided for @studentChargesSavingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving charges...'**
+  String get studentChargesSavingAction;
+
+  /// No description provided for @studentChargesSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges saved successfully.'**
+  String get studentChargesSaveSuccess;
+
+  /// No description provided for @studentChargesSaveHintBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save charge changes before continuing.'**
+  String get studentChargesSaveHintBeforeContinue;
+
+  /// No description provided for @studentChargesNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load charges. Please check your internet connection.'**
+  String get studentChargesNetworkError;
+
+  /// No description provided for @studentChargesNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No charges were found for this student.'**
+  String get studentChargesNotFound;
+
+  /// No description provided for @studentChargesValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested charge data is invalid.'**
+  String get studentChargesValidationError;
+
+  /// No description provided for @studentChargesUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to access these charges.'**
+  String get studentChargesUnauthorizedError;
+
+  /// No description provided for @studentChargesInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to these charges.'**
+  String get studentChargesInvalidCredentialsError;
+
+  /// No description provided for @studentChargesServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get studentChargesServerError;
+
+  /// No description provided for @studentChargesStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents charges from being displayed.'**
+  String get studentChargesStorageError;
+
+  /// No description provided for @studentChargesAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents charges from loading.'**
+  String get studentChargesAuthError;
+
+  /// No description provided for @studentChargesUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading charges.'**
+  String get studentChargesUnknownError;
+
+  /// No description provided for @studentChargeStatusDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get studentChargeStatusDue;
+
+  /// No description provided for @studentChargeStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get studentChargeStatusPartial;
+
+  /// No description provided for @studentChargeStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get studentChargeStatusPaid;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:

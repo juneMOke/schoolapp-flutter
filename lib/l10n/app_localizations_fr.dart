@@ -750,6 +750,78 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentEditableMessage => 'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
 
   @override
+  String get studentChargesStepTitle => 'Charges de l\'élève';
+
+  @override
+  String get studentChargesStepSubtitle => 'Montants financiers appliqués à l\'élève';
+
+  @override
+  String get studentChargesLoading => 'Chargement des charges de l\'élève...';
+
+  @override
+  String get studentChargesRetry => 'Réessayer';
+
+  @override
+  String get studentChargesEmpty => 'Aucune charge disponible pour cet élève.';
+
+  @override
+  String get studentChargesUnavailable => 'Impossible de charger les charges sans élève ou niveau cible.';
+
+  @override
+  String get studentChargesAmountColumn => 'Montant';
+
+  @override
+  String get studentChargesAmountPaidLabel => 'Montant payé';
+
+  @override
+  String get studentChargesSaveAction => 'Enregistrer les charges';
+
+  @override
+  String get studentChargesSavingAction => 'Enregistrement des charges...';
+
+  @override
+  String get studentChargesSaveSuccess => 'Charges enregistrées avec succès.';
+
+  @override
+  String get studentChargesSaveHintBeforeContinue => 'Veuillez enregistrer les modifications des charges avant de continuer.';
+
+  @override
+  String get studentChargesNetworkError => 'Impossible de charger les charges. Vérifiez votre connexion internet.';
+
+  @override
+  String get studentChargesNotFound => 'Aucune charge trouvée pour cet élève.';
+
+  @override
+  String get studentChargesValidationError => 'Les informations de charges demandées sont invalides.';
+
+  @override
+  String get studentChargesUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter ces charges.';
+
+  @override
+  String get studentChargesInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux charges.';
+
+  @override
+  String get studentChargesServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get studentChargesStorageError => 'Une erreur locale empêche l\'affichage des charges.';
+
+  @override
+  String get studentChargesAuthError => 'Une erreur d\'authentification empêche le chargement des charges.';
+
+  @override
+  String get studentChargesUnknownError => 'Une erreur inattendue est survenue lors du chargement des charges.';
+
+  @override
+  String get studentChargeStatusDue => 'Dû';
+
+  @override
+  String get studentChargeStatusPartial => 'Partiel';
+
+  @override
+  String get studentChargeStatusPaid => 'Payé';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override

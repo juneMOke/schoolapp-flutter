@@ -750,6 +750,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentEditableMessage => 'This enrollment is in progress (IN_PROGRESS). Information can be updated.';
 
   @override
+  String get studentChargesStepTitle => 'Student charges';
+
+  @override
+  String get studentChargesStepSubtitle => 'Financial charges applied to the student';
+
+  @override
+  String get studentChargesLoading => 'Loading student charges...';
+
+  @override
+  String get studentChargesRetry => 'Retry';
+
+  @override
+  String get studentChargesEmpty => 'No charges are available for this student.';
+
+  @override
+  String get studentChargesUnavailable => 'Student charges cannot be loaded without a student or target level.';
+
+  @override
+  String get studentChargesAmountColumn => 'Amount';
+
+  @override
+  String get studentChargesAmountPaidLabel => 'Paid amount';
+
+  @override
+  String get studentChargesSaveAction => 'Save charges';
+
+  @override
+  String get studentChargesSavingAction => 'Saving charges...';
+
+  @override
+  String get studentChargesSaveSuccess => 'Charges saved successfully.';
+
+  @override
+  String get studentChargesSaveHintBeforeContinue => 'Please save charge changes before continuing.';
+
+  @override
+  String get studentChargesNetworkError => 'Unable to load charges. Please check your internet connection.';
+
+  @override
+  String get studentChargesNotFound => 'No charges were found for this student.';
+
+  @override
+  String get studentChargesValidationError => 'The requested charge data is invalid.';
+
+  @override
+  String get studentChargesUnauthorizedError => 'You are not allowed to access these charges.';
+
+  @override
+  String get studentChargesInvalidCredentialsError => 'Your credentials do not allow access to these charges.';
+
+  @override
+  String get studentChargesServerError => 'The server is currently unavailable.';
+
+  @override
+  String get studentChargesStorageError => 'A local error prevents charges from being displayed.';
+
+  @override
+  String get studentChargesAuthError => 'An authentication error prevents charges from loading.';
+
+  @override
+  String get studentChargesUnknownError => 'An unexpected error occurred while loading charges.';
+
+  @override
+  String get studentChargeStatusDue => 'Due';
+
+  @override
+  String get studentChargeStatusPartial => 'Partial';
+
+  @override
+  String get studentChargeStatusPaid => 'Paid';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override
