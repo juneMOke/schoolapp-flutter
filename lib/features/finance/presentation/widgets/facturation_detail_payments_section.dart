@@ -6,6 +6,10 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payments_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -33,29 +37,19 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.detailCardPadding),
-        decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.financeDetailPaymentsSurface,
-            AppColors.financeDetailPaymentsSurfaceAlt,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(
-          color: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
-        ),
-      ),
+    return FinanceSectionCard(
+      gradientColors: const [
+        AppColors.financeDetailPaymentsSurface,
+        AppColors.financeDetailPaymentsSurfaceAlt,
+      ],
+      borderColor: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final isCompact = constraints.maxWidth < 760;
+              final isCompact =
+                  constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
               final actionButton = _CollectPaymentButton(
                 label: l10n.facturationDetailCollectPaymentAction,
                 onPressed: onCreatePaymentRequested,
@@ -67,25 +61,12 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: AppDimensions.spacingL,
-                          height: AppDimensions.spacingL,
-                          decoration: BoxDecoration(
-                            color: AppColors.financeDetailPaymentsAccentSoft,
-                            borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-                          ),
-                          child: const Icon(
-                            Icons.payments_outlined,
-                            size: AppDimensions.detailMiniIconSize,
-                            color: AppColors.financeDetailPaymentsAccent,
-                          ),
-                        ),
-                        const SizedBox(width: AppDimensions.spacingS),
-                        Text(
-                          l10n.facturationDetailPaymentsSectionTitle,
-                          style: AppTextStyles.sectionTitle.copyWith(
-                            color: AppColors.financeDetailPaymentsAccent,
-                            fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: FinanceSectionHeader(
+                            icon: Icons.payments_outlined,
+                            title: l10n.facturationDetailPaymentsSectionTitle,
+                            accent: AppColors.financeDetailPaymentsAccent,
+                            accentSoft: AppColors.financeDetailPaymentsAccentSoft,
                           ),
                         ),
                       ],
@@ -109,30 +90,11 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: AppDimensions.spacingL,
-                              height: AppDimensions.spacingL,
-                              decoration: BoxDecoration(
-                                color: AppColors.financeDetailPaymentsAccentSoft,
-                                borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-                              ),
-                              child: const Icon(
-                                Icons.payments_outlined,
-                                size: AppDimensions.detailMiniIconSize,
-                                color: AppColors.financeDetailPaymentsAccent,
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.spacingS),
-                            Text(
-                              l10n.facturationDetailPaymentsSectionTitle,
-                              style: AppTextStyles.sectionTitle.copyWith(
-                                color: AppColors.financeDetailPaymentsAccent,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                        FinanceSectionHeader(
+                          icon: Icons.payments_outlined,
+                          title: l10n.facturationDetailPaymentsSectionTitle,
+                          accent: AppColors.financeDetailPaymentsAccent,
+                          accentSoft: AppColors.financeDetailPaymentsAccentSoft,
                         ),
                         const SizedBox(height: AppDimensions.spacingXS),
                         Text(
@@ -167,88 +129,50 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                 prev.payments != curr.payments ||
                 prev.errorType != curr.errorType,
             builder: (context, state) {
-              if (state.status == PaymentsStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+              return AnimatedSwitcher(
+                duration: FinanceMotion.standard,
+                switchInCurve: FinanceMotion.outCurve,
+                switchOutCurve: FinanceMotion.inCurve,
+                child: () {
+                  if (state.status == PaymentsStatus.loading) {
+                    return const Center(
+                      key: ValueKey('payments-loading'),
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-              if (state.status == PaymentsStatus.failure) {
-                return _ErrorCard(
-                  message: state.errorType.localizedMessage(l10n),
-                  retryLabel: l10n.facturationDetailPaymentsRetry,
-                  onRetry: () => _retry(context),
-                );
-              }
+                  if (state.status == PaymentsStatus.failure) {
+                    return FinanceStateCard(
+                      key: const ValueKey('payments-error'),
+                      message: state.errorType.localizedMessage(l10n),
+                      icon: Icons.error_outline,
+                      accent: AppColors.warning,
+                      accentSoft: AppColors.financeDetailWarningSoft,
+                      actionLabel: l10n.facturationDetailPaymentsRetry,
+                      onAction: () => _retry(context),
+                    );
+                  }
 
-              if (state.payments.isEmpty) {
-                return _EmptyCard(message: l10n.facturationDetailPaymentsEmpty);
-              }
+                  if (state.payments.isEmpty) {
+                    return FinanceStateCard(
+                      key: const ValueKey('payments-empty'),
+                      message: l10n.facturationDetailPaymentsEmpty,
+                      icon: Icons.inbox_outlined,
+                      accent: AppColors.textSecondary,
+                      accentSoft: AppColors.financeDetailMutedSurface,
+                    );
+                  }
 
-              return FacturationPaymentsTable(
-                payments: state.payments,
-                onViewRequested: onViewPaymentRequested,
+                  return FacturationPaymentsTable(
+                    key: const ValueKey('payments-table'),
+                    payments: state.payments,
+                    onViewRequested: onViewPaymentRequested,
+                  );
+                }(),
               );
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  const _ErrorCard({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      decoration: BoxDecoration(
-        color: AppColors.financeDetailMutedSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyCard extends StatelessWidget {
-  final String message;
-
-  const _EmptyCard({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      decoration: BoxDecoration(
-        color: AppColors.financeDetailMutedSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Text(
-        message,
-        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
       ),
     );
   }
@@ -265,12 +189,13 @@ class _CollectPaymentButton extends StatelessWidget {
     required this.onPressed,
   });
 
-  static const _gradientStart = Color(0xFF818CF8); // violet clair
+  static const _gradientStart = AppColors.financeDetailPaymentsAccentLight;
   static const _gradientEnd = AppColors.financeDetailPaymentsAccent; // violet ancre
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return AnimatedContainer(
+      duration: FinanceMotion.fast,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -291,7 +216,7 @@ class _CollectPaymentButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(AppDimensions.spacingXL),
-          splashColor: Colors.white.withValues(alpha: 0.15),
+          splashColor: AppColors.surface.withValues(alpha: 0.15),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimensions.spacingL,
@@ -302,14 +227,14 @@ class _CollectPaymentButton extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.point_of_sale_outlined,
-                  color: Colors.white,
+                  color: AppColors.surface,
                   size: AppDimensions.detailMiniIconSize,
                 ),
                 const SizedBox(width: AppDimensions.spacingS),
                 Text(
                   label,
                   style: AppTextStyles.action.copyWith(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     letterSpacing: 0.3,
                   ),
                 ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_page_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
@@ -41,79 +43,66 @@ class _FacturationPageState extends State<FacturationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF4F8FF), Color(0xFFEFF5FF), Color(0xFFF7FAFF)],
-        ),
-      ),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppTheme.largePadding),
-        child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-          buildWhen: (prev, curr) =>
-              prev.status != curr.status || prev.bootstrap != curr.bootstrap,
-          builder: (context, bootstrapState) {
-            if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                bootstrapState.status == BootstrapContextLoadStatus.initial) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 48),
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
-
-            if (bootstrapState.status != BootstrapContextLoadStatus.success) {
-              return BootstrapContextError(
-                onLogout: () =>
-                    context.read<AuthBloc>().add(const AuthLogoutRequested()),
-              );
-            }
-
-            final academicOptions = _buildAcademicOptions(
-              bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+    return FinancePageBackground(
+      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+        buildWhen: (prev, curr) =>
+            prev.status != curr.status || prev.bootstrap != curr.bootstrap,
+        builder: (context, bootstrapState) {
+          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+              bootstrapState.status == BootstrapContextLoadStatus.initial) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
+              child: Center(child: CircularProgressIndicator()),
             );
+          }
 
-            return Column(
+          if (bootstrapState.status != BootstrapContextLoadStatus.success) {
+            return BootstrapContextError(
+              onLogout: () =>
+                  context.read<AuthBloc>().add(const AuthLogoutRequested()),
+            );
+          }
+
+          final academicOptions = _buildAcademicOptions(
+            bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+          );
+
+          return AnimatedSwitcher(
+            duration: FinanceMotion.standard,
+            child: Column(
+              key: const ValueKey('facturation-content'),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── En-tête page ─────────────────────────────────────────
                 const FacturationPageHeader(),
-                const SizedBox(height: 16),
-                // ── Formulaire de recherche ───────────────────────────────
+                const SizedBox(height: AppDimensions.spacingM),
                 BlocBuilder<EnrollmentBloc, EnrollmentState>(
                   buildWhen: (prev, curr) =>
                       prev.summariesStatus != curr.summariesStatus,
                   builder: (context, enrollmentState) {
                     return FacturationSearchForm(
                       options: academicOptions,
-                      isLoading: enrollmentState.summariesStatus ==
-                          EnrollmentLoadStatus.loading,
-                      onSearch: (request) =>
-                          context.read<EnrollmentBloc>().add(
-                            EnrollmentSummariesByAcademicInfoRequested(
-                              firstName: request.firstName,
-                              lastName: request.lastName,
-                              surname: request.surname,
-                              schoolLevelGroupId: request.schoolLevelGroupId,
-                              schoolLevelId: request.schoolLevelId,
-                            ),
-                          ),
+                      isLoading:
+                          enrollmentState.summariesStatus == EnrollmentLoadStatus.loading,
+                      onSearch: (request) => context.read<EnrollmentBloc>().add(
+                        EnrollmentSummariesByAcademicInfoRequested(
+                          firstName: request.firstName,
+                          lastName: request.lastName,
+                          surname: request.surname,
+                          schoolLevelGroupId: request.schoolLevelGroupId,
+                          schoolLevelId: request.schoolLevelId,
+                        ),
+                      ),
                     );
                   },
                 ),
-                const SizedBox(height: 14),
-                // ── Tableau des élèves ────────────────────────────────────
+                const SizedBox(height: AppDimensions.spacingM),
                 FacturationStudentTable(
                   onViewRequested: _onViewChargesRequested,
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

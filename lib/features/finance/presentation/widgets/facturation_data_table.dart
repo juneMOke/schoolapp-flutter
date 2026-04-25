@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 // ─── Enum de tri (privé au fichier) ───────────────────────────────────────────
@@ -290,7 +291,7 @@ class _SortCell extends StatelessWidget {
               ),
               const SizedBox(width: 2),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: FinanceMotion.standard,
                 child: Icon(
                   key: ValueKey('${column.name}_$asc'),
                   isActive
@@ -342,7 +343,7 @@ class _TableRowState extends State<_TableRow> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 130),
+        duration: FinanceMotion.micro,
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
@@ -472,7 +473,7 @@ class _EyeButtonState extends State<_EyeButton> {
           child: GestureDetector(
             onTap: widget.onTap,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
+              duration: FinanceMotion.fast,
               width: 30,
               height: 30,
               decoration: BoxDecoration(

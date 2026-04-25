@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_info_tile.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_context_chip.dart';
 
 class FacturationPaymentInfoSection extends StatelessWidget {
@@ -144,19 +145,25 @@ class FacturationPaymentInfoSection extends StatelessWidget {
                 spacing: AppDimensions.spacingM,
                 runSpacing: AppDimensions.spacingM,
                 children: [
-                  _InfoTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: payerLabel,
                     value: isUnknownPayer ? unknownValue : payer,
-                    isUnknown: isUnknownPayer,
+                    valueColor: isUnknownPayer
+                        ? AppColors.textSecondary
+                        : AppColors.textPrimary,
                   ),
-                  _InfoTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: amountLabel,
                     value: _formatAmount(amountInCents, currency),
-                    emphasizeValue: true,
+                    backgroundColor: AppColors.financeDetailPaymentsAccentSoft,
+                    borderColor: AppColors.financeDetailPaymentsAccent.withValues(
+                      alpha: 0.22,
+                    ),
+                    valueFontSize: 16,
                   ),
-                  _InfoTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: paidAtLabel,
                     value: localizations.formatFullDate(paidAt),
@@ -166,64 +173,6 @@ class FacturationPaymentInfoSection extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final double width;
-  final bool emphasizeValue;
-  final bool isUnknown;
-
-  const _InfoTile({
-    required this.label,
-    required this.value,
-    required this.width,
-    this.emphasizeValue = false,
-    this.isUnknown = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        decoration: BoxDecoration(
-          color: emphasizeValue
-              ? AppColors.financeDetailPaymentsAccentSoft
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-          border: Border.all(
-            color: emphasizeValue
-                ? AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.22)
-                : AppColors.border,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.tableHeader.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              value,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: isUnknown
-                    ? AppColors.textSecondary
-                    : AppColors.textPrimary,
-                fontSize: emphasizeValue ? 16 : 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

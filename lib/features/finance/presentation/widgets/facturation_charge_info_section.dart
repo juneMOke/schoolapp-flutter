@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_info_tile.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_context_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -102,22 +103,26 @@ class FacturationChargeInfoSection extends StatelessWidget {
                 spacing: AppDimensions.spacingM,
                 runSpacing: AppDimensions.spacingM,
                 children: [
-                  _AmountTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationChargeDetailExpectedAmountLabel,
                     value: _formatAmount(expectedAmountInCents, currency),
                   ),
-                  _AmountTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationChargeDetailPaidAmountLabel,
                     value: _formatAmount(amountPaidInCents, currency),
-                    emphasize: true,
+                    backgroundColor: AppColors.financeDetailChargeInfoAccentSoft,
+                    borderColor: AppColors.financeDetailChargeInfoAccent.withValues(
+                      alpha: 0.22,
+                    ),
+                    valueFontSize: 16,
                   ),
-                  _AmountTile(
+                  FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationChargeDetailRemainingAmountLabel,
                     value: _formatAmount(_remainingInCents, currency),
-                    accentColor: _remainingInCents > 0
+                    valueColor: _remainingInCents > 0
                         ? AppColors.warning
                         : AppColors.success,
                   ),
@@ -186,64 +191,6 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _AmountTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final double width;
-  final bool emphasize;
-  final Color? accentColor;
-
-  const _AmountTile({
-    required this.label,
-    required this.value,
-    required this.width,
-    this.emphasize = false,
-    this.accentColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final resolvedAccent = accentColor ?? AppColors.financeDetailChargeInfoAccent;
-    final resolvedSurface = emphasize
-        ? AppColors.financeDetailChargeInfoAccentSoft
-        : AppColors.surface;
-    final resolvedBorder = emphasize
-        ? AppColors.financeDetailChargeInfoAccent.withValues(alpha: 0.22)
-        : AppColors.border;
-
-    return SizedBox(
-      width: width,
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        decoration: BoxDecoration(
-          color: resolvedSurface,
-          borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-          border: Border.all(color: resolvedBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.tableHeader.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              value,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: accentColor != null ? resolvedAccent : AppColors.textPrimary,
-                fontSize: emphasize ? 16 : 14,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

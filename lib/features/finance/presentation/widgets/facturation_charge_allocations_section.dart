@@ -6,6 +6,10 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_consistency_info_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_context_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -54,30 +58,12 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.detailCardPadding),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.financeDetailPaymentsSurface,
-            AppColors.financeDetailPaymentsSurfaceAlt,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(
-          color: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.financeDetailShadow,
-            blurRadius: AppDimensions.financeDetailCardShadowBlur,
-            offset: Offset(0, AppDimensions.financeDetailCardShadowOffsetY),
-          ),
-        ],
-      ),
+    return FinanceSectionCard(
+      gradientColors: const [
+        AppColors.financeDetailPaymentsSurface,
+        AppColors.financeDetailPaymentsSurfaceAlt,
+      ],
+      borderColor: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
       child: BlocConsumer<StudentChargesBloc, StudentChargesState>(
         listenWhen: _shouldListen,
         listener: (context, state) {
@@ -94,100 +80,105 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
           final allocations =
               state.allocationsByChargeId[chargeId] ?? const [];
 
-          if (state.allocationsStatus == StudentChargesStatus.loading &&
-              allocations.isEmpty) {
-            return _StateCard(
-              message: l10n.loadingStudents,
-              icon: Icons.hourglass_top_rounded,
-              accent: AppColors.financeDetailPaymentsAccent,
-              accentSoft: AppColors.financeDetailPaymentsAccentSoft,
-              child: const Padding(
-                padding: EdgeInsets.only(top: AppDimensions.spacingM),
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
+          return AnimatedSwitcher(
+            duration: FinanceMotion.standard,
+            switchInCurve: FinanceMotion.outCurve,
+            switchOutCurve: FinanceMotion.inCurve,
+            child: () {
+              if (state.allocationsStatus == StudentChargesStatus.loading &&
+                  allocations.isEmpty) {
+                return FinanceStateCard(
+                  key: const ValueKey('charge-allocations-loading'),
+                  message: l10n.loadingStudents,
+                  icon: Icons.hourglass_top_rounded,
+                  accent: AppColors.financeDetailPaymentsAccent,
+                  accentSoft: AppColors.financeDetailPaymentsAccentSoft,
+                  child: const CircularProgressIndicator(),
+                );
+              }
 
-          if (state.allocationsStatus == StudentChargesStatus.failure &&
-              allocations.isEmpty) {
-            return _StateCard(
-              message: state.allocationsErrorType.localizedMessage(l10n),
-              icon: Icons.error_outline,
-              accent: AppColors.financeDetailAmber,
-              accentSoft: AppColors.financeDetailWarningSoft,
-              actionLabel:
-                  l10n.facturationChargeDetailAllocationsRetry,
-              onAction: () => _retry(context),
-            );
-          }
+              if (state.allocationsStatus == StudentChargesStatus.failure &&
+                  allocations.isEmpty) {
+                return FinanceStateCard(
+                  key: const ValueKey('charge-allocations-error'),
+                  message: state.allocationsErrorType.localizedMessage(l10n),
+                  icon: Icons.error_outline,
+                  accent: AppColors.financeDetailAmber,
+                  accentSoft: AppColors.financeDetailWarningSoft,
+                  actionLabel: l10n.facturationChargeDetailAllocationsRetry,
+                  onAction: () => _retry(context),
+                );
+              }
 
-          if (allocations.isEmpty) {
-            return _StateCard(
-              message: l10n.facturationChargeDetailAllocationsEmpty,
-              icon: Icons.inbox_outlined,
-              accent: AppColors.textSecondary,
-              accentSoft: AppColors.financeDetailMutedSurface,
-              actionLabel:
-                  l10n.facturationChargeDetailAllocationsRetry,
-              onAction: () => _retry(context),
-            );
-          }
+              if (allocations.isEmpty) {
+                return FinanceStateCard(
+                  key: const ValueKey('charge-allocations-empty'),
+                  message: l10n.facturationChargeDetailAllocationsEmpty,
+                  icon: Icons.inbox_outlined,
+                  accent: AppColors.textSecondary,
+                  accentSoft: AppColors.financeDetailMutedSurface,
+                  actionLabel: l10n.facturationChargeDetailAllocationsRetry,
+                  onAction: () => _retry(context),
+                );
+              }
 
-          final totalPaid = allocations.fold<double>(
-            0,
-            (sum, item) => sum + item.amountInCents,
-          );
-          final isConsistent = totalPaid == expectedAmountInCents;
+              final totalPaid = allocations.fold<double>(
+                0,
+                (sum, item) => sum + item.amountInCents,
+              );
+              final isConsistent = totalPaid == expectedAmountInCents;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionHeader(
-                title:
-                    l10n.facturationChargeDetailAllocationsSectionTitle,
-                subtitle:
-                    l10n.facturationChargeDetailAllocationsSectionSubtitle,
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Wrap(
-                spacing: AppDimensions.spacingS,
-                runSpacing: AppDimensions.spacingS,
+              return Column(
+                key: const ValueKey('charge-allocations-content'),
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FinanceContextChip(
-                    label: currency,
-                    icon: Icons.attach_money_outlined,
+                  FinanceSectionHeader(
+                    icon: Icons.list_alt_outlined,
+                    title: l10n.facturationChargeDetailAllocationsSectionTitle,
+                    subtitle: l10n.facturationChargeDetailAllocationsSectionSubtitle,
                     accent: AppColors.financeDetailPaymentsAccent,
                     accentSoft: AppColors.financeDetailPaymentsAccentSoft,
                   ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  Wrap(
+                    spacing: AppDimensions.spacingS,
+                    runSpacing: AppDimensions.spacingS,
+                    children: [
+                      FinanceContextChip(
+                        label: currency,
+                        icon: Icons.attach_money_outlined,
+                        accent: AppColors.financeDetailPaymentsAccent,
+                        accentSoft: AppColors.financeDetailPaymentsAccentSoft,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  ...allocations.map(
+                    (item) => Padding(
+                      padding:
+                          const EdgeInsets.only(bottom: AppDimensions.spacingS),
+                      child: _AllocationRow(
+                        label: item.studentChargeLabel,
+                        amount: _formatAmountFromItem(item),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spacingS),
+                  _AllocationRow(
+                    label: l10n.facturationChargeDetailAllocationsTotalLabel,
+                    amount: _formatAmount(totalPaid, currency),
+                    isTotal: true,
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  FinanceConsistencyInfoBar(
+                    message: isConsistent
+                        ? l10n.facturationPaymentAllocationsConsistencyOk
+                        : l10n.facturationPaymentAllocationsConsistencyWarning,
+                    isConsistent: isConsistent,
+                  ),
                 ],
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              ...allocations.map(
-                (item) => Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: AppDimensions.spacingS,
-                  ),
-                  child: _AllocationRow(
-                    label: item.studentChargeLabel,
-                    amount: _formatAmountFromItem(item),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingS),
-              _AllocationRow(
-                label:
-                    l10n.facturationChargeDetailAllocationsTotalLabel,
-                amount: _formatAmount(totalPaid, currency),
-                isTotal: true,
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              FinanceConsistencyInfoBar(
-                message: isConsistent
-                    ? l10n.facturationPaymentAllocationsConsistencyOk
-                    : l10n.facturationPaymentAllocationsConsistencyWarning,
-                isConsistent: isConsistent,
-              ),
-            ],
+              );
+            }(),
           );
         },
       ),
@@ -202,57 +193,6 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
       (_) => ' ',
     );
     return '$whole.${parts.last} ${item.currency}';
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _SectionHeader({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: AppDimensions.spacingL,
-          height: AppDimensions.spacingL,
-          decoration: BoxDecoration(
-            color: AppColors.financeDetailPaymentsAccentSoft,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          ),
-          child: const Icon(
-            Icons.list_alt_outlined,
-            size: AppDimensions.detailMiniIconSize,
-            color: AppColors.financeDetailPaymentsAccent,
-          ),
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: AppColors.financeDetailPaymentsAccent,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                subtitle,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
 
@@ -303,68 +243,6 @@ class _AllocationRow extends StatelessWidget {
               fontSize: isTotal ? 16 : 14,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StateCard extends StatelessWidget {
-  final String message;
-  final IconData icon;
-  final Color accent;
-  final Color accentSoft;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-  final Widget? child;
-
-  const _StateCard({
-    required this.message,
-    required this.icon,
-    required this.accent,
-    required this.accentSoft,
-    this.actionLabel,
-    this.onAction,
-    this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      decoration: BoxDecoration(
-        color: accentSoft,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: AppDimensions.detailHeaderIconSize,
-                color: accent,
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Text(
-                  message,
-                  style: AppTextStyles.body.copyWith(color: accent),
-                ),
-              ),
-            ],
-          ),
-          child ?? const SizedBox.shrink(),
-          if (actionLabel != null && onAction != null) ...[
-            const SizedBox(height: AppDimensions.spacingM),
-            OutlinedButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
-          ],
         ],
       ),
     );
