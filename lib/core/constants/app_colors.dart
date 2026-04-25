@@ -31,9 +31,15 @@ class AppColors {
   static const financeDetailPaymentsAccent = Color(0xFF6366F1);
   static const financeDetailPaymentsAccentSoft = Color(0xFFEDE9FE);
 
-  // Finance — Charges (émeraude)
+  // Finance — Charges (émeraude) — utilisé pour la liste des charges
   static const financeDetailChargesAccent = Color(0xFF10B981);
   static const financeDetailChargesAccentSoft = Color(0xFFD1FAE5);
+
+  // Finance — Info charge (orange ardoise) — utilisé pour la page de détail d'une charge
+  static const financeDetailChargeInfoAccent = Color(0xFFEA580C);
+  static const financeDetailChargeInfoAccentSoft = Color(0xFFFFF7ED);
+  static const financeDetailChargeInfoSurface = Color(0xFFFFFAF5);
+  static const financeDetailChargeInfoSurfaceAlt = Color(0xFFFFFFFF);
 
   // Finance — Méta badge Cycle (ambre)
   static const financeDetailAmber = Color(0xFFD97706);
@@ -50,7 +56,7 @@ class AppColors {
   static const financeDetailInfoSurfaceAlt = Color(0xFFFFFFFF);
   static const financeDetailPaymentsSurface = Color(0xFFF5F3FF); // violet très clair
   static const financeDetailPaymentsSurfaceAlt = Color(0xFFFFFFFF);
-  static const financeDetailChargesSurface = Color(0xFFF0FDF9); // vert très clair
+  static const financeDetailChargesSurface = Color(0xFFF0FDF9); // vert très clair — liste charges
   static const financeDetailChargesSurfaceAlt = Color(0xFFFFFFFF);
   static const financeDetailStudentTitle = Color(0xFF2E7D32);
   static const financeDetailInfoTitle = Color(0xFF1A73E8);

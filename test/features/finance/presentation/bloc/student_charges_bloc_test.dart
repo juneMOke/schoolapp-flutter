@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
@@ -16,6 +17,9 @@ class MockUpdateStudentChargeExpectedAmountUseCase extends Mock
 
 class MockGetStudentChargesByAcademicYearUseCase extends Mock
     implements GetStudentChargesByAcademicYearUseCase {}
+
+class MockGetPaymentAllocationsFromStudentChargesUseCase extends Mock
+    implements GetPaymentAllocationsFromStudentChargesUseCase {}
 
 const tStudentId = 'student-1';
 const tLevelId = 'level-1';
@@ -65,7 +69,9 @@ void main() {
   late MockUpdateStudentChargeExpectedAmountUseCase
   mockUpdateStudentChargeExpectedAmountUseCase;
   late MockGetStudentChargesByAcademicYearUseCase
-      mockGetStudentChargesByAcademicYearUseCase;
+  mockGetStudentChargesByAcademicYearUseCase;
+  late MockGetPaymentAllocationsFromStudentChargesUseCase
+  mockGetPaymentAllocationsFromStudentChargesUseCase;
 
   setUp(() {
     mockGetStudentChargesUseCase = MockGetStudentChargesUseCase();
@@ -73,12 +79,16 @@ void main() {
         MockUpdateStudentChargeExpectedAmountUseCase();
     mockGetStudentChargesByAcademicYearUseCase =
         MockGetStudentChargesByAcademicYearUseCase();
+    mockGetPaymentAllocationsFromStudentChargesUseCase =
+        MockGetPaymentAllocationsFromStudentChargesUseCase();
   });
 
   StudentChargesBloc buildBloc() => StudentChargesBloc(
     getStudentChargesUseCase: mockGetStudentChargesUseCase,
     getStudentChargesByAcademicYearUseCase:
         mockGetStudentChargesByAcademicYearUseCase,
+    getPaymentAllocationsFromStudentChargesUseCase:
+        mockGetPaymentAllocationsFromStudentChargesUseCase,
     updateStudentChargeExpectedAmountUseCase:
         mockUpdateStudentChargeExpectedAmountUseCase,
   );

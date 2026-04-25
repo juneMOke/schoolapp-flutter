@@ -1047,10 +1047,88 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentsUnknownError => 'Une erreur inattendue est survenue lors du chargement des paiements.';
 
   @override
-  String get facturationPrintReceiptLabel => 'Imprimer le reçu';
+  String get facturationPrintReceiptLabel => 'Imprimer le reu';
 
   @override
-  String get facturationPrintReceiptSubtitle => 'Générez et téléchargez le reçu de ce paiement';
+  String get facturationPrintReceiptSubtitle => 'Gnrez et tlchargez le reu de ce paiement';
+
+  @override
+  String get facturationPrintStatementsLabel => 'Imprimer les relevs';
+
+  @override
+  String get facturationPrintStatementsSubtitle => 'Gnrez et tlchargez les relevs de facturation de cet tudiant';
+
+  @override
+  String get facturationChargeDetailBackLabel => 'Retour au détail de facturation';
+
+  @override
+  String get facturationChargeDetailHeroTitle => 'Détail d\'une charge';
+
+  @override
+  String get facturationChargeDetailHeroSubtitle => 'Consultez l\'état de cette charge et les paiements qui y ont été alloués.';
+
+  @override
+  String get facturationChargeDetailInfoSectionTitle => 'Informations de la charge';
+
+  @override
+  String get facturationChargeDetailExpectedAmountLabel => 'Montant attendu';
+
+  @override
+  String get facturationChargeDetailPaidAmountLabel => 'Montant payé';
+
+  @override
+  String get facturationChargeDetailRemainingAmountLabel => 'Reste à payer';
+
+  @override
+  String get facturationChargeDetailStatusLabel => 'Statut';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionTitle => 'Allocations liées à cette charge';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionSubtitle => 'Détail des paiements alloués à cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsTotalLabel => 'Total alloué';
+
+  @override
+  String get facturationChargeDetailAllocationsEmpty => 'Aucune allocation n\'a été trouvée pour cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsRetry => 'Réessayer';
+
+  @override
+  String get facturationChargeDetailAllocationsNetworkError => 'Impossible de charger les allocations. Vérifiez votre connexion internet.';
+
+  @override
+  String get facturationChargeDetailAllocationsNotFound => 'Aucune allocation trouvée pour cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsValidationError => 'Les informations demandées pour les allocations sont invalides.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter les allocations de cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux allocations de cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get facturationChargeDetailAllocationsStorageError => 'Une erreur locale empêche l\'affichage des allocations.';
+
+  @override
+  String get facturationChargeDetailAllocationsAuthError => 'Une erreur d\'authentification empêche le chargement des allocations.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnknownError => 'Une erreur inattendue est survenue lors du chargement des allocations.';
+
+  @override
+  String get facturationChargeDetailContextErrorTitle => 'Contexte de détail de charge indisponible';
+
+  @override
+  String get facturationChargeDetailContextErrorMessage => 'Les informations nécessaires pour afficher cette charge ne sont pas disponibles. Revenez à la liste puis relancez la consultation.';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';

@@ -2093,6 +2093,162 @@ abstract class AppLocalizations {
   /// **'Generate and download the receipt for this payment'**
   String get facturationPrintReceiptSubtitle;
 
+  /// No description provided for @facturationPrintStatementsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print statements'**
+  String get facturationPrintStatementsLabel;
+
+  /// No description provided for @facturationPrintStatementsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate and download the billing statements for this student'**
+  String get facturationPrintStatementsSubtitle;
+
+  /// No description provided for @facturationChargeDetailBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to billing detail'**
+  String get facturationChargeDetailBackLabel;
+
+  /// No description provided for @facturationChargeDetailHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge detail'**
+  String get facturationChargeDetailHeroTitle;
+
+  /// No description provided for @facturationChargeDetailHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review this charge status and the payments allocated to it.'**
+  String get facturationChargeDetailHeroSubtitle;
+
+  /// No description provided for @facturationChargeDetailInfoSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge information'**
+  String get facturationChargeDetailInfoSectionTitle;
+
+  /// No description provided for @facturationChargeDetailExpectedAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected amount'**
+  String get facturationChargeDetailExpectedAmountLabel;
+
+  /// No description provided for @facturationChargeDetailPaidAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid amount'**
+  String get facturationChargeDetailPaidAmountLabel;
+
+  /// No description provided for @facturationChargeDetailRemainingAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining amount'**
+  String get facturationChargeDetailRemainingAmountLabel;
+
+  /// No description provided for @facturationChargeDetailStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get facturationChargeDetailStatusLabel;
+
+  /// No description provided for @facturationChargeDetailAllocationsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocations for this charge'**
+  String get facturationChargeDetailAllocationsSectionTitle;
+
+  /// No description provided for @facturationChargeDetailAllocationsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown of payments allocated to this charge.'**
+  String get facturationChargeDetailAllocationsSectionSubtitle;
+
+  /// No description provided for @facturationChargeDetailAllocationsTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated total'**
+  String get facturationChargeDetailAllocationsTotalLabel;
+
+  /// No description provided for @facturationChargeDetailAllocationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No allocation was found for this charge.'**
+  String get facturationChargeDetailAllocationsEmpty;
+
+  /// No description provided for @facturationChargeDetailAllocationsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationChargeDetailAllocationsRetry;
+
+  /// No description provided for @facturationChargeDetailAllocationsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load allocations. Please check your internet connection.'**
+  String get facturationChargeDetailAllocationsNetworkError;
+
+  /// No description provided for @facturationChargeDetailAllocationsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No allocation found for this charge.'**
+  String get facturationChargeDetailAllocationsNotFound;
+
+  /// No description provided for @facturationChargeDetailAllocationsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested allocation data is invalid.'**
+  String get facturationChargeDetailAllocationsValidationError;
+
+  /// No description provided for @facturationChargeDetailAllocationsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to access allocations for this charge.'**
+  String get facturationChargeDetailAllocationsUnauthorizedError;
+
+  /// No description provided for @facturationChargeDetailAllocationsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to allocations for this charge.'**
+  String get facturationChargeDetailAllocationsInvalidCredentialsError;
+
+  /// No description provided for @facturationChargeDetailAllocationsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get facturationChargeDetailAllocationsServerError;
+
+  /// No description provided for @facturationChargeDetailAllocationsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents allocations from being displayed.'**
+  String get facturationChargeDetailAllocationsStorageError;
+
+  /// No description provided for @facturationChargeDetailAllocationsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents allocations from loading.'**
+  String get facturationChargeDetailAllocationsAuthError;
+
+  /// No description provided for @facturationChargeDetailAllocationsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading allocations.'**
+  String get facturationChargeDetailAllocationsUnknownError;
+
+  /// No description provided for @facturationChargeDetailContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge detail context unavailable'**
+  String get facturationChargeDetailContextErrorTitle;
+
+  /// No description provided for @facturationChargeDetailContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Required context for this charge detail view is missing. Go back and open the detail again.'**
+  String get facturationChargeDetailContextErrorMessage;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:

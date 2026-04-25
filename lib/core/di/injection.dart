@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/finance/domain/repositories/finance_
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
@@ -575,6 +576,12 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerFactory<GetPaymentAllocationsFromStudentChargesUseCase>(
+    () => GetPaymentAllocationsFromStudentChargesUseCase(
+      getIt<StudentChargesRepository>(),
+    ),
+  );
+
   getIt.registerFactory<GetPaymentsUseCase>(
     () => GetPaymentsUseCase(getIt<PaymentsRepository>()),
   );
@@ -598,6 +605,8 @@ Future<void> configureDependencies() async {
       getStudentChargesUseCase: getIt<GetStudentChargesUseCase>(),
       getStudentChargesByAcademicYearUseCase:
           getIt<GetStudentChargesByAcademicYearUseCase>(),
+      getPaymentAllocationsFromStudentChargesUseCase:
+          getIt<GetPaymentAllocationsFromStudentChargesUseCase>(),
       updateStudentChargeExpectedAmountUseCase:
           getIt<UpdateStudentChargeExpectedAmountUseCase>(),
     ),

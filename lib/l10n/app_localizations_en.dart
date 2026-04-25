@@ -1053,6 +1053,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPrintReceiptSubtitle => 'Generate and download the receipt for this payment';
 
   @override
+  String get facturationPrintStatementsLabel => 'Print statements';
+
+  @override
+  String get facturationPrintStatementsSubtitle => 'Generate and download the billing statements for this student';
+
+  @override
+  String get facturationChargeDetailBackLabel => 'Back to billing detail';
+
+  @override
+  String get facturationChargeDetailHeroTitle => 'Charge detail';
+
+  @override
+  String get facturationChargeDetailHeroSubtitle => 'Review this charge status and the payments allocated to it.';
+
+  @override
+  String get facturationChargeDetailInfoSectionTitle => 'Charge information';
+
+  @override
+  String get facturationChargeDetailExpectedAmountLabel => 'Expected amount';
+
+  @override
+  String get facturationChargeDetailPaidAmountLabel => 'Paid amount';
+
+  @override
+  String get facturationChargeDetailRemainingAmountLabel => 'Remaining amount';
+
+  @override
+  String get facturationChargeDetailStatusLabel => 'Status';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionTitle => 'Allocations for this charge';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionSubtitle => 'Breakdown of payments allocated to this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsTotalLabel => 'Allocated total';
+
+  @override
+  String get facturationChargeDetailAllocationsEmpty => 'No allocation was found for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsRetry => 'Retry';
+
+  @override
+  String get facturationChargeDetailAllocationsNetworkError => 'Unable to load allocations. Please check your internet connection.';
+
+  @override
+  String get facturationChargeDetailAllocationsNotFound => 'No allocation found for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsValidationError => 'Requested allocation data is invalid.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnauthorizedError => 'You are not allowed to access allocations for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsInvalidCredentialsError => 'Your credentials do not allow access to allocations for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationChargeDetailAllocationsStorageError => 'A local error prevents allocations from being displayed.';
+
+  @override
+  String get facturationChargeDetailAllocationsAuthError => 'An authentication error prevents allocations from loading.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnknownError => 'An unexpected error occurred while loading allocations.';
+
+  @override
+  String get facturationChargeDetailContextErrorTitle => 'Charge detail context unavailable';
+
+  @override
+  String get facturationChargeDetailContextErrorMessage => 'Required context for this charge detail view is missing. Go back and open the detail again.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

@@ -30,6 +30,15 @@ class StudentChargesByAcademicYearRequested extends StudentChargesEvent {
   List<Object?> get props => [studentId, academicYearId];
 }
 
+class StudentChargePaymentAllocationsRequested extends StudentChargesEvent {
+  final String chargeId;
+
+  const StudentChargePaymentAllocationsRequested({required this.chargeId});
+
+  @override
+  List<Object?> get props => [chargeId];
+}
+
 class StudentChargesDraftSaved extends StudentChargesEvent {
   final List<StudentCharge> studentCharges;
 

@@ -15,8 +15,10 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_charge_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
@@ -224,6 +226,24 @@ class AppRouter {
                     );
 
                     return FacturationPaymentDetailPage(intent: intent);
+                  },
+                ),
+                GoRoute(
+                  path: 'charge/:studentId/:academicYearId/:chargeId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+                    final chargeId = state.pathParameters['chargeId'] ?? '';
+
+                    final intent = FacturationChargeDetailIntent.fromRouteContext(
+                      chargeId: chargeId,
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationChargeDetailPage(intent: intent);
                   },
                 ),
               ],

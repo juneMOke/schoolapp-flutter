@@ -9,11 +9,13 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment.dart
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_print_receipt_cta.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -28,6 +30,31 @@ class FacturationDetailPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.pageUnderConstruction)),
+    );
+  }
+
+  void _openChargeDetail(BuildContext context, StudentCharge charge) {
+    context.push(
+      AppRoutesNames.facturationChargeDetailPath(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+        chargeId: charge.id,
+      ),
+      extra: FacturationChargeDetailIntent(
+        chargeId: charge.id,
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+        firstName: intent.firstName,
+        lastName: intent.lastName,
+        surname: intent.surname,
+        levelName: intent.levelName,
+        levelGroupName: intent.levelGroupName,
+        chargeLabel: charge.label,
+        expectedAmountInCents: charge.expectedAmountInCents,
+        amountPaidInCents: charge.amountPaidInCents,
+        currency: charge.currency,
+        chargeStatus: charge.status,
+      ),
     );
   }
 
@@ -163,9 +190,10 @@ class FacturationDetailPage extends StatelessWidget {
                               FacturationDetailChargesSection(
                                 studentId: intent.studentId,
                                 academicYearId: intent.academicYearId,
-                                onViewChargeRequested: (StudentCharge _) =>
-                                    _showPlaceholder(context),
+                                onViewChargeRequested: (charge) =>
+                                    _openChargeDetail(context, charge),
                               ),
+                            ],
                             ],
                           ),
                         ),

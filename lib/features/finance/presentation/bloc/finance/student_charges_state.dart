@@ -21,12 +21,18 @@ class StudentChargesState extends Equatable {
   final StudentChargesStatus status;
   final List<StudentCharge> studentCharges;
   final StudentChargesErrorType errorType;
+  final StudentChargesStatus allocationsStatus;
+  final Map<String, List<PaymentAllocation>> allocationsByChargeId;
+  final StudentChargesErrorType allocationsErrorType;
   final String? updatingChargeId;
 
   const StudentChargesState({
     this.status = StudentChargesStatus.initial,
     this.studentCharges = const [],
     this.errorType = StudentChargesErrorType.none,
+    this.allocationsStatus = StudentChargesStatus.initial,
+    this.allocationsByChargeId = const {},
+    this.allocationsErrorType = StudentChargesErrorType.none,
     this.updatingChargeId,
   });
 
@@ -34,11 +40,18 @@ class StudentChargesState extends Equatable {
     StudentChargesStatus? status,
     List<StudentCharge>? studentCharges,
     StudentChargesErrorType? errorType,
+    StudentChargesStatus? allocationsStatus,
+    Map<String, List<PaymentAllocation>>? allocationsByChargeId,
+    StudentChargesErrorType? allocationsErrorType,
     Object? updatingChargeId = _undefined,
   }) => StudentChargesState(
     status: status ?? this.status,
     studentCharges: studentCharges ?? this.studentCharges,
     errorType: errorType ?? this.errorType,
+    allocationsStatus: allocationsStatus ?? this.allocationsStatus,
+    allocationsByChargeId: allocationsByChargeId ?? this.allocationsByChargeId,
+    allocationsErrorType:
+        allocationsErrorType ?? this.allocationsErrorType,
     updatingChargeId: identical(updatingChargeId, _undefined)
         ? this.updatingChargeId
         : updatingChargeId as String?,
@@ -49,6 +62,9 @@ class StudentChargesState extends Equatable {
     status,
     studentCharges,
     errorType,
+    allocationsStatus,
+    allocationsByChargeId,
+    allocationsErrorType,
     updatingChargeId,
   ];
 }
