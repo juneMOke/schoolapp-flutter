@@ -61,6 +61,7 @@ class AppConstants {
       '/api/v1/finance/student-charges/student/{studentId}/academic-year/{academicYearId}';
   static const String listPaymentsByStudentAndAcademicYearEndpoint =
       '/api/v1/finance/payments/student/{studentId}/academic-year/{academicYearId}';
+  static const String createPaymentEndpoint = '/api/v1/finance/payments';
   static const String listPaymentAllocationsByPaymentIdEndpoint =
       '/api/v1/finance/payments/{paymentId}/allocations';
   static const String listPaymentAllocationsByChargeIdEndpoint =

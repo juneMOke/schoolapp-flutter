@@ -1131,6 +1131,144 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationChargeDetailContextErrorMessage => 'Required context for this charge detail view is missing. Go back and open the detail again.';
 
   @override
+  String get facturationCreatePaymentBackLabel => 'Back to billing detail';
+
+  @override
+  String get facturationCreatePaymentHeroTitle => 'New payment';
+
+  @override
+  String get facturationCreatePaymentHeroSubtitle => 'Fill in the payer information and allocations to record a payment.';
+
+  @override
+  String get facturationCreatePaymentPayerSectionTitle => 'Payer information';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameLabel => 'Last name';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameHint => 'Enter last name';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameLabel => 'First name';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameHint => 'Enter first name';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameLabel => 'Surname (optional)';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameHint => 'Enter surname';
+
+  @override
+  String get facturationCreatePaymentPayerFieldRequired => 'This field is required';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionTitle => 'Payment allocations';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionSubtitle => 'Associate an amount to one or more student charges.';
+
+  @override
+  String get facturationCreatePaymentAddAllocationLabel => 'Add allocation';
+
+  @override
+  String get facturationCreatePaymentAllChargesPaid => 'All student charges are already paid.';
+
+  @override
+  String get facturationCreatePaymentChargesUnavailable => 'No charges available. Go back to the list and try again.';
+
+  @override
+  String get facturationCreatePaymentChargeDropdownHint => 'Select a charge';
+
+  @override
+  String get facturationCreatePaymentAmountLabel => 'Amount to pay';
+
+  @override
+  String get facturationCreatePaymentAmountHint => 'E.g.: 5000';
+
+  @override
+  String get facturationCreatePaymentAmountRequired => 'Amount is required';
+
+  @override
+  String get facturationCreatePaymentAmountInvalid => 'Please enter a valid number';
+
+  @override
+  String get facturationCreatePaymentAmountExceedsRemaining => 'Amount cannot exceed remaining balance';
+
+  @override
+  String get facturationCreatePaymentAmountMustBePositive => 'Amount must be greater than zero';
+
+  @override
+  String get facturationCreatePaymentBeforeLabel => 'Before payment';
+
+  @override
+  String get facturationCreatePaymentAfterLabel => 'After payment';
+
+  @override
+  String get facturationCreatePaymentSubmitLabel => 'Validate payment';
+
+  @override
+  String get facturationCreatePaymentNoAllocations => 'Add at least one allocation to validate the payment.';
+
+  @override
+  String get facturationCreatePaymentConfirmTitle => 'Confirm payment';
+
+  @override
+  String get facturationCreatePaymentConfirmMessage => 'This operation is irreversible. Do you confirm recording this payment?';
+
+  @override
+  String get facturationCreatePaymentConfirmCancel => 'Cancel';
+
+  @override
+  String get facturationCreatePaymentConfirmValidate => 'Confirm';
+
+  @override
+  String get facturationCreatePaymentSuccessMessage => 'Payment successfully recorded.';
+
+  @override
+  String get facturationCreatePaymentExpectedLabel => 'Expected';
+
+  @override
+  String get facturationCreatePaymentPaidLabel => 'Already paid';
+
+  @override
+  String get facturationCreatePaymentRemainingLabel => 'Remaining';
+
+  @override
+  String get facturationCreatePaymentStatusLabel => 'Status';
+
+  @override
+  String get facturationCreatePaymentNetworkError => 'Check your connection and try again.';
+
+  @override
+  String get facturationCreatePaymentNotFoundError => 'The requested resource was not found.';
+
+  @override
+  String get facturationCreatePaymentValidationError => 'Submitted data is invalid. Please review the form.';
+
+  @override
+  String get facturationCreatePaymentUnauthorizedError => 'You are not authorized to perform this operation.';
+
+  @override
+  String get facturationCreatePaymentInvalidCredentialsError => 'Your credentials do not allow recording this payment.';
+
+  @override
+  String get facturationCreatePaymentServerError => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get facturationCreatePaymentStorageError => 'A storage error occurred.';
+
+  @override
+  String get facturationCreatePaymentAuthError => 'An authentication error occurred.';
+
+  @override
+  String get facturationCreatePaymentUnknownError => 'An unexpected error occurred.';
+
+  @override
+  String get facturationCreatePaymentNoChargesAvailable => 'No unpaid charges available for this student.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

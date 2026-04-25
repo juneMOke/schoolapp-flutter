@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/models/create_payment_request_model.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
@@ -27,6 +28,53 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
         academicYearId,
       );
       return Right(models.map((model) => model.toEntity()).toList());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Payment>> createPayment({
+    required String studentId,
+    required String academicYearId,
+    required int amountInCents,
+    required String currency,
+    required String payerFirstName,
+    required String payerLastName,
+    String? payerMiddleName,
+    required List<CreatePaymentAllocationInput> allocations,
+  }) async {
+    try {
+      final model = await remoteDataSource.createPayment(
+        requiredAuth,
+        CreatePaymentRequestModel(
+          studentId: studentId,
+          academicYearId: academicYearId,
+          amountInCents: amountInCents,
+          currency: currency,
+          payerFirstName: payerFirstName,
+          payerLastName: payerLastName,
+          payerMiddleName: payerMiddleName,
+          allocations: allocations
+              .map(
+                (allocation) => CreatePaymentAllocationRequestModel(
+                  studentChargeId: allocation.studentChargeId,
+                  feeCode: allocation.feeCode,
+                  studentChargeLabel: allocation.studentChargeLabel,
+                  amountInCents: allocation.amountInCents,
+                  currency: allocation.currency,
+                ),
+              )
+              .toList(growable: false),
+        ),
+      );
+
+      return Right(model.toEntity());
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);

@@ -16,6 +16,22 @@ extension PaymentsErrorL10nX on PaymentsErrorType {
     PaymentsErrorType.none => l10n.facturationPaymentsUnknownError,
   };
 
+  String localizedCreateMessage(AppLocalizations l10n) => switch (this) {
+    PaymentsErrorType.network => l10n.facturationCreatePaymentNetworkError,
+    PaymentsErrorType.notFound => l10n.facturationCreatePaymentNotFoundError,
+    PaymentsErrorType.validation =>
+      l10n.facturationCreatePaymentValidationError,
+    PaymentsErrorType.unauthorized =>
+      l10n.facturationCreatePaymentUnauthorizedError,
+    PaymentsErrorType.invalidCredentials =>
+      l10n.facturationCreatePaymentInvalidCredentialsError,
+    PaymentsErrorType.server => l10n.facturationCreatePaymentServerError,
+    PaymentsErrorType.storage => l10n.facturationCreatePaymentStorageError,
+    PaymentsErrorType.auth => l10n.facturationCreatePaymentAuthError,
+    PaymentsErrorType.unknown => l10n.facturationCreatePaymentUnknownError,
+    PaymentsErrorType.none => l10n.facturationCreatePaymentUnknownError,
+  };
+
   String localizedAllocationsMessage(AppLocalizations l10n) => switch (this) {
     PaymentsErrorType.network => l10n.facturationPaymentAllocationsNetworkError,
     PaymentsErrorType.notFound => l10n.facturationPaymentAllocationsNotFound,

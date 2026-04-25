@@ -6,24 +6,6 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
-import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
-import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
-import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
-import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/data/repositories/payments_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
-import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
-import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
-import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
-import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
@@ -73,6 +55,25 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/payments_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/create_payment_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
 import 'package:school_app_flutter/features/student/data/datasources/student_remote_data_source.dart';
 import 'package:school_app_flutter/features/student/data/repositories/parent_repository_impl.dart';
@@ -158,7 +159,8 @@ Future<void> configureDependencies() async {
                 type: e.type,
               ),
             );
-          } else if (e.response?.statusCode == 422) {
+          } else if (e.response?.statusCode == 400 ||
+              e.response?.statusCode == 422) {
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
@@ -586,6 +588,10 @@ Future<void> configureDependencies() async {
     () => GetPaymentsUseCase(getIt<PaymentsRepository>()),
   );
 
+  getIt.registerFactory<CreatePaymentUseCase>(
+    () => CreatePaymentUseCase(getIt<PaymentsRepository>()),
+  );
+
   getIt.registerFactory<GetPaymentAllocationsUseCase>(
     () => GetPaymentAllocationsUseCase(getIt<PaymentsRepository>()),
   );
@@ -615,6 +621,7 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<PaymentsBloc>(
     () => PaymentsBloc(
       getPaymentsUseCase: getIt<GetPaymentsUseCase>(),
+      createPaymentUseCase: getIt<CreatePaymentUseCase>(),
       getPaymentAllocationsUseCase: getIt<GetPaymentAllocationsUseCase>(),
     ),
   );

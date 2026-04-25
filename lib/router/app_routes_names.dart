@@ -22,6 +22,8 @@ class AppRoutesNames {
       '/finances/${MenuConstants.facturationsId}/payment/:studentId/:academicYearId/:paymentId';
   static const String facturationChargeDetail =
       '/finances/${MenuConstants.facturationsId}/charge/:studentId/:academicYearId/:chargeId';
+  static const String facturationCreatePayment =
+      '/finances/${MenuConstants.facturationsId}/create-payment/:studentId/:academicYearId';
 
   static String facturationDetailPath({
     required String studentId,
@@ -42,6 +44,12 @@ class AppRoutesNames {
     required String chargeId,
   }) =>
       '/finances/${MenuConstants.facturationsId}/charge/$studentId/$academicYearId/$chargeId';
+
+  static String facturationCreatePaymentPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/create-payment/$studentId/$academicYearId';
 
   static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';

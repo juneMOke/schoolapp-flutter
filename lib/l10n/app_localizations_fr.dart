@@ -1131,6 +1131,144 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationChargeDetailContextErrorMessage => 'Les informations nécessaires pour afficher cette charge ne sont pas disponibles. Revenez à la liste puis relancez la consultation.';
 
   @override
+  String get facturationCreatePaymentBackLabel => 'Retour au détail de facturation';
+
+  @override
+  String get facturationCreatePaymentHeroTitle => 'Nouveau paiement';
+
+  @override
+  String get facturationCreatePaymentHeroSubtitle => 'Renseignez les informations du payeur et les allocations pour enregistrer un paiement.';
+
+  @override
+  String get facturationCreatePaymentPayerSectionTitle => 'Informations du payeur';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameLabel => 'Nom';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameHint => 'Entrez le nom';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameLabel => 'Prénom';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameHint => 'Entrez le prénom';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameLabel => 'Post-nom (optionnel)';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameHint => 'Entrez le post-nom';
+
+  @override
+  String get facturationCreatePaymentPayerFieldRequired => 'Ce champ est obligatoire';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionTitle => 'Allocations de paiement';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionSubtitle => 'Associez un montant à une ou plusieurs charges de l\'élève.';
+
+  @override
+  String get facturationCreatePaymentAddAllocationLabel => 'Ajouter une allocation';
+
+  @override
+  String get facturationCreatePaymentAllChargesPaid => 'Toutes les charges de cet élève sont déjà réglées.';
+
+  @override
+  String get facturationCreatePaymentChargesUnavailable => 'Aucune charge disponible. Revenez à la liste et recommencez.';
+
+  @override
+  String get facturationCreatePaymentChargeDropdownHint => 'Sélectionnez une charge';
+
+  @override
+  String get facturationCreatePaymentAmountLabel => 'Montant à payer';
+
+  @override
+  String get facturationCreatePaymentAmountHint => 'Ex : 5000';
+
+  @override
+  String get facturationCreatePaymentAmountRequired => 'Le montant est obligatoire';
+
+  @override
+  String get facturationCreatePaymentAmountInvalid => 'Veuillez entrer un nombre valide';
+
+  @override
+  String get facturationCreatePaymentAmountExceedsRemaining => 'Le montant ne peut pas dépasser le restant à payer';
+
+  @override
+  String get facturationCreatePaymentAmountMustBePositive => 'Le montant doit être supérieur à zéro';
+
+  @override
+  String get facturationCreatePaymentBeforeLabel => 'Avant paiement';
+
+  @override
+  String get facturationCreatePaymentAfterLabel => 'Après paiement';
+
+  @override
+  String get facturationCreatePaymentSubmitLabel => 'Valider le paiement';
+
+  @override
+  String get facturationCreatePaymentNoAllocations => 'Ajoutez au moins une allocation pour valider le paiement.';
+
+  @override
+  String get facturationCreatePaymentConfirmTitle => 'Confirmer le paiement';
+
+  @override
+  String get facturationCreatePaymentConfirmMessage => 'Cette opération est irréversible. Confirmez-vous l\'enregistrement de ce paiement ?';
+
+  @override
+  String get facturationCreatePaymentConfirmCancel => 'Annuler';
+
+  @override
+  String get facturationCreatePaymentConfirmValidate => 'Confirmer';
+
+  @override
+  String get facturationCreatePaymentSuccessMessage => 'Paiement enregistré avec succès.';
+
+  @override
+  String get facturationCreatePaymentExpectedLabel => 'Montant attendu';
+
+  @override
+  String get facturationCreatePaymentPaidLabel => 'Déjà payé';
+
+  @override
+  String get facturationCreatePaymentRemainingLabel => 'Restant';
+
+  @override
+  String get facturationCreatePaymentStatusLabel => 'Statut';
+
+  @override
+  String get facturationCreatePaymentNetworkError => 'Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get facturationCreatePaymentNotFoundError => 'La ressource demandée est introuvable.';
+
+  @override
+  String get facturationCreatePaymentValidationError => 'Les données saisies sont invalides. Vérifiez le formulaire.';
+
+  @override
+  String get facturationCreatePaymentUnauthorizedError => 'Vous n\'êtes pas autorisé à effectuer cette opération.';
+
+  @override
+  String get facturationCreatePaymentInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'enregistrer ce paiement.';
+
+  @override
+  String get facturationCreatePaymentServerError => 'Le serveur est indisponible. Réessayez plus tard.';
+
+  @override
+  String get facturationCreatePaymentStorageError => 'Une erreur de stockage est survenue.';
+
+  @override
+  String get facturationCreatePaymentAuthError => 'Une erreur d\'authentification est survenue.';
+
+  @override
+  String get facturationCreatePaymentUnknownError => 'Une erreur inattendue est survenue.';
+
+  @override
+  String get facturationCreatePaymentNoChargesAvailable => 'Aucune charge non réglée disponible pour cet élève.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override

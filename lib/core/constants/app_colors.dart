@@ -29,6 +29,7 @@ class AppColors {
 
   // Finance — Paiements (violet)
   static const financeDetailPaymentsAccent = Color(0xFF6366F1);
+  static const financeDetailPaymentsAccentLight = Color(0xFF818CF8);
   static const financeDetailPaymentsAccentSoft = Color(0xFFEDE9FE);
 
   // Finance — Charges (émeraude) — utilisé pour la liste des charges
