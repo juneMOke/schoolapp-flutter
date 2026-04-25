@@ -18,12 +18,21 @@ class AppRoutesNames {
   static const String facturations = '/finances/${MenuConstants.facturationsId}';
   static const String facturationDetail =
       '/finances/${MenuConstants.facturationsId}/detail/:studentId/:academicYearId';
+  static const String facturationPaymentDetail =
+      '/finances/${MenuConstants.facturationsId}/payment/:studentId/:academicYearId/:paymentId';
 
   static String facturationDetailPath({
     required String studentId,
     required String academicYearId,
   }) =>
       '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
+
+  static String facturationPaymentDetailPath({
+    required String studentId,
+    required String academicYearId,
+    required String paymentId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/payment/$studentId/$academicYearId/$paymentId';
 
   static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';

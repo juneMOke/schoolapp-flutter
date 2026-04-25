@@ -1847,6 +1847,132 @@ abstract class AppLocalizations {
   /// **'View payment detail'**
   String get facturationDetailViewPaymentLabel;
 
+  /// No description provided for @facturationPaymentDetailHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment detail'**
+  String get facturationPaymentDetailHeroTitle;
+
+  /// No description provided for @facturationPaymentDetailHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review this payment information and the breakdown of allocated amounts.'**
+  String get facturationPaymentDetailHeroSubtitle;
+
+  /// No description provided for @facturationPaymentInfoSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment information'**
+  String get facturationPaymentInfoSectionTitle;
+
+  /// No description provided for @facturationPaymentPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get facturationPaymentPayerLabel;
+
+  /// No description provided for @facturationPaymentAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid amount'**
+  String get facturationPaymentAmountLabel;
+
+  /// No description provided for @facturationPaymentPaidAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at'**
+  String get facturationPaymentPaidAtLabel;
+
+  /// No description provided for @facturationPaymentAllocationsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment allocations'**
+  String get facturationPaymentAllocationsSectionTitle;
+
+  /// No description provided for @facturationPaymentAllocationsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List of charges covered by this payment.'**
+  String get facturationPaymentAllocationsSectionSubtitle;
+
+  /// No description provided for @facturationPaymentAllocationsTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated total'**
+  String get facturationPaymentAllocationsTotalLabel;
+
+  /// No description provided for @facturationPaymentAllocationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No allocation was found for this payment.'**
+  String get facturationPaymentAllocationsEmpty;
+
+  /// No description provided for @facturationPaymentAllocationsConsistencyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation sum is consistent with the total paid amount.'**
+  String get facturationPaymentAllocationsConsistencyOk;
+
+  /// No description provided for @facturationPaymentAllocationsConsistencyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Inconsistency detected: allocation sum does not match the total paid amount.'**
+  String get facturationPaymentAllocationsConsistencyWarning;
+
+  /// No description provided for @facturationPaymentAllocationsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load payment allocations. Please check your internet connection.'**
+  String get facturationPaymentAllocationsNetworkError;
+
+  /// No description provided for @facturationPaymentAllocationsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No allocation found for this payment.'**
+  String get facturationPaymentAllocationsNotFound;
+
+  /// No description provided for @facturationPaymentAllocationsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested allocation data is invalid.'**
+  String get facturationPaymentAllocationsValidationError;
+
+  /// No description provided for @facturationPaymentAllocationsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to access allocations for this payment.'**
+  String get facturationPaymentAllocationsUnauthorizedError;
+
+  /// No description provided for @facturationPaymentAllocationsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to allocations for this payment.'**
+  String get facturationPaymentAllocationsInvalidCredentialsError;
+
+  /// No description provided for @facturationPaymentAllocationsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get facturationPaymentAllocationsServerError;
+
+  /// No description provided for @facturationPaymentAllocationsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents allocations from being displayed.'**
+  String get facturationPaymentAllocationsStorageError;
+
+  /// No description provided for @facturationPaymentAllocationsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents allocations from loading.'**
+  String get facturationPaymentAllocationsAuthError;
+
+  /// No description provided for @facturationPaymentAllocationsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading allocations.'**
+  String get facturationPaymentAllocationsUnknownError;
+
   /// No description provided for @facturationDetailChargesSectionTitle.
   ///
   /// In en, this message translates to:
@@ -1954,6 +2080,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred while loading payments.'**
   String get facturationPaymentsUnknownError;
+
+  /// No description provided for @facturationPrintReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print receipt'**
+  String get facturationPrintReceiptLabel;
+
+  /// No description provided for @facturationPrintReceiptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate and download the receipt for this payment'**
+  String get facturationPrintReceiptSubtitle;
 
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///

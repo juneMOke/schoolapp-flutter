@@ -930,6 +930,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationDetailViewPaymentLabel => 'View payment detail';
 
   @override
+  String get facturationPaymentDetailHeroTitle => 'Payment detail';
+
+  @override
+  String get facturationPaymentDetailHeroSubtitle => 'Review this payment information and the breakdown of allocated amounts.';
+
+  @override
+  String get facturationPaymentInfoSectionTitle => 'Payment information';
+
+  @override
+  String get facturationPaymentPayerLabel => 'Payer';
+
+  @override
+  String get facturationPaymentAmountLabel => 'Total paid amount';
+
+  @override
+  String get facturationPaymentPaidAtLabel => 'Paid at';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Payment allocations';
+
+  @override
+  String get facturationPaymentAllocationsSectionSubtitle => 'List of charges covered by this payment.';
+
+  @override
+  String get facturationPaymentAllocationsTotalLabel => 'Allocated total';
+
+  @override
+  String get facturationPaymentAllocationsEmpty => 'No allocation was found for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyOk => 'Allocation sum is consistent with the total paid amount.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyWarning => 'Inconsistency detected: allocation sum does not match the total paid amount.';
+
+  @override
+  String get facturationPaymentAllocationsNetworkError => 'Unable to load payment allocations. Please check your internet connection.';
+
+  @override
+  String get facturationPaymentAllocationsNotFound => 'No allocation found for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsValidationError => 'Requested allocation data is invalid.';
+
+  @override
+  String get facturationPaymentAllocationsUnauthorizedError => 'You are not allowed to access allocations for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsInvalidCredentialsError => 'Your credentials do not allow access to allocations for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationPaymentAllocationsStorageError => 'A local error prevents allocations from being displayed.';
+
+  @override
+  String get facturationPaymentAllocationsAuthError => 'An authentication error prevents allocations from loading.';
+
+  @override
+  String get facturationPaymentAllocationsUnknownError => 'An unexpected error occurred while loading allocations.';
+
+  @override
   String get facturationDetailChargesSectionTitle => 'Student charges';
 
   @override
@@ -982,6 +1045,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPaymentsUnknownError => 'An unexpected error occurred while loading payments.';
+
+  @override
+  String get facturationPrintReceiptLabel => 'Print receipt';
+
+  @override
+  String get facturationPrintReceiptSubtitle => 'Generate and download the receipt for this payment';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';

@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/finance/domain/repositories/finance_
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
@@ -578,6 +579,10 @@ Future<void> configureDependencies() async {
     () => GetPaymentsUseCase(getIt<PaymentsRepository>()),
   );
 
+  getIt.registerFactory<GetPaymentAllocationsUseCase>(
+    () => GetPaymentAllocationsUseCase(getIt<PaymentsRepository>()),
+  );
+
   getIt.registerFactory<UpdateStudentChargeExpectedAmountUseCase>(
     () => UpdateStudentChargeExpectedAmountUseCase(
       getIt<StudentChargesRepository>(),
@@ -599,6 +604,9 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerFactory<PaymentsBloc>(
-    () => PaymentsBloc(getPaymentsUseCase: getIt<GetPaymentsUseCase>()),
+    () => PaymentsBloc(
+      getPaymentsUseCase: getIt<GetPaymentsUseCase>(),
+      getPaymentAllocationsUseCase: getIt<GetPaymentAllocationsUseCase>(),
+    ),
   );
 }

@@ -16,3 +16,12 @@ class PaymentsRequested extends PaymentsEvent {
   @override
   List<Object?> get props => [studentId, academicYearId];
 }
+
+class PaymentsAllocationsRequested extends PaymentsEvent {
+  final String paymentId;
+
+  const PaymentsAllocationsRequested({required this.paymentId});
+
+  @override
+  List<Object?> get props => [paymentId];
+}

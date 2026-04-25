@@ -16,8 +16,10 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
@@ -204,6 +206,24 @@ class AppRouter {
                     );
 
                     return FacturationDetailPage(intent: intent);
+                  },
+                ),
+                GoRoute(
+                  path: 'payment/:studentId/:academicYearId/:paymentId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+                    final paymentId = state.pathParameters['paymentId'] ?? '';
+
+                    final intent = FacturationPaymentDetailIntent.fromRouteContext(
+                      paymentId: paymentId,
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationPaymentDetailPage(intent: intent);
                   },
                 ),
               ],

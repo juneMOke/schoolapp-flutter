@@ -10,9 +10,12 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -21,18 +24,36 @@ class FacturationDetailPage extends StatelessWidget {
 
   const FacturationDetailPage({super.key, required this.intent});
 
-  void _goBack(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    context.go(AppRoutesNames.facturations);
-  }
-
   void _showPlaceholder(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.pageUnderConstruction)),
+    );
+  }
+
+  void _openPaymentDetail(BuildContext context, Payment payment) {
+    context.push(
+      AppRoutesNames.facturationPaymentDetailPath(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+        paymentId: payment.id,
+      ),
+      extra: FacturationPaymentDetailIntent(
+        paymentId: payment.id,
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+        firstName: intent.firstName,
+        lastName: intent.lastName,
+        surname: intent.surname,
+        levelName: intent.levelName,
+        levelGroupName: intent.levelGroupName,
+        payerFirstName: payment.payerFirstName,
+        payerLastName: payment.payerLastName,
+        payerMiddleName: payment.payerMiddleName,
+        amountInCents: payment.amountInCents,
+        currency: payment.currency,
+        paidAt: payment.paidAt,
+      ),
     );
   }
 
@@ -96,30 +117,26 @@ class FacturationDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.border),
-                          backgroundColor: AppColors.surface,
-                          foregroundColor: AppColors.financeDetailAccent,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.spacingM,
-                            vertical: AppDimensions.spacingS,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppDimensions.sectionCardRadius,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => _goBack(context),
-                        icon: const Icon(Icons.arrow_back_outlined),
-                        label: Text(
-                          l10n.facturationDetailBackLabel,
-                          style: AppTextStyles.action,
-                        ),
+                      FinanceDetailBackButton(
+                        label: l10n.facturationDetailBackLabel,
+                        fallbackRoute: AppRoutesNames.facturations,
                       ),
                       const SizedBox(height: AppDimensions.spacingM),
-                      _DetailHero(intent: intent),
+                      FinanceStudentHeroCard(
+                        title: l10n.facturationDetailInfoTitle,
+                        subtitle: l10n.facturationDetailInfoSubtitle,
+                        unknownValue: l10n.facturationDetailUnknownValue,
+                        firstName: intent.firstName,
+                        lastName: intent.lastName,
+                        surname: intent.surname,
+                        levelName: intent.levelName,
+                        levelGroupName: intent.levelGroupName,
+                        levelLabel: l10n.facturationDetailStudentLevel,
+                        levelGroupLabel: l10n.facturationDetailStudentLevelGroup,
+                        showFeatureChips: true,
+                        paymentsChipLabel: l10n.facturationDetailInfoChipPayments,
+                        chargesChipLabel: l10n.facturationDetailInfoChipCharges,
+                      ),
                       const SizedBox(height: AppDimensions.detailSectionSpacing),
                       if (!intent.hasDisplayContext)
                         _ContextErrorCard(
@@ -137,8 +154,8 @@ class FacturationDetailPage extends StatelessWidget {
                                 academicYearId: intent.academicYearId,
                                 onCreatePaymentRequested: () =>
                                     _showPlaceholder(context),
-                                onViewPaymentRequested: (Payment _) =>
-                                    _showPlaceholder(context),
+                                onViewPaymentRequested: (payment) =>
+                                    _openPaymentDetail(context, payment),
                               ),
                               const SizedBox(
                                 height: AppDimensions.detailSectionSpacing,
@@ -203,249 +220,6 @@ class _ContextErrorCard extends StatelessWidget {
               color: AppColors.textSecondary,
               height: 1.4,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailHero extends StatelessWidget {
-  final FacturationDetailIntent intent;
-
-  const _DetailHero({required this.intent});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final fullName = [intent.lastName, intent.firstName, intent.surname]
-        .where((part) => part.trim().isNotEmpty)
-        .join(' ');
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.detailCardPadding),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.financeDetailInfoSurface,
-            AppColors.financeDetailCard,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.financeDetailShadow,
-            blurRadius: AppDimensions.financeDetailCardShadowBlur,
-            offset: Offset(0, AppDimensions.financeDetailCardShadowOffsetY),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCompact =
-              constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
-
-          final metaBadges = Wrap(
-            spacing: AppDimensions.spacingS,
-            runSpacing: AppDimensions.spacingS,
-            children: [
-              if (intent.levelGroupName.trim().isNotEmpty)
-                _MetaBadge(
-                  label: l10n.facturationDetailStudentLevelGroup,
-                  value: intent.levelGroupName,
-                  accent: AppColors.financeDetailAmber,
-                  accentSoft: AppColors.financeDetailAmberSoft,
-                ),
-              if (intent.levelName.trim().isNotEmpty)
-                _MetaBadge(
-                  label: l10n.facturationDetailStudentLevel,
-                  value: intent.levelName,
-                  accent: AppColors.financeDetailTeal,
-                  accentSoft: AppColors.financeDetailTealSoft,
-                ),
-            ],
-          );
-
-          final featureChips = Wrap(
-            spacing: AppDimensions.spacingS,
-            runSpacing: AppDimensions.spacingS,
-            children: [
-              _FeatureChip(
-                label: l10n.facturationDetailInfoChipPayments,
-                icon: Icons.payments_outlined,
-                accent: AppColors.financeDetailPaymentsAccent,
-                accentSoft: AppColors.financeDetailPaymentsAccentSoft,
-              ),
-              _FeatureChip(
-                label: l10n.facturationDetailInfoChipCharges,
-                icon: Icons.receipt_long_outlined,
-                accent: AppColors.financeDetailChargesAccent,
-                accentSoft: AppColors.financeDetailChargesAccentSoft,
-              ),
-            ],
-          );
-
-          final textContent = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.facturationDetailInfoTitle,
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                fullName.isEmpty
-                    ? l10n.facturationDetailUnknownValue
-                    : fullName,
-                style: AppTextStyles.detailHeroTitle.copyWith(
-                  color: AppColors.financeDetailAccent,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingS),
-              metaBadges,
-              const SizedBox(height: AppDimensions.spacingS),
-              Text(
-                l10n.facturationDetailInfoSubtitle,
-                style: AppTextStyles.detailHeroSubtitle.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              featureChips,
-            ],
-          );
-
-          final avatar = Container(
-            width: AppDimensions.detailHeroAvatarSize,
-            height: AppDimensions.detailHeroAvatarSize,
-            decoration: BoxDecoration(
-              color: AppColors.financeDetailAccentSoft,
-              borderRadius: BorderRadius.circular(AppDimensions.spacingXL),
-              border: Border.all(
-                color: AppColors.financeDetailAccent.withValues(alpha: 0.2),
-              ),
-            ),
-            child: const Icon(
-              Icons.receipt_long_outlined,
-              size: AppDimensions.detailHeaderIconSize,
-              color: AppColors.financeDetailAccent,
-            ),
-          );
-
-          if (isCompact) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                avatar,
-                const SizedBox(height: AppDimensions.spacingM),
-                textContent,
-              ],
-            );
-          }
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              avatar,
-              const SizedBox(width: AppDimensions.spacingM),
-              Expanded(child: textContent),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Badge compact affichant un label et sa valeur (ex: Cycle · Secondaire).
-class _MetaBadge extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color accent;
-  final Color accentSoft;
-
-  const _MetaBadge({
-    required this.label,
-    required this.value,
-    required this.accent,
-    required this.accentSoft,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: accentSoft,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingL),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
-      ),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '$label · ',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            TextSpan(
-              text: value,
-              style: AppTextStyles.caption.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Chip feature affichant une icône et un libellé (ex: Paiements, Charges).
-class _FeatureChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color accent;
-  final Color accentSoft;
-
-  const _FeatureChip({
-    required this.label,
-    required this.icon,
-    required this.accent,
-    required this.accentSoft,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingS,
-      ),
-      decoration: BoxDecoration(
-        color: accentSoft,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingL),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: AppDimensions.detailMiniIconSize, color: accent),
-          const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            label,
-            style: AppTextStyles.badge.copyWith(color: accent),
           ),
         ],
       ),

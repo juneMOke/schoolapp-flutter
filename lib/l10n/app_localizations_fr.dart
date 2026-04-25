@@ -930,6 +930,69 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailViewPaymentLabel => 'Voir le détail du paiement';
 
   @override
+  String get facturationPaymentDetailHeroTitle => 'Détail du paiement';
+
+  @override
+  String get facturationPaymentDetailHeroSubtitle => 'Consultez les informations de ce paiement et la répartition des montants alloués.';
+
+  @override
+  String get facturationPaymentInfoSectionTitle => 'Informations du paiement';
+
+  @override
+  String get facturationPaymentPayerLabel => 'Payeur';
+
+  @override
+  String get facturationPaymentAmountLabel => 'Montant global payé';
+
+  @override
+  String get facturationPaymentPaidAtLabel => 'Date de paiement';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Allocations de paiement';
+
+  @override
+  String get facturationPaymentAllocationsSectionSubtitle => 'Liste des charges couvertes par ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsTotalLabel => 'Total alloué';
+
+  @override
+  String get facturationPaymentAllocationsEmpty => 'Aucune allocation n\'a été trouvée pour ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyOk => 'La somme des allocations est cohérente avec le montant global payé.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyWarning => 'Incohérence détectée : la somme des allocations ne correspond pas au montant global payé.';
+
+  @override
+  String get facturationPaymentAllocationsNetworkError => 'Impossible de charger les allocations du paiement. Vérifiez votre connexion internet.';
+
+  @override
+  String get facturationPaymentAllocationsNotFound => 'Aucune allocation trouvée pour ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsValidationError => 'Les informations demandées pour les allocations sont invalides.';
+
+  @override
+  String get facturationPaymentAllocationsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter les allocations de ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux allocations de ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get facturationPaymentAllocationsStorageError => 'Une erreur locale empêche l\'affichage des allocations.';
+
+  @override
+  String get facturationPaymentAllocationsAuthError => 'Une erreur d\'authentification empêche le chargement des allocations.';
+
+  @override
+  String get facturationPaymentAllocationsUnknownError => 'Une erreur inattendue est survenue lors du chargement des allocations.';
+
+  @override
   String get facturationDetailChargesSectionTitle => 'Charges de l\'élève';
 
   @override
@@ -982,6 +1045,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationPaymentsUnknownError => 'Une erreur inattendue est survenue lors du chargement des paiements.';
+
+  @override
+  String get facturationPrintReceiptLabel => 'Imprimer le reçu';
+
+  @override
+  String get facturationPrintReceiptSubtitle => 'Générez et téléchargez le reçu de ce paiement';
 
   @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
