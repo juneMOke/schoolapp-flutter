@@ -37,6 +37,30 @@ class StudentChargesRepositoryImpl implements StudentChargesRepository {
   }
 
   @override
+  Future<Either<Failure, List<StudentCharge>>>
+  getStudentChargesByAcademicYear({
+    required String studentId,
+    required String academicYearId,
+  }) async {
+    try {
+      final models = await remoteDataSource
+          .listStudentChargesByStudentAndAcademicYear(
+            requiredAuth,
+            studentId,
+            academicYearId,
+          );
+      return Right(models.map((m) => m.toEntity()).toList());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
   Future<Either<Failure, StudentCharge>> updateStudentChargeExpectedAmount({
     required String studentChargeId,
     required String studentId,

@@ -7,15 +7,20 @@ import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/payments_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/finance_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -537,9 +542,20 @@ Future<void> configureDependencies() async {
     () => StudentChargesRemoteDataSource(getIt<Dio>()),
   );
 
+  getIt.registerLazySingleton<PaymentsRemoteDataSource>(
+    () => PaymentsRemoteDataSource(getIt<Dio>()),
+  );
+
   getIt.registerLazySingleton<StudentChargesRepository>(
     () => StudentChargesRepositoryImpl(
       remoteDataSource: getIt<StudentChargesRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<PaymentsRepository>(
+    () => PaymentsRepositoryImpl(
+      remoteDataSource: getIt<PaymentsRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
@@ -550,6 +566,16 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<GetStudentChargesUseCase>(
     () => GetStudentChargesUseCase(getIt<StudentChargesRepository>()),
+  );
+
+  getIt.registerFactory<GetStudentChargesByAcademicYearUseCase>(
+    () => GetStudentChargesByAcademicYearUseCase(
+      getIt<StudentChargesRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<GetPaymentsUseCase>(
+    () => GetPaymentsUseCase(getIt<PaymentsRepository>()),
   );
 
   getIt.registerFactory<UpdateStudentChargeExpectedAmountUseCase>(
@@ -565,8 +591,14 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<StudentChargesBloc>(
     () => StudentChargesBloc(
       getStudentChargesUseCase: getIt<GetStudentChargesUseCase>(),
+      getStudentChargesByAcademicYearUseCase:
+          getIt<GetStudentChargesByAcademicYearUseCase>(),
       updateStudentChargeExpectedAmountUseCase:
           getIt<UpdateStudentChargeExpectedAmountUseCase>(),
     ),
+  );
+
+  getIt.registerFactory<PaymentsBloc>(
+    () => PaymentsBloc(getPaymentsUseCase: getIt<GetPaymentsUseCase>()),
   );
 }

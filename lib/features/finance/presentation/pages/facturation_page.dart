@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -10,9 +11,12 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_page_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class FacturationPage extends StatefulWidget {
   const FacturationPage({super.key});
@@ -151,10 +155,49 @@ class _FacturationPageState extends State<FacturationPage> {
     return options;
   }
 
-  /// Point d'extension : sera câblé vers la page de détail lors de la
-  /// prochaine itération (discussion en cours).
+  /// Navigue vers la page de détail facturation avec le contexte d'affichage.
   void _onViewChargesRequested(EnrollmentSummary summary, String levelId) {
-    // TODO(facturation-detail): naviguer vers la page de détail des charges
-    // context.push('/finances/facturation-detail/${summary.student.id}/$levelId');
+    final l10n = AppLocalizations.of(context)!;
+    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
+    final academicYearId = bootstrap?.academicYear.id ?? '';
+
+    if (academicYearId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.bootstrapContextUnavailableMessage)),
+      );
+      return;
+    }
+
+    String levelName = '';
+    String levelGroupName = '';
+
+    for (final groupBundle in bootstrap?.schoolLevelGroups ?? const []) {
+      for (final levelBundle in groupBundle.schoolLevels) {
+        if (levelBundle.schoolLevel.id == levelId) {
+          levelName = levelBundle.schoolLevel.name;
+          levelGroupName = groupBundle.schoolLevelGroup.name;
+          break;
+        }
+      }
+      if (levelName.isNotEmpty) {
+        break;
+      }
+    }
+
+    context.push(
+      AppRoutesNames.facturationDetailPath(
+        studentId: summary.student.id,
+        academicYearId: academicYearId,
+      ),
+      extra: FacturationDetailIntent(
+        studentId: summary.student.id,
+        academicYearId: academicYearId,
+        firstName: summary.student.firstName,
+        lastName: summary.student.lastName,
+        surname: summary.student.surname,
+        levelName: levelName,
+        levelGroupName: levelGroupName,
+      ),
+    );
   }
 }

@@ -17,6 +17,13 @@ abstract class StudentChargesRemoteDataSource {
     @Query('levelId') String levelId,
   );
 
+  @GET(AppConstants.listStudentChargesByStudentAndAcademicYearEndpoint)
+  Future<List<StudentChargesModel>> listStudentChargesByStudentAndAcademicYear(
+    @Extras() Map<String, dynamic> extras,
+    @Path('studentId') String studentId,
+    @Path('academicYearId') String academicYearId,
+  );
+
   @PUT(AppConstants.updateStudentChargeExpectedAmountEndpoint)
   Future<StudentChargesModel> updateStudentChargeExpectedAmount(
     @Extras() Map<String, dynamic> extras,

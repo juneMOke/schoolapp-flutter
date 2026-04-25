@@ -1703,6 +1703,258 @@ abstract class AppLocalizations {
   /// **'No student matches these criteria. Update the form and try again.'**
   String get facturationNoResultsDescription;
 
+  /// No description provided for @facturationDetailBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to billing'**
+  String get facturationDetailBackLabel;
+
+  /// No description provided for @facturationDetailContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail context unavailable'**
+  String get facturationDetailContextErrorTitle;
+
+  /// No description provided for @facturationDetailContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Required context for this detail view is missing. Go back to billing list and open the detail again.'**
+  String get facturationDetailContextErrorMessage;
+
+  /// No description provided for @facturationDetailUnknownValue.
+  ///
+  /// In en, this message translates to:
+  /// **'-'**
+  String get facturationDetailUnknownValue;
+
+  /// No description provided for @facturationDetailStudentSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student information'**
+  String get facturationDetailStudentSectionTitle;
+
+  /// No description provided for @facturationDetailStudentLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get facturationDetailStudentLastName;
+
+  /// No description provided for @facturationDetailStudentFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get facturationDetailStudentFirstName;
+
+  /// No description provided for @facturationDetailStudentSurname.
+  ///
+  /// In en, this message translates to:
+  /// **'Surname'**
+  String get facturationDetailStudentSurname;
+
+  /// No description provided for @facturationDetailStudentLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Level group'**
+  String get facturationDetailStudentLevelGroup;
+
+  /// No description provided for @facturationDetailStudentLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get facturationDetailStudentLevel;
+
+  /// No description provided for @facturationDetailInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing detail'**
+  String get facturationDetailInfoTitle;
+
+  /// No description provided for @facturationDetailInfoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review recent payments and student charge status for the selected academic year.'**
+  String get facturationDetailInfoSubtitle;
+
+  /// No description provided for @facturationDetailInfoChipPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get facturationDetailInfoChipPayments;
+
+  /// No description provided for @facturationDetailInfoChipCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges'**
+  String get facturationDetailInfoChipCharges;
+
+  /// No description provided for @facturationDetailPaymentsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent payments'**
+  String get facturationDetailPaymentsSectionTitle;
+
+  /// No description provided for @facturationDetailPaymentsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history recorded for this student.'**
+  String get facturationDetailPaymentsSectionSubtitle;
+
+  /// No description provided for @facturationDetailCollectPaymentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect payment'**
+  String get facturationDetailCollectPaymentAction;
+
+  /// No description provided for @facturationDetailPaymentsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationDetailPaymentsRetry;
+
+  /// No description provided for @facturationDetailPaymentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment has been recorded for this student.'**
+  String get facturationDetailPaymentsEmpty;
+
+  /// No description provided for @facturationDetailPaymentPayerColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer details'**
+  String get facturationDetailPaymentPayerColumn;
+
+  /// No description provided for @facturationDetailPaymentPaidAtColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at'**
+  String get facturationDetailPaymentPaidAtColumn;
+
+  /// No description provided for @facturationDetailPaymentAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get facturationDetailPaymentAmountColumn;
+
+  /// No description provided for @facturationDetailPaymentActionsColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get facturationDetailPaymentActionsColumn;
+
+  /// No description provided for @facturationDetailViewPaymentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View payment detail'**
+  String get facturationDetailViewPaymentLabel;
+
+  /// No description provided for @facturationDetailChargesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student charges'**
+  String get facturationDetailChargesSectionTitle;
+
+  /// No description provided for @facturationDetailChargesSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown of expected, paid and remaining amounts.'**
+  String get facturationDetailChargesSectionSubtitle;
+
+  /// No description provided for @facturationDetailChargesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationDetailChargesRetry;
+
+  /// No description provided for @facturationDetailChargesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No charge was found for this student.'**
+  String get facturationDetailChargesEmpty;
+
+  /// No description provided for @facturationDetailChargeLabelColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get facturationDetailChargeLabelColumn;
+
+  /// No description provided for @facturationDetailChargeExpectedAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected amount'**
+  String get facturationDetailChargeExpectedAmountColumn;
+
+  /// No description provided for @facturationDetailChargePaidAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid amount'**
+  String get facturationDetailChargePaidAmountColumn;
+
+  /// No description provided for @facturationDetailChargeRemainingAmountColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining amount'**
+  String get facturationDetailChargeRemainingAmountColumn;
+
+  /// No description provided for @facturationDetailChargeStatusColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get facturationDetailChargeStatusColumn;
+
+  /// No description provided for @facturationPaymentsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load payments. Please check your internet connection.'**
+  String get facturationPaymentsNetworkError;
+
+  /// No description provided for @facturationPaymentsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment was found for this student.'**
+  String get facturationPaymentsNotFound;
+
+  /// No description provided for @facturationPaymentsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested payment data is invalid.'**
+  String get facturationPaymentsValidationError;
+
+  /// No description provided for @facturationPaymentsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to access these payments.'**
+  String get facturationPaymentsUnauthorizedError;
+
+  /// No description provided for @facturationPaymentsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to these payments.'**
+  String get facturationPaymentsInvalidCredentialsError;
+
+  /// No description provided for @facturationPaymentsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get facturationPaymentsServerError;
+
+  /// No description provided for @facturationPaymentsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents payments from being displayed.'**
+  String get facturationPaymentsStorageError;
+
+  /// No description provided for @facturationPaymentsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents payments from loading.'**
+  String get facturationPaymentsAuthError;
+
+  /// No description provided for @facturationPaymentsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading payments.'**
+  String get facturationPaymentsUnknownError;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:

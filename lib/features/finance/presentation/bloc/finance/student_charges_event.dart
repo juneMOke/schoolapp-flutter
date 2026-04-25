@@ -17,6 +17,19 @@ class StudentChargesRequested extends StudentChargesEvent {
   List<Object?> get props => [studentId, levelId];
 }
 
+class StudentChargesByAcademicYearRequested extends StudentChargesEvent {
+  final String studentId;
+  final String academicYearId;
+
+  const StudentChargesByAcademicYearRequested({
+    required this.studentId,
+    required this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [studentId, academicYearId];
+}
+
 class StudentChargesDraftSaved extends StudentChargesEvent {
   final List<StudentCharge> studentCharges;
 

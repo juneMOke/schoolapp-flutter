@@ -858,6 +858,132 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationNoResultsDescription => 'No student matches these criteria. Update the form and try again.';
 
   @override
+  String get facturationDetailBackLabel => 'Back to billing';
+
+  @override
+  String get facturationDetailContextErrorTitle => 'Detail context unavailable';
+
+  @override
+  String get facturationDetailContextErrorMessage => 'Required context for this detail view is missing. Go back to billing list and open the detail again.';
+
+  @override
+  String get facturationDetailUnknownValue => '-';
+
+  @override
+  String get facturationDetailStudentSectionTitle => 'Student information';
+
+  @override
+  String get facturationDetailStudentLastName => 'Last name';
+
+  @override
+  String get facturationDetailStudentFirstName => 'First name';
+
+  @override
+  String get facturationDetailStudentSurname => 'Surname';
+
+  @override
+  String get facturationDetailStudentLevelGroup => 'Level group';
+
+  @override
+  String get facturationDetailStudentLevel => 'Level';
+
+  @override
+  String get facturationDetailInfoTitle => 'Billing detail';
+
+  @override
+  String get facturationDetailInfoSubtitle => 'Review recent payments and student charge status for the selected academic year.';
+
+  @override
+  String get facturationDetailInfoChipPayments => 'Payments';
+
+  @override
+  String get facturationDetailInfoChipCharges => 'Charges';
+
+  @override
+  String get facturationDetailPaymentsSectionTitle => 'Recent payments';
+
+  @override
+  String get facturationDetailPaymentsSectionSubtitle => 'Payment history recorded for this student.';
+
+  @override
+  String get facturationDetailCollectPaymentAction => 'Collect payment';
+
+  @override
+  String get facturationDetailPaymentsRetry => 'Retry';
+
+  @override
+  String get facturationDetailPaymentsEmpty => 'No payment has been recorded for this student.';
+
+  @override
+  String get facturationDetailPaymentPayerColumn => 'Payer details';
+
+  @override
+  String get facturationDetailPaymentPaidAtColumn => 'Paid at';
+
+  @override
+  String get facturationDetailPaymentAmountColumn => 'Amount';
+
+  @override
+  String get facturationDetailPaymentActionsColumn => 'Actions';
+
+  @override
+  String get facturationDetailViewPaymentLabel => 'View payment detail';
+
+  @override
+  String get facturationDetailChargesSectionTitle => 'Student charges';
+
+  @override
+  String get facturationDetailChargesSectionSubtitle => 'Breakdown of expected, paid and remaining amounts.';
+
+  @override
+  String get facturationDetailChargesRetry => 'Retry';
+
+  @override
+  String get facturationDetailChargesEmpty => 'No charge was found for this student.';
+
+  @override
+  String get facturationDetailChargeLabelColumn => 'Label';
+
+  @override
+  String get facturationDetailChargeExpectedAmountColumn => 'Expected amount';
+
+  @override
+  String get facturationDetailChargePaidAmountColumn => 'Paid amount';
+
+  @override
+  String get facturationDetailChargeRemainingAmountColumn => 'Remaining amount';
+
+  @override
+  String get facturationDetailChargeStatusColumn => 'Status';
+
+  @override
+  String get facturationPaymentsNetworkError => 'Unable to load payments. Please check your internet connection.';
+
+  @override
+  String get facturationPaymentsNotFound => 'No payment was found for this student.';
+
+  @override
+  String get facturationPaymentsValidationError => 'Requested payment data is invalid.';
+
+  @override
+  String get facturationPaymentsUnauthorizedError => 'You are not allowed to access these payments.';
+
+  @override
+  String get facturationPaymentsInvalidCredentialsError => 'Your credentials do not allow access to these payments.';
+
+  @override
+  String get facturationPaymentsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationPaymentsStorageError => 'A local error prevents payments from being displayed.';
+
+  @override
+  String get facturationPaymentsAuthError => 'An authentication error prevents payments from loading.';
+
+  @override
+  String get facturationPaymentsUnknownError => 'An unexpected error occurred while loading payments.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

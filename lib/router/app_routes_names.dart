@@ -16,6 +16,14 @@ class AppRoutesNames {
 
   static const String financesDashboard = '/finances/${MenuConstants.financesDashboardId}';
   static const String facturations = '/finances/${MenuConstants.facturationsId}';
+  static const String facturationDetail =
+      '/finances/${MenuConstants.facturationsId}/detail/:studentId/:academicYearId';
+
+  static String facturationDetailPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
 
   static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';

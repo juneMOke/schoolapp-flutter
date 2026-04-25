@@ -14,6 +14,9 @@ class MockGetStudentChargesUseCase extends Mock
 class MockUpdateStudentChargeExpectedAmountUseCase extends Mock
     implements UpdateStudentChargeExpectedAmountUseCase {}
 
+class MockGetStudentChargesByAcademicYearUseCase extends Mock
+    implements GetStudentChargesByAcademicYearUseCase {}
+
 const tStudentId = 'student-1';
 const tLevelId = 'level-1';
 const tParams = GetStudentChargesParams(
@@ -61,15 +64,21 @@ void main() {
   late MockGetStudentChargesUseCase mockGetStudentChargesUseCase;
   late MockUpdateStudentChargeExpectedAmountUseCase
   mockUpdateStudentChargeExpectedAmountUseCase;
+  late MockGetStudentChargesByAcademicYearUseCase
+      mockGetStudentChargesByAcademicYearUseCase;
 
   setUp(() {
     mockGetStudentChargesUseCase = MockGetStudentChargesUseCase();
     mockUpdateStudentChargeExpectedAmountUseCase =
         MockUpdateStudentChargeExpectedAmountUseCase();
+    mockGetStudentChargesByAcademicYearUseCase =
+        MockGetStudentChargesByAcademicYearUseCase();
   });
 
   StudentChargesBloc buildBloc() => StudentChargesBloc(
     getStudentChargesUseCase: mockGetStudentChargesUseCase,
+    getStudentChargesByAcademicYearUseCase:
+        mockGetStudentChargesByAcademicYearUseCase,
     updateStudentChargeExpectedAmountUseCase:
         mockUpdateStudentChargeExpectedAmountUseCase,
   );

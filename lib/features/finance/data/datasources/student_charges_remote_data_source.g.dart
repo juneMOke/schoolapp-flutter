@@ -58,6 +58,43 @@ class _StudentChargesRemoteDataSource
   }
 
   @override
+  Future<List<StudentChargesModel>> listStudentChargesByStudentAndAcademicYear(
+    Map<String, dynamic> extras,
+    String studentId,
+    String academicYearId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<StudentChargesModel>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/finance/student-charges/student/${studentId}/academic-year/${academicYearId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<StudentChargesModel> _value;
+    try {
+      _value = _result.data!
+          .map(
+            (dynamic i) =>
+                StudentChargesModel.fromJson(i as Map<String, dynamic>),
+          )
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<StudentChargesModel> updateStudentChargeExpectedAmount(
     Map<String, dynamic> extras,
     String studentChargeId,

@@ -8,6 +8,12 @@ abstract class StudentChargesRepository {
     required String levelId,
   });
 
+  Future<Either<Failure, List<StudentCharge>>>
+  getStudentChargesByAcademicYear({
+    required String studentId,
+    required String academicYearId,
+  });
+
   Future<Either<Failure, StudentCharge>> updateStudentChargeExpectedAmount({
     required String studentChargeId,
     required String studentId,

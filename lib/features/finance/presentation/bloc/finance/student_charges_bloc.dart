@@ -11,18 +11,27 @@ part 'student_charges_state.dart';
 class StudentChargesBloc
     extends Bloc<StudentChargesEvent, StudentChargesState> {
   final GetStudentChargesUseCase _getStudentChargesUseCase;
+  final GetStudentChargesByAcademicYearUseCase?
+      _getStudentChargesByAcademicYearUseCase;
   final UpdateStudentChargeExpectedAmountUseCase
-  _updateStudentChargeExpectedAmountUseCase;
+      _updateStudentChargeExpectedAmountUseCase;
 
   StudentChargesBloc({
     required GetStudentChargesUseCase getStudentChargesUseCase,
+    GetStudentChargesByAcademicYearUseCase?
+        getStudentChargesByAcademicYearUseCase,
     required UpdateStudentChargeExpectedAmountUseCase
-    updateStudentChargeExpectedAmountUseCase,
+        updateStudentChargeExpectedAmountUseCase,
   }) : _getStudentChargesUseCase = getStudentChargesUseCase,
+       _getStudentChargesByAcademicYearUseCase =
+           getStudentChargesByAcademicYearUseCase,
        _updateStudentChargeExpectedAmountUseCase =
            updateStudentChargeExpectedAmountUseCase,
        super(const StudentChargesState()) {
     on<StudentChargesRequested>(_onStudentChargesRequested);
+    on<StudentChargesByAcademicYearRequested>(
+      _onStudentChargesByAcademicYearRequested,
+    );
     on<StudentChargesDraftSaved>(_onStudentChargesDraftSaved);
     on<StudentChargeExpectedAmountUpdateRequested>(
       _onStudentChargeExpectedAmountUpdateRequested,
@@ -45,6 +54,55 @@ class StudentChargesBloc
       GetStudentChargesParams(
         studentId: event.studentId,
         levelId: event.levelId,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: StudentChargesStatus.failure,
+          errorType: _mapFailureToErrorType(failure),
+          updatingChargeId: null,
+        ),
+      ),
+      (studentCharges) => emit(
+        state.copyWith(
+          status: StudentChargesStatus.success,
+          studentCharges: studentCharges,
+          errorType: StudentChargesErrorType.none,
+          updatingChargeId: null,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onStudentChargesByAcademicYearRequested(
+    StudentChargesByAcademicYearRequested event,
+    Emitter<StudentChargesState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        status: StudentChargesStatus.loading,
+        errorType: StudentChargesErrorType.none,
+        updatingChargeId: null,
+      ),
+    );
+
+    if (_getStudentChargesByAcademicYearUseCase == null) {
+      emit(
+        state.copyWith(
+          status: StudentChargesStatus.failure,
+          errorType: StudentChargesErrorType.unknown,
+          updatingChargeId: null,
+        ),
+      );
+      return;
+    }
+
+    final result = await _getStudentChargesByAcademicYearUseCase(
+      GetStudentChargesByAcademicYearParams(
+        studentId: event.studentId,
+        academicYearId: event.academicYearId,
       ),
     );
 
