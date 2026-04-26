@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
@@ -32,7 +33,6 @@ class _SearchFormState extends State<SearchForm> {
   final _surnameController = TextEditingController();
   final _dateOfBirthController = TextEditingController();
 
-  static const Duration _actionCooldown = Duration(milliseconds: 600);
   DateTime? _lastActionAt;
 
   @override
@@ -281,7 +281,7 @@ class _SearchFormState extends State<SearchForm> {
     if (lastActionAt == null) {
       return false;
     }
-    return DateTime.now().difference(lastActionAt) < _actionCooldown;
+    return DateTime.now().difference(lastActionAt) < AppMotion.actionCooldown;
   }
 
   void _markActionTriggered() {

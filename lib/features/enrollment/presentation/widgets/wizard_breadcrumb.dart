@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -75,7 +76,8 @@ class WizardBreadcrumb extends StatelessWidget {
                         ? SystemMouseCursors.click
                         : SystemMouseCursors.forbidden,
                     child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 160),
+                      duration: AppMotion.fast,
+                      curve: AppMotion.outCurve,
                       opacity: isFuture ? 0.55 : 1,
                       child: InkWell(
                         onTap: canTap ? () => onStepTap(index) : null,

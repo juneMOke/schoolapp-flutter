@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -56,7 +57,8 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
               context.read<NavigationBloc>().add(MenuItemSelected(widget.menu.id));
             },
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
+              duration: AppMotion.fast,
+              curve: AppMotion.outCurve,
               padding: EdgeInsets.symmetric(
                 horizontal: widget.isExpanded ? 12 : 0,
                 vertical: 11,
@@ -123,8 +125,8 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
 
   Widget _buildSubMenus() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
+      duration: AppMotion.medium,
+      curve: AppMotion.gentleOut,
       margin: const EdgeInsets.only(left: 16, right: 10, bottom: 6),
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(

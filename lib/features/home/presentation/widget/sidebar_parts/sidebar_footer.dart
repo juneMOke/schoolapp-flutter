@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 
 class SidebarFooter extends StatelessWidget {
   final bool isExpanded;
@@ -11,7 +12,8 @@ class SidebarFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
+      duration: AppMotion.standard,
+      curve: AppMotion.outCurve,
       margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 12),
       padding: EdgeInsets.symmetric(horizontal: isExpanded ? 12 : 6, vertical: 10),
       decoration: BoxDecoration(

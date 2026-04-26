@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item.dart';
@@ -74,7 +75,9 @@ class GuardianInfoStepBody extends StatelessWidget {
             ),
           ),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
+            duration: AppMotion.medium,
+            switchInCurve: AppMotion.outCurve,
+            switchOutCurve: AppMotion.inCurve,
             child: isLoading
                 ? Padding(
                     key: const ValueKey<String>('guardian-loading-bar'),

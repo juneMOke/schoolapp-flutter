@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_footer.dart';
@@ -14,8 +15,8 @@ class Sidebar extends StatelessWidget {
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, state) {
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
+          duration: AppMotion.layout,
+          curve: AppMotion.outCurve,
           width: state.isSidebarExpanded
               ? AppTheme.sidebarWidth
               : AppTheme.sidebarCollapsedWidth,

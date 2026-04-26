@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 
 class EnrollmentDetailBackButton extends StatefulWidget {
@@ -33,7 +34,8 @@ class _EnrollmentDetailBackButtonState extends State<EnrollmentDetailBackButton>
               }
             },
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
+              duration: AppMotion.fast,
+              curve: AppMotion.outCurve,
               width: 36,
               height: 36,
               decoration: BoxDecoration(

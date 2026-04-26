@@ -1,20 +1,22 @@
 import 'package:flutter/animation.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 
 /// Tokens d'animation du module Finance.
 ///
-/// Objectif: harmoniser les interactions et faciliter un tuning global.
+/// Backward-compatible: conserve l'API FinanceMotion tout en deleguant
+/// les valeurs a AppMotion (source unique transverse).
 class FinanceMotion {
   const FinanceMotion._();
 
   // Durations
-  static const Duration micro = Duration(milliseconds: 130);
-  static const Duration fast = Duration(milliseconds: 160);
-  static const Duration medium = Duration(milliseconds: 180);
-  static const Duration standard = Duration(milliseconds: 220);
-  static const Duration entrance = Duration(milliseconds: 260);
+  static const Duration micro = AppMotion.micro;
+  static const Duration fast = AppMotion.fast;
+  static const Duration medium = AppMotion.medium;
+  static const Duration standard = AppMotion.standard;
+  static const Duration entrance = AppMotion.entrance;
 
   // Curves
-  static const Curve inCurve = Curves.easeInCubic;
-  static const Curve outCurve = Curves.easeOutCubic;
-  static const Curve gentleOut = Curves.easeOut;
+  static const Curve inCurve = AppMotion.inCurve;
+  static const Curve outCurve = AppMotion.outCurve;
+  static const Curve gentleOut = AppMotion.gentleOut;
 }

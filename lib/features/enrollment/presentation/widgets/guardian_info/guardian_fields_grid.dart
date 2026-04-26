@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_email_field.dart';
@@ -179,7 +180,8 @@ class GuardianFieldsGrid extends StatelessWidget {
                                   ? () => onRelationshipTypeChanged(type)
                                   : null,
                               child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 160),
+                                duration: AppMotion.fast,
+                                curve: AppMotion.outCurve,
                                 width: chipWidth,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,

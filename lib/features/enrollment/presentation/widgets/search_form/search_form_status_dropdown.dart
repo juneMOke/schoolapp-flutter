@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -148,7 +149,8 @@ class SearchFormStatusDropdown extends StatelessWidget {
     final textColor = isSelected ? visual.base : AppTheme.textPrimaryColor;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
+      duration: AppMotion.fast,
+      curve: AppMotion.outCurve,
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingXS + 2,
         vertical: AppDimensions.spacingXS + 2,
@@ -187,7 +189,8 @@ class SearchFormStatusDropdown extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingXS),
           AnimatedOpacity(
-            duration: const Duration(milliseconds: 150),
+            duration: AppMotion.fast,
+            curve: AppMotion.outCurve,
             opacity: isSelected ? 1 : 0,
             child: Icon(
               Icons.check_circle_rounded,
