@@ -42,6 +42,11 @@ import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
@@ -439,6 +444,26 @@ Future<void> configureDependencies() async {
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
       updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
     ),
+  );
+
+  // ── Classes ──────────────────────────────────────────────────────────────
+  getIt.registerLazySingleton<ClassroomRemoteDataSource>(
+    () => ClassroomRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ClassroomRepository>(
+    () => ClassroomRepositoryImpl(
+      remoteDataSource: getIt<ClassroomRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetClassroomsUseCase>(
+    () => GetClassroomsUseCase(getIt<ClassroomRepository>()),
+  );
+
+  getIt.registerFactory<ClassroomBloc>(
+    () => ClassroomBloc(getClassroomsUseCase: getIt<GetClassroomsUseCase>()),
   );
 
   // ── Student ───────────────────────────────────────────────────────────────
