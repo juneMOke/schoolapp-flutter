@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -51,6 +52,7 @@ class FinanceTextFormField extends StatelessWidget {
   final bool readOnly;
   final Color accentColor;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const FinanceTextFormField({
     super.key,
@@ -61,6 +63,7 @@ class FinanceTextFormField extends StatelessWidget {
     this.validator,
     this.readOnly = false,
     this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -69,6 +72,7 @@ class FinanceTextFormField extends StatelessWidget {
       controller: controller,
       readOnly: readOnly,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
       decoration: financeInputDecoration(
         label: label,

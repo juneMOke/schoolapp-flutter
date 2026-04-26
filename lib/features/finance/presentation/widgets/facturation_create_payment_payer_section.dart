@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
@@ -24,6 +25,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    const nameInputFormatters = [FirstLetterUppercaseTextInputFormatter()];
 
     return FinanceSectionCard(
       gradientColors: const [
@@ -50,6 +52,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
                 ? l10n.facturationCreatePaymentPayerFieldRequired
                 : null,
             readOnly: readOnly,
+            inputFormatters: nameInputFormatters,
           ),
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
@@ -61,6 +64,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
                 ? l10n.facturationCreatePaymentPayerFieldRequired
                 : null,
             readOnly: readOnly,
+            inputFormatters: nameInputFormatters,
           ),
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
@@ -69,6 +73,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
             hint: l10n.facturationCreatePaymentPayerMiddleNameHint,
             accentColor: AppColors.financeDetailAccent,
             readOnly: readOnly,
+            inputFormatters: nameInputFormatters,
           ),
         ],
       ),
