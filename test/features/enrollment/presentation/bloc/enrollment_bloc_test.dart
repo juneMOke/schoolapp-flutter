@@ -101,6 +101,7 @@ final _tEnrollmentDetail = EnrollmentDetail(
       name: '6ème',
       code: '6EME',
       displayOrder: 1,
+      splitIntoClassrooms: false,
     ),
     schoolLevelGroup: SchoolLevelGroup(
       id: 'group-1',

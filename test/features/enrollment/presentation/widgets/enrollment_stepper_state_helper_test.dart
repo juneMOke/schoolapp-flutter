@@ -279,6 +279,7 @@ StudentDetail _buildStudentDetail({
       name: '6eme',
       code: '6E',
       displayOrder: 1,
+      splitIntoClassrooms: false,
     ),
     schoolLevelGroup: const SchoolLevelGroup(
       id: 'group-1',
