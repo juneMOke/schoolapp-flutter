@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 
@@ -16,6 +17,13 @@ abstract class ClassroomRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Query('schoolLevelGroupId') String schoolLevelGroupId,
     @Query('schoolLevelId') String schoolLevelId,
+    @Query('academicYearId') String academicYearId,
+  );
+
+  @GET(AppConstants.classroomMembersEndpoint)
+  Future<List<ClassroomMemberModel>> listClassroomMembers(
+    @Extras() Map<String, dynamic> extras,
+    @Path('classroomId') String classroomId,
     @Query('academicYearId') String academicYearId,
   );
 

@@ -4,10 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 
 class MockClassroomRemoteDataSource extends Mock
@@ -20,6 +22,29 @@ const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
+const tClassroomId = 'classroom-1';
+
+const tClassroomMemberModel = ClassroomMemberModel(
+  id: 'member-1',
+  studentId: 'student-1',
+  classroomId: tClassroomId,
+  academicYearId: tAcademicYearId,
+  studentFirstName: 'John',
+  studentLastName: 'Doe',
+  studentMiddleName: 'K',
+  studentGender: 'MALE',
+);
+
+const tClassroomMember = ClassroomMember(
+  id: 'member-1',
+  studentId: 'student-1',
+  classroomId: tClassroomId,
+  academicYearId: tAcademicYearId,
+  studentFirstName: 'John',
+  studentLastName: 'Doe',
+  studentMiddleName: 'K',
+  studentGender: ClassroomMemberGender.male,
+);
 
 const tClassroomModel = ClassroomModel(
   id: 'classroom-1',
@@ -189,6 +214,96 @@ void main() {
         result,
         const Left<Failure, List<Classroom>>(
           ServerFailure('Unexpected error occurred'),
+        ),
+      );
+    });
+  });
+
+  group('getClassroomMembers', () {
+    test(
+      'returns Right(List<ClassroomMember>) when datasource succeeds',
+      () async {
+        when(
+          () => mockRemoteDataSource.listClassroomMembers(
+            tRequiredAuth,
+            tClassroomId,
+            tAcademicYearId,
+          ),
+        ).thenAnswer((_) async => const [tClassroomMemberModel]);
+
+        final result = await repository.getClassroomMembers(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        );
+
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (members) => expect(members, const [tClassroomMember]),
+        );
+      },
+    );
+
+    test('returns Left(Failure) when DioException carries a Failure', () async {
+      const failure = NotFoundFailure('Resource not found');
+      when(
+        () => mockRemoteDataSource.listClassroomMembers(
+          tRequiredAuth,
+          tClassroomId,
+          tAcademicYearId,
+        ),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.getClassroomMembers(
+        classroomId: tClassroomId,
+        academicYearId: tAcademicYearId,
+      );
+
+      expect(result, const Left<Failure, List<ClassroomMember>>(failure));
+    });
+
+    test(
+      'returns Left(NetworkFailure) when DioException has no Failure',
+      () async {
+        when(
+          () => mockRemoteDataSource.listClassroomMembers(
+            tRequiredAuth,
+            tClassroomId,
+            tAcademicYearId,
+          ),
+        ).thenThrow(_dioException(error: Exception('socket error')));
+
+        final result = await repository.getClassroomMembers(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        );
+
+        expect(
+          result,
+          const Left<Failure, List<ClassroomMember>>(
+            NetworkFailure('Network error occurred'),
+          ),
+        );
+      },
+    );
+
+    test('returns Left(ServerFailure) when payload is invalid', () async {
+      when(
+        () => mockRemoteDataSource.listClassroomMembers(
+          tRequiredAuth,
+          tClassroomId,
+          tAcademicYearId,
+        ),
+      ).thenThrow(const FormatException('Invalid payload'));
+
+      final result = await repository.getClassroomMembers(
+        classroomId: tClassroomId,
+        academicYearId: tAcademicYearId,
+      );
+
+      expect(
+        result,
+        const Left<Failure, List<ClassroomMember>>(
+          ServerFailure('Invalid classroom member payload'),
         ),
       );
     });

@@ -1,24 +1,29 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 
 class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final GetClassroomsUseCase _getClassroomsUseCase;
+  final GetClassroomMembersUseCase _getClassroomMembersUseCase;
   final DistributeStudentsToClassroomsUseCase
   _distributeStudentsToClassroomsUseCase;
 
   ClassroomBloc({
     required GetClassroomsUseCase getClassroomsUseCase,
+    required GetClassroomMembersUseCase getClassroomMembersUseCase,
     required DistributeStudentsToClassroomsUseCase
     distributeStudentsToClassroomsUseCase,
   }) : _getClassroomsUseCase = getClassroomsUseCase,
+       _getClassroomMembersUseCase = getClassroomMembersUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
        super(const ClassroomState()) {
     on<ClassroomRequested>(_onClassroomRequested);
+    on<ClassroomMembersRequested>(_onClassroomMembersRequested);
     on<ClassroomDistributionRequested>(_onClassroomDistributionRequested);
     on<ClassroomResetRequested>(_onClassroomResetRequested);
   }
@@ -93,6 +98,39 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
         state.copyWith(
           distributionStatus: ClassroomStatus.success,
           distributionErrorType: ClassroomErrorType.none,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onClassroomMembersRequested(
+    ClassroomMembersRequested event,
+    Emitter<ClassroomState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        membersStatus: ClassroomStatus.loading,
+        membersErrorType: ClassroomErrorType.none,
+      ),
+    );
+
+    final result = await _getClassroomMembersUseCase(
+      classroomId: event.classroomId,
+      academicYearId: event.academicYearId,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          membersStatus: ClassroomStatus.failure,
+          membersErrorType: _mapFailureToErrorType(failure),
+        ),
+      ),
+      (members) => emit(
+        state.copyWith(
+          membersStatus: ClassroomStatus.success,
+          members: members,
+          membersErrorType: ClassroomErrorType.none,
         ),
       ),
     );

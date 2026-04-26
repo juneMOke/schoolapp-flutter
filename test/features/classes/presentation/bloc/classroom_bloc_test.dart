@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
@@ -16,9 +18,24 @@ class MockGetClassroomsUseCase extends Mock implements GetClassroomsUseCase {}
 class MockDistributeStudentsToClassroomsUseCase extends Mock
     implements DistributeStudentsToClassroomsUseCase {}
 
+class MockGetClassroomMembersUseCase extends Mock
+    implements GetClassroomMembersUseCase {}
+
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
+const tClassroomId = 'classroom-1';
+
+const tClassroomMember = ClassroomMember(
+  id: 'member-1',
+  studentId: 'student-1',
+  classroomId: tClassroomId,
+  academicYearId: tAcademicYearId,
+  studentFirstName: 'John',
+  studentLastName: 'Doe',
+  studentMiddleName: 'K',
+  studentGender: ClassroomMemberGender.male,
+);
 
 const tClassroom = Classroom(
   id: 'classroom-1',
@@ -38,17 +55,20 @@ const tClassroom = Classroom(
 
 void main() {
   late MockGetClassroomsUseCase mockGetClassroomsUseCase;
+  late MockGetClassroomMembersUseCase mockGetClassroomMembersUseCase;
   late MockDistributeStudentsToClassroomsUseCase
   mockDistributeStudentsToClassroomsUseCase;
 
   setUp(() {
     mockGetClassroomsUseCase = MockGetClassroomsUseCase();
+    mockGetClassroomMembersUseCase = MockGetClassroomMembersUseCase();
     mockDistributeStudentsToClassroomsUseCase =
         MockDistributeStudentsToClassroomsUseCase();
   });
 
   ClassroomBloc buildBloc() => ClassroomBloc(
     getClassroomsUseCase: mockGetClassroomsUseCase,
+    getClassroomMembersUseCase: mockGetClassroomMembersUseCase,
     distributeStudentsToClassroomsUseCase:
         mockDistributeStudentsToClassroomsUseCase,
   );
@@ -180,6 +200,60 @@ void main() {
         ClassroomState(
           distributionStatus: ClassroomStatus.failure,
           distributionErrorType: ClassroomErrorType.validation,
+        ),
+      ],
+    );
+  });
+
+  group('ClassroomMembersRequested', () {
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits members [loading, success] when classroom members are loaded',
+      setUp: () {
+        when(
+          () => mockGetClassroomMembersUseCase(
+            classroomId: tClassroomId,
+            academicYearId: tAcademicYearId,
+          ),
+        ).thenAnswer((_) async => const Right([tClassroomMember]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomMembersRequested(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(membersStatus: ClassroomStatus.loading),
+        ClassroomState(
+          membersStatus: ClassroomStatus.success,
+          members: [tClassroomMember],
+        ),
+      ],
+    );
+
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits members failure with notFound error type on NotFoundFailure',
+      setUp: () {
+        when(
+          () => mockGetClassroomMembersUseCase(
+            classroomId: tClassroomId,
+            academicYearId: tAcademicYearId,
+          ),
+        ).thenAnswer((_) async => const Left(NotFoundFailure('Not found')));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomMembersRequested(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(membersStatus: ClassroomStatus.loading),
+        ClassroomState(
+          membersStatus: ClassroomStatus.failure,
+          membersErrorType: ClassroomErrorType.notFound,
         ),
       ],
     );

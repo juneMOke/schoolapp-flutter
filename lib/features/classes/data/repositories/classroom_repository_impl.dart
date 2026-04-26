@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
 
@@ -39,6 +40,31 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
       return const Left(NetworkFailure('Network error occurred'));
     } on FormatException catch (_) {
       return const Left(ServerFailure('Invalid classroom payload'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ClassroomMember>>> getClassroomMembers({
+    required String classroomId,
+    required String academicYearId,
+  }) async {
+    try {
+      final models = await remoteDataSource.listClassroomMembers(
+        requiredAuth,
+        classroomId,
+        academicYearId,
+      );
+
+      return Right(models.map((model) => model.toEntity()).toList());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } on FormatException catch (_) {
+      return const Left(ServerFailure('Invalid classroom member payload'));
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }

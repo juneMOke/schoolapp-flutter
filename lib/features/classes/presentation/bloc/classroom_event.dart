@@ -52,3 +52,16 @@ class ClassroomDistributionRequested extends ClassroomEvent {
     distributionCriterion,
   ];
 }
+
+class ClassroomMembersRequested extends ClassroomEvent {
+  final String classroomId;
+  final String academicYearId;
+
+  const ClassroomMembersRequested({
+    required this.classroomId,
+    required this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [classroomId, academicYearId];
+}
