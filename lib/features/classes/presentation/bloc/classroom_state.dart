@@ -20,23 +20,37 @@ class ClassroomState extends Equatable {
   final ClassroomStatus status;
   final List<Classroom> classrooms;
   final ClassroomErrorType errorType;
+  final ClassroomStatus distributionStatus;
+  final ClassroomErrorType distributionErrorType;
 
   const ClassroomState({
     this.status = ClassroomStatus.initial,
     this.classrooms = const [],
     this.errorType = ClassroomErrorType.none,
+    this.distributionStatus = ClassroomStatus.initial,
+    this.distributionErrorType = ClassroomErrorType.none,
   });
 
   ClassroomState copyWith({
     ClassroomStatus? status,
     List<Classroom>? classrooms,
     ClassroomErrorType? errorType,
+    ClassroomStatus? distributionStatus,
+    ClassroomErrorType? distributionErrorType,
   }) => ClassroomState(
     status: status ?? this.status,
     classrooms: classrooms ?? this.classrooms,
     errorType: errorType ?? this.errorType,
+    distributionStatus: distributionStatus ?? this.distributionStatus,
+    distributionErrorType: distributionErrorType ?? this.distributionErrorType,
   );
 
   @override
-  List<Object?> get props => [status, classrooms, errorType];
+  List<Object?> get props => [
+    status,
+    classrooms,
+    errorType,
+    distributionStatus,
+    distributionErrorType,
+  ];
 }

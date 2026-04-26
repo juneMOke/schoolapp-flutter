@@ -5,11 +5,16 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 
 class MockClassroomRemoteDataSource extends Mock
     implements ClassroomRemoteDataSource {}
+
+class FakeDistributionRequestModel extends Fake
+    implements DistributionRequestModel {}
 
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 const tSchoolLevelGroupId = 'group-1';
@@ -53,6 +58,7 @@ void main() {
   late ClassroomRepositoryImpl repository;
 
   setUp(() {
+    registerFallbackValue(FakeDistributionRequestModel());
     mockRemoteDataSource = MockClassroomRemoteDataSource();
     repository = ClassroomRepositoryImpl(
       remoteDataSource: mockRemoteDataSource,
@@ -184,6 +190,106 @@ void main() {
         const Left<Failure, List<Classroom>>(
           ServerFailure('Unexpected error occurred'),
         ),
+      );
+    });
+  });
+
+  group('distributeStudentsToClassrooms', () {
+    test(
+      'returns Right(void) and sends mapped request body on success',
+      () async {
+        when(
+          () => mockRemoteDataSource.distributeStudentsToClassrooms(
+            tRequiredAuth,
+            any(),
+          ),
+        ).thenAnswer((_) async {});
+
+        final result = await repository.distributeStudentsToClassrooms(
+          academicYearId: tAcademicYearId,
+          schoolLevelGroupId: tSchoolLevelGroupId,
+          schoolLevelId: tSchoolLevelId,
+          distributionCriterion: ClassroomDistributionCriterion.gender,
+        );
+
+        expect(result.isRight(), true);
+        final captured =
+            verify(
+                  () => mockRemoteDataSource.distributeStudentsToClassrooms(
+                    tRequiredAuth,
+                    captureAny(),
+                  ),
+                ).captured.single
+                as DistributionRequestModel;
+
+        expect(captured.academicYearId, tAcademicYearId);
+        expect(captured.schoolLevelGroupId, tSchoolLevelGroupId);
+        expect(captured.schoolLevelId, tSchoolLevelId);
+        expect(captured.distributionCriterion, 'GENDER');
+      },
+    );
+
+    test('returns Left(Failure) when DioException carries a Failure', () async {
+      const failure = ValidationFailure('Invalid request data');
+      when(
+        () => mockRemoteDataSource.distributeStudentsToClassrooms(
+          tRequiredAuth,
+          any(),
+        ),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.distributeStudentsToClassrooms(
+        academicYearId: tAcademicYearId,
+        schoolLevelGroupId: tSchoolLevelGroupId,
+        schoolLevelId: tSchoolLevelId,
+        distributionCriterion: ClassroomDistributionCriterion.percentage,
+      );
+
+      expect(result, const Left<Failure, void>(failure));
+    });
+
+    test(
+      'returns Left(NetworkFailure) when DioException has no Failure',
+      () async {
+        when(
+          () => mockRemoteDataSource.distributeStudentsToClassrooms(
+            tRequiredAuth,
+            any(),
+          ),
+        ).thenThrow(_dioException(error: Exception('socket error')));
+
+        final result = await repository.distributeStudentsToClassrooms(
+          academicYearId: tAcademicYearId,
+          schoolLevelGroupId: tSchoolLevelGroupId,
+          schoolLevelId: tSchoolLevelId,
+          distributionCriterion: ClassroomDistributionCriterion.gender,
+        );
+
+        expect(
+          result,
+          const Left<Failure, void>(NetworkFailure('Network error occurred')),
+        );
+      },
+    );
+
+    test('returns Left(ServerFailure) on unknown exception', () async {
+      when(
+        () => mockRemoteDataSource.distributeStudentsToClassrooms(
+          tRequiredAuth,
+          any(),
+        ),
+      ).thenThrow(Exception('unexpected'));
+
+      final result = await repository.distributeStudentsToClassrooms(
+        academicYearId: tAcademicYearId,
+        schoolLevelGroupId: tSchoolLevelGroupId,
+        schoolLevelId: tSchoolLevelId,
+        distributionCriterion: ClassroomDistributionCriterion.percentage,
+      );
+
+      expect(
+        result,
+        const Left<Failure, void>(ServerFailure('Unexpected error occurred')),
       );
     });
   });

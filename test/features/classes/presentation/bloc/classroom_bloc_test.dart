@@ -3,13 +3,18 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 
 class MockGetClassroomsUseCase extends Mock implements GetClassroomsUseCase {}
+
+class MockDistributeStudentsToClassroomsUseCase extends Mock
+    implements DistributeStudentsToClassroomsUseCase {}
 
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
@@ -33,13 +38,20 @@ const tClassroom = Classroom(
 
 void main() {
   late MockGetClassroomsUseCase mockGetClassroomsUseCase;
+  late MockDistributeStudentsToClassroomsUseCase
+  mockDistributeStudentsToClassroomsUseCase;
 
   setUp(() {
     mockGetClassroomsUseCase = MockGetClassroomsUseCase();
+    mockDistributeStudentsToClassroomsUseCase =
+        MockDistributeStudentsToClassroomsUseCase();
   });
 
-  ClassroomBloc buildBloc() =>
-      ClassroomBloc(getClassroomsUseCase: mockGetClassroomsUseCase);
+  ClassroomBloc buildBloc() => ClassroomBloc(
+    getClassroomsUseCase: mockGetClassroomsUseCase,
+    distributeStudentsToClassroomsUseCase:
+        mockDistributeStudentsToClassroomsUseCase,
+  );
 
   group('ClassroomRequested', () {
     blocTest<ClassroomBloc, ClassroomState>(
@@ -109,6 +121,67 @@ void main() {
       ),
       act: (bloc) => bloc.add(const ClassroomResetRequested()),
       expect: () => const [ClassroomState()],
+    );
+  });
+
+  group('ClassroomDistributionRequested', () {
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits distribution [loading, success] when distribution succeeds',
+      setUp: () {
+        when(
+          () => mockDistributeStudentsToClassroomsUseCase(
+            academicYearId: tAcademicYearId,
+            schoolLevelGroupId: tSchoolLevelGroupId,
+            schoolLevelId: tSchoolLevelId,
+            distributionCriterion: ClassroomDistributionCriterion.gender,
+          ),
+        ).thenAnswer((_) async => const Right(null));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomDistributionRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelGroupId: tSchoolLevelGroupId,
+          schoolLevelId: tSchoolLevelId,
+          distributionCriterion: ClassroomDistributionCriterion.gender,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(distributionStatus: ClassroomStatus.loading),
+        ClassroomState(distributionStatus: ClassroomStatus.success),
+      ],
+    );
+
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits distribution failure with validation error type on ValidationFailure',
+      setUp: () {
+        when(
+          () => mockDistributeStudentsToClassroomsUseCase(
+            academicYearId: tAcademicYearId,
+            schoolLevelGroupId: tSchoolLevelGroupId,
+            schoolLevelId: tSchoolLevelId,
+            distributionCriterion: ClassroomDistributionCriterion.percentage,
+          ),
+        ).thenAnswer(
+          (_) async => const Left(ValidationFailure('Invalid request data')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomDistributionRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelGroupId: tSchoolLevelGroupId,
+          schoolLevelId: tSchoolLevelId,
+          distributionCriterion: ClassroomDistributionCriterion.percentage,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(distributionStatus: ClassroomStatus.loading),
+        ClassroomState(
+          distributionStatus: ClassroomStatus.failure,
+          distributionErrorType: ClassroomErrorType.validation,
+        ),
+      ],
     );
   });
 }

@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
 
@@ -37,6 +39,36 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
       return const Left(NetworkFailure('Network error occurred'));
     } on FormatException catch (_) {
       return const Left(ServerFailure('Invalid classroom payload'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> distributeStudentsToClassrooms({
+    required String academicYearId,
+    required String schoolLevelGroupId,
+    required String schoolLevelId,
+    required ClassroomDistributionCriterion distributionCriterion,
+  }) async {
+    try {
+      final request = DistributionRequestModel.fromDomain(
+        academicYearId: academicYearId,
+        schoolLevelGroupId: schoolLevelGroupId,
+        schoolLevelId: schoolLevelId,
+        distributionCriterion: distributionCriterion,
+      );
+
+      await remoteDataSource.distributeStudentsToClassrooms(
+        requiredAuth,
+        request,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }

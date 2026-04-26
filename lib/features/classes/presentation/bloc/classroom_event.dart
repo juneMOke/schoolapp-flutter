@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 
 sealed class ClassroomEvent extends Equatable {
   const ClassroomEvent();
@@ -28,4 +29,26 @@ class ClassroomResetRequested extends ClassroomEvent {
 
   @override
   List<Object?> get props => [];
+}
+
+class ClassroomDistributionRequested extends ClassroomEvent {
+  final String academicYearId;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
+  final ClassroomDistributionCriterion distributionCriterion;
+
+  const ClassroomDistributionRequested({
+    required this.academicYearId,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
+    required this.distributionCriterion,
+  });
+
+  @override
+  List<Object?> get props => [
+    academicYearId,
+    schoolLevelGroupId,
+    schoolLevelId,
+    distributionCriterion,
+  ];
 }
