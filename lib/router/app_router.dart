@@ -15,6 +15,16 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_charge_detail_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -165,8 +175,7 @@ class AppRouter {
               builder: (context, state) => const FirstRegistrationPage(),
             ),
             GoRoute(
-              path:
-                  '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+              path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
               builder: (context, state) {
                 final enrollmentId = state.pathParameters['enrollmentId']!;
                 final intent = EnrollmentDetailIntent.fromRouteContext(
@@ -177,6 +186,86 @@ class AppRouter {
 
                 return EnrollmentDetailPage(intent: intent);
               },
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) => FinanceFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.facturations,
+              builder: (context, state) => const FacturationPage(),
+              routes: [
+                GoRoute(
+                  path: 'detail/:studentId/:academicYearId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+
+                    final intent = FacturationDetailIntent.fromRouteContext(
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationDetailPage(intent: intent);
+                  },
+                ),
+                GoRoute(
+                  path: 'payment/:studentId/:academicYearId/:paymentId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+                    final paymentId = state.pathParameters['paymentId'] ?? '';
+
+                    final intent = FacturationPaymentDetailIntent.fromRouteContext(
+                      paymentId: paymentId,
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationPaymentDetailPage(intent: intent);
+                  },
+                ),
+                GoRoute(
+                  path: 'charge/:studentId/:academicYearId/:chargeId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+                    final chargeId = state.pathParameters['chargeId'] ?? '';
+
+                    final intent = FacturationChargeDetailIntent.fromRouteContext(
+                      chargeId: chargeId,
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationChargeDetailPage(intent: intent);
+                  },
+                ),
+                GoRoute(
+                  path: 'create-payment/:studentId/:academicYearId',
+                  builder: (context, state) {
+                    final studentId = state.pathParameters['studentId'] ?? '';
+                    final academicYearId =
+                        state.pathParameters['academicYearId'] ?? '';
+
+                    final intent =
+                        FacturationCreatePaymentIntent.fromRouteContext(
+                      studentId: studentId,
+                      academicYearId: academicYearId,
+                      extra: state.extra,
+                    );
+
+                    return FacturationCreatePaymentPage(intent: intent);
+                  },
+                ),
+              ],
             ),
           ],
         ),

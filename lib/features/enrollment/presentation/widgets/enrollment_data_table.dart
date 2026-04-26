@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
@@ -335,7 +336,9 @@ class _SortCell extends StatelessWidget {
               ),
               const SizedBox(width: 2),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: AppMotion.standard,
+                switchInCurve: AppMotion.outCurve,
+                switchOutCurve: AppMotion.inCurve,
                 child: Icon(
                   key: ValueKey('${column.name}_$ascending'),
                   isActive
@@ -388,7 +391,7 @@ class _DataRowState extends State<_DataRow> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 130),
+        duration: AppMotion.micro,
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
@@ -600,7 +603,7 @@ class _EyeButtonState extends State<_EyeButton> {
         child: GestureDetector(
           onTap: widget.onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: AppMotion.fast,
             width: 30,
             height: 30,
             decoration: BoxDecoration(

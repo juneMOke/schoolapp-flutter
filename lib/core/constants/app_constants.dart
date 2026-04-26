@@ -57,6 +57,15 @@ class AppConstants {
   static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
   static const String initializeStudentChargesEndpoint =
       '/api/v1/finance/student-charges/{studentId}/initialize-charges';
+  static const String listStudentChargesByStudentAndAcademicYearEndpoint =
+      '/api/v1/finance/student-charges/student/{studentId}/academic-year/{academicYearId}';
+  static const String listPaymentsByStudentAndAcademicYearEndpoint =
+      '/api/v1/finance/payments/student/{studentId}/academic-year/{academicYearId}';
+  static const String createPaymentEndpoint = '/api/v1/finance/payments';
+  static const String listPaymentAllocationsByPaymentIdEndpoint =
+      '/api/v1/finance/payments/{paymentId}/allocations';
+  static const String listPaymentAllocationsByChargeIdEndpoint =
+      '/api/v1/finance/student-charges/{chargeId}/allocations';
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
 

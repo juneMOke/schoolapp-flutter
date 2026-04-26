@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 
 abstract class StudentChargesRepository {
@@ -7,6 +8,15 @@ abstract class StudentChargesRepository {
     required String studentId,
     required String levelId,
   });
+
+  Future<Either<Failure, List<StudentCharge>>>
+  getStudentChargesByAcademicYear({
+    required String studentId,
+    required String academicYearId,
+  });
+
+  Future<Either<Failure, List<PaymentAllocation>>>
+  getPaymentAllocationsByChargeId({required String chargeId});
 
   Future<Either<Failure, StudentCharge>> updateStudentChargeExpectedAmount({
     required String studentChargeId,

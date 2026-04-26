@@ -16,6 +16,40 @@ class AppRoutesNames {
 
   static const String financesDashboard = '/finances/${MenuConstants.financesDashboardId}';
   static const String facturations = '/finances/${MenuConstants.facturationsId}';
+  static const String facturationDetail =
+      '/finances/${MenuConstants.facturationsId}/detail/:studentId/:academicYearId';
+  static const String facturationPaymentDetail =
+      '/finances/${MenuConstants.facturationsId}/payment/:studentId/:academicYearId/:paymentId';
+  static const String facturationChargeDetail =
+      '/finances/${MenuConstants.facturationsId}/charge/:studentId/:academicYearId/:chargeId';
+  static const String facturationCreatePayment =
+      '/finances/${MenuConstants.facturationsId}/create-payment/:studentId/:academicYearId';
+
+  static String facturationDetailPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/detail/$studentId/$academicYearId';
+
+  static String facturationPaymentDetailPath({
+    required String studentId,
+    required String academicYearId,
+    required String paymentId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/payment/$studentId/$academicYearId/$paymentId';
+
+  static String facturationChargeDetailPath({
+    required String studentId,
+    required String academicYearId,
+    required String chargeId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/charge/$studentId/$academicYearId/$chargeId';
+
+  static String facturationCreatePaymentPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/finances/${MenuConstants.facturationsId}/create-payment/$studentId/$academicYearId';
 
   static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
   static const String organisation = '/classes/${MenuConstants.organisationId}';

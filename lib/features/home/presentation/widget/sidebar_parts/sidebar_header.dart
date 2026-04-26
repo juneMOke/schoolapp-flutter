@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 
@@ -25,7 +26,9 @@ class SidebarHeader extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
+        duration: AppMotion.standard,
+        switchInCurve: AppMotion.outCurve,
+        switchOutCurve: AppMotion.inCurve,
         child: isExpanded
             ? const _ExpandedHeader()
             : const _CollapsedHeader(),

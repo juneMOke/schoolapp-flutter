@@ -822,6 +822,453 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargeStatusPaid => 'Paid';
 
   @override
+  String get facturationPageHeaderTitle => 'Student Billing';
+
+  @override
+  String get facturationPageHeaderSubtitle => 'Search a student by name or class level to view and manage their school fees.';
+
+  @override
+  String get facturationPageHeaderChipByName => 'Search by name';
+
+  @override
+  String get facturationPageHeaderChipByLevel => 'Filter by level';
+
+  @override
+  String get facturationPageHeaderChipViewCharges => 'View charges';
+
+  @override
+  String get facturationSearchTitle => 'Search Students';
+
+  @override
+  String get facturationSearchHint => 'Enter First name, Last name, Surname and/or Cycle/Level to filter results.';
+
+  @override
+  String get facturationSearchInvitationTitle => 'Start a billing search';
+
+  @override
+  String get facturationSearchInvitationMessage => 'Select a level or enter a student name then click Search to display records.';
+
+  @override
+  String get facturationViewChargesLabel => 'View charges';
+
+  @override
+  String get facturationActionsColumnLabel => 'Actions';
+
+  @override
+  String get facturationNoResultsDescription => 'No student matches these criteria. Update the form and try again.';
+
+  @override
+  String get facturationDetailBackLabel => 'Back to billing';
+
+  @override
+  String get facturationDetailContextErrorTitle => 'Detail context unavailable';
+
+  @override
+  String get facturationDetailContextErrorMessage => 'Required context for this detail view is missing. Go back to billing list and open the detail again.';
+
+  @override
+  String get facturationDetailUnknownValue => '-';
+
+  @override
+  String get facturationDetailStudentSectionTitle => 'Student information';
+
+  @override
+  String get facturationDetailStudentLastName => 'Last name';
+
+  @override
+  String get facturationDetailStudentFirstName => 'First name';
+
+  @override
+  String get facturationDetailStudentSurname => 'Surname';
+
+  @override
+  String get facturationDetailStudentLevelGroup => 'Level group';
+
+  @override
+  String get facturationDetailStudentLevel => 'Level';
+
+  @override
+  String get facturationDetailInfoTitle => 'Billing detail';
+
+  @override
+  String get facturationDetailInfoSubtitle => 'Review recent payments and student charge status for the selected academic year.';
+
+  @override
+  String get facturationDetailInfoChipPayments => 'Payments';
+
+  @override
+  String get facturationDetailInfoChipCharges => 'Charges';
+
+  @override
+  String get facturationDetailPaymentsSectionTitle => 'Recent payments';
+
+  @override
+  String get facturationDetailPaymentsSectionSubtitle => 'Payment history recorded for this student.';
+
+  @override
+  String get facturationDetailCollectPaymentAction => 'Collect payment';
+
+  @override
+  String get facturationDetailPaymentsRetry => 'Retry';
+
+  @override
+  String get facturationDetailPaymentsEmpty => 'No payment has been recorded for this student.';
+
+  @override
+  String get facturationDetailPaymentPayerColumn => 'Payer details';
+
+  @override
+  String get facturationDetailPaymentPaidAtColumn => 'Paid at';
+
+  @override
+  String get facturationDetailPaymentAmountColumn => 'Amount';
+
+  @override
+  String get facturationDetailPaymentActionsColumn => 'Actions';
+
+  @override
+  String get facturationDetailViewPaymentLabel => 'View payment detail';
+
+  @override
+  String get facturationPaymentDetailHeroTitle => 'Payment detail';
+
+  @override
+  String get facturationPaymentDetailHeroSubtitle => 'Review this payment information and the breakdown of allocated amounts.';
+
+  @override
+  String get facturationPaymentInfoSectionTitle => 'Payment information';
+
+  @override
+  String get facturationPaymentPayerLabel => 'Payer';
+
+  @override
+  String get facturationPaymentAmountLabel => 'Total paid amount';
+
+  @override
+  String get facturationPaymentPaidAtLabel => 'Paid at';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Payment allocations';
+
+  @override
+  String get facturationPaymentAllocationsSectionSubtitle => 'List of charges covered by this payment.';
+
+  @override
+  String get facturationPaymentAllocationsTotalLabel => 'Allocated total';
+
+  @override
+  String get facturationPaymentAllocationsEmpty => 'No allocation was found for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyOk => 'Allocation sum is consistent with the total paid amount.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyWarning => 'Inconsistency detected: allocation sum does not match the total paid amount.';
+
+  @override
+  String get facturationPaymentAllocationsNetworkError => 'Unable to load payment allocations. Please check your internet connection.';
+
+  @override
+  String get facturationPaymentAllocationsNotFound => 'No allocation found for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsValidationError => 'Requested allocation data is invalid.';
+
+  @override
+  String get facturationPaymentAllocationsUnauthorizedError => 'You are not allowed to access allocations for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsInvalidCredentialsError => 'Your credentials do not allow access to allocations for this payment.';
+
+  @override
+  String get facturationPaymentAllocationsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationPaymentAllocationsStorageError => 'A local error prevents allocations from being displayed.';
+
+  @override
+  String get facturationPaymentAllocationsAuthError => 'An authentication error prevents allocations from loading.';
+
+  @override
+  String get facturationPaymentAllocationsUnknownError => 'An unexpected error occurred while loading allocations.';
+
+  @override
+  String get facturationDetailChargesSectionTitle => 'Student charges';
+
+  @override
+  String get facturationDetailChargesSectionSubtitle => 'Breakdown of expected, paid and remaining amounts.';
+
+  @override
+  String get facturationDetailChargesRetry => 'Retry';
+
+  @override
+  String get facturationDetailChargesEmpty => 'No charge was found for this student.';
+
+  @override
+  String get facturationDetailChargeLabelColumn => 'Label';
+
+  @override
+  String get facturationDetailChargeExpectedAmountColumn => 'Expected amount';
+
+  @override
+  String get facturationDetailChargePaidAmountColumn => 'Paid amount';
+
+  @override
+  String get facturationDetailChargeRemainingAmountColumn => 'Remaining amount';
+
+  @override
+  String get facturationDetailChargeStatusColumn => 'Status';
+
+  @override
+  String get facturationPaymentsNetworkError => 'Unable to load payments. Please check your internet connection.';
+
+  @override
+  String get facturationPaymentsNotFound => 'No payment was found for this student.';
+
+  @override
+  String get facturationPaymentsValidationError => 'Requested payment data is invalid.';
+
+  @override
+  String get facturationPaymentsUnauthorizedError => 'You are not allowed to access these payments.';
+
+  @override
+  String get facturationPaymentsInvalidCredentialsError => 'Your credentials do not allow access to these payments.';
+
+  @override
+  String get facturationPaymentsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationPaymentsStorageError => 'A local error prevents payments from being displayed.';
+
+  @override
+  String get facturationPaymentsAuthError => 'An authentication error prevents payments from loading.';
+
+  @override
+  String get facturationPaymentsUnknownError => 'An unexpected error occurred while loading payments.';
+
+  @override
+  String get facturationPrintReceiptLabel => 'Print receipt';
+
+  @override
+  String get facturationPrintReceiptSubtitle => 'Generate and download the receipt for this payment';
+
+  @override
+  String get facturationPrintStatementsLabel => 'Print statements';
+
+  @override
+  String get facturationPrintStatementsSubtitle => 'Generate and download the billing statements for this student';
+
+  @override
+  String get facturationChargeDetailBackLabel => 'Back to billing detail';
+
+  @override
+  String get facturationChargeDetailHeroTitle => 'Charge detail';
+
+  @override
+  String get facturationChargeDetailHeroSubtitle => 'Review this charge status and the payments allocated to it.';
+
+  @override
+  String get facturationChargeDetailInfoSectionTitle => 'Charge information';
+
+  @override
+  String get facturationChargeDetailExpectedAmountLabel => 'Expected amount';
+
+  @override
+  String get facturationChargeDetailPaidAmountLabel => 'Paid amount';
+
+  @override
+  String get facturationChargeDetailRemainingAmountLabel => 'Remaining amount';
+
+  @override
+  String get facturationChargeDetailStatusLabel => 'Status';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionTitle => 'Allocations for this charge';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionSubtitle => 'Breakdown of payments allocated to this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsTotalLabel => 'Allocated total';
+
+  @override
+  String get facturationChargeDetailAllocationsEmpty => 'No allocation was found for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsRetry => 'Retry';
+
+  @override
+  String get facturationChargeDetailAllocationsNetworkError => 'Unable to load allocations. Please check your internet connection.';
+
+  @override
+  String get facturationChargeDetailAllocationsNotFound => 'No allocation found for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsValidationError => 'Requested allocation data is invalid.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnauthorizedError => 'You are not allowed to access allocations for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsInvalidCredentialsError => 'Your credentials do not allow access to allocations for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get facturationChargeDetailAllocationsStorageError => 'A local error prevents allocations from being displayed.';
+
+  @override
+  String get facturationChargeDetailAllocationsAuthError => 'An authentication error prevents allocations from loading.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnknownError => 'An unexpected error occurred while loading allocations.';
+
+  @override
+  String get facturationChargeDetailContextErrorTitle => 'Charge detail context unavailable';
+
+  @override
+  String get facturationChargeDetailContextErrorMessage => 'Required context for this charge detail view is missing. Go back and open the detail again.';
+
+  @override
+  String get facturationCreatePaymentBackLabel => 'Back to billing detail';
+
+  @override
+  String get facturationCreatePaymentHeroTitle => 'New payment';
+
+  @override
+  String get facturationCreatePaymentHeroSubtitle => 'Fill in the payer information and allocations to record a payment.';
+
+  @override
+  String get facturationCreatePaymentPayerSectionTitle => 'Payer information';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameLabel => 'Last name';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameHint => 'Enter last name';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameLabel => 'First name';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameHint => 'Enter first name';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameLabel => 'Surname (optional)';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameHint => 'Enter surname';
+
+  @override
+  String get facturationCreatePaymentPayerFieldRequired => 'This field is required';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionTitle => 'Payment allocations';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionSubtitle => 'Associate an amount to one or more student charges.';
+
+  @override
+  String get facturationCreatePaymentAddAllocationLabel => 'Add allocation';
+
+  @override
+  String get facturationCreatePaymentAllChargesPaid => 'All student charges are already paid.';
+
+  @override
+  String get facturationCreatePaymentChargesUnavailable => 'No charges available. Go back to the list and try again.';
+
+  @override
+  String get facturationCreatePaymentChargeDropdownHint => 'Select a charge';
+
+  @override
+  String get facturationCreatePaymentAmountLabel => 'Amount to pay';
+
+  @override
+  String get facturationCreatePaymentAmountHint => 'E.g.: 5000';
+
+  @override
+  String get facturationCreatePaymentAmountRequired => 'Amount is required';
+
+  @override
+  String get facturationCreatePaymentAmountInvalid => 'Please enter a valid number';
+
+  @override
+  String get facturationCreatePaymentAmountExceedsRemaining => 'Amount cannot exceed remaining balance';
+
+  @override
+  String get facturationCreatePaymentAmountMustBePositive => 'Amount must be greater than zero';
+
+  @override
+  String get facturationCreatePaymentBeforeLabel => 'Before payment';
+
+  @override
+  String get facturationCreatePaymentAfterLabel => 'After payment';
+
+  @override
+  String get facturationCreatePaymentSubmitLabel => 'Validate payment';
+
+  @override
+  String get facturationCreatePaymentNoAllocations => 'Add at least one allocation to validate the payment.';
+
+  @override
+  String get facturationCreatePaymentConfirmTitle => 'Confirm payment';
+
+  @override
+  String get facturationCreatePaymentConfirmMessage => 'This operation is irreversible. Do you confirm recording this payment?';
+
+  @override
+  String get facturationCreatePaymentConfirmCancel => 'Cancel';
+
+  @override
+  String get facturationCreatePaymentConfirmValidate => 'Confirm';
+
+  @override
+  String get facturationCreatePaymentSuccessMessage => 'Payment successfully recorded.';
+
+  @override
+  String get facturationCreatePaymentExpectedLabel => 'Expected';
+
+  @override
+  String get facturationCreatePaymentPaidLabel => 'Already paid';
+
+  @override
+  String get facturationCreatePaymentRemainingLabel => 'Remaining';
+
+  @override
+  String get facturationCreatePaymentStatusLabel => 'Status';
+
+  @override
+  String get facturationCreatePaymentNetworkError => 'Check your connection and try again.';
+
+  @override
+  String get facturationCreatePaymentNotFoundError => 'The requested resource was not found.';
+
+  @override
+  String get facturationCreatePaymentValidationError => 'Submitted data is invalid. Please review the form.';
+
+  @override
+  String get facturationCreatePaymentUnauthorizedError => 'You are not authorized to perform this operation.';
+
+  @override
+  String get facturationCreatePaymentInvalidCredentialsError => 'Your credentials do not allow recording this payment.';
+
+  @override
+  String get facturationCreatePaymentServerError => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get facturationCreatePaymentStorageError => 'A storage error occurred.';
+
+  @override
+  String get facturationCreatePaymentAuthError => 'An authentication error occurred.';
+
+  @override
+  String get facturationCreatePaymentUnknownError => 'An unexpected error occurred.';
+
+  @override
+  String get facturationCreatePaymentNoChargesAvailable => 'No unpaid charges available for this student.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

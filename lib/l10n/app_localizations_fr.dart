@@ -822,6 +822,453 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargeStatusPaid => 'Payé';
 
   @override
+  String get facturationPageHeaderTitle => 'Facturation des élèves';
+
+  @override
+  String get facturationPageHeaderSubtitle => 'Recherchez un élève par nom ou par niveau de classe pour consulter ses charges de scolarité.';
+
+  @override
+  String get facturationPageHeaderChipByName => 'Recherche par nom';
+
+  @override
+  String get facturationPageHeaderChipByLevel => 'Filtrer par niveau';
+
+  @override
+  String get facturationPageHeaderChipViewCharges => 'Voir les charges';
+
+  @override
+  String get facturationSearchTitle => 'Rechercher les élèves';
+
+  @override
+  String get facturationSearchHint => 'Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.';
+
+  @override
+  String get facturationSearchInvitationTitle => 'Lancez une recherche de facturation';
+
+  @override
+  String get facturationSearchInvitationMessage => 'Sélectionnez un niveau ou renseignez le nom d\'un élève puis cliquez sur Rechercher pour afficher les dossiers.';
+
+  @override
+  String get facturationViewChargesLabel => 'Voir les charges';
+
+  @override
+  String get facturationActionsColumnLabel => 'Actions';
+
+  @override
+  String get facturationNoResultsDescription => 'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
+
+  @override
+  String get facturationDetailBackLabel => 'Retour aux facturations';
+
+  @override
+  String get facturationDetailContextErrorTitle => 'Contexte de détail indisponible';
+
+  @override
+  String get facturationDetailContextErrorMessage => 'Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.';
+
+  @override
+  String get facturationDetailUnknownValue => '-';
+
+  @override
+  String get facturationDetailStudentSectionTitle => 'Informations de l\'élève';
+
+  @override
+  String get facturationDetailStudentLastName => 'Nom';
+
+  @override
+  String get facturationDetailStudentFirstName => 'Prénom';
+
+  @override
+  String get facturationDetailStudentSurname => 'Post-nom';
+
+  @override
+  String get facturationDetailStudentLevelGroup => 'Cycle';
+
+  @override
+  String get facturationDetailStudentLevel => 'Niveau';
+
+  @override
+  String get facturationDetailInfoTitle => 'Détail de facturation';
+
+  @override
+  String get facturationDetailInfoSubtitle => 'Consultez les paiements récents et l\'état des charges de l\'élève pour l\'année scolaire sélectionnée.';
+
+  @override
+  String get facturationDetailInfoChipPayments => 'Paiements';
+
+  @override
+  String get facturationDetailInfoChipCharges => 'Charges';
+
+  @override
+  String get facturationDetailPaymentsSectionTitle => 'Derniers paiements';
+
+  @override
+  String get facturationDetailPaymentsSectionSubtitle => 'Historique des paiements enregistrés pour cet élève.';
+
+  @override
+  String get facturationDetailCollectPaymentAction => 'Encaisser un paiement';
+
+  @override
+  String get facturationDetailPaymentsRetry => 'Réessayer';
+
+  @override
+  String get facturationDetailPaymentsEmpty => 'Aucun paiement n\'a été enregistré pour cet élève.';
+
+  @override
+  String get facturationDetailPaymentPayerColumn => 'Infos du payeur';
+
+  @override
+  String get facturationDetailPaymentPaidAtColumn => 'Date de paiement';
+
+  @override
+  String get facturationDetailPaymentAmountColumn => 'Montant';
+
+  @override
+  String get facturationDetailPaymentActionsColumn => 'Actions';
+
+  @override
+  String get facturationDetailViewPaymentLabel => 'Voir le détail du paiement';
+
+  @override
+  String get facturationPaymentDetailHeroTitle => 'Détail du paiement';
+
+  @override
+  String get facturationPaymentDetailHeroSubtitle => 'Consultez les informations de ce paiement et la répartition des montants alloués.';
+
+  @override
+  String get facturationPaymentInfoSectionTitle => 'Informations du paiement';
+
+  @override
+  String get facturationPaymentPayerLabel => 'Payeur';
+
+  @override
+  String get facturationPaymentAmountLabel => 'Montant global payé';
+
+  @override
+  String get facturationPaymentPaidAtLabel => 'Date de paiement';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Allocations de paiement';
+
+  @override
+  String get facturationPaymentAllocationsSectionSubtitle => 'Liste des charges couvertes par ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsTotalLabel => 'Total alloué';
+
+  @override
+  String get facturationPaymentAllocationsEmpty => 'Aucune allocation n\'a été trouvée pour ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyOk => 'La somme des allocations est cohérente avec le montant global payé.';
+
+  @override
+  String get facturationPaymentAllocationsConsistencyWarning => 'Incohérence détectée : la somme des allocations ne correspond pas au montant global payé.';
+
+  @override
+  String get facturationPaymentAllocationsNetworkError => 'Impossible de charger les allocations du paiement. Vérifiez votre connexion internet.';
+
+  @override
+  String get facturationPaymentAllocationsNotFound => 'Aucune allocation trouvée pour ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsValidationError => 'Les informations demandées pour les allocations sont invalides.';
+
+  @override
+  String get facturationPaymentAllocationsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter les allocations de ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux allocations de ce paiement.';
+
+  @override
+  String get facturationPaymentAllocationsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get facturationPaymentAllocationsStorageError => 'Une erreur locale empêche l\'affichage des allocations.';
+
+  @override
+  String get facturationPaymentAllocationsAuthError => 'Une erreur d\'authentification empêche le chargement des allocations.';
+
+  @override
+  String get facturationPaymentAllocationsUnknownError => 'Une erreur inattendue est survenue lors du chargement des allocations.';
+
+  @override
+  String get facturationDetailChargesSectionTitle => 'Charges de l\'élève';
+
+  @override
+  String get facturationDetailChargesSectionSubtitle => 'Répartition des montants attendus, payés et restants.';
+
+  @override
+  String get facturationDetailChargesRetry => 'Réessayer';
+
+  @override
+  String get facturationDetailChargesEmpty => 'Aucune charge n\'a été trouvée pour cet élève.';
+
+  @override
+  String get facturationDetailChargeLabelColumn => 'Libellé';
+
+  @override
+  String get facturationDetailChargeExpectedAmountColumn => 'Montant attendu';
+
+  @override
+  String get facturationDetailChargePaidAmountColumn => 'Montant payé';
+
+  @override
+  String get facturationDetailChargeRemainingAmountColumn => 'Reste à payer';
+
+  @override
+  String get facturationDetailChargeStatusColumn => 'Statut';
+
+  @override
+  String get facturationPaymentsNetworkError => 'Impossible de charger les paiements. Vérifiez votre connexion internet.';
+
+  @override
+  String get facturationPaymentsNotFound => 'Aucun paiement trouvé pour cet élève.';
+
+  @override
+  String get facturationPaymentsValidationError => 'Les informations demandées pour les paiements sont invalides.';
+
+  @override
+  String get facturationPaymentsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter ces paiements.';
+
+  @override
+  String get facturationPaymentsInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux paiements.';
+
+  @override
+  String get facturationPaymentsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get facturationPaymentsStorageError => 'Une erreur locale empêche l\'affichage des paiements.';
+
+  @override
+  String get facturationPaymentsAuthError => 'Une erreur d\'authentification empêche le chargement des paiements.';
+
+  @override
+  String get facturationPaymentsUnknownError => 'Une erreur inattendue est survenue lors du chargement des paiements.';
+
+  @override
+  String get facturationPrintReceiptLabel => 'Imprimer le reu';
+
+  @override
+  String get facturationPrintReceiptSubtitle => 'Gnrez et tlchargez le reu de ce paiement';
+
+  @override
+  String get facturationPrintStatementsLabel => 'Imprimer les relevs';
+
+  @override
+  String get facturationPrintStatementsSubtitle => 'Gnrez et tlchargez les relevs de facturation de cet tudiant';
+
+  @override
+  String get facturationChargeDetailBackLabel => 'Retour au détail de facturation';
+
+  @override
+  String get facturationChargeDetailHeroTitle => 'Détail d\'une charge';
+
+  @override
+  String get facturationChargeDetailHeroSubtitle => 'Consultez l\'état de cette charge et les paiements qui y ont été alloués.';
+
+  @override
+  String get facturationChargeDetailInfoSectionTitle => 'Informations de la charge';
+
+  @override
+  String get facturationChargeDetailExpectedAmountLabel => 'Montant attendu';
+
+  @override
+  String get facturationChargeDetailPaidAmountLabel => 'Montant payé';
+
+  @override
+  String get facturationChargeDetailRemainingAmountLabel => 'Reste à payer';
+
+  @override
+  String get facturationChargeDetailStatusLabel => 'Statut';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionTitle => 'Allocations liées à cette charge';
+
+  @override
+  String get facturationChargeDetailAllocationsSectionSubtitle => 'Détail des paiements alloués à cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsTotalLabel => 'Total alloué';
+
+  @override
+  String get facturationChargeDetailAllocationsEmpty => 'Aucune allocation n\'a été trouvée pour cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsRetry => 'Réessayer';
+
+  @override
+  String get facturationChargeDetailAllocationsNetworkError => 'Impossible de charger les allocations. Vérifiez votre connexion internet.';
+
+  @override
+  String get facturationChargeDetailAllocationsNotFound => 'Aucune allocation trouvée pour cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsValidationError => 'Les informations demandées pour les allocations sont invalides.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter les allocations de cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux allocations de cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get facturationChargeDetailAllocationsStorageError => 'Une erreur locale empêche l\'affichage des allocations.';
+
+  @override
+  String get facturationChargeDetailAllocationsAuthError => 'Une erreur d\'authentification empêche le chargement des allocations.';
+
+  @override
+  String get facturationChargeDetailAllocationsUnknownError => 'Une erreur inattendue est survenue lors du chargement des allocations.';
+
+  @override
+  String get facturationChargeDetailContextErrorTitle => 'Contexte de détail de charge indisponible';
+
+  @override
+  String get facturationChargeDetailContextErrorMessage => 'Les informations nécessaires pour afficher cette charge ne sont pas disponibles. Revenez à la liste puis relancez la consultation.';
+
+  @override
+  String get facturationCreatePaymentBackLabel => 'Retour au détail de facturation';
+
+  @override
+  String get facturationCreatePaymentHeroTitle => 'Nouveau paiement';
+
+  @override
+  String get facturationCreatePaymentHeroSubtitle => 'Renseignez les informations du payeur et les allocations pour enregistrer un paiement.';
+
+  @override
+  String get facturationCreatePaymentPayerSectionTitle => 'Informations du payeur';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameLabel => 'Nom';
+
+  @override
+  String get facturationCreatePaymentPayerLastNameHint => 'Entrez le nom';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameLabel => 'Prénom';
+
+  @override
+  String get facturationCreatePaymentPayerFirstNameHint => 'Entrez le prénom';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameLabel => 'Post-nom (optionnel)';
+
+  @override
+  String get facturationCreatePaymentPayerMiddleNameHint => 'Entrez le post-nom';
+
+  @override
+  String get facturationCreatePaymentPayerFieldRequired => 'Ce champ est obligatoire';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionTitle => 'Allocations de paiement';
+
+  @override
+  String get facturationCreatePaymentAllocationSectionSubtitle => 'Associez un montant à une ou plusieurs charges de l\'élève.';
+
+  @override
+  String get facturationCreatePaymentAddAllocationLabel => 'Ajouter une allocation';
+
+  @override
+  String get facturationCreatePaymentAllChargesPaid => 'Toutes les charges de cet élève sont déjà réglées.';
+
+  @override
+  String get facturationCreatePaymentChargesUnavailable => 'Aucune charge disponible. Revenez à la liste et recommencez.';
+
+  @override
+  String get facturationCreatePaymentChargeDropdownHint => 'Sélectionnez une charge';
+
+  @override
+  String get facturationCreatePaymentAmountLabel => 'Montant à payer';
+
+  @override
+  String get facturationCreatePaymentAmountHint => 'Ex : 5000';
+
+  @override
+  String get facturationCreatePaymentAmountRequired => 'Le montant est obligatoire';
+
+  @override
+  String get facturationCreatePaymentAmountInvalid => 'Veuillez entrer un nombre valide';
+
+  @override
+  String get facturationCreatePaymentAmountExceedsRemaining => 'Le montant ne peut pas dépasser le restant à payer';
+
+  @override
+  String get facturationCreatePaymentAmountMustBePositive => 'Le montant doit être supérieur à zéro';
+
+  @override
+  String get facturationCreatePaymentBeforeLabel => 'Avant paiement';
+
+  @override
+  String get facturationCreatePaymentAfterLabel => 'Après paiement';
+
+  @override
+  String get facturationCreatePaymentSubmitLabel => 'Valider le paiement';
+
+  @override
+  String get facturationCreatePaymentNoAllocations => 'Ajoutez au moins une allocation pour valider le paiement.';
+
+  @override
+  String get facturationCreatePaymentConfirmTitle => 'Confirmer le paiement';
+
+  @override
+  String get facturationCreatePaymentConfirmMessage => 'Cette opération est irréversible. Confirmez-vous l\'enregistrement de ce paiement ?';
+
+  @override
+  String get facturationCreatePaymentConfirmCancel => 'Annuler';
+
+  @override
+  String get facturationCreatePaymentConfirmValidate => 'Confirmer';
+
+  @override
+  String get facturationCreatePaymentSuccessMessage => 'Paiement enregistré avec succès.';
+
+  @override
+  String get facturationCreatePaymentExpectedLabel => 'Montant attendu';
+
+  @override
+  String get facturationCreatePaymentPaidLabel => 'Déjà payé';
+
+  @override
+  String get facturationCreatePaymentRemainingLabel => 'Restant';
+
+  @override
+  String get facturationCreatePaymentStatusLabel => 'Statut';
+
+  @override
+  String get facturationCreatePaymentNetworkError => 'Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get facturationCreatePaymentNotFoundError => 'La ressource demandée est introuvable.';
+
+  @override
+  String get facturationCreatePaymentValidationError => 'Les données saisies sont invalides. Vérifiez le formulaire.';
+
+  @override
+  String get facturationCreatePaymentUnauthorizedError => 'Vous n\'êtes pas autorisé à effectuer cette opération.';
+
+  @override
+  String get facturationCreatePaymentInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'enregistrer ce paiement.';
+
+  @override
+  String get facturationCreatePaymentServerError => 'Le serveur est indisponible. Réessayez plus tard.';
+
+  @override
+  String get facturationCreatePaymentStorageError => 'Une erreur de stockage est survenue.';
+
+  @override
+  String get facturationCreatePaymentAuthError => 'Une erreur d\'authentification est survenue.';
+
+  @override
+  String get facturationCreatePaymentUnknownError => 'Une erreur inattendue est survenue.';
+
+  @override
+  String get facturationCreatePaymentNoChargesAvailable => 'Aucune charge non réglée disponible pour cet élève.';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override

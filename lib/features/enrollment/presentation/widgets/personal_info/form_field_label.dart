@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 
 class FormFieldLabel extends StatefulWidget {
@@ -46,7 +47,7 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
         if (widget.helpMessage.isNotEmpty)
           Tooltip(
             message: widget.helpMessage,
-            showDuration: const Duration(seconds: 3),
+            showDuration: AppMotion.tooltipShowDuration,
             preferBelow: true,
             decoration: BoxDecoration(
               color: AppTheme.textPrimaryColor.withValues(alpha: 0.9),

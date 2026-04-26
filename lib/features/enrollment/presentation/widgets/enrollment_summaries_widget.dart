@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -39,7 +40,6 @@ class EnrollmentSummariesWidget extends StatefulWidget {
 }
 
 class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
-  static const Duration _refreshCooldown = Duration(milliseconds: 700);
   DateTime? _lastRefreshAt;
 
   /// Effective status used for queries. When [showStatusFilter] is true,
@@ -206,7 +206,7 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
     final now = DateTime.now();
     final lastRefreshAt = _lastRefreshAt;
     if (lastRefreshAt != null &&
-        now.difference(lastRefreshAt) < _refreshCooldown) {
+        now.difference(lastRefreshAt) < AppMotion.refreshCooldown) {
       return;
     }
 
