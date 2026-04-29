@@ -49,6 +49,8 @@ class AppConstants {
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =
       '/api/v1/classrooms/{classroomId}/members';
+  static const String classroomMemberReassignEndpoint =
+      '/api/v1/classrooms/{classroomId}/members/{classroomMemberId}';
   static const String classroomsDistributeEndpoint =
       '/api/v1/classrooms/distribute';
 

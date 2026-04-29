@@ -138,6 +138,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuOrganization => 'Organization';
 
   @override
+  String get classesOrganisationHeroTitle => 'Classes organization';
+
+  @override
+  String get classesOrganisationHeroSubtitle => 'Search students by identity or level and view classroom distribution.';
+
+  @override
+  String get classesOrganisationSearchTitle => 'Search form';
+
+  @override
+  String get classesOrganisationSearchHint => 'Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.';
+
+  @override
+  String get classesOrganisationClassroomFieldLabel => 'Classroom';
+
+  @override
+  String get classesOrganisationDistributionLabel => 'Distribution criterion';
+
+  @override
+  String get classesOrganisationDistributionByGender => 'Distribute by gender';
+
+  @override
+  String get classesOrganisationDistributionByPercentage => 'Distribute by average';
+
+  @override
+  String get classesOrganisationDistributionAction => 'Distribute';
+
+  @override
+  String get classesOrganisationDistributionConfirmTitle => 'Confirm distribution';
+
+  @override
+  String get classesOrganisationDistributionConfirmMessage => 'Do you want to distribute students for this level?';
+
+  @override
+  String get classesOrganisationDistributionSuccess => 'Distribution completed successfully.';
+
+  @override
+  String get classesOrganisationSplitInfo => 'Split mode enabled: classroom grid with members and stats.';
+
+  @override
+  String get classesOrganisationNonSplitInfo => 'Non-split mode enabled: student list for the selected level.';
+
+  @override
+  String get classesOrganisationNoClassrooms => 'No classroom is available for this level.';
+
+  @override
+  String classesOrganisationClassroomStats(int total, int girls, int boys) {
+    return '$total students - Girls: $girls - Boys: $boys';
+  }
+
+  @override
+  String get classesOrganisationTransferDialogTitle => 'Transfer student';
+
+  @override
+  String classesOrganisationTransferDialogMessage(String studentName) {
+    return 'Choose the destination classroom for $studentName.';
+  }
+
+  @override
+  String get classesOrganisationTransferTargetLabel => 'Destination classroom';
+
+  @override
+  String get classesOrganisationTransferAction => 'Transfer';
+
+  @override
+  String get classesOrganisationTransferInProgress => 'Transfer in progress...';
+
+  @override
+  String get classesOrganisationTransferSuccess => 'Transfer completed successfully.';
+
+  @override
+  String get classesOrganisationTransferNoTarget => 'No destination classroom is available.';
+
+  @override
+  String classesOrganisationLoadingClassroomsCount(int count) {
+    return 'Loading members for $count classrooms...';
+  }
+
+  @override
+  String get classesOrganisationStudentDetailSoon => 'Student details will be available in the next batch.';
+
+  @override
+  String get classesOrganisationErrorNetwork => 'Check your internet connection.';
+
+  @override
+  String get classesOrganisationErrorNotFound => 'No data found for these criteria.';
+
+  @override
+  String get classesOrganisationErrorValidation => 'Some entered information is invalid.';
+
+  @override
+  String get classesOrganisationErrorUnauthorized => 'Access is not authorized.';
+
+  @override
+  String get classesOrganisationErrorInvalidCredentials => 'Invalid credentials.';
+
+  @override
+  String get classesOrganisationErrorServer => 'Server error, try again later.';
+
+  @override
+  String get classesOrganisationErrorStorage => 'Local storage error.';
+
+  @override
+  String get classesOrganisationErrorAuth => 'Session is not valid, please sign in again.';
+
+  @override
+  String get classesOrganisationErrorUnknown => 'An error occurred.';
+
+  @override
   String get subMenuClassesList => 'Classes List';
 
   @override

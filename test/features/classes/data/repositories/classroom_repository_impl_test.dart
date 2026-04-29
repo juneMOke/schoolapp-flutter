@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/classes/data/datasources/classroom_r
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
@@ -18,11 +19,16 @@ class MockClassroomRemoteDataSource extends Mock
 class FakeDistributionRequestModel extends Fake
     implements DistributionRequestModel {}
 
+class FakeReassignClassroomMemberRequestModel extends Fake
+    implements ReassignClassroomMemberRequestModel {}
+
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
+const tClassroomMemberId = 'member-1';
+const tTargetClassroomId = 'classroom-2';
 
 const tClassroomMemberModel = ClassroomMemberModel(
   id: 'member-1',
@@ -84,6 +90,7 @@ void main() {
 
   setUp(() {
     registerFallbackValue(FakeDistributionRequestModel());
+    registerFallbackValue(FakeReassignClassroomMemberRequestModel());
     mockRemoteDataSource = MockClassroomRemoteDataSource();
     repository = ClassroomRepositoryImpl(
       remoteDataSource: mockRemoteDataSource,
@@ -220,28 +227,25 @@ void main() {
   });
 
   group('getClassroomMembers', () {
-    test(
-      'returns Right(List<ClassroomMember>) when datasource succeeds',
-      () async {
-        when(
-          () => mockRemoteDataSource.listClassroomMembers(
-            tRequiredAuth,
-            tClassroomId,
-            tAcademicYearId,
-          ),
-        ).thenAnswer((_) async => const [tClassroomMemberModel]);
+    test('returns Right(List<ClassroomMember>) when datasource succeeds', () async {
+      when(
+        () => mockRemoteDataSource.listClassroomMembers(
+          tRequiredAuth,
+          tClassroomId,
+          tAcademicYearId,
+        ),
+      ).thenAnswer((_) async => const [tClassroomMemberModel]);
 
-        final result = await repository.getClassroomMembers(
-          classroomId: tClassroomId,
-          academicYearId: tAcademicYearId,
-        );
+      final result = await repository.getClassroomMembers(
+        classroomId: tClassroomId,
+        academicYearId: tAcademicYearId,
+      );
 
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (members) => expect(members, const [tClassroomMember]),
-        );
-      },
-    );
+      result.fold(
+        (_) => fail('Expected Right but got Left'),
+        (members) => expect(members, const [tClassroomMember]),
+      );
+    });
 
     test('returns Left(Failure) when DioException carries a Failure', () async {
       const failure = NotFoundFailure('Resource not found');
@@ -261,30 +265,27 @@ void main() {
       expect(result, const Left<Failure, List<ClassroomMember>>(failure));
     });
 
-    test(
-      'returns Left(NetworkFailure) when DioException has no Failure',
-      () async {
-        when(
-          () => mockRemoteDataSource.listClassroomMembers(
-            tRequiredAuth,
-            tClassroomId,
-            tAcademicYearId,
-          ),
-        ).thenThrow(_dioException(error: Exception('socket error')));
+    test('returns Left(NetworkFailure) when DioException has no Failure', () async {
+      when(
+        () => mockRemoteDataSource.listClassroomMembers(
+          tRequiredAuth,
+          tClassroomId,
+          tAcademicYearId,
+        ),
+      ).thenThrow(_dioException(error: Exception('socket error')));
 
-        final result = await repository.getClassroomMembers(
-          classroomId: tClassroomId,
-          academicYearId: tAcademicYearId,
-        );
+      final result = await repository.getClassroomMembers(
+        classroomId: tClassroomId,
+        academicYearId: tAcademicYearId,
+      );
 
-        expect(
-          result,
-          const Left<Failure, List<ClassroomMember>>(
-            NetworkFailure('Network error occurred'),
-          ),
-        );
-      },
-    );
+      expect(
+        result,
+        const Left<Failure, List<ClassroomMember>>(
+          NetworkFailure('Network error occurred'),
+        ),
+      );
+    });
 
     test('returns Left(ServerFailure) when payload is invalid', () async {
       when(
@@ -406,6 +407,57 @@ void main() {
         result,
         const Left<Failure, void>(ServerFailure('Unexpected error occurred')),
       );
+    });
+  });
+
+  group('reassignClassroomMember', () {
+    test('returns Right(void) and sends target classroom payload on success', () async {
+      when(
+        () => mockRemoteDataSource.reassignClassroomMember(
+          tRequiredAuth,
+          tClassroomId,
+          tClassroomMemberId,
+          any(),
+        ),
+      ).thenAnswer((_) async {});
+
+      final result = await repository.reassignClassroomMember(
+        classroomId: tClassroomId,
+        classroomMemberId: tClassroomMemberId,
+        targetClassroomId: tTargetClassroomId,
+      );
+
+      expect(result.isRight(), true);
+      final captured = verify(
+        () => mockRemoteDataSource.reassignClassroomMember(
+          tRequiredAuth,
+          tClassroomId,
+          tClassroomMemberId,
+          captureAny(),
+        ),
+      ).captured.single as ReassignClassroomMemberRequestModel;
+
+      expect(captured.targetClassroomId, tTargetClassroomId);
+    });
+
+    test('returns Left(Failure) when DioException carries a Failure', () async {
+      const failure = NotFoundFailure('Resource not found');
+      when(
+        () => mockRemoteDataSource.reassignClassroomMember(
+          tRequiredAuth,
+          tClassroomId,
+          tClassroomMemberId,
+          any(),
+        ),
+      ).thenThrow(_dioException(error: failure));
+
+      final result = await repository.reassignClassroomMember(
+        classroomId: tClassroomId,
+        classroomMemberId: tClassroomMemberId,
+        targetClassroomId: tTargetClassroomId,
+      );
+
+      expect(result, const Left<Failure, void>(failure));
     });
   });
 }

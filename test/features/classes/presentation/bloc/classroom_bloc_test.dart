@@ -3,12 +3,13 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -21,10 +22,15 @@ class MockDistributeStudentsToClassroomsUseCase extends Mock
 class MockGetClassroomMembersUseCase extends Mock
     implements GetClassroomMembersUseCase {}
 
+class MockReassignClassroomMemberUseCase extends Mock
+    implements ReassignClassroomMemberUseCase {}
+
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
+const tTargetClassroomId = 'classroom-2';
+const tClassroomMemberId = 'member-1';
 
 const tClassroomMember = ClassroomMember(
   id: 'member-1',
@@ -58,12 +64,14 @@ void main() {
   late MockGetClassroomMembersUseCase mockGetClassroomMembersUseCase;
   late MockDistributeStudentsToClassroomsUseCase
   mockDistributeStudentsToClassroomsUseCase;
+  late MockReassignClassroomMemberUseCase mockReassignClassroomMemberUseCase;
 
   setUp(() {
     mockGetClassroomsUseCase = MockGetClassroomsUseCase();
     mockGetClassroomMembersUseCase = MockGetClassroomMembersUseCase();
     mockDistributeStudentsToClassroomsUseCase =
         MockDistributeStudentsToClassroomsUseCase();
+    mockReassignClassroomMemberUseCase = MockReassignClassroomMemberUseCase();
   });
 
   ClassroomBloc buildBloc() => ClassroomBloc(
@@ -71,6 +79,7 @@ void main() {
     getClassroomMembersUseCase: mockGetClassroomMembersUseCase,
     distributeStudentsToClassroomsUseCase:
         mockDistributeStudentsToClassroomsUseCase,
+    reassignClassroomMemberUseCase: mockReassignClassroomMemberUseCase,
   );
 
   group('ClassroomRequested', () {
@@ -224,7 +233,10 @@ void main() {
         ),
       ),
       expect: () => const [
-        ClassroomState(membersStatus: ClassroomStatus.loading),
+        ClassroomState(
+          membersStatus: ClassroomStatus.loading,
+          membersLoadingCount: 1,
+        ),
         ClassroomState(
           membersStatus: ClassroomStatus.success,
           members: [tClassroomMember],
@@ -250,10 +262,74 @@ void main() {
         ),
       ),
       expect: () => const [
-        ClassroomState(membersStatus: ClassroomStatus.loading),
+        ClassroomState(
+          membersStatus: ClassroomStatus.loading,
+          membersLoadingCount: 1,
+        ),
         ClassroomState(
           membersStatus: ClassroomStatus.failure,
           membersErrorType: ClassroomErrorType.notFound,
+        ),
+      ],
+    );
+  });
+
+  group('ClassroomMemberReassignRequested', () {
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits reassign [loading, success] when transfer succeeds',
+      setUp: () {
+        when(
+          () => mockReassignClassroomMemberUseCase(
+            classroomId: tClassroomId,
+            classroomMemberId: tClassroomMemberId,
+            targetClassroomId: tTargetClassroomId,
+          ),
+        ).thenAnswer((_) async => const Right(null));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomMemberReassignRequested(
+          classroomId: tClassroomId,
+          classroomMemberId: tClassroomMemberId,
+          targetClassroomId: tTargetClassroomId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(
+          reassignStatus: ClassroomStatus.loading,
+          reassigningMemberId: tClassroomMemberId,
+        ),
+        ClassroomState(reassignStatus: ClassroomStatus.success),
+      ],
+    );
+
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits reassign failure with notFound error type on NotFoundFailure',
+      setUp: () {
+        when(
+          () => mockReassignClassroomMemberUseCase(
+            classroomId: tClassroomId,
+            classroomMemberId: tClassroomMemberId,
+            targetClassroomId: tTargetClassroomId,
+          ),
+        ).thenAnswer((_) async => const Left(NotFoundFailure('Not found')));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomMemberReassignRequested(
+          classroomId: tClassroomId,
+          classroomMemberId: tClassroomMemberId,
+          targetClassroomId: tTargetClassroomId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(
+          reassignStatus: ClassroomStatus.loading,
+          reassigningMemberId: tClassroomMemberId,
+        ),
+        ClassroomState(
+          reassignStatus: ClassroomStatus.failure,
+          reassignErrorType: ClassroomErrorType.notFound,
         ),
       ],
     );

@@ -138,6 +138,114 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuOrganization => 'Organisation';
 
   @override
+  String get classesOrganisationHeroTitle => 'Organisation des classes';
+
+  @override
+  String get classesOrganisationHeroSubtitle => 'Recherchez les eleves par identite ou niveau et visualisez la repartition par classroom.';
+
+  @override
+  String get classesOrganisationSearchTitle => 'Formulaire de recherche';
+
+  @override
+  String get classesOrganisationSearchHint => 'Renseignez les champs d\'identite ou selectionnez un cycle/niveau. Si le niveau est split, vous pouvez cibler une classroom.';
+
+  @override
+  String get classesOrganisationClassroomFieldLabel => 'Classroom';
+
+  @override
+  String get classesOrganisationDistributionLabel => 'Critere de repartition';
+
+  @override
+  String get classesOrganisationDistributionByGender => 'Repartition par genre';
+
+  @override
+  String get classesOrganisationDistributionByPercentage => 'Repartition par moyenne';
+
+  @override
+  String get classesOrganisationDistributionAction => 'Repartir';
+
+  @override
+  String get classesOrganisationDistributionConfirmTitle => 'Confirmer la repartition';
+
+  @override
+  String get classesOrganisationDistributionConfirmMessage => 'Voulez-vous lancer la repartition des eleves pour ce niveau ?';
+
+  @override
+  String get classesOrganisationDistributionSuccess => 'Repartition terminee avec succes.';
+
+  @override
+  String get classesOrganisationSplitInfo => 'Mode split actif: affichage par classroom avec membres et statistiques.';
+
+  @override
+  String get classesOrganisationNonSplitInfo => 'Mode non split actif: liste des eleves du niveau selectionne.';
+
+  @override
+  String get classesOrganisationNoClassrooms => 'Aucune classroom disponible pour ce niveau.';
+
+  @override
+  String classesOrganisationClassroomStats(int total, int girls, int boys) {
+    return '$total eleves - Filles: $girls - Garcons: $boys';
+  }
+
+  @override
+  String get classesOrganisationTransferDialogTitle => 'Transferer l\'eleve';
+
+  @override
+  String classesOrganisationTransferDialogMessage(String studentName) {
+    return 'Choisissez la classroom de destination pour $studentName.';
+  }
+
+  @override
+  String get classesOrganisationTransferTargetLabel => 'Classroom de destination';
+
+  @override
+  String get classesOrganisationTransferAction => 'Transferer';
+
+  @override
+  String get classesOrganisationTransferInProgress => 'Transfert en cours...';
+
+  @override
+  String get classesOrganisationTransferSuccess => 'Transfert effectue avec succes.';
+
+  @override
+  String get classesOrganisationTransferNoTarget => 'Aucune classroom de destination disponible.';
+
+  @override
+  String classesOrganisationLoadingClassroomsCount(int count) {
+    return 'Chargement des membres de $count classrooms...';
+  }
+
+  @override
+  String get classesOrganisationStudentDetailSoon => 'Le detail eleve sera disponible au prochain lot.';
+
+  @override
+  String get classesOrganisationErrorNetwork => 'Verifiez votre connexion internet.';
+
+  @override
+  String get classesOrganisationErrorNotFound => 'Aucune donnee trouvee pour ces criteres.';
+
+  @override
+  String get classesOrganisationErrorValidation => 'Certaines informations saisies sont invalides.';
+
+  @override
+  String get classesOrganisationErrorUnauthorized => 'Acces non autorise.';
+
+  @override
+  String get classesOrganisationErrorInvalidCredentials => 'Identifiants invalides.';
+
+  @override
+  String get classesOrganisationErrorServer => 'Erreur serveur, reessayez plus tard.';
+
+  @override
+  String get classesOrganisationErrorStorage => 'Erreur de stockage local.';
+
+  @override
+  String get classesOrganisationErrorAuth => 'Session non valide, reconnectez-vous.';
+
+  @override
+  String get classesOrganisationErrorUnknown => 'Une erreur est survenue.';
+
+  @override
   String get subMenuClassesList => 'Classes';
 
   @override
@@ -1047,16 +1155,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentsUnknownError => 'Une erreur inattendue est survenue lors du chargement des paiements.';
 
   @override
-  String get facturationPrintReceiptLabel => 'Imprimer le reu';
+  String get facturationPrintReceiptLabel => 'Imprimer le reçu';
 
   @override
-  String get facturationPrintReceiptSubtitle => 'Gnrez et tlchargez le reu de ce paiement';
+  String get facturationPrintReceiptSubtitle => 'Générez et télchargez le reçu de ce paiement';
 
   @override
   String get facturationPrintStatementsLabel => 'Imprimer les relevs';
 
   @override
-  String get facturationPrintStatementsSubtitle => 'Gnrez et tlchargez les relevs de facturation de cet tudiant';
+  String get facturationPrintStatementsSubtitle => 'Générez et téléchargez les relevés de facturation de cet étudiant';
 
   @override
   String get facturationChargeDetailBackLabel => 'Retour au détail de facturation';

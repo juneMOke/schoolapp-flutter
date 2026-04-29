@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 
@@ -11,20 +12,25 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final GetClassroomMembersUseCase _getClassroomMembersUseCase;
   final DistributeStudentsToClassroomsUseCase
   _distributeStudentsToClassroomsUseCase;
+  final ReassignClassroomMemberUseCase _reassignClassroomMemberUseCase;
 
   ClassroomBloc({
     required GetClassroomsUseCase getClassroomsUseCase,
     required GetClassroomMembersUseCase getClassroomMembersUseCase,
     required DistributeStudentsToClassroomsUseCase
     distributeStudentsToClassroomsUseCase,
+    required ReassignClassroomMemberUseCase reassignClassroomMemberUseCase,
   }) : _getClassroomsUseCase = getClassroomsUseCase,
        _getClassroomMembersUseCase = getClassroomMembersUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
+       _reassignClassroomMemberUseCase = reassignClassroomMemberUseCase,
        super(const ClassroomState()) {
     on<ClassroomRequested>(_onClassroomRequested);
     on<ClassroomMembersRequested>(_onClassroomMembersRequested);
+    on<ClassroomMembersBatchRequested>(_onClassroomMembersBatchRequested);
     on<ClassroomDistributionRequested>(_onClassroomDistributionRequested);
+    on<ClassroomMemberReassignRequested>(_onClassroomMemberReassignRequested);
     on<ClassroomResetRequested>(_onClassroomResetRequested);
   }
 
@@ -110,6 +116,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     emit(
       state.copyWith(
         membersStatus: ClassroomStatus.loading,
+        membersLoadingCount: 1,
         membersErrorType: ClassroomErrorType.none,
       ),
     );
@@ -123,6 +130,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
       (failure) => emit(
         state.copyWith(
           membersStatus: ClassroomStatus.failure,
+          membersLoadingCount: 0,
           membersErrorType: _mapFailureToErrorType(failure),
         ),
       ),
@@ -130,7 +138,108 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
         state.copyWith(
           membersStatus: ClassroomStatus.success,
           members: members,
+          membersLoadingCount: 0,
           membersErrorType: ClassroomErrorType.none,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onClassroomMembersBatchRequested(
+    ClassroomMembersBatchRequested event,
+    Emitter<ClassroomState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        membersStatus: ClassroomStatus.loading,
+        membersLoadingCount: event.classroomIds.length,
+        membersErrorType: ClassroomErrorType.none,
+        membersByClassroom: const [],
+      ),
+    );
+
+    final results = await Future.wait(
+      event.classroomIds.map(
+        (classroomId) async {
+          final result = await _getClassroomMembersUseCase(
+            classroomId: classroomId,
+            academicYearId: event.academicYearId,
+          );
+          return (classroomId: classroomId, result: result);
+        },
+      ),
+    );
+
+    final buckets = <ClassroomMembersGroup>[];
+    for (final item in results) {
+      final failed = item.result.fold<bool>(
+        (failure) {
+          emit(
+            state.copyWith(
+              membersStatus: ClassroomStatus.failure,
+              membersLoadingCount: 0,
+              membersErrorType: _mapFailureToErrorType(failure),
+            ),
+          );
+          return true;
+        },
+        (members) {
+          buckets.add(
+            ClassroomMembersGroup(
+              classroomId: item.classroomId,
+              members: members,
+            ),
+          );
+          return false;
+        },
+      );
+
+      if (failed) {
+        return;
+      }
+    }
+
+    emit(
+      state.copyWith(
+        membersStatus: ClassroomStatus.success,
+        membersByClassroom: buckets,
+        membersLoadingCount: 0,
+        membersErrorType: ClassroomErrorType.none,
+      ),
+    );
+  }
+
+  Future<void> _onClassroomMemberReassignRequested(
+    ClassroomMemberReassignRequested event,
+    Emitter<ClassroomState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        reassignStatus: ClassroomStatus.loading,
+        reassignErrorType: ClassroomErrorType.none,
+        reassigningMemberId: event.classroomMemberId,
+      ),
+    );
+
+    final result = await _reassignClassroomMemberUseCase(
+      classroomId: event.classroomId,
+      classroomMemberId: event.classroomMemberId,
+      targetClassroomId: event.targetClassroomId,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          reassignStatus: ClassroomStatus.failure,
+          reassignErrorType: _mapFailureToErrorType(failure),
+          reassigningMemberId: '',
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          reassignStatus: ClassroomStatus.success,
+          reassignErrorType: ClassroomErrorType.none,
+          reassigningMemberId: '',
         ),
       ),
     );

@@ -22,4 +22,10 @@ abstract class ClassroomRepository {
     required String schoolLevelId,
     required ClassroomDistributionCriterion distributionCriterion,
   });
+
+  Future<Either<Failure, void>> reassignClassroomMember({
+    required String classroomId,
+    required String classroomMemberId,
+    required String targetClassroomId,
+  });
 }

@@ -95,6 +95,57 @@
   "@subMenuOrganization": {
     "description": "Organization sub-menu title"
   },
+  "classesOrganisationHeroTitle": "Classes organization",
+  "classesOrganisationHeroSubtitle": "Search students by identity or level and view classroom distribution.",
+  "classesOrganisationSearchTitle": "Search form",
+  "classesOrganisationSearchHint": "Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.",
+  "classesOrganisationClassroomFieldLabel": "Classroom",
+  "classesOrganisationDistributionLabel": "Distribution criterion",
+  "classesOrganisationDistributionByGender": "Distribute by gender",
+  "classesOrganisationDistributionByPercentage": "Distribute by average",
+  "classesOrganisationDistributionAction": "Distribute",
+  "classesOrganisationDistributionConfirmTitle": "Confirm distribution",
+  "classesOrganisationDistributionConfirmMessage": "Do you want to distribute students for this level?",
+  "classesOrganisationDistributionSuccess": "Distribution completed successfully.",
+  "classesOrganisationSplitInfo": "Split mode enabled: classroom grid with members and stats.",
+  "classesOrganisationNonSplitInfo": "Non-split mode enabled: student list for the selected level.",
+  "classesOrganisationNoClassrooms": "No classroom is available for this level.",
+  "classesOrganisationClassroomStats": "{total} students - Girls: {girls} - Boys: {boys}",
+  "@classesOrganisationClassroomStats": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "girls": { "type": "int" },
+      "boys": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferDialogTitle": "Transfer student",
+  "classesOrganisationTransferDialogMessage": "Choose the destination classroom for {studentName}.",
+  "@classesOrganisationTransferDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationTransferTargetLabel": "Destination classroom",
+  "classesOrganisationTransferAction": "Transfer",
+  "classesOrganisationTransferInProgress": "Transfer in progress...",
+  "classesOrganisationTransferSuccess": "Transfer completed successfully.",
+  "classesOrganisationTransferNoTarget": "No destination classroom is available.",
+  "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
+  "@classesOrganisationLoadingClassroomsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationStudentDetailSoon": "Student details will be available in the next batch.",
+  "classesOrganisationErrorNetwork": "Check your internet connection.",
+  "classesOrganisationErrorNotFound": "No data found for these criteria.",
+  "classesOrganisationErrorValidation": "Some entered information is invalid.",
+  "classesOrganisationErrorUnauthorized": "Access is not authorized.",
+  "classesOrganisationErrorInvalidCredentials": "Invalid credentials.",
+  "classesOrganisationErrorServer": "Server error, try again later.",
+  "classesOrganisationErrorStorage": "Local storage error.",
+  "classesOrganisationErrorAuth": "Session is not valid, please sign in again.",
+  "classesOrganisationErrorUnknown": "An error occurred.",
   "subMenuClassesList": "Classes List",
   "@subMenuClassesList": {
     "description": "Classes list sub-menu title"

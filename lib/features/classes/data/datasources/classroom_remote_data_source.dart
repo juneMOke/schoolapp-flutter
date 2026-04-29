@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 
 part 'classroom_remote_data_source.g.dart';
 
@@ -31,5 +32,13 @@ abstract class ClassroomRemoteDataSource {
   Future<void> distributeStudentsToClassrooms(
     @Extras() Map<String, dynamic> extras,
     @Body() DistributionRequestModel request,
+  );
+
+  @PUT(AppConstants.classroomMemberReassignEndpoint)
+  Future<void> reassignClassroomMember(
+    @Extras() Map<String, dynamic> extras,
+    @Path('classroomId') String classroomId,
+    @Path('classroomMemberId') String classroomMemberId,
+    @Body() ReassignClassroomMemberRequestModel request,
   );
 }

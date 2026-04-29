@@ -62,6 +62,57 @@
   "subMenuFirstRegistration": "Première Inscription",
   "subMenuBilling": "Facturations",
   "subMenuOrganization": "Organisation",
+  "classesOrganisationHeroTitle": "Organisation des classes",
+  "classesOrganisationHeroSubtitle": "Recherchez les eleves par identite ou niveau et visualisez la repartition par classroom.",
+  "classesOrganisationSearchTitle": "Formulaire de recherche",
+  "classesOrganisationSearchHint": "Renseignez les champs d'identite ou selectionnez un cycle/niveau. Si le niveau est split, vous pouvez cibler une classroom.",
+  "classesOrganisationClassroomFieldLabel": "Classroom",
+  "classesOrganisationDistributionLabel": "Critere de repartition",
+  "classesOrganisationDistributionByGender": "Repartition par genre",
+  "classesOrganisationDistributionByPercentage": "Repartition par moyenne",
+  "classesOrganisationDistributionAction": "Repartir",
+  "classesOrganisationDistributionConfirmTitle": "Confirmer la repartition",
+  "classesOrganisationDistributionConfirmMessage": "Voulez-vous lancer la repartition des eleves pour ce niveau ?",
+  "classesOrganisationDistributionSuccess": "Repartition terminee avec succes.",
+  "classesOrganisationSplitInfo": "Mode split actif: affichage par classroom avec membres et statistiques.",
+  "classesOrganisationNonSplitInfo": "Mode non split actif: liste des eleves du niveau selectionne.",
+  "classesOrganisationNoClassrooms": "Aucune classroom disponible pour ce niveau.",
+  "classesOrganisationClassroomStats": "{total} eleves - Filles: {girls} - Garcons: {boys}",
+  "@classesOrganisationClassroomStats": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "girls": { "type": "int" },
+      "boys": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferDialogTitle": "Transferer l'eleve",
+  "classesOrganisationTransferDialogMessage": "Choisissez la classroom de destination pour {studentName}.",
+  "@classesOrganisationTransferDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationTransferTargetLabel": "Classroom de destination",
+  "classesOrganisationTransferAction": "Transferer",
+  "classesOrganisationTransferInProgress": "Transfert en cours...",
+  "classesOrganisationTransferSuccess": "Transfert effectue avec succes.",
+  "classesOrganisationTransferNoTarget": "Aucune classroom de destination disponible.",
+  "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} classrooms...",
+  "@classesOrganisationLoadingClassroomsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationStudentDetailSoon": "Le detail eleve sera disponible au prochain lot.",
+  "classesOrganisationErrorNetwork": "Verifiez votre connexion internet.",
+  "classesOrganisationErrorNotFound": "Aucune donnee trouvee pour ces criteres.",
+  "classesOrganisationErrorValidation": "Certaines informations saisies sont invalides.",
+  "classesOrganisationErrorUnauthorized": "Acces non autorise.",
+  "classesOrganisationErrorInvalidCredentials": "Identifiants invalides.",
+  "classesOrganisationErrorServer": "Erreur serveur, reessayez plus tard.",
+  "classesOrganisationErrorStorage": "Erreur de stockage local.",
+  "classesOrganisationErrorAuth": "Session non valide, reconnectez-vous.",
+  "classesOrganisationErrorUnknown": "Une erreur est survenue.",
   "subMenuClassesList": "Classes",
   "subMenuAttendance": "Présences",
   "subMenuDisciplinesList": "Disciplines",

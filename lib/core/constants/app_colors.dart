@@ -68,6 +68,24 @@ class AppColors {
   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
 
+  // Classes organisation palette
+  static const classesHeroGradientStart = Color(0xFFEAF2FF);
+  static const classesHeroGradientEnd = Color(0xFFF2F8FF);
+  static const classesSectionSurface = Color(0xFFF9FBFF);
+  static const classesInfoBannerSurface = Color(0xFFEEF4FF);
+  static const classesInfoBannerBorder = Color(0xFFD7E4FF);
+  static const classesClassroomSurface = Color(0xFFF7FAFF);
+  static const classesMemberSurface = Color(0xFFF1F6FF);
+  static const classesChipGirlsBg = Color(0xFFFCE7F3);
+  static const classesChipGirlsFg = Color(0xFF9D174D);
+  static const classesChipBoysBg = Color(0xFFE0ECFF);
+  static const classesChipBoysFg = Color(0xFF1D4ED8);
+  static const classesChipTotalBg = Color(0xFFE8F5E9);
+  static const classesChipTotalFg = Color(0xFF1B5E20);
+  static const classesFocusRing = Color(0xFF1A73E8);
+  static const classesDisabledBg = Color(0xFFE5E7EB);
+  static const classesDisabledFg = Color(0xFF6B7280);
+
   static const success = green;
   static const warning = indigo;
   static const muted = textSecondary;

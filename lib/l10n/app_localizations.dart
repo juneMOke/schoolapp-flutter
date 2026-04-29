@@ -341,6 +341,210 @@ abstract class AppLocalizations {
   /// **'Organization'**
   String get subMenuOrganization;
 
+  /// No description provided for @classesOrganisationHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes organization'**
+  String get classesOrganisationHeroTitle;
+
+  /// No description provided for @classesOrganisationHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search students by identity or level and view classroom distribution.'**
+  String get classesOrganisationHeroSubtitle;
+
+  /// No description provided for @classesOrganisationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search form'**
+  String get classesOrganisationSearchTitle;
+
+  /// No description provided for @classesOrganisationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.'**
+  String get classesOrganisationSearchHint;
+
+  /// No description provided for @classesOrganisationClassroomFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom'**
+  String get classesOrganisationClassroomFieldLabel;
+
+  /// No description provided for @classesOrganisationDistributionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution criterion'**
+  String get classesOrganisationDistributionLabel;
+
+  /// No description provided for @classesOrganisationDistributionByGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute by gender'**
+  String get classesOrganisationDistributionByGender;
+
+  /// No description provided for @classesOrganisationDistributionByPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute by average'**
+  String get classesOrganisationDistributionByPercentage;
+
+  /// No description provided for @classesOrganisationDistributionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute'**
+  String get classesOrganisationDistributionAction;
+
+  /// No description provided for @classesOrganisationDistributionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm distribution'**
+  String get classesOrganisationDistributionConfirmTitle;
+
+  /// No description provided for @classesOrganisationDistributionConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to distribute students for this level?'**
+  String get classesOrganisationDistributionConfirmMessage;
+
+  /// No description provided for @classesOrganisationDistributionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution completed successfully.'**
+  String get classesOrganisationDistributionSuccess;
+
+  /// No description provided for @classesOrganisationSplitInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Split mode enabled: classroom grid with members and stats.'**
+  String get classesOrganisationSplitInfo;
+
+  /// No description provided for @classesOrganisationNonSplitInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-split mode enabled: student list for the selected level.'**
+  String get classesOrganisationNonSplitInfo;
+
+  /// No description provided for @classesOrganisationNoClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'No classroom is available for this level.'**
+  String get classesOrganisationNoClassrooms;
+
+  /// No description provided for @classesOrganisationClassroomStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} students - Girls: {girls} - Boys: {boys}'**
+  String classesOrganisationClassroomStats(int total, int girls, int boys);
+
+  /// No description provided for @classesOrganisationTransferDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer student'**
+  String get classesOrganisationTransferDialogTitle;
+
+  /// No description provided for @classesOrganisationTransferDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the destination classroom for {studentName}.'**
+  String classesOrganisationTransferDialogMessage(String studentName);
+
+  /// No description provided for @classesOrganisationTransferTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination classroom'**
+  String get classesOrganisationTransferTargetLabel;
+
+  /// No description provided for @classesOrganisationTransferAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get classesOrganisationTransferAction;
+
+  /// No description provided for @classesOrganisationTransferInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer in progress...'**
+  String get classesOrganisationTransferInProgress;
+
+  /// No description provided for @classesOrganisationTransferSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer completed successfully.'**
+  String get classesOrganisationTransferSuccess;
+
+  /// No description provided for @classesOrganisationTransferNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'No destination classroom is available.'**
+  String get classesOrganisationTransferNoTarget;
+
+  /// No description provided for @classesOrganisationLoadingClassroomsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading members for {count} classrooms...'**
+  String classesOrganisationLoadingClassroomsCount(int count);
+
+  /// No description provided for @classesOrganisationStudentDetailSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Student details will be available in the next batch.'**
+  String get classesOrganisationStudentDetailSoon;
+
+  /// No description provided for @classesOrganisationErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection.'**
+  String get classesOrganisationErrorNetwork;
+
+  /// No description provided for @classesOrganisationErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No data found for these criteria.'**
+  String get classesOrganisationErrorNotFound;
+
+  /// No description provided for @classesOrganisationErrorValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Some entered information is invalid.'**
+  String get classesOrganisationErrorValidation;
+
+  /// No description provided for @classesOrganisationErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Access is not authorized.'**
+  String get classesOrganisationErrorUnauthorized;
+
+  /// No description provided for @classesOrganisationErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credentials.'**
+  String get classesOrganisationErrorInvalidCredentials;
+
+  /// No description provided for @classesOrganisationErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error, try again later.'**
+  String get classesOrganisationErrorServer;
+
+  /// No description provided for @classesOrganisationErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local storage error.'**
+  String get classesOrganisationErrorStorage;
+
+  /// No description provided for @classesOrganisationErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Session is not valid, please sign in again.'**
+  String get classesOrganisationErrorAuth;
+
+  /// No description provided for @classesOrganisationErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get classesOrganisationErrorUnknown;
+
   /// Classes list sub-menu title
   ///
   /// In en, this message translates to:

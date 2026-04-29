@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
@@ -88,6 +89,32 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
       await remoteDataSource.distributeStudentsToClassrooms(
         requiredAuth,
         request,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> reassignClassroomMember({
+    required String classroomId,
+    required String classroomMemberId,
+    required String targetClassroomId,
+  }) async {
+    try {
+      await remoteDataSource.reassignClassroomMember(
+        requiredAuth,
+        classroomId,
+        classroomMemberId,
+        ReassignClassroomMemberRequestModel(
+          targetClassroomId: targetClassroomId,
+        ),
       );
       return const Right(null);
     } on DioException catch (e) {
