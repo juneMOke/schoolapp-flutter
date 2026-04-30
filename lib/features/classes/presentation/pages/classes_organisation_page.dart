@@ -21,7 +21,7 @@ import 'package:school_app_flutter/features/classes/presentation/widgets/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_results.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_invitation_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -54,7 +54,7 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return FinancePageBackground(
+    return AppPageBackground(
       child: MultiBlocListener(
         listeners: [
           BlocListener<ClassroomBloc, ClassroomState>(

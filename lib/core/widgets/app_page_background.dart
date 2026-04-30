@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
-/// Fond visuel standard des pages Finance (gradient + orbes + zone centree).
-class FinancePageBackground extends StatelessWidget {
+/// Fond visuel standard partagé par toutes les pages de l'application
+/// (gradient doux + orbes décoratifs + zone centrée scrollable).
+class AppPageBackground extends StatelessWidget {
   final Widget child;
   final bool scrollable;
 
-  const FinancePageBackground({
+  const AppPageBackground({
     super.key,
     required this.child,
     this.scrollable = true,
@@ -41,15 +42,15 @@ class FinancePageBackground extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.financeDetailGradientStart,
-              AppColors.financeDetailGradientMiddle,
-              AppColors.financeDetailGradientEnd,
+              AppColors.pageBackgroundGradientStart,
+              AppColors.pageBackgroundGradientMiddle,
+              AppColors.pageBackgroundGradientEnd,
             ],
           ),
         ),
         child: Stack(
           children: [
-            const _FinanceDecorativeOrbs(),
+            const _AppDecorativeOrbs(),
             if (scrollable)
               SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
@@ -73,31 +74,31 @@ class FinancePageBackground extends StatelessWidget {
   }
 }
 
-class _FinanceDecorativeOrbs extends StatelessWidget {
-  const _FinanceDecorativeOrbs();
+class _AppDecorativeOrbs extends StatelessWidget {
+  const _AppDecorativeOrbs();
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned(
-          top: AppDimensions.financeDetailOrbLargeTop,
-          right: AppDimensions.financeDetailOrbLargeRight,
+          top: AppDimensions.pageBackgroundOrbLargeTop,
+          right: AppDimensions.pageBackgroundOrbLargeRight,
           child: Container(
-            width: AppDimensions.financeDetailOrbLargeSize,
-            height: AppDimensions.financeDetailOrbLargeSize,
+            width: AppDimensions.pageBackgroundOrbLargeSize,
+            height: AppDimensions.pageBackgroundOrbLargeSize,
             decoration: BoxDecoration(
-              color: AppColors.financeDetailAccent.withValues(alpha: 0.08),
+              color: AppColors.pageBackgroundAccent.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
         ),
         Positioned(
-          top: AppDimensions.financeDetailOrbMediumTop,
-          left: AppDimensions.financeDetailOrbMediumLeft,
+          top: AppDimensions.pageBackgroundOrbMediumTop,
+          left: AppDimensions.pageBackgroundOrbMediumLeft,
           child: Container(
-            width: AppDimensions.financeDetailOrbMediumSize,
-            height: AppDimensions.financeDetailOrbMediumSize,
+            width: AppDimensions.pageBackgroundOrbMediumSize,
+            height: AppDimensions.pageBackgroundOrbMediumSize,
             decoration: BoxDecoration(
               color: AppColors.success.withValues(alpha: 0.08),
               shape: BoxShape.circle,

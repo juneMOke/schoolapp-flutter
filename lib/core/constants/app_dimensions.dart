@@ -22,13 +22,13 @@ class AppDimensions {
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;
 
-  // Finance detail decorative/background tokens
-  static const financeDetailOrbLargeSize = 180.0;
-  static const financeDetailOrbMediumSize = 130.0;
-  static const financeDetailOrbLargeTop = -60.0;
-  static const financeDetailOrbLargeRight = -50.0;
-  static const financeDetailOrbMediumTop = 120.0;
-  static const financeDetailOrbMediumLeft = -40.0;
+  // Page background decorative tokens (orbes — partagé entre tous les modules)
+  static const pageBackgroundOrbLargeSize = 180.0;
+  static const pageBackgroundOrbMediumSize = 130.0;
+  static const pageBackgroundOrbLargeTop = -60.0;
+  static const pageBackgroundOrbLargeRight = -50.0;
+  static const pageBackgroundOrbMediumTop = 120.0;
+  static const pageBackgroundOrbMediumLeft = -40.0;
 
   // Finance detail elevation/responsive tokens
   static const financeDetailCardShadowBlur = 20.0;

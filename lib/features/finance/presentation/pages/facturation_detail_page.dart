@@ -13,7 +13,7 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
@@ -129,7 +129,7 @@ class FacturationDetailPage extends StatelessWidget {
           create: (_) => getIt<StudentChargesBloc>(),
         ),
       ],
-      child: FinancePageBackground(
+      child: AppPageBackground(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =

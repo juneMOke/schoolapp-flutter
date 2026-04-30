@@ -12,10 +12,13 @@ class AppColors {
   static const textSecondary = Color(0xFF6B7280);
   static const border = Color(0xFFE5E7EB);
 
+  // Page background palette (gradient + orbes — partagé entre tous les modules)
+  static const pageBackgroundGradientStart = Color(0xFFF4F8FF);
+  static const pageBackgroundGradientMiddle = Color(0xFFEFF5FF);
+  static const pageBackgroundGradientEnd = Color(0xFFF7FAFF);
+  static const pageBackgroundAccent = Color(0xFF1A73E8);
+
   // Finance detail palette
-  static const financeDetailGradientStart = Color(0xFFF4F8FF);
-  static const financeDetailGradientMiddle = Color(0xFFEFF5FF);
-  static const financeDetailGradientEnd = Color(0xFFF7FAFF);
   static const financeDetailCard = Color(0xFFFFFFFF);
   static const financeDetailMutedSurface = Color(0xFFF5F8FF);
   static const financeDetailAccent = Color(0xFF1A73E8);

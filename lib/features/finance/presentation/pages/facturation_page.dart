@@ -13,7 +13,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_page_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
@@ -43,7 +43,7 @@ class _FacturationPageState extends State<FacturationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FinancePageBackground(
+    return AppPageBackground(
       child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.bootstrap != curr.bootstrap,

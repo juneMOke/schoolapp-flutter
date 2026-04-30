@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_allocation_editor.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
@@ -247,7 +247,7 @@ class _PageScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final unpaid = intent.unpaidCharges;
 
-    return FinancePageBackground(
+    return AppPageBackground(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact =
