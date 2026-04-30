@@ -96,6 +96,11 @@ class AppConstants {
   static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
 
+  // ─── Attendance ────────────────────────────────────────────────────────────
+  static const String attendanceEndpoint = '/api/v1/attendances';
+  static const String attendanceByClassroomEndpoint =
+      '/api/v1/attendances/classes/{classroomId}';
+
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;
