@@ -146,6 +146,41 @@
   "classesOrganisationErrorStorage": "Local storage error.",
   "classesOrganisationErrorAuth": "Session is not valid, please sign in again.",
   "classesOrganisationErrorUnknown": "An error occurred.",
+  "classesListHeroTitle": "Classes and students list",
+  "classesListHeroSubtitle": "Quickly search students by cycle, level or classroom, then export the displayed results.",
+  "classesListHeroFilterChip": "Multi-criteria search by identity and level.",
+  "classesListHeroClassroomChip": "Optional classroom filtering for the current school year.",
+  "classesListSearchTitle": "Search form",
+  "classesListSearchHint": "Start by selecting a cycle and a level, then optionally refine with a classroom or the three name fields.",
+  "classesListSearchValidationLevelRequired": "Select a cycle and a level to start the search.",
+  "classesListSearchValidationNamesIncomplete": "Fill in first name, last name and surname to enable name-based filtering.",
+  "classesListSearchReady": "Valid criteria, you can run the search.",
+  "classesListClassroomHelpSelectCycle": "Select a cycle before choosing a classroom.",
+  "classesListClassroomHelpSelectLevel": "Please select a level to choose a classroom.",
+  "classesListClassroomHelpLevelNotSplit": "Students in this level are not split into classrooms yet. Use the organization menu first.",
+  "classesListClassroomHelpOptional": "Classroom selection is optional: leave it empty to search the whole level.",
+  "classesListInvitationTitle": "Start a search in the Classes module",
+  "classesListInvitationMessage": "Fill the filters above, then click Search to display students.",
+  "classesListResultsTitle": "Search results",
+  "classesListResultsLevelMode": "Level results: {levelLabel}",
+  "@classesListResultsLevelMode": {
+    "placeholders": {
+      "levelLabel": { "type": "String" }
+    }
+  },
+  "classesListResultsClassroomMode": "Classroom results: {classroomName}",
+  "@classesListResultsClassroomMode": {
+    "placeholders": {
+      "classroomName": { "type": "String" }
+    }
+  },
+  "classesListLoadingClassroomMembers": "Loading classroom members...",
+  "classesListClassroomEmptyMessage": "No student is currently assigned to this classroom.",
+  "classesListClassroomFilteredEmptyMessage": "No student in this classroom matches the entered filters.",
+  "classesListStudentDetailSoon": "Student details will be available in a future release.",
+  "classesListExportSuccess": "Export copied to clipboard.",
+  "classesListExportFailed": "Unable to prepare the export right now.",
+  "classesListExportNothingToExport": "There is no data to export for this search.",
   "subMenuClassesList": "Classes List",
   "@subMenuClassesList": {
     "description": "Classes list sub-menu title"

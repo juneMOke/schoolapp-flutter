@@ -545,6 +545,156 @@ abstract class AppLocalizations {
   /// **'An error occurred.'**
   String get classesOrganisationErrorUnknown;
 
+  /// No description provided for @classesListHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes and students list'**
+  String get classesListHeroTitle;
+
+  /// No description provided for @classesListHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickly search students by cycle, level or classroom, then export the displayed results.'**
+  String get classesListHeroSubtitle;
+
+  /// No description provided for @classesListHeroFilterChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-criteria search by identity and level.'**
+  String get classesListHeroFilterChip;
+
+  /// No description provided for @classesListHeroClassroomChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional classroom filtering for the current school year.'**
+  String get classesListHeroClassroomChip;
+
+  /// No description provided for @classesListSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search form'**
+  String get classesListSearchTitle;
+
+  /// No description provided for @classesListSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by selecting a cycle and a level, then optionally refine with a classroom or the three name fields.'**
+  String get classesListSearchHint;
+
+  /// No description provided for @classesListSearchValidationLevelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cycle and a level to start the search.'**
+  String get classesListSearchValidationLevelRequired;
+
+  /// No description provided for @classesListSearchValidationNamesIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in first name, last name and surname to enable name-based filtering.'**
+  String get classesListSearchValidationNamesIncomplete;
+
+  /// No description provided for @classesListSearchReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid criteria, you can run the search.'**
+  String get classesListSearchReady;
+
+  /// No description provided for @classesListClassroomHelpSelectCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cycle before choosing a classroom.'**
+  String get classesListClassroomHelpSelectCycle;
+
+  /// No description provided for @classesListClassroomHelpSelectLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a level to choose a classroom.'**
+  String get classesListClassroomHelpSelectLevel;
+
+  /// No description provided for @classesListClassroomHelpLevelNotSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Students in this level are not split into classrooms yet. Use the organization menu first.'**
+  String get classesListClassroomHelpLevelNotSplit;
+
+  /// No description provided for @classesListClassroomHelpOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom selection is optional: leave it empty to search the whole level.'**
+  String get classesListClassroomHelpOptional;
+
+  /// No description provided for @classesListInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a search in the Classes module'**
+  String get classesListInvitationTitle;
+
+  /// No description provided for @classesListInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the filters above, then click Search to display students.'**
+  String get classesListInvitationMessage;
+
+  /// No description provided for @classesListResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get classesListResultsTitle;
+
+  /// No description provided for @classesListResultsLevelMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Level results: {levelLabel}'**
+  String classesListResultsLevelMode(String levelLabel);
+
+  /// No description provided for @classesListResultsClassroomMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom results: {classroomName}'**
+  String classesListResultsClassroomMode(String classroomName);
+
+  /// No description provided for @classesListLoadingClassroomMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading classroom members...'**
+  String get classesListLoadingClassroomMembers;
+
+  /// No description provided for @classesListClassroomEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is currently assigned to this classroom.'**
+  String get classesListClassroomEmptyMessage;
+
+  /// No description provided for @classesListClassroomFilteredEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this classroom matches the entered filters.'**
+  String get classesListClassroomFilteredEmptyMessage;
+
+  /// No description provided for @classesListStudentDetailSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Student details will be available in a future release.'**
+  String get classesListStudentDetailSoon;
+
+  /// No description provided for @classesListExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export copied to clipboard.'**
+  String get classesListExportSuccess;
+
+  /// No description provided for @classesListExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to prepare the export right now.'**
+  String get classesListExportFailed;
+
+  /// No description provided for @classesListExportNothingToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no data to export for this search.'**
+  String get classesListExportNothingToExport;
+
   /// Classes list sub-menu title
   ///
   /// In en, this message translates to:

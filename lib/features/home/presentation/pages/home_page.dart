@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/re_reg
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
@@ -124,7 +125,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
         state.selectedSubMenuId == MenuConstants.facturationsId ||
-        state.selectedSubMenuId == MenuConstants.organisationId;
+        state.selectedSubMenuId == MenuConstants.organisationId ||
+        state.selectedSubMenuId == MenuConstants.classesListId;
 
     return Container(
       width: double.infinity,
@@ -196,6 +198,8 @@ class _HomePageView extends StatelessWidget {
         return const FinanceFeatureScope(child: FacturationPage());
       case MenuConstants.organisationId:
         return const ClassesFeatureScope(child: ClassesOrganisationPage());
+      case MenuConstants.classesListId:
+        return const ClassesFeatureScope(child: ClassesListPage());
       default:
         return Container(
           width: double.infinity,

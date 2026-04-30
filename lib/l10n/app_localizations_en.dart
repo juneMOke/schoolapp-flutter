@@ -246,6 +246,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'An error occurred.';
 
   @override
+  String get classesListHeroTitle => 'Classes and students list';
+
+  @override
+  String get classesListHeroSubtitle => 'Quickly search students by cycle, level or classroom, then export the displayed results.';
+
+  @override
+  String get classesListHeroFilterChip => 'Multi-criteria search by identity and level.';
+
+  @override
+  String get classesListHeroClassroomChip => 'Optional classroom filtering for the current school year.';
+
+  @override
+  String get classesListSearchTitle => 'Search form';
+
+  @override
+  String get classesListSearchHint => 'Start by selecting a cycle and a level, then optionally refine with a classroom or the three name fields.';
+
+  @override
+  String get classesListSearchValidationLevelRequired => 'Select a cycle and a level to start the search.';
+
+  @override
+  String get classesListSearchValidationNamesIncomplete => 'Fill in first name, last name and surname to enable name-based filtering.';
+
+  @override
+  String get classesListSearchReady => 'Valid criteria, you can run the search.';
+
+  @override
+  String get classesListClassroomHelpSelectCycle => 'Select a cycle before choosing a classroom.';
+
+  @override
+  String get classesListClassroomHelpSelectLevel => 'Please select a level to choose a classroom.';
+
+  @override
+  String get classesListClassroomHelpLevelNotSplit => 'Students in this level are not split into classrooms yet. Use the organization menu first.';
+
+  @override
+  String get classesListClassroomHelpOptional => 'Classroom selection is optional: leave it empty to search the whole level.';
+
+  @override
+  String get classesListInvitationTitle => 'Start a search in the Classes module';
+
+  @override
+  String get classesListInvitationMessage => 'Fill the filters above, then click Search to display students.';
+
+  @override
+  String get classesListResultsTitle => 'Search results';
+
+  @override
+  String classesListResultsLevelMode(String levelLabel) {
+    return 'Level results: $levelLabel';
+  }
+
+  @override
+  String classesListResultsClassroomMode(String classroomName) {
+    return 'Classroom results: $classroomName';
+  }
+
+  @override
+  String get classesListLoadingClassroomMembers => 'Loading classroom members...';
+
+  @override
+  String get classesListClassroomEmptyMessage => 'No student is currently assigned to this classroom.';
+
+  @override
+  String get classesListClassroomFilteredEmptyMessage => 'No student in this classroom matches the entered filters.';
+
+  @override
+  String get classesListStudentDetailSoon => 'Student details will be available in a future release.';
+
+  @override
+  String get classesListExportSuccess => 'Export copied to clipboard.';
+
+  @override
+  String get classesListExportFailed => 'Unable to prepare the export right now.';
+
+  @override
+  String get classesListExportNothingToExport => 'There is no data to export for this search.';
+
+  @override
   String get subMenuClassesList => 'Classes List';
 
   @override
