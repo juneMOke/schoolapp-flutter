@@ -37,7 +37,7 @@ abstract class ClassroomRemoteDataSource {
   @PUT(AppConstants.classroomMemberReassignEndpoint)
   Future<void> reassignClassroomMember(
     @Extras() Map<String, dynamic> extras,
-    @Path('classroomId') String classroomId,
+    @Path('classroomId') String targetClassroomId,
     @Path('classroomMemberId') String classroomMemberId,
     @Body() ReassignClassroomMemberRequestModel request,
   );

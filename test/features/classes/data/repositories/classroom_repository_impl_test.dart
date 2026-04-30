@@ -415,14 +415,13 @@ void main() {
       when(
         () => mockRemoteDataSource.reassignClassroomMember(
           tRequiredAuth,
-          tClassroomId,
+          tTargetClassroomId,
           tClassroomMemberId,
           any(),
         ),
       ).thenAnswer((_) async {});
 
       final result = await repository.reassignClassroomMember(
-        classroomId: tClassroomId,
         classroomMemberId: tClassroomMemberId,
         targetClassroomId: tTargetClassroomId,
       );
@@ -431,7 +430,7 @@ void main() {
       final captured = verify(
         () => mockRemoteDataSource.reassignClassroomMember(
           tRequiredAuth,
-          tClassroomId,
+          tTargetClassroomId,
           tClassroomMemberId,
           captureAny(),
         ),
@@ -445,14 +444,13 @@ void main() {
       when(
         () => mockRemoteDataSource.reassignClassroomMember(
           tRequiredAuth,
-          tClassroomId,
+          tTargetClassroomId,
           tClassroomMemberId,
           any(),
         ),
       ).thenThrow(_dioException(error: failure));
 
       final result = await repository.reassignClassroomMember(
-        classroomId: tClassroomId,
         classroomMemberId: tClassroomMemberId,
         targetClassroomId: tTargetClassroomId,
       );

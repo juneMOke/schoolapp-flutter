@@ -7,7 +7,6 @@ import 'package:school_app_flutter/features/classes/domain/usecases/reassign_cla
 
 class MockClassroomRepository extends Mock implements ClassroomRepository {}
 
-const tClassroomId = 'classroom-1';
 const tClassroomMemberId = 'member-1';
 const tTargetClassroomId = 'classroom-2';
 
@@ -23,14 +22,12 @@ void main() {
   test('delegates to repository and returns Right on success', () async {
     when(
       () => mockRepository.reassignClassroomMember(
-        classroomId: tClassroomId,
         classroomMemberId: tClassroomMemberId,
         targetClassroomId: tTargetClassroomId,
       ),
     ).thenAnswer((_) async => const Right(null));
 
     final result = await useCase(
-      classroomId: tClassroomId,
       classroomMemberId: tClassroomMemberId,
       targetClassroomId: tTargetClassroomId,
     );
@@ -38,7 +35,6 @@ void main() {
     expect(result.isRight(), true);
     verify(
       () => mockRepository.reassignClassroomMember(
-        classroomId: tClassroomId,
         classroomMemberId: tClassroomMemberId,
         targetClassroomId: tTargetClassroomId,
       ),
@@ -50,14 +46,12 @@ void main() {
     const failure = NotFoundFailure('Resource not found');
     when(
       () => mockRepository.reassignClassroomMember(
-        classroomId: tClassroomId,
         classroomMemberId: tClassroomMemberId,
         targetClassroomId: tTargetClassroomId,
       ),
     ).thenAnswer((_) async => const Left(failure));
 
     final result = await useCase(
-      classroomId: tClassroomId,
       classroomMemberId: tClassroomMemberId,
       targetClassroomId: tTargetClassroomId,
     );

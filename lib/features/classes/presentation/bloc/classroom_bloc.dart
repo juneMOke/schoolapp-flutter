@@ -222,7 +222,6 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     );
 
     final result = await _reassignClassroomMemberUseCase(
-      classroomId: event.classroomId,
       classroomMemberId: event.classroomMemberId,
       targetClassroomId: event.targetClassroomId,
     );

@@ -8,12 +8,10 @@ class ReassignClassroomMemberUseCase {
   const ReassignClassroomMemberUseCase(this._repository);
 
   Future<Either<Failure, void>> call({
-    required String classroomId,
     required String classroomMemberId,
     required String targetClassroomId,
   }) =>
       _repository.reassignClassroomMember(
-        classroomId: classroomId,
         classroomMemberId: classroomMemberId,
         targetClassroomId: targetClassroomId,
       );

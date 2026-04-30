@@ -446,11 +446,11 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
                         onPressed: isLoading || selectedTargetId == null
                             ? null
                             : () {
+                                final targetClassroomId = selectedTargetId!;
                                 context.read<ClassroomBloc>().add(
                                   ClassroomMemberReassignRequested(
-                                    classroomId: intent.classroomId,
                                     classroomMemberId: intent.classroomMemberId,
-                                    targetClassroomId: selectedTargetId!,
+                                    targetClassroomId: targetClassroomId,
                                   ),
                                 );
                               },

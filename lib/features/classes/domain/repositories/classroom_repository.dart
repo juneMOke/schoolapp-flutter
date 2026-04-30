@@ -24,7 +24,6 @@ abstract class ClassroomRepository {
   });
 
   Future<Either<Failure, void>> reassignClassroomMember({
-    required String classroomId,
     required String classroomMemberId,
     required String targetClassroomId,
   });

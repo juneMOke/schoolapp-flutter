@@ -103,14 +103,13 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
 
   @override
   Future<Either<Failure, void>> reassignClassroomMember({
-    required String classroomId,
     required String classroomMemberId,
     required String targetClassroomId,
   }) async {
     try {
       await remoteDataSource.reassignClassroomMember(
         requiredAuth,
-        classroomId,
+        targetClassroomId,
         classroomMemberId,
         ReassignClassroomMemberRequestModel(
           targetClassroomId: targetClassroomId,

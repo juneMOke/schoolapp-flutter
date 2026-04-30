@@ -80,19 +80,16 @@ class ClassroomMembersBatchRequested extends ClassroomEvent {
 }
 
 class ClassroomMemberReassignRequested extends ClassroomEvent {
-  final String classroomId;
   final String classroomMemberId;
   final String targetClassroomId;
 
   const ClassroomMemberReassignRequested({
-    required this.classroomId,
     required this.classroomMemberId,
     required this.targetClassroomId,
   });
 
   @override
   List<Object?> get props => [
-    classroomId,
     classroomMemberId,
     targetClassroomId,
   ];

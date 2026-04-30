@@ -280,7 +280,6 @@ void main() {
       setUp: () {
         when(
           () => mockReassignClassroomMemberUseCase(
-            classroomId: tClassroomId,
             classroomMemberId: tClassroomMemberId,
             targetClassroomId: tTargetClassroomId,
           ),
@@ -289,7 +288,6 @@ void main() {
       build: buildBloc,
       act: (bloc) => bloc.add(
         const ClassroomMemberReassignRequested(
-          classroomId: tClassroomId,
           classroomMemberId: tClassroomMemberId,
           targetClassroomId: tTargetClassroomId,
         ),
@@ -308,7 +306,6 @@ void main() {
       setUp: () {
         when(
           () => mockReassignClassroomMemberUseCase(
-            classroomId: tClassroomId,
             classroomMemberId: tClassroomMemberId,
             targetClassroomId: tTargetClassroomId,
           ),
@@ -317,7 +314,6 @@ void main() {
       build: buildBloc,
       act: (bloc) => bloc.add(
         const ClassroomMemberReassignRequested(
-          classroomId: tClassroomId,
           classroomMemberId: tClassroomMemberId,
           targetClassroomId: tTargetClassroomId,
         ),
