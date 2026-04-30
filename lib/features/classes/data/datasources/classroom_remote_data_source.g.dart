@@ -126,7 +126,7 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
   @override
   Future<void> reassignClassroomMember(
     Map<String, dynamic> extras,
-    String classroomId,
+    String targetClassroomId,
     String classroomMemberId,
     ReassignClassroomMemberRequestModel request,
   ) async {
@@ -140,7 +140,7 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
       Options(method: 'PUT', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/classrooms/${classroomId}/members/${classroomMemberId}',
+            '/api/v1/classrooms/${targetClassroomId}/members/${classroomMemberId}',
             queryParameters: queryParameters,
             data: _data,
           )
