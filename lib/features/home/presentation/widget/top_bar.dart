@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -16,6 +17,9 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (previous, current) =>
+          previous.currentTitle != current.currentTitle ||
+          previous.selectedSubMenuId != current.selectedSubMenuId,
       builder: (context, state) {
         final isPreRegistrations =
             state.selectedSubMenuId == MenuConstants.preInscriptionsId;
@@ -32,7 +36,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           actions: [
             TopBarNotificationButton(onPressed: () {}),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppDimensions.spacingS),
             const TopBarProfileMenuButton(),
             const SizedBox(width: AppTheme.defaultPadding),
           ],

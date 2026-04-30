@@ -175,7 +175,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
                 child: EnrollmentDetailErrorTemplate(
                   message:
                       state.errorMessage ??
-                      'Erreur lors du chargement des détails.',
+                      l10n.enrollmentDetailLoadErrorFallback,
                   onRetry: _requestDetail,
                 ),
               );

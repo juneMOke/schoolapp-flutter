@@ -5,12 +5,15 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summaries_widget.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class FirstRegistrationPage extends StatelessWidget {
   const FirstRegistrationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: EnrollmentSummariesWidget(
         status: 'IN_PROGRESS',
@@ -29,7 +32,7 @@ class FirstRegistrationPage extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.add, size: 16),
-          label: const Text('Nouvelle inscription'),
+          label: Text(l10n.firstRegistrationNewEnrollmentAction),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primaryColor,
             foregroundColor: Colors.white,

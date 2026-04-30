@@ -61,10 +61,10 @@ les usages existants du module Finance.
 
 ## Checklist de validation par lot
 
-- [ ] Aucune nouvelle `Duration(...)` hardcodee sur les fichiers du lot
-- [ ] Mapping widget -> token renseigne dans ce document
-- [ ] Courbes d'entree/sortie coherentes sur les switches d'etat
-- [ ] Pas de regression UX visible (hover, switch, transitions shell)
+- [x] Aucune nouvelle `Duration(...)` hardcodee sur les fichiers du lot
+- [x] Mapping widget -> token renseigne dans ce document
+- [x] Courbes d'entree/sortie coherentes sur les switches d'etat
+- [x] Pas de regression UX visible (hover, switch, transitions shell)
 
 ## Rappel du mapping Finance existant
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarNotificationButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -11,7 +13,10 @@ class TopBarNotificationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return IconButton(
+      tooltip: l10n.homeTopBarNotificationsTooltip,
       onPressed: onPressed,
       icon: Stack(
         children: [
@@ -26,7 +31,7 @@ class TopBarNotificationButton extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: const BoxDecoration(
-                color: Color(0xFFEF4444),
+                color: AppColors.danger,
                 shape: BoxShape.circle,
               ),
             ),

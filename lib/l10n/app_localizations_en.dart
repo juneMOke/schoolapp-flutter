@@ -264,6 +264,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home => 'Home';
 
   @override
+  String get homeTopBarPendingSubtitle => 'Pending files follow-up';
+
+  @override
+  String get homeTopBarNotificationsTooltip => 'Notifications';
+
+  @override
+  String get homeUserMenuTooltip => 'User menu';
+
+  @override
+  String get homeSidebarCollapseTooltip => 'Collapse menu';
+
+  @override
+  String get homeSidebarExpandTooltip => 'Expand menu';
+
+  @override
+  String get homeSidebarFooterLabel => 'School dashboard';
+
+  @override
+  String get homeSidebarNavigationLabel => 'Main navigation';
+
+  @override
   String get pageUnderConstruction => 'This page is under development';
 
   @override
@@ -377,6 +398,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentUnknownStudent => 'Student not specified';
+
+  @override
+  String get firstRegistrationNewEnrollmentAction => 'New enrollment';
+
+  @override
+  String get enrollmentDetailLoadingTitle => 'Loading enrollment file';
+
+  @override
+  String get enrollmentDetailLoadingMessage => 'Please wait while enrollment details are being loaded.';
+
+  @override
+  String get enrollmentDetailLoadErrorTitle => 'Unable to load enrollment file';
+
+  @override
+  String get enrollmentDetailLoadErrorFallback => 'An error occurred while loading enrollment details.';
+
+  @override
+  String get enrollmentDetailRetryAction => 'Retry';
+
+  @override
+  String get enrollmentDetailNotFoundTitle => 'Details not found';
+
+  @override
+  String get enrollmentDetailNotFoundMessage => 'This enrollment file does not exist or is no longer available.';
 
   @override
   String get gender => 'Gender';

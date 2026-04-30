@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -140,8 +141,8 @@ class _FacturationSearchFormState extends State<FacturationSearchForm> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           const spacing = 10.0;
-          final isWide = constraints.maxWidth >= 1280;
-          final isMedium = constraints.maxWidth >= 860;
+          final isWide = constraints.maxWidth >= AppBreakpoints.formWideMin;
+          final isMedium = constraints.maxWidth >= AppBreakpoints.formMediumMin;
           final columns = isMedium ? 3 : 1;
 
           final nameFields = _buildNameFields(l10n);

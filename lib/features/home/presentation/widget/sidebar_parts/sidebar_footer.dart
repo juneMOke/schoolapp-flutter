@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarFooter extends StatelessWidget {
   final bool isExpanded;
@@ -11,6 +13,8 @@ class SidebarFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AnimatedContainer(
       duration: AppMotion.standard,
       curve: AppMotion.outCurve,
@@ -22,16 +26,16 @@ class SidebarFooter extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: isExpanded
-          ? const Row(
+          ? Row(
               children: [
-                Icon(Icons.verified_outlined, color: Colors.white60, size: 16),
-                SizedBox(width: 8),
+                const Icon(Icons.verified_outlined, color: Colors.white60, size: 16),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Dashboard scolaire',
+                    l10n.homeSidebarFooterLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white60, fontSize: 12),
+                    style: AppTextStyles.caption.copyWith(color: Colors.white60),
                   ),
                 ),
               ],

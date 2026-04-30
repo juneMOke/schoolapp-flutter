@@ -6,6 +6,8 @@ class EteeloEmailInput extends StatelessWidget {
   final String label;
   final String? Function(String?)? validator;
   final bool enabled;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
 
   const EteeloEmailInput({
     super.key,
@@ -13,6 +15,8 @@ class EteeloEmailInput extends StatelessWidget {
     required this.label,
     this.validator,
     this.enabled = true,
+    this.textInputAction,
+    this.autofillHints,
   });
 
   @override
@@ -20,6 +24,8 @@ class EteeloEmailInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
+      textInputAction: textInputAction,
+      autofillHints: autofillHints,
       enabled: enabled,
       validator: validator,
       decoration: buildEteeloInputDecoration(

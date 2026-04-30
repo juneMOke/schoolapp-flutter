@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+
 class AppDimensions {
   static const sidebarWidth = 280.0;
   static const sidebarCollapsedWidth = 84.0;
@@ -31,7 +33,7 @@ class AppDimensions {
   // Finance detail elevation/responsive tokens
   static const financeDetailCardShadowBlur = 20.0;
   static const financeDetailCardShadowOffsetY = 10.0;
-  static const detailCompactBreakpoint = 760.0;
+  static const detailCompactBreakpoint = AppBreakpoints.detailCompactMax;
 
   // Classes organisation responsive tokens
   static const classesOrganisationCompactFieldWidth = 260.0;

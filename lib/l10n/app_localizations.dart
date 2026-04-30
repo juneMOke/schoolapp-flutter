@@ -581,6 +581,48 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get home;
 
+  /// No description provided for @homeTopBarPendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending files follow-up'**
+  String get homeTopBarPendingSubtitle;
+
+  /// No description provided for @homeTopBarNotificationsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get homeTopBarNotificationsTooltip;
+
+  /// No description provided for @homeUserMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'User menu'**
+  String get homeUserMenuTooltip;
+
+  /// No description provided for @homeSidebarCollapseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse menu'**
+  String get homeSidebarCollapseTooltip;
+
+  /// No description provided for @homeSidebarExpandTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand menu'**
+  String get homeSidebarExpandTooltip;
+
+  /// No description provided for @homeSidebarFooterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School dashboard'**
+  String get homeSidebarFooterLabel;
+
+  /// No description provided for @homeSidebarNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Main navigation'**
+  String get homeSidebarNavigationLabel;
+
   /// No description provided for @pageUnderConstruction.
   ///
   /// In en, this message translates to:
@@ -772,6 +814,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Student not specified'**
   String get enrollmentUnknownStudent;
+
+  /// No description provided for @firstRegistrationNewEnrollmentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New enrollment'**
+  String get firstRegistrationNewEnrollmentAction;
+
+  /// No description provided for @enrollmentDetailLoadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading enrollment file'**
+  String get enrollmentDetailLoadingTitle;
+
+  /// No description provided for @enrollmentDetailLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait while enrollment details are being loaded.'**
+  String get enrollmentDetailLoadingMessage;
+
+  /// No description provided for @enrollmentDetailLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load enrollment file'**
+  String get enrollmentDetailLoadErrorTitle;
+
+  /// No description provided for @enrollmentDetailLoadErrorFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading enrollment details.'**
+  String get enrollmentDetailLoadErrorFallback;
+
+  /// No description provided for @enrollmentDetailRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentDetailRetryAction;
+
+  /// No description provided for @enrollmentDetailNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Details not found'**
+  String get enrollmentDetailNotFoundTitle;
+
+  /// No description provided for @enrollmentDetailNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment file does not exist or is no longer available.'**
+  String get enrollmentDetailNotFoundMessage;
 
   /// No description provided for @gender.
   ///

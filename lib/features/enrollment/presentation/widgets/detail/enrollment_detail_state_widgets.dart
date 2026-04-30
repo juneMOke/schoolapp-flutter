@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailPageStateShell extends StatelessWidget {
   final Widget child;
@@ -45,6 +46,8 @@ class EnrollmentDetailLoadingTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -61,19 +64,19 @@ class EnrollmentDetailLoadingTemplate extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Chargement du dossier',
-          style: TextStyle(
+        Text(
+          l10n.enrollmentDetailLoadingTitle,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppTheme.textPrimaryColor,
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Veuillez patienter pendant la récupération des informations.',
+        Text(
+          l10n.enrollmentDetailLoadingMessage,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             color: AppTheme.textSecondaryColor,
             height: 1.45,
@@ -96,7 +99,12 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final l10n = AppLocalizations.of(context)!;
+
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -113,9 +121,9 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Impossible de charger le dossier',
-          style: TextStyle(
+        Text(
+          l10n.enrollmentDetailLoadErrorTitle,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppTheme.textPrimaryColor,
@@ -136,7 +144,7 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: onRetry,
           icon: const Icon(Icons.refresh_rounded, size: 16),
-          label: const Text('Réessayer'),
+          label: Text(l10n.enrollmentDetailRetryAction),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primaryColor,
             foregroundColor: Colors.white,
@@ -147,6 +155,7 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -156,28 +165,30 @@ class EnrollmentDetailEmptyTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
+        const Icon(
           Icons.inbox_outlined,
           size: 42,
           color: AppTheme.textSecondaryColor,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Text(
-          'Détails introuvables',
-          style: TextStyle(
+          l10n.enrollmentDetailNotFoundTitle,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppTheme.textPrimaryColor,
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         Text(
-          'Ce dossier n\'existe pas ou n\'est plus disponible.',
+          l10n.enrollmentDetailNotFoundMessage,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             color: AppTheme.textSecondaryColor,
             height: 1.45,

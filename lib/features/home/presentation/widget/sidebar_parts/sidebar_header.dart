@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarHeader extends StatelessWidget {
   final bool isExpanded;
@@ -42,6 +45,8 @@ class _ExpandedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       key: const ValueKey('expanded'),
       children: [
@@ -64,23 +69,25 @@ class _ExpandedHeader extends StatelessWidget {
           child: const Icon(Icons.school_rounded, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 10),
-        const Expanded(
+        Expanded(
           child: Text(
-            'ETEELO',
+            l10n.schoolApp,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTextStyles.sectionTitle.copyWith(
               color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
             ),
           ),
         ),
         IconButton(
-          tooltip: 'Replier le menu',
+          tooltip: l10n.homeSidebarCollapseTooltip,
           onPressed: () => context.read<NavigationBloc>().add(const SidebarToggled()),
           icon: const Icon(Icons.menu_open_rounded, color: Colors.white70, size: 20),
+          constraints: const BoxConstraints(
+            minWidth: AppDimensions.minTouchTarget,
+            minHeight: AppDimensions.minTouchTarget,
+          ),
         ),
       ],
     );
@@ -92,12 +99,18 @@ class _CollapsedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       key: const ValueKey('collapsed'),
       child: IconButton(
-        tooltip: 'Etendre le menu',
+        tooltip: l10n.homeSidebarExpandTooltip,
         onPressed: () => context.read<NavigationBloc>().add(const SidebarToggled()),
         icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+        constraints: const BoxConstraints(
+          minWidth: AppDimensions.minTouchTarget,
+          minHeight: AppDimensions.minTouchTarget,
+        ),
       ),
     );
   }

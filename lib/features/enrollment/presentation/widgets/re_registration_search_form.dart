@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
@@ -92,8 +95,8 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           const spacing = 10.0;
-          final isWide = constraints.maxWidth >= 1280;
-          final isMedium = constraints.maxWidth >= 860;
+          final isWide = constraints.maxWidth >= AppBreakpoints.formWideMin;
+          final isMedium = constraints.maxWidth >= AppBreakpoints.formMediumMin;
           final columns = isMedium ? 3 : 1;
 
           final nameFields = _buildNameFields(l10n);
@@ -114,9 +117,8 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
               const SizedBox(height: 6),
               Text(
                 l10n.reRegistrationSearchHint,
-                style: const TextStyle(
+                style: AppTextStyles.caption.copyWith(
                   color: AppTheme.textSecondaryColor,
-                  fontSize: 12,
                   height: 1.35,
                 ),
               ),
@@ -249,10 +251,8 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        minimumSize: const Size(112, 40),
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        minimumSize: const Size(112, AppDimensions.minTouchTarget),
+        textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
         disabledBackgroundColor: Colors.grey[300],
         disabledForegroundColor: Colors.grey,

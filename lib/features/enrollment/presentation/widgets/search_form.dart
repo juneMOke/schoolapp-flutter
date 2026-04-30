@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
@@ -57,8 +60,8 @@ class _SearchFormState extends State<SearchForm> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           const spacing = 10.0;
-          final isWide = constraints.maxWidth >= 1280;
-          final isMedium = constraints.maxWidth >= 860;
+          final isWide = constraints.maxWidth >= AppBreakpoints.formWideMin;
+          final isMedium = constraints.maxWidth >= AppBreakpoints.formMediumMin;
           final columns = isMedium ? 3 : 1;
           final title = SearchFormTitle(label: l10n.searchStudents);
           final actions = _buildActionButtons(context, l10n);
@@ -141,13 +144,8 @@ class _SearchFormState extends State<SearchForm> {
             foregroundColor: Colors.white,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, 40),
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(9),
             ),
@@ -164,13 +162,8 @@ class _SearchFormState extends State<SearchForm> {
             foregroundColor: AppTheme.textSecondaryColor,
             side: const BorderSide(color: Color(0xFFE5E7EB)),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, 40),
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(9),
             ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarTitle extends StatelessWidget {
   final String title;
@@ -13,6 +16,8 @@ class TopBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Container(
@@ -39,29 +44,31 @@ class TopBarTitle extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-                color: AppTheme.textPrimaryColor,
-              ),
-            ),
-            if (isPreRegistrations)
-              const Text(
-                'Suivi des dossiers en attente',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textSecondaryColor,
+        const SizedBox(width: AppDimensions.spacingS),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.sidebarTitle.copyWith(
+                  color: AppTheme.textPrimaryColor,
                 ),
               ),
-          ],
+              if (isPreRegistrations)
+                Text(
+                  l10n.homeTopBarPendingSubtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );

@@ -264,6 +264,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get home => 'Accueil';
 
   @override
+  String get homeTopBarPendingSubtitle => 'Suivi des dossiers en attente';
+
+  @override
+  String get homeTopBarNotificationsTooltip => 'Notifications';
+
+  @override
+  String get homeUserMenuTooltip => 'Menu utilisateur';
+
+  @override
+  String get homeSidebarCollapseTooltip => 'Replier le menu';
+
+  @override
+  String get homeSidebarExpandTooltip => 'Etendre le menu';
+
+  @override
+  String get homeSidebarFooterLabel => 'Dashboard scolaire';
+
+  @override
+  String get homeSidebarNavigationLabel => 'Navigation principale';
+
+  @override
   String get pageUnderConstruction => 'Cette page est en cours de développement';
 
   @override
@@ -377,6 +398,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentUnknownStudent => 'Élève non renseigné';
+
+  @override
+  String get firstRegistrationNewEnrollmentAction => 'Nouvelle inscription';
+
+  @override
+  String get enrollmentDetailLoadingTitle => 'Chargement du dossier';
+
+  @override
+  String get enrollmentDetailLoadingMessage => 'Veuillez patienter pendant la récupération des informations.';
+
+  @override
+  String get enrollmentDetailLoadErrorTitle => 'Impossible de charger le dossier';
+
+  @override
+  String get enrollmentDetailLoadErrorFallback => 'Erreur lors du chargement des détails.';
+
+  @override
+  String get enrollmentDetailRetryAction => 'Réessayer';
+
+  @override
+  String get enrollmentDetailNotFoundTitle => 'Détails introuvables';
+
+  @override
+  String get enrollmentDetailNotFoundMessage => 'Ce dossier n\'existe pas ou n\'est plus disponible.';
 
   @override
   String get gender => 'Genre';
