@@ -141,13 +141,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationHeroTitle => 'Classes organization';
 
   @override
-  String get classesOrganisationHeroSubtitle => 'Search students by identity or level and view classroom distribution.';
+  String get classesOrganisationHeroSubtitle => 'Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.';
 
   @override
-  String get classesOrganisationSearchTitle => 'Search form';
+  String get classesOrganisationSearchTitle => 'Level selection for class distribution';
 
   @override
-  String get classesOrganisationSearchHint => 'Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.';
+  String get classesOrganisationSearchHint => 'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.';
 
   @override
   String get classesOrganisationClassroomFieldLabel => 'Classroom';

@@ -96,9 +96,9 @@
     "description": "Organization sub-menu title"
   },
   "classesOrganisationHeroTitle": "Classes organization",
-  "classesOrganisationHeroSubtitle": "Search students by identity or level and view classroom distribution.",
-  "classesOrganisationSearchTitle": "Search form",
-  "classesOrganisationSearchHint": "Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.",
+  "classesOrganisationHeroSubtitle": "Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.",
+  "classesOrganisationSearchTitle": "Level selection for class distribution",
+  "classesOrganisationSearchHint": "Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.",
   "classesOrganisationClassroomFieldLabel": "Classroom",
   "classesOrganisationDistributionLabel": "Distribution criterion",
   "classesOrganisationDistributionByGender": "Distribute by gender",

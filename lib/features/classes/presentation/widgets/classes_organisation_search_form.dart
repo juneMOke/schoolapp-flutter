@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -41,8 +42,16 @@ class _ClassesOrganisationSearchFormState
   @override
   void didUpdateWidget(covariant ClassesOrganisationSearchForm oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_selectedLevel == null && _selectedLevelKey != null) {
-      setState(() => _selectedLevelKey = null);
+    // Invalider la sélection seulement si les options ont réellement changé
+    // et ne contiennent plus la clé choisie (ex : patch bootstrap post-distribution).
+    // Le setState est différé en post-frame pour éviter d'appeler setState
+    // pendant la phase de build/update du widget parent.
+    if (oldWidget.options != widget.options &&
+        _selectedLevelKey != null &&
+        _selectedLevel == null) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedLevelKey = null);
+      });
     }
   }
 
@@ -76,8 +85,7 @@ class _ClassesOrganisationSearchFormState
 
   void _onLevelChanged(String? value) {
     setState(() => _selectedLevelKey = value);
-    // Déclenche la recherche automatiquement dès qu'un niveau est sélectionné
-    WidgetsBinding.instance.addPostFrameCallback((_) => _submitSearch());
+    // La recherche est déclenchée uniquement via le bouton "Rechercher".
   }
 
   @override
@@ -104,12 +112,16 @@ class _ClassesOrganisationSearchFormState
         children: [
           Text(
             l10n.classesOrganisationSearchTitle,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Text(
             l10n.classesOrganisationSearchHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           Row(
@@ -152,7 +164,9 @@ class _ClassesOrganisationSearchFormState
               child: Text(
                 option.label,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           )
@@ -182,10 +196,7 @@ class _ClassesOrganisationSearchFormState
           foregroundColor: AppColors.surface,
           disabledBackgroundColor: AppColors.classesDisabledBg,
           disabledForegroundColor: AppColors.classesDisabledFg,
-          minimumSize: const Size(
-            132,
-            AppDimensions.minTouchTarget,
-          ),
+          minimumSize: const Size(132, AppDimensions.minTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.spacingS),
           ),
@@ -198,7 +209,10 @@ class _ClassesOrganisationSearchFormState
     );
   }
 
-  InputDecoration _fieldDecoration({required String label, required IconData icon}) {
+  InputDecoration _fieldDecoration({
+    required String label,
+    required IconData icon,
+  }) {
     return InputDecoration(
       labelText: label,
       filled: true,
@@ -215,7 +229,10 @@ class _ClassesOrganisationSearchFormState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
+        borderSide: const BorderSide(
+          color: AppColors.classesFocusRing,
+          width: 1.6,
+        ),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
@@ -295,7 +312,9 @@ class _DistributionSection extends StatelessWidget {
                     ),
                     DropdownMenuItem<ClassroomDistributionCriterion>(
                       value: ClassroomDistributionCriterion.percentage,
-                      child: Text(l10n.classesOrganisationDistributionByPercentage),
+                      child: Text(
+                        l10n.classesOrganisationDistributionByPercentage,
+                      ),
                     ),
                   ],
                   onChanged: enabled
@@ -331,10 +350,7 @@ class _DistributionSection extends StatelessWidget {
                   foregroundColor: AppColors.surface,
                   disabledBackgroundColor: AppColors.classesDisabledBg,
                   disabledForegroundColor: AppColors.classesDisabledFg,
-                  minimumSize: const Size(
-                    150,
-                    AppDimensions.minTouchTarget,
-                  ),
+                  minimumSize: const Size(150, AppDimensions.minTouchTarget),
                 ),
               ),
             ],

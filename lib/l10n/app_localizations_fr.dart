@@ -120,16 +120,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuDisciplines => 'Disciplines';
 
   @override
-  String get subMenuDashboard => 'Tableau de Bord';
+  String get subMenuDashboard => 'Tableau de bord';
 
   @override
-  String get subMenuPreRegistrations => 'Pré-Inscriptions';
+  String get subMenuPreRegistrations => 'Pré-inscriptions';
 
   @override
-  String get subMenuReRegistrations => 'Re-Inscriptions';
+  String get subMenuReRegistrations => 'Réinscriptions';
 
   @override
-  String get subMenuFirstRegistration => 'Première Inscription';
+  String get subMenuFirstRegistration => 'Première inscription';
 
   @override
   String get subMenuBilling => 'Facturations';
@@ -141,100 +141,100 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesOrganisationHeroTitle => 'Organisation des classes';
 
   @override
-  String get classesOrganisationHeroSubtitle => 'Recherchez les eleves par identite ou niveau et visualisez la repartition par classroom.';
+  String get classesOrganisationHeroSubtitle => 'Repartissez les élèves d\'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.';
 
   @override
-  String get classesOrganisationSearchTitle => 'Formulaire de recherche';
+  String get classesOrganisationSearchTitle => 'Sélection du niveau à organiser';
 
   @override
-  String get classesOrganisationSearchHint => 'Renseignez les champs d\'identite ou selectionnez un cycle/niveau. Si le niveau est split, vous pouvez cibler une classroom.';
+  String get classesOrganisationSearchHint => 'Sélectionnez le cycle et le niveau à organiser, puis lancez la recherche pour afficher la répartition actuelle ou préparer la distribution en sous-classes.';
 
   @override
-  String get classesOrganisationClassroomFieldLabel => 'Classroom';
+  String get classesOrganisationClassroomFieldLabel => 'Sous-classe';
 
   @override
-  String get classesOrganisationDistributionLabel => 'Critere de repartition';
+  String get classesOrganisationDistributionLabel => 'Critère de répartition';
 
   @override
-  String get classesOrganisationDistributionByGender => 'Repartition par genre';
+  String get classesOrganisationDistributionByGender => 'Répartition par genre';
 
   @override
-  String get classesOrganisationDistributionByPercentage => 'Repartition par moyenne';
+  String get classesOrganisationDistributionByPercentage => 'Répartition par moyenne';
 
   @override
-  String get classesOrganisationDistributionAction => 'Repartir';
+  String get classesOrganisationDistributionAction => 'Répartir';
 
   @override
-  String get classesOrganisationDistributionConfirmTitle => 'Confirmer la repartition';
+  String get classesOrganisationDistributionConfirmTitle => 'Confirmer la répartition';
 
   @override
-  String get classesOrganisationDistributionConfirmMessage => 'Voulez-vous lancer la repartition des eleves pour ce niveau ?';
+  String get classesOrganisationDistributionConfirmMessage => 'Voulez-vous lancer la répartition des élèves pour ce niveau ?';
 
   @override
-  String get classesOrganisationDistributionSuccess => 'Repartition terminee avec succes.';
+  String get classesOrganisationDistributionSuccess => 'Répartition terminée avec succès.';
 
   @override
-  String get classesOrganisationSplitInfo => 'Mode split actif: affichage par classroom avec membres et statistiques.';
+  String get classesOrganisationSplitInfo => 'Mode sous-classes actif : affichage par sous-classe avec effectifs et statistiques.';
 
   @override
-  String get classesOrganisationNonSplitInfo => 'Mode non split actif: liste des eleves du niveau selectionne.';
+  String get classesOrganisationNonSplitInfo => 'Mode classe unique actif : liste des élèves du niveau sélectionné.';
 
   @override
-  String get classesOrganisationNoClassrooms => 'Aucune classroom disponible pour ce niveau.';
+  String get classesOrganisationNoClassrooms => 'Aucune sous-classe disponible pour ce niveau.';
 
   @override
   String classesOrganisationClassroomStats(int total, int girls, int boys) {
-    return '$total eleves - Filles: $girls - Garcons: $boys';
+    return '$total élèves - Filles: $girls - Garçons: $boys';
   }
 
   @override
-  String get classesOrganisationTransferDialogTitle => 'Transferer l\'eleve';
+  String get classesOrganisationTransferDialogTitle => 'Transférer l\'élève';
 
   @override
   String classesOrganisationTransferDialogMessage(String studentName) {
-    return 'Choisissez la classroom de destination pour $studentName.';
+    return 'Choisissez la sous-classe de destination pour $studentName.';
   }
 
   @override
-  String get classesOrganisationTransferTargetLabel => 'Classroom de destination';
+  String get classesOrganisationTransferTargetLabel => 'Sous-classe de destination';
 
   @override
-  String get classesOrganisationTransferAction => 'Transferer';
+  String get classesOrganisationTransferAction => 'Transférer';
 
   @override
   String get classesOrganisationTransferInProgress => 'Transfert en cours...';
 
   @override
-  String get classesOrganisationTransferSuccess => 'Transfert effectue avec succes.';
+  String get classesOrganisationTransferSuccess => 'Transfert effectué avec succès.';
 
   @override
-  String get classesOrganisationTransferNoTarget => 'Aucune classroom de destination disponible.';
+  String get classesOrganisationTransferNoTarget => 'Aucune sous-classe de destination disponible.';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {
-    return 'Chargement des membres de $count classrooms...';
+    return 'Chargement des membres de $count sous-classes...';
   }
 
   @override
-  String get classesOrganisationStudentDetailSoon => 'Le detail eleve sera disponible au prochain lot.';
+  String get classesOrganisationStudentDetailSoon => 'Le détail élève sera disponible au prochain lot.';
 
   @override
-  String get classesOrganisationErrorNetwork => 'Verifiez votre connexion internet.';
+  String get classesOrganisationErrorNetwork => 'Vérifiez votre connexion internet.';
 
   @override
-  String get classesOrganisationErrorNotFound => 'Aucune donnee trouvee pour ces criteres.';
+  String get classesOrganisationErrorNotFound => 'Aucune donnée trouvée pour ces critères.';
 
   @override
   String get classesOrganisationErrorValidation => 'Certaines informations saisies sont invalides.';
 
   @override
-  String get classesOrganisationErrorUnauthorized => 'Acces non autorise.';
+  String get classesOrganisationErrorUnauthorized => 'Accès non autorisé.';
 
   @override
   String get classesOrganisationErrorInvalidCredentials => 'Identifiants invalides.';
 
   @override
-  String get classesOrganisationErrorServer => 'Erreur serveur, reessayez plus tard.';
+  String get classesOrganisationErrorServer => 'Erreur serveur, réessayez plus tard.';
 
   @override
   String get classesOrganisationErrorStorage => 'Erreur de stockage local.';
@@ -276,10 +276,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeSidebarCollapseTooltip => 'Replier le menu';
 
   @override
-  String get homeSidebarExpandTooltip => 'Etendre le menu';
+  String get homeSidebarExpandTooltip => 'Étendre le menu';
 
   @override
-  String get homeSidebarFooterLabel => 'Dashboard scolaire';
+  String get homeSidebarFooterLabel => 'Tableau de bord scolaire';
 
   @override
   String get homeSidebarNavigationLabel => 'Navigation principale';
@@ -291,7 +291,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get preRegistrations => 'Pré-Inscriptions';
 
   @override
-  String get searchStudents => 'Rechercher des Étudiants';
+  String get searchStudents => 'Rechercher des élèves';
 
   @override
   String get reRegistrationSearchHint => 'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
@@ -430,7 +430,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get actions => 'Actions';
 
   @override
-  String get personalInformation => 'Informations Personnelles';
+  String get personalInformation => 'Informations personnelles';
 
   @override
   String get address => 'Adresse';
@@ -442,7 +442,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get targetYear => 'Année Cible';
 
   @override
-  String get guardianInformation => 'Informations Tuteurs';
+  String get guardianInformation => 'Informations des tuteurs';
 
   @override
   String get guardianAddAction => 'Ajouter un tuteur/responsable';
@@ -747,10 +747,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validateGuardianInfoHint => 'Veuillez vérifier les informations du/des tuteur(s).';
 
   @override
-  String get enrollmentReadyForValidation => 'Dossier prt pour validation finale.';
+  String get enrollmentReadyForValidation => 'Dossier prêt pour validation finale.';
 
   @override
-  String get completedEnrollmentRedirecting => 'Ce dossier est deja complete. Redirection vers Premiere Inscription.';
+  String get completedEnrollmentRedirecting => 'Ce dossier est déjà complété. Redirection vers Première Inscription.';
 
   @override
   String get validateEnrollment => 'Valider l\'inscription';
@@ -759,7 +759,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validatingEnrollment => 'Validation en cours...';
 
   @override
-  String get goToFirstRegistration => 'Retourner a la premiere inscription';
+  String get goToFirstRegistration => 'Retourner à la première inscription';
 
   @override
   String get enrollmentStatusUpdateSuccess => 'Statut mis à jour avec succès.';
@@ -806,7 +806,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get savingAddress => 'Enregistrement de l\'adresse...';
 
   @override
-  String get saveAcademicInfo => 'Enregistrer les infos acadmiques';
+  String get saveAcademicInfo => 'Enregistrer les informations académiques';
 
   @override
   String get savingAcademicInfo => 'Enregistrement en cours...';
@@ -828,7 +828,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String academicInfoSaveError(String message) {
-    return 'Erreur lors de la mise à jour des infos académiques : $message';
+    return 'Erreur lors de la mise à jour des informations académiques : $message';
   }
 
   @override
@@ -1203,10 +1203,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPrintReceiptLabel => 'Imprimer le reçu';
 
   @override
-  String get facturationPrintReceiptSubtitle => 'Générez et télchargez le reçu de ce paiement';
+  String get facturationPrintReceiptSubtitle => 'Générez et téléchargez le reçu de ce paiement';
 
   @override
-  String get facturationPrintStatementsLabel => 'Imprimer les relevs';
+  String get facturationPrintStatementsLabel => 'Imprimer les relevés';
 
   @override
   String get facturationPrintStatementsSubtitle => 'Générez et téléchargez les relevés de facturation de cet étudiant';

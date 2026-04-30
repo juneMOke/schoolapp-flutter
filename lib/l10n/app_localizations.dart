@@ -350,19 +350,19 @@ abstract class AppLocalizations {
   /// No description provided for @classesOrganisationHeroSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Search students by identity or level and view classroom distribution.'**
+  /// **'Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.'**
   String get classesOrganisationHeroSubtitle;
 
   /// No description provided for @classesOrganisationSearchTitle.
   ///
   /// In en, this message translates to:
-  /// **'Search form'**
+  /// **'Level selection for class distribution'**
   String get classesOrganisationSearchTitle;
 
   /// No description provided for @classesOrganisationSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Fill identity fields or select a cycle/level. If the level is split, you can target a classroom.'**
+  /// **'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.'**
   String get classesOrganisationSearchHint;
 
   /// No description provided for @classesOrganisationClassroomFieldLabel.
