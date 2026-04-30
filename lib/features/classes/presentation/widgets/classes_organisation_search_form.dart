@@ -112,16 +112,12 @@ class _ClassesOrganisationSearchFormState
         children: [
           Text(
             l10n.classesOrganisationSearchTitle,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Text(
             l10n.classesOrganisationSearchHint,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           Row(
@@ -164,9 +160,7 @@ class _ClassesOrganisationSearchFormState
               child: Text(
                 option.label,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
               ),
             ),
           )
@@ -196,7 +190,10 @@ class _ClassesOrganisationSearchFormState
           foregroundColor: AppColors.surface,
           disabledBackgroundColor: AppColors.classesDisabledBg,
           disabledForegroundColor: AppColors.classesDisabledFg,
-          minimumSize: const Size(132, AppDimensions.minTouchTarget),
+          minimumSize: const Size(
+            132,
+            AppDimensions.minTouchTarget,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.spacingS),
           ),
@@ -209,10 +206,7 @@ class _ClassesOrganisationSearchFormState
     );
   }
 
-  InputDecoration _fieldDecoration({
-    required String label,
-    required IconData icon,
-  }) {
+  InputDecoration _fieldDecoration({required String label, required IconData icon}) {
     return InputDecoration(
       labelText: label,
       filled: true,
@@ -229,10 +223,7 @@ class _ClassesOrganisationSearchFormState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: const BorderSide(
-          color: AppColors.classesFocusRing,
-          width: 1.6,
-        ),
+        borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
@@ -312,9 +303,7 @@ class _DistributionSection extends StatelessWidget {
                     ),
                     DropdownMenuItem<ClassroomDistributionCriterion>(
                       value: ClassroomDistributionCriterion.percentage,
-                      child: Text(
-                        l10n.classesOrganisationDistributionByPercentage,
-                      ),
+                      child: Text(l10n.classesOrganisationDistributionByPercentage),
                     ),
                   ],
                   onChanged: enabled
@@ -350,7 +339,10 @@ class _DistributionSection extends StatelessWidget {
                   foregroundColor: AppColors.surface,
                   disabledBackgroundColor: AppColors.classesDisabledBg,
                   disabledForegroundColor: AppColors.classesDisabledFg,
-                  minimumSize: const Size(150, AppDimensions.minTouchTarget),
+                  minimumSize: const Size(
+                    150,
+                    AppDimensions.minTouchTarget,
+                  ),
                 ),
               ),
             ],
