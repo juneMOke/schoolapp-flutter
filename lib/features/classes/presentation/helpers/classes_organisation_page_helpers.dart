@@ -2,6 +2,7 @@ import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
+import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -11,38 +12,22 @@ class ClassesOrganisationPageHelpers {
   static List<ClassesOrganisationLevelOption> buildAcademicOptions(
     List<BootstrapSchoolLevelGroupBundle> bundles,
   ) {
-    final options = <ClassesOrganisationLevelOption>[];
     final seen = <String>{};
+    final sortedOptions = SortedNestedOptionsHelper.buildFlat(
+      outers: bundles,
+      outerOrder: (bundle) => bundle.schoolLevelGroup.displayOrder,
+      inners: (bundle) => bundle.schoolLevels,
+      innerOrder: (levelBundle) => levelBundle.schoolLevel.displayOrder,
+      mapItem: (groupBundle, levelBundle) => ClassesOrganisationLevelOption(
+        schoolLevelGroupId: groupBundle.schoolLevelGroup.id,
+        schoolLevelId: levelBundle.schoolLevel.id,
+        label: '${groupBundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
+        splitIntoClassrooms: levelBundle.schoolLevel.splitIntoClassrooms,
+        classrooms: levelBundle.classrooms,
+      ),
+    );
 
-    final sortedGroups = [...bundles]
-      ..sort((a, b) => a.schoolLevelGroup.displayOrder.compareTo(
-            b.schoolLevelGroup.displayOrder,
-          ));
-
-    for (final groupBundle in sortedGroups) {
-      final sortedLevels = [...groupBundle.schoolLevels]
-        ..sort(
-          (a, b) =>
-              a.schoolLevel.displayOrder.compareTo(b.schoolLevel.displayOrder),
-        );
-
-      for (final levelBundle in sortedLevels) {
-        final option = ClassesOrganisationLevelOption(
-          schoolLevelGroupId: groupBundle.schoolLevelGroup.id,
-          schoolLevelId: levelBundle.schoolLevel.id,
-          label:
-              '${groupBundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
-          splitIntoClassrooms: levelBundle.schoolLevel.splitIntoClassrooms,
-          classrooms: levelBundle.classrooms,
-        );
-
-        if (seen.add(option.key)) {
-          options.add(option);
-        }
-      }
-    }
-
-    return options;
+    return sortedOptions.where((option) => seen.add(option.key)).toList(growable: false);
   }
 
   static String mapClassroomErrorToMessage(

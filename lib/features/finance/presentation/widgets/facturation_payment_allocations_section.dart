@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_consistency_info_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_context_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -85,7 +85,7 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
             child: () {
               if (state.allocationsStatus == PaymentsStatus.loading &&
                   allocations.isEmpty) {
-                return FinanceStateCard(
+                return StateCard(
                   key: const ValueKey('payment-allocations-loading'),
                   message: l10n.loadingStudents,
                   icon: Icons.hourglass_top_rounded,
@@ -97,7 +97,7 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
 
               if (state.allocationsStatus == PaymentsStatus.failure &&
                   allocations.isEmpty) {
-                return FinanceStateCard(
+                return StateCard(
                   key: const ValueKey('payment-allocations-error'),
                   message: state.allocationsErrorType.localizedAllocationsMessage(l10n),
                   icon: Icons.error_outline,
@@ -109,7 +109,7 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
               }
 
               if (allocations.isEmpty) {
-                return FinanceStateCard(
+                return StateCard(
                   key: const ValueKey('payment-allocations-empty'),
                   message: l10n.facturationPaymentAllocationsEmpty,
                   icon: Icons.inbox_outlined,

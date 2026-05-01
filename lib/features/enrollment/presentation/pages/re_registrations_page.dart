@@ -6,11 +6,11 @@ import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_registrations_page_helpers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
@@ -74,7 +74,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                 );
               }
 
-              final academicOptions = _buildAcademicOptions(
+              final academicOptions = ReRegistrationsPageHelpers.buildAcademicOptions(
                 bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
               );
 
@@ -177,43 +177,6 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         ),
       ),
     );
-  }
-
-  List<ReRegistrationAcademicOption> _buildAcademicOptions(
-    List<BootstrapSchoolLevelGroupBundle> bundles,
-  ) {
-    final options = <ReRegistrationAcademicOption>[];
-    final seenKeys = <String>{};
-
-    final sortedBundles = [...bundles]
-      ..sort(
-        (a, b) => a.schoolLevelGroup.displayOrder.compareTo(
-          b.schoolLevelGroup.displayOrder,
-        ),
-      );
-
-    for (final bundle in sortedBundles) {
-      final sortedLevels = [...bundle.schoolLevels]
-        ..sort(
-          (a, b) =>
-              a.schoolLevel.displayOrder.compareTo(b.schoolLevel.displayOrder),
-        );
-
-      for (final levelBundle in sortedLevels) {
-        final option = ReRegistrationAcademicOption(
-          schoolLevelGroupId: bundle.schoolLevelGroup.id,
-          schoolLevelId: levelBundle.schoolLevel.id,
-          label:
-              '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
-        );
-
-        if (seenKeys.add(option.key)) {
-          options.add(option);
-        }
-      }
-    }
-
-    return options;
   }
 }
 
