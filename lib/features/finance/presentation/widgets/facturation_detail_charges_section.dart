@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charges_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -88,7 +88,7 @@ class FacturationDetailChargesSection extends StatelessWidget {
                   }
 
                   if (state.status == StudentChargesStatus.failure) {
-                    return FinanceStateCard(
+                    return StateCard(
                       key: const ValueKey('charges-error'),
                       message: state.errorType.localizedMessage(l10n),
                       icon: Icons.error_outline,
@@ -100,7 +100,7 @@ class FacturationDetailChargesSection extends StatelessWidget {
                   }
 
                   if (state.studentCharges.isEmpty) {
-                    return FinanceStateCard(
+                    return StateCard(
                       key: const ValueKey('charges-empty'),
                       message: l10n.facturationDetailChargesEmpty,
                       icon: Icons.inbox_outlined,

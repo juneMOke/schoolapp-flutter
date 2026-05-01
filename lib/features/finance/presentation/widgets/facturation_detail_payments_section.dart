@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payments_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -142,7 +142,7 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                   }
 
                   if (state.status == PaymentsStatus.failure) {
-                    return FinanceStateCard(
+                    return StateCard(
                       key: const ValueKey('payments-error'),
                       message: state.errorType.localizedMessage(l10n),
                       icon: Icons.error_outline,
@@ -154,7 +154,7 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                   }
 
                   if (state.payments.isEmpty) {
-                    return FinanceStateCard(
+                    return StateCard(
                       key: const ValueKey('payments-empty'),
                       message: l10n.facturationDetailPaymentsEmpty,
                       icon: Icons.inbox_outlined,
