@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_email_page.dart';
@@ -266,6 +268,15 @@ class AppRouter {
                   },
                 ),
               ],
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) => AttendanceFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.presences,
+              builder: (context, state) => const PresencesPage(),
             ),
           ],
         ),

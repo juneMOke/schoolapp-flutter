@@ -1501,6 +1501,200 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentNoChargesAvailable => 'No unpaid charges available for this student.';
 
   @override
+  String get attendanceHeroTitle => 'Attendance';
+
+  @override
+  String get attendanceHeroSubtitle => 'View class attendance by date for reliable daily tracking.';
+
+  @override
+  String get attendanceHeroChipClass => 'Class-based search';
+
+  @override
+  String get attendanceHeroChipDate => 'Date filter';
+
+  @override
+  String get attendanceSearchTitle => 'Attendance Search';
+
+  @override
+  String get attendanceSearchHint => 'Select cycle, level, class and date to display attendance records.';
+
+  @override
+  String get attendanceDateLabel => 'Date';
+
+  @override
+  String get attendanceInvitationMessage => 'Run a search to display attendance for the selected class.';
+
+  @override
+  String get attendanceLoadingMessage => 'Loading attendance records...';
+
+  @override
+  String get attendanceEmptyMessage => 'No attendance found for these filters.';
+
+  @override
+  String get attendanceExportAction => 'Export';
+
+  @override
+  String get attendanceExportTooltip => 'Prepare result export';
+
+  @override
+  String get attendanceExportSoon => 'Export will be available soon.';
+
+  @override
+  String get attendanceSaveAction => 'Save';
+
+  @override
+  String get attendanceSavingAction => 'Saving...';
+
+  @override
+  String get attendanceSaveTooltip => 'Save all entered changes';
+
+  @override
+  String get attendanceSaveValidationHint => 'Fix absent rows without a reason before saving.';
+
+  @override
+  String get attendanceSaveSuccess => 'Attendance records were saved successfully.';
+
+  @override
+  String get attendancePendingChanges => 'Pending changes';
+
+  @override
+  String get attendancePendingInvalidChanges => 'Fixes required';
+
+  @override
+  String get attendanceRowModifiedLabel => 'Modified';
+
+  @override
+  String get attendanceUnsavedChangesTitle => 'Unsaved changes';
+
+  @override
+  String get attendanceUnsavedChangesMessage => 'A new search will discard unsaved changes. Do you want to continue?';
+
+  @override
+  String get attendanceDateTooltip => 'Choose the attendance date';
+
+  @override
+  String get attendanceTotalCount => 'Total students';
+
+  @override
+  String get attendanceGirlsCount => 'Girls';
+
+  @override
+  String get attendanceBoysCount => 'Boys';
+
+  @override
+  String attendanceCriteriaSummary(String classroomName, String formattedDate) {
+    return 'Class: $classroomName · Date: $formattedDate';
+  }
+
+  @override
+  String get attendanceTableLastName => 'Last name';
+
+  @override
+  String get attendanceTableMiddleName => 'Middle name';
+
+  @override
+  String get attendanceTableFirstName => 'First name';
+
+  @override
+  String get attendanceTablePresent => 'Present';
+
+  @override
+  String get attendanceTableAbsenceReason => 'Reason';
+
+  @override
+  String get attendanceTableAbsenceReasonNote => 'Note';
+
+  @override
+  String get attendancePresenceStatusLabel => 'Attendance status';
+
+  @override
+  String get attendancePresentValue => 'Present';
+
+  @override
+  String get attendanceAbsentValue => 'Absent';
+
+  @override
+  String get attendanceReadOnlyHint => 'Read-only informational status';
+
+  @override
+  String get attendanceReasonRequiredError => 'Please select a reason for this absence.';
+
+  @override
+  String get attendanceReasonDisabledHint => 'Reason is required only when the student is absent.';
+
+  @override
+  String get attendanceNoteDisabledHint => 'Note is optional only when the student is absent.';
+
+  @override
+  String get attendanceNotePlaceholder => 'Add details if needed';
+
+  @override
+  String get attendanceNoMiddleName => 'Not provided';
+
+  @override
+  String get attendanceNoAbsenceReason => 'No reason';
+
+  @override
+  String get attendanceNoAbsenceNote => 'No note';
+
+  @override
+  String get attendanceErrorNetwork => 'Check your internet connection and try again.';
+
+  @override
+  String get attendanceErrorNotFound => 'No attendance resource was found.';
+
+  @override
+  String get attendanceErrorValidation => 'Submitted data is invalid.';
+
+  @override
+  String get attendanceErrorUnauthorized => 'You are not authorized to access this resource.';
+
+  @override
+  String get attendanceErrorInvalidCredentials => 'Your credentials do not allow access to attendance.';
+
+  @override
+  String get attendanceErrorServer => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get attendanceErrorStorage => 'A local storage error occurred.';
+
+  @override
+  String get attendanceErrorAuth => 'An authentication error occurred.';
+
+  @override
+  String get attendanceErrorUnknown => 'An unexpected error occurred.';
+
+  @override
+  String get absenceReasonSickness => 'Sickness';
+
+  @override
+  String get absenceReasonFamilyEmergency => 'Family emergency';
+
+  @override
+  String get absenceReasonPersonal => 'Personal';
+
+  @override
+  String get absenceReasonUnknown => 'Unknown';
+
+  @override
+  String get absenceReasonVacation => 'Vacation';
+
+  @override
+  String get absenceReasonUnderGraduateLeave => 'Study leave';
+
+  @override
+  String get absenceReasonMarriageLeave => 'Marriage leave';
+
+  @override
+  String get absenceReasonParentalLeave => 'Parental leave';
+
+  @override
+  String get absenceReasonWorkLeave => 'Work leave';
+
+  @override
+  String get absenceReasonOther => 'Other';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override

@@ -50,6 +50,17 @@ les usages existants du module Finance.
 | `WizardBreadcrumb` | Opacite steps futures | `fast` |
 | `FormFieldLabel` | Affichage tooltip d'aide | `tooltipShowDuration` |
 
+### Lot 4 - Attendance polish
+
+| Widget | Type d'animation | Token(s) |
+|---|---|---|
+| `AttendancePageContent` | Entree de page | `entrance` + `outCurve` |
+| `AttendanceResultsSection` | Switch loading/error/empty/success | `standard` + `outCurve`/`inCurve` |
+| `AttendanceRecordsTable` | Switch table desktop / cartes mobile | `standard` + `outCurve`/`inCurve` |
+| `AttendanceResultsToolbar` | Reflow toolbar stats/export | `medium` + `outCurve` |
+| `AttendanceSearchFields` | Reflow du formulaire | `medium` + `outCurve` |
+| `AttendanceSearchButton` | Feedback recherche / spinner | `fast` + `outCurve`/`inCurve` |
+
 ## Regles d'usage (transverses)
 
 1. **Entree de page/detail**: `AppMotion.entrance`.

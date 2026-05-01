@@ -1501,6 +1501,200 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentNoChargesAvailable => 'Aucune charge non réglée disponible pour cet élève.';
 
   @override
+  String get attendanceHeroTitle => 'Présences';
+
+  @override
+  String get attendanceHeroSubtitle => 'Consultez les présences par classe et date pour un suivi quotidien fiable.';
+
+  @override
+  String get attendanceHeroChipClass => 'Recherche par classe';
+
+  @override
+  String get attendanceHeroChipDate => 'Filtre par date';
+
+  @override
+  String get attendanceSearchTitle => 'Recherche des présences';
+
+  @override
+  String get attendanceSearchHint => 'Sélectionnez cycle, niveau, classe et date pour afficher les enregistrements.';
+
+  @override
+  String get attendanceDateLabel => 'Date';
+
+  @override
+  String get attendanceInvitationMessage => 'Lancez une recherche pour afficher les présences de la classe sélectionnée.';
+
+  @override
+  String get attendanceLoadingMessage => 'Chargement des présences en cours...';
+
+  @override
+  String get attendanceEmptyMessage => 'Aucune présence trouvée pour ces critères.';
+
+  @override
+  String get attendanceExportAction => 'Exporter';
+
+  @override
+  String get attendanceExportTooltip => 'Préparer l\'export des résultats';
+
+  @override
+  String get attendanceExportSoon => 'L\'export sera disponible prochainement.';
+
+  @override
+  String get attendanceSaveAction => 'Enregistrer';
+
+  @override
+  String get attendanceSavingAction => 'Enregistrement...';
+
+  @override
+  String get attendanceSaveTooltip => 'Enregistrer toutes les modifications saisies';
+
+  @override
+  String get attendanceSaveValidationHint => 'Corrigez les lignes absentes sans motif avant d\'enregistrer.';
+
+  @override
+  String get attendanceSaveSuccess => 'Les présences ont été enregistrées avec succès.';
+
+  @override
+  String get attendancePendingChanges => 'Modifications en attente';
+
+  @override
+  String get attendancePendingInvalidChanges => 'Corrections requises';
+
+  @override
+  String get attendanceRowModifiedLabel => 'Modifiée';
+
+  @override
+  String get attendanceUnsavedChangesTitle => 'Modifications non enregistrées';
+
+  @override
+  String get attendanceUnsavedChangesMessage => 'Une nouvelle recherche supprimera les changements non enregistrés. Voulez-vous continuer ?';
+
+  @override
+  String get attendanceDateTooltip => 'Choisir la date des présences';
+
+  @override
+  String get attendanceTotalCount => 'Effectif total';
+
+  @override
+  String get attendanceGirlsCount => 'Effectif filles';
+
+  @override
+  String get attendanceBoysCount => 'Effectif garçons';
+
+  @override
+  String attendanceCriteriaSummary(String classroomName, String formattedDate) {
+    return 'Classe : $classroomName · Date : $formattedDate';
+  }
+
+  @override
+  String get attendanceTableLastName => 'Nom';
+
+  @override
+  String get attendanceTableMiddleName => 'Post-nom';
+
+  @override
+  String get attendanceTableFirstName => 'Prénom';
+
+  @override
+  String get attendanceTablePresent => 'Présence';
+
+  @override
+  String get attendanceTableAbsenceReason => 'Motif';
+
+  @override
+  String get attendanceTableAbsenceReasonNote => 'Note';
+
+  @override
+  String get attendancePresenceStatusLabel => 'Statut de présence';
+
+  @override
+  String get attendancePresentValue => 'Présent';
+
+  @override
+  String get attendanceAbsentValue => 'Absent';
+
+  @override
+  String get attendanceReadOnlyHint => 'Statut consultatif en lecture seule';
+
+  @override
+  String get attendanceReasonRequiredError => 'Veuillez sélectionner un motif pour cette absence.';
+
+  @override
+  String get attendanceReasonDisabledHint => 'Le motif est requis seulement pour une absence.';
+
+  @override
+  String get attendanceNoteDisabledHint => 'La note est facultative seulement pour une absence.';
+
+  @override
+  String get attendanceNotePlaceholder => 'Ajouter une précision si nécessaire';
+
+  @override
+  String get attendanceNoMiddleName => 'Non renseigné';
+
+  @override
+  String get attendanceNoAbsenceReason => 'Aucun motif';
+
+  @override
+  String get attendanceNoAbsenceNote => 'Aucune note';
+
+  @override
+  String get attendanceErrorNetwork => 'Vérifiez votre connexion internet puis réessayez.';
+
+  @override
+  String get attendanceErrorNotFound => 'Aucune ressource de présence n\'a été trouvée.';
+
+  @override
+  String get attendanceErrorValidation => 'Les données envoyées sont invalides.';
+
+  @override
+  String get attendanceErrorUnauthorized => 'Vous n\'êtes pas autorisé à accéder à cette ressource.';
+
+  @override
+  String get attendanceErrorInvalidCredentials => 'Vos identifiants ne permettent pas d\'accéder aux présences.';
+
+  @override
+  String get attendanceErrorServer => 'Le serveur est indisponible. Réessayez plus tard.';
+
+  @override
+  String get attendanceErrorStorage => 'Une erreur de stockage local est survenue.';
+
+  @override
+  String get attendanceErrorAuth => 'Une erreur d\'authentification est survenue.';
+
+  @override
+  String get attendanceErrorUnknown => 'Une erreur inattendue est survenue.';
+
+  @override
+  String get absenceReasonSickness => 'Maladie';
+
+  @override
+  String get absenceReasonFamilyEmergency => 'Urgence familiale';
+
+  @override
+  String get absenceReasonPersonal => 'Personnel';
+
+  @override
+  String get absenceReasonUnknown => 'Inconnu';
+
+  @override
+  String get absenceReasonVacation => 'Vacances';
+
+  @override
+  String get absenceReasonUnderGraduateLeave => 'Congé d\'études';
+
+  @override
+  String get absenceReasonMarriageLeave => 'Congé de mariage';
+
+  @override
+  String get absenceReasonParentalLeave => 'Congé parental';
+
+  @override
+  String get absenceReasonWorkLeave => 'Congé professionnel';
+
+  @override
+  String get absenceReasonOther => 'Autre';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Contexte d\'inscription indisponible';
 
   @override

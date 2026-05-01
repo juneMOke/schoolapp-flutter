@@ -2969,6 +2969,390 @@ abstract class AppLocalizations {
   /// **'No unpaid charges available for this student.'**
   String get facturationCreatePaymentNoChargesAvailable;
 
+  /// No description provided for @attendanceHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceHeroTitle;
+
+  /// No description provided for @attendanceHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View class attendance by date for reliable daily tracking.'**
+  String get attendanceHeroSubtitle;
+
+  /// No description provided for @attendanceHeroChipClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class-based search'**
+  String get attendanceHeroChipClass;
+
+  /// No description provided for @attendanceHeroChipDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date filter'**
+  String get attendanceHeroChipDate;
+
+  /// No description provided for @attendanceSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Search'**
+  String get attendanceSearchTitle;
+
+  /// No description provided for @attendanceSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select cycle, level, class and date to display attendance records.'**
+  String get attendanceSearchHint;
+
+  /// No description provided for @attendanceDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get attendanceDateLabel;
+
+  /// No description provided for @attendanceInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a search to display attendance for the selected class.'**
+  String get attendanceInvitationMessage;
+
+  /// No description provided for @attendanceLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading attendance records...'**
+  String get attendanceLoadingMessage;
+
+  /// No description provided for @attendanceEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance found for these filters.'**
+  String get attendanceEmptyMessage;
+
+  /// No description provided for @attendanceExportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get attendanceExportAction;
+
+  /// No description provided for @attendanceExportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare result export'**
+  String get attendanceExportTooltip;
+
+  /// No description provided for @attendanceExportSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Export will be available soon.'**
+  String get attendanceExportSoon;
+
+  /// No description provided for @attendanceSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get attendanceSaveAction;
+
+  /// No description provided for @attendanceSavingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get attendanceSavingAction;
+
+  /// No description provided for @attendanceSaveTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all entered changes'**
+  String get attendanceSaveTooltip;
+
+  /// No description provided for @attendanceSaveValidationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix absent rows without a reason before saving.'**
+  String get attendanceSaveValidationHint;
+
+  /// No description provided for @attendanceSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance records were saved successfully.'**
+  String get attendanceSaveSuccess;
+
+  /// No description provided for @attendancePendingChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending changes'**
+  String get attendancePendingChanges;
+
+  /// No description provided for @attendancePendingInvalidChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes required'**
+  String get attendancePendingInvalidChanges;
+
+  /// No description provided for @attendanceRowModifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get attendanceRowModifiedLabel;
+
+  /// No description provided for @attendanceUnsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get attendanceUnsavedChangesTitle;
+
+  /// No description provided for @attendanceUnsavedChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A new search will discard unsaved changes. Do you want to continue?'**
+  String get attendanceUnsavedChangesMessage;
+
+  /// No description provided for @attendanceDateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the attendance date'**
+  String get attendanceDateTooltip;
+
+  /// No description provided for @attendanceTotalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total students'**
+  String get attendanceTotalCount;
+
+  /// No description provided for @attendanceGirlsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get attendanceGirlsCount;
+
+  /// No description provided for @attendanceBoysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get attendanceBoysCount;
+
+  /// No description provided for @attendanceCriteriaSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Class: {classroomName} · Date: {formattedDate}'**
+  String attendanceCriteriaSummary(String classroomName, String formattedDate);
+
+  /// No description provided for @attendanceTableLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get attendanceTableLastName;
+
+  /// No description provided for @attendanceTableMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get attendanceTableMiddleName;
+
+  /// No description provided for @attendanceTableFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get attendanceTableFirstName;
+
+  /// No description provided for @attendanceTablePresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendanceTablePresent;
+
+  /// No description provided for @attendanceTableAbsenceReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get attendanceTableAbsenceReason;
+
+  /// No description provided for @attendanceTableAbsenceReasonNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get attendanceTableAbsenceReasonNote;
+
+  /// No description provided for @attendancePresenceStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance status'**
+  String get attendancePresenceStatusLabel;
+
+  /// No description provided for @attendancePresentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendancePresentValue;
+
+  /// No description provided for @attendanceAbsentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceAbsentValue;
+
+  /// No description provided for @attendanceReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only informational status'**
+  String get attendanceReadOnlyHint;
+
+  /// No description provided for @attendanceReasonRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason for this absence.'**
+  String get attendanceReasonRequiredError;
+
+  /// No description provided for @attendanceReasonDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason is required only when the student is absent.'**
+  String get attendanceReasonDisabledHint;
+
+  /// No description provided for @attendanceNoteDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note is optional only when the student is absent.'**
+  String get attendanceNoteDisabledHint;
+
+  /// No description provided for @attendanceNotePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details if needed'**
+  String get attendanceNotePlaceholder;
+
+  /// No description provided for @attendanceNoMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get attendanceNoMiddleName;
+
+  /// No description provided for @attendanceNoAbsenceReason.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason'**
+  String get attendanceNoAbsenceReason;
+
+  /// No description provided for @attendanceNoAbsenceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No note'**
+  String get attendanceNoAbsenceNote;
+
+  /// No description provided for @attendanceErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get attendanceErrorNetwork;
+
+  /// No description provided for @attendanceErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance resource was found.'**
+  String get attendanceErrorNotFound;
+
+  /// No description provided for @attendanceErrorValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted data is invalid.'**
+  String get attendanceErrorValidation;
+
+  /// No description provided for @attendanceErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to access this resource.'**
+  String get attendanceErrorUnauthorized;
+
+  /// No description provided for @attendanceErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to attendance.'**
+  String get attendanceErrorInvalidCredentials;
+
+  /// No description provided for @attendanceErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server is unavailable. Please try again later.'**
+  String get attendanceErrorServer;
+
+  /// No description provided for @attendanceErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'A local storage error occurred.'**
+  String get attendanceErrorStorage;
+
+  /// No description provided for @attendanceErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error occurred.'**
+  String get attendanceErrorAuth;
+
+  /// No description provided for @attendanceErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get attendanceErrorUnknown;
+
+  /// No description provided for @absenceReasonSickness.
+  ///
+  /// In en, this message translates to:
+  /// **'Sickness'**
+  String get absenceReasonSickness;
+
+  /// No description provided for @absenceReasonFamilyEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Family emergency'**
+  String get absenceReasonFamilyEmergency;
+
+  /// No description provided for @absenceReasonPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get absenceReasonPersonal;
+
+  /// No description provided for @absenceReasonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get absenceReasonUnknown;
+
+  /// No description provided for @absenceReasonVacation.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation'**
+  String get absenceReasonVacation;
+
+  /// No description provided for @absenceReasonUnderGraduateLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Study leave'**
+  String get absenceReasonUnderGraduateLeave;
+
+  /// No description provided for @absenceReasonMarriageLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage leave'**
+  String get absenceReasonMarriageLeave;
+
+  /// No description provided for @absenceReasonParentalLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Parental leave'**
+  String get absenceReasonParentalLeave;
+
+  /// No description provided for @absenceReasonWorkLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Work leave'**
+  String get absenceReasonWorkLeave;
+
+  /// No description provided for @absenceReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get absenceReasonOther;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:
