@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/boot
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/pre_registrations_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 
 class EnrollmentSummariesWidget extends StatefulWidget {
   final String status;
@@ -67,92 +68,101 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(AppTheme.largePadding),
-          child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-            builder: (context, bootstrapState) {
-              final academicYearId =
-                  bootstrapState.bootstrap?.academicYear.id ?? '';
-              final schoolId = context.select(
-                (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
-              );
-              final hasBootstrapContext =
-                  bootstrapState.status == BootstrapContextLoadStatus.success &&
-                  academicYearId.isNotEmpty &&
-                  schoolId.isNotEmpty;
-
-              if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                  bootstrapState.status == BootstrapContextLoadStatus.initial) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 48),
-                    child: CircularProgressIndicator(),
-                  ),
+          child: AnimatedSwitcher(
+            duration: FinanceMotion.standard,
+            switchInCurve: FinanceMotion.outCurve,
+            switchOutCurve: FinanceMotion.inCurve,
+            child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+              key: ValueKey<String>('enrollment-content-${DateTime.now().millisecondsSinceEpoch ~/ 1000}'),
+              builder: (context, bootstrapState) {
+                final academicYearId =
+                    bootstrapState.bootstrap?.academicYear.id ?? '';
+                final schoolId = context.select(
+                  (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
                 );
-              }
+                final hasBootstrapContext =
+                    bootstrapState.status == BootstrapContextLoadStatus.success &&
+                    academicYearId.isNotEmpty &&
+                    schoolId.isNotEmpty;
 
-              if (!hasBootstrapContext) {
-                return BootstrapContextError(
-                  onLogout: () =>
-                      context.read<AuthBloc>().add(const AuthLogoutRequested()),
-                );
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SearchForm(
-                    academicYearId: academicYearId,
-                    status: _effectiveStatus,
-                    showStatusFilter: widget.showStatusFilter,
-                    onStatusChanged: (newStatus) {
-                      setState(() => _effectiveStatus = newStatus);
-                      _requestSummariesIfContextAvailable();
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                    builder: (context, state) => PreRegistrationsInfoBar(
-                      count: state.summariesTotalElements,
-                      isLoading: _isLoading(state),
-                      onRefresh: _requestSummariesIfContextAvailable,
-                      statusLabel: widget.status,
-                      showStatusBadge: widget.showStatusBadge,
-                      currentPage: state.summariesPage,
-                      totalPages: state.summariesTotalPages,
-                      onPreviousPage: () => context.read<EnrollmentBloc>().add(
-                        EnrollmentSummariesPageRequested(
-                          page: state.summariesPage - 1,
-                        ),
-                      ),
-                      onNextPage: () => context.read<EnrollmentBloc>().add(
-                        EnrollmentSummariesPageRequested(
-                          page: state.summariesPage + 1,
-                        ),
-                      ),
-                      action: widget.action,
+                if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+                    bootstrapState.status == BootstrapContextLoadStatus.initial) {
+                  return const Center(
+                    key: ObjectKey('enrollment-loading'),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 48),
+                      child: CircularProgressIndicator(),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                    builder: (context, state) => EnrollmentDataTable(
-                      isLoading: _isLoading(state),
-                      enrollments: state.summaries,
-                      totalCount: state.summariesTotalElements,
-                      onViewRequested: (summary) {
-                        final intent = widget.intentFactory(summary);
-                        context.push(
-                          Uri(
-                            path:
-                                '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
-                            queryParameters: intent.toQueryParameters(),
-                          ).toString(),
-                          extra: intent,
-                        );
+                  );
+                }
+
+                if (!hasBootstrapContext) {
+                  return BootstrapContextError(
+                    key: const ObjectKey('enrollment-error'),
+                    onLogout: () =>
+                        context.read<AuthBloc>().add(const AuthLogoutRequested()),
+                  );
+                }
+
+                return Column(
+                  key: const ObjectKey('enrollment-success'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SearchForm(
+                      academicYearId: academicYearId,
+                      status: _effectiveStatus,
+                      showStatusFilter: widget.showStatusFilter,
+                      onStatusChanged: (newStatus) {
+                        setState(() => _effectiveStatus = newStatus);
+                        _requestSummariesIfContextAvailable();
                       },
                     ),
-                  ),
-                ],
-              );
-            },
+                    const SizedBox(height: 12),
+                    BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                      builder: (context, state) => PreRegistrationsInfoBar(
+                        count: state.summariesTotalElements,
+                        isLoading: _isLoading(state),
+                        onRefresh: _requestSummariesIfContextAvailable,
+                        statusLabel: widget.status,
+                        showStatusBadge: widget.showStatusBadge,
+                        currentPage: state.summariesPage,
+                        totalPages: state.summariesTotalPages,
+                        onPreviousPage: () => context.read<EnrollmentBloc>().add(
+                          EnrollmentSummariesPageRequested(
+                            page: state.summariesPage - 1,
+                          ),
+                        ),
+                        onNextPage: () => context.read<EnrollmentBloc>().add(
+                          EnrollmentSummariesPageRequested(
+                            page: state.summariesPage + 1,
+                          ),
+                        ),
+                        action: widget.action,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                      builder: (context, state) => EnrollmentDataTable(
+                        isLoading: _isLoading(state),
+                        enrollments: state.summaries,
+                        totalCount: state.summariesTotalElements,
+                        onViewRequested: (summary) {
+                          final intent = widget.intentFactory(summary);
+                          context.push(
+                            Uri(
+                              path:
+                                  '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
+                              queryParameters: intent.toQueryParameters(),
+                            ).toString(),
+                            extra: intent,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
