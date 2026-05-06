@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
@@ -42,21 +43,7 @@ class _SearchFormState extends State<SearchForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
+    return SearchFormCard(
       child: LayoutBuilder(
         builder: (context, constraints) {
           const spacing = 10.0;

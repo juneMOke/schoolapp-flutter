@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -77,21 +78,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     final canSearch =
         !widget.isLoading && (_hasRequiredNames() || selectedKey != null);
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
+    return SearchFormCard(
       child: LayoutBuilder(
         builder: (context, constraints) {
           const spacing = 10.0;

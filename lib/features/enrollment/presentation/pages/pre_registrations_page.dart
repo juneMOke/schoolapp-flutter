@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summaries_widget.dart';
 
@@ -13,6 +14,9 @@ class PreRegistrationsPage extends StatelessWidget {
       child: EnrollmentSummariesWidget(
         status: 'PRE_REGISTERED',
         showStatusBadge: false,
+        contentPadding: EnrollmentPageLayout.contentPadding,
+        loadingPadding: EnrollmentPageLayout.loadingPadding,
+        sectionSpacing: EnrollmentPageLayout.sectionSpacing,
         intentFactory: (summary) => EnrollmentDetailIntent.preRegistration(
           enrollmentId: summary.enrollmentId,
         ),

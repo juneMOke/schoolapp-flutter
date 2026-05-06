@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_registrations_page_helpers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -53,7 +54,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             bootstrapState.status == BootstrapContextLoadStatus.initial) {
           return const Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 48),
+              padding: EnrollmentPageLayout.loadingPadding,
               child: CircularProgressIndicator(),
             ),
           );
@@ -105,7 +106,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                   );
                 },
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
               BlocBuilder<EnrollmentBloc, EnrollmentState>(
                 builder: (context, state) {
                   final hasAcademicSearch =
@@ -139,7 +140,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
                   );
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
               BlocBuilder<EnrollmentBloc, EnrollmentState>(
                 buildWhen: (previous, current) =>
                     previous.summariesPage != current.summariesPage ||

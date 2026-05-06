@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
@@ -23,6 +23,9 @@ class EnrollmentSummariesWidget extends StatefulWidget {
   final bool showStatusBadge;
   final bool showStatusFilter;
   final Widget? action;
+  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry loadingPadding;
+  final double sectionSpacing;
   final EnrollmentDetailIntent Function(EnrollmentSummary summary)
   intentFactory;
 
@@ -32,6 +35,9 @@ class EnrollmentSummariesWidget extends StatefulWidget {
     this.showStatusBadge = true,
     this.showStatusFilter = false,
     this.action,
+    this.contentPadding = EnrollmentPageLayout.contentPadding,
+    this.loadingPadding = EnrollmentPageLayout.loadingPadding,
+    this.sectionSpacing = EnrollmentPageLayout.sectionSpacing,
     required this.intentFactory,
   });
 
@@ -67,13 +73,12 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
         onRefresh: _requestSummariesIfContextAvailable,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppTheme.largePadding),
+          padding: widget.contentPadding,
           child: AnimatedSwitcher(
             duration: FinanceMotion.standard,
             switchInCurve: FinanceMotion.outCurve,
             switchOutCurve: FinanceMotion.inCurve,
             child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-              key: ValueKey<String>('enrollment-content-${DateTime.now().millisecondsSinceEpoch ~/ 1000}'),
               builder: (context, bootstrapState) {
                 final academicYearId =
                     bootstrapState.bootstrap?.academicYear.id ?? '';
@@ -87,11 +92,11 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
 
                 if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
                     bootstrapState.status == BootstrapContextLoadStatus.initial) {
-                  return const Center(
-                    key: ObjectKey('enrollment-loading'),
+                  return Center(
+                    key: const ObjectKey('enrollment-loading'),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 48),
-                      child: CircularProgressIndicator(),
+                      padding: widget.loadingPadding,
+                      child: const CircularProgressIndicator(),
                     ),
                   );
                 }
@@ -117,7 +122,7 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
                         _requestSummariesIfContextAvailable();
                       },
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.sectionSpacing),
                     BlocBuilder<EnrollmentBloc, EnrollmentState>(
                       builder: (context, state) => PreRegistrationsInfoBar(
                         count: state.summariesTotalElements,
@@ -140,7 +145,7 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
                         action: widget.action,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.sectionSpacing),
                     BlocBuilder<EnrollmentBloc, EnrollmentState>(
                       builder: (context, state) => EnrollmentDataTable(
                         isLoading: _isLoading(state),
