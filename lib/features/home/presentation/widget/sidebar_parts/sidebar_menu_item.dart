@@ -29,8 +29,19 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
     return Column(
       children: [
         _buildMenuItem(),
-        if (widget.isExpanded && _isExpanded && widget.menu.subMenus.isNotEmpty)
-          _buildSubMenus(),
+        AnimatedSwitcher(
+          duration: AppMotion.medium,
+          switchInCurve: AppMotion.gentleOut,
+          switchOutCurve: AppMotion.inCurve,
+          child: widget.isExpanded && _isExpanded && widget.menu.subMenus.isNotEmpty
+              ? KeyedSubtree(
+                  key: ValueKey<String>('submenu-open-${widget.menu.id}'),
+                  child: _buildSubMenus(),
+                )
+              : const SizedBox.shrink(
+                  key: ValueKey<String>('submenu-closed'),
+                ),
+        ),
       ],
     );
   }
@@ -52,6 +63,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
           child: Semantics(
             button: true,
             label: widget.menu.title,
+            selected: isActive,
             toggled: widget.menu.subMenus.isNotEmpty ? _isExpanded : false,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
@@ -89,10 +101,8 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                     final canShowExpandedContent =
                         widget.isExpanded && constraints.maxWidth >= 110;
 
-                    final content = Row(
-                      mainAxisAlignment: widget.isExpanded
-                          ? MainAxisAlignment.start
-                          : MainAxisAlignment.center,
+                    final expandedContent = Row(
+                      key: ValueKey<String>('menu-expanded-${widget.menu.id}'),
                       children: [
                         Icon(
                           widget.menu.icon,
@@ -126,11 +136,26 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                       ],
                     );
 
-                    if (canShowExpandedContent) {
-                      return content;
-                    }
+                    final collapsedContent = Tooltip(
+                      key: ValueKey<String>('menu-collapsed-${widget.menu.id}'),
+                      message: widget.menu.title,
+                      excludeFromSemantics: true,
+                      child: Center(
+                        child: Icon(
+                          widget.menu.icon,
+                          color: isActive ? Colors.white : Colors.white70,
+                          size: 22,
+                        ),
+                      ),
+                    );
 
-                    return Tooltip(message: widget.menu.title, child: content);
+                    return AnimatedSwitcher(
+                      duration: AppMotion.fast,
+                      switchInCurve: AppMotion.outCurve,
+                      switchOutCurve: AppMotion.inCurve,
+                      child:
+                          canShowExpandedContent ? expandedContent : collapsedContent,
+                    );
                   },
                 ),
               ),
@@ -158,6 +183,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
             child: Semantics(
               button: true,
               label: subMenu.title,
+              selected: subMenu.isActive,
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () {
@@ -170,42 +196,56 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                   );
                 },
                 child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                constraints: const BoxConstraints(
-                  minHeight: AppDimensions.minTouchTarget,
-                ),
-                decoration: BoxDecoration(
-                  color: subMenu.isActive
-                      ? AppTheme.primaryColor.withValues(alpha: 0.16)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: subMenu.isActive ? Colors.white : Colors.white54,
-                        shape: BoxShape.circle,
-                      ),
+                  margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  constraints: const BoxConstraints(
+                    minHeight: AppDimensions.minTouchTarget,
+                  ),
+                  decoration: BoxDecoration(
+                    color: subMenu.isActive
+                        ? AppTheme.primaryColor.withValues(alpha: 0.16)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Pendant l'animation de collapse, la largeur peut devenir
+                        // très petite: on masque le marqueur fixe pour éviter l'overflow.
+                        final canShowLeadingMarker = constraints.maxWidth >= 24;
+
+                        return Row(
+                          children: [
+                            if (canShowLeadingMarker) ...[
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  color: subMenu.isActive ? Colors.white : Colors.white54,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                            ],
+                            Expanded(
+                              child: Text(
+                                subMenu.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: subMenu.isActive ? Colors.white : Colors.white70,
+                                  fontSize: 13,
+                                  fontWeight:
+                                      subMenu.isActive ? FontWeight.w600 : FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        subMenu.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: subMenu.isActive ? Colors.white : Colors.white70,
-                          fontSize: 13,
-                          fontWeight: subMenu.isActive ? FontWeight.w600 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
                 ),
               ),
             ),

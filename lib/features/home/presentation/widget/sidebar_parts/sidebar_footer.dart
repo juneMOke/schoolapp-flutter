@@ -25,22 +25,44 @@ class SidebarFooter extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
-      child: isExpanded
-          ? Row(
-              children: [
-                const Icon(Icons.verified_outlined, color: Colors.white60, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.homeSidebarFooterLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption.copyWith(color: Colors.white60),
+      child: Semantics(
+        container: true,
+        readOnly: true,
+        label: l10n.homeSidebarFooterLabel,
+        child: ExcludeSemantics(
+          child: AnimatedSwitcher(
+            duration: AppMotion.standard,
+            switchInCurve: AppMotion.outCurve,
+            switchOutCurve: AppMotion.inCurve,
+            child: isExpanded
+                ? Row(
+                    key: const ValueKey('sidebar-footer-expanded'),
+                    children: [
+                      const Icon(
+                        Icons.verified_outlined,
+                        color: Colors.white60,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.homeSidebarFooterLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(color: Colors.white60),
+                        ),
+                      ),
+                    ],
+                  )
+                : const Icon(
+                    key: ValueKey('sidebar-footer-collapsed'),
+                    Icons.verified_outlined,
+                    color: Colors.white60,
+                    size: 16,
                   ),
-                ),
-              ],
-            )
-          : const Icon(Icons.verified_outlined, color: Colors.white60, size: 16),
+          ),
+        ),
+      ),
     );
   }
 }

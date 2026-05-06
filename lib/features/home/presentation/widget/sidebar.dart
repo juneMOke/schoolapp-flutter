@@ -24,6 +24,7 @@ class Sidebar extends StatelessWidget {
         return Semantics(
           container: true,
           label: l10n.homeSidebarNavigationLabel,
+          explicitChildNodes: true,
           child: AnimatedContainer(
             duration: AppMotion.layout,
             curve: AppMotion.outCurve,
@@ -50,13 +51,27 @@ class Sidebar extends StatelessWidget {
               ],
             ),
             child: SafeArea(
-              child: Column(
-                children: [
-                  SidebarHeader(isExpanded: state.isSidebarExpanded),
-                  const SizedBox(height: AppDimensions.spacingXS + 2),
-                  Expanded(child: _buildMenuList(context, state)),
-                  SidebarFooter(isExpanded: state.isSidebarExpanded),
-                ],
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(),
+                child: Column(
+                  children: [
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(1),
+                      child: SidebarHeader(isExpanded: state.isSidebarExpanded),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingXS + 2),
+                    Expanded(
+                      child: FocusTraversalOrder(
+                        order: const NumericFocusOrder(2),
+                        child: _buildMenuList(context, state),
+                      ),
+                    ),
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(3),
+                      child: SidebarFooter(isExpanded: state.isSidebarExpanded),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -70,9 +85,16 @@ class Sidebar extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: state.menuItems.length,
+      semanticChildCount: state.menuItems.length,
       itemBuilder: (context, index) {
         final menu = state.menuItems[index];
-        return SidebarMenuItem(menu: menu, isExpanded: state.isSidebarExpanded);
+        return IndexedSemantics(
+          index: index,
+          child: SidebarMenuItem(
+            menu: menu,
+            isExpanded: state.isSidebarExpanded,
+          ),
+        );
       },
     );
   }

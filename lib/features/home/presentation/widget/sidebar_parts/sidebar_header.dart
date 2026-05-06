@@ -80,13 +80,22 @@ class _ExpandedHeader extends StatelessWidget {
             ),
           ),
         ),
-        IconButton(
-          tooltip: l10n.homeSidebarCollapseTooltip,
-          onPressed: () => context.read<NavigationBloc>().add(const SidebarToggled()),
-          icon: const Icon(Icons.menu_open_rounded, color: Colors.white70, size: 20),
-          constraints: const BoxConstraints(
-            minWidth: AppDimensions.minTouchTarget,
-            minHeight: AppDimensions.minTouchTarget,
+        Semantics(
+          button: true,
+          label: l10n.homeSidebarNavigationLabel,
+          hint: l10n.homeSidebarCollapseTooltip,
+          toggled: true,
+          child: ExcludeSemantics(
+            child: IconButton(
+              tooltip: l10n.homeSidebarCollapseTooltip,
+              onPressed: () =>
+                  context.read<NavigationBloc>().add(const SidebarToggled()),
+              icon: const Icon(Icons.menu_open_rounded, color: Colors.white70, size: 20),
+              constraints: const BoxConstraints(
+                minWidth: AppDimensions.minTouchTarget,
+                minHeight: AppDimensions.minTouchTarget,
+              ),
+            ),
           ),
         ),
       ],
@@ -103,13 +112,22 @@ class _CollapsedHeader extends StatelessWidget {
 
     return Center(
       key: const ValueKey('collapsed'),
-      child: IconButton(
-        tooltip: l10n.homeSidebarExpandTooltip,
-        onPressed: () => context.read<NavigationBloc>().add(const SidebarToggled()),
-        icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
-        constraints: const BoxConstraints(
-          minWidth: AppDimensions.minTouchTarget,
-          minHeight: AppDimensions.minTouchTarget,
+      child: Semantics(
+        button: true,
+        label: l10n.homeSidebarNavigationLabel,
+        hint: l10n.homeSidebarExpandTooltip,
+        toggled: false,
+        child: ExcludeSemantics(
+          child: IconButton(
+            tooltip: l10n.homeSidebarExpandTooltip,
+            onPressed: () =>
+                context.read<NavigationBloc>().add(const SidebarToggled()),
+            icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+            constraints: const BoxConstraints(
+              minWidth: AppDimensions.minTouchTarget,
+              minHeight: AppDimensions.minTouchTarget,
+            ),
+          ),
         ),
       ),
     );
