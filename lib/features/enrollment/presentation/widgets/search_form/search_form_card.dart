@@ -5,10 +5,14 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 
 class SearchFormCard extends StatelessWidget {
   final Widget child;
+  final EdgeInsetsGeometry padding;
+  final bool showShadow;
 
   const SearchFormCard({
     super.key,
     required this.child,
+    this.padding = const EdgeInsets.all(AppDimensions.spacingM),
+    this.showShadow = true,
   });
 
   @override
@@ -19,15 +23,17 @@ class SearchFormCard extends StatelessWidget {
         color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: AppDimensions.spacingM,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: AppDimensions.spacingM,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      padding: padding,
       child: child,
     );
   }

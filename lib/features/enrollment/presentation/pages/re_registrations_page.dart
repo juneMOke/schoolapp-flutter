@@ -7,8 +7,8 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_r
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -45,134 +46,135 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     return AppPageBackground(
       scrollable: false,
       child: BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
-            builder: (context, bootstrapState) {
-        final schoolId = context.select(
-          (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
-        );
+        builder: (context, bootstrapState) {
+          final schoolId = context.select(
+            (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
+          );
 
-        if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-            bootstrapState.status == BootstrapContextLoadStatus.initial) {
-          return const Center(
-            child: Padding(
-              padding: EnrollmentPageLayout.loadingPadding,
-              child: CircularProgressIndicator(),
+          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+              bootstrapState.status == BootstrapContextLoadStatus.initial) {
+            return const Center(
+              child: Padding(
+                padding: EnrollmentPageLayout.loadingPadding,
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          if (bootstrapState.status != BootstrapContextLoadStatus.success ||
+              schoolId.isEmpty) {
+            return BootstrapContextError(
+              onLogout: () =>
+                  context.read<AuthBloc>().add(const AuthLogoutRequested()),
+            );
+          }
+
+          final academicOptions =
+              ReRegistrationsPageHelpers.buildAcademicOptions(
+                bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+              );
+
+          return AnimatedSwitcher(
+            duration: FinanceMotion.standard,
+            switchInCurve: FinanceMotion.outCurve,
+            switchOutCurve: FinanceMotion.inCurve,
+            child: Column(
+              key: ValueKey<String>('re-reg-content-${bootstrapState.status}'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                  buildWhen: (previous, current) =>
+                      previous.summariesStatus != current.summariesStatus,
+                  builder: (context, enrollmentState) {
+                    final isLoading =
+                        enrollmentState.summariesStatus ==
+                        EnrollmentLoadStatus.loading;
+
+                    return ReRegistrationSearchForm(
+                      options: academicOptions,
+                      isLoading: isLoading,
+                      onSearch: (request) {
+                        context.read<EnrollmentBloc>().add(
+                          EnrollmentSummariesByAcademicInfoRequested(
+                            firstName: request.firstName,
+                            lastName: request.lastName,
+                            surname: request.surname,
+                            schoolLevelGroupId: request.schoolLevelGroupId,
+                            schoolLevelId: request.schoolLevelId,
+                            page: 0,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
+                BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                  builder: (context, state) {
+                    final hasAcademicSearch =
+                        state.summariesQueryType ==
+                        EnrollmentSummaryQueryType.byAcademicInfo;
+
+                    if (!hasAcademicSearch) {
+                      return const _SearchInvitationCard();
+                    }
+
+                    return EnrollmentDataTable(
+                      isLoading:
+                          state.summariesStatus == EnrollmentLoadStatus.loading,
+                      enrollments: state.summaries,
+                      totalCount: state.summariesTotalElements,
+                      onViewRequested: (summary) {
+                        final intent = EnrollmentDetailIntent.reRegistration(
+                          enrollmentId: summary.enrollmentId,
+                          studentId: summary.student.id,
+                        );
+                        context.push(
+                          Uri(
+                            path:
+                                '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
+                            queryParameters: intent.toQueryParameters(),
+                          ).toString(),
+                          extra: intent,
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
+                BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                  buildWhen: (previous, current) =>
+                      previous.summariesPage != current.summariesPage ||
+                      previous.summariesTotalPages !=
+                          current.summariesTotalPages ||
+                      previous.summariesStatus != current.summariesStatus,
+                  builder: (context, state) {
+                    if (state.summariesTotalPages <= 1) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return _PaginationBar(
+                      currentPage: state.summariesPage,
+                      totalPages: state.summariesTotalPages,
+                      isLoading:
+                          state.summariesStatus == EnrollmentLoadStatus.loading,
+                      onPrevious: () => context.read<EnrollmentBloc>().add(
+                        EnrollmentSummariesPageRequested(
+                          page: state.summariesPage - 1,
+                        ),
+                      ),
+                      onNext: () => context.read<EnrollmentBloc>().add(
+                        EnrollmentSummariesPageRequested(
+                          page: state.summariesPage + 1,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           );
-        }
-
-        if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-            schoolId.isEmpty) {
-          return BootstrapContextError(
-            onLogout: () =>
-                context.read<AuthBloc>().add(const AuthLogoutRequested()),
-          );
-        }
-
-        final academicOptions = ReRegistrationsPageHelpers.buildAcademicOptions(
-          bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
-        );
-
-        return AnimatedSwitcher(
-          duration: FinanceMotion.standard,
-          switchInCurve: FinanceMotion.outCurve,
-          switchOutCurve: FinanceMotion.inCurve,
-          child: Column(
-            key: ValueKey<String>('re-reg-content-${bootstrapState.status}'),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                buildWhen: (previous, current) =>
-                    previous.summariesStatus != current.summariesStatus,
-                builder: (context, enrollmentState) {
-                  final isLoading =
-                      enrollmentState.summariesStatus ==
-                      EnrollmentLoadStatus.loading;
-
-                  return ReRegistrationSearchForm(
-                    options: academicOptions,
-                    isLoading: isLoading,
-                    onSearch: (request) {
-                      context.read<EnrollmentBloc>().add(
-                        EnrollmentSummariesByAcademicInfoRequested(
-                          firstName: request.firstName,
-                          lastName: request.lastName,
-                          surname: request.surname,
-                          schoolLevelGroupId: request.schoolLevelGroupId,
-                          schoolLevelId: request.schoolLevelId,
-                          page: 0,
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
-              BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                builder: (context, state) {
-                  final hasAcademicSearch =
-                      state.summariesQueryType ==
-                      EnrollmentSummaryQueryType.byAcademicInfo;
-
-                  if (!hasAcademicSearch) {
-                    return const _SearchInvitationCard();
-                  }
-
-                  return EnrollmentDataTable(
-                    isLoading:
-                        state.summariesStatus ==
-                        EnrollmentLoadStatus.loading,
-                    enrollments: state.summaries,
-                    totalCount: state.summariesTotalElements,
-                    onViewRequested: (summary) {
-                      final intent = EnrollmentDetailIntent.reRegistration(
-                        enrollmentId: summary.enrollmentId,
-                        studentId: summary.student.id,
-                      );
-                      context.push(
-                        Uri(
-                          path:
-                              '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
-                          queryParameters: intent.toQueryParameters(),
-                        ).toString(),
-                        extra: intent,
-                      );
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
-              BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                buildWhen: (previous, current) =>
-                    previous.summariesPage != current.summariesPage ||
-                    previous.summariesTotalPages != current.summariesTotalPages ||
-                    previous.summariesStatus != current.summariesStatus,
-                builder: (context, state) {
-                  if (state.summariesTotalPages <= 1) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return _PaginationBar(
-                    currentPage: state.summariesPage,
-                    totalPages: state.summariesTotalPages,
-                    isLoading:
-                        state.summariesStatus == EnrollmentLoadStatus.loading,
-                    onPrevious: () => context.read<EnrollmentBloc>().add(
-                      EnrollmentSummariesPageRequested(
-                        page: state.summariesPage - 1,
-                      ),
-                    ),
-                    onNext: () => context.read<EnrollmentBloc>().add(
-                      EnrollmentSummariesPageRequested(
-                        page: state.summariesPage + 1,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
+        },
       ),
     );
   }
@@ -185,14 +187,9 @@ class _SearchInvitationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      width: double.infinity,
+    return SearchFormCard(
+      showShadow: false,
       padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 24),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
