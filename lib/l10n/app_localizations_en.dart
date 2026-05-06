@@ -1702,4 +1702,133 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signOutAction => 'Sign out';
+
+  @override
+  String get disciplinaryDetailBackLabel => 'Back to disciplines';
+
+  @override
+  String get disciplinaryHeroTitle => 'Disciplinary case file detail';
+
+  @override
+  String get disciplinaryHeroChipCases => 'Disciplinary cases';
+
+  @override
+  String get disciplinaryDetailContextErrorTitle => 'Detail context unavailable';
+
+  @override
+  String get disciplinaryDetailContextErrorMessage => 'Required context for this detail view is missing. Go back to the list and open the detail again.';
+
+  @override
+  String get disciplinaryTabCasesLabel => 'Disciplinary cases';
+
+  @override
+  String get disciplinaryCaseCreateAction => 'New case';
+
+  @override
+  String get disciplinaryCaseCreateCtaSubtitle => 'Document a new disciplinary incident for this student.';
+
+  @override
+  String get disciplinaryCasesTableTitleColumn => 'Title';
+
+  @override
+  String get disciplinaryCasesTableStatusColumn => 'Status';
+
+  @override
+  String get disciplinaryCasesTableActionColumn => 'Actions';
+
+  @override
+  String get disciplinaryCaseViewLabel => 'View case';
+
+  @override
+  String get disciplinaryCasesLoadingMessage => 'Loading disciplinary cases...';
+
+  @override
+  String get disciplinaryCasesEmptyMessage => 'No disciplinary cases for this student.';
+
+  @override
+  String get disciplinaryCaseViewDialogTitle => 'Disciplinary case detail';
+
+  @override
+  String get disciplinaryCaseViewDialogSectionTitle => 'Case information';
+
+  @override
+  String get disciplinaryCaseViewDialogTitleField => 'Title';
+
+  @override
+  String get disciplinaryCaseViewDialogStatusField => 'Status';
+
+  @override
+  String get disciplinaryCaseViewDialogContentField => 'Content';
+
+  @override
+  String get disciplinaryCaseViewDialogLoadingMessage => 'Loading case detail...';
+
+  @override
+  String get disciplinaryCaseViewDialogErrorMessage => 'Unable to load case detail';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitle => 'Create disciplinary case';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleField => 'Case title';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleHint => 'Give a brief case description';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentField => 'Content';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentHint => 'Disciplinary case details';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateField => 'Case date';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateHint => 'Select date';
+
+  @override
+  String get disciplinaryCaseCreateDialogSubmitAction => 'Create case';
+
+  @override
+  String get disciplinaryCaseCreateDialogCreatingMessage => 'Creating...';
+
+  @override
+  String get disciplinaryCaseCreateDialogSuccessMessage => 'Disciplinary case created successfully.';
+
+  @override
+  String get disciplinaryCaseCreateDialogRequiredFieldError => 'This field is required.';
+
+  @override
+  String get disciplinaryCasesNetworkError => 'Check your internet connection and try again.';
+
+  @override
+  String get disciplinaryCasesNotFound => 'No disciplinary cases found.';
+
+  @override
+  String get disciplinaryCasesValidationError => 'Requested data is invalid.';
+
+  @override
+  String get disciplinaryCasesUnauthorizedError => 'You are not authorized to access these cases.';
+
+  @override
+  String get disciplinaryCasesInvalidCredentialsError => 'Your credentials do not allow access to cases.';
+
+  @override
+  String get disciplinaryCasesServerError => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get disciplinaryCasesStorageError => 'A local storage error occurred.';
+
+  @override
+  String get disciplinaryCasesAuthError => 'An authentication error prevents loading cases.';
+
+  @override
+  String get disciplinaryCasesUnknownError => 'An unexpected error occurred.';
+
+  @override
+  String get disciplinaryCaseStatusOpen => 'Open';
+
+  @override
+  String get disciplinaryCaseStatusUnknown => 'Unknown';
 }

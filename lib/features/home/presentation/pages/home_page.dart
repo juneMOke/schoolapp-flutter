@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
@@ -129,7 +130,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.facturationsId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
-        state.selectedSubMenuId == MenuConstants.presencesId;
+        state.selectedSubMenuId == MenuConstants.presencesId ||
+        state.selectedSubMenuId == MenuConstants.disciplinesListId;
 
     return Container(
       width: double.infinity,
@@ -202,9 +204,15 @@ class _HomePageView extends StatelessWidget {
       case MenuConstants.organisationId:
         return const ClassesFeatureScope(child: ClassesOrganisationPage());
       case MenuConstants.classesListId:
-        return const ClassesFeatureScope(child: ClassesListPage());
+        return const ClassesFeatureScope(
+          child: ClassesListPage(intent: ClassesListIntent.classesList()),
+        );
       case MenuConstants.presencesId:
         return const AttendanceFeatureScope(child: PresencesPage());
+      case MenuConstants.disciplinesListId:
+        return const ClassesFeatureScope(
+          child: ClassesListPage(intent: ClassesListIntent.disciplinesList()),
+        );
       default:
         return Container(
           width: double.infinity,

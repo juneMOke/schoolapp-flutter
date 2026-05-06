@@ -51,11 +51,19 @@ class AppRoutesNames {
   }) =>
       '/finances/${MenuConstants.facturationsId}/create-payment/$studentId/$academicYearId';
 
-  static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
-  static const String organisation = '/classes/${MenuConstants.organisationId}';
-  static const String classesList = '/classes/${MenuConstants.classesListId}';
+   static const String classesDashboard = '/classes/${MenuConstants.classesDashboardId}';
+   static const String organisation = '/classes/${MenuConstants.organisationId}';
+   static const String classesList = '/classes/${MenuConstants.classesListId}';
 
-  static const String disciplinesDashboard = '/disciplines/${MenuConstants.disciplinesDashboardId}';
-  static const String presences = '/disciplines/${MenuConstants.presencesId}';
-  static const String disciplinesList = '/disciplines/${MenuConstants.disciplinesListId}';
+   static const String disciplinesDashboard = '/disciplines/${MenuConstants.disciplinesDashboardId}';
+   static const String presences = '/disciplines/${MenuConstants.presencesId}';
+   static const String disciplinaryStudentDetail =
+       '/disciplines/${MenuConstants.presencesId}/student/:studentId/:academicYearId';
+   static const String disciplinesList = '/disciplines/${MenuConstants.disciplinesListId}';
+
+   static String disciplinaryStudentDetailPath({
+     required String studentId,
+     required String academicYearId,
+   }) =>
+       '/disciplines/${MenuConstants.presencesId}/student/$studentId/$academicYearId';
 }

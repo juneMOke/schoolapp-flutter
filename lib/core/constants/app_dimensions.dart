@@ -18,6 +18,7 @@ class AppDimensions {
   static const detailHeaderIconSize = 24.0;
   static const detailMiniIconSize = 16.0;
   static const detailHeroAvatarSize = 64.0;
+  static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;

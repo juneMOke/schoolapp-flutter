@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
+import 'package:school_app_flutter/features/classes/presentation/context/classes_list_policy.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -22,7 +24,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/boot
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListPage extends StatefulWidget {
-  const ClassesListPage({super.key});
+  final ClassesListIntent intent;
+
+  const ClassesListPage({super.key, required this.intent});
 
   @override
   State<ClassesListPage> createState() => _ClassesListPageState();
@@ -30,10 +34,12 @@ class ClassesListPage extends StatefulWidget {
 
 class _ClassesListPageState extends State<ClassesListPage> {
   ClassesListSearchRequest? _lastRequest;
+  late ClassesListPolicy _policy;
 
   @override
   void initState() {
     super.initState();
+    _policy = ClassesListPolicyResolver.fromIntent(widget.intent);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
@@ -42,6 +48,14 @@ class _ClassesListPageState extends State<ClassesListPage> {
         const BootstrapContextLocalRequested(key: AppConstants.bootstrapPayloadKey),
       );
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ClassesListPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.intent != widget.intent) {
+      _policy = ClassesListPolicyResolver.fromIntent(widget.intent);
+    }
   }
 
   @override
@@ -211,13 +225,19 @@ class _ClassesListPageState extends State<ClassesListPage> {
     );
   }
 
-  void _onEnrollmentViewRequested(EnrollmentSummary _) {
-    final l10n = AppLocalizations.of(context)!;
-    AppSnackBar.showInfo(context, l10n.classesListStudentDetailSoon);
+  void _onEnrollmentViewRequested(EnrollmentSummary summary) {
+    _policy.onEnrollmentViewRequested(
+      context,
+      summary,
+      request: _lastRequest,
+    );
   }
 
-  void _onClassroomMemberViewRequested(ClassroomMember _) {
-    final l10n = AppLocalizations.of(context)!;
-    AppSnackBar.showInfo(context, l10n.classesListStudentDetailSoon);
+  void _onClassroomMemberViewRequested(ClassroomMember member) {
+    _policy.onClassroomMemberViewRequested(
+      context,
+      member,
+      request: _lastRequest,
+    );
   }
 }

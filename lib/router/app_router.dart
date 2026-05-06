@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
+import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/disciplinary_student_detail_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -200,6 +202,15 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: 'detail/:studentId/:academicYearId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                    ])) {
+                      return AppRoutesNames.facturations;
+                    }
+                    return null;
+                  },
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =
@@ -216,6 +227,16 @@ class AppRouter {
                 ),
                 GoRoute(
                   path: 'payment/:studentId/:academicYearId/:paymentId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                      'paymentId',
+                    ])) {
+                      return AppRoutesNames.facturations;
+                    }
+                    return null;
+                  },
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =
@@ -234,6 +255,16 @@ class AppRouter {
                 ),
                 GoRoute(
                   path: 'charge/:studentId/:academicYearId/:chargeId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                      'chargeId',
+                    ])) {
+                      return AppRoutesNames.facturations;
+                    }
+                    return null;
+                  },
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =
@@ -252,6 +283,15 @@ class AppRouter {
                 ),
                 GoRoute(
                   path: 'create-payment/:studentId/:academicYearId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                    ])) {
+                      return AppRoutesNames.facturations;
+                    }
+                    return null;
+                  },
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =
@@ -278,9 +318,49 @@ class AppRouter {
               path: AppRoutesNames.presences,
               builder: (context, state) => const PresencesPage(),
             ),
+            GoRoute(
+              path: AppRoutesNames.disciplinaryStudentDetail,
+              redirect: (context, state) {
+                final studentId = state.pathParameters['studentId'] ?? '';
+                final academicYearId =
+                    state.pathParameters['academicYearId'] ?? '';
+
+                if (studentId.trim().isEmpty || academicYearId.trim().isEmpty) {
+                  return AppRoutesNames.presences;
+                }
+
+                return null;
+              },
+              builder: (context, state) {
+                final studentId = state.pathParameters['studentId'] ?? '';
+                final academicYearId =
+                    state.pathParameters['academicYearId'] ?? '';
+
+                final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
+                  studentId: studentId,
+                  academicYearId: academicYearId,
+                  extra: state.extra,
+                );
+
+                return DisciplinaryStudentDetailPage(intent: intent);
+              },
+            ),
           ],
         ),
       ],
     );
+  }
+
+  static bool _hasRequiredPathParameters(
+    GoRouterState state,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = state.pathParameters[key] ?? '';
+      if (value.trim().isEmpty) {
+        return false;
+      }
+    }
+    return true;
   }
 }

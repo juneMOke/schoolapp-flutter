@@ -3370,6 +3370,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get signOutAction;
+
+  /// No description provided for @disciplinaryDetailBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to disciplines'**
+  String get disciplinaryDetailBackLabel;
+
+  /// No description provided for @disciplinaryHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case file detail'**
+  String get disciplinaryHeroTitle;
+
+  /// No description provided for @disciplinaryHeroChipCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary cases'**
+  String get disciplinaryHeroChipCases;
+
+  /// No description provided for @disciplinaryDetailContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail context unavailable'**
+  String get disciplinaryDetailContextErrorTitle;
+
+  /// No description provided for @disciplinaryDetailContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Required context for this detail view is missing. Go back to the list and open the detail again.'**
+  String get disciplinaryDetailContextErrorMessage;
+
+  /// No description provided for @disciplinaryTabCasesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary cases'**
+  String get disciplinaryTabCasesLabel;
+
+  /// No description provided for @disciplinaryCaseCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New case'**
+  String get disciplinaryCaseCreateAction;
+
+  /// No description provided for @disciplinaryCaseCreateCtaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document a new disciplinary incident for this student.'**
+  String get disciplinaryCaseCreateCtaSubtitle;
+
+  /// No description provided for @disciplinaryCasesTableTitleColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get disciplinaryCasesTableTitleColumn;
+
+  /// No description provided for @disciplinaryCasesTableStatusColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get disciplinaryCasesTableStatusColumn;
+
+  /// No description provided for @disciplinaryCasesTableActionColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get disciplinaryCasesTableActionColumn;
+
+  /// No description provided for @disciplinaryCaseViewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View case'**
+  String get disciplinaryCaseViewLabel;
+
+  /// No description provided for @disciplinaryCasesLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading disciplinary cases...'**
+  String get disciplinaryCasesLoadingMessage;
+
+  /// No description provided for @disciplinaryCasesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No disciplinary cases for this student.'**
+  String get disciplinaryCasesEmptyMessage;
+
+  /// No description provided for @disciplinaryCaseViewDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case detail'**
+  String get disciplinaryCaseViewDialogTitle;
+
+  /// No description provided for @disciplinaryCaseViewDialogSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Case information'**
+  String get disciplinaryCaseViewDialogSectionTitle;
+
+  /// No description provided for @disciplinaryCaseViewDialogTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get disciplinaryCaseViewDialogTitleField;
+
+  /// No description provided for @disciplinaryCaseViewDialogStatusField.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get disciplinaryCaseViewDialogStatusField;
+
+  /// No description provided for @disciplinaryCaseViewDialogContentField.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get disciplinaryCaseViewDialogContentField;
+
+  /// No description provided for @disciplinaryCaseViewDialogLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading case detail...'**
+  String get disciplinaryCaseViewDialogLoadingMessage;
+
+  /// No description provided for @disciplinaryCaseViewDialogErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load case detail'**
+  String get disciplinaryCaseViewDialogErrorMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create disciplinary case'**
+  String get disciplinaryCaseCreateDialogTitle;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Case title'**
+  String get disciplinaryCaseCreateDialogTitleField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a brief case description'**
+  String get disciplinaryCaseCreateDialogTitleHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogContentField.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get disciplinaryCaseCreateDialogContentField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case details'**
+  String get disciplinaryCaseCreateDialogContentHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCaseDateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Case date'**
+  String get disciplinaryCaseCreateDialogCaseDateField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCaseDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get disciplinaryCaseCreateDialogCaseDateHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogSubmitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create case'**
+  String get disciplinaryCaseCreateDialogSubmitAction;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCreatingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get disciplinaryCaseCreateDialogCreatingMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case created successfully.'**
+  String get disciplinaryCaseCreateDialogSuccessMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogRequiredFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get disciplinaryCaseCreateDialogRequiredFieldError;
+
+  /// No description provided for @disciplinaryCasesNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get disciplinaryCasesNetworkError;
+
+  /// No description provided for @disciplinaryCasesNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No disciplinary cases found.'**
+  String get disciplinaryCasesNotFound;
+
+  /// No description provided for @disciplinaryCasesValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested data is invalid.'**
+  String get disciplinaryCasesValidationError;
+
+  /// No description provided for @disciplinaryCasesUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to access these cases.'**
+  String get disciplinaryCasesUnauthorizedError;
+
+  /// No description provided for @disciplinaryCasesInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to cases.'**
+  String get disciplinaryCasesInvalidCredentialsError;
+
+  /// No description provided for @disciplinaryCasesServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Server is unavailable. Please try again later.'**
+  String get disciplinaryCasesServerError;
+
+  /// No description provided for @disciplinaryCasesStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local storage error occurred.'**
+  String get disciplinaryCasesStorageError;
+
+  /// No description provided for @disciplinaryCasesAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading cases.'**
+  String get disciplinaryCasesAuthError;
+
+  /// No description provided for @disciplinaryCasesUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get disciplinaryCasesUnknownError;
+
+  /// No description provided for @disciplinaryCaseStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get disciplinaryCaseStatusOpen;
+
+  /// No description provided for @disciplinaryCaseStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get disciplinaryCaseStatusUnknown;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,0 +1,4 @@
+enum ClassesListOrigin {
+  classesList,
+  disciplinesList,
+}

@@ -1,17 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 part 'attendance_record_model.g.dart';
-
-DateTime _dateOnlyFromJson(String value) => DateTime.parse(value);
-
-String _dateOnlyToJson(DateTime date) =>
-    '${date.year.toString().padLeft(4, '0')}-'
-    '${date.month.toString().padLeft(2, '0')}-'
-    '${date.day.toString().padLeft(2, '0')}';
 
 @JsonSerializable()
 class AttendanceRecordModel extends Equatable {
@@ -23,7 +17,7 @@ class AttendanceRecordModel extends Equatable {
   final String studentGender;
   final String classroomId;
   final String academicYearId;
-  @JsonKey(fromJson: _dateOnlyFromJson, toJson: _dateOnlyToJson)
+  @JsonKey(fromJson: DateOnlyJsonHelper.fromJson, toJson: DateOnlyJsonHelper.toJson)
   final DateTime attendanceDate;
   final bool present;
   final String? absenceReason;

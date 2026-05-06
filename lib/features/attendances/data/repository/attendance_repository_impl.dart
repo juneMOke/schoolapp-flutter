@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/features/attendances/data/models/daily_attendance_command_model.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
@@ -26,7 +27,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       final models = await remoteDataSource.listAttendanceForClass(
         requiredAuth,
         classroomId,
-        _formatDate(date),
+        DateOnlyJsonHelper.toJson(date),
         academicYearId,
       );
 
@@ -65,9 +66,4 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
-
-  String _formatDate(DateTime date) =>
-      '${date.year.toString().padLeft(4, '0')}-'
-      '${date.month.toString().padLeft(2, '0')}-'
-      '${date.day.toString().padLeft(2, '0')}';
 }

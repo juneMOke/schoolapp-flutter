@@ -100,6 +100,9 @@ class AppConstants {
   static const String attendanceEndpoint = '/api/v1/attendances';
   static const String attendanceByClassroomEndpoint =
       '/api/v1/attendances/classes/{classroomId}';
+  static const String disciplinaryCasesEndpoint = '/api/v1/disciplinary-cases';
+  static const String disciplinaryCaseByIdEndpoint =
+      '/api/v1/disciplinary-cases/{caseId}';
 
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.

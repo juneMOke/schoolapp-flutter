@@ -1,21 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/features/attendances/data/models/attendance_update_model.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
 
 part 'daily_attendance_command_model.g.dart';
 
-DateTime _dateOnlyFromJson(String value) => DateTime.parse(value);
-
-String _dateOnlyToJson(DateTime date) =>
-    '${date.year.toString().padLeft(4, '0')}-'
-    '${date.month.toString().padLeft(2, '0')}-'
-    '${date.day.toString().padLeft(2, '0')}';
-
 @JsonSerializable(explicitToJson: true)
 class DailyAttendanceCommandModel extends Equatable {
   final String classroomId;
-  @JsonKey(fromJson: _dateOnlyFromJson, toJson: _dateOnlyToJson)
+  @JsonKey(fromJson: DateOnlyJsonHelper.fromJson, toJson: DateOnlyJsonHelper.toJson)
   final DateTime date;
   final String academicYearId;
   final List<AttendanceUpdateModel> updates;

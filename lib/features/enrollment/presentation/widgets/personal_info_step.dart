@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
@@ -211,14 +212,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
   DateTime? _formatSelectedDate(StudentDetail student) {
     try {
-      final parts = student.dateOfBirth.split('-');
-      if (parts.length == 3) {
-        return DateTime(
-          int.parse(parts[0]),
-          int.parse(parts[1]),
-          int.parse(parts[2]),
-        );
-      }
+      return DateOnlyJsonHelper.fromJson(student.dateOfBirth);
     } catch (_) {}
 
     return null;
@@ -331,10 +325,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
   String _toIsoDate(DateTime? date) {
     if (date == null) return widget.studentDetail.dateOfBirth;
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
+    return DateOnlyJsonHelper.toJson(date);
   }
 
   void submitForm() {

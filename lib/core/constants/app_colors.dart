@@ -67,11 +67,20 @@ class AppColors {
   static const financeDetailPaymentsTitle = Color(0xFF3F51B5);
   static const financeDetailChargesTitle = Color(0xFF2E7D32);
 
-  static const financeDetailChargeRowPaid = Color(0xFFF1FAF2);
-  static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
-  static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
+   static const financeDetailChargeRowPaid = Color(0xFFF1FAF2);
+   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
+   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
 
-  // Classes organisation palette
+   // Disciplinary detail palette
+   static const disciplinaryDetailCard = Color(0xFFFFFFFF);
+   static const disciplinaryDetailAccent = Color(0xFFDC2626);
+   static const disciplinaryDetailAccentSoft = Color(0xFFFEE2E2);
+   static const disciplinaryDetailTeal = Color(0xFF0891B2);
+   static const disciplinaryDetailTealSoft = Color(0xFFE0F2FE);
+   static const disciplinaryDetailInfoSurface = Color(0xFFF8F1F6);
+   static const disciplinaryDetailShadow = Color(0x14243352);
+
+   // Classes organisation palette
   static const classesHeroGradientStart = Color(0xFFEAF2FF);
   static const classesHeroGradientEnd = Color(0xFFF2F8FF);
   static const classesSectionSurface = Color(0xFFF9FBFF);

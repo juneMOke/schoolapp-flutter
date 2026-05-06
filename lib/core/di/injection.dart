@@ -6,11 +6,18 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/attendance_repository_impl.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/disciplinary_case_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/attendance_repository.dart';
+import 'package:school_app_flutter/features/attendances/domain/repository/disciplinary_case_repository.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/create_disciplinary_case_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_list_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/update_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -702,6 +709,38 @@ Future<void> configureDependencies() async {
     () => AttendanceBloc(
       getAttendanceUseCase: getIt<GetAttendanceUseCase>(),
       updateAttendanceUseCase: getIt<UpdateAttendanceUseCase>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<DisciplinaryCaseRemoteDataSource>(
+    () => DisciplinaryCaseRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<DisciplinaryCaseRepository>(
+    () => DisciplinaryCaseRepositoryImpl(
+      remoteDataSource: getIt<DisciplinaryCaseRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetDisciplinaryCaseListUseCase>(
+    () => GetDisciplinaryCaseListUseCase(getIt<DisciplinaryCaseRepository>()),
+  );
+
+  getIt.registerFactory<GetDisciplinaryCaseDetailUseCase>(
+    () => GetDisciplinaryCaseDetailUseCase(getIt<DisciplinaryCaseRepository>()),
+  );
+
+  getIt.registerFactory<CreateDisciplinaryCaseUseCase>(
+    () => CreateDisciplinaryCaseUseCase(getIt<DisciplinaryCaseRepository>()),
+  );
+
+  getIt.registerFactory<DisciplinaryCaseBloc>(
+    () => DisciplinaryCaseBloc(
+      getDisciplinaryCaseListUseCase: getIt<GetDisciplinaryCaseListUseCase>(),
+      getDisciplinaryCaseDetailUseCase:
+          getIt<GetDisciplinaryCaseDetailUseCase>(),
+      createDisciplinaryCaseUseCase: getIt<CreateDisciplinaryCaseUseCase>(),
     ),
   );
 }

@@ -1702,4 +1702,133 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signOutAction => 'Se déconnecter';
+
+  @override
+  String get disciplinaryDetailBackLabel => 'Retour aux disciplines';
+
+  @override
+  String get disciplinaryHeroTitle => 'Détail du dossier disciplinaire';
+
+  @override
+  String get disciplinaryHeroChipCases => 'Cas disciplinaires';
+
+  @override
+  String get disciplinaryDetailContextErrorTitle => 'Contexte de détail indisponible';
+
+  @override
+  String get disciplinaryDetailContextErrorMessage => 'Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.';
+
+  @override
+  String get disciplinaryTabCasesLabel => 'Cas disciplinaires';
+
+  @override
+  String get disciplinaryCaseCreateAction => 'Nouveau cas';
+
+  @override
+  String get disciplinaryCaseCreateCtaSubtitle => 'Documentez un nouvel incident disciplinaire pour cet élève.';
+
+  @override
+  String get disciplinaryCasesTableTitleColumn => 'Titre';
+
+  @override
+  String get disciplinaryCasesTableStatusColumn => 'Statut';
+
+  @override
+  String get disciplinaryCasesTableActionColumn => 'Actions';
+
+  @override
+  String get disciplinaryCaseViewLabel => 'Voir le cas';
+
+  @override
+  String get disciplinaryCasesLoadingMessage => 'Chargement des cas disciplinaires...';
+
+  @override
+  String get disciplinaryCasesEmptyMessage => 'Aucun cas disciplinaire pour cet élève.';
+
+  @override
+  String get disciplinaryCaseViewDialogTitle => 'Détail du cas disciplinaire';
+
+  @override
+  String get disciplinaryCaseViewDialogSectionTitle => 'Informations du cas';
+
+  @override
+  String get disciplinaryCaseViewDialogTitleField => 'Titre';
+
+  @override
+  String get disciplinaryCaseViewDialogStatusField => 'Statut';
+
+  @override
+  String get disciplinaryCaseViewDialogContentField => 'Contenu';
+
+  @override
+  String get disciplinaryCaseViewDialogLoadingMessage => 'Chargement du détail du cas...';
+
+  @override
+  String get disciplinaryCaseViewDialogErrorMessage => 'Impossible de charger le détail du cas';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitle => 'Créer un cas disciplinaire';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleField => 'Titre du cas';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleHint => 'Décrivez brièvement le cas';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentField => 'Contenu';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentHint => 'Détails du cas disciplinaire';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateField => 'Date du cas';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateHint => 'Sélectionner la date';
+
+  @override
+  String get disciplinaryCaseCreateDialogSubmitAction => 'Créer le cas';
+
+  @override
+  String get disciplinaryCaseCreateDialogCreatingMessage => 'Création en cours...';
+
+  @override
+  String get disciplinaryCaseCreateDialogSuccessMessage => 'Cas disciplinaire créé avec succès.';
+
+  @override
+  String get disciplinaryCaseCreateDialogRequiredFieldError => 'Ce champ est obligatoire.';
+
+  @override
+  String get disciplinaryCasesNetworkError => 'Vérifiez votre connexion internet puis réessayez.';
+
+  @override
+  String get disciplinaryCasesNotFound => 'Aucun cas disciplinaire trouvé.';
+
+  @override
+  String get disciplinaryCasesValidationError => 'Les données demandées sont invalides.';
+
+  @override
+  String get disciplinaryCasesUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter ces cas.';
+
+  @override
+  String get disciplinaryCasesInvalidCredentialsError => 'Vos identifiants ne permettent pas d\'accéder aux cas.';
+
+  @override
+  String get disciplinaryCasesServerError => 'Le serveur est indisponible. Réessayez plus tard.';
+
+  @override
+  String get disciplinaryCasesStorageError => 'Une erreur de stockage local est survenue.';
+
+  @override
+  String get disciplinaryCasesAuthError => 'Une erreur d\'authentification empêche le chargement des cas.';
+
+  @override
+  String get disciplinaryCasesUnknownError => 'Une erreur inattendue est survenue.';
+
+  @override
+  String get disciplinaryCaseStatusOpen => 'Ouvert';
+
+  @override
+  String get disciplinaryCaseStatusUnknown => 'Inconnu';
 }
