@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summaries_widget.dart';
@@ -14,8 +15,9 @@ class FirstRegistrationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      body: EnrollmentSummariesWidget(
+    return AppPageBackground(
+      scrollable: false,
+      child: EnrollmentSummariesWidget(
         status: 'IN_PROGRESS',
         showStatusBadge: false,
         showStatusFilter: true,

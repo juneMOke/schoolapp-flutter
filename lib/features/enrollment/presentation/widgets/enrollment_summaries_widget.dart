@@ -62,139 +62,98 @@ class _EnrollmentSummariesWidgetState extends State<EnrollmentSummariesWidget> {
     return BlocListener<BootstrapCurrentYearBloc, BootstrapContextState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) => _requestSummariesIfContextAvailable(),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF4F8FF), Color(0xFFEFF5FF), Color(0xFFF7FAFF)],
+      child: RefreshIndicator(
+        onRefresh: _requestSummariesIfContextAvailable,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppTheme.largePadding),
+          child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+            builder: (context, bootstrapState) {
+              final academicYearId =
+                  bootstrapState.bootstrap?.academicYear.id ?? '';
+              final schoolId = context.select(
+                (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
+              );
+              final hasBootstrapContext =
+                  bootstrapState.status == BootstrapContextLoadStatus.success &&
+                  academicYearId.isNotEmpty &&
+                  schoolId.isNotEmpty;
+
+              if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+                  bootstrapState.status == BootstrapContextLoadStatus.initial) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 48),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              if (!hasBootstrapContext) {
+                return BootstrapContextError(
+                  onLogout: () =>
+                      context.read<AuthBloc>().add(const AuthLogoutRequested()),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SearchForm(
+                    academicYearId: academicYearId,
+                    status: _effectiveStatus,
+                    showStatusFilter: widget.showStatusFilter,
+                    onStatusChanged: (newStatus) {
+                      setState(() => _effectiveStatus = newStatus);
+                      _requestSummariesIfContextAvailable();
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                    builder: (context, state) => PreRegistrationsInfoBar(
+                      count: state.summariesTotalElements,
+                      isLoading: _isLoading(state),
+                      onRefresh: _requestSummariesIfContextAvailable,
+                      statusLabel: widget.status,
+                      showStatusBadge: widget.showStatusBadge,
+                      currentPage: state.summariesPage,
+                      totalPages: state.summariesTotalPages,
+                      onPreviousPage: () => context.read<EnrollmentBloc>().add(
+                        EnrollmentSummariesPageRequested(
+                          page: state.summariesPage - 1,
+                        ),
+                      ),
+                      onNextPage: () => context.read<EnrollmentBloc>().add(
+                        EnrollmentSummariesPageRequested(
+                          page: state.summariesPage + 1,
+                        ),
+                      ),
+                      action: widget.action,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                    builder: (context, state) => EnrollmentDataTable(
+                      isLoading: _isLoading(state),
+                      enrollments: state.summaries,
+                      totalCount: state.summariesTotalElements,
+                      onViewRequested: (summary) {
+                        final intent = widget.intentFactory(summary);
+                        context.push(
+                          Uri(
+                            path:
+                                '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
+                            queryParameters: intent.toQueryParameters(),
+                          ).toString(),
+                          extra: intent,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -60,
-              right: -50,
-              child: Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 120,
-              left: -40,
-              child: Container(
-                width: 130,
-                height: 130,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            RefreshIndicator(
-              onRefresh: _requestSummariesIfContextAvailable,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(AppTheme.largePadding),
-                child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-                  builder: (context, bootstrapState) {
-                    final academicYearId =
-                        bootstrapState.bootstrap?.academicYear.id ?? '';
-                    final schoolId = context.select(
-                      (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
-                    );
-                    final hasBootstrapContext =
-                        bootstrapState.status ==
-                            BootstrapContextLoadStatus.success &&
-                        academicYearId.isNotEmpty &&
-                        schoolId.isNotEmpty;
-
-                    if (bootstrapState.status ==
-                            BootstrapContextLoadStatus.loading ||
-                        bootstrapState.status ==
-                            BootstrapContextLoadStatus.initial) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 48),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-
-                    if (!hasBootstrapContext) {
-                      return BootstrapContextError(
-                        onLogout: () => context.read<AuthBloc>().add(
-                          const AuthLogoutRequested(),
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SearchForm(
-                          academicYearId: academicYearId,
-                          status: _effectiveStatus,
-                          showStatusFilter: widget.showStatusFilter,
-                          onStatusChanged: (newStatus) {
-                            setState(() => _effectiveStatus = newStatus);
-                            _requestSummariesIfContextAvailable();
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                          builder: (context, state) => PreRegistrationsInfoBar(
-                            count: state.summariesTotalElements,
-                            isLoading: _isLoading(state),
-                            onRefresh: _requestSummariesIfContextAvailable,
-                            statusLabel: widget.status,
-                            showStatusBadge: widget.showStatusBadge,
-                            currentPage: state.summariesPage,
-                            totalPages: state.summariesTotalPages,
-                            onPreviousPage: () => context.read<EnrollmentBloc>().add(
-                              EnrollmentSummariesPageRequested(
-                                page: state.summariesPage - 1,
-                              ),
-                            ),
-                            onNextPage: () => context.read<EnrollmentBloc>().add(
-                              EnrollmentSummariesPageRequested(
-                                page: state.summariesPage + 1,
-                              ),
-                            ),
-                            action: widget.action,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                          builder: (context, state) => EnrollmentDataTable(
-                            isLoading: _isLoading(state),
-                            enrollments: state.summaries,
-                            totalCount: state.summariesTotalElements,
-                            onViewRequested: (summary) {
-                              final intent = widget.intentFactory(summary);
-                              context.push(
-                                Uri(
-                                  path:
-                                      '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
-                                  queryParameters: intent.toQueryParameters(),
-                                ).toString(),
-                                extra: intent,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

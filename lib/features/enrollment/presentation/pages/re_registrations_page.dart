@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
@@ -39,142 +40,131 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF4F8FF), Color(0xFFEFF5FF), Color(0xFFF7FAFF)],
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.largePadding),
-          child: BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
+    return AppPageBackground(
+      scrollable: false,
+      child: BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
             builder: (context, bootstrapState) {
-              final schoolId = context.select(
-                (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
-              );
+        final schoolId = context.select(
+          (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
+        );
 
-              if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                  bootstrapState.status == BootstrapContextLoadStatus.initial) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 48),
-                    child: CircularProgressIndicator(),
+        if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+            bootstrapState.status == BootstrapContextLoadStatus.initial) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (bootstrapState.status != BootstrapContextLoadStatus.success ||
+            schoolId.isEmpty) {
+          return BootstrapContextError(
+            onLogout: () =>
+                context.read<AuthBloc>().add(const AuthLogoutRequested()),
+          );
+        }
+
+        final academicOptions = ReRegistrationsPageHelpers.buildAcademicOptions(
+          bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BlocBuilder<EnrollmentBloc, EnrollmentState>(
+              buildWhen: (previous, current) =>
+                  previous.summariesStatus != current.summariesStatus,
+              builder: (context, enrollmentState) {
+                final isLoading =
+                    enrollmentState.summariesStatus ==
+                    EnrollmentLoadStatus.loading;
+
+                return ReRegistrationSearchForm(
+                  options: academicOptions,
+                  isLoading: isLoading,
+                  onSearch: (request) {
+                    context.read<EnrollmentBloc>().add(
+                      EnrollmentSummariesByAcademicInfoRequested(
+                        firstName: request.firstName,
+                        lastName: request.lastName,
+                        surname: request.surname,
+                        schoolLevelGroupId: request.schoolLevelGroupId,
+                        schoolLevelId: request.schoolLevelId,
+                        page: 0,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+            BlocBuilder<EnrollmentBloc, EnrollmentState>(
+              builder: (context, state) {
+                final hasAcademicSearch =
+                    state.summariesQueryType ==
+                    EnrollmentSummaryQueryType.byAcademicInfo;
+
+                if (!hasAcademicSearch) {
+                  return const _SearchInvitationCard();
+                }
+
+                return EnrollmentDataTable(
+                  isLoading:
+                      state.summariesStatus ==
+                      EnrollmentLoadStatus.loading,
+                  enrollments: state.summaries,
+                  totalCount: state.summariesTotalElements,
+                  onViewRequested: (summary) {
+                    final intent = EnrollmentDetailIntent.reRegistration(
+                      enrollmentId: summary.enrollmentId,
+                      studentId: summary.student.id,
+                    );
+                    context.push(
+                      Uri(
+                        path:
+                            '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
+                        queryParameters: intent.toQueryParameters(),
+                      ).toString(),
+                      extra: intent,
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            BlocBuilder<EnrollmentBloc, EnrollmentState>(
+              buildWhen: (previous, current) =>
+                  previous.summariesPage != current.summariesPage ||
+                  previous.summariesTotalPages != current.summariesTotalPages ||
+                  previous.summariesStatus != current.summariesStatus,
+              builder: (context, state) {
+                if (state.summariesTotalPages <= 1) {
+                  return const SizedBox.shrink();
+                }
+
+                return _PaginationBar(
+                  currentPage: state.summariesPage,
+                  totalPages: state.summariesTotalPages,
+                  isLoading:
+                      state.summariesStatus == EnrollmentLoadStatus.loading,
+                  onPrevious: () => context.read<EnrollmentBloc>().add(
+                    EnrollmentSummariesPageRequested(
+                      page: state.summariesPage - 1,
+                    ),
+                  ),
+                  onNext: () => context.read<EnrollmentBloc>().add(
+                    EnrollmentSummariesPageRequested(
+                      page: state.summariesPage + 1,
+                    ),
                   ),
                 );
-              }
-
-              if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-                  schoolId.isEmpty) {
-                return BootstrapContextError(
-                  onLogout: () =>
-                      context.read<AuthBloc>().add(const AuthLogoutRequested()),
-                );
-              }
-
-              final academicOptions = ReRegistrationsPageHelpers.buildAcademicOptions(
-                bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
-              );
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                    buildWhen: (previous, current) =>
-                        previous.summariesStatus != current.summariesStatus,
-                    builder: (context, enrollmentState) {
-                      final isLoading =
-                          enrollmentState.summariesStatus ==
-                          EnrollmentLoadStatus.loading;
-
-                      return ReRegistrationSearchForm(
-                        options: academicOptions,
-                        isLoading: isLoading,
-                        onSearch: (request) {
-                          context.read<EnrollmentBloc>().add(
-                            EnrollmentSummariesByAcademicInfoRequested(
-                              firstName: request.firstName,
-                              lastName: request.lastName,
-                              surname: request.surname,
-                              schoolLevelGroupId: request.schoolLevelGroupId,
-                              schoolLevelId: request.schoolLevelId,
-                              page: 0,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                    builder: (context, state) {
-                      final hasAcademicSearch =
-                          state.summariesQueryType ==
-                          EnrollmentSummaryQueryType.byAcademicInfo;
-
-                      if (!hasAcademicSearch) {
-                        return const _SearchInvitationCard();
-                      }
-
-                      return EnrollmentDataTable(
-                        isLoading:
-                            state.summariesStatus ==
-                            EnrollmentLoadStatus.loading,
-                        enrollments: state.summaries,
-                        totalCount: state.summariesTotalElements,
-                        onViewRequested: (summary) {
-                          final intent = EnrollmentDetailIntent.reRegistration(
-                            enrollmentId: summary.enrollmentId,
-                            studentId: summary.student.id,
-                          );
-                          context.push(
-                            Uri(
-                              path:
-                                  '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
-                              queryParameters: intent.toQueryParameters(),
-                            ).toString(),
-                            extra: intent,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  BlocBuilder<EnrollmentBloc, EnrollmentState>(
-                    buildWhen: (previous, current) =>
-                        previous.summariesPage != current.summariesPage ||
-                        previous.summariesTotalPages != current.summariesTotalPages ||
-                        previous.summariesStatus != current.summariesStatus,
-                    builder: (context, state) {
-                      if (state.summariesTotalPages <= 1) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return _PaginationBar(
-                        currentPage: state.summariesPage,
-                        totalPages: state.summariesTotalPages,
-                        isLoading:
-                            state.summariesStatus == EnrollmentLoadStatus.loading,
-                        onPrevious: () => context.read<EnrollmentBloc>().add(
-                          EnrollmentSummariesPageRequested(
-                            page: state.summariesPage - 1,
-                          ),
-                        ),
-                        onNext: () => context.read<EnrollmentBloc>().add(
-                          EnrollmentSummariesPageRequested(
-                            page: state.summariesPage + 1,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+              },
+            ),
+          ],
+        );
+      },
       ),
     );
   }
