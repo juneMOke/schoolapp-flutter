@@ -53,7 +53,9 @@ class SearchFormStatusDropdown extends StatelessWidget {
     const borderSide = BorderSide(color: AppColors.border);
 
     return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: borderRadius),
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+      ),
       child: DropdownButtonFormField<String>(
         initialValue: selectedStatus,
         borderRadius: borderRadius,
@@ -102,8 +104,9 @@ class SearchFormStatusDropdown extends StatelessWidget {
         ),
         isExpanded: true,
         itemHeight: null,
-        selectedItemBuilder: (context) =>
-            options.map((o) => _buildSelectedStatusItem(o)).toList(),
+        selectedItemBuilder: (context) => options
+            .map((o) => _buildSelectedStatusItem(o))
+            .toList(),
         items: options
             .map(
               (o) => DropdownMenuItem<String>(
@@ -122,7 +125,11 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusItem(_StatusOption option, {required bool isSelected}) {
+  Widget _buildStatusItem(
+    _StatusOption option,
+    {
+    required bool isSelected,
+  }) {
     final visual = _visualForStatus(option.value);
     final tileBackground = isSelected
         ? _blendWithSurface(visual.base, 0.88)
@@ -186,7 +193,9 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedStatusItem(_StatusOption option) {
+  Widget _buildSelectedStatusItem(
+    _StatusOption option,
+  ) {
     final visual = _visualForStatus(option.value);
 
     return Align(

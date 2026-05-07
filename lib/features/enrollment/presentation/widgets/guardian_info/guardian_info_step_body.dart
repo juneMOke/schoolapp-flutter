@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
@@ -42,7 +44,7 @@ class GuardianInfoStepBody extends StatelessWidget {
       icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
       label: Text(l10n.guardianAddAction),
       style: FilledButton.styleFrom(
-        foregroundColor: AppTheme.primaryColor,
+        foregroundColor: AppColors.bleuArdoise,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
@@ -53,11 +55,11 @@ class GuardianInfoStepBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.all(AppTheme.defaultPadding),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
+              color: AppColors.surface,
+              borderRadius: AppRadius.brMd,
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
@@ -66,7 +68,7 @@ class GuardianInfoStepBody extends StatelessWidget {
                     l10n.guardianInformation,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimaryColor,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -123,15 +125,20 @@ class GuardianInfoStepBody extends StatelessWidget {
                     ? const SizedBox(
                         height: 18,
                         width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textOnDark,
+                        ),
                       )
                     : const Icon(Icons.save_outlined, size: 18),
                 label: Text(l10n.guardianSaveAction),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.terreCuite,
+                  foregroundColor: AppColors.textOnDark,
+                  shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+                  elevation: 0,
                 ),
               ),
             ),

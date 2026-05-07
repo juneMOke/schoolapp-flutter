@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
@@ -92,10 +93,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
             uniqueOptions: uniqueOptions,
             selectedKey: selectedKey,
           );
-          final actions = _buildActions(
-            l10n: l10n,
-            canSearch: canSearch,
-          );
+          final actions = _buildActions(l10n: l10n, canSearch: canSearch);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +103,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
               Text(
                 l10n.reRegistrationSearchHint,
                 style: AppTextStyles.caption.copyWith(
-                  color: AppTheme.textSecondaryColor,
+                  color: AppColors.textSecondary,
                   height: 1.35,
                 ),
               ),
@@ -168,14 +166,11 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
       initialValue: selectedKey,
       isExpanded: true,
       isDense: true,
-      style: const TextStyle(
-        fontSize: 13,
-        color: AppTheme.textPrimaryColor,
-      ),
+      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
       icon: const Icon(
         Icons.keyboard_arrow_down_rounded,
         size: 18,
-        color: AppTheme.textSecondaryColor,
+        color: AppColors.textSecondary,
       ),
       decoration: InputDecoration(
         labelText: '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
@@ -184,26 +179,23 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         prefixIconConstraints: const BoxConstraints(minWidth: 34),
         isDense: true,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(9),
+        fillColor: AppColors.surfaceAlt,
+        border: const OutlineInputBorder(
+          borderRadius: AppRadius.brSm,
           borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(9),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: AppRadius.brSm,
           borderSide: BorderSide.none,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(9),
-          borderSide: const BorderSide(
-            color: AppTheme.primaryColor,
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: AppRadius.brSm,
+          borderSide: BorderSide(
+            color: AppColors.bleuArdoise,
             width: 1.4,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 8,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
       items: uniqueOptions
           .map(
@@ -229,20 +221,23 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
           ? const SizedBox(
               width: 14,
               height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.textOnDark,
+              ),
             )
           : const Icon(Icons.search_rounded, size: 14),
       label: Text(l10n.search),
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.bleuArdoise,
+        foregroundColor: AppColors.textOnDark,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         minimumSize: const Size(112, AppDimensions.minTouchTarget),
         textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-        disabledBackgroundColor: Colors.grey[300],
-        disabledForegroundColor: Colors.grey,
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+        disabledBackgroundColor: AppColors.stateDisabled,
+        disabledForegroundColor: AppColors.textMuted,
       ),
     );
   }
@@ -259,9 +254,13 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
 
   void _sanitizeSelectedKey() {
     final key = _selectedAcademicOptionKey;
-    if (key == null) return;
+    if (key == null) {
+      return;
+    }
     final stillExists = _buildUniqueOptions().any((o) => o.key == key);
-    if (!stillExists && mounted) setState(() => _selectedAcademicOptionKey = null);
+    if (!stillExists && mounted) {
+      setState(() => _selectedAcademicOptionKey = null);
+    }
   }
 
   bool _hasRequiredNames() =>
@@ -278,8 +277,9 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     if (widget.isLoading || (!_hasRequiredNames() && selectedKey == null)) {
       return;
     }
-    final selectedOption =
-        uniqueOptions.where((o) => o.key == selectedKey).firstOrNull;
+    final selectedOption = uniqueOptions
+        .where((o) => o.key == selectedKey)
+        .firstOrNull;
     widget.onSearch(
       ReRegistrationSearchRequest(
         firstName: _firstNameController.text.trim(),

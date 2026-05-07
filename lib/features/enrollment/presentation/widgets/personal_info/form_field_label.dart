@@ -54,10 +54,7 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
               color: AppColors.textPrimary.withValues(alpha: 0.9),
               borderRadius: AppRadius.brSm,
             ),
-            textStyle: const TextStyle(
-              color: AppColors.textOnDark,
-              fontSize: 12,
-            ),
+            textStyle: const TextStyle(color: AppColors.textOnDark, fontSize: 12),
             child: const MouseRegion(
               cursor: SystemMouseCursors.help,
               child: Padding(

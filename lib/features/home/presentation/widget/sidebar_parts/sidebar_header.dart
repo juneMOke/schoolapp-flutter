@@ -11,17 +11,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SidebarHeader extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarHeader({super.key, required this.isExpanded});
+  const SidebarHeader({
+    super.key,
+    required this.isExpanded,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(
-        isExpanded ? 12 : 8,
-        8,
-        isExpanded ? 12 : 8,
-        0,
-      ),
+      margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 0),
       padding: EdgeInsets.symmetric(
         horizontal: isExpanded ? 10 : 6,
         vertical: 8,
@@ -35,7 +33,9 @@ class SidebarHeader extends StatelessWidget {
         duration: AppMotion.standard,
         switchInCurve: AppMotion.outCurve,
         switchOutCurve: AppMotion.inCurve,
-        child: isExpanded ? const _ExpandedHeader() : const _CollapsedHeader(),
+        child: isExpanded
+            ? const _ExpandedHeader()
+            : const _CollapsedHeader(),
       ),
     );
   }

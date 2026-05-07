@@ -14,7 +14,7 @@ class AppSpacing {
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
   static const EdgeInsets screenPadding = EdgeInsets.all(lg);
   static const EdgeInsets listItem = EdgeInsets.symmetric(
-    horizontal: lg,
-    vertical: md,
+	horizontal: lg,
+	vertical: md,
   );
 }

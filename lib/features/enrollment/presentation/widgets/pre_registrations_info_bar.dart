@@ -33,8 +33,7 @@ class PreRegistrationsInfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final canGoPrevious =
-        !isLoading && onPreviousPage != null && currentPage > 0;
+    final canGoPrevious = !isLoading && onPreviousPage != null && currentPage > 0;
     final canGoNext =
         !isLoading && onNextPage != null && currentPage + 1 < totalPages;
 
@@ -43,7 +42,9 @@ class PreRegistrationsInfoBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt,
         borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: AppColors.border,
+        ),
       ),
       child: Row(
         children: [
@@ -109,20 +110,23 @@ class PreRegistrationsInfoBar extends StatelessWidget {
               color: AppColors.bleuArdoise,
             ),
           ],
-          if (action != null) ...[action!, const SizedBox(width: 6)],
+          if (action != null) ...[
+            action!,
+            const SizedBox(width: 6),
+          ],
           Tooltip(
             message: l10n.refresh,
             child: IconButton(
-              onPressed: isLoading || onRefresh == null
-                  ? null
-                  : () => onRefresh!(),
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded),
+              onPressed:
+                  isLoading || onRefresh == null ? null : () => onRefresh!(),
+              icon:
+                  isLoading
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Icon(Icons.refresh_rounded),
               color: AppColors.bleuArdoise,
             ),
           ),

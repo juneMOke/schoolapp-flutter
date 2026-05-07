@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class GuardianEmptyState extends StatelessWidget {
@@ -12,7 +13,7 @@ class GuardianEmptyState extends StatelessWidget {
     return Card(
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.largePadding),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Center(
           child: Column(
             children: [
@@ -20,13 +21,13 @@ class GuardianEmptyState extends StatelessWidget {
                 height: 72,
                 width: 72,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                  color: AppColors.bleuArdoise.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.people_outline,
                   size: 34,
-                  color: AppTheme.primaryColor,
+                  color: AppColors.bleuArdoise,
                 ),
               ),
               const SizedBox(height: 16),
@@ -34,7 +35,7 @@ class GuardianEmptyState extends StatelessWidget {
                 l10n.noGuardianInfo,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.textSecondaryColor,
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

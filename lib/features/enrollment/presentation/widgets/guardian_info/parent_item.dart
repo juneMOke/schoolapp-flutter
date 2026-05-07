@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_card_header.dart';
@@ -193,7 +194,6 @@ class _ParentItemState extends State<ParentItem> {
     final l10n = AppLocalizations.of(context)!;
     final state = _currentState();
     final changed = state.changedFields;
-    const deleteColor = Color(0xFFDC2626); // rouge sémantique, constant
 
     return Container(
       decoration: BoxDecoration(
@@ -202,7 +202,7 @@ class _ParentItemState extends State<ParentItem> {
         border: Border.all(
           color: widget.isPrimary
               ? AppTheme.primaryColor.withValues(alpha: 0.35)
-              : const Color(0xFFE5E7EB),
+              : AppColors.classesDisabledBg,
           width: widget.isPrimary ? 1.5 : 1,
         ),
         boxShadow: [
@@ -235,18 +235,18 @@ class _ParentItemState extends State<ParentItem> {
                     icon: const Icon(
                       Icons.delete_outline_rounded,
                       size: 16,
-                      color: deleteColor,
+                      color: AppColors.disciplinaryDetailAccent,
                     ),
                     label: Text(
                       l10n.guardianDeleteAction,
                       style: const TextStyle(
-                        color: deleteColor,
+                        color: AppColors.disciplinaryDetailAccent,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: TextButton.styleFrom(
-                      foregroundColor: deleteColor,
+                      foregroundColor: AppColors.disciplinaryDetailAccent,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 6,

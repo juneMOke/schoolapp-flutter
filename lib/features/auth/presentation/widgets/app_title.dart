@@ -25,9 +25,9 @@ class EteeloAppTitle extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           subTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: 32),
       ],

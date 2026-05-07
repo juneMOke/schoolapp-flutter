@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -173,7 +175,7 @@ class AddressFormContent extends StatelessWidget {
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.textOnDark,
                           ),
                         )
                       : const Icon(Icons.save_outlined),
@@ -181,16 +183,11 @@ class AddressFormContent extends StatelessWidget {
                     isLoading ? l10n.savingAddress : l10n.saveAddress,
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-                    foregroundColor: Colors.white,
-                    elevation: canSave ? 6 : 0,
-                    shadowColor: const Color(
-                      0xFF0EA5E9,
-                    ).withValues(alpha: 0.45),
+                    backgroundColor: canSave ? AppColors.terreCuite : null,
+                    foregroundColor: AppColors.textOnDark,
+                    elevation: 0,
                     minimumSize: const Size(164, 44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,

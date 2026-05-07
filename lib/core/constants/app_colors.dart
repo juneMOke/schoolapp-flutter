@@ -156,11 +156,20 @@ class AppColors {
   static const classesChipBoysFg = tokens.AppColors.classesChipBoysFg;
   static const classesChipTotalBg = tokens.AppColors.classesChipTotalBg;
   static const classesChipTotalFg = tokens.AppColors.classesChipTotalFg;
-  static const classesFocusRing = tokens.AppColors.classesFocusRing;
-  static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
-  static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
+   static const classesFocusRing = tokens.AppColors.classesFocusRing;
+   static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
+   static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
 
-  static const success = tokens.AppColors.success;
+   // Relationship colours
+   static const relationshipFather = tokens.AppColors.relationshipFather;
+   static const relationshipMother = tokens.AppColors.relationshipMother;
+   static const relationshipGuardian = tokens.AppColors.relationshipGuardian;
+   static const relationshipUncle = tokens.AppColors.relationshipUncle;
+   static const relationshipAunt = tokens.AppColors.relationshipAunt;
+   static const relationshipGrandparent = tokens.AppColors.relationshipGrandparent;
+   static const relationshipOther = tokens.AppColors.relationshipOther;
+
+   static const success = tokens.AppColors.success;
   static const warning = tokens.AppColors.warning;
   static const muted = tokens.AppColors.textMuted;
   static const danger = tokens.AppColors.error;

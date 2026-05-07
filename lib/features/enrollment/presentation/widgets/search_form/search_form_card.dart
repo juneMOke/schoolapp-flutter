@@ -21,10 +21,7 @@ class SearchFormCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: (showShadow ? AppElevation.surface3 : AppElevation.surface2)
-          .copyWith(
-            borderRadius: AppRadius.brMd,
-            border: Border.all(color: AppColors.border),
-          ),
+          .copyWith(borderRadius: AppRadius.brMd, border: Border.all(color: AppColors.border)),
       padding: padding,
       child: child,
     );

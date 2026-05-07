@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart'
@@ -35,7 +36,6 @@ class SummaryStep extends StatelessWidget {
   }
 
   Widget _buildHeroHeader(BuildContext context, AppLocalizations l10n) {
-    final colorScheme = Theme.of(context).colorScheme;
     final student = enrollmentDetail.studentDetail;
     final location = [student.city, student.district]
         .map((value) => value.trim())
@@ -45,16 +45,9 @@ class SummaryStep extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.spacingL),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppColors.indigo,
-            AppColors.indigoDark,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: AppRadius.brMd,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -65,7 +58,7 @@ class SummaryStep extends StatelessWidget {
               Text(
                 l10n.summary,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onPrimary.withValues(alpha: 0.9),
+                  color: AppColors.textOnDark.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -75,7 +68,7 @@ class SummaryStep extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.onPrimary,
+                  color: AppColors.textOnDark,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -85,7 +78,7 @@ class SummaryStep extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimary.withValues(alpha: 0.9),
+                    color: AppColors.textOnDark.withValues(alpha: 0.9),
                   ),
                 ),
               if (location.isNotEmpty) ...[
@@ -95,7 +88,7 @@ class SummaryStep extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onPrimary.withValues(alpha: 0.85),
+                    color: AppColors.textOnDark.withValues(alpha: 0.85),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -210,7 +203,7 @@ class SummaryStep extends StatelessWidget {
     return _SummaryCard(
       title: l10n.personalInformation,
       icon: Icons.person_outline,
-      color: AppColors.indigo,
+      color: AppColors.bleuArdoise,
       children: [
         _SummaryItem(
           label: l10n.dateOfBirth,
@@ -231,7 +224,7 @@ class SummaryStep extends StatelessWidget {
     return _SummaryCard(
       title: l10n.previousYear,
       icon: Icons.school_outlined,
-      color: AppColors.indigoDark,
+      color: AppColors.bleuProfond,
       children: [
         _SummaryItem(
           label: l10n.schoolLabel,
@@ -253,7 +246,7 @@ class SummaryStep extends StatelessWidget {
           label: l10n.confirm,
           value: enrollment.validatedPreviousYear ? l10n.confirm : l10n.cancel,
           valueColor: enrollment.validatedPreviousYear
-              ? AppColors.green
+              ? AppColors.success
               : AppColors.textSecondary,
         ),
       ],
@@ -291,7 +284,7 @@ class SummaryStep extends StatelessWidget {
         return _SummaryCard(
           title: l10n.targetYear,
           icon: Icons.flag_outlined,
-          color: AppColors.indigo,
+          color: AppColors.bleuArdoise,
           children: [
             _SummaryItem(
               label: l10n.targetCycleLabel,
@@ -319,7 +312,7 @@ class SummaryStep extends StatelessWidget {
     return _SummaryCard(
       title: l10n.guardianInformation,
       icon: Icons.family_restroom,
-      color: AppColors.green,
+      color: AppColors.success,
       children: parents.isEmpty
           ? [const _SummaryItem(label: '-', value: '-')]
           : [
@@ -435,17 +428,10 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brMd,
+        border: Border.fromBorderSide(BorderSide(color: AppColors.border)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingM),
@@ -460,7 +446,7 @@ class _SummaryCard extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+                borderRadius: AppRadius.brSm,
               ),
               child: Row(
                 children: [
@@ -510,8 +496,8 @@ class _SummaryItem extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppDimensions.spacingS),
         decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+          color: AppColors.surfaceAlt,
+          borderRadius: AppRadius.brSm,
           border: Border.all(color: AppColors.border),
         ),
         child: Column(

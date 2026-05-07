@@ -4,7 +4,8 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
@@ -127,17 +128,15 @@ class _SearchFormState extends State<SearchForm> {
           icon: const Icon(Icons.search_rounded, size: 14),
           label: Text(l10n.search),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryColor,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.bleuArdoise,
+            foregroundColor: AppColors.textOnDark,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
             textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
-            disabledBackgroundColor: Colors.grey[300],
-            disabledForegroundColor: Colors.grey,
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+            disabledBackgroundColor: AppColors.stateDisabled,
+            disabledForegroundColor: AppColors.textMuted,
           ),
         ),
         const SizedBox(width: 6),
@@ -146,14 +145,12 @@ class _SearchFormState extends State<SearchForm> {
           icon: const Icon(Icons.refresh_rounded, size: 14),
           label: Text(l10n.clear),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.textSecondaryColor,
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
+            foregroundColor: AppColors.textSecondary,
+            side: const BorderSide(color: AppColors.border),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
             textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
           ),
         ),
       ],

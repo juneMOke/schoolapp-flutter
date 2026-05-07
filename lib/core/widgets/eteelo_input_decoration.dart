@@ -14,9 +14,19 @@ InputDecoration buildEteeloInputDecoration({
     labelText: labelText,
     helperText: helperText,
     counterText: counterText,
-    labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-    helperStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-    prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
+    labelStyle: const TextStyle(
+      fontSize: 13,
+      color: AppColors.textSecondary,
+    ),
+    helperStyle: const TextStyle(
+      fontSize: 12,
+      color: AppColors.textSecondary,
+    ),
+    prefixIcon: Icon(
+      prefixIcon,
+      size: 18,
+      color: AppColors.textSecondary,
+    ),
     suffixIcon: suffixIcon,
     isDense: true,
     filled: true,

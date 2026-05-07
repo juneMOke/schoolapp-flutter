@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_email_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_phone_field.dart';
@@ -70,10 +71,10 @@ class GuardianFieldsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final successColor = AppTheme.secondaryColor;
-    final surfaceColor = AppTheme.surfaceColor;
-    final textSecondaryColor = AppTheme.textSecondaryColor;
+    final primaryColor = AppColors.bleuArdoise;
+    final successColor = AppColors.success;
+    final surfaceColor = AppColors.surface;
+    final textSecondaryColor = AppColors.textSecondary;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -136,11 +137,11 @@ class GuardianFieldsGrid extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: surfaceColor,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: AppRadius.brMd,
                   border: Border.all(
                     color: relationshipChanged
                         ? successColor.withValues(alpha: 0.35)
-                        : Colors.grey.withValues(alpha: 0.2),
+                        : AppColors.border,
                   ),
                 ),
                 child: Column(
@@ -190,12 +191,12 @@ class GuardianFieldsGrid extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? activeColor.withValues(alpha: 0.1)
-                                      : AppTheme.backgroundColor,
-                                  borderRadius: BorderRadius.circular(10),
+                                      : AppColors.surfaceAlt,
+                                  borderRadius: AppRadius.brSm,
                                   border: Border.all(
                                     color: isSelected
                                         ? activeColor
-                                        : Colors.grey.withValues(alpha: 0.2),
+                                        : AppColors.border,
                                     width: isSelected ? 1.5 : 1,
                                   ),
                                 ),
@@ -222,7 +223,7 @@ class GuardianFieldsGrid extends StatelessWidget {
                                             : FontWeight.normal,
                                         color: isSelected
                                             ? activeColor
-                                            : AppTheme.textPrimaryColor,
+                                            : AppColors.textPrimary,
                                       ),
                                     ),
                                   ],

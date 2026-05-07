@@ -6,19 +6,19 @@ class AppElevation {
   AppElevation._();
 
   static BoxDecoration get surface1 => const BoxDecoration(
-    color: AppColors.surfaceAlt,
-    borderRadius: AppRadius.brMd,
+	color: AppColors.surfaceAlt,
+	borderRadius: AppRadius.brMd,
   );
 
   static BoxDecoration get surface2 => BoxDecoration(
-    color: AppColors.surface,
-    borderRadius: AppRadius.brMd,
-    border: Border.all(color: AppColors.border),
+	color: AppColors.surface,
+	borderRadius: AppRadius.brMd,
+	border: Border.all(color: AppColors.border),
   );
 
   static BoxDecoration get surface3 => BoxDecoration(
-    color: AppColors.surfaceRaised,
-    borderRadius: AppRadius.brMd,
-    border: Border.all(color: AppColors.border),
+	color: AppColors.surfaceRaised,
+	borderRadius: AppRadius.brMd,
+	border: Border.all(color: AppColors.border),
   );
 }

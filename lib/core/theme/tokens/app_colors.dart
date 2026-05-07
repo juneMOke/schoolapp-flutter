@@ -115,6 +115,15 @@ class AppColors {
   static const classesChipTotalBg = Color(0xFFE8F5E9);
   static const classesChipTotalFg = Color(0xFF1B5E20);
   static const classesFocusRing = Color(0xFF1A73E8);
-  static const classesDisabledBg = Color(0xFFE5E7EB);
-  static const classesDisabledFg = Color(0xFF6B7280);
-}
+   static const classesDisabledBg = Color(0xFFE5E7EB);
+   static const classesDisabledFg = Color(0xFF6B7280);
+
+   // Relationship colours
+   static const relationshipFather = Color(0xFF1976D2);
+   static const relationshipMother = Color(0xFFC2185B);
+   static const relationshipGuardian = Color(0xFF7B1FA2);
+   static const relationshipUncle = Color(0xFFF57C00);
+   static const relationshipAunt = Color(0xFF7E57C2);
+   static const relationshipGrandparent = Color(0xFF00897B);
+   static const relationshipOther = Color(0xFF546E7A);
+ }
