@@ -779,5 +779,23 @@
    "disciplinaryCasesAuthError": "An authentication error prevents loading cases.",
    "disciplinaryCasesUnknownError": "An unexpected error occurred.",
    "disciplinaryCaseStatusOpen": "Open",
-   "disciplinaryCaseStatusUnknown": "Unknown"
+   "disciplinaryCaseStatusUnknown": "Unknown",
+
+   "enrollmentStatusPreRegistered": "Pre-registered",
+
+   "statusPaid": "Paid",
+   "statusPartial": "Partial",
+   "statusOverdue": "Overdue",
+
+   "statusPresent": "Present",
+   "statusAbsentJustified": "Justified",
+   "statusAbsentUnjustified": "Absent",
+
+   "statusSynced": "Up to date",
+   "statusSyncing": "Syncing…",
+   "statusOffline": "Offline",
+   "statusPendingUpload": "Pending upload",
+   "statusSyncConflict": "Conflict",
+
+   "componentGalleryTitle": "Component gallery"
 }

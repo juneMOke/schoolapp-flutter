@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+    as core_avatar;
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_color_extension.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_l10n_extension.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 // ─── Colonnes triables ────────────────────────────────────────────────────────
@@ -384,7 +385,6 @@ class _DataRowState extends State<_DataRow> {
   Widget build(BuildContext context) {
     final status = EnrollmentStatus.fromString(widget.enrollment.status);
     final student = widget.enrollment.student;
-    final initials = _initials(student.lastName, student.firstName);
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -410,8 +410,12 @@ class _DataRowState extends State<_DataRow> {
         ),
         child: Row(
           children: [
-            // Avatar initiales
-            _Avatar(initials: initials, color: _avatarColor(student.lastName)),
+            core_avatar.StudentAvatar(
+              firstName: student.firstName,
+              lastName: student.lastName,
+              size: 28,
+              variant: _avatarVariantForStatus(status),
+            ),
             const SizedBox(width: 8),
             _Cell(student.lastName, flex: 3, bold: true),
             _Cell(student.surname, flex: 3),
@@ -425,25 +429,12 @@ class _DataRowState extends State<_DataRow> {
     );
   }
 
-  String _initials(String last, String first) {
-    final l = last.isNotEmpty ? last[0].toUpperCase() : '';
-    final f = first.isNotEmpty ? first[0].toUpperCase() : '';
-    return '$l$f';
-  }
-
-  Color _avatarColor(String seed) {
-    const palette = [
-      Color(0xFF3B82F6),
-      Color(0xFF10B981),
-      Color(0xFF8B5CF6),
-      Color(0xFFF59E0B),
-      Color(0xFFEF4444),
-      Color(0xFF06B6D4),
-      Color(0xFFEC4899),
-      Color(0xFF84CC16),
-    ];
-    final idx = seed.isNotEmpty ? seed.codeUnitAt(0) % palette.length : 0;
-    return palette[idx];
+  core_avatar.AvatarVariant _avatarVariantForStatus(EnrollmentStatus status) {
+    return switch (status) {
+      EnrollmentStatus.completed || EnrollmentStatus.validated =>
+        core_avatar.AvatarVariant.solid,
+      _ => core_avatar.AvatarVariant.outlined,
+    };
   }
 
   String _formatDate(String raw) {
@@ -452,36 +443,6 @@ class _DataRowState extends State<_DataRow> {
       if (p.length == 3) return '${p[2]}/${p[1]}/${p[0]}';
     } catch (_) {}
     return raw;
-  }
-}
-
-// ─── Avatar ───────────────────────────────────────────────────────────────────
-
-class _Avatar extends StatelessWidget {
-  final String initials;
-  final Color color;
-
-  const _Avatar({required this.initials, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        initials,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
   }
 }
 
@@ -528,52 +489,11 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 122),
-        decoration: BoxDecoration(
-          color: status.tableBackgroundColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: status.tableForegroundColor.withValues(alpha: 0.25),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: status.tableForegroundColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: status.tableForegroundColor.withValues(alpha: 0.4),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                status.localizedLabel(l10n),
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: status.tableForegroundColor,
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: EnrollmentStatusBadge(status: status),
       ),
     );
   }

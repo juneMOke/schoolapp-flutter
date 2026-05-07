@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
@@ -19,33 +18,29 @@ class FirstRegistrationPage extends StatelessWidget {
 
     return AppPageBackground(
       scrollable: false,
+      floatingActionButton: EteeloFab(
+        label: l10n.firstRegistrationNewEnrollmentAction,
+        icon: Icons.add,
+        onPressed: () {
+          context.go(
+            '${EnrollmentConstants.enrollmentDetailRoute}/new',
+            extra: const EnrollmentDetailIntent.newFirstRegistration(),
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       child: EnrollmentSummariesWidget(
         status: 'IN_PROGRESS',
         showStatusBadge: false,
         showStatusFilter: true,
-        contentPadding: EnrollmentPageLayout.contentPadding,
+        contentPadding:
+            EnrollmentPageLayout.firstRegistrationContentPaddingWithFab,
         loadingPadding: EnrollmentPageLayout.loadingPadding,
         sectionSpacing: EnrollmentPageLayout.sectionSpacing,
         intentFactory: (summary) => EnrollmentDetailIntent(
           origin: EnrollmentDetailOrigin.firstRegistration,
           enrollmentId: summary.enrollmentId,
           status: summary.status,
-        ),
-        action: ElevatedButton.icon(
-          onPressed: () {
-            context.go(
-              '${EnrollmentConstants.enrollmentDetailRoute}/new',
-              extra: const EnrollmentDetailIntent.newFirstRegistration(),
-            );
-          },
-          icon: const Icon(Icons.add, size: 16),
-          label: Text(l10n.firstRegistrationNewEnrollmentAction),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.terreCuite,
-            foregroundColor: AppColors.textOnDark,
-            elevation: 0,
-            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-          ),
         ),
       ),
     );

@@ -738,5 +738,23 @@
    "disciplinaryCasesAuthError": "Une erreur d'authentification empêche le chargement des cas.",
    "disciplinaryCasesUnknownError": "Une erreur inattendue est survenue.",
    "disciplinaryCaseStatusOpen": "Ouvert",
-   "disciplinaryCaseStatusUnknown": "Inconnu"
+   "disciplinaryCaseStatusUnknown": "Inconnu",
+
+   "enrollmentStatusPreRegistered": "Pré-inscrit",
+
+   "statusPaid": "Payé",
+   "statusPartial": "Partiel",
+   "statusOverdue": "En retard",
+
+   "statusPresent": "Présent",
+   "statusAbsentJustified": "Justifié",
+   "statusAbsentUnjustified": "Absent",
+
+   "statusSynced": "À jour",
+   "statusSyncing": "Synchro…",
+   "statusOffline": "Hors ligne",
+   "statusPendingUpload": "À envoyer",
+   "statusSyncConflict": "Conflit",
+
+   "componentGalleryTitle": "Galerie de composants"
 }

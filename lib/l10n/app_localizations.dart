@@ -3628,6 +3628,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get disciplinaryCaseStatusUnknown;
+
+  /// No description provided for @enrollmentStatusPreRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-registered'**
+  String get enrollmentStatusPreRegistered;
+
+  /// No description provided for @statusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get statusPaid;
+
+  /// No description provided for @statusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get statusPartial;
+
+  /// No description provided for @statusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get statusOverdue;
+
+  /// No description provided for @statusPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get statusPresent;
+
+  /// No description provided for @statusAbsentJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get statusAbsentJustified;
+
+  /// No description provided for @statusAbsentUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get statusAbsentUnjustified;
+
+  /// No description provided for @statusSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get statusSynced;
+
+  /// No description provided for @statusSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get statusSyncing;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get statusOffline;
+
+  /// No description provided for @statusPendingUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending upload'**
+  String get statusPendingUpload;
+
+  /// No description provided for @statusSyncConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict'**
+  String get statusSyncConflict;
+
+  /// No description provided for @componentGalleryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Component gallery'**
+  String get componentGalleryTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

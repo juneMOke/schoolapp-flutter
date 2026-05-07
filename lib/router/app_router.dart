@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
@@ -32,6 +33,9 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
+
+// Debug import — uniquement accédé via kDebugMode
+import 'package:school_app_flutter/dev/component_gallery_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -347,6 +351,15 @@ class AppRouter {
             ),
           ],
         ),
+        // -------------------------------------------------------------------
+        // Route debug — galerie de composants (kDebugMode uniquement)
+        // -------------------------------------------------------------------
+        if (kDebugMode)
+          GoRoute(
+            path: AppRoutesNames.componentGallery,
+            name: AppRoutesNames.componentGallery,
+            builder: (context, state) => const ComponentGalleryPage(),
+          ),
       ],
     );
   }

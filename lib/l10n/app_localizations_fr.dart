@@ -1831,4 +1831,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get disciplinaryCaseStatusUnknown => 'Inconnu';
+
+  @override
+  String get enrollmentStatusPreRegistered => 'Pré-inscrit';
+
+  @override
+  String get statusPaid => 'Payé';
+
+  @override
+  String get statusPartial => 'Partiel';
+
+  @override
+  String get statusOverdue => 'En retard';
+
+  @override
+  String get statusPresent => 'Présent';
+
+  @override
+  String get statusAbsentJustified => 'Justifié';
+
+  @override
+  String get statusAbsentUnjustified => 'Absent';
+
+  @override
+  String get statusSynced => 'À jour';
+
+  @override
+  String get statusSyncing => 'Synchro…';
+
+  @override
+  String get statusOffline => 'Hors ligne';
+
+  @override
+  String get statusPendingUpload => 'À envoyer';
+
+  @override
+  String get statusSyncConflict => 'Conflit';
+
+  @override
+  String get componentGalleryTitle => 'Galerie de composants';
 }

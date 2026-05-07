@@ -66,4 +66,7 @@ class AppRoutesNames {
      required String academicYearId,
    }) =>
        '/disciplines/${MenuConstants.presencesId}/student/$studentId/$academicYearId';
+
+  // Debug — galerie de composants (kDebugMode uniquement)
+  static const String componentGallery = '/dev/components';
 }
