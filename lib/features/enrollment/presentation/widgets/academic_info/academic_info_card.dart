@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 class AcademicInfoCard extends StatelessWidget {
   final IconData icon;
@@ -20,11 +22,7 @@ class AcademicInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      decoration: AppElevation.surface2.copyWith(borderRadius: AppRadius.brSm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,15 +30,8 @@ class AcademicInfoCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  iconColor.withValues(alpha: 0.08),
-                  iconColor.withValues(alpha: 0.04),
-                ],
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(10),
-              ),
+              color: iconColor.withValues(alpha: 0.08),
+              borderRadius: const BorderRadius.vertical(top: AppRadius.sm),
             ),
             child: Row(
               children: [
@@ -56,10 +47,7 @@ class AcademicInfoCard extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(AppTheme.defaultPadding),
-            child: child,
-          ),
+          Padding(padding: const EdgeInsets.all(AppSpacing.lg), child: child),
         ],
       ),
     );

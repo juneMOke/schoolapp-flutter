@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarTitle extends StatelessWidget {
@@ -23,25 +24,16 @@ class TopBarTitle extends StatelessWidget {
         Container(
           width: 34,
           height: 34,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.accentBlue, AppTheme.accentIndigo],
-            ),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.accentBlue.withValues(alpha: 0.28),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
+          decoration: const BoxDecoration(
+            color: AppColors.bleuArdoise,
+            borderRadius: AppRadius.brSm,
           ),
           child: Icon(
             isPreRegistrations
                 ? Icons.assignment_outlined
                 : Icons.dashboard_customize_outlined,
             size: 18,
-            color: Colors.white,
+            color: AppColors.textOnDark,
           ),
         ),
         const SizedBox(width: AppDimensions.spacingS),
@@ -55,7 +47,7 @@ class TopBarTitle extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.sidebarTitle.copyWith(
-                  color: AppTheme.textPrimaryColor,
+                  color: AppColors.textPrimary,
                 ),
               ),
               if (isPreRegistrations)
@@ -64,7 +56,7 @@ class TopBarTitle extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppColors.textSecondary,
                   ),
                 ),
             ],

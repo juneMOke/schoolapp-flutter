@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class BootstrapContextError extends StatelessWidget {
@@ -14,10 +18,9 @@ class BootstrapContextError extends StatelessWidget {
       child: Container(
         width: 560,
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFFECACA)),
+        decoration: AppElevation.surface3.copyWith(
+          borderRadius: AppRadius.brMd,
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.22)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -25,17 +28,12 @@ class BootstrapContextError extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(
-                  Icons.error_outline_rounded,
-                  color: Color(0xFFB91C1C),
-                ),
+                const Icon(Icons.error_outline_rounded, color: AppColors.error),
                 const SizedBox(width: 8),
                 Text(
                   l10n.bootstrapContextUnavailableTitle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF7F1D1D),
+                  style: AppTypography.titleMedium.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -43,7 +41,10 @@ class BootstrapContextError extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               l10n.bootstrapContextUnavailableMessage,
-              style: const TextStyle(height: 1.45, color: Color(0xFF991B1B)),
+              style: AppTypography.bodyMedium.copyWith(
+                height: 1.45,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 14),
             Align(

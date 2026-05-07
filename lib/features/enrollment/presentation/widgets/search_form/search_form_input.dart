@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
 class SearchFormInput extends StatelessWidget {
@@ -39,13 +42,16 @@ class SearchFormInput extends StatelessWidget {
         suffixIcon: suffixIcon,
         isDense: true,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AppColors.surfaceAlt,
         labelStyle: const TextStyle(fontSize: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(9),
+        border: const OutlineInputBorder(
+          borderRadius: AppRadius.brSm,
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2,
+          vertical: AppSpacing.sm,
+        ),
       ),
       style: const TextStyle(fontSize: 13),
     );

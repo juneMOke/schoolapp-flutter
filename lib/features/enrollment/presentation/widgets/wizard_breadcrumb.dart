@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class WizardBreadcrumb extends StatelessWidget {
@@ -22,9 +24,9 @@ class WizardBreadcrumb extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,14 +34,12 @@ class WizardBreadcrumb extends StatelessWidget {
           Row(
             children: [
               Text(
-                AppLocalizations.of(context)!.stepIndicator(
-                  currentStep + 1,
-                  titles.length,
-                ),
-                style: const TextStyle(
-                  fontSize: 12,
+                AppLocalizations.of(
+                  context,
+                )!.stepIndicator(currentStep + 1, titles.length),
+                style: AppTypography.labelMedium.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimaryColor,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -49,9 +49,9 @@ class WizardBreadcrumb extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6,
-                    backgroundColor: const Color(0xFFE5E7EB),
+                    backgroundColor: AppColors.border,
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppTheme.primaryColor,
+                      AppColors.bleuArdoise,
                     ),
                   ),
                 ),
@@ -89,11 +89,13 @@ class WizardBreadcrumb extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: isCurrent
-                                ? AppTheme.primaryColor
+                                ? AppColors.bleuArdoise
                                 : isDone
-                                    ? AppTheme.primaryColor.withValues(alpha: 0.14)
-                                    : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(18),
+                                ? AppColors.bleuArdoise.withValues(alpha: 0.14)
+                                : AppColors.surfaceAlt,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(18),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -104,12 +106,14 @@ class WizardBreadcrumb extends StatelessWidget {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isCurrent
-                                      ? Colors.white.withValues(alpha: 0.22)
+                                      ? AppColors.textOnDark.withValues(
+                                          alpha: 0.22,
+                                        )
                                       : isDone
-                                          ? AppTheme.primaryColor.withValues(
-                                              alpha: 0.18,
-                                            )
-                                          : const Color(0xFFE5E7EB),
+                                      ? AppColors.bleuArdoise.withValues(
+                                          alpha: 0.18,
+                                        )
+                                      : AppColors.border,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
@@ -118,10 +122,10 @@ class WizardBreadcrumb extends StatelessWidget {
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                     color: isCurrent
-                                        ? Colors.white
+                                        ? AppColors.textOnDark
                                         : isDone
-                                            ? AppTheme.primaryColor
-                                            : const Color(0xFF6B7280),
+                                        ? AppColors.bleuArdoise
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -132,10 +136,10 @@ class WizardBreadcrumb extends StatelessWidget {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: isCurrent
-                                      ? Colors.white
+                                      ? AppColors.textOnDark
                                       : isDone
-                                          ? AppTheme.primaryColor
-                                          : const Color(0xFF6B7280),
+                                      ? AppColors.bleuArdoise
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -150,7 +154,7 @@ class WizardBreadcrumb extends StatelessWidget {
                       child: Icon(
                         Icons.chevron_right_rounded,
                         size: 16,
-                        color: Color(0xFF9CA3AF),
+                        color: AppColors.textMuted,
                       ),
                     ),
                 ],

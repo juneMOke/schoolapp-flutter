@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 
 class FormFieldLabel extends StatefulWidget {
   final String label;
@@ -32,13 +33,13 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: widget.labelColor ?? AppTheme.textPrimaryColor,
+                color: widget.labelColor ?? AppColors.textPrimary,
               ),
               children: [
                 if (widget.requiredField)
                   const TextSpan(
                     text: ' *',
-                    style: TextStyle(color: Color(0xFFEF4444)),
+                    style: TextStyle(color: AppColors.error),
                   ),
               ],
             ),
@@ -50,10 +51,13 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
             showDuration: AppMotion.tooltipShowDuration,
             preferBelow: true,
             decoration: BoxDecoration(
-              color: AppTheme.textPrimaryColor.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(6),
+              color: AppColors.textPrimary.withValues(alpha: 0.9),
+              borderRadius: AppRadius.brSm,
             ),
-            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+            textStyle: const TextStyle(
+              color: AppColors.textOnDark,
+              fontSize: 12,
+            ),
             child: const MouseRegion(
               cursor: SystemMouseCursors.help,
               child: Padding(
@@ -61,7 +65,7 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
                 child: Icon(
                   Icons.help_outline_rounded,
                   size: 16,
-                  color: AppTheme.textSecondaryColor,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),

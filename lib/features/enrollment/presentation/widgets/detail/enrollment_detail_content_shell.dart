@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 class EnrollmentDetailContentShell extends StatelessWidget {
   final Widget infoBar;
@@ -14,17 +15,7 @@ class EnrollmentDetailContentShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF4F8FF),
-            Color(0xFFEFF5FF),
-            Color(0xFFF7FAFF),
-          ],
-        ),
-      ),
+      decoration: const BoxDecoration(color: AppColors.surface),
       child: Stack(
         children: [
           Positioned(
@@ -34,7 +25,7 @@ class EnrollmentDetailContentShell extends StatelessWidget {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                color: AppColors.bleuArdoise.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -46,18 +37,18 @@ class EnrollmentDetailContentShell extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                color: AppColors.success.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(AppTheme.largePadding),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: SingleChildScrollView(
               child: Column(
                 children: [
                   infoBar,
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   child,
                 ],
               ),

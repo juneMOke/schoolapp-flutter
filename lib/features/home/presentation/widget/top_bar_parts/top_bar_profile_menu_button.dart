@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -66,8 +66,8 @@ class TopBarProfileMenuButton extends StatelessWidget {
       },
       child: const CircleAvatar(
         radius: 18,
-        backgroundColor: AppTheme.accentBlue,
-        child: Icon(Icons.person, color: Colors.white, size: 20),
+        backgroundColor: tokens.AppColors.bleuArdoise,
+        child: Icon(Icons.person, color: tokens.AppColors.textOnDark, size: 20),
       ),
     );
   }

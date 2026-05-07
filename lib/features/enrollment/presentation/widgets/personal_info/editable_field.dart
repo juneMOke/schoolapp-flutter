@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
@@ -43,7 +43,7 @@ class EditableField extends StatelessWidget {
             label: label,
             requiredField: requiredField,
             helpMessage: helpMessage,
-            labelColor: isChanged ? const Color(0xFF15803D) : null,
+            labelColor: isChanged ? AppColors.success : null,
           ),
           const SizedBox(height: 6),
           ValueListenableBuilder<TextEditingValue>(
@@ -65,7 +65,7 @@ class EditableField extends StatelessWidget {
                   prefixIcon: const Icon(
                     Icons.edit_outlined,
                     size: 16,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppColors.textSecondary,
                   ),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -77,7 +77,7 @@ class EditableField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                            color: AppTheme.textSecondaryColor,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       Icon(
@@ -86,8 +86,8 @@ class EditableField extends StatelessWidget {
                             : Icons.mode_edit_outline_rounded,
                         size: 16,
                         color: readOnly
-                            ? AppTheme.textSecondaryColor
-                            : AppTheme.primaryColor,
+                            ? AppColors.textSecondary
+                            : AppColors.bleuArdoise,
                       ),
                       const SizedBox(width: 8),
                     ],

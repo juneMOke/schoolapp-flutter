@@ -3,38 +3,39 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarHeader extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarHeader({
-    super.key,
-    required this.isExpanded,
-  });
+  const SidebarHeader({super.key, required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 0),
+      margin: EdgeInsets.fromLTRB(
+        isExpanded ? 12 : 8,
+        8,
+        isExpanded ? 12 : 8,
+        0,
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: isExpanded ? 10 : 6,
         vertical: 8,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppColors.textOnDark.withValues(alpha: 0.08),
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: AppColors.textOnDark.withValues(alpha: 0.08)),
       ),
       child: AnimatedSwitcher(
         duration: AppMotion.standard,
         switchInCurve: AppMotion.outCurve,
         switchOutCurve: AppMotion.inCurve,
-        child: isExpanded
-            ? const _ExpandedHeader()
-            : const _CollapsedHeader(),
+        child: isExpanded ? const _ExpandedHeader() : const _CollapsedHeader(),
       ),
     );
   }
@@ -53,20 +54,15 @@ class _ExpandedHeader extends StatelessWidget {
         Container(
           width: 36,
           height: 36,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.accentBlue, AppTheme.accentIndigo],
-            ),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.accentBlue.withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+          decoration: const BoxDecoration(
+            color: AppColors.terreCuite,
+            borderRadius: AppRadius.brSm,
           ),
-          child: const Icon(Icons.school_rounded, color: Colors.white, size: 20),
+          child: const Icon(
+            Icons.school_rounded,
+            color: AppColors.textOnDark,
+            size: 20,
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -75,7 +71,7 @@ class _ExpandedHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.sectionTitle.copyWith(
-              color: Colors.white,
+              color: AppColors.textOnDark,
               letterSpacing: 0.3,
             ),
           ),
@@ -90,7 +86,11 @@ class _ExpandedHeader extends StatelessWidget {
               tooltip: l10n.homeSidebarCollapseTooltip,
               onPressed: () =>
                   context.read<NavigationBloc>().add(const SidebarToggled()),
-              icon: const Icon(Icons.menu_open_rounded, color: Colors.white70, size: 20),
+              icon: Icon(
+                Icons.menu_open_rounded,
+                color: AppColors.textOnDark.withValues(alpha: 0.7),
+                size: 20,
+              ),
               constraints: const BoxConstraints(
                 minWidth: AppDimensions.minTouchTarget,
                 minHeight: AppDimensions.minTouchTarget,
@@ -122,7 +122,11 @@ class _CollapsedHeader extends StatelessWidget {
             tooltip: l10n.homeSidebarExpandTooltip,
             onPressed: () =>
                 context.read<NavigationBloc>().add(const SidebarToggled()),
-            icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+            icon: const Icon(
+              Icons.menu_rounded,
+              color: AppColors.textOnDark,
+              size: 22,
+            ),
             constraints: const BoxConstraints(
               minWidth: AppDimensions.minTouchTarget,
               minHeight: AppDimensions.minTouchTarget,

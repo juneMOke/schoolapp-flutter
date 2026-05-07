@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Couples each API status value with its localized label.
@@ -36,7 +35,6 @@ class SearchFormStatusDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
 
     final options = <_StatusOption>[
       _StatusOption('IN_PROGRESS', l10n.enrollmentStatusInProgress),
@@ -55,16 +53,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
     const borderSide = BorderSide(color: AppColors.border);
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withValues(alpha: 0.06),
-            blurRadius: AppDimensions.spacingM,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(borderRadius: borderRadius),
       child: DropdownButtonFormField<String>(
         initialValue: selectedStatus,
         borderRadius: borderRadius,
@@ -74,17 +63,17 @@ class SearchFormStatusDropdown extends StatelessWidget {
           labelText: l10n.enrollmentStatusFilterLabel,
           labelStyle: const TextStyle(
             fontSize: 12,
-            color: AppTheme.textSecondaryColor,
+            color: AppColors.textSecondary,
           ),
           prefixIcon: const Icon(
             Icons.tune_rounded,
             size: 16,
-            color: AppTheme.textSecondaryColor,
+            color: AppColors.textSecondary,
           ),
           prefixIconConstraints: const BoxConstraints(minWidth: 34),
           isDense: false,
           filled: true,
-          fillColor: AppTheme.backgroundColor,
+          fillColor: AppColors.surface,
           enabledBorder: OutlineInputBorder(
             borderRadius: borderRadius,
             borderSide: borderSide,
@@ -92,7 +81,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: borderRadius,
             borderSide: const BorderSide(
-              color: AppTheme.primaryColor,
+              color: AppColors.bleuArdoise,
               width: 1.4,
             ),
           ),
@@ -104,25 +93,23 @@ class SearchFormStatusDropdown extends StatelessWidget {
         style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: AppTheme.textPrimaryColor,
+          color: AppColors.textPrimary,
         ),
         icon: const Icon(
           Icons.keyboard_arrow_down_rounded,
           size: 18,
-          color: AppTheme.textSecondaryColor,
+          color: AppColors.textSecondary,
         ),
         isExpanded: true,
         itemHeight: null,
-        selectedItemBuilder: (context) => options
-            .map((o) => _buildSelectedStatusItem(o, colorScheme))
-            .toList(),
+        selectedItemBuilder: (context) =>
+            options.map((o) => _buildSelectedStatusItem(o)).toList(),
         items: options
             .map(
               (o) => DropdownMenuItem<String>(
                 value: o.value,
                 child: _buildStatusItem(
                   o,
-                  colorScheme,
                   isSelected: o.value == selectedStatus,
                 ),
               ),
@@ -135,18 +122,14 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusItem(
-    _StatusOption option,
-    ColorScheme colorScheme, {
-    required bool isSelected,
-  }) {
-    final visual = _visualForStatus(option.value, colorScheme);
+  Widget _buildStatusItem(_StatusOption option, {required bool isSelected}) {
+    final visual = _visualForStatus(option.value);
     final tileBackground = isSelected
         ? _blendWithSurface(visual.base, 0.88)
         : _blendWithSurface(visual.base, 0.94);
     final badgeBackground = _blendWithSurface(visual.base, 0.84);
     final tileBorder = visual.base.withValues(alpha: isSelected ? 0.35 : 0.18);
-    final textColor = isSelected ? visual.base : AppTheme.textPrimaryColor;
+    final textColor = isSelected ? visual.base : AppColors.textPrimary;
 
     return AnimatedContainer(
       duration: AppMotion.fast,
@@ -203,11 +186,8 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedStatusItem(
-    _StatusOption option,
-    ColorScheme colorScheme,
-  ) {
-    final visual = _visualForStatus(option.value, colorScheme);
+  Widget _buildSelectedStatusItem(_StatusOption option) {
+    final visual = _visualForStatus(option.value);
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -246,45 +226,48 @@ class SearchFormStatusDropdown extends StatelessWidget {
   Color _blendWithSurface(Color color, double amount) =>
       Color.lerp(color, AppColors.surface, amount) ?? color;
 
-  _StatusVisual _visualForStatus(String status, ColorScheme scheme) {
+  _StatusVisual _visualForStatus(String status) {
     switch (status) {
       case 'IN_PROGRESS':
         return const _StatusVisual(
           icon: Icons.autorenew_rounded,
-          base: Color(0xFFB45309),
+          base: AppColors.warning,
         );
       case 'ADMIN_COMPLETED':
         return const _StatusVisual(
           icon: Icons.assignment_turned_in_rounded,
-          base: Color(0xFF6D28D9),
+          base: AppColors.bleuArdoise,
         );
       case 'FINANCIAL_COMPLETED':
         return const _StatusVisual(
           icon: Icons.account_balance_wallet_rounded,
-          base: Color(0xFF0D9488),
+          base: AppColors.info,
         );
       case 'COMPLETED':
         return const _StatusVisual(
           icon: Icons.task_alt_rounded,
-          base: Color(0xFF059669),
+          base: AppColors.success,
         );
       case 'VALIDATED':
         return const _StatusVisual(
           icon: Icons.verified_rounded,
-          base: Color(0xFF16A34A),
+          base: AppColors.success,
         );
       case 'REJECTED':
         return const _StatusVisual(
           icon: Icons.gpp_bad_rounded,
-          base: Color(0xFFEA580C),
+          base: AppColors.terreCuite,
         );
       case 'CANCELLED':
         return const _StatusVisual(
           icon: Icons.cancel_rounded,
-          base: Color(0xFFDC2626),
+          base: AppColors.error,
         );
       default:
-        return _StatusVisual(icon: Icons.label_rounded, base: scheme.outline);
+        return const _StatusVisual(
+          icon: Icons.label_rounded,
+          base: AppColors.textSecondary,
+        );
     }
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InfoField extends StatelessWidget {
@@ -29,13 +31,13 @@ class InfoField extends StatelessWidget {
         Row(
           children: [
             if (icon != null) ...[
-              Icon(icon!, size: 16, color: Colors.grey[600]),
+              Icon(icon!, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
             ],
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -48,8 +50,8 @@ class InfoField extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.border),
+              borderRadius: AppRadius.brSm,
               color: _getBackgroundColor(),
             ),
             child: Text(
@@ -70,22 +72,22 @@ class InfoField extends StatelessWidget {
 
   Color _getBackgroundColor() {
     if (isPhone || isEmail) {
-      return Colors.blue[50]!;
+      return AppColors.info.withValues(alpha: 0.12);
     }
     if (isNumeric && value != 'N/A') {
-      return Colors.green[50]!;
+      return AppColors.success.withValues(alpha: 0.12);
     }
-    return Colors.grey[50]!;
+    return AppColors.surfaceAlt;
   }
 
   Color _getTextColor() {
     if (isPhone || isEmail) {
-      return Colors.blue[700]!;
+      return AppColors.info;
     }
     if (isNumeric && value != 'N/A') {
-      return Colors.green[700]!;
+      return AppColors.success;
     }
-    return Colors.black87;
+    return AppColors.textPrimary;
   }
 
   TextDecoration? _getDecoration() {

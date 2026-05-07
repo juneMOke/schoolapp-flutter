@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarFooter extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarFooter({
-    super.key,
-    required this.isExpanded,
-  });
+  const SidebarFooter({super.key, required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +17,20 @@ class SidebarFooter extends StatelessWidget {
     return AnimatedContainer(
       duration: AppMotion.standard,
       curve: AppMotion.outCurve,
-      margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 12),
-      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 12 : 6, vertical: 10),
+      margin: EdgeInsets.fromLTRB(
+        isExpanded ? 12 : 8,
+        8,
+        isExpanded ? 12 : 8,
+        12,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isExpanded ? 12 : 6,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        color: AppColors.textOnDark.withValues(alpha: 0.06),
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: AppColors.textOnDark.withValues(alpha: 0.06)),
       ),
       child: Semantics(
         container: true,
@@ -40,7 +47,7 @@ class SidebarFooter extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.verified_outlined,
-                        color: Colors.white60,
+                        color: AppColors.textOnDark,
                         size: 16,
                       ),
                       const SizedBox(width: 8),
@@ -49,7 +56,9 @@ class SidebarFooter extends StatelessWidget {
                           l10n.homeSidebarFooterLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(color: Colors.white60),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textOnDark.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ],
@@ -57,7 +66,7 @@ class SidebarFooter extends StatelessWidget {
                 : const Icon(
                     key: ValueKey('sidebar-footer-collapsed'),
                     Icons.verified_outlined,
-                    color: Colors.white60,
+                    color: AppColors.textOnDark,
                     size: 16,
                   ),
           ),

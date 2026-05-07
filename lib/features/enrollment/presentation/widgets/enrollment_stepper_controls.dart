@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepperControls extends StatelessWidget {
@@ -53,10 +54,9 @@ class EnrollmentStepperControls extends StatelessWidget {
                 : const Icon(Icons.save_outlined, size: 16),
             label: Text(saveLabel),
             style: FilledButton.styleFrom(
-              backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-              foregroundColor: Colors.white,
-              elevation: canSave ? 6 : 0,
-              shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
+              backgroundColor: canSave ? AppColors.terreCuite : null,
+              foregroundColor: AppColors.textOnDark,
+              elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               textStyle: const TextStyle(
                 fontSize: 13,
@@ -76,9 +76,11 @@ class EnrollmentStepperControls extends StatelessWidget {
               size: 16,
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.bleuArdoise,
+              foregroundColor: AppColors.textOnDark,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+              elevation: 0,
             ),
             label: Text(isLast ? l10n.finish : l10n.next),
           ),

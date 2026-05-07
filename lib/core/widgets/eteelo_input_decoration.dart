@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 InputDecoration buildEteeloInputDecoration({
   required String labelText,
@@ -12,43 +14,36 @@ InputDecoration buildEteeloInputDecoration({
     labelText: labelText,
     helperText: helperText,
     counterText: counterText,
-    labelStyle: const TextStyle(
-      fontSize: 13,
-      color: AppTheme.textSecondaryColor,
-    ),
-    helperStyle: const TextStyle(
-      fontSize: 12,
-      color: AppTheme.textSecondaryColor,
-    ),
-    prefixIcon: Icon(
-      prefixIcon,
-      size: 18,
-      color: AppTheme.textSecondaryColor,
-    ),
+    labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+    helperStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+    prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
     suffixIcon: suffixIcon,
     isDense: true,
     filled: true,
-    fillColor: AppTheme.backgroundColor,
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
+    fillColor: AppColors.surface,
+    enabledBorder: const OutlineInputBorder(
+      borderRadius: AppRadius.brSm,
+      borderSide: BorderSide(color: AppColors.border),
     ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+    focusedBorder: const OutlineInputBorder(
+      borderRadius: AppRadius.brSm,
+      borderSide: BorderSide(color: AppColors.bleuArdoise, width: 1.5),
     ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFF87171)),
+    errorBorder: const OutlineInputBorder(
+      borderRadius: AppRadius.brSm,
+      borderSide: BorderSide(color: AppColors.error),
     ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+    focusedErrorBorder: const OutlineInputBorder(
+      borderRadius: AppRadius.brSm,
+      borderSide: BorderSide(color: AppColors.error, width: 1.5),
     ),
-    disabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+    disabledBorder: const OutlineInputBorder(
+      borderRadius: AppRadius.brSm,
+      borderSide: BorderSide(color: AppColors.stateDisabled),
     ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.md,
+    ),
   );
 }

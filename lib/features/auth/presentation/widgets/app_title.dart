@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EteeloAppTitle extends StatelessWidget {
@@ -12,13 +13,13 @@ class EteeloAppTitle extends StatelessWidget {
 
     return Column(
       children: [
-        const Icon(Icons.school, size: 80, color: Colors.indigo),
+        const Icon(Icons.school, size: 80, color: AppColors.bleuArdoise),
         const SizedBox(height: 16),
         Text(
           l10n.schoolApp,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.indigo,
+            color: AppColors.bleuArdoise,
           ),
         ),
         const SizedBox(height: 8),
@@ -26,7 +27,7 @@ class EteeloAppTitle extends StatelessWidget {
           subTitle,
           style: Theme.of(
             context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 32),
       ],

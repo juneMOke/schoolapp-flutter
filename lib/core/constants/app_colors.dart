@@ -1,105 +1,167 @@
-import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 
 class AppColors {
+  AppColors._();
+
+  static const bleuArdoise = tokens.AppColors.bleuArdoise;
+  static const bleuProfond = tokens.AppColors.bleuProfond;
+  static const terreCuite = tokens.AppColors.terreCuite;
+  static const orDoux = tokens.AppColors.orDoux;
+  static const vertSavane = tokens.AppColors.vertSavane;
+  static const blancCasse = tokens.AppColors.blancCasse;
+  static const papier = tokens.AppColors.papier;
+  static const noirChaud = tokens.AppColors.noirChaud;
+  static const info = tokens.AppColors.info;
+  static const error = tokens.AppColors.error;
+  static const textMuted = tokens.AppColors.textMuted;
+  static const textOnDark = tokens.AppColors.textOnDark;
+  static const surfaceAlt = tokens.AppColors.surfaceAlt;
+  static const surfaceRaised = tokens.AppColors.surfaceRaised;
+  static const surfaceDark = tokens.AppColors.surfaceDark;
+  static const borderStrong = tokens.AppColors.borderStrong;
+  static const stateHover = tokens.AppColors.stateHover;
+  static const statePressed = tokens.AppColors.statePressed;
+  static const stateFocus = tokens.AppColors.stateFocus;
+  static const stateDisabled = tokens.AppColors.stateDisabled;
+
   // Base palette
-  static const indigo = Color(0xFF3F51B5);
-  static const indigoDark = Color(0xFF1A237E);
-  static const green = Color(0xFF2E7D32);
-  static const red = Color(0xFFC62828);
-  static const background = Color(0xFFF7F9FF);
-  static const surface = Colors.white;
-  static const textPrimary = Color(0xFF1F2937);
-  static const textSecondary = Color(0xFF6B7280);
-  static const border = Color(0xFFE5E7EB);
+  static const indigo = tokens.AppColors.bleuArdoise;
+  static const indigoDark = tokens.AppColors.bleuProfond;
+  static const green = tokens.AppColors.vertSavane;
+  static const red = tokens.AppColors.error;
+  static const background = tokens.AppColors.surface;
+  static const surface = tokens.AppColors.surface;
+  static const textPrimary = tokens.AppColors.textPrimary;
+  static const textSecondary = tokens.AppColors.textSecondary;
+  static const border = tokens.AppColors.border;
 
   // Page background palette (gradient + orbes — partagé entre tous les modules)
-  static const pageBackgroundGradientStart = Color(0xFFF4F8FF);
-  static const pageBackgroundGradientMiddle = Color(0xFFEFF5FF);
-  static const pageBackgroundGradientEnd = Color(0xFFF7FAFF);
-  static const pageBackgroundAccent = Color(0xFF1A73E8);
+  static const pageBackgroundGradientStart = tokens.AppColors.surface;
+  static const pageBackgroundGradientMiddle = tokens.AppColors.surfaceAlt;
+  static const pageBackgroundGradientEnd = tokens.AppColors.surface;
+  static const pageBackgroundAccent = tokens.AppColors.bleuArdoise;
 
   // Finance detail palette
-  static const financeDetailCard = Color(0xFFFFFFFF);
-  static const financeDetailMutedSurface = Color(0xFFF5F8FF);
-  static const financeDetailAccent = Color(0xFF1A73E8);
-  static const financeDetailAccentSoft = Color(0xFFE8F0FE);
-  static const financeDetailSecondaryAccent = Color(0xFF3F51B5);
-  static const financeDetailSecondaryAccentSoft = Color(0xFFEAF0FF);
-  static const financeDetailSuccessSoft = Color(0xFFDCFCE7);
-  static const financeDetailWarningSoft = Color(0xFFEAF0FF);
-  static const financeDetailDangerSoft = Color(0xFFFEE2E2);
-  static const financeDetailShadow = Color(0x14243352);
+  static const financeDetailCard = tokens.AppColors.financeDetailCard;
+  static const financeDetailMutedSurface =
+      tokens.AppColors.financeDetailMutedSurface;
+  static const financeDetailAccent = tokens.AppColors.financeDetailAccent;
+  static const financeDetailAccentSoft =
+      tokens.AppColors.financeDetailAccentSoft;
+  static const financeDetailSecondaryAccent =
+      tokens.AppColors.financeDetailSecondaryAccent;
+  static const financeDetailSecondaryAccentSoft =
+      tokens.AppColors.financeDetailSecondaryAccentSoft;
+  static const financeDetailSuccessSoft =
+      tokens.AppColors.financeDetailSuccessSoft;
+  static const financeDetailWarningSoft =
+      tokens.AppColors.financeDetailWarningSoft;
+  static const financeDetailDangerSoft =
+      tokens.AppColors.financeDetailDangerSoft;
+  static const financeDetailShadow = tokens.AppColors.financeDetailShadow;
 
   // Finance — Paiements (violet)
-  static const financeDetailPaymentsAccent = Color(0xFF6366F1);
-  static const financeDetailPaymentsAccentLight = Color(0xFF818CF8);
-  static const financeDetailPaymentsAccentSoft = Color(0xFFEDE9FE);
+  static const financeDetailPaymentsAccent =
+      tokens.AppColors.financeDetailPaymentsAccent;
+  static const financeDetailPaymentsAccentLight =
+      tokens.AppColors.financeDetailPaymentsAccentLight;
+  static const financeDetailPaymentsAccentSoft =
+      tokens.AppColors.financeDetailPaymentsAccentSoft;
 
   // Finance — Charges (émeraude) — utilisé pour la liste des charges
-  static const financeDetailChargesAccent = Color(0xFF10B981);
-  static const financeDetailChargesAccentSoft = Color(0xFFD1FAE5);
+  static const financeDetailChargesAccent =
+      tokens.AppColors.financeDetailChargesAccent;
+  static const financeDetailChargesAccentSoft =
+      tokens.AppColors.financeDetailChargesAccentSoft;
 
   // Finance — Info charge (orange ardoise) — utilisé pour la page de détail d'une charge
-  static const financeDetailChargeInfoAccent = Color(0xFFEA580C);
-  static const financeDetailChargeInfoAccentSoft = Color(0xFFFFF7ED);
-  static const financeDetailChargeInfoSurface = Color(0xFFFFFAF5);
-  static const financeDetailChargeInfoSurfaceAlt = Color(0xFFFFFFFF);
+  static const financeDetailChargeInfoAccent =
+      tokens.AppColors.financeDetailChargeInfoAccent;
+  static const financeDetailChargeInfoAccentSoft =
+      tokens.AppColors.financeDetailChargeInfoAccentSoft;
+  static const financeDetailChargeInfoSurface =
+      tokens.AppColors.financeDetailChargeInfoSurface;
+  static const financeDetailChargeInfoSurfaceAlt =
+      tokens.AppColors.financeDetailChargeInfoSurfaceAlt;
 
   // Finance — Méta badge Cycle (ambre)
-  static const financeDetailAmber = Color(0xFFD97706);
-  static const financeDetailAmberSoft = Color(0xFFFEF3C7);
+  static const financeDetailAmber = tokens.AppColors.financeDetailAmber;
+  static const financeDetailAmberSoft = tokens.AppColors.financeDetailAmberSoft;
 
   // Finance — Méta badge Niveau (teal)
-  static const financeDetailTeal = Color(0xFF0891B2);
-  static const financeDetailTealSoft = Color(0xFFE0F2FE);
+  static const financeDetailTeal = tokens.AppColors.financeDetailTeal;
+  static const financeDetailTealSoft = tokens.AppColors.financeDetailTealSoft;
 
   // Finance detail section tones
-  static const financeDetailStudentSurface = Color(0xFFF7FCF8);
-  static const financeDetailStudentSurfaceAlt = Color(0xFFFFFFFF);
-  static const financeDetailInfoSurface = Color(0xFFF6F9FF);
-  static const financeDetailInfoSurfaceAlt = Color(0xFFFFFFFF);
-  static const financeDetailPaymentsSurface = Color(0xFFF5F3FF); // violet très clair
-  static const financeDetailPaymentsSurfaceAlt = Color(0xFFFFFFFF);
-  static const financeDetailChargesSurface = Color(0xFFF0FDF9); // vert très clair — liste charges
-  static const financeDetailChargesSurfaceAlt = Color(0xFFFFFFFF);
-  static const financeDetailStudentTitle = Color(0xFF2E7D32);
-  static const financeDetailInfoTitle = Color(0xFF1A73E8);
-  static const financeDetailPaymentsTitle = Color(0xFF3F51B5);
-  static const financeDetailChargesTitle = Color(0xFF2E7D32);
+  static const financeDetailStudentSurface =
+      tokens.AppColors.financeDetailStudentSurface;
+  static const financeDetailStudentSurfaceAlt =
+      tokens.AppColors.financeDetailStudentSurfaceAlt;
+  static const financeDetailInfoSurface =
+      tokens.AppColors.financeDetailInfoSurface;
+  static const financeDetailInfoSurfaceAlt =
+      tokens.AppColors.financeDetailInfoSurfaceAlt;
+  static const financeDetailPaymentsSurface =
+      tokens.AppColors.financeDetailPaymentsSurface;
+  static const financeDetailPaymentsSurfaceAlt =
+      tokens.AppColors.financeDetailPaymentsSurfaceAlt;
+  static const financeDetailChargesSurface =
+      tokens.AppColors.financeDetailChargesSurface;
+  static const financeDetailChargesSurfaceAlt =
+      tokens.AppColors.financeDetailChargesSurfaceAlt;
+  static const financeDetailStudentTitle =
+      tokens.AppColors.financeDetailStudentTitle;
+  static const financeDetailInfoTitle = tokens.AppColors.financeDetailInfoTitle;
+  static const financeDetailPaymentsTitle =
+      tokens.AppColors.financeDetailPaymentsTitle;
+  static const financeDetailChargesTitle =
+      tokens.AppColors.financeDetailChargesTitle;
 
-   static const financeDetailChargeRowPaid = Color(0xFFF1FAF2);
-   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
-   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
+  static const financeDetailChargeRowPaid =
+      tokens.AppColors.financeDetailChargeRowPaid;
+  static const financeDetailChargeRowPartial =
+      tokens.AppColors.financeDetailChargeRowPartial;
+  static const financeDetailChargeRowDue =
+      tokens.AppColors.financeDetailChargeRowDue;
 
-   // Disciplinary detail palette
-   static const disciplinaryDetailCard = Color(0xFFFFFFFF);
-   static const disciplinaryDetailAccent = Color(0xFFDC2626);
-   static const disciplinaryDetailAccentSoft = Color(0xFFFEE2E2);
-   static const disciplinaryDetailTeal = Color(0xFF0891B2);
-   static const disciplinaryDetailTealSoft = Color(0xFFE0F2FE);
-   static const disciplinaryDetailInfoSurface = Color(0xFFF8F1F6);
-   static const disciplinaryDetailShadow = Color(0x14243352);
+  // Disciplinary detail palette
+  static const disciplinaryDetailCard = tokens.AppColors.disciplinaryDetailCard;
+  static const disciplinaryDetailAccent =
+      tokens.AppColors.disciplinaryDetailAccent;
+  static const disciplinaryDetailAccentSoft =
+      tokens.AppColors.disciplinaryDetailAccentSoft;
+  static const disciplinaryDetailTeal = tokens.AppColors.disciplinaryDetailTeal;
+  static const disciplinaryDetailTealSoft =
+      tokens.AppColors.disciplinaryDetailTealSoft;
+  static const disciplinaryDetailInfoSurface =
+      tokens.AppColors.disciplinaryDetailInfoSurface;
+  static const disciplinaryDetailShadow =
+      tokens.AppColors.disciplinaryDetailShadow;
 
-   // Classes organisation palette
-  static const classesHeroGradientStart = Color(0xFFEAF2FF);
-  static const classesHeroGradientEnd = Color(0xFFF2F8FF);
-  static const classesSectionSurface = Color(0xFFF9FBFF);
-  static const classesInfoBannerSurface = Color(0xFFEEF4FF);
-  static const classesInfoBannerBorder = Color(0xFFD7E4FF);
-  static const classesClassroomSurface = Color(0xFFF7FAFF);
-  static const classesMemberSurface = Color(0xFFF1F6FF);
-  static const classesChipGirlsBg = Color(0xFFFCE7F3);
-  static const classesChipGirlsFg = Color(0xFF9D174D);
-  static const classesChipBoysBg = Color(0xFFE0ECFF);
-  static const classesChipBoysFg = Color(0xFF1D4ED8);
-  static const classesChipTotalBg = Color(0xFFE8F5E9);
-  static const classesChipTotalFg = Color(0xFF1B5E20);
-  static const classesFocusRing = Color(0xFF1A73E8);
-  static const classesDisabledBg = Color(0xFFE5E7EB);
-  static const classesDisabledFg = Color(0xFF6B7280);
+  // Classes organisation palette
+  static const classesHeroGradientStart =
+      tokens.AppColors.classesHeroGradientStart;
+  static const classesHeroGradientEnd = tokens.AppColors.classesHeroGradientEnd;
+  static const classesSectionSurface = tokens.AppColors.classesSectionSurface;
+  static const classesInfoBannerSurface =
+      tokens.AppColors.classesInfoBannerSurface;
+  static const classesInfoBannerBorder =
+      tokens.AppColors.classesInfoBannerBorder;
+  static const classesClassroomSurface =
+      tokens.AppColors.classesClassroomSurface;
+  static const classesMemberSurface = tokens.AppColors.classesMemberSurface;
+  static const classesChipGirlsBg = tokens.AppColors.classesChipGirlsBg;
+  static const classesChipGirlsFg = tokens.AppColors.classesChipGirlsFg;
+  static const classesChipBoysBg = tokens.AppColors.classesChipBoysBg;
+  static const classesChipBoysFg = tokens.AppColors.classesChipBoysFg;
+  static const classesChipTotalBg = tokens.AppColors.classesChipTotalBg;
+  static const classesChipTotalFg = tokens.AppColors.classesChipTotalFg;
+  static const classesFocusRing = tokens.AppColors.classesFocusRing;
+  static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
+  static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
 
-  static const success = green;
-  static const warning = indigo;
-  static const muted = textSecondary;
-  static const danger = red;
+  static const success = tokens.AppColors.success;
+  static const warning = tokens.AppColors.warning;
+  static const muted = tokens.AppColors.textMuted;
+  static const danger = tokens.AppColors.error;
 }

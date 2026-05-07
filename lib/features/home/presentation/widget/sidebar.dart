@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_footer.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_header.dart';
@@ -32,49 +33,41 @@ class Sidebar extends StatelessWidget {
                 ? AppTheme.sidebarWidth
                 : AppTheme.sidebarCollapsedWidth,
             child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppTheme.sidebarGradientTop,
-                  AppTheme.sidebarColor,
-                  AppTheme.sidebarGradientBottom,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 14,
-                  offset: Offset(3, 0),
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceDark,
+                border: Border(
+                  right: BorderSide(color: AppColors.borderStrong),
                 ),
-              ],
-            ),
-            child: SafeArea(
-              child: FocusTraversalGroup(
-                policy: OrderedTraversalPolicy(),
-                child: Column(
-                  children: [
-                    FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: SidebarHeader(isExpanded: state.isSidebarExpanded),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXS + 2),
-                    Expanded(
-                      child: FocusTraversalOrder(
-                        order: const NumericFocusOrder(2),
-                        child: _buildMenuList(context, state),
+              ),
+              child: SafeArea(
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: Column(
+                    children: [
+                      FocusTraversalOrder(
+                        order: const NumericFocusOrder(1),
+                        child: SidebarHeader(
+                          isExpanded: state.isSidebarExpanded,
+                        ),
                       ),
-                    ),
-                    FocusTraversalOrder(
-                      order: const NumericFocusOrder(3),
-                      child: SidebarFooter(isExpanded: state.isSidebarExpanded),
-                    ),
-                  ],
+                      const SizedBox(height: AppDimensions.spacingXS + 2),
+                      Expanded(
+                        child: FocusTraversalOrder(
+                          order: const NumericFocusOrder(2),
+                          child: _buildMenuList(context, state),
+                        ),
+                      ),
+                      FocusTraversalOrder(
+                        order: const NumericFocusOrder(3),
+                        child: SidebarFooter(
+                          isExpanded: state.isSidebarExpanded,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           ),
         );
       },
