@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -11,15 +12,17 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SidebarHeader extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarHeader({
-    super.key,
-    required this.isExpanded,
-  });
+  const SidebarHeader({super.key, required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 0),
+      margin: EdgeInsets.fromLTRB(
+        isExpanded ? 12 : 8,
+        8,
+        isExpanded ? 12 : 8,
+        0,
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: isExpanded ? 10 : 6,
         vertical: 8,
@@ -33,9 +36,7 @@ class SidebarHeader extends StatelessWidget {
         duration: AppMotion.standard,
         switchInCurve: AppMotion.outCurve,
         switchOutCurve: AppMotion.inCurve,
-        child: isExpanded
-            ? const _ExpandedHeader()
-            : const _CollapsedHeader(),
+        child: isExpanded ? const _ExpandedHeader() : const _CollapsedHeader(),
       ),
     );
   }
@@ -47,28 +48,20 @@ class _ExpandedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final schoolAppLabel = l10n.schoolApp.trim();
+    final sidebarTitle = schoolAppLabel.contains(' ')
+        ? schoolAppLabel.replaceFirst(RegExp(r'\s+'), '\n')
+        : schoolAppLabel;
 
     return Row(
       key: const ValueKey('expanded'),
       children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-            color: AppColors.terreCuite,
-            borderRadius: AppRadius.brSm,
-          ),
-          child: const Icon(
-            Icons.school_rounded,
-            color: AppColors.textOnDark,
-            size: 20,
-          ),
-        ),
+        const EteeloLogo(variant: EteeloLogoVariant.symbolOnDark, size: 36),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            l10n.schoolApp,
-            maxLines: 1,
+            sidebarTitle,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.sectionTitle.copyWith(
               color: AppColors.textOnDark,
@@ -118,18 +111,22 @@ class _CollapsedHeader extends StatelessWidget {
         hint: l10n.homeSidebarExpandTooltip,
         toggled: false,
         child: ExcludeSemantics(
-          child: IconButton(
-            tooltip: l10n.homeSidebarExpandTooltip,
-            onPressed: () =>
+          child: InkWell(
+            onTap: () =>
                 context.read<NavigationBloc>().add(const SidebarToggled()),
-            icon: const Icon(
-              Icons.menu_rounded,
-              color: AppColors.textOnDark,
-              size: 22,
-            ),
-            constraints: const BoxConstraints(
-              minWidth: AppDimensions.minTouchTarget,
-              minHeight: AppDimensions.minTouchTarget,
+            borderRadius: AppRadius.brSm,
+            child: Tooltip(
+              message: l10n.homeSidebarExpandTooltip,
+              child: const SizedBox(
+                width: AppDimensions.minTouchTarget,
+                height: AppDimensions.minTouchTarget,
+                child: Center(
+                  child: EteeloLogo(
+                    variant: EteeloLogoVariant.symbolOnDark,
+                    size: 30,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

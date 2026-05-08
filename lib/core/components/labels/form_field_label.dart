@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -29,11 +31,10 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
         Expanded(
           child: RichText(
             text: TextSpan(
-              text: widget.label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: widget.labelColor ?? AppColors.textPrimary,
+                text: widget.label,
+                style: AppTypography.labelFormMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                color: widget.labelColor ?? AppColors.textSecondary,
               ),
               children: [
                 if (widget.requiredField)
@@ -49,6 +50,7 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
           Tooltip(
             message: widget.helpMessage,
             showDuration: AppMotion.tooltipShowDuration,
+            triggerMode: TooltipTriggerMode.tap,
             preferBelow: true,
             decoration: BoxDecoration(
               color: AppColors.textPrimary.withValues(alpha: 0.9),
@@ -57,12 +59,15 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
             textStyle: const TextStyle(color: AppColors.textOnDark, fontSize: 12),
             child: const MouseRegion(
               cursor: SystemMouseCursors.help,
-              child: Padding(
-                padding: EdgeInsets.all(4),
-                child: Icon(
-                  Icons.help_outline_rounded,
-                  size: 16,
-                  color: AppColors.textSecondary,
+              child: SizedBox(
+                width: AppDimensions.minTouchTarget,
+                height: AppDimensions.minTouchTarget,
+                child: Center(
+                  child: Icon(
+                    Icons.help_outline_rounded,
+                    size: 18,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),

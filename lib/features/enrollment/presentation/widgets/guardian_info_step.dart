@@ -54,6 +54,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   bool _showValidationHints = false;
   bool _isSaving = false;
   bool _isHydratingFromDetail = false;
+  String? _expandedParentId;
+  String? _primaryParentId;
 
   bool get _canSave => _stepState.canSave;
   StepFormState get _stepState =>
@@ -125,6 +127,23 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             parent.id: ParentItemValue.fromParent(parent),
         };
       }
+
+      if (_editableParentDetails.isNotEmpty) {
+        final expandedStillExists = _expandedParentId != null &&
+            _editableParentDetails.any((p) => p.id == _expandedParentId);
+        _expandedParentId = expandedStillExists
+            ? _expandedParentId
+            : _editableParentDetails.first.id;
+
+        final primaryStillExists = _primaryParentId != null &&
+            _editableParentDetails.any((p) => p.id == _primaryParentId);
+        _primaryParentId = primaryStillExists
+            ? _primaryParentId
+            : _editableParentDetails.first.id;
+      } else {
+        _expandedParentId = null;
+        _primaryParentId = null;
+      }
     } finally {
       _isHydratingFromDetail = false;
     }
@@ -184,6 +203,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
     final validNow =
         parentIds.isNotEmpty &&
+        _primaryParentId != null &&
+        parentIds.contains(_primaryParentId) &&
         parentIds.every((id) => _itemStatesByParentId[id]?.valid == true);
 
     final dirtyNow = parentIds.any(
@@ -247,13 +268,15 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.phoneNumberLabel)}',
         );
       }
-      if (value.email.trim().isEmpty) {
-        errors.add(
-          'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.emailLabel)}',
-        );
-      } else if (!ParentItemValue.isEmailValid(value.email)) {
+      if (value.email.trim().isNotEmpty &&
+          !ParentItemValue.isEmailValid(value.email)) {
         errors.add('Gardien ${i + 1}: ${l10n.pleaseEnterValidEmail}');
       }
+    }
+
+    if (_primaryParentId == null ||
+        !_editableParentDetails.any((parent) => parent.id == _primaryParentId)) {
+      errors.add(l10n.guardianPrimaryRequiredHint);
     }
 
     return errors;
@@ -366,6 +389,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         dirty: false,
         changedFields: const <String, bool>{},
       );
+
+      if (_expandedParentId == draftId) {
+        _expandedParentId = created.id;
+      }
+      if (_primaryParentId == draftId) {
+        _primaryParentId = created.id;
+      }
     });
   }
 
@@ -437,6 +467,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         dirty: false,
         changedFields: const <String, bool>{},
       );
+      _expandedParentId = draftId;
+      _primaryParentId ??= draftId;
     });
 
     _recomputeFormState();
@@ -458,6 +490,18 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       _initialValuesByParentId.remove(parentId);
       _itemStatesByParentId.remove(parentId);
       _pendingParentIds.removeWhere((id) => id == parentId);
+
+      if (_expandedParentId == parentId) {
+        _expandedParentId = _editableParentDetails.isNotEmpty
+            ? _editableParentDetails.first.id
+            : null;
+      }
+
+      if (_primaryParentId == parentId) {
+        _primaryParentId = _editableParentDetails.isNotEmpty
+            ? _editableParentDetails.first.id
+            : null;
+      }
     });
 
     _recomputeFormState();
@@ -496,6 +540,17 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _parentBloc.add(
       ParentUnlinkRequested(studentId: studentId, parentId: parentId),
     );
+  }
+
+  void _onOpenParent(String parentId) {
+    if (_expandedParentId == parentId) return;
+    setState(() => _expandedParentId = parentId);
+  }
+
+  void _onPrimaryParentChanged(String parentId) {
+    if (_primaryParentId == parentId) return;
+    setState(() => _primaryParentId = parentId);
+    _recomputeFormState();
   }
 
   @override
@@ -550,17 +605,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
           } else if (state.status == ParentUpdateStatus.unlinkSuccess) {
             final pendingId = _pendingUnlinkParentId;
             if (pendingId != null) {
-              setState(() {
-                _editableParentDetails = _editableParentDetails
-                    .where((parent) => parent.id != pendingId)
-                    .toList(growable: false);
-                _currentValuesByParentId.remove(pendingId);
-                _initialValuesByParentId.remove(pendingId);
-                _itemStatesByParentId.remove(pendingId);
-                _pendingParentIds.removeWhere((id) => id == pendingId);
-              });
-
-              _recomputeFormState();
+              _onRemoveGuardian(pendingId);
               _onSavingChanged(false);
               _pendingUnlinkParentId = null;
 
@@ -588,6 +633,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             onItemValueChanged: _onParentItemValueChanged,
             onAddParent: _onAddGuardian,
             onRemoveParent: _onRemoveGuardianRequested,
+            onOpenParent: _onOpenParent,
+            onPrimaryParentChanged: _onPrimaryParentChanged,
+            expandedParentId: _expandedParentId,
+            primaryParentId: _primaryParentId,
             isLoading: isLoading,
             canSave: _canSave,
             showInlineSaveButton: widget.showInlineSaveButton,

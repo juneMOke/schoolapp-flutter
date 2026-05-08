@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -54,6 +55,7 @@ class EditableField extends StatelessWidget {
                 controller: controller,
                 textInputAction: TextInputAction.next,
                 textCapitalization: textCapitalization,
+                style: AppTypography.formValueMedium,
                 inputFormatters: const [
                   FirstLetterUppercaseTextInputFormatter(),
                 ],
@@ -62,11 +64,6 @@ class EditableField extends StatelessWidget {
                   hintText: hintText ?? l10n.enterFieldHint(label),
                   errorText: errorText,
                   isChanged: isChanged,
-                  prefixIcon: const Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -77,19 +74,9 @@ class EditableField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                              color: AppColors.textSecondary,
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                      Icon(
-                        readOnly
-                            ? Icons.lock_outline_rounded
-                            : Icons.mode_edit_outline_rounded,
-                        size: 16,
-                        color: readOnly
-                            ? AppColors.textSecondary
-                            : AppColors.bleuArdoise,
-                      ),
-                      const SizedBox(width: 8),
                     ],
                   ),
                 ),

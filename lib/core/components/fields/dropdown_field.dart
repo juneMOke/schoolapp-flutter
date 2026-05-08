@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 
 class DropdownField extends StatelessWidget {
@@ -43,6 +44,9 @@ class DropdownField extends StatelessWidget {
           DropdownButtonFormField<String>(
             initialValue: value,
             isExpanded: true,
+            style: AppTypography.formValueMedium.copyWith(
+              color: AppTheme.textPrimaryColor,
+            ),
             items: items,
             onChanged: (!enabled || items.isEmpty) ? null : onChanged,
             decoration: buildInputDecoration(

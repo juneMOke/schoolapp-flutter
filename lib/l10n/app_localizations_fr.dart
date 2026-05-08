@@ -36,7 +36,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Veuillez entrer un email valide';
 
   @override
-  String get schoolApp => 'ETEELO TECH';
+  String get schoolApp => 'ETEELO CONNECT';
 
   @override
   String get logout => 'Déconnexion';
@@ -533,6 +533,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianRelationshipLabel => 'Relation';
 
   @override
+  String get guardianMarkAsPrimary => 'Désigner comme tuteur principal';
+
+  @override
+  String get guardianPrimaryRequiredHint => 'Au moins un tuteur principal est requis';
+
+  @override
+  String get guardianPrincipalBadge => 'Principal';
+
+  @override
+  String get guardianToggleCard => 'Ouvrir ou fermer la carte tuteur';
+
+  @override
+  String get guardianEmailOptionalInline => '(facultatif)';
+
+  @override
   String get guardianDeleteAction => 'Supprimer ce tuteur';
 
   @override
@@ -557,6 +572,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get summary => 'Résumé';
+
+  @override
+  String get summaryYes => 'Oui';
+
+  @override
+  String get summaryNo => 'Non';
+
+  @override
+  String get summaryChargesTotalDue => 'Total à régler';
+
+  @override
+  String get summaryChargesUnavailable => 'Montants indisponibles pour le moment.';
+
+  @override
+  String get summaryValidationNoticeTitle => 'Avant validation';
+
+  @override
+  String get summaryValidationNoticeBody => 'Vous certifiez que les informations sont exactes. Le dossier passera au statut validé et un reçu pourra être généré.';
 
   @override
   String get next => 'Continuer';
@@ -705,6 +738,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yearValidated => 'Année validée';
 
   @override
+  String get yearValidatedHelp => 'Indique si l\'élève a validé son année scolaire précédente.';
+
+  @override
   String get yearNotValidated => 'Non validée';
 
   @override
@@ -804,6 +840,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get stepSummarySubtitle => 'Récapitulatif final du dossier';
+
+  @override
+  String get wizardStepShortPersonal => 'Perso';
+
+  @override
+  String get wizardStepShortAddress => 'Adresse';
+
+  @override
+  String get wizardStepShortPrevious => 'Précédent';
+
+  @override
+  String get wizardStepShortTarget => 'Cible';
+
+  @override
+  String get wizardStepShortCharges => 'Charges';
+
+  @override
+  String get wizardStepShortGuardian => 'Tuteurs';
+
+  @override
+  String get wizardStepShortSummary => 'Résumé';
 
   @override
   String stepIndicator(int current, int total) {
@@ -1003,6 +1060,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargesAmountColumn => 'Montant';
 
   @override
+  String get studentChargesLabelColumn => 'Libellé';
+
+  @override
+  String get studentChargesActionsColumn => 'Actions';
+
+  @override
   String get studentChargesAmountPaidLabel => 'Montant payé';
 
   @override
@@ -1016,6 +1079,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get studentChargesSaveHintBeforeContinue => 'Veuillez enregistrer les modifications des charges avant de continuer.';
+
+  @override
+  String get studentChargesTotalLabel => 'Total';
+
+  @override
+  String get studentChargesHelperText => 'Les montants peuvent être modifiés ultérieurement depuis la fiche de l\'élève.';
 
   @override
   String get studentChargesNetworkError => 'Impossible de charger les charges. Vérifiez votre connexion internet.';
@@ -1052,6 +1121,78 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get studentChargeStatusPaid => 'Payé';
+
+  @override
+  String get studentChargeFeeCodeTuition => 'Frais de scolarité';
+
+  @override
+  String get studentChargeFeeCodeRegistration => 'Frais d\'inscription';
+
+  @override
+  String get studentChargeFeeCodeEnrollment => 'Frais d\'enrôlement';
+
+  @override
+  String get studentChargeFeeCodeApplication => 'Frais de dossier';
+
+  @override
+  String get studentChargeFeeCodeAdmission => 'Frais d\'admission';
+
+  @override
+  String get studentChargeFeeCodeCanteen => 'Cantine';
+
+  @override
+  String get studentChargeFeeCodeTransport => 'Transport';
+
+  @override
+  String get studentChargeFeeCodeBoarding => 'Internat';
+
+  @override
+  String get studentChargeFeeCodeBooks => 'Livres et matériels';
+
+  @override
+  String get studentChargeFeeCodeUniform => 'Uniforme';
+
+  @override
+  String get studentChargeFeeCodeExamination => 'Frais d\'examen';
+
+  @override
+  String get studentChargeFeeCodeLabFee => 'Frais de laboratoire';
+
+  @override
+  String get studentChargeFeeCodeActivity => 'Frais d\'activités';
+
+  @override
+  String get studentChargeFeeCodeSports => 'Frais de sport';
+
+  @override
+  String get studentChargeFeeCodeLibrary => 'Frais de bibliothèque';
+
+  @override
+  String get studentChargeFeeCodeTechnology => 'Frais technologie / informatique';
+
+  @override
+  String get studentChargeFeeCodeDevelopment => 'Frais de développement / infrastructure';
+
+  @override
+  String get studentChargeFeeCodeInsurance => 'Assurance';
+
+  @override
+  String get studentChargeFeeCodeSecurityDeposit => 'Caution';
+
+  @override
+  String get studentChargeFeeCodeProcessingFee => 'Frais de traitement';
+
+  @override
+  String get studentChargeFeeCodeLatePaymentFee => 'Pénalité de retard';
+
+  @override
+  String get studentChargeFeeCodeRefund => 'Remboursement';
+
+  @override
+  String get studentChargeFeeCodeOther => 'Autre';
+
+  @override
+  String get studentChargeFeeCodeFallback => 'Frais scolaire';
 
   @override
   String get facturationPageHeaderTitle => 'Facturation des élèves';

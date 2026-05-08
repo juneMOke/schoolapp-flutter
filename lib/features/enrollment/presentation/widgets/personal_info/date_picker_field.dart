@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -47,6 +48,7 @@ class DatePickerField extends StatelessWidget {
             enabled: enabled,
             onTap: enabled ? onTap : null,
             controller: TextEditingController(text: displayValue),
+            style: AppTypography.formValueMedium,
             decoration: buildInputDecoration(
               hintText: l10n.dateHint,
               errorText: errorText,

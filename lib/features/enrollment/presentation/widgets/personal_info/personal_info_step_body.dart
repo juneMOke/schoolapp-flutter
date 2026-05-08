@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
+import 'package:school_app_flutter/core/components/fields/editable_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_avatar.dart';
@@ -126,14 +126,6 @@ class PersonalInfoStepBody extends StatelessWidget {
                               '${studentDetail.firstName} ${studentDetail.lastName}',
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              l10n.personalInfoSubtitle,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: AppTheme.textSecondaryColor,
-                                  ),
                             ),
                           ],
                         ),

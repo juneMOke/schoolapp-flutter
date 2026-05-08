@@ -39,7 +39,9 @@ class StepPageCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTypography.titleSmall.copyWith(
+                  style: AppTypography.titleLarge.copyWith(
+                    fontFamily: 'Lora',
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),

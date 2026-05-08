@@ -57,13 +57,12 @@ class ParentItemValue extends Equatable {
     return firstName.trim().isNotEmpty &&
         lastName.trim().isNotEmpty &&
         phoneNumber.trim().isNotEmpty &&
-        normalizedEmail.isNotEmpty &&
         isEmailValid(normalizedEmail);
   }
 
   static bool isEmailValid(String rawEmail) {
     final normalized = rawEmail.trim();
-    if (normalized.isEmpty) return false;
+    if (normalized.isEmpty) return true;
     return _emailRegExp.hasMatch(normalized);
   }
 

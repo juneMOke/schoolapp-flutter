@@ -89,4 +89,29 @@ class AppTypography {
     fontWeight: FontWeight.w500,
     fontFeatures: [FontFeature.tabularFigures()],
   );
+
+  // Formulaires — Lora pour chaleur éditoriale
+  static const labelFormLarge = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const labelFormMedium = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const formValueMedium = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const formValueSmall = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+  );
 }

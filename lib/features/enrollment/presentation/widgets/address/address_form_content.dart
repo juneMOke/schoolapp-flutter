@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_dropdown_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
+import 'package:school_app_flutter/core/components/fields/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AddressFormContent extends StatelessWidget {

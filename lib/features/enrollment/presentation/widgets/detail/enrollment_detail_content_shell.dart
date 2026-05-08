@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
@@ -42,17 +43,28 @@ class EnrollmentDetailContentShell extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  infoBar,
-                  const SizedBox(height: AppSpacing.md),
-                  child,
-                ],
-              ),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact =
+                  constraints.maxWidth <= AppBreakpoints.detailCompactMax;
+              final shellPadding = isCompact
+                  ? const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.md,
+                    )
+                  : const EdgeInsets.all(AppSpacing.xl);
+
+              return Padding(
+                padding: shellPadding,
+                child: Column(
+                  children: [
+                    infoBar,
+                    const SizedBox(height: AppSpacing.md),
+                    Expanded(child: child),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

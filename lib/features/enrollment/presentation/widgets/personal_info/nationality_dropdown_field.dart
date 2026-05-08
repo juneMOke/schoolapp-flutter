@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -96,8 +97,7 @@ class _NationalityDropdownFieldState extends State<NationalityDropdownField> {
           ),
           title: Text(
             option,
-            style: TextStyle(
-              fontSize: 13,
+            style: AppTypography.formValueMedium.copyWith(
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               color: AppTheme.textPrimaryColor,
             ),
@@ -141,6 +141,7 @@ class _NationalityDropdownFieldState extends State<NationalityDropdownField> {
                   readOnly: true,
                   enabled: widget.enabled,
                   onTap: widget.enabled ? controller.openView : null,
+                  style: AppTypography.formValueMedium,
                   decoration: buildInputDecoration(
                     hintText: l10n.enterFieldHint(widget.label),
                     errorText: widget.errorText,

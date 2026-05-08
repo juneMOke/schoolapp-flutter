@@ -213,10 +213,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
                     EnrollmentReadOnlyBanner(mode: accessMode!),
                     const SizedBox(height: 12),
                   ],
-                  EnrollmentStepper(
-                    enrollmentDetail: detail,
-                    detailIntent: _effectiveIntent,
-                    detailPolicy: _policy,
+                  Expanded(
+                    child: EnrollmentStepper(
+                      enrollmentDetail: detail,
+                      detailIntent: _effectiveIntent,
+                      detailPolicy: _policy,
+                    ),
                   ),
                 ],
               ),

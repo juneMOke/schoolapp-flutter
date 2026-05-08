@@ -75,7 +75,7 @@ void main() {
     const parentItemKey = ValueKey<String>('parent-item-parent-1');
     expect(find.byKey(parentItemKey), findsOneWidget);
 
-    await tester.tap(find.text('Supprimer ce tuteur').first);
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
     await tester.pumpAndSettle();
 
     expect(find.text('Confirmer la suppression'), findsOneWidget);
@@ -111,7 +111,7 @@ void main() {
     const parentItemKey = ValueKey<String>('parent-item-parent-1');
     expect(find.byKey(parentItemKey), findsOneWidget);
 
-    await tester.tap(find.text('Supprimer ce tuteur').first);
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
     await tester.pumpAndSettle();
 
     expect(find.text('Confirmer la suppression'), findsOneWidget);
@@ -143,7 +143,7 @@ void main() {
       const parentItemKey = ValueKey<String>('parent-item-parent-1');
       expect(find.byKey(parentItemKey), findsOneWidget);
 
-      await tester.tap(find.text('Supprimer ce tuteur').first);
+      await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Confirmer la suppression'), findsOneWidget);

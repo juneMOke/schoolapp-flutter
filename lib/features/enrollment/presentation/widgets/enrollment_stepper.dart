@@ -161,7 +161,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final stepTitles = _stepTitles(l10n);
-    final stepSubtitles = _stepSubtitles(l10n);
+    final stepCardTitles = _stepCardTitles(l10n);
+    final stepCardSubtitles = _stepCardSubtitles(l10n);
     final steps = _stepContents();
 
     return BlocProvider<EnrollmentStepperFlowBloc>.value(
@@ -222,8 +223,45 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                     flowState.showSaveAction &&
                     widget.detailPolicy.canSaveStep(currentWizardStep);
 
-                return Padding(
-                  padding: const EdgeInsets.all(AppTheme.defaultPadding),
+                final controls = EnrollmentStepperControls(
+                  currentStep: currentStep,
+                  isLast: flowState.isLast,
+                  isSummaryStep: currentStep == _totalSteps - 1,
+                  canSave: canSaveCurrentStep,
+                  canContinue: flowState.canContinue,
+                  showSaveAction: showSaveAction,
+                  savingNow: effectiveSavingNow,
+                  saveLabel: _saveLabelForStep(
+                    l10n,
+                    currentStep,
+                    effectiveSavingNow,
+                  ),
+                  onPrevious: () {
+                    _flowBloc.add(
+                      EnrollmentStepperCurrentStepChanged(currentStep - 1),
+                    );
+                  },
+                  onSave: () => _onSavePressed(currentStep, flowState),
+                  onContinue: () {
+                    if (!_validateCurrentStep(
+                      currentStep,
+                      flowState,
+                      isEditable: stepIsEditable,
+                    )) {
+                      return;
+                    }
+                    if (flowState.isLast) {
+                      _showHint(l10n.enrollmentReadyForValidation);
+                      return;
+                    }
+                    _flowBloc.add(
+                      EnrollmentStepperCurrentStepChanged(currentStep + 1),
+                    );
+                    _resetContentScroll();
+                  },
+                );
+
+                final content = SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -237,53 +275,30 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                       const SizedBox(height: 12),
                       StepPageCard(
                         key: ValueKey(currentStep),
-                        title: stepTitles[currentStep],
-                        subtitle: stepSubtitles[currentStep],
+                        title: stepCardTitles[currentStep],
+                        subtitle: stepCardSubtitles[currentStep],
                         child: _buildStepContent(steps[currentStep]),
                       ),
-                      const SizedBox(height: 12),
-                      EnrollmentStepperControls(
-                        currentStep: currentStep,
-                        isLast: flowState.isLast,
-                        canSave: canSaveCurrentStep,
-                        canContinue: flowState.canContinue,
-                        showSaveAction: showSaveAction,
-                        savingNow: effectiveSavingNow,
-                        saveLabel: _saveLabelForStep(
-                          l10n,
-                          currentStep,
-                          effectiveSavingNow,
-                        ),
-                        onPrevious: () {
-                          _flowBloc.add(
-                            EnrollmentStepperCurrentStepChanged(
-                              currentStep - 1,
-                            ),
-                          );
-                        },
-                        onSave: () => _onSavePressed(currentStep, flowState),
-                        onContinue: () {
-                          if (!_validateCurrentStep(
-                            currentStep,
-                            flowState,
-                            isEditable: stepIsEditable,
-                          )) {
-                            return;
-                          }
-                          if (flowState.isLast) {
-                            _showHint(l10n.enrollmentReadyForValidation);
-                            return;
-                          }
-                          _flowBloc.add(
-                            EnrollmentStepperCurrentStepChanged(
-                              currentStep + 1,
-                            ),
-                          );
-                          _resetContentScroll();
-                        },
-                      ),
+                      if (currentStep != _totalSteps - 1) ...[
+                        const SizedBox(height: 12),
+                        controls,
+                      ],
                     ],
                   ),
+                );
+
+                return Padding(
+                  padding: const EdgeInsets.all(AppTheme.defaultPadding),
+                  child: currentStep == _totalSteps - 1
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: content),
+                            const SizedBox(height: 12),
+                            controls,
+                          ],
+                        )
+                      : content,
                 );
               },
             );
@@ -295,6 +310,18 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   List<String> _stepTitles(AppLocalizations l10n) {
     return [
+      l10n.wizardStepShortPersonal,
+      l10n.wizardStepShortAddress,
+      l10n.wizardStepShortPrevious,
+      l10n.wizardStepShortTarget,
+      l10n.wizardStepShortCharges,
+      l10n.wizardStepShortGuardian,
+      l10n.wizardStepShortSummary,
+    ];
+  }
+
+  List<String> _stepCardTitles(AppLocalizations l10n) {
+    return [
       l10n.personalInformation,
       l10n.address,
       l10n.previousYear,
@@ -305,7 +332,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     ];
   }
 
-  List<String> _stepSubtitles(AppLocalizations l10n) {
+  List<String> _stepCardSubtitles(AppLocalizations l10n) {
     return [
       l10n.stepPersonalInfoSubtitle,
       l10n.stepAddressSubtitle,
@@ -398,8 +425,17 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
         onRefreshRequested: _refreshAfterSave,
         isEditable: canEditGuardian,
       ),
-      SummaryStep(enrollmentDetail: widget.enrollmentDetail),
+      SummaryStep(
+        enrollmentDetail: widget.enrollmentDetail,
+        onEditRequested: _onSummaryEditRequested,
+      ),
     ];
+  }
+
+  void _onSummaryEditRequested(int step) {
+    final boundedStep = step.clamp(0, _totalSteps - 2);
+    _flowBloc.add(EnrollmentStepperCurrentStepChanged(boundedStep));
+    _resetContentScroll();
   }
 
   String _resolveStudentId() {
@@ -595,6 +631,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       silent: true,
     );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
+    _flowBloc.add(const EnrollmentStepperCurrentStepChanged(_totalSteps - 1));
+    _resetContentScroll();
   }
 
   Widget _buildStepContent(Widget stepContent) {

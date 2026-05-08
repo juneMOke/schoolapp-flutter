@@ -21,8 +21,10 @@ class WizardBreadcrumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brMd,
@@ -34,22 +36,22 @@ class WizardBreadcrumb extends StatelessWidget {
           Row(
             children: [
               Text(
-                AppLocalizations.of(context)!.stepIndicator(
+                l10n.stepIndicator(
                   currentStep + 1,
                   titles.length,
                 ),
-                style: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 6,
+                    minHeight: 3,
                     backgroundColor: AppColors.border,
                     valueColor: const AlwaysStoppedAnimation<Color>(AppColors.bleuArdoise),
                   ),
@@ -57,10 +59,10 @@ class WizardBreadcrumb extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           Wrap(
-            spacing: 6,
-            runSpacing: 8,
+            spacing: 4,
+            runSpacing: 4,
             children: List.generate(titles.length, (index) {
               final isDone = index < currentStep;
               final isCurrent = index == currentStep;
@@ -83,38 +85,45 @@ class WizardBreadcrumb extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 6,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
                             color: isCurrent
                                 ? AppColors.bleuArdoise
                                 : isDone
-                                    ? AppColors.bleuArdoise.withValues(alpha: 0.14)
+                                    ? AppColors.bleuArdoise.withValues(alpha: 0.10)
                                     : AppColors.surfaceAlt,
                             borderRadius: const BorderRadius.all(Radius.circular(18)),
+                            border: isCurrent
+                                ? null
+                                : Border.all(
+                                    color: isDone
+                                        ? AppColors.bleuArdoise.withValues(alpha: 0.14)
+                                        : AppColors.border,
+                                  ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                width: 16,
-                                height: 16,
+                                width: 12,
+                                height: 12,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isCurrent
                                       ? AppColors.textOnDark.withValues(alpha: 0.22)
                                       : isDone
                                           ? AppColors.bleuArdoise.withValues(
-                                              alpha: 0.18,
+                                              alpha: 0.16,
                                             )
                                           : AppColors.border,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
                                   isDone ? '✓' : '${index + 1}',
-                                  style: TextStyle(
-                                    fontSize: 10,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    fontSize: 8,
                                     fontWeight: FontWeight.w700,
                                     color: isCurrent
                                         ? AppColors.textOnDark
@@ -124,17 +133,16 @@ class WizardBreadcrumb extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 5),
                               Text(
                                 titles[index],
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: AppTypography.labelSmall.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isCurrent
                                       ? AppColors.textOnDark
                                       : isDone
                                           ? AppColors.bleuArdoise
-                                          : AppColors.textSecondary,
+                                          : AppColors.textSecondary.withValues(alpha: 0.75),
                                 ),
                               ),
                             ],
@@ -145,10 +153,10 @@ class WizardBreadcrumb extends StatelessWidget {
                   ),
                   if (index < titles.length - 1)
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 1),
                       child: Icon(
                         Icons.chevron_right_rounded,
-                        size: 16,
+                        size: 12,
                         color: AppColors.textMuted,
                       ),
                     ),

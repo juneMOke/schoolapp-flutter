@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ValidatedYearSelector extends StatelessWidget {
@@ -8,6 +11,7 @@ class ValidatedYearSelector extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final bool isChanged;
   final bool enabled;
+  final String helpMessage;
 
   const ValidatedYearSelector({
     super.key,
@@ -17,91 +21,63 @@ class ValidatedYearSelector extends StatelessWidget {
     required this.onChanged,
     this.isChanged = false,
     this.enabled = true,
+    this.helpMessage = '',
   });
 
   @override
   Widget build(BuildContext context) {
-    final successColor = const Color(0xFF16A34A);
-    final errorColor = const Color(0xFFDC2626);
-
     return SizedBox(
       width: width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.yearValidated,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isChanged ? successColor : null,
-                ),
+          FormFieldLabel(
+            label: l10n.yearValidated,
+            labelColor: isChanged ? AppColors.success : null,
+            helpMessage: helpMessage,
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _ValidationChip(
-                label: l10n.yearValidated,
-                isSelected: validatedPreviousYear,
-                activeColor: successColor,
-                icon: Icons.check_circle_rounded,
-                onSelected: enabled ? () => onChanged(true) : null,
+          const SizedBox(height: 6),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<bool>(
+              segments: [
+                ButtonSegment<bool>(
+                  value: true,
+                  label: Text(l10n.yearValidated),
+                  icon: const Icon(Icons.check_circle_rounded, size: 16),
+                ),
+                ButtonSegment<bool>(
+                  value: false,
+                  label: Text(l10n.yearNotValidated),
+                  icon: const Icon(Icons.cancel_rounded, size: 16),
+                ),
+              ],
+              selected: {validatedPreviousYear},
+              onSelectionChanged: enabled
+                  ? (selection) {
+                      final selectedValue = selection.firstOrNull;
+                      if (selectedValue != null) {
+                        onChanged(selectedValue);
+                      }
+                    }
+                  : null,
+              style: SegmentedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppTheme.textSecondaryColor,
+                selectedForegroundColor: Colors.white,
+                selectedBackgroundColor: AppTheme.primaryColor,
+                side: BorderSide(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.25),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(fontSize: 13),
               ),
-              _ValidationChip(
-                label: l10n.yearNotValidated,
-                isSelected: !validatedPreviousYear,
-                activeColor: errorColor,
-                icon: Icons.cancel_rounded,
-                onSelected: enabled ? () => onChanged(false) : null,
-              ),
-            ],
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ValidationChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final Color activeColor;
-  final IconData icon;
-  final VoidCallback? onSelected;
-
-  const _ValidationChip({
-    required this.label,
-    required this.isSelected,
-    required this.activeColor,
-    required this.icon,
-    this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      avatar: isSelected
-          ? Icon(
-              icon,
-              size: 18,
-              color: activeColor,
-            )
-          : null,
-      label: Text(label),
-      selected: isSelected,
-      onSelected: onSelected != null ? (_) => onSelected!() : null,
-      selectedColor: activeColor.withValues(alpha: 0.12),
-      checkmarkColor: activeColor,
-      labelStyle: TextStyle(
-        color: isSelected ? activeColor : null,
-        fontWeight: isSelected ? FontWeight.bold : null,
-      ),
-      side: BorderSide(
-        color: isSelected ? activeColor : Colors.grey.shade300,
-        width: isSelected ? 1.5 : 1.0,
-      ),
-      showCheckmark: false,
     );
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/dropdown_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/read_only_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
+import 'package:school_app_flutter/core/components/fields/dropdown_field.dart';
+import 'package:school_app_flutter/core/components/fields/read_only_field.dart';
+import 'package:school_app_flutter/core/components/fields/editable_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 typedef OnTargetGroupChanged =
@@ -55,7 +56,10 @@ class TargetYearFields extends StatelessWidget {
             .map(
               (bundle) => DropdownMenuItem<String>(
                 value: bundle.schoolLevelGroup.id,
-                child: Text(bundle.schoolLevelGroup.name),
+                child: Text(
+                  bundle.schoolLevelGroup.name,
+                  style: AppTypography.formValueMedium,
+                ),
               ),
             )
             .toList();
@@ -64,7 +68,10 @@ class TargetYearFields extends StatelessWidget {
             .map(
               (levelBundle) => DropdownMenuItem<String>(
                 value: levelBundle.schoolLevel.id,
-                child: Text(levelBundle.schoolLevel.name),
+                child: Text(
+                  levelBundle.schoolLevel.name,
+                  style: AppTypography.formValueMedium,
+                ),
               ),
             )
             .toList();

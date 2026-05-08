@@ -533,6 +533,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianRelationshipLabel => 'Relationship';
 
   @override
+  String get guardianMarkAsPrimary => 'Set as primary guardian';
+
+  @override
+  String get guardianPrimaryRequiredHint => 'At least one primary guardian is required';
+
+  @override
+  String get guardianPrincipalBadge => 'Primary';
+
+  @override
+  String get guardianToggleCard => 'Open or close guardian card';
+
+  @override
+  String get guardianEmailOptionalInline => '(optional)';
+
+  @override
   String get guardianDeleteAction => 'Remove this guardian';
 
   @override
@@ -557,6 +572,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summary => 'Summary';
+
+  @override
+  String get summaryYes => 'Yes';
+
+  @override
+  String get summaryNo => 'No';
+
+  @override
+  String get summaryChargesTotalDue => 'Total due';
+
+  @override
+  String get summaryChargesUnavailable => 'Amounts are unavailable for now.';
+
+  @override
+  String get summaryValidationNoticeTitle => 'Before validation';
+
+  @override
+  String get summaryValidationNoticeBody => 'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.';
 
   @override
   String get next => 'Continue';
@@ -705,6 +738,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearValidated => 'Year validated';
 
   @override
+  String get yearValidatedHelp => 'Indicates whether the student validated the previous school year.';
+
+  @override
   String get yearNotValidated => 'Not validated';
 
   @override
@@ -804,6 +840,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stepSummarySubtitle => 'Final enrollment summary';
+
+  @override
+  String get wizardStepShortPersonal => 'Personal';
+
+  @override
+  String get wizardStepShortAddress => 'Address';
+
+  @override
+  String get wizardStepShortPrevious => 'Previous';
+
+  @override
+  String get wizardStepShortTarget => 'Target';
+
+  @override
+  String get wizardStepShortCharges => 'Fees';
+
+  @override
+  String get wizardStepShortGuardian => 'Guardians';
+
+  @override
+  String get wizardStepShortSummary => 'Summary';
 
   @override
   String stepIndicator(int current, int total) {
@@ -1003,6 +1060,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargesAmountColumn => 'Amount';
 
   @override
+  String get studentChargesLabelColumn => 'Charge label';
+
+  @override
+  String get studentChargesActionsColumn => 'Actions';
+
+  @override
   String get studentChargesAmountPaidLabel => 'Paid amount';
 
   @override
@@ -1016,6 +1079,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentChargesSaveHintBeforeContinue => 'Please save charge changes before continuing.';
+
+  @override
+  String get studentChargesTotalLabel => 'Total';
+
+  @override
+  String get studentChargesHelperText => 'Amounts can be updated later from the student\'s profile.';
 
   @override
   String get studentChargesNetworkError => 'Unable to load charges. Please check your internet connection.';
@@ -1052,6 +1121,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentChargeStatusPaid => 'Paid';
+
+  @override
+  String get studentChargeFeeCodeTuition => 'Tuition';
+
+  @override
+  String get studentChargeFeeCodeRegistration => 'Registration';
+
+  @override
+  String get studentChargeFeeCodeEnrollment => 'Enrollment';
+
+  @override
+  String get studentChargeFeeCodeApplication => 'Application';
+
+  @override
+  String get studentChargeFeeCodeAdmission => 'Admission';
+
+  @override
+  String get studentChargeFeeCodeCanteen => 'Canteen';
+
+  @override
+  String get studentChargeFeeCodeTransport => 'Transport';
+
+  @override
+  String get studentChargeFeeCodeBoarding => 'Boarding';
+
+  @override
+  String get studentChargeFeeCodeBooks => 'Books & Materials';
+
+  @override
+  String get studentChargeFeeCodeUniform => 'Uniform';
+
+  @override
+  String get studentChargeFeeCodeExamination => 'Examination';
+
+  @override
+  String get studentChargeFeeCodeLabFee => 'Laboratory Fee';
+
+  @override
+  String get studentChargeFeeCodeActivity => 'Activity Fee';
+
+  @override
+  String get studentChargeFeeCodeSports => 'Sports Fee';
+
+  @override
+  String get studentChargeFeeCodeLibrary => 'Library Fee';
+
+  @override
+  String get studentChargeFeeCodeTechnology => 'Technology / IT Fee';
+
+  @override
+  String get studentChargeFeeCodeDevelopment => 'Development / Infrastructure Fee';
+
+  @override
+  String get studentChargeFeeCodeInsurance => 'Insurance';
+
+  @override
+  String get studentChargeFeeCodeSecurityDeposit => 'Security Deposit';
+
+  @override
+  String get studentChargeFeeCodeProcessingFee => 'Processing Fee';
+
+  @override
+  String get studentChargeFeeCodeLatePaymentFee => 'Late Payment Fee';
+
+  @override
+  String get studentChargeFeeCodeRefund => 'Refund';
+
+  @override
+  String get studentChargeFeeCodeOther => 'Other';
+
+  @override
+  String get studentChargeFeeCodeFallback => 'School fee';
 
   @override
   String get facturationPageHeaderTitle => 'Student Billing';

@@ -1,88 +1,162 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/relationship_chip.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class GuardianCardHeader extends StatelessWidget {
   final ParentSummary parent;
   final bool isPrimary;
-  final int number;
-  final String initials;
+  final bool isExpanded;
+  final VoidCallback? onToggle;
 
   const GuardianCardHeader({
     super.key,
     required this.parent,
     required this.isPrimary,
-    required this.number,
-    required this.initials,
+    required this.isExpanded,
+    this.onToggle,
   });
+
+  String _relationshipLabel(AppLocalizations l10n, RelationshipType type) {
+    return switch (type) {
+      RelationshipType.father => l10n.relationshipFather,
+      RelationshipType.mother => l10n.relationshipMother,
+      RelationshipType.guardian => l10n.relationshipGuardian,
+      RelationshipType.uncle => l10n.relationshipUncle,
+      RelationshipType.aunt => l10n.relationshipAunt,
+      RelationshipType.grandparent => l10n.relationshipGrandparent,
+      RelationshipType.other => l10n.relationshipOther,
+    };
+  }
+
+  Widget _buildAvatar() {
+    final initials =
+        '${parent.firstName.isNotEmpty ? parent.firstName[0] : ''}${parent.lastName.isNotEmpty ? parent.lastName[0] : ''}'
+            .toUpperCase();
+    final hasInitials = initials.trim().isNotEmpty;
+
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: hasInitials ? AppColors.bleuArdoise : AppColors.surfaceAlt,
+        border: Border.all(
+          color: hasInitials ? AppColors.bleuArdoise : AppColors.border,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: hasInitials
+          ? Text(
+              initials,
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.blancCasse,
+                fontWeight: FontWeight.w700,
+              ),
+            )
+          : const Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.textMuted,
+              size: 18,
+            ),
+    );
+  }
+
+  Widget _buildPrimaryBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.bleuArdoise.withValues(alpha: 0.10),
+        borderRadius: AppRadius.brSm,
+        border: Border.all(
+          color: AppColors.bleuArdoise.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.star_rounded,
+            size: 12,
+            color: AppColors.bleuArdoise,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.bleuArdoise,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final badgeText = isPrimary
-        ? l10n.primaryGuardian
-        : l10n.guardianNumber(number);
+    final fullName = '${parent.firstName} ${parent.lastName}'.trim();
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
-          child: Text(
-            initials,
-            style: const TextStyle(
-              color: AppTheme.primaryColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
+        _buildAvatar(),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isPrimary
-                          ? AppTheme.primaryColor
-                          : Colors.grey[600],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  Expanded(
                     child: Text(
-                      badgeText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                      fullName.isEmpty ? '—' : fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        height: 1.15,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  RelationshipChip(relationshipType: parent.relationshipType),
+                  if (isPrimary) ...[
+                    const SizedBox(width: 6),
+                    _buildPrimaryBadge(l10n.guardianPrincipalBadge),
+                  ],
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
-                '${parent.firstName} ${parent.lastName}'.trim().isEmpty
-                    ? '—'
-                    : '${parent.firstName} ${parent.lastName}',
+                '${_relationshipLabel(l10n, parent.relationshipType)} • ${parent.phoneNumber.trim().isEmpty ? '—' : parent.phoneNumber}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimaryColor,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.15,
                 ),
               ),
             ],
+          ),
+        ),
+        SizedBox(
+          width: 32,
+          height: 32,
+          child: IconButton(
+          tooltip: l10n.guardianToggleCard,
+          onPressed: onToggle,
+          icon: Icon(
+            isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+            color: AppColors.textSecondary,
+            size: 20,
+          ),
+          padding: EdgeInsets.zero,
+          splashRadius: 18,
           ),
         ),
       ],

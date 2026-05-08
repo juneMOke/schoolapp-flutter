@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/widgets.dart';
 
 class AppTextStyles {
@@ -67,6 +69,30 @@ class AppTextStyles {
     fontSize: 11,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.2,
+    decoration: TextDecoration.none,
+  );
+
+  static final codeMuted = const TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.2,
+    fontFamily: 'monospace',
+    decoration: TextDecoration.none,
+  );
+
+  static final moneyTabular = const TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Inter',
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
+    decoration: TextDecoration.none,
+  );
+
+  static final totalAmountLora = const TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Lora',
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
     decoration: TextDecoration.none,
   );
 }

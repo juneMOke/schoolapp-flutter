@@ -1073,6 +1073,36 @@ abstract class AppLocalizations {
   /// **'Relationship'**
   String get guardianRelationshipLabel;
 
+  /// No description provided for @guardianMarkAsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as primary guardian'**
+  String get guardianMarkAsPrimary;
+
+  /// No description provided for @guardianPrimaryRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one primary guardian is required'**
+  String get guardianPrimaryRequiredHint;
+
+  /// No description provided for @guardianPrincipalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get guardianPrincipalBadge;
+
+  /// No description provided for @guardianToggleCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open or close guardian card'**
+  String get guardianToggleCard;
+
+  /// No description provided for @guardianEmailOptionalInline.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get guardianEmailOptionalInline;
+
   /// No description provided for @guardianDeleteAction.
   ///
   /// In en, this message translates to:
@@ -1120,6 +1150,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Summary'**
   String get summary;
+
+  /// No description provided for @summaryYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get summaryYes;
+
+  /// No description provided for @summaryNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get summaryNo;
+
+  /// No description provided for @summaryChargesTotalDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total due'**
+  String get summaryChargesTotalDue;
+
+  /// No description provided for @summaryChargesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts are unavailable for now.'**
+  String get summaryChargesUnavailable;
+
+  /// No description provided for @summaryValidationNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before validation'**
+  String get summaryValidationNoticeTitle;
+
+  /// No description provided for @summaryValidationNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.'**
+  String get summaryValidationNoticeBody;
 
   /// No description provided for @next.
   ///
@@ -1409,6 +1475,12 @@ abstract class AppLocalizations {
   /// **'Year validated'**
   String get yearValidated;
 
+  /// No description provided for @yearValidatedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicates whether the student validated the previous school year.'**
+  String get yearValidatedHelp;
+
   /// No description provided for @yearNotValidated.
   ///
   /// In en, this message translates to:
@@ -1606,6 +1678,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Final enrollment summary'**
   String get stepSummarySubtitle;
+
+  /// No description provided for @wizardStepShortPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get wizardStepShortPersonal;
+
+  /// No description provided for @wizardStepShortAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get wizardStepShortAddress;
+
+  /// No description provided for @wizardStepShortPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get wizardStepShortPrevious;
+
+  /// No description provided for @wizardStepShortTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get wizardStepShortTarget;
+
+  /// No description provided for @wizardStepShortCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees'**
+  String get wizardStepShortCharges;
+
+  /// No description provided for @wizardStepShortGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardians'**
+  String get wizardStepShortGuardian;
+
+  /// No description provided for @wizardStepShortSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get wizardStepShortSummary;
 
   /// No description provided for @stepIndicator.
   ///
@@ -1973,6 +2087,18 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get studentChargesAmountColumn;
 
+  /// No description provided for @studentChargesLabelColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge label'**
+  String get studentChargesLabelColumn;
+
+  /// No description provided for @studentChargesActionsColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get studentChargesActionsColumn;
+
   /// No description provided for @studentChargesAmountPaidLabel.
   ///
   /// In en, this message translates to:
@@ -2002,6 +2128,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please save charge changes before continuing.'**
   String get studentChargesSaveHintBeforeContinue;
+
+  /// No description provided for @studentChargesTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get studentChargesTotalLabel;
+
+  /// No description provided for @studentChargesHelperText.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts can be updated later from the student\'s profile.'**
+  String get studentChargesHelperText;
 
   /// No description provided for @studentChargesNetworkError.
   ///
@@ -2074,6 +2212,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paid'**
   String get studentChargeStatusPaid;
+
+  /// No description provided for @studentChargeFeeCodeTuition.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuition'**
+  String get studentChargeFeeCodeTuition;
+
+  /// No description provided for @studentChargeFeeCodeRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get studentChargeFeeCodeRegistration;
+
+  /// No description provided for @studentChargeFeeCodeEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment'**
+  String get studentChargeFeeCodeEnrollment;
+
+  /// No description provided for @studentChargeFeeCodeApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get studentChargeFeeCodeApplication;
+
+  /// No description provided for @studentChargeFeeCodeAdmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission'**
+  String get studentChargeFeeCodeAdmission;
+
+  /// No description provided for @studentChargeFeeCodeCanteen.
+  ///
+  /// In en, this message translates to:
+  /// **'Canteen'**
+  String get studentChargeFeeCodeCanteen;
+
+  /// No description provided for @studentChargeFeeCodeTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get studentChargeFeeCodeTransport;
+
+  /// No description provided for @studentChargeFeeCodeBoarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding'**
+  String get studentChargeFeeCodeBoarding;
+
+  /// No description provided for @studentChargeFeeCodeBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Books & Materials'**
+  String get studentChargeFeeCodeBooks;
+
+  /// No description provided for @studentChargeFeeCodeUniform.
+  ///
+  /// In en, this message translates to:
+  /// **'Uniform'**
+  String get studentChargeFeeCodeUniform;
+
+  /// No description provided for @studentChargeFeeCodeExamination.
+  ///
+  /// In en, this message translates to:
+  /// **'Examination'**
+  String get studentChargeFeeCodeExamination;
+
+  /// No description provided for @studentChargeFeeCodeLabFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Laboratory Fee'**
+  String get studentChargeFeeCodeLabFee;
+
+  /// No description provided for @studentChargeFeeCodeActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Fee'**
+  String get studentChargeFeeCodeActivity;
+
+  /// No description provided for @studentChargeFeeCodeSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports Fee'**
+  String get studentChargeFeeCodeSports;
+
+  /// No description provided for @studentChargeFeeCodeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Fee'**
+  String get studentChargeFeeCodeLibrary;
+
+  /// No description provided for @studentChargeFeeCodeTechnology.
+  ///
+  /// In en, this message translates to:
+  /// **'Technology / IT Fee'**
+  String get studentChargeFeeCodeTechnology;
+
+  /// No description provided for @studentChargeFeeCodeDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Development / Infrastructure Fee'**
+  String get studentChargeFeeCodeDevelopment;
+
+  /// No description provided for @studentChargeFeeCodeInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get studentChargeFeeCodeInsurance;
+
+  /// No description provided for @studentChargeFeeCodeSecurityDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Deposit'**
+  String get studentChargeFeeCodeSecurityDeposit;
+
+  /// No description provided for @studentChargeFeeCodeProcessingFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Fee'**
+  String get studentChargeFeeCodeProcessingFee;
+
+  /// No description provided for @studentChargeFeeCodeLatePaymentFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Late Payment Fee'**
+  String get studentChargeFeeCodeLatePaymentFee;
+
+  /// No description provided for @studentChargeFeeCodeRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get studentChargeFeeCodeRefund;
+
+  /// No description provided for @studentChargeFeeCodeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get studentChargeFeeCodeOther;
+
+  /// No description provided for @studentChargeFeeCodeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'School fee'**
+  String get studentChargeFeeCodeFallback;
 
   /// No description provided for @facturationPageHeaderTitle.
   ///
