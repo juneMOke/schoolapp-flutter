@@ -138,7 +138,7 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
                     AppDimensions.spacingM,
                   ),
                   itemCount: 3,
-                  separatorBuilder: (_, __) =>
+                  separatorBuilder: (_, _) =>
                       const SizedBox(height: AppDimensions.spacingS),
                   itemBuilder: (_, index) => _SkeletonCaseRow(
                     delay: Duration(milliseconds: 100 * index),

@@ -512,16 +512,10 @@
   "studentChargeFeeCodeOther": "Autre",
   "studentChargeFeeCodeFallback": "Frais scolaire",
 
-  "facturationPageHeaderTitle": "Facturation des élèves",
-  "facturationPageHeaderSubtitle": "Recherchez un élève par nom ou par niveau de classe pour consulter ses charges de scolarité.",
-  "facturationPageHeaderChipByName": "Recherche par nom",
-  "facturationPageHeaderChipByLevel": "Filtrer par niveau",
-  "facturationPageHeaderChipViewCharges": "Voir les charges",
-
   "facturationSearchTitle": "Rechercher les élèves",
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",
-  "facturationSearchInvitationTitle": "Lancez une recherche de facturation",
-  "facturationSearchInvitationMessage": "Sélectionnez un niveau ou renseignez le nom d'un élève puis cliquez sur Rechercher pour afficher les dossiers.",
+  "facturationSearchInvitationTitle": "Aucune recherche en cours",
+  "facturationSearchInvitationMessage": "Saisissez un nom ou un niveau ci-dessus pour afficher les élèves correspondants.",
   "facturationViewChargesLabel": "Voir les charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",

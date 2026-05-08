@@ -1195,31 +1195,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargeFeeCodeFallback => 'School fee';
 
   @override
-  String get facturationPageHeaderTitle => 'Student Billing';
-
-  @override
-  String get facturationPageHeaderSubtitle => 'Search a student by name or class level to view and manage their school fees.';
-
-  @override
-  String get facturationPageHeaderChipByName => 'Search by name';
-
-  @override
-  String get facturationPageHeaderChipByLevel => 'Filter by level';
-
-  @override
-  String get facturationPageHeaderChipViewCharges => 'View charges';
-
-  @override
   String get facturationSearchTitle => 'Search Students';
 
   @override
   String get facturationSearchHint => 'Enter First name, Last name, Surname and/or Cycle/Level to filter results.';
 
   @override
-  String get facturationSearchInvitationTitle => 'Start a billing search';
+  String get facturationSearchInvitationTitle => 'No search in progress';
 
   @override
-  String get facturationSearchInvitationMessage => 'Select a level or enter a student name then click Search to display records.';
+  String get facturationSearchInvitationMessage => 'Enter a name or level above to display matching students.';
 
   @override
   String get facturationViewChargesLabel => 'View charges';

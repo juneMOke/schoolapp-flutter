@@ -2357,36 +2357,6 @@ abstract class AppLocalizations {
   /// **'School fee'**
   String get studentChargeFeeCodeFallback;
 
-  /// No description provided for @facturationPageHeaderTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Student Billing'**
-  String get facturationPageHeaderTitle;
-
-  /// No description provided for @facturationPageHeaderSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Search a student by name or class level to view and manage their school fees.'**
-  String get facturationPageHeaderSubtitle;
-
-  /// No description provided for @facturationPageHeaderChipByName.
-  ///
-  /// In en, this message translates to:
-  /// **'Search by name'**
-  String get facturationPageHeaderChipByName;
-
-  /// No description provided for @facturationPageHeaderChipByLevel.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by level'**
-  String get facturationPageHeaderChipByLevel;
-
-  /// No description provided for @facturationPageHeaderChipViewCharges.
-  ///
-  /// In en, this message translates to:
-  /// **'View charges'**
-  String get facturationPageHeaderChipViewCharges;
-
   /// No description provided for @facturationSearchTitle.
   ///
   /// In en, this message translates to:
@@ -2402,13 +2372,13 @@ abstract class AppLocalizations {
   /// No description provided for @facturationSearchInvitationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Start a billing search'**
+  /// **'No search in progress'**
   String get facturationSearchInvitationTitle;
 
   /// No description provided for @facturationSearchInvitationMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select a level or enter a student name then click Search to display records.'**
+  /// **'Enter a name or level above to display matching students.'**
   String get facturationSearchInvitationMessage;
 
   /// No description provided for @facturationViewChargesLabel.

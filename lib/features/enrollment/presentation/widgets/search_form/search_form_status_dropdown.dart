@@ -164,7 +164,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
             duration: AppMotion.fast,
             curve: AppMotion.outCurve,
             opacity: isSelected ? 1 : 0,
-            child: Icon(
+            child: const Icon(
               Icons.check_circle_rounded,
               size: 16,
               color: AppColors.bleuArdoise,

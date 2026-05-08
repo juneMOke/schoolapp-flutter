@@ -14,7 +14,6 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_page_helpers.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_page_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -73,8 +72,6 @@ class _FacturationPageState extends State<FacturationPage> {
               key: const ValueKey('facturation-content'),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const FacturationPageHeader(),
-                const SizedBox(height: AppDimensions.spacingM),
                 BlocBuilder<EnrollmentBloc, EnrollmentState>(
                   buildWhen: (prev, curr) =>
                       prev.summariesStatus != curr.summariesStatus,
@@ -82,7 +79,8 @@ class _FacturationPageState extends State<FacturationPage> {
                     return FacturationSearchForm(
                       options: academicOptions,
                       isLoading:
-                          enrollmentState.summariesStatus == EnrollmentLoadStatus.loading,
+                          enrollmentState.summariesStatus ==
+                          EnrollmentLoadStatus.loading,
                       onSearch: (request) => context.read<EnrollmentBloc>().add(
                         EnrollmentSummariesByAcademicInfoRequested(
                           firstName: request.firstName,
@@ -106,6 +104,7 @@ class _FacturationPageState extends State<FacturationPage> {
       ),
     );
   }
+
   /// Navigue vers la page de détail facturation avec le contexte d'affichage.
   void _onViewChargesRequested(EnrollmentSummary summary, String levelId) {
     final l10n = AppLocalizations.of(context)!;

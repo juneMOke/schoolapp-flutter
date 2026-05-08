@@ -54,11 +54,11 @@ class _DisciplinaryCaseViewDialogState
           switchOutCurve: AppMotion.inCurve,
           child: switch (state.detailStatus) {
             DisciplinaryCaseStatusState.loading =>
-              _buildLoading(l10n, key: ValueKey('loading')),
+              _buildLoading(l10n, key: const ValueKey('loading')),
             DisciplinaryCaseStatusState.success =>
-              _buildContent(context, l10n, state, key: ValueKey('success')),
+              _buildContent(context, l10n, state, key: const ValueKey('success')),
             DisciplinaryCaseStatusState.failure =>
-              _buildError(context, l10n, key: ValueKey('error')),
+              _buildError(context, l10n, key: const ValueKey('error')),
             DisciplinaryCaseStatusState.initial => const SizedBox.shrink(),
           },
         ),
@@ -77,7 +77,7 @@ class _DisciplinaryCaseViewDialogState
             Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.disciplinaryDetailAccentSoft,
                 shape: BoxShape.circle,
               ),
@@ -113,7 +113,7 @@ class _DisciplinaryCaseViewDialogState
   }) {
     final caseDetail = state.selectedCase;
     if (caseDetail == null) {
-      return _buildError(context, l10n, key: ValueKey('null-error'));
+      return _buildError(context, l10n, key: const ValueKey('null-error'));
     }
 
     return KeyedSubtree(
@@ -232,7 +232,7 @@ class _DisciplinaryCaseViewDialogState
           // Footer
           Container(
             padding: const EdgeInsets.all(AppDimensions.spacingM),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.surface,
               border: Border(
                 top: BorderSide(color: AppColors.border),

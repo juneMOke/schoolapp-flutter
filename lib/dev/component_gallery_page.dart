@@ -121,11 +121,11 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
           // ----------------------------------------------------------------
           const _SectionHeader(title: 'StudentAvatar'),
           const SizedBox(height: AppSpacing.sm),
-          Wrap(
+          const Wrap(
             spacing: AppSpacing.lg,
             runSpacing: AppSpacing.sm,
             crossAxisAlignment: WrapCrossAlignment.center,
-            children: const [
+            children: [
               _AvatarLabel(
                 avatar: StudentAvatar(
                   firstName: 'Jean',
@@ -174,7 +174,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
           // ----------------------------------------------------------------
           // StatusBadge
           // ----------------------------------------------------------------
-          _SectionHeader(title: 'StatusBadge — Paiement'),
+          const _SectionHeader(title: 'StatusBadge — Paiement'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
@@ -187,7 +187,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _SectionHeader(title: 'StatusBadge — Présence'),
+          const _SectionHeader(title: 'StatusBadge — Présence'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
@@ -199,7 +199,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _SectionHeader(title: 'StatusBadge — Synchro'),
+          const _SectionHeader(title: 'StatusBadge — Synchro'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
@@ -213,7 +213,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _SectionHeader(title: 'StatusBadge — Inscription'),
+          const _SectionHeader(title: 'StatusBadge — Inscription'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
@@ -231,7 +231,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _SectionHeader(title: 'StatusBadge — small'),
+          const _SectionHeader(title: 'StatusBadge — small'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
@@ -257,12 +257,12 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
           // ----------------------------------------------------------------
           // SyncIndicator — tous les états
           // ----------------------------------------------------------------
-          _SectionHeader(title: 'SyncIndicator — tous états'),
+          const _SectionHeader(title: 'SyncIndicator — tous états'),
           const SizedBox(height: AppSpacing.sm),
-          Wrap(
+          const Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
-            children: const [
+            children: [
               SyncIndicator(status: SyncStatus.synced),
               SyncIndicator(status: SyncStatus.syncing),
               SyncIndicator(status: SyncStatus.offline),

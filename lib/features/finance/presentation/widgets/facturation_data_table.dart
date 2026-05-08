@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -54,13 +57,13 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
   }
 
   void _onSort(_SortCol col) => setState(() {
-        if (_sortCol == col) {
-          _sortAsc = !_sortAsc;
-        } else {
-          _sortCol = col;
-          _sortAsc = true;
-        }
-      });
+    if (_sortCol == col) {
+      _sortAsc = !_sortAsc;
+    } else {
+      _sortCol = col;
+      _sortAsc = true;
+    }
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +83,7 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
           onSort: _onSort,
           l10n: l10n,
         ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+        const Divider(height: 1, thickness: 1, color: AppColors.border),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -91,7 +94,7 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
             onViewRequested: widget.onViewRequested,
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+        const Divider(height: 1, thickness: 1, color: AppColors.border),
         _TableFooter(
           pageCount: sorted.length,
           totalCount: widget.summaries.length,
@@ -109,28 +112,25 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StateShell(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 44,
-              height: 44,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.loadingStudents,
-              style: const TextStyle(
-                color: AppTheme.textSecondaryColor,
-                fontSize: 14,
-              ),
-            ),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          width: 44,
+          height: 44,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: AppColors.bleuArdoise,
+          ),
         ),
-      );
+        const SizedBox(height: AppDimensions.spacingM),
+        Text(
+          l10n.loadingStudents,
+          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
+    ),
+  );
 }
 
 class _EmptyState extends StatelessWidget {
@@ -139,44 +139,41 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StateShell(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0F4FF),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: const Icon(
-                Icons.person_search_outlined,
-                size: 40,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.noResultsFound,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l10n.facturationNoResultsDescription,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppTheme.textSecondaryColor,
-                height: 1.5,
-              ),
-            ),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.bleuArdoise.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: const Icon(
+            Icons.person_search_outlined,
+            size: 40,
+            color: AppColors.bleuArdoise,
+          ),
         ),
-      );
+        const SizedBox(height: AppDimensions.spacingM),
+        Text(
+          l10n.noResultsFound,
+          style: AppTextStyles.sectionTitle.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingS),
+        Text(
+          l10n.facturationNoResultsDescription,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _StateShell extends StatelessWidget {
@@ -185,9 +182,12 @@ class _StateShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
-        child: Center(child: child),
-      );
+    padding: const EdgeInsets.symmetric(
+      vertical: AppDimensions.spacingXL * 2,
+      horizontal: AppDimensions.spacingXL,
+    ),
+    child: Center(child: child),
+  );
 }
 
 // ─── Header triable ───────────────────────────────────────────────────────────
@@ -209,10 +209,10 @@ class _TableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 46,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingS),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
+          colors: [AppColors.surface, AppColors.surfaceAlt],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -220,26 +220,42 @@ class _TableHeader extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 38), // avatar placeholder
-          _SortCell(l10n.lastName, _SortCol.nom,
-              flex: 3, sortCol: sortCol, asc: ascending, onSort: onSort),
-          _SortCell(l10n.surname, _SortCol.postnom,
-              flex: 3, sortCol: sortCol, asc: ascending, onSort: onSort),
-          _SortCell(l10n.firstName, _SortCol.prenom,
-              flex: 3, sortCol: sortCol, asc: ascending, onSort: onSort),
+          _SortCell(
+            l10n.lastName,
+            _SortCol.nom,
+            flex: 3,
+            sortCol: sortCol,
+            asc: ascending,
+            onSort: onSort,
+          ),
+          _SortCell(
+            l10n.surname,
+            _SortCol.postnom,
+            flex: 3,
+            sortCol: sortCol,
+            asc: ascending,
+            onSort: onSort,
+          ),
+          _SortCell(
+            l10n.firstName,
+            _SortCol.prenom,
+            flex: 3,
+            sortCol: sortCol,
+            asc: ascending,
+            onSort: onSort,
+          ),
           Expanded(
             flex: 2,
             child: Text(
               l10n.facturationActionsColumnLabel.toUpperCase(),
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF94A3B8),
+              style: AppTextStyles.badge.copyWith(
+                color: AppColors.textMuted,
                 letterSpacing: 0.9,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppDimensions.spacingS),
         ],
       ),
     );
@@ -279,12 +295,10 @@ class _SortCell extends StatelessWidget {
                 child: Text(
                   label.toUpperCase(),
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                  style: AppTextStyles.badge.copyWith(
                     color: isActive
-                        ? AppTheme.primaryColor
-                        : const Color(0xFF94A3B8),
+                        ? AppColors.bleuArdoise
+                        : AppColors.textMuted,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -296,12 +310,13 @@ class _SortCell extends StatelessWidget {
                   key: ValueKey('${column.name}_$asc'),
                   isActive
                       ? (asc
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded)
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded)
                       : Icons.unfold_more_rounded,
                   size: 12,
-                  color:
-                      isActive ? AppTheme.primaryColor : const Color(0xFFCBD5E1),
+                  color: isActive
+                      ? AppColors.bleuArdoise
+                      : AppColors.borderStrong,
                 ),
               ),
             ],
@@ -336,7 +351,6 @@ class _TableRowState extends State<_TableRow> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final student = widget.summary.student;
-    final initials = _initials(student.lastName, student.firstName);
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -345,23 +359,29 @@ class _TableRowState extends State<_TableRow> {
       child: AnimatedContainer(
         duration: FinanceMotion.micro,
         height: 58,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingS),
         decoration: BoxDecoration(
           color: _hovered
-              ? const Color(0xFFF0F6FF)
+              ? AppColors.bleuArdoise.withValues(alpha: 0.06)
               : widget.isEven
-                  ? AppTheme.surfaceColor
-                  : const Color(0xFFFAFBFC),
+              ? AppColors.surface
+              : AppColors.surfaceAlt,
           border: _hovered
               ? const Border(
-                  left: BorderSide(color: AppTheme.primaryColor, width: 3))
+                  left: BorderSide(color: AppColors.bleuArdoise, width: 3),
+                )
               : const Border(
-                  left: BorderSide(color: Colors.transparent, width: 3)),
+                  left: BorderSide(color: Colors.transparent, width: 3),
+                ),
         ),
         child: Row(
           children: [
-            _Avatar(initials: initials, seed: student.lastName),
-            const SizedBox(width: 8),
+            StudentAvatar(
+              firstName: student.firstName,
+              lastName: student.lastName,
+              size: 28,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
             _Cell(student.lastName, flex: 3, bold: true),
             _Cell(student.surname, flex: 3),
             _Cell(student.firstName, flex: 3),
@@ -375,58 +395,15 @@ class _TableRowState extends State<_TableRow> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppDimensions.spacingS),
           ],
         ),
       ),
     );
   }
-
-  static String _initials(String last, String first) {
-    final l = last.isNotEmpty ? last[0].toUpperCase() : '';
-    final f = first.isNotEmpty ? first[0].toUpperCase() : '';
-    return '$l$f';
-  }
 }
 
 // ─── Composants atomiques ─────────────────────────────────────────────────────
-
-class _Avatar extends StatelessWidget {
-  final String initials;
-  final String seed;
-
-  const _Avatar({required this.initials, required this.seed});
-
-  static const _palette = [
-    Color(0xFF3B82F6), Color(0xFF10B981), Color(0xFF8B5CF6),
-    Color(0xFFF59E0B), Color(0xFFEF4444), Color(0xFF06B6D4),
-    Color(0xFFEC4899), Color(0xFF84CC16),
-  ];
-
-  Color get _color {
-    final idx = seed.isNotEmpty ? seed.codeUnitAt(0) % _palette.length : 0;
-    return _palette[idx];
-  }
-
-  @override
-  Widget build(BuildContext context) => Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: _color.withValues(alpha: 0.12),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          initials,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: _color,
-          ),
-        ),
-      );
-}
 
 class _Cell extends StatelessWidget {
   final String text;
@@ -437,17 +414,16 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        flex: flex,
-        child: Text(
-          text.isNotEmpty ? text : '—',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
-            color: bold ? AppTheme.textPrimaryColor : const Color(0xFF4B5563),
-          ),
-        ),
-      );
+    flex: flex,
+    child: Text(
+      text.isNotEmpty ? text : '—',
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.body.copyWith(
+        fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+        color: bold ? AppColors.textPrimary : AppColors.textSecondary,
+      ),
+    ),
+  );
 }
 
 class _EyeButton extends StatefulWidget {
@@ -465,32 +441,32 @@ class _EyeButtonState extends State<_EyeButton> {
 
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: widget.tooltip,
-        preferBelow: false,
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: GestureDetector(
-            onTap: widget.onTap,
-            child: AnimatedContainer(
-              duration: FinanceMotion.fast,
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _hovered
-                    ? AppTheme.primaryColor
-                    : AppTheme.primaryColor.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.visibility_outlined,
-                size: 16,
-                color: _hovered ? Colors.white : AppTheme.primaryColor,
-              ),
-            ),
+    message: widget.tooltip,
+    preferBelow: false,
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: FinanceMotion.fast,
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: _hovered
+                ? AppColors.bleuArdoise
+                : AppColors.bleuArdoise.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+          ),
+          child: Icon(
+            Icons.visibility_outlined,
+            size: 16,
+            color: _hovered ? AppColors.blancCasse : AppColors.bleuArdoise,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 // ─── Pied de tableau ──────────────────────────────────────────────────────────
@@ -510,23 +486,24 @@ class _TableFooter extends StatelessWidget {
 
     return Container(
       height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: const BoxDecoration(color: Color(0xFFF8FAFC)),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingM),
+      decoration: const BoxDecoration(color: AppColors.surfaceAlt),
       child: Row(
         children: [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingS,
+              vertical: AppDimensions.spacingXS,
+            ),
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withValues(alpha: 0.08),
+              color: AppColors.bleuArdoise.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
+              style: AppTextStyles.body.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppTheme.primaryColor,
+                color: AppColors.bleuArdoise,
               ),
             ),
           ),

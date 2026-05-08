@@ -33,7 +33,7 @@ void main() {
     });
 
     test('hasDisplayContext should be false when firstName is empty', () {
-      final intent = DisciplinaryStudentDetailIntent(
+      final intent = const DisciplinaryStudentDetailIntent(
         studentId: '123',
         studentFirstName: '',
         studentLastName: 'Doe',
@@ -47,7 +47,7 @@ void main() {
     });
 
     test('should create invalid intent with required IDs', () {
-      final invalid = DisciplinaryStudentDetailIntent.invalid(
+      final invalid = const DisciplinaryStudentDetailIntent.invalid(
         studentId: '123',
         academicYearId: 'year-2024',
       );

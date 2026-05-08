@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_data_table.dart';
@@ -13,7 +14,8 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 class FacturationStudentTable extends StatelessWidget {
   /// Appelé quand l'icône "œil" est tapée.
   /// [levelId] provient du dernier critère de recherche stocké dans l'état BLoC.
-  final void Function(EnrollmentSummary summary, String levelId) onViewRequested;
+  final void Function(EnrollmentSummary summary, String levelId)
+  onViewRequested;
 
   const FacturationStudentTable({super.key, required this.onViewRequested});
 
@@ -39,7 +41,7 @@ class FacturationStudentTable extends StatelessWidget {
               summaries: state.summaries,
               onViewRequested: (s) => onViewRequested(s, levelId),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppDimensions.spacingS),
             if (state.summariesTotalPages > 1)
               FacturationPaginationBar(
                 currentPage: state.summariesPage,

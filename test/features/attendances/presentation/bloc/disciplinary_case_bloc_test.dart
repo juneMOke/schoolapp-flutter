@@ -23,7 +23,7 @@ class MockGetDisciplinaryCaseDetailUseCase extends Mock
 class MockCreateDisciplinaryCaseUseCase extends Mock
     implements CreateDisciplinaryCaseUseCase {}
 
-final tSummary = DisciplinaryCaseSummary(
+final tSummary = const DisciplinaryCaseSummary(
   id: 'case-1',
   studentId: 'student-1',
   studentFirstName: 'Aline',
@@ -36,7 +36,7 @@ final tSummary = DisciplinaryCaseSummary(
   content: 'The student arrived late three times this week.',
 );
 
-final tDetail = DisciplinaryCaseDetail(
+final tDetail = const DisciplinaryCaseDetail(
   id: 'case-1',
   studentId: 'student-1',
   studentFirstName: 'Aline',
