@@ -2198,7 +2198,7 @@ abstract class AppLocalizations {
   /// No description provided for @studentChargeStatusDue.
   ///
   /// In en, this message translates to:
-  /// **'Due'**
+  /// **'To settle'**
   String get studentChargeStatusDue;
 
   /// No description provided for @studentChargeStatusPartial.
@@ -2462,14 +2462,32 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailInfoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Billing detail'**
+  /// **'Financial record'**
   String get facturationDetailInfoTitle;
 
   /// No description provided for @facturationDetailInfoSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Review recent payments and student charge status for the selected academic year.'**
+  /// **'Review recent payments and student charge status for this student.'**
   String get facturationDetailInfoSubtitle;
+
+  /// No description provided for @facturationDetailHeaderKpiTotalDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total due'**
+  String get facturationDetailHeaderKpiTotalDue;
+
+  /// No description provided for @facturationDetailHeaderKpiAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get facturationDetailHeaderKpiAlreadyPaid;
+
+  /// No description provided for @facturationDetailHeaderKpiRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining due'**
+  String get facturationDetailHeaderKpiRemaining;
 
   /// No description provided for @facturationDetailInfoChipPayments.
   ///
@@ -2486,14 +2504,20 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailPaymentsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Recent payments'**
+  /// **'Payments'**
   String get facturationDetailPaymentsSectionTitle;
 
   /// No description provided for @facturationDetailPaymentsSectionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment history recorded for this student.'**
+  /// **'Recorded payment history for this student.'**
   String get facturationDetailPaymentsSectionSubtitle;
+
+  /// No description provided for @facturationDetailPaymentsRecordedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}'**
+  String facturationDetailPaymentsRecordedCount(num count);
 
   /// No description provided for @facturationDetailCollectPaymentAction.
   ///
@@ -2516,13 +2540,13 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailPaymentPayerColumn.
   ///
   /// In en, this message translates to:
-  /// **'Payer details'**
+  /// **'Payer'**
   String get facturationDetailPaymentPayerColumn;
 
   /// No description provided for @facturationDetailPaymentPaidAtColumn.
   ///
   /// In en, this message translates to:
-  /// **'Paid at'**
+  /// **'Date'**
   String get facturationDetailPaymentPaidAtColumn;
 
   /// No description provided for @facturationDetailPaymentAmountColumn.
@@ -2542,6 +2566,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View payment detail'**
   String get facturationDetailViewPaymentLabel;
+
+  /// No description provided for @facturationDetailViewChargeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View charge detail'**
+  String get facturationDetailViewChargeLabel;
 
   /// No description provided for @facturationPaymentDetailHeroTitle.
   ///
@@ -2672,7 +2702,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailChargesSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Student charges'**
+  /// **'Charges'**
   String get facturationDetailChargesSectionTitle;
 
   /// No description provided for @facturationDetailChargesSectionSubtitle.
@@ -2680,6 +2710,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Breakdown of expected, paid and remaining amounts.'**
   String get facturationDetailChargesSectionSubtitle;
+
+  /// No description provided for @facturationDetailChargesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle'**
+  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount);
 
   /// No description provided for @facturationDetailChargesRetry.
   ///
@@ -2702,19 +2738,19 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailChargeExpectedAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Expected amount'**
+  /// **'Expected'**
   String get facturationDetailChargeExpectedAmountColumn;
 
   /// No description provided for @facturationDetailChargePaidAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Paid amount'**
+  /// **'Paid'**
   String get facturationDetailChargePaidAmountColumn;
 
   /// No description provided for @facturationDetailChargeRemainingAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Remaining amount'**
+  /// **'Remaining'**
   String get facturationDetailChargeRemainingAmountColumn;
 
   /// No description provided for @facturationDetailChargeStatusColumn.
@@ -2722,6 +2758,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get facturationDetailChargeStatusColumn;
+
+  /// No description provided for @facturationDetailChargeTotalsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get facturationDetailChargeTotalsLabel;
 
   /// No description provided for @facturationPaymentsNetworkError.
   ///
@@ -2788,6 +2830,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate and download the receipt for this payment'**
   String get facturationPrintReceiptSubtitle;
+
+  /// No description provided for @facturationPaymentDownloadPdfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get facturationPaymentDownloadPdfLabel;
 
   /// No description provided for @facturationPrintStatementsLabel.
   ///
@@ -3094,6 +3142,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'After payment'**
   String get facturationCreatePaymentAfterLabel;
+
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm removal'**
+  String get facturationCreatePaymentRemoveAllocationConfirmTitle;
+
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to remove allocation #{allocationIndex}? This action cannot be undone.'**
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex);
+
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get facturationCreatePaymentRemoveAllocationConfirmAction;
 
   /// No description provided for @facturationCreatePaymentSubmitLabel.
   ///

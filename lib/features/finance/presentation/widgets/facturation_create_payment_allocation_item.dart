@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
@@ -96,7 +97,7 @@ class _FacturationCreatePaymentAllocationItemState
 
     return FinanceSectionCard(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
-      borderColor: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.22),
+      borderColor: AppColors.bleuArdoise.withValues(alpha: 0.22),
       withShadow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,6 +116,7 @@ class _FacturationCreatePaymentAllocationItemState
                   : []),
             onChanged: widget.readOnly ? null : widget.onChargeSelected,
             hint: l10n.facturationCreatePaymentChargeDropdownHint,
+            l10n: l10n,
           ),
           AnimatedSwitcher(
             duration: FinanceMotion.standard,
@@ -144,7 +146,7 @@ class _FacturationCreatePaymentAllocationItemState
                             const TextInputType.numberWithOptions(decimal: true),
                         label: l10n.facturationCreatePaymentAmountLabel,
                         hint: l10n.facturationCreatePaymentAmountHint,
-                        accentColor: AppColors.financeDetailPaymentsAccent,
+                        accentColor: AppColors.bleuArdoise,
                         validator: (v) => _amountValidator(v, l10n, remaining),
                       ),
                     ],
@@ -165,8 +167,8 @@ class _FacturationCreatePaymentAllocationItemState
                             projected.clamp(0, charge.expectedAmountInCents),
                         currency: charge.currency,
                         status: _projectedStatus(charge),
-                        accentColor: AppColors.financeDetailPaymentsAccent,
-                        accentSoftColor: AppColors.financeDetailPaymentsAccentSoft,
+                        accentColor: AppColors.bleuArdoise,
+                        accentSoftColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
                       ),
                     ],
                   )
@@ -199,13 +201,13 @@ class _ItemHeader extends StatelessWidget {
             vertical: AppDimensions.spacingXS,
           ),
           decoration: BoxDecoration(
-            color: AppColors.financeDetailPaymentsAccentSoft,
+            color: AppColors.bleuArdoise.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppDimensions.spacingS),
           ),
           child: Text(
             '${index + 1}',
             style: AppTextStyles.caption.copyWith(
-              color: AppColors.financeDetailPaymentsAccent,
+              color: AppColors.bleuArdoise,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -230,12 +232,14 @@ class _ChargeDropdown extends StatelessWidget {
   final List<StudentCharge> availableCharges;
   final ValueChanged<StudentCharge?>? onChanged;
   final String hint;
+  final AppLocalizations l10n;
 
   const _ChargeDropdown({
     required this.selectedCharge,
     required this.availableCharges,
     required this.onChanged,
     required this.hint,
+    required this.l10n,
   });
 
   @override
@@ -246,7 +250,7 @@ class _ChargeDropdown extends StatelessWidget {
       decoration: financeInputDecoration(
         label: hint,
         hint: hint,
-        accentColor: AppColors.financeDetailPaymentsAccent,
+        accentColor: AppColors.bleuArdoise,
         readOnly: onChanged == null,
       ),
       items: availableCharges
@@ -254,7 +258,7 @@ class _ChargeDropdown extends StatelessWidget {
             (c) => DropdownMenuItem<StudentCharge>(
               value: c,
               child: Text(
-                c.label,
+                c.feeCode.localizedFeeLabel(l10n),
                 style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),

@@ -56,7 +56,7 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
         AppColors.financeDetailPaymentsSurface,
         AppColors.financeDetailPaymentsSurfaceAlt,
       ],
-      borderColor: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
+      borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -64,8 +64,8 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
             icon: Icons.payments_outlined,
             title: l10n.facturationCreatePaymentAllocationSectionTitle,
             subtitle: l10n.facturationCreatePaymentAllocationSectionSubtitle,
-            accent: AppColors.financeDetailPaymentsAccent,
-            accentSoft: AppColors.financeDetailPaymentsAccentSoft,
+            accent: AppColors.bleuArdoise,
+            accentSoft: AppColors.bleuArdoise.withValues(alpha: 0.1),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           AnimatedSwitcher(
@@ -177,13 +177,9 @@ class _AddAllocationButton extends StatelessWidget {
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
         side: BorderSide(
-          color: disabled
-              ? AppColors.border
-              : AppColors.financeDetailPaymentsAccent,
+          color: disabled ? AppColors.border : AppColors.bleuArdoise,
         ),
-        foregroundColor: disabled
-            ? AppColors.textSecondary
-            : AppColors.financeDetailPaymentsAccent,
+        foregroundColor: disabled ? AppColors.textSecondary : AppColors.bleuArdoise,
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingM,
           vertical: AppDimensions.spacingS,

@@ -45,7 +45,45 @@ Future<void> showClassesOrganisationReassignDialog({
                 return PopScope(
                   canPop: !isLoading,
                   child: AlertDialog(
-                    title: Text(l10n.classesOrganisationTransferDialogTitle),
+                    backgroundColor: AppColors.financeDetailCard,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.sectionCardRadius,
+                      ),
+                      side: BorderSide(
+                        color: AppColors.borderStrong.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Container(
+                          width: AppDimensions.spacingXL,
+                          height: AppDimensions.spacingXL,
+                          decoration: BoxDecoration(
+                            color: AppColors.bleuArdoise.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.spacingM,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.swap_horiz_rounded,
+                            color: AppColors.bleuArdoise,
+                          ),
+                        ),
+                        const SizedBox(width: AppDimensions.spacingS),
+                        Expanded(
+                          child: Text(
+                            l10n.classesOrganisationTransferDialogTitle,
+                            style: AppTextStyles.sectionTitle.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,37 +150,67 @@ Future<void> showClassesOrganisationReassignDialog({
                       ],
                     ),
                     actions: [
-                      TextButton(
-                        onPressed: isLoading
-                            ? null
-                            : () => Navigator.of(dialogContext).pop(),
-                        child: Text(l10n.cancel),
-                      ),
-                      FilledButton.icon(
-                        onPressed: isLoading || selectedTargetId == null
-                            ? null
-                            : () {
-                                context.read<ClassroomBloc>().add(
-                                      ClassroomMemberReassignRequested(
-                                        classroomMemberId:
-                                            intent.classroomMemberId,
-                                        targetClassroomId: selectedTargetId!,
-                                      ),
-                                    );
-                              },
-                        icon: isLoading
-                            ? const SizedBox(
-                                width: AppDimensions.detailMiniIconSize,
-                                height: AppDimensions.detailMiniIconSize,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.swap_horiz),
-                        label: Text(l10n.classesOrganisationTransferAction),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(
-                            150,
-                            AppDimensions.minTouchTarget,
-                          ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: isLoading
+                                    ? null
+                                    : () => Navigator.of(dialogContext).pop(),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(
+                                    0,
+                                    AppDimensions.minTouchTarget,
+                                  ),
+                                ),
+                                child: Text(
+                                  l10n.cancel,
+                                  style: AppTextStyles.action.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppDimensions.spacingS),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: isLoading || selectedTargetId == null
+                                    ? null
+                                    : () {
+                                        context.read<ClassroomBloc>().add(
+                                              ClassroomMemberReassignRequested(
+                                                classroomMemberId:
+                                                    intent.classroomMemberId,
+                                                targetClassroomId:
+                                                    selectedTargetId!,
+                                              ),
+                                            );
+                                      },
+                                icon: isLoading
+                                    ? const SizedBox(
+                                        width: AppDimensions.detailMiniIconSize,
+                                        height: AppDimensions.detailMiniIconSize,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(Icons.swap_horiz),
+                                label: Text(
+                                  l10n.classesOrganisationTransferAction,
+                                ),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(
+                                    0,
+                                    AppDimensions.minTouchTarget,
+                                  ),
+                                  backgroundColor: AppColors.bleuArdoise,
+                                  foregroundColor: AppColors.blancCasse,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

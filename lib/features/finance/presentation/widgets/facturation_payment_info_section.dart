@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_info_tile.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_context_chip.dart';
 
@@ -34,13 +35,10 @@ class FacturationPaymentInfoSection extends StatelessWidget {
   });
 
   String _formatAmount(int cents, String currencyCode) {
-    final major = (cents / 100).toStringAsFixed(2);
-    final parts = major.split('.');
-    final wholePart = parts.first.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => ' ',
+    return formatMonetaryAmountWithCurrency(
+      amount: cents / 100,
+      currency: currencyCode,
     );
-    return '$wholePart.${parts.last} $currencyCode';
   }
 
   String _payerFullName() {
@@ -63,25 +61,9 @@ class FacturationPaymentInfoSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.detailCardPadding),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.financeDetailPaymentsSurface,
-            AppColors.financeDetailPaymentsSurfaceAlt,
-          ],
-        ),
+        color: AppColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(
-          color: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.financeDetailShadow,
-            blurRadius: AppDimensions.financeDetailCardShadowBlur,
-            offset: Offset(0, AppDimensions.financeDetailCardShadowOffsetY),
-          ),
-        ],
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,13 +74,13 @@ class FacturationPaymentInfoSection extends StatelessWidget {
                 width: AppDimensions.spacingL,
                 height: AppDimensions.spacingL,
                 decoration: BoxDecoration(
-                  color: AppColors.financeDetailPaymentsAccentSoft,
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(AppDimensions.spacingS),
                 ),
                 child: const Icon(
                   Icons.info_outline,
                   size: AppDimensions.detailMiniIconSize,
-                  color: AppColors.financeDetailPaymentsAccent,
+                  color: AppColors.bleuArdoise,
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingS),
@@ -106,7 +88,7 @@ class FacturationPaymentInfoSection extends StatelessWidget {
                 child: Text(
                   title,
                   style: AppTextStyles.sectionTitle.copyWith(
-                    color: AppColors.financeDetailPaymentsAccent,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -121,8 +103,8 @@ class FacturationPaymentInfoSection extends StatelessWidget {
               FinanceContextChip(
                 label: currency.isEmpty ? unknownValue : currency,
                 icon: Icons.attach_money_outlined,
-                accent: AppColors.financeDetailPaymentsAccent,
-                accentSoft: AppColors.financeDetailPaymentsAccentSoft,
+                accent: AppColors.bleuArdoise,
+                accentSoft: AppColors.surfaceAlt,
               ),
               FinanceContextChip(
                 label: localizations.formatShortDate(paidAt),
@@ -157,11 +139,13 @@ class FacturationPaymentInfoSection extends StatelessWidget {
                     width: tileWidth,
                     label: amountLabel,
                     value: _formatAmount(amountInCents, currency),
-                    backgroundColor: AppColors.financeDetailPaymentsAccentSoft,
-                    borderColor: AppColors.financeDetailPaymentsAccent.withValues(
-                      alpha: 0.22,
-                    ),
+                    backgroundColor: AppColors.papier,
+                    borderColor: AppColors.borderStrong.withValues(alpha: 0.4),
                     valueFontSize: 16,
+                    valueStyle: AppTextStyles.moneyTabular.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   FinanceInfoTile(
                     width: tileWidth,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -17,8 +18,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -27,13 +27,38 @@ class FacturationDetailPage extends StatelessWidget {
 
   const FacturationDetailPage({super.key, required this.intent});
 
+  String _studentFullName(AppLocalizations l10n) {
+    final fullName = [
+      intent.lastName,
+      intent.firstName,
+      intent.surname,
+    ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
+
+    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
+  String _studentSubtitle(AppLocalizations l10n) {
+    final parts = [intent.levelName, intent.levelGroupName]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' · ');
+
+    return parts.isEmpty ? l10n.facturationDetailUnknownValue : parts;
+  }
+
+  String _formatAmountOnly(double cents) {
+    return formatMonetaryAmount(cents / 100);
+  }
+
   void _openCreatePayment(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final chargesState = context.read<StudentChargesBloc>().state;
 
     if (chargesState.status != StudentChargesStatus.success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.facturationCreatePaymentChargesUnavailable)),
+        SnackBar(
+          content: Text(l10n.facturationCreatePaymentChargesUnavailable),
+        ),
       );
       return;
     }
@@ -44,7 +69,9 @@ class FacturationDetailPage extends StatelessWidget {
 
     if (unpaid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.facturationCreatePaymentNoChargesAvailable)),
+        SnackBar(
+          content: Text(l10n.facturationCreatePaymentNoChargesAvailable),
+        ),
       );
       return;
     }
@@ -121,6 +148,8 @@ class FacturationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final studentFullName = _studentFullName(l10n);
+    final studentSubtitle = _studentSubtitle(l10n);
 
     return MultiBlocProvider(
       providers: [
@@ -130,6 +159,11 @@ class FacturationDetailPage extends StatelessWidget {
         ),
       ],
       child: AppPageBackground(
+        appBar: FinanceDetailAppBar(
+          title: l10n.facturationDetailInfoTitle,
+          subtitle: '$studentFullName · $studentSubtitle',
+          fallbackRoute: AppRoutesNames.facturations,
+        ),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =
@@ -141,25 +175,68 @@ class FacturationDetailPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FinanceDetailBackButton(
-                  label: l10n.facturationDetailBackLabel,
-                  fallbackRoute: AppRoutesNames.facturations,
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                FinanceStudentHeroCard(
-                  title: l10n.facturationDetailInfoTitle,
-                  subtitle: l10n.facturationDetailInfoSubtitle,
-                  unknownValue: l10n.facturationDetailUnknownValue,
-                  firstName: intent.firstName,
-                  lastName: intent.lastName,
-                  surname: intent.surname,
-                  levelName: intent.levelName,
-                  levelGroupName: intent.levelGroupName,
-                  levelLabel: l10n.facturationDetailStudentLevel,
-                  levelGroupLabel: l10n.facturationDetailStudentLevelGroup,
-                  showFeatureChips: true,
-                  paymentsChipLabel: l10n.facturationDetailInfoChipPayments,
-                  chargesChipLabel: l10n.facturationDetailInfoChipCharges,
+                BlocBuilder<StudentChargesBloc, StudentChargesState>(
+                  buildWhen: (prev, curr) =>
+                      prev.status != curr.status ||
+                      prev.studentCharges != curr.studentCharges,
+                  builder: (context, state) {
+                    final hasCharges =
+                        state.status == StudentChargesStatus.success &&
+                        state.studentCharges.isNotEmpty;
+                    final totalDue = hasCharges
+                        ? state.studentCharges.fold<double>(
+                            0.0,
+                            (sum, charge) => sum + charge.expectedAmountInCents,
+                          )
+                        : 0.0;
+                    final alreadyPaid = hasCharges
+                        ? state.studentCharges.fold<double>(
+                            0.0,
+                            (sum, charge) => sum + charge.amountPaidInCents,
+                          )
+                        : 0.0;
+                    final remaining = (totalDue - alreadyPaid).toDouble();
+                    final currency = hasCharges
+                        ? state.studentCharges.first.currency
+                        : '';
+
+                    return FinanceStudentSummaryCard(
+                      firstName: intent.firstName,
+                      lastName: intent.lastName,
+                      surname: intent.surname,
+                      levelName: intent.levelName,
+                      levelGroupName: intent.levelGroupName,
+                      unknownValue: l10n.facturationDetailUnknownValue,
+                      trailing: FinanceDetailKpiStrip(
+                        items: [
+                          FinanceDetailKpiItem(
+                            label: l10n.facturationDetailHeaderKpiTotalDue,
+                            value: hasCharges
+                                ? _formatAmountOnly(totalDue)
+                                : l10n.facturationDetailUnknownValue,
+                            suffix: hasCharges ? currency : null,
+                            valueColor: AppColors.bleuArdoise,
+                          ),
+                          FinanceDetailKpiItem(
+                            label: l10n.facturationDetailHeaderKpiAlreadyPaid,
+                            value: hasCharges
+                                ? _formatAmountOnly(alreadyPaid)
+                                : l10n.facturationDetailUnknownValue,
+                            suffix: hasCharges ? currency : null,
+                            valueColor: AppColors.bleuArdoise,
+                          ),
+                          FinanceDetailKpiItem(
+                            label: l10n.facturationDetailHeaderKpiRemaining,
+                            value: hasCharges
+                                ? _formatAmountOnly(remaining)
+                                : l10n.facturationDetailUnknownValue,
+                            suffix: hasCharges ? currency : null,
+                            valueColor: AppColors.terreCuite,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(height: blockSpacing),
                 if (!intent.hasDisplayContext)
@@ -206,4 +283,3 @@ class FacturationDetailPage extends StatelessWidget {
     );
   }
 }
-

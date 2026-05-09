@@ -1114,7 +1114,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargesUnknownError => 'Une erreur inattendue est survenue lors du chargement des charges.';
 
   @override
-  String get studentChargeStatusDue => 'Dû';
+  String get studentChargeStatusDue => 'À régler';
 
   @override
   String get studentChargeStatusPartial => 'Partiel';
@@ -1246,10 +1246,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailStudentLevel => 'Niveau';
 
   @override
-  String get facturationDetailInfoTitle => 'Détail de facturation';
+  String get facturationDetailInfoTitle => 'Fiche financière';
 
   @override
-  String get facturationDetailInfoSubtitle => 'Consultez les paiements récents et l\'état des charges de l\'élève pour l\'année scolaire sélectionnée.';
+  String get facturationDetailInfoSubtitle => 'Consultez les paiements récents et l\'état des charges de l\'élève.';
+
+  @override
+  String get facturationDetailHeaderKpiTotalDue => 'Total dû';
+
+  @override
+  String get facturationDetailHeaderKpiAlreadyPaid => 'Déjà payé';
+
+  @override
+  String get facturationDetailHeaderKpiRemaining => 'Reste à payer';
 
   @override
   String get facturationDetailInfoChipPayments => 'Paiements';
@@ -1261,7 +1270,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailPaymentsSectionTitle => 'Derniers paiements';
 
   @override
-  String get facturationDetailPaymentsSectionSubtitle => 'Historique des paiements enregistrés pour cet élève.';
+  String get facturationDetailPaymentsSectionSubtitle => 'Historique des encaissements enregistrés pour cet élève.';
+
+  @override
+  String facturationDetailPaymentsRecordedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paiements enregistrés',
+      one: '1 paiement enregistré',
+      zero: 'Aucun paiement enregistré',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get facturationDetailCollectPaymentAction => 'Encaisser un paiement';
@@ -1273,10 +1294,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailPaymentsEmpty => 'Aucun paiement n\'a été enregistré pour cet élève.';
 
   @override
-  String get facturationDetailPaymentPayerColumn => 'Infos du payeur';
+  String get facturationDetailPaymentPayerColumn => 'Payeur';
 
   @override
-  String get facturationDetailPaymentPaidAtColumn => 'Date de paiement';
+  String get facturationDetailPaymentPaidAtColumn => 'Date';
 
   @override
   String get facturationDetailPaymentAmountColumn => 'Montant';
@@ -1286,6 +1307,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationDetailViewPaymentLabel => 'Voir le détail du paiement';
+
+  @override
+  String get facturationDetailViewChargeLabel => 'Voir le détail de la charge';
 
   @override
   String get facturationPaymentDetailHeroTitle => 'Détail du paiement';
@@ -1357,6 +1381,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailChargesSectionSubtitle => 'Répartition des montants attendus, payés et restants.';
 
   @override
+  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalCount,
+      locale: localeName,
+      other: '$totalCount charges',
+      one: '1 charge',
+      zero: '0 charge',
+    );
+    return '$_temp0 · $partialCount partielle(s), $dueCount à régler';
+  }
+
+  @override
   String get facturationDetailChargesRetry => 'Réessayer';
 
   @override
@@ -1366,16 +1402,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationDetailChargeLabelColumn => 'Libellé';
 
   @override
-  String get facturationDetailChargeExpectedAmountColumn => 'Montant attendu';
+  String get facturationDetailChargeExpectedAmountColumn => 'Attendu';
 
   @override
-  String get facturationDetailChargePaidAmountColumn => 'Montant payé';
+  String get facturationDetailChargePaidAmountColumn => 'Payé';
 
   @override
-  String get facturationDetailChargeRemainingAmountColumn => 'Reste à payer';
+  String get facturationDetailChargeRemainingAmountColumn => 'Reste';
 
   @override
   String get facturationDetailChargeStatusColumn => 'Statut';
+
+  @override
+  String get facturationDetailChargeTotalsLabel => 'Totaux';
 
   @override
   String get facturationPaymentsNetworkError => 'Impossible de charger les paiements. Vérifiez votre connexion internet.';
@@ -1409,6 +1448,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationPrintReceiptSubtitle => 'Générez et téléchargez le reçu de ce paiement';
+
+  @override
+  String get facturationPaymentDownloadPdfLabel => 'Télécharger le PDF';
 
   @override
   String get facturationPrintStatementsLabel => 'Imprimer les relevés';
@@ -1562,6 +1604,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentAfterLabel => 'Après paiement';
+
+  @override
+  String get facturationCreatePaymentRemoveAllocationConfirmTitle => 'Confirmer la suppression';
+
+  @override
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex) {
+    return 'Voulez-vous vraiment supprimer l\'allocation n° $allocationIndex ? Cette action est irréversible.';
+  }
+
+  @override
+  String get facturationCreatePaymentRemoveAllocationConfirmAction => 'Supprimer';
 
   @override
   String get facturationCreatePaymentSubmitLabel => 'Valider le paiement';

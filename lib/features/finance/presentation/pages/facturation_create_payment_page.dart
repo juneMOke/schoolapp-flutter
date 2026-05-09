@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -9,14 +10,13 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_allocation_editor.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_submit_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_print_receipt_cta.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -84,6 +84,27 @@ class _FacturationCreatePaymentPageState
     final draft = _drafts[index];
     setState(() => _drafts.removeAt(index));
     draft.dispose();
+  }
+
+  Future<void> _onRemoveDraftRequested(int index) async {
+    if (index < 0 || index >= _drafts.length) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: l10n.facturationCreatePaymentRemoveAllocationConfirmTitle,
+      message: l10n.facturationCreatePaymentRemoveAllocationConfirmMessage(
+        index + 1,
+      ),
+      confirmLabel: l10n.facturationCreatePaymentRemoveAllocationConfirmAction,
+      cancelLabel: l10n.cancel,
+      isDestructive: true,
+    );
+
+    if (!mounted || !confirmed) return;
+    if (index < 0 || index >= _drafts.length) return;
+
+    _removeDraft(index);
   }
 
   void _onChargeSelected(int index, StudentCharge? charge) {
@@ -191,7 +212,7 @@ class _FacturationCreatePaymentPageState
             isLoading: isLoading,
             isSubmitted: _isSubmitted,
             onAddDraft: _addDraft,
-            onRemoveDraft: _removeDraft,
+            onRemoveDraft: _onRemoveDraftRequested,
             onChargeSelected: _onChargeSelected,
             onSubmitPressed: () => _onSubmitPressed(context, l10n),
             onPrintReceiptPressed: () => _onPrintReceiptRequested(context, l10n),
@@ -239,8 +260,20 @@ class _PageScaffold extends StatelessWidget {
     required this.l10n,
   });
 
-  double compactHorizontalPadding(BuildContext context) {
-    return AppDimensions.spacingL;
+  String _studentFullName() {
+    final fullName = [intent.lastName, intent.firstName, intent.surname]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' ');
+    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
+  String _studentSubtitle() {
+    final subtitle = [intent.levelName, intent.levelGroupName]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' · ');
+    return subtitle.isEmpty ? l10n.facturationDetailUnknownValue : subtitle;
   }
 
   @override
@@ -248,6 +281,18 @@ class _PageScaffold extends StatelessWidget {
     final unpaid = intent.unpaidCharges;
 
     return AppPageBackground(
+      appBar: FinanceDetailAppBar(
+        title: l10n.facturationCreatePaymentHeroTitle,
+        subtitle: '${_studentFullName()} · ${_studentSubtitle()}',
+        fallbackRoute: AppRoutesNames.facturations,
+      ),
+      // Footer sticky "Imprimer le reçu" affiché uniquement après soumission réussie
+      bottomNavigationBar: isSubmitted
+          ? _PrintReceiptFooter(
+              label: l10n.facturationPrintReceiptLabel,
+              onPressed: onPrintReceiptPressed,
+            )
+          : null,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact =
@@ -261,27 +306,6 @@ class _PageScaffold extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FinanceDetailBackButton(
-                  label: l10n.facturationCreatePaymentBackLabel,
-                  fallbackRoute: AppRoutesNames.facturations,
-                ),
-                SizedBox(height: blockSpacing),
-                FinanceStudentHeroCard(
-                  title: l10n.facturationCreatePaymentHeroTitle,
-                  subtitle: l10n.facturationCreatePaymentHeroSubtitle,
-                  unknownValue: l10n.facturationDetailUnknownValue,
-                  firstName: intent.firstName,
-                  lastName: intent.lastName,
-                  surname: intent.surname,
-                  levelName: intent.levelName,
-                  levelGroupName: intent.levelGroupName,
-                  levelLabel: l10n.facturationDetailStudentLevel,
-                  levelGroupLabel: l10n.facturationDetailStudentLevelGroup,
-                  showFeatureChips: false,
-                  paymentsChipLabel: l10n.facturationDetailInfoChipPayments,
-                  chargesChipLabel: l10n.facturationDetailInfoChipCharges,
-                ),
-                SizedBox(height: blockSpacing),
                 if (!intent.hasDisplayContext)
                   FinanceContextErrorCard(
                     title: l10n.facturationDetailContextErrorTitle,
@@ -296,11 +320,9 @@ class _PageScaffold extends StatelessWidget {
                     title: l10n.facturationCreatePaymentChargesUnavailable,
                     message: l10n.facturationCreatePaymentChargesUnavailable,
                     icon: Icons.receipt_long_outlined,
-                    accent: AppColors.financeDetailPaymentsAccent,
-                    accentSoft: AppColors.financeDetailPaymentsAccentSoft,
-                    borderColor: AppColors.financeDetailPaymentsAccent.withValues(
-                      alpha: 0.2,
-                    ),
+                    accent: AppColors.bleuArdoise,
+                    accentSoft: AppColors.surfaceAlt,
+                    borderColor: AppColors.border,
                   )
                 else ...[
                   FacturationCreatePaymentPayerSection(
@@ -329,20 +351,55 @@ class _PageScaffold extends StatelessWidget {
                       isSubmitted: isSubmitted,
                       onSubmit: onSubmitPressed,
                     ),
-                  if (isSubmitted) ...[
-                    SizedBox(height: blockSpacing),
-                    FacturationPrintReceiptCta(
-                      label: l10n.facturationPrintReceiptLabel,
-                      subtitle: l10n.facturationPrintReceiptSubtitle,
-                      onPressed: onPrintReceiptPressed,
-                    ),
-                  ],
+                  if (isSubmitted)
+                    const SizedBox(height: AppDimensions.fabListBottomPadding),
                 ],
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Footer sticky post-soumission : "Imprimer le reçu"
+// ---------------------------------------------------------------------------
+class _PrintReceiptFooter extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _PrintReceiptFooter({
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 420;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceRaised,
+            border: Border(
+              top: BorderSide(color: AppColors.borderStrong.withValues(alpha: 0.2)),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppDimensions.spacingM),
+              child: SecondaryButton(
+                label: label,
+                icon: compact ? null : Icons.print_outlined,
+                onPressed: onPressed,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

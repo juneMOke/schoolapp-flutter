@@ -357,23 +357,21 @@ class _TableRowState extends State<_TableRow> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
-        duration: FinanceMotion.micro,
-        height: 58,
-        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingS),
-        decoration: BoxDecoration(
-          color: _hovered
-              ? AppColors.bleuArdoise.withValues(alpha: 0.06)
-              : widget.isEven
-              ? AppColors.surface
-              : AppColors.surfaceAlt,
-          border: _hovered
-              ? const Border(
-                  left: BorderSide(color: AppColors.bleuArdoise, width: 3),
-                )
-              : const Border(
-                  left: BorderSide(color: Colors.transparent, width: 3),
-                ),
-        ),
+         duration: FinanceMotion.micro,
+         height: 58,
+         padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingS),
+         decoration: BoxDecoration(
+           color: _hovered
+               ? AppColors.bleuArdoise.withValues(alpha: 0.06)
+               : AppColors.surfaceRaised,
+           border: _hovered
+               ? const Border(
+                   left: BorderSide(color: AppColors.bleuArdoise, width: 3),
+                 )
+               : const Border(
+                   left: BorderSide(color: Colors.transparent, width: 3),
+                 ),
+         ),
         child: Row(
           children: [
             StudentAvatar(

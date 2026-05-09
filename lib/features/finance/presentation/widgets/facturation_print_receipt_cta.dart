@@ -29,22 +29,9 @@ class FacturationPrintReceiptCta extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.financeDetailAccent,
-                AppColors.financeDetailSecondaryAccent,
-              ],
-            ),
+            color: AppColors.surfaceRaised,
             borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.financeDetailShadow,
-                blurRadius: AppDimensions.financeDetailCardShadowBlur,
-                offset: Offset(0, AppDimensions.financeDetailCardShadowOffsetY),
-              ),
-            ],
+            border: Border.all(color: AppColors.border),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -57,13 +44,13 @@ class FacturationPrintReceiptCta extends StatelessWidget {
                   width: AppDimensions.spacingXL + AppDimensions.spacingM,
                   height: AppDimensions.spacingXL + AppDimensions.spacingM,
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withValues(alpha: 0.15),
+                    color: AppColors.surfaceAlt,
                     borderRadius: BorderRadius.circular(AppDimensions.spacingM),
                   ),
                   child: const Icon(
                     Icons.print_outlined,
                     size: AppDimensions.detailHeaderIconSize,
-                    color: AppColors.surface,
+                    color: AppColors.bleuArdoise,
                   ),
                 ),
                 const SizedBox(width: AppDimensions.spacingM),
@@ -74,7 +61,7 @@ class FacturationPrintReceiptCta extends StatelessWidget {
                       Text(
                         label,
                         style: AppTextStyles.sectionTitle.copyWith(
-                          color: AppColors.surface,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -82,7 +69,7 @@ class FacturationPrintReceiptCta extends StatelessWidget {
                       Text(
                         subtitle,
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.surface.withValues(alpha: 0.85),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -90,7 +77,7 @@ class FacturationPrintReceiptCta extends StatelessWidget {
                 ),
                 const Icon(
                   Icons.arrow_forward_rounded,
-                  color: AppColors.surface,
+                  color: AppColors.textMuted,
                   size: AppDimensions.detailHeaderIconSize,
                 ),
               ],

@@ -32,22 +32,22 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
         AppColors.financeDetailInfoSurface,
         AppColors.financeDetailCard,
       ],
-      borderColor: AppColors.financeDetailAccent.withValues(alpha: 0.18),
+      borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FinanceSectionHeader(
             icon: Icons.person_outline,
             title: l10n.facturationCreatePaymentPayerSectionTitle,
-            accent: AppColors.financeDetailAccent,
-            accentSoft: AppColors.financeDetailAccentSoft,
+            accent: AppColors.bleuArdoise,
+            accentSoft: AppColors.bleuArdoise.withValues(alpha: 0.1),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
             controller: lastNameController,
             label: l10n.facturationCreatePaymentPayerLastNameLabel,
             hint: l10n.facturationCreatePaymentPayerLastNameHint,
-            accentColor: AppColors.financeDetailAccent,
+            accentColor: AppColors.bleuArdoise,
             validator: (value) => (value == null || value.trim().isEmpty)
                 ? l10n.facturationCreatePaymentPayerFieldRequired
                 : null,
@@ -59,7 +59,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
             controller: firstNameController,
             label: l10n.facturationCreatePaymentPayerFirstNameLabel,
             hint: l10n.facturationCreatePaymentPayerFirstNameHint,
-            accentColor: AppColors.financeDetailAccent,
+            accentColor: AppColors.bleuArdoise,
             validator: (value) => (value == null || value.trim().isEmpty)
                 ? l10n.facturationCreatePaymentPayerFieldRequired
                 : null,
@@ -71,7 +71,10 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
             controller: middleNameController,
             label: l10n.facturationCreatePaymentPayerMiddleNameLabel,
             hint: l10n.facturationCreatePaymentPayerMiddleNameHint,
-            accentColor: AppColors.financeDetailAccent,
+            accentColor: AppColors.bleuArdoise,
+            validator: (value) => (value == null || value.trim().isEmpty)
+                ? l10n.facturationCreatePaymentPayerFieldRequired
+                : null,
             readOnly: readOnly,
             inputFormatters: nameInputFormatters,
           ),

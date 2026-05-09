@@ -23,16 +23,13 @@ class FinanceSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment:
-          subtitle == null ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: subtitle == null
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: AppDimensions.spacingL,
           height: AppDimensions.spacingL,
-          decoration: BoxDecoration(
-            color: accentSoft,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          ),
           child: Icon(
             icon,
             size: AppDimensions.detailMiniIconSize,

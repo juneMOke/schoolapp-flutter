@@ -9,10 +9,9 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_allocations_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_info_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_print_receipt_cta.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_footer_actions.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_summary_strip.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -23,11 +22,34 @@ class FacturationChargeDetailPage extends StatelessWidget {
 
   const FacturationChargeDetailPage({super.key, required this.intent});
 
+  String _studentFullName(AppLocalizations l10n) {
+    final fullName = [intent.lastName, intent.firstName, intent.surname]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' ');
+    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
+  String _studentSubtitle(AppLocalizations l10n) {
+    final subtitle = [intent.levelName, intent.levelGroupName]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' · ');
+    return subtitle.isEmpty ? l10n.facturationDetailUnknownValue : subtitle;
+  }
+
   void _onPrintStatementsRequested(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.pageUnderConstruction)),
     );
+  }
+
+  bool _hasAllocations(StudentChargesState state) {
+    final allocations = state.allocationsByChargeId[intent.chargeId];
+    return state.allocationsStatus == StudentChargesStatus.success &&
+        allocations != null &&
+        allocations.isNotEmpty;
   }
 
   Widget _buildEntrance({
@@ -51,6 +73,8 @@ class FacturationChargeDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final studentFullName = _studentFullName(l10n);
+    final studentSubtitle = _studentSubtitle(l10n);
 
     return BlocProvider<StudentChargesBloc>(
       create: (_) {
@@ -65,6 +89,26 @@ class FacturationChargeDetailPage extends StatelessWidget {
         return bloc;
       },
       child: AppPageBackground(
+        appBar: FinanceDetailAppBar(
+          title: l10n.facturationChargeDetailHeroTitle,
+          subtitle: '$studentFullName · $studentSubtitle',
+          fallbackRoute: AppRoutesNames.facturations,
+        ),
+        bottomNavigationBar: BlocBuilder<StudentChargesBloc, StudentChargesState>(
+          buildWhen: (prev, curr) => prev.allocationsStatus != curr.allocationsStatus,
+          builder: (context, state) {
+            if (!_hasAllocations(state)) {
+              return const SizedBox.shrink();
+            }
+            return _buildEntrance(
+              intervalStart: 0.4,
+              child: FacturationChargeFooterActions(
+                printLabel: l10n.facturationPrintStatementsLabel,
+                onPrintStatements: () => _onPrintStatementsRequested(context),
+              ),
+            );
+          },
+        ),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =
@@ -76,36 +120,9 @@ class FacturationChargeDetailPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildEntrance(
-                  intervalStart: 0,
-                  child: FinanceDetailBackButton(
-                    label: l10n.facturationChargeDetailBackLabel,
-                    fallbackRoute: AppRoutesNames.facturations,
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                _buildEntrance(
-                  intervalStart: 0.1,
-                  child: FinanceStudentHeroCard(
-                    title: l10n.facturationChargeDetailHeroTitle,
-                    subtitle: l10n.facturationChargeDetailHeroSubtitle,
-                    unknownValue: l10n.facturationDetailUnknownValue,
-                    firstName: intent.firstName,
-                    lastName: intent.lastName,
-                    surname: intent.surname,
-                    levelName: intent.levelName,
-                    levelGroupName: intent.levelGroupName,
-                    levelLabel: l10n.facturationDetailStudentLevel,
-                    levelGroupLabel: l10n.facturationDetailStudentLevelGroup,
-                    showFeatureChips: false,
-                    paymentsChipLabel: l10n.facturationDetailInfoChipPayments,
-                    chargesChipLabel: l10n.facturationDetailInfoChipCharges,
-                  ),
-                ),
-                SizedBox(height: blockSpacing),
                 if (!intent.hasDisplayContext)
                   _buildEntrance(
-                    intervalStart: 0.2,
+                    intervalStart: 0,
                     child: FinanceContextErrorCard(
                       title: l10n.facturationChargeDetailContextErrorTitle,
                       message: l10n.facturationChargeDetailContextErrorMessage,
@@ -120,54 +137,28 @@ class FacturationChargeDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildEntrance(
-                        intervalStart: 0.2,
-                        child: FacturationChargeInfoSection(
+                        intervalStart: 0,
+                        child: FacturationChargeSummaryStrip(
                           chargeLabel: intent.chargeLabel,
+                          chargeStatus: intent.chargeStatus,
                           expectedAmountInCents: intent.expectedAmountInCents,
                           amountPaidInCents: intent.amountPaidInCents,
                           currency: intent.currency,
-                          chargeStatus: intent.chargeStatus,
                         ),
                       ),
                       SizedBox(height: blockSpacing),
                       _buildEntrance(
-                        intervalStart: 0.3,
+                        intervalStart: 0.2,
                         child: FacturationChargeAllocationsSection(
                           chargeId: intent.chargeId,
-                          expectedAmountInCents: intent.amountPaidInCents,
+                          paidAmountInCents: intent.amountPaidInCents,
                           currency: intent.currency,
-                        ),
-                      ),
-                      SizedBox(height: blockSpacing),
-                      _buildEntrance(
-                        intervalStart: 0.4,
-                        child: BlocBuilder<StudentChargesBloc,
-                            StudentChargesState>(
-                          buildWhen: (prev, curr) =>
-                              prev.allocationsStatus != curr.allocationsStatus ||
-                              prev.allocationsByChargeId !=
-                                  curr.allocationsByChargeId,
-                          builder: (context, state) {
-                            final allocations =
-                                state.allocationsByChargeId[intent.chargeId];
-                            final hasAllocations =
-                                state.allocationsStatus ==
-                                    StudentChargesStatus.success &&
-                                allocations != null &&
-                                allocations.isNotEmpty;
-                            if (!hasAllocations) {
-                              return const SizedBox.shrink();
-                            }
-                            return FacturationPrintReceiptCta(
-                              label: l10n.facturationPrintStatementsLabel,
-                              subtitle: l10n.facturationPrintStatementsSubtitle,
-                              onPressed: () => _onPrintStatementsRequested(context),
-                            );
-                          },
                         ),
                       ),
                     ],
                   ),
+                if (intent.hasDisplayContext)
+                  const SizedBox(height: AppDimensions.fabListBottomPadding),
               ],
             );
           },

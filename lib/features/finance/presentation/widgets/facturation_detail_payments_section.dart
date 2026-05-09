@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -9,7 +10,6 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payments_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -38,81 +38,11 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return FinanceSectionCard(
-      gradientColors: const [
-        AppColors.financeDetailPaymentsSurface,
-        AppColors.financeDetailPaymentsSurfaceAlt,
-      ],
-      borderColor: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.18),
+      backgroundColor: AppColors.surfaceRaised,
+      borderColor: AppColors.border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isCompact =
-                  constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
-              final actionButton = _CollectPaymentButton(
-                label: l10n.facturationDetailCollectPaymentAction,
-                onPressed: onCreatePaymentRequested,
-              );
-
-              if (isCompact) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FinanceSectionHeader(
-                            icon: Icons.payments_outlined,
-                            title: l10n.facturationDetailPaymentsSectionTitle,
-                            accent: AppColors.financeDetailPaymentsAccent,
-                            accentSoft: AppColors.financeDetailPaymentsAccentSoft,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    Text(
-                      l10n.facturationDetailPaymentsSectionSubtitle,
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    actionButton,
-                  ],
-                );
-              }
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FinanceSectionHeader(
-                          icon: Icons.payments_outlined,
-                          title: l10n.facturationDetailPaymentsSectionTitle,
-                          accent: AppColors.financeDetailPaymentsAccent,
-                          accentSoft: AppColors.financeDetailPaymentsAccentSoft,
-                        ),
-                        const SizedBox(height: AppDimensions.spacingXS),
-                        Text(
-                          l10n.facturationDetailPaymentsSectionSubtitle,
-                          style: AppTextStyles.body.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingM),
-                  actionButton,
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
           BlocConsumer<PaymentsBloc, PaymentsState>(
             listenWhen: (prev, curr) =>
                 prev.status != curr.status || prev.errorType != curr.errorType,
@@ -129,46 +59,66 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                 prev.payments != curr.payments ||
                 prev.errorType != curr.errorType,
             builder: (context, state) {
-              return AnimatedSwitcher(
-                duration: FinanceMotion.standard,
-                switchInCurve: FinanceMotion.outCurve,
-                switchOutCurve: FinanceMotion.inCurve,
-                child: () {
-                  if (state.status == PaymentsStatus.loading) {
-                    return const Center(
-                      key: ValueKey('payments-loading'),
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+              final subtitle = state.status == PaymentsStatus.success
+                  ? l10n.facturationDetailPaymentsRecordedCount(
+                      state.payments.length,
+                    )
+                  : l10n.facturationDetailPaymentsSectionSubtitle;
 
-                  if (state.status == PaymentsStatus.failure) {
-                    return StateCard(
-                      key: const ValueKey('payments-error'),
-                      message: state.errorType.localizedMessage(l10n),
-                      icon: Icons.error_outline,
-                      accent: AppColors.warning,
-                      accentSoft: AppColors.financeDetailWarningSoft,
-                      actionLabel: l10n.facturationDetailPaymentsRetry,
-                      onAction: () => _retry(context),
-                    );
-                  }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(
+                    title: l10n.facturationDetailPaymentsSectionTitle,
+                    subtitle: subtitle,
+                    actionLabel: l10n.facturationDetailCollectPaymentAction,
+                    onActionPressed: onCreatePaymentRequested,
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  const Divider(height: 1, color: AppColors.border),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  AnimatedSwitcher(
+                    duration: FinanceMotion.standard,
+                    switchInCurve: FinanceMotion.outCurve,
+                    switchOutCurve: FinanceMotion.inCurve,
+                    child: () {
+                      if (state.status == PaymentsStatus.loading) {
+                        return const Center(
+                          key: ValueKey('payments-loading'),
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                  if (state.payments.isEmpty) {
-                    return StateCard(
-                      key: const ValueKey('payments-empty'),
-                      message: l10n.facturationDetailPaymentsEmpty,
-                      icon: Icons.inbox_outlined,
-                      accent: AppColors.textSecondary,
-                      accentSoft: AppColors.financeDetailMutedSurface,
-                    );
-                  }
+                      if (state.status == PaymentsStatus.failure) {
+                        return StateCard(
+                          key: const ValueKey('payments-error'),
+                          message: state.errorType.localizedMessage(l10n),
+                          icon: Icons.error_outline,
+                          accent: AppColors.warning,
+                          accentSoft: AppColors.financeDetailWarningSoft,
+                          actionLabel: l10n.facturationDetailPaymentsRetry,
+                          onAction: () => _retry(context),
+                        );
+                      }
 
-                  return FacturationPaymentsTable(
-                    key: const ValueKey('payments-table'),
-                    payments: state.payments,
-                    onViewRequested: onViewPaymentRequested,
-                  );
-                }(),
+                      if (state.payments.isEmpty) {
+                        return StateCard(
+                          key: const ValueKey('payments-empty'),
+                          message: l10n.facturationDetailPaymentsEmpty,
+                          icon: Icons.inbox_outlined,
+                          accent: AppColors.textSecondary,
+                          accentSoft: AppColors.surfaceAlt,
+                        );
+                      }
+
+                      return FacturationPaymentsTable(
+                        key: const ValueKey('payments-table'),
+                        payments: state.payments,
+                        onViewRequested: onViewPaymentRequested,
+                      );
+                    }(),
+                  ),
+                ],
               );
             },
           ),
@@ -178,71 +128,92 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
   }
 }
 
-/// Bouton CTA principal — encaisser un paiement.
-/// Gradient pill avec ombre portée pour un fort impact visuel.
-class _CollectPaymentButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String actionLabel;
+  final VoidCallback onActionPressed;
 
-  const _CollectPaymentButton({
-    required this.label,
-    required this.onPressed,
+  const _SectionHeader({
+    required this.title,
+    required this.subtitle,
+    required this.actionLabel,
+    required this.onActionPressed,
   });
-
-  static const _gradientStart = AppColors.financeDetailPaymentsAccentLight;
-  static const _gradientEnd = AppColors.financeDetailPaymentsAccent; // violet ancre
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: FinanceMotion.fast,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_gradientStart, _gradientEnd],
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.spacingXL),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.financeDetailPaymentsAccent.withValues(alpha: 0.35),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppDimensions.spacingXL),
-          splashColor: AppColors.surface.withValues(alpha: 0.15),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.spacingL,
-              vertical: AppDimensions.spacingM,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
+        final button = PrimaryButton(
+          label: actionLabel,
+          icon: Icons.point_of_sale_outlined,
+          onPressed: onActionPressed,
+          fullWidth: false,
+        );
+
+        final titleBlock = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              width: AppDimensions.spacingXL,
+              height: AppDimensions.spacingXL,
+              child: Icon(
+                Icons.payments_outlined,
+                size: AppDimensions.detailHeaderIconSize,
+                color: AppColors.bleuArdoise,
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.point_of_sale_outlined,
-                  color: AppColors.surface,
-                  size: AppDimensions.detailMiniIconSize,
-                ),
-                const SizedBox(width: AppDimensions.spacingS),
-                Text(
-                  label,
-                  style: AppTextStyles.action.copyWith(
-                    color: AppColors.surface,
-                    letterSpacing: 0.3,
+            const SizedBox(width: AppDimensions.spacingM),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: AppColors.bleuProfond,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: AppDimensions.spacingS),
+                  Expanded(
+                    child: Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
+          ],
+        );
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              titleBlock,
+              const SizedBox(height: AppDimensions.spacingM),
+              button,
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: titleBlock),
+            button,
+          ],
+        );
+      },
     );
   }
 }

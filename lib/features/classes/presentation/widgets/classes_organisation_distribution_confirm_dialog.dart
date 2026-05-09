@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 Future<bool> showClassesOrganisationDistributionConfirmDialog(
@@ -6,23 +7,13 @@ Future<bool> showClassesOrganisationDistributionConfirmDialog(
 ) async {
   final l10n = AppLocalizations.of(context)!;
 
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showAppConfirmationDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(l10n.classesOrganisationDistributionConfirmTitle),
-      content: Text(l10n.classesOrganisationDistributionConfirmMessage),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.confirm),
-        ),
-      ],
-    ),
+    title: l10n.classesOrganisationDistributionConfirmTitle,
+    message: l10n.classesOrganisationDistributionConfirmMessage,
+    confirmLabel: l10n.confirm,
+    cancelLabel: l10n.cancel,
   );
 
-  return confirmed ?? false;
+  return confirmed;
 }

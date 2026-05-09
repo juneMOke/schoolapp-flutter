@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
@@ -171,23 +172,12 @@ class _PresencesPageState extends State<PresencesPage> {
   Future<bool> _confirmDiscardUnsavedChanges() async {
     final l10n = AppLocalizations.of(context)!;
 
-    return await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: Text(l10n.attendanceUnsavedChangesTitle),
-            content: Text(l10n.attendanceUnsavedChangesMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(l10n.confirm),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    return showAppConfirmationDialog(
+      context: context,
+      title: l10n.attendanceUnsavedChangesTitle,
+      message: l10n.attendanceUnsavedChangesMessage,
+      confirmLabel: l10n.confirm,
+      cancelLabel: l10n.cancel,
+    );
   }
 }

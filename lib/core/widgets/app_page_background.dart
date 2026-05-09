@@ -7,15 +7,19 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 class AppPageBackground extends StatelessWidget {
   final Widget child;
   final bool scrollable;
+  final PreferredSizeWidget? appBar;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
+  final Widget? bottomNavigationBar;
 
   const AppPageBackground({
     super.key,
     required this.child,
     this.scrollable = true,
+    this.appBar,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
+    this.bottomNavigationBar,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -40,8 +44,10 @@ class AppPageBackground extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
+      bottomNavigationBar: bottomNavigationBar,
       body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

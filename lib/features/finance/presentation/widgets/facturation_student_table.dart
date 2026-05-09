@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
@@ -33,32 +34,35 @@ class FacturationStudentTable extends StatelessWidget {
         final levelId = state.lastSummariesQuery?.schoolLevelId ?? '';
         final isLoading = state.summariesStatus == EnrollmentLoadStatus.loading;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FacturationDataTable(
-              isLoading: isLoading,
-              summaries: state.summaries,
-              onViewRequested: (s) => onViewRequested(s, levelId),
-            ),
-            const SizedBox(height: AppDimensions.spacingS),
-            if (state.summariesTotalPages > 1)
-              FacturationPaginationBar(
-                currentPage: state.summariesPage,
-                totalPages: state.summariesTotalPages,
+        return Container(
+          color: AppColors.surfaceRaised,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FacturationDataTable(
                 isLoading: isLoading,
-                onPrevious: () => context.read<EnrollmentBloc>().add(
-                  EnrollmentSummariesPageRequested(
-                    page: state.summariesPage - 1,
-                  ),
-                ),
-                onNext: () => context.read<EnrollmentBloc>().add(
-                  EnrollmentSummariesPageRequested(
-                    page: state.summariesPage + 1,
-                  ),
-                ),
+                summaries: state.summaries,
+                onViewRequested: (s) => onViewRequested(s, levelId),
               ),
-          ],
+              const SizedBox(height: AppDimensions.spacingS),
+              if (state.summariesTotalPages > 1)
+                FacturationPaginationBar(
+                  currentPage: state.summariesPage,
+                  totalPages: state.summariesTotalPages,
+                  isLoading: isLoading,
+                  onPrevious: () => context.read<EnrollmentBloc>().add(
+                    EnrollmentSummariesPageRequested(
+                      page: state.summariesPage - 1,
+                    ),
+                  ),
+                  onNext: () => context.read<EnrollmentBloc>().add(
+                    EnrollmentSummariesPageRequested(
+                      page: state.summariesPage + 1,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );

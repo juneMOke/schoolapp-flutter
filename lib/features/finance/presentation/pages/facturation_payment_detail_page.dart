@@ -9,10 +9,9 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_info_section.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_print_receipt_cta.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_back_button.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/finance_student_hero_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_footer_actions.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_summary_strip.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -23,7 +22,23 @@ class FacturationPaymentDetailPage extends StatelessWidget {
 
   const FacturationPaymentDetailPage({super.key, required this.intent});
 
-  void _onPrintReceiptRequested(BuildContext context) {
+  String _studentFullName(AppLocalizations l10n) {
+    final fullName = [intent.lastName, intent.firstName, intent.surname]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' ');
+    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
+  String _studentSubtitle(AppLocalizations l10n) {
+    final subtitle = [intent.levelName, intent.levelGroupName]
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .join(' · ');
+    return subtitle.isEmpty ? l10n.facturationDetailUnknownValue : subtitle;
+  }
+
+  void _onActionRequested(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.pageUnderConstruction)),
@@ -51,6 +66,8 @@ class FacturationPaymentDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final studentFullName = _studentFullName(l10n);
+    final studentSubtitle = _studentSubtitle(l10n);
 
     return BlocProvider<PaymentsBloc>(
       create: (_) {
@@ -61,6 +78,22 @@ class FacturationPaymentDetailPage extends StatelessWidget {
         return bloc;
       },
       child: AppPageBackground(
+        appBar: FinanceDetailAppBar(
+          title: l10n.facturationPaymentDetailHeroTitle,
+          subtitle: '$studentFullName · $studentSubtitle',
+          fallbackRoute: AppRoutesNames.facturations,
+        ),
+        bottomNavigationBar: intent.hasDisplayContext
+            ? _buildEntrance(
+                intervalStart: 0.4,
+                child: FacturationPaymentFooterActions(
+                  downloadLabel: l10n.facturationPaymentDownloadPdfLabel,
+                  printLabel: l10n.facturationPrintReceiptLabel,
+                  onDownloadPdf: () => _onActionRequested(context),
+                  onPrintReceipt: () => _onActionRequested(context),
+                ),
+              )
+            : null,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =
@@ -72,36 +105,9 @@ class FacturationPaymentDetailPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildEntrance(
-                  intervalStart: 0,
-                  child: FinanceDetailBackButton(
-                    label: l10n.facturationDetailBackLabel,
-                    fallbackRoute: AppRoutesNames.facturations,
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                _buildEntrance(
-                  intervalStart: 0.1,
-                  child: FinanceStudentHeroCard(
-                    title: l10n.facturationPaymentDetailHeroTitle,
-                    subtitle: l10n.facturationPaymentDetailHeroSubtitle,
-                    unknownValue: l10n.facturationDetailUnknownValue,
-                    firstName: intent.firstName,
-                    lastName: intent.lastName,
-                    surname: intent.surname,
-                    levelName: intent.levelName,
-                    levelGroupName: intent.levelGroupName,
-                    levelLabel: l10n.facturationDetailStudentLevel,
-                    levelGroupLabel: l10n.facturationDetailStudentLevelGroup,
-                    showFeatureChips: true,
-                    paymentsChipLabel: l10n.facturationDetailInfoChipPayments,
-                    chargesChipLabel: l10n.facturationDetailInfoChipCharges,
-                  ),
-                ),
-                SizedBox(height: blockSpacing),
                 if (!intent.hasDisplayContext)
                   _buildEntrance(
-                    intervalStart: 0.2,
+                    intervalStart: 0,
                     child: FinanceContextErrorCard(
                       title: l10n.facturationDetailContextErrorTitle,
                       message: l10n.facturationDetailContextErrorMessage,
@@ -116,9 +122,8 @@ class FacturationPaymentDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildEntrance(
-                        intervalStart: 0.2,
-                        child: FacturationPaymentInfoSection(
-                          title: l10n.facturationPaymentInfoSectionTitle,
+                        intervalStart: 0,
+                        child: FacturationPaymentSummaryStrip(
                           payerLabel: l10n.facturationPaymentPayerLabel,
                           amountLabel: l10n.facturationPaymentAmountLabel,
                           paidAtLabel: l10n.facturationPaymentPaidAtLabel,
@@ -133,24 +138,16 @@ class FacturationPaymentDetailPage extends StatelessWidget {
                       ),
                       SizedBox(height: blockSpacing),
                       _buildEntrance(
-                        intervalStart: 0.3,
+                        intervalStart: 0.2,
                         child: FacturationPaymentAllocationsSection(
                           paymentId: intent.paymentId,
-                          expectedTotalInCents: intent.amountInCents,
                           currency: intent.currency,
-                        ),
-                      ),
-                      SizedBox(height: blockSpacing),
-                      _buildEntrance(
-                        intervalStart: 0.4,
-                        child: FacturationPrintReceiptCta(
-                          label: l10n.facturationPrintReceiptLabel,
-                          subtitle: l10n.facturationPrintReceiptSubtitle,
-                          onPressed: () => _onPrintReceiptRequested(context),
                         ),
                       ),
                     ],
                   ),
+                if (intent.hasDisplayContext)
+                  const SizedBox(height: AppDimensions.fabListBottomPadding),
               ],
             );
           },
