@@ -1489,6 +1489,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationChargeDetailAllocationsSectionSubtitle => 'Breakdown of payments allocated to this charge.';
 
   @override
+  String get facturationChargeDetailAllocationLabelColumn => 'Allocation';
+
+  @override
   String get facturationChargeDetailAllocationsTotalLabel => 'Allocated total';
 
   @override
@@ -1562,6 +1565,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerFieldRequired => 'This field is required';
+
+  @override
+  String get facturationCreatePaymentDetailsSectionTitle => 'Payment details';
+
+  @override
+  String get facturationCreatePaymentDetailsSectionSubtitle => 'Enter the received amount, currency and payment date.';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountLabel => 'Amount received';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountHint => 'E.g.: 200';
+
+  @override
+  String get facturationCreatePaymentCurrencyLabel => 'Currency';
+
+  @override
+  String get facturationCreatePaymentCurrencyReadOnlyHint => 'Multiple currencies detected: read-only value.';
+
+  @override
+  String get facturationCreatePaymentCurrencyUnavailable => 'Currency unavailable';
+
+  @override
+  String get facturationCreatePaymentDateLabel => 'Payment date';
 
   @override
   String get facturationCreatePaymentAllocationSectionTitle => 'Payment allocations';
@@ -1648,6 +1675,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentStatusLabel => 'Status';
+
+  @override
+  String get facturationCreatePaymentChargeImpactTitle => 'Impact on charge';
+
+  @override
+  String facturationCreatePaymentChargeRemainingHelper(String remainingAmount) {
+    return 'Remaining on this charge: $remainingAmount';
+  }
+
+  @override
+  String get facturationCreatePaymentPayAllAction => 'Pay all';
+
+  @override
+  String get facturationCreatePaymentDistributionTrackerIdle => 'Enter at least one allocation to compute total payments.';
+
+  @override
+  String facturationCreatePaymentFooterTotalPayments(String allocatedAmount) {
+    return 'Total payments: $allocatedAmount';
+  }
 
   @override
   String get facturationCreatePaymentNetworkError => 'Check your connection and try again.';

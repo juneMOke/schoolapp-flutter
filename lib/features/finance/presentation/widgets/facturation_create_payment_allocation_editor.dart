@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_distribution_tracker.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_allocation_item.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -18,7 +19,10 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
   final List<StudentCharge?> selectedCharges;
   final List<TextEditingController> amountControllers;
   final bool readOnly;
+  final int allocatedAmountInCents;
+  final String trackerCurrency;
   final VoidCallback onAddAllocation;
+  final VoidCallback onAmountChanged;
   final ValueChanged<int> onRemoveAllocation;
   final void Function(int index, StudentCharge? charge) onChargeSelected;
 
@@ -28,8 +32,11 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
     required this.selectedCharges,
     required this.amountControllers,
     required this.onAddAllocation,
+    required this.onAmountChanged,
     required this.onRemoveAllocation,
     required this.onChargeSelected,
+    required this.allocatedAmountInCents,
+    required this.trackerCurrency,
     this.readOnly = false,
   });
 
@@ -93,6 +100,7 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
                             selectedCharge: selectedCharges[i],
                             availableCharges: _availableFor(i),
                             amountController: amountControllers[i],
+                            onAmountChanged: onAmountChanged,
                             onChargeSelected: (c) => onChargeSelected(i, c),
                             onRemove: () => onRemoveAllocation(i),
                             readOnly: readOnly,
@@ -101,11 +109,18 @@ class FacturationCreatePaymentAllocationEditor extends StatelessWidget {
                         ],
                         if (!readOnly)
                           _AddAllocationButton(
-                            label: l10n.facturationCreatePaymentAddAllocationLabel,
+                            label:
+                                l10n.facturationCreatePaymentAddAllocationLabel,
                             onPressed: onAddAllocation,
                             disabled:
-                                selectedCharges.length >= allUnpaidCharges.length,
+                                selectedCharges.length >=
+                                allUnpaidCharges.length,
                           ),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        FacturationCreatePaymentDistributionTracker(
+                          allocatedAmountInCents: allocatedAmountInCents,
+                          currency: trackerCurrency,
+                        ),
                       ],
                     ),
                   ),
@@ -129,9 +144,7 @@ class _AllPaidMessage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.financeDetailSuccessSoft,
         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: Border.all(
-          color: AppColors.success.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -179,7 +192,9 @@ class _AddAllocationButton extends StatelessWidget {
         side: BorderSide(
           color: disabled ? AppColors.border : AppColors.bleuArdoise,
         ),
-        foregroundColor: disabled ? AppColors.textSecondary : AppColors.bleuArdoise,
+        foregroundColor: disabled
+            ? AppColors.textSecondary
+            : AppColors.bleuArdoise,
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingM,
           vertical: AppDimensions.spacingS,

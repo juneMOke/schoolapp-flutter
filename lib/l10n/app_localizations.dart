@@ -2909,6 +2909,12 @@ abstract class AppLocalizations {
   /// **'Breakdown of payments allocated to this charge.'**
   String get facturationChargeDetailAllocationsSectionSubtitle;
 
+  /// No description provided for @facturationChargeDetailAllocationLabelColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation'**
+  String get facturationChargeDetailAllocationLabelColumn;
+
   /// No description provided for @facturationChargeDetailAllocationsTotalLabel.
   ///
   /// In en, this message translates to:
@@ -3058,6 +3064,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This field is required'**
   String get facturationCreatePaymentPayerFieldRequired;
+
+  /// No description provided for @facturationCreatePaymentDetailsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details'**
+  String get facturationCreatePaymentDetailsSectionTitle;
+
+  /// No description provided for @facturationCreatePaymentDetailsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the received amount, currency and payment date.'**
+  String get facturationCreatePaymentDetailsSectionSubtitle;
+
+  /// No description provided for @facturationCreatePaymentReceivedAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get facturationCreatePaymentReceivedAmountLabel;
+
+  /// No description provided for @facturationCreatePaymentReceivedAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: 200'**
+  String get facturationCreatePaymentReceivedAmountHint;
+
+  /// No description provided for @facturationCreatePaymentCurrencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get facturationCreatePaymentCurrencyLabel;
+
+  /// No description provided for @facturationCreatePaymentCurrencyReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple currencies detected: read-only value.'**
+  String get facturationCreatePaymentCurrencyReadOnlyHint;
+
+  /// No description provided for @facturationCreatePaymentCurrencyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency unavailable'**
+  String get facturationCreatePaymentCurrencyUnavailable;
+
+  /// No description provided for @facturationCreatePaymentDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment date'**
+  String get facturationCreatePaymentDateLabel;
 
   /// No description provided for @facturationCreatePaymentAllocationSectionTitle.
   ///
@@ -3226,6 +3280,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get facturationCreatePaymentStatusLabel;
+
+  /// No description provided for @facturationCreatePaymentChargeImpactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact on charge'**
+  String get facturationCreatePaymentChargeImpactTitle;
+
+  /// No description provided for @facturationCreatePaymentChargeRemainingHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining on this charge: {remainingAmount}'**
+  String facturationCreatePaymentChargeRemainingHelper(String remainingAmount);
+
+  /// No description provided for @facturationCreatePaymentPayAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay all'**
+  String get facturationCreatePaymentPayAllAction;
+
+  /// No description provided for @facturationCreatePaymentDistributionTrackerIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one allocation to compute total payments.'**
+  String get facturationCreatePaymentDistributionTrackerIdle;
+
+  /// No description provided for @facturationCreatePaymentFooterTotalPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Total payments: {allocatedAmount}'**
+  String facturationCreatePaymentFooterTotalPayments(String allocatedAmount);
 
   /// No description provided for @facturationCreatePaymentNetworkError.
   ///

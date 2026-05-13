@@ -12,7 +12,7 @@ class FacturationChargeDetailIntent extends Equatable {
   final String levelName;
   final String levelGroupName;
   // Charge detail fields
-  final String chargeLabel;
+  final String feeCode;
   final double expectedAmountInCents;
   final double amountPaidInCents;
   final String currency;
@@ -27,7 +27,7 @@ class FacturationChargeDetailIntent extends Equatable {
     required this.surname,
     required this.levelName,
     required this.levelGroupName,
-    required this.chargeLabel,
+    required this.feeCode,
     required this.expectedAmountInCents,
     required this.amountPaidInCents,
     required this.currency,
@@ -47,7 +47,7 @@ class FacturationChargeDetailIntent extends Equatable {
          surname: '',
          levelName: '',
          levelGroupName: '',
-         chargeLabel: '',
+         feeCode: '',
          expectedAmountInCents: 0,
          amountPaidInCents: 0,
          currency: '',
@@ -74,7 +74,7 @@ class FacturationChargeDetailIntent extends Equatable {
     surname: surname,
     levelName: levelName,
     levelGroupName: levelGroupName,
-    chargeLabel: chargeLabel,
+    feeCode: feeCode,
     expectedAmountInCents: expectedAmountInCents,
     amountPaidInCents: amountPaidInCents,
     currency: currency,
@@ -111,7 +111,7 @@ class FacturationChargeDetailIntent extends Equatable {
     surname,
     levelName,
     levelGroupName,
-    chargeLabel,
+    feeCode,
     expectedAmountInCents,
     amountPaidInCents,
     currency,

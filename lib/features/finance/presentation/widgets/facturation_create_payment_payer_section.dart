@@ -45,7 +45,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
             controller: lastNameController,
-            label: l10n.facturationCreatePaymentPayerLastNameLabel,
+            label: '${l10n.facturationCreatePaymentPayerLastNameLabel} *',
             hint: l10n.facturationCreatePaymentPayerLastNameHint,
             accentColor: AppColors.bleuArdoise,
             validator: (value) => (value == null || value.trim().isEmpty)
@@ -57,7 +57,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
             controller: firstNameController,
-            label: l10n.facturationCreatePaymentPayerFirstNameLabel,
+            label: '${l10n.facturationCreatePaymentPayerFirstNameLabel} *',
             hint: l10n.facturationCreatePaymentPayerFirstNameHint,
             accentColor: AppColors.bleuArdoise,
             validator: (value) => (value == null || value.trim().isEmpty)
@@ -69,7 +69,7 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           FinanceTextFormField(
             controller: middleNameController,
-            label: l10n.facturationCreatePaymentPayerMiddleNameLabel,
+            label: '${l10n.facturationCreatePaymentPayerMiddleNameLabel} *',
             hint: l10n.facturationCreatePaymentPayerMiddleNameHint,
             accentColor: AppColors.bleuArdoise,
             validator: (value) => (value == null || value.trim().isEmpty)

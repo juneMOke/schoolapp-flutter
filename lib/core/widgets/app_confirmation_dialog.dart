@@ -9,6 +9,12 @@ class AppConfirmationDialog extends StatelessWidget {
   final String confirmLabel;
   final String cancelLabel;
   final bool isDestructive;
+  final IconData? headerIcon;
+  final Color? headerIconColor;
+  final Color? headerIconBackgroundColor;
+  final IconData? confirmIcon;
+  final Color? confirmButtonColor;
+  final Color? confirmForegroundColor;
 
   const AppConfirmationDialog({
     super.key,
@@ -17,15 +23,39 @@ class AppConfirmationDialog extends StatelessWidget {
     required this.confirmLabel,
     required this.cancelLabel,
     this.isDestructive = false,
+    this.headerIcon,
+    this.headerIconColor,
+    this.headerIconBackgroundColor,
+    this.confirmIcon,
+    this.confirmButtonColor,
+    this.confirmForegroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final iconColor = isDestructive ? AppColors.danger : AppColors.bleuArdoise;
-    final iconBackgroundColor = isDestructive
+    final resolvedHeaderIconColor =
+        headerIconColor ??
+        (isDestructive ? AppColors.danger : AppColors.bleuArdoise);
+    final resolvedHeaderIconBackgroundColor =
+        headerIconBackgroundColor ??
+        (isDestructive
         ? AppColors.financeDetailDangerSoft
-        : AppColors.bleuArdoise.withValues(alpha: 0.12);
+        : AppColors.bleuArdoise.withValues(alpha: 0.12));
+    final resolvedConfirmButtonColor =
+        confirmButtonColor ??
+        (isDestructive ? colorScheme.error : AppColors.bleuArdoise);
+    final resolvedConfirmForegroundColor =
+        confirmForegroundColor ??
+        (isDestructive ? colorScheme.onError : AppColors.blancCasse);
+    final resolvedHeaderIcon =
+        headerIcon ??
+        (isDestructive
+            ? Icons.warning_amber_rounded
+            : Icons.help_outline_rounded);
+    final resolvedConfirmIcon =
+        confirmIcon ??
+        (isDestructive ? Icons.delete_outline_rounded : Icons.check_rounded);
     final borderColor = isDestructive
         ? AppColors.danger.withValues(alpha: 0.24)
         : AppColors.borderStrong.withValues(alpha: 0.22);
@@ -61,15 +91,13 @@ class AppConfirmationDialog extends StatelessWidget {
             width: AppDimensions.spacingXL + AppDimensions.spacingXS,
             height: AppDimensions.spacingXL + AppDimensions.spacingXS,
             decoration: BoxDecoration(
-              color: iconBackgroundColor,
+              color: resolvedHeaderIconBackgroundColor,
               borderRadius: BorderRadius.circular(AppDimensions.spacingM),
             ),
             child: Icon(
-              isDestructive
-                  ? Icons.warning_amber_rounded
-                  : Icons.help_outline_rounded,
+              resolvedHeaderIcon,
               size: AppDimensions.spacingL,
-              color: iconColor,
+              color: resolvedHeaderIconColor,
             ),
           ),
           const SizedBox(width: AppDimensions.spacingM),
@@ -108,7 +136,7 @@ class AppConfirmationDialog extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                    side: BorderSide(color: AppColors.borderStrong),
+                    side: const BorderSide(color: AppColors.borderStrong),
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
                   icon: const Icon(
@@ -128,26 +156,18 @@ class AppConfirmationDialog extends StatelessWidget {
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                    backgroundColor: isDestructive
-                        ? colorScheme.error
-                        : AppColors.bleuArdoise,
-                    foregroundColor: isDestructive
-                        ? colorScheme.onError
-                        : AppColors.blancCasse,
+                    backgroundColor: resolvedConfirmButtonColor,
+                    foregroundColor: resolvedConfirmForegroundColor,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
                   icon: Icon(
-                    isDestructive
-                        ? Icons.delete_outline_rounded
-                        : Icons.check_rounded,
+                    resolvedConfirmIcon,
                     size: AppDimensions.spacingM,
                   ),
                   label: Text(
                     confirmLabel,
                     style: AppTextStyles.action.copyWith(
-                      color: isDestructive
-                          ? colorScheme.onError
-                          : AppColors.blancCasse,
+                      color: resolvedConfirmForegroundColor,
                     ),
                   ),
                 ),
@@ -168,6 +188,12 @@ Future<bool> showAppConfirmationDialog({
   required String cancelLabel,
   bool isDestructive = false,
   bool barrierDismissible = true,
+  IconData? headerIcon,
+  Color? headerIconColor,
+  Color? headerIconBackgroundColor,
+  IconData? confirmIcon,
+  Color? confirmButtonColor,
+  Color? confirmForegroundColor,
 }) async {
   final result = await showDialog<bool>(
     context: context,
@@ -178,6 +204,12 @@ Future<bool> showAppConfirmationDialog({
       confirmLabel: confirmLabel,
       cancelLabel: cancelLabel,
       isDestructive: isDestructive,
+      headerIcon: headerIcon,
+      headerIconColor: headerIconColor,
+      headerIconBackgroundColor: headerIconBackgroundColor,
+      confirmIcon: confirmIcon,
+      confirmButtonColor: confirmButtonColor,
+      confirmForegroundColor: confirmForegroundColor,
     ),
   );
 

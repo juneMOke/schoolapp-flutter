@@ -275,7 +275,9 @@ class _ChargeRow extends StatelessWidget {
       color: AppColors.surfaceRaised,
       child: InkWell(
         onTap: () => onViewRequested(charge),
-        hoverColor: AppColors.stateHover,
+        hoverColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+        splashColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+        highlightColor: AppColors.bleuArdoise.withValues(alpha: 0.16),
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.spacingM),
           child: Row(
@@ -346,11 +348,24 @@ class _ChargeRow extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Icon(
-                    Icons.visibility_outlined,
-                    color: AppColors.textMuted,
-                    size: AppDimensions.detailHeaderIconSize,
-                    semanticLabel: l10n.facturationDetailViewChargeLabel,
+                  child: IconButton(
+                    onPressed: () => onViewRequested(charge),
+                    tooltip: l10n.facturationDetailViewChargeLabel,
+                    style: IconButton.styleFrom(
+                      foregroundColor: AppColors.bleuArdoise,
+                      backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                      hoverColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                      focusColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+                      highlightColor: AppColors.bleuArdoise.withValues(alpha: 0.16),
+                      minimumSize: const Size(
+                        AppDimensions.minTouchTarget,
+                        AppDimensions.minTouchTarget,
+                      ),
+                    ),
+                    icon: const Icon(
+                      Icons.visibility_outlined,
+                      size: AppDimensions.detailHeaderIconSize,
+                    ),
                   ),
                 ),
               ),

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Tableau ETEELO des allocations (paiements imputés) pour une charge en détail.
@@ -108,7 +109,7 @@ class _HeaderRow extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                l10n.facturationDetailPaymentPayerColumn,
+                l10n.facturationChargeDetailAllocationLabelColumn,
                 style: AppTextStyles.tableHeader.copyWith(
                   color: AppColors.textMuted,
                   letterSpacing: 0.8,
@@ -143,8 +144,13 @@ class _AllocationRow extends StatelessWidget {
     required this.formatAmount,
   });
 
+  String _allocationLabel(AppLocalizations l10n) =>
+      allocation.feeCode.localizedFeeLabel(l10n);
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final label = _allocationLabel(l10n);
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
       child: Row(
@@ -154,7 +160,7 @@ class _AllocationRow extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                allocation.studentChargeLabel,
+                label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.body.copyWith(

@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_footer_actions.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_summary_strip.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_header.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -37,6 +38,9 @@ class FacturationChargeDetailPage extends StatelessWidget {
         .join(' · ');
     return subtitle.isEmpty ? l10n.facturationDetailUnknownValue : subtitle;
   }
+
+  String _chargeLabel(AppLocalizations l10n) =>
+      intent.feeCode.localizedFeeLabel(l10n);
 
   void _onPrintStatementsRequested(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -75,6 +79,7 @@ class FacturationChargeDetailPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final studentFullName = _studentFullName(l10n);
     final studentSubtitle = _studentSubtitle(l10n);
+    final chargeLabel = _chargeLabel(l10n);
 
     return BlocProvider<StudentChargesBloc>(
       create: (_) {
@@ -139,7 +144,7 @@ class FacturationChargeDetailPage extends StatelessWidget {
                       _buildEntrance(
                         intervalStart: 0,
                         child: FacturationChargeSummaryStrip(
-                          chargeLabel: intent.chargeLabel,
+                          chargeLabel: chargeLabel,
                           chargeStatus: intent.chargeStatus,
                           expectedAmountInCents: intent.expectedAmountInCents,
                           amountPaidInCents: intent.amountPaidInCents,
@@ -147,14 +152,14 @@ class FacturationChargeDetailPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: blockSpacing),
-                      _buildEntrance(
-                        intervalStart: 0.2,
-                        child: FacturationChargeAllocationsSection(
-                          chargeId: intent.chargeId,
-                          paidAmountInCents: intent.amountPaidInCents,
-                          currency: intent.currency,
-                        ),
-                      ),
+                       _buildEntrance(
+                         intervalStart: 0.2,
+                         child: FacturationChargeAllocationsSection(
+                           chargeId: intent.chargeId,
+                           paidAmountInCents: intent.amountPaidInCents,
+                           currency: intent.currency,
+                         ),
+                       ),
                     ],
                   ),
                 if (intent.hasDisplayContext)

@@ -22,6 +22,7 @@ class AppDimensions {
   static const detailContentMaxWidth = 1180.0;
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;
+  static const detailTableLabelColumnWidth = 72.0;
   static const fabListBottomPadding = 80.0;
 
   // Page background decorative tokens (orbes — partagé entre tous les modules)

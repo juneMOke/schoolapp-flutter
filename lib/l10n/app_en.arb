@@ -658,6 +658,7 @@
   "facturationChargeDetailStatusLabel": "Status",
   "facturationChargeDetailAllocationsSectionTitle": "Allocations for this charge",
   "facturationChargeDetailAllocationsSectionSubtitle": "Breakdown of payments allocated to this charge.",
+  "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Allocated total",
   "facturationChargeDetailAllocationsEmpty": "No allocation was found for this charge.",
   "facturationChargeDetailAllocationsRetry": "Retry",
@@ -683,6 +684,14 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Surname (optional)",
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
+  "facturationCreatePaymentDetailsSectionTitle": "Payment details",
+  "facturationCreatePaymentDetailsSectionSubtitle": "Enter the received amount, currency and payment date.",
+  "facturationCreatePaymentReceivedAmountLabel": "Amount received",
+  "facturationCreatePaymentReceivedAmountHint": "E.g.: 200",
+  "facturationCreatePaymentCurrencyLabel": "Currency",
+  "facturationCreatePaymentCurrencyReadOnlyHint": "Multiple currencies detected: read-only value.",
+  "facturationCreatePaymentCurrencyUnavailable": "Currency unavailable",
+  "facturationCreatePaymentDateLabel": "Payment date",
   "facturationCreatePaymentAllocationSectionTitle": "Payment allocations",
   "facturationCreatePaymentAllocationSectionSubtitle": "Associate an amount to one or more student charges.",
   "facturationCreatePaymentAddAllocationLabel": "Add allocation",
@@ -718,6 +727,25 @@
   "facturationCreatePaymentPaidLabel": "Already paid",
   "facturationCreatePaymentRemainingLabel": "Remaining",
   "facturationCreatePaymentStatusLabel": "Status",
+  "facturationCreatePaymentChargeImpactTitle": "Impact on charge",
+  "facturationCreatePaymentChargeRemainingHelper": "Remaining on this charge: {remainingAmount}",
+  "@facturationCreatePaymentChargeRemainingHelper": {
+    "placeholders": {
+      "remainingAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentPayAllAction": "Pay all",
+  "facturationCreatePaymentDistributionTrackerIdle": "Enter at least one allocation to compute total payments.",
+  "facturationCreatePaymentFooterTotalPayments": "Total payments: {allocatedAmount}",
+  "@facturationCreatePaymentFooterTotalPayments": {
+    "placeholders": {
+      "allocatedAmount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentNetworkError": "Check your connection and try again.",
   "facturationCreatePaymentNotFoundError": "The requested resource was not found.",
   "facturationCreatePaymentValidationError": "Submitted data is invalid. Please review the form.",

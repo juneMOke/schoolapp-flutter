@@ -1489,6 +1489,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationChargeDetailAllocationsSectionSubtitle => 'Détail des paiements alloués à cette charge.';
 
   @override
+  String get facturationChargeDetailAllocationLabelColumn => 'Allocation';
+
+  @override
   String get facturationChargeDetailAllocationsTotalLabel => 'Total alloué';
 
   @override
@@ -1562,6 +1565,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerFieldRequired => 'Ce champ est obligatoire';
+
+  @override
+  String get facturationCreatePaymentDetailsSectionTitle => 'Détails du paiement';
+
+  @override
+  String get facturationCreatePaymentDetailsSectionSubtitle => 'Saisissez le montant reçu, la devise et la date du paiement.';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountLabel => 'Montant reçu';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountHint => 'Ex : 200';
+
+  @override
+  String get facturationCreatePaymentCurrencyLabel => 'Devise';
+
+  @override
+  String get facturationCreatePaymentCurrencyReadOnlyHint => 'Plusieurs devises détectées : valeur en lecture seule.';
+
+  @override
+  String get facturationCreatePaymentCurrencyUnavailable => 'Devise indisponible';
+
+  @override
+  String get facturationCreatePaymentDateLabel => 'Date du paiement';
 
   @override
   String get facturationCreatePaymentAllocationSectionTitle => 'Allocations de paiement';
@@ -1648,6 +1675,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentStatusLabel => 'Statut';
+
+  @override
+  String get facturationCreatePaymentChargeImpactTitle => 'Impact sur la charge';
+
+  @override
+  String facturationCreatePaymentChargeRemainingHelper(String remainingAmount) {
+    return 'Restant sur cette charge : $remainingAmount';
+  }
+
+  @override
+  String get facturationCreatePaymentPayAllAction => 'Tout payer';
+
+  @override
+  String get facturationCreatePaymentDistributionTrackerIdle => 'Saisissez au moins une allocation pour calculer le total paiements.';
+
+  @override
+  String facturationCreatePaymentFooterTotalPayments(String allocatedAmount) {
+    return 'Total paiements : $allocatedAmount';
+  }
 
   @override
   String get facturationCreatePaymentNetworkError => 'Vérifiez votre connexion et réessayez.';

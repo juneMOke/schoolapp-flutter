@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -178,7 +179,9 @@ class _PaymentRow extends StatelessWidget {
       color: AppColors.surfaceRaised,
       child: InkWell(
         onTap: () => onViewRequested(payment),
-        hoverColor: AppColors.stateHover,
+        hoverColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+        splashColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+        highlightColor: AppColors.bleuArdoise.withValues(alpha: 0.16),
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.spacingM),
           child: Row(
@@ -187,12 +190,27 @@ class _PaymentRow extends StatelessWidget {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    _payerFullName(l10n),
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textPrimary,
-                      letterSpacing: 0.8,
-                    ),
+                  child: Row(
+                    children: [
+                      StudentAvatar(
+                        firstName: payment.payerFirstName,
+                        lastName: payment.payerLastName,
+                        size: 32,
+                        variant: AvatarVariant.solid,
+                      ),
+                      const SizedBox(width: AppDimensions.spacingS),
+                      Expanded(
+                        child: Text(
+                          _payerFullName(l10n),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.body.copyWith(
+                            color: AppColors.textPrimary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -225,11 +243,24 @@ class _PaymentRow extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Icon(
-                    Icons.visibility_outlined,
-                    color: AppColors.textMuted,
-                    size: AppDimensions.detailHeaderIconSize,
-                    semanticLabel: l10n.facturationDetailViewPaymentLabel,
+                  child: IconButton(
+                    onPressed: () => onViewRequested(payment),
+                    tooltip: l10n.facturationDetailViewPaymentLabel,
+                    style: IconButton.styleFrom(
+                      foregroundColor: AppColors.bleuArdoise,
+                      backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                      hoverColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                      focusColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+                      highlightColor: AppColors.bleuArdoise.withValues(alpha: 0.16),
+                      minimumSize: const Size(
+                        AppDimensions.minTouchTarget,
+                        AppDimensions.minTouchTarget,
+                      ),
+                    ),
+                    icon: const Icon(
+                      Icons.visibility_outlined,
+                      size: AppDimensions.detailHeaderIconSize,
+                    ),
                   ),
                 ),
               ),

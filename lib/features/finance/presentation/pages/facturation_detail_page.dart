@@ -110,7 +110,7 @@ class FacturationDetailPage extends StatelessWidget {
         surname: intent.surname,
         levelName: intent.levelName,
         levelGroupName: intent.levelGroupName,
-        chargeLabel: charge.label,
+        feeCode: charge.feeCode,
         expectedAmountInCents: charge.expectedAmountInCents,
         amountPaidInCents: charge.amountPaidInCents,
         currency: charge.currency,
