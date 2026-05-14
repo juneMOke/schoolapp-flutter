@@ -132,10 +132,13 @@ class _ClassesListPageState extends State<ClassesListPage> {
     if (academicYearId.isEmpty) {
       return;
     }
+    if (!request.hasAnyCriteria) {
+      return;
+    }
 
     setState(() => _lastRequest = request);
 
-    if (request.targetsClassroom) {
+    if (request.targetsClassroom && request.selectedClassroom != null) {
       context.read<EnrollmentBloc>().add(const EnrollmentResetRequested());
       context.read<ClassroomBloc>().add(
             ClassroomMembersRequested(
@@ -152,8 +155,8 @@ class _ClassesListPageState extends State<ClassesListPage> {
             firstName: request.firstName,
             lastName: request.lastName,
             surname: request.surname,
-            schoolLevelGroupId: request.selectedLevel.schoolLevelGroupId,
-            schoolLevelId: request.selectedLevel.schoolLevelId,
+            schoolLevelGroupId: request.selectedLevel?.schoolLevelGroupId ?? '',
+            schoolLevelId: request.selectedLevel?.schoolLevelId ?? '',
           ),
         );
   }

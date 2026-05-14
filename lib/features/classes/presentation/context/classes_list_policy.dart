@@ -10,8 +10,6 @@ import 'package:school_app_flutter/features/classes/presentation/context/classes
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_origin.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -52,14 +50,8 @@ class DefaultClassesListPolicy extends ClassesListPolicy {
     EnrollmentSummary summary, {
     ClassesListSearchRequest? request,
   }) {
-    final intent = EnrollmentDetailIntent(
-      origin: EnrollmentDetailOrigin.firstRegistration,
-      enrollmentId: summary.enrollmentId,
-      studentId: summary.student.id,
-      status: summary.status,
-    );
-
-    context.push(intent.toLocation(), extra: intent);
+    final l10n = AppLocalizations.of(context)!;
+    AppSnackBar.showInfo(context, l10n.classesListStudentDetailSoon);
   }
 
   @override
@@ -157,8 +149,8 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
       };
 
   String _resolveLevelName(ClassesListSearchRequest? request) =>
-      request?.selectedLevel.label.trim() ?? '';
+      request?.selectedLevel?.label.trim() ?? '';
 
   String _resolveLevelGroupName(ClassesListSearchRequest? request) =>
-      request?.selectedLevel.schoolLevelGroupName.trim() ?? '';
+      request?.selectedLevel?.schoolLevelGroupName.trim() ?? '';
 }

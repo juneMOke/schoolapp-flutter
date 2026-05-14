@@ -55,8 +55,8 @@ class ClassesListSearchRequest extends Equatable {
   final String firstName;
   final String lastName;
   final String surname;
-  final ClassesListCycleOption selectedCycle;
-  final ClassesListLevelOption selectedLevel;
+  final ClassesListCycleOption? selectedCycle;
+  final ClassesListLevelOption? selectedLevel;
   final BootstrapClassroom? selectedClassroom;
 
   const ClassesListSearchRequest({
@@ -75,6 +75,11 @@ class ClassesListSearchRequest extends Equatable {
 
   bool get targetsClassroom => selectedClassroom != null;
 
+  bool get hasAcademicFilters =>
+      selectedCycle != null || selectedLevel != null || selectedClassroom != null;
+
+  bool get hasAnyCriteria => hasNameFilters || hasAcademicFilters;
+
   @override
   List<Object?> get props => [
         firstName,
@@ -91,14 +96,16 @@ class ClassesListStudentRow extends Equatable {
   final String lastName;
   final String surname;
   final String firstName;
+  final String classroomLabel;
 
   const ClassesListStudentRow({
     required this.id,
     required this.lastName,
     required this.surname,
     required this.firstName,
+    this.classroomLabel = '',
   });
 
   @override
-  List<Object?> get props => [id, lastName, surname, firstName];
+  List<Object?> get props => [id, lastName, surname, firstName, classroomLabel];
 }

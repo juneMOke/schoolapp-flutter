@@ -33,13 +33,12 @@ class ClassesListSearchActions extends StatelessWidget {
             label: clearLabel,
             child: Tooltip(
               message: clearLabel,
-              child: OutlinedButton.icon(
+              child: TextButton.icon(
                 onPressed: onReset,
                 icon: const Icon(Icons.refresh_rounded),
                 label: Text(clearLabel),
-                style: OutlinedButton.styleFrom(
+                style: TextButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
-                  side: const BorderSide(color: AppColors.border),
                   minimumSize: const Size(0, AppDimensions.minTouchTarget),
                   textStyle: AppTextStyles.action,
                 ),
@@ -55,7 +54,7 @@ class ClassesListSearchActions extends StatelessWidget {
             label: searchLabel,
             child: Tooltip(
               message: searchLabel,
-              child: ElevatedButton.icon(
+              child: FilledButton.icon(
                 onPressed: onSearch,
                 icon: isSearching
                     ? const SizedBox(
@@ -68,9 +67,9 @@ class ClassesListSearchActions extends StatelessWidget {
                       )
                     : const Icon(Icons.search_rounded),
                 label: Text(searchLabel),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.indigo,
-                  foregroundColor: AppColors.surface,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.terreCuite,
+                  foregroundColor: AppColors.blancCasse,
                   disabledBackgroundColor: AppColors.classesDisabledBg,
                   disabledForegroundColor: AppColors.classesDisabledFg,
                   minimumSize: const Size(0, AppDimensions.minTouchTarget),

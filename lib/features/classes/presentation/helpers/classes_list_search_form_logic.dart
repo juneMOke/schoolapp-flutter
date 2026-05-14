@@ -1,6 +1,5 @@
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListSearchFormLogic {
   const ClassesListSearchFormLogic._();
@@ -80,48 +79,22 @@ class ClassesListSearchFormLogic {
     return null;
   }
 
-  static String? validationMessage({
-    required AppLocalizations l10n,
+  static bool hasAtLeastOneCriterion({
     required ClassesListCycleOption? selectedCycle,
     required ClassesListLevelOption? selectedLevel,
+    required String? selectedClassroomId,
     required String firstName,
     required String lastName,
     required String surname,
   }) {
-    if (selectedCycle == null || selectedLevel == null) {
-      return l10n.classesListSearchValidationLevelRequired;
-    }
+    final hasNames = [firstName, lastName, surname]
+        .map((value) => value.trim())
+        .any((value) => value.isNotEmpty);
 
-    final values = [firstName, lastName, surname].map((value) => value.trim());
-    final hasAny = values.any((value) => value.isNotEmpty);
-    final hasAll = values.every((value) => value.isNotEmpty);
-
-    if (hasAny && !hasAll) {
-      return l10n.classesListSearchValidationNamesIncomplete;
-    }
-
-    return null;
-  }
-
-  static String classroomHelper({
-    required AppLocalizations l10n,
-    required ClassesListCycleOption? selectedCycle,
-    required ClassesListLevelOption? selectedLevel,
-    required List<BootstrapClassroom> classroomOptions,
-  }) {
-    if (selectedCycle == null) {
-      return l10n.classesListClassroomHelpSelectCycle;
-    }
-    if (selectedLevel == null) {
-      return l10n.classesListClassroomHelpSelectLevel;
-    }
-    if (!selectedLevel.splitIntoClassrooms) {
-      return l10n.classesListClassroomHelpLevelNotSplit;
-    }
-    if (classroomOptions.isEmpty) {
-      return l10n.classesOrganisationNoClassrooms;
-    }
-    return l10n.classesListClassroomHelpOptional;
+    return hasNames ||
+        selectedCycle != null ||
+        selectedLevel != null ||
+        (selectedClassroomId?.trim().isNotEmpty ?? false);
   }
 }
 

@@ -33,6 +33,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           title: TopBarTitle(
             title: state.currentTitle,
             isPreRegistrations: isPreRegistrations,
+            selectedSubMenuId: state.selectedSubMenuId,
           ),
           actions: [
             TopBarNotificationButton(onPressed: () {}),

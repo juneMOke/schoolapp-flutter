@@ -201,9 +201,9 @@ class StatusBadge extends StatelessWidget {
     StatusBadgeSize size = StatusBadgeSize.medium,
   }) =>
       StatusBadge(
-        icon: Icons.schedule,
+        icon: Icons.pending_outlined,
         label: label,
-        color: AppColors.warning,
+        color: AppColors.bleuArdoise,
         size: size,
       );
 

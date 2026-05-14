@@ -36,17 +36,26 @@ class ClassesListEnrollmentResults extends StatelessWidget {
             lastName: summary.student.lastName,
             surname: summary.student.surname,
             firstName: summary.student.firstName,
+            classroomLabel: request.selectedClassroom?.name ?? '',
           ),
         )
         .toList(growable: false);
+
+    final criteria = [
+      request.selectedCycle?.label,
+      request.selectedLevel?.label,
+      request.selectedClassroom?.name,
+    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' · ');
+
+    final summary = criteria.isEmpty
+        ? l10n.classesListResultsSummaryWithoutCriteria(state.summaries.length)
+        : l10n.classesListResultsSummary(state.summaries.length, criteria);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClassesListResultsToolbar(
-          title: l10n.classesListResultsTitle,
-          subtitle: l10n.classesListResultsLevelMode(request.selectedLevel.label),
-          resultCount: state.summaries.length,
+          summary: summary,
           canExport: state.summariesStatus == EnrollmentLoadStatus.success && rows.isNotEmpty,
           onExportPressed: onExportPressed,
         ),
@@ -87,8 +96,8 @@ class ClassesListEnrollmentResults extends StatelessWidget {
           return ClassesListStateCard(
             key: const ValueKey('classes-list-enrollment-empty'),
             icon: Icons.people_outline_rounded,
-            title: l10n.noResultsFound,
-            message: l10n.enrollmentNoResultsDescription,
+              title: l10n.classesListNoMatchTitle,
+              message: l10n.classesListNoMatchMessage,
           );
         }
 
@@ -124,8 +133,8 @@ class ClassesListEnrollmentResults extends StatelessWidget {
         return ClassesListStateCard(
           key: const ValueKey('classes-list-enrollment-initial'),
           icon: Icons.search_rounded,
-          title: l10n.classesListInvitationTitle,
-          message: l10n.classesListInvitationMessage,
+          title: l10n.classesListInitialEmptyTitle,
+          message: l10n.classesListInitialEmptyMessage,
         );
     }
   }

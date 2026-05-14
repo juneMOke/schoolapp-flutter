@@ -325,7 +325,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'Une erreur est survenue.';
 
   @override
-  String get classesListHeroTitle => 'Liste des classes et élèves';
+  String get classesListHeroTitle => 'Listes de classe';
 
   @override
   String get classesListHeroSubtitle => 'Recherchez rapidement les élèves par cycle, niveau ou classe, puis exportez les résultats affichés.';
@@ -340,47 +340,47 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesListSearchTitle => 'Formulaire de recherche';
 
   @override
-  String get classesListSearchHint => 'Sélectionnez d\'abord un cycle et un niveau, puis affinez éventuellement avec une classe ou les trois champs nominatifs.';
+  String get classesListSearchHint => '';
 
   @override
-  String get classesListSearchValidationLevelRequired => 'Sélectionnez un cycle et un niveau pour lancer la recherche.';
+  String get classesListValidationAtLeastOneCriterion => 'Renseignez au moins un critère pour lancer la recherche.';
 
   @override
-  String get classesListSearchValidationNamesIncomplete => 'Renseignez le prénom, le nom et le post-nom pour activer la recherche nominative.';
+  String get classesListClassroomOptionalLabel => 'Classe (optionnel)';
 
   @override
-  String get classesListSearchReady => 'Critères valides, vous pouvez lancer la recherche.';
+  String get classesListFirstNameOptionalLabel => 'Prénom (optionnel)';
 
   @override
-  String get classesListClassroomHelpSelectCycle => 'Sélectionnez un cycle pour préparer le choix d\'une classe.';
+  String get classesListLastNameOptionalLabel => 'Nom (optionnel)';
 
   @override
-  String get classesListClassroomHelpSelectLevel => 'Veuillez sélectionner un niveau pour choisir une classe.';
+  String get classesListSurnameOptionalLabel => 'Post-nom (optionnel)';
 
   @override
-  String get classesListClassroomHelpLevelNotSplit => 'Les élèves de ce niveau ne sont pas répartis en classes, faites-le depuis le menu organisation.';
+  String get classesListInitialEmptyTitle => 'Aucune recherche en cours';
 
   @override
-  String get classesListClassroomHelpOptional => 'Le choix d\'une classe est facultatif : laissez vide pour rechercher tout le niveau.';
+  String get classesListInitialEmptyMessage => 'Renseignez au moins un critère pour afficher les élèves.';
 
   @override
-  String get classesListInvitationTitle => 'Lancez une recherche dans le module Classes';
+  String get classesListNoMatchTitle => 'Aucun élève ne correspond aux critères';
 
   @override
-  String get classesListInvitationMessage => 'Renseignez les filtres ci-dessus puis cliquez sur Rechercher pour afficher les élèves.';
+  String get classesListNoMatchMessage => 'Essayez d\'élargir vos filtres ou de modifier votre recherche.';
 
   @override
-  String get classesListResultsTitle => 'Résultats de la recherche';
-
-  @override
-  String classesListResultsLevelMode(String levelLabel) {
-    return 'Résultats par niveau : $levelLabel';
+  String classesListResultsSummary(int count, String criteria) {
+    return '$count élèves trouvés — $criteria';
   }
 
   @override
-  String classesListResultsClassroomMode(String classroomName) {
-    return 'Résultats par classe : $classroomName';
+  String classesListResultsSummaryWithoutCriteria(int count) {
+    return '$count élèves trouvés';
   }
+
+  @override
+  String get classesListClassroomChipLabel => 'Classe';
 
   @override
   String get classesListLoadingClassroomMembers => 'Chargement des membres de la classe...';
@@ -404,7 +404,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesListExportNothingToExport => 'Aucune donnée à exporter pour cette recherche.';
 
   @override
-  String get subMenuClassesList => 'Classes';
+  String get classesListExportPdf => 'Exporter en PDF';
+
+  @override
+  String get subMenuClassesList => 'Listes de classe';
 
   @override
   String get subMenuAttendance => 'Présences';

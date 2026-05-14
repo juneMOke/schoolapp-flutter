@@ -123,6 +123,19 @@ class _SearchFormState extends State<SearchForm> {
       mainAxisSize: MainAxisSize.min,
       spacing: 10,
       children: [
+        OutlinedButton.icon(
+          onPressed: isClearEnabled ? _clearSearch : null,
+          icon: const Icon(Icons.refresh_rounded, size: 14),
+          label: Text(l10n.clear),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+            side: const BorderSide(color: AppColors.border),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+          ),
+        ),
         ElevatedButton.icon(
           onPressed: isSearchEnabled ? _performSearch : null,
           icon: const Icon(Icons.search_rounded, size: 14),
@@ -137,20 +150,6 @@ class _SearchFormState extends State<SearchForm> {
             shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
             disabledBackgroundColor: AppColors.stateDisabled,
             disabledForegroundColor: AppColors.textMuted,
-          ),
-        ),
-        const SizedBox(width: 6),
-        OutlinedButton.icon(
-          onPressed: isClearEnabled ? _clearSearch : null,
-          icon: const Icon(Icons.refresh_rounded, size: 14),
-          label: Text(l10n.clear),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            side: const BorderSide(color: AppColors.border),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
-            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
           ),
         ),
       ],

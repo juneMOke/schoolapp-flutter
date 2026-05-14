@@ -36,19 +36,26 @@ class ClassesListClassroomResults extends StatelessWidget {
             lastName: member.studentLastName,
             surname: member.studentMiddleName ?? '',
             firstName: member.studentFirstName,
+            classroomLabel: request.selectedClassroom?.name ?? '',
           ),
         )
         .toList(growable: false);
+
+    final criteria = [
+      request.selectedCycle?.label,
+      request.selectedLevel?.label,
+      request.selectedClassroom?.name,
+    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' · ');
+
+    final summary = criteria.isEmpty
+        ? l10n.classesListResultsSummaryWithoutCriteria(rows.length)
+        : l10n.classesListResultsSummary(rows.length, criteria);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClassesListResultsToolbar(
-          title: l10n.classesListResultsTitle,
-          subtitle: l10n.classesListResultsClassroomMode(
-            request.selectedClassroom?.name ?? '',
-          ),
-          resultCount: rows.length,
+          summary: summary,
           canExport: state.membersStatus == ClassroomStatus.success && rows.isNotEmpty,
           onExportPressed: onExportPressed,
         ),
@@ -93,10 +100,8 @@ class ClassesListClassroomResults extends StatelessWidget {
       return ClassesListStateCard(
         key: const ValueKey('classes-list-classroom-empty'),
         icon: Icons.groups_outlined,
-        title: l10n.noResultsFound,
-        message: request.hasNameFilters
-            ? l10n.classesListClassroomFilteredEmptyMessage
-            : l10n.classesListClassroomEmptyMessage,
+        title: l10n.classesListNoMatchTitle,
+        message: l10n.classesListNoMatchMessage,
       );
     }
 

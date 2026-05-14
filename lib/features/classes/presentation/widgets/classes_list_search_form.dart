@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_search_form_logic.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_actions.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_fields.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_inputs.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListSearchForm extends StatefulWidget {
@@ -86,10 +83,10 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       _selectedLevelKey,
     );
     final classroomOptions = selectedLevel?.classrooms ?? const [];
-    final validationMessage = ClassesListSearchFormLogic.validationMessage(
-      l10n: l10n,
+    final canSearch = ClassesListSearchFormLogic.hasAtLeastOneCriterion(
       selectedCycle: selectedCycle,
       selectedLevel: selectedLevel,
+      selectedClassroomId: _selectedClassroomId,
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,
       surname: _surnameController.text,
@@ -99,7 +96,7 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.classesSectionSurface,
+        color: AppColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
         border: Border.all(color: AppColors.border),
         boxShadow: const [
@@ -113,16 +110,6 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.classesListSearchTitle,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: AppDimensions.spacingS),
-          Text(
-            l10n.classesListSearchHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
           ClassesListSearchFieldsGrid(
             cycleOptions: widget.options,
             selectedCycleId: _selectedCycleId,
@@ -132,21 +119,15 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
             selectedClassroomId: _selectedClassroomId,
             classroomEnabled: (selectedLevel?.splitIntoClassrooms ?? false) &&
                 classroomOptions.isNotEmpty,
-            classroomHelper: ClassesListSearchFormLogic.classroomHelper(
-              l10n: l10n,
-              selectedCycle: selectedCycle,
-              selectedLevel: selectedLevel,
-              classroomOptions: classroomOptions,
-            ),
             firstNameController: _firstNameController,
             lastNameController: _lastNameController,
             surnameController: _surnameController,
-            cycleLabel: l10n.targetCycleLabel,
-            levelLabel: l10n.targetLevelLabel,
-            classroomLabel: l10n.classesOrganisationClassroomFieldLabel,
-            firstNameLabel: l10n.firstName,
-            lastNameLabel: l10n.lastName,
-            surnameLabel: l10n.surname,
+            cycleLabel: l10n.schoolCycle,
+            levelLabel: l10n.schoolLevelLabel,
+            classroomLabel: l10n.classesListClassroomOptionalLabel,
+            firstNameLabel: l10n.classesListFirstNameOptionalLabel,
+            lastNameLabel: l10n.classesListLastNameOptionalLabel,
+            surnameLabel: l10n.classesListSurnameOptionalLabel,
             onCycleChanged: (value) {
               setState(() {
                 _selectedCycleId = value;
@@ -165,29 +146,10 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
             onLastNameChanged: (_) => setState(() {}),
             onSurnameChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: AppDimensions.spacingS),
-          AnimatedSwitcher(
-            duration: AppMotion.standard,
-            switchInCurve: AppMotion.outCurve,
-            switchOutCurve: AppMotion.inCurve,
-            child: validationMessage == null
-                ? ClassesListSearchFeedbackBanner(
-                    key: const ValueKey('classes-list-ready'),
-                    message: l10n.classesListSearchReady,
-                    foreground: AppColors.financeDetailAccent,
-                    background: AppColors.financeDetailAccentSoft,
-                    icon: Icons.check_circle_outline_rounded,
-                  )
-                : ClassesListSearchFeedbackBanner(
-                    key: const ValueKey('classes-list-error'),
-                    message: validationMessage,
-                    foreground: AppColors.danger,
-                    background: AppColors.financeDetailDangerSoft,
-                    icon: Icons.info_outline_rounded,
-                  ),
-          ),
           const SizedBox(height: AppDimensions.spacingM),
-          ClassesListSearchActions(
+          Align(
+            alignment: Alignment.centerRight,
+            child: ClassesListSearchActions(
             onReset: () {
               setState(() {
                 _firstNameController.clear();
@@ -198,15 +160,15 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
                 _selectedClassroomId = null;
               });
             },
-            onSearch: validationMessage == null && !widget.isSearching
+            onSearch: canSearch && !widget.isSearching
                 ? () {
-                    if (selectedCycle == null || selectedLevel == null) {
-                      return;
-                    }
-                    final classroom = ClassesListSearchFormLogic.findClassroom(
-                      selectedLevel.classrooms,
-                      _selectedClassroomId,
-                    );
+                    final classroom = selectedLevel == null
+                        ? null
+                        : ClassesListSearchFormLogic.findClassroom(
+                            selectedLevel.classrooms,
+                            _selectedClassroomId,
+                          );
+
                     widget.onSearch(
                       ClassesListSearchRequest(
                         firstName: _firstNameController.text.trim(),
@@ -222,6 +184,7 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
             isSearching: widget.isSearching,
             clearLabel: l10n.clear,
             searchLabel: l10n.search,
+          ),
           ),
         ],
       ),

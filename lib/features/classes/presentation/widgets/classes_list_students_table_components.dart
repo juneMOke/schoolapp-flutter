@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -36,6 +37,15 @@ class ClassesListStudentsTableHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
+          const SizedBox(
+            width: AppDimensions.minTouchTarget,
+            child: Icon(
+              Icons.person_outline_rounded,
+              size: AppDimensions.detailMiniIconSize,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
           _SortCell(
             label: l10n.lastName,
             column: ClassesListStudentsSortColumn.lastName,
@@ -57,7 +67,9 @@ class ClassesListStudentsTableHeader extends StatelessWidget {
             sortAscending: sortAscending,
             onSortChanged: onSortChanged,
           ),
-          Expanded(
+          const SizedBox(width: AppDimensions.spacingS),
+          SizedBox(
+            width: AppDimensions.minTouchTarget,
             child: Text(
               l10n.actions,
               textAlign: TextAlign.end,
@@ -96,49 +108,64 @@ class _ClassesListStudentsDataRowState extends State<ClassesListStudentsDataRow>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final defaultColor = widget.isEven
-        ? AppColors.surface
-        : AppColors.classesClassroomSurface;
+    const defaultColor = AppColors.surface;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Focus(
         onFocusChange: (focused) => setState(() => _isFocused = focused),
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          curve: AppMotion.outCurve,
-          color: (_isHovered || _isFocused)
-              ? AppColors.classesMemberSurface
-              : defaultColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingM,
-            vertical: AppDimensions.spacingS,
-          ),
-          child: Row(
-            children: [
-              _DataCell(text: widget.row.lastName),
-              _DataCell(text: widget.row.surname),
-              _DataCell(text: widget.row.firstName),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    tooltip: l10n.viewDetails,
-                    onPressed: () => widget.onViewRequested(widget.row),
-                    style: IconButton.styleFrom(
-                      minimumSize: const Size(
-                        AppDimensions.minTouchTarget,
-                        AppDimensions.minTouchTarget,
-                      ),
-                      foregroundColor: AppColors.indigo,
-                      side: const BorderSide(color: AppColors.border),
-                    ),
-                    icon: const Icon(Icons.remove_red_eye_outlined),
-                  ),
-                ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => widget.onViewRequested(widget.row),
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              curve: AppMotion.outCurve,
+              color: (_isHovered || _isFocused)
+                  ? AppColors.classesMemberSurface
+                  : defaultColor,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingM,
+                vertical: AppDimensions.spacingS,
               ),
-            ],
+              child: Row(
+                children: [
+                  StudentAvatar(
+                    firstName: widget.row.firstName,
+                    lastName: widget.row.lastName,
+                    size: 32,
+                  ),
+                  const SizedBox(width: AppDimensions.spacingS),
+                  _DataCell(
+                    text: widget.row.lastName,
+                    isStrong: true,
+                  ),
+                  _DataCell(text: widget.row.surname),
+                  _DataCell(text: widget.row.firstName),
+                  const SizedBox(width: AppDimensions.spacingS),
+                  SizedBox(
+                    width: AppDimensions.minTouchTarget,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: l10n.viewDetails,
+                        onPressed: () => widget.onViewRequested(widget.row),
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(
+                            AppDimensions.minTouchTarget,
+                            AppDimensions.minTouchTarget,
+                          ),
+                          foregroundColor: AppColors.indigo,
+                          side: const BorderSide(color: AppColors.border),
+                        ),
+                        icon: const Icon(Icons.remove_red_eye_outlined),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -214,8 +241,9 @@ class _SortCell extends StatelessWidget {
 
 class _DataCell extends StatelessWidget {
   final String text;
+  final bool isStrong;
 
-  const _DataCell({required this.text});
+  const _DataCell({required this.text, this.isStrong = false});
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +251,8 @@ class _DataCell extends StatelessWidget {
       child: Text(
         text,
         overflow: TextOverflow.ellipsis,
-        style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+        style: (isStrong ? AppTextStyles.bodyStrong : AppTextStyles.body)
+            .copyWith(color: AppColors.textPrimary),
       ),
     );
   }

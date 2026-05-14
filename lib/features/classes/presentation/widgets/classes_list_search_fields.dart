@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_inputs.dart';
@@ -14,7 +12,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
   final List<BootstrapClassroom> classroomOptions;
   final String? selectedClassroomId;
   final bool classroomEnabled;
-  final String classroomHelper;
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
   final TextEditingController surnameController;
@@ -40,7 +37,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
     required this.classroomOptions,
     required this.selectedClassroomId,
     required this.classroomEnabled,
-    required this.classroomHelper,
     required this.firstNameController,
     required this.lastNameController,
     required this.surnameController,
@@ -63,14 +59,11 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: AppDimensions.spacingS,
-          runSpacing: AppDimensions.spacingS,
+        Row(
           children: [
             FocusTraversalOrder(
               order: const NumericFocusOrder(1),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactFieldWidth,
+              child: Expanded(
                 child: ClassesListSearchDropdownField<String>(
                   value: selectedCycleId,
                   label: cycleLabel,
@@ -87,10 +80,10 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: AppDimensions.spacingS),
             FocusTraversalOrder(
               order: const NumericFocusOrder(2),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactFieldWidth,
+              child: Expanded(
                 child: ClassesListSearchDropdownField<String>(
                   value: selectedLevelKey,
                   label: levelLabel,
@@ -107,10 +100,10 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: AppDimensions.spacingS),
             FocusTraversalOrder(
               order: const NumericFocusOrder(3),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactSelectWidth,
+              child: Expanded(
                 child: ClassesListSearchDropdownField<String>(
                   value: selectedClassroomId,
                   label: classroomLabel,
@@ -130,10 +123,14 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
                 ),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.spacingS),
+        Row(
+          children: [
             FocusTraversalOrder(
               order: const NumericFocusOrder(4),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactFieldWidth,
+              child: Expanded(
                 child: ClassesListSearchTextField(
                   controller: firstNameController,
                   label: firstNameLabel,
@@ -142,10 +139,10 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: AppDimensions.spacingS),
             FocusTraversalOrder(
               order: const NumericFocusOrder(5),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactFieldWidth,
+              child: Expanded(
                 child: ClassesListSearchTextField(
                   controller: lastNameController,
                   label: lastNameLabel,
@@ -154,10 +151,10 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: AppDimensions.spacingS),
             FocusTraversalOrder(
               order: const NumericFocusOrder(6),
-              child: SizedBox(
-                width: AppDimensions.classesOrganisationCompactFieldWidth,
+              child: Expanded(
                 child: ClassesListSearchTextField(
                   controller: surnameController,
                   label: surnameLabel,
@@ -167,11 +164,6 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        const SizedBox(height: AppDimensions.spacingS),
-        Text(
-          classroomHelper,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );

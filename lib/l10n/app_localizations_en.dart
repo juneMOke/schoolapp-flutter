@@ -325,7 +325,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'An error occurred.';
 
   @override
-  String get classesListHeroTitle => 'Classes and students list';
+  String get classesListHeroTitle => 'Class lists';
 
   @override
   String get classesListHeroSubtitle => 'Quickly search students by cycle, level or classroom, then export the displayed results.';
@@ -340,47 +340,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesListSearchTitle => 'Search form';
 
   @override
-  String get classesListSearchHint => 'Start by selecting a cycle and a level, then optionally refine with a classroom or the three name fields.';
+  String get classesListSearchHint => '';
 
   @override
-  String get classesListSearchValidationLevelRequired => 'Select a cycle and a level to start the search.';
+  String get classesListValidationAtLeastOneCriterion => 'Provide at least one criterion to run a search.';
 
   @override
-  String get classesListSearchValidationNamesIncomplete => 'Fill in first name, last name and surname to enable name-based filtering.';
+  String get classesListClassroomOptionalLabel => 'Classroom (optional)';
 
   @override
-  String get classesListSearchReady => 'Valid criteria, you can run the search.';
+  String get classesListFirstNameOptionalLabel => 'First name (optional)';
 
   @override
-  String get classesListClassroomHelpSelectCycle => 'Select a cycle before choosing a classroom.';
+  String get classesListLastNameOptionalLabel => 'Last name (optional)';
 
   @override
-  String get classesListClassroomHelpSelectLevel => 'Please select a level to choose a classroom.';
+  String get classesListSurnameOptionalLabel => 'Surname (optional)';
 
   @override
-  String get classesListClassroomHelpLevelNotSplit => 'Students in this level are not split into classrooms yet. Use the organization menu first.';
+  String get classesListInitialEmptyTitle => 'No search in progress';
 
   @override
-  String get classesListClassroomHelpOptional => 'Classroom selection is optional: leave it empty to search the whole level.';
+  String get classesListInitialEmptyMessage => 'Fill in at least one criterion to display students.';
 
   @override
-  String get classesListInvitationTitle => 'Start a search in the Classes module';
+  String get classesListNoMatchTitle => 'No student matches the criteria';
 
   @override
-  String get classesListInvitationMessage => 'Fill the filters above, then click Search to display students.';
+  String get classesListNoMatchMessage => 'Try broadening your filters or adjusting your search.';
 
   @override
-  String get classesListResultsTitle => 'Search results';
-
-  @override
-  String classesListResultsLevelMode(String levelLabel) {
-    return 'Level results: $levelLabel';
+  String classesListResultsSummary(int count, String criteria) {
+    return '$count students found — $criteria';
   }
 
   @override
-  String classesListResultsClassroomMode(String classroomName) {
-    return 'Classroom results: $classroomName';
+  String classesListResultsSummaryWithoutCriteria(int count) {
+    return '$count students found';
   }
+
+  @override
+  String get classesListClassroomChipLabel => 'Classroom';
 
   @override
   String get classesListLoadingClassroomMembers => 'Loading classroom members...';
@@ -404,7 +404,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesListExportNothingToExport => 'There is no data to export for this search.';
 
   @override
-  String get subMenuClassesList => 'Classes List';
+  String get classesListExportPdf => 'Export as PDF';
+
+  @override
+  String get subMenuClassesList => 'Class lists';
 
   @override
   String get subMenuAttendance => 'Attendance';

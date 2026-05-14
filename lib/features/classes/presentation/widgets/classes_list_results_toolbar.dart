@@ -6,17 +6,13 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListResultsToolbar extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final int resultCount;
+  final String summary;
   final bool canExport;
   final VoidCallback onExportPressed;
 
   const ClassesListResultsToolbar({
     super.key,
-    required this.title,
-    required this.subtitle,
-    required this.resultCount,
+    required this.summary,
     required this.canExport,
     required this.onExportPressed,
   });
@@ -43,22 +39,13 @@ class ClassesListResultsToolbar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: AppTextStyles.sectionTitle.copyWith(
+                summary,
+                style: AppTextStyles.bodyStrong.copyWith(
                   color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                subtitle,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
                 ),
               ),
             ],
           );
-
-          final counter = _ResultsCountBadge(count: resultCount);
 
           if (isCompact) {
             return Column(
@@ -68,7 +55,6 @@ class ClassesListResultsToolbar extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacingS),
                 Row(
                   children: [
-                    counter,
                     const Spacer(),
                     exportButton,
                   ],
@@ -80,36 +66,10 @@ class ClassesListResultsToolbar extends StatelessWidget {
           return Row(
             children: [
               Expanded(child: info),
-              counter,
-              const SizedBox(width: AppDimensions.spacingM),
               exportButton,
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _ResultsCountBadge extends StatelessWidget {
-  final int count;
-
-  const _ResultsCountBadge({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.financeDetailAccentSoft,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-      ),
-      child: Text(
-        '$count',
-        style: AppTextStyles.badge.copyWith(color: AppColors.financeDetailAccent),
       ),
     );
   }
@@ -133,18 +93,21 @@ class _ExportButton extends StatelessWidget {
         child: Semantics(
           button: true,
           enabled: canExport,
-          label: l10n.exportData,
+          label: l10n.classesListExportPdf,
           child: Tooltip(
-            message: l10n.exportData,
-            child: ElevatedButton.icon(
+            message: l10n.classesListExportPdf,
+            child: OutlinedButton.icon(
               onPressed: canExport ? onPressed : null,
               icon: const Icon(Icons.download_rounded),
-              label: Text(l10n.exportData),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.indigo,
-                foregroundColor: AppColors.surface,
-                disabledBackgroundColor: AppColors.classesDisabledBg,
+              label: Text(l10n.classesListExportPdf),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.bleuArdoise,
                 disabledForegroundColor: AppColors.classesDisabledFg,
+                side: BorderSide(
+                  color: canExport
+                      ? AppColors.bleuArdoise.withValues(alpha: 0.5)
+                      : AppColors.border,
+                ),
                 minimumSize: const Size(0, AppDimensions.minTouchTarget),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.spacingM,

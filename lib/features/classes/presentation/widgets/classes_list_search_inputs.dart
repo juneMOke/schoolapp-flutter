@@ -106,10 +106,11 @@ InputDecoration classesListSearchInputDecoration({
 }) {
   return InputDecoration(
     labelText: label,
+    labelStyle: const TextStyle(color: AppColors.bleuArdoise),
     filled: true,
-    fillColor: AppColors.background,
-    prefixIcon: Icon(icon, color: AppColors.textSecondary),
-    floatingLabelStyle: const TextStyle(color: AppColors.classesFocusRing),
+    fillColor: AppColors.surfaceRaised,
+    prefixIcon: Icon(icon, color: AppColors.bleuArdoise),
+    floatingLabelStyle: const TextStyle(color: AppColors.bleuArdoise),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppDimensions.spacingS),
       borderSide: BorderSide.none,
@@ -120,7 +121,7 @@ InputDecoration classesListSearchInputDecoration({
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-      borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
+      borderSide: const BorderSide(color: AppColors.bleuArdoise, width: 1.6),
     ),
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppDimensions.spacingS,

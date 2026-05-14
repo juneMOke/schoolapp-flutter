@@ -34,8 +34,8 @@ class ClassesListResultsSection extends StatelessWidget {
     if (request == null) {
       return ClassesListStateCard(
         icon: Icons.search_rounded,
-        title: l10n.classesListInvitationTitle,
-        message: l10n.classesListInvitationMessage,
+        title: l10n.classesListInitialEmptyTitle,
+        message: l10n.classesListInitialEmptyMessage,
       );
     }
 

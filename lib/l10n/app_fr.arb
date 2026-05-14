@@ -176,34 +176,35 @@
   "classesOrganisationErrorStorage": "Erreur de stockage local.",
   "classesOrganisationErrorAuth": "Session non valide, reconnectez-vous.",
   "classesOrganisationErrorUnknown": "Une erreur est survenue.",
-  "classesListHeroTitle": "Liste des classes et élèves",
+  "classesListHeroTitle": "Listes de classe",
   "classesListHeroSubtitle": "Recherchez rapidement les élèves par cycle, niveau ou classe, puis exportez les résultats affichés.",
   "classesListHeroFilterChip": "Recherche multi-critères par identité et niveau.",
   "classesListHeroClassroomChip": "Filtrage optionnel par classe de l'année courante.",
   "classesListSearchTitle": "Formulaire de recherche",
-  "classesListSearchHint": "Sélectionnez d'abord un cycle et un niveau, puis affinez éventuellement avec une classe ou les trois champs nominatifs.",
-  "classesListSearchValidationLevelRequired": "Sélectionnez un cycle et un niveau pour lancer la recherche.",
-  "classesListSearchValidationNamesIncomplete": "Renseignez le prénom, le nom et le post-nom pour activer la recherche nominative.",
-  "classesListSearchReady": "Critères valides, vous pouvez lancer la recherche.",
-  "classesListClassroomHelpSelectCycle": "Sélectionnez un cycle pour préparer le choix d'une classe.",
-  "classesListClassroomHelpSelectLevel": "Veuillez sélectionner un niveau pour choisir une classe.",
-  "classesListClassroomHelpLevelNotSplit": "Les élèves de ce niveau ne sont pas répartis en classes, faites-le depuis le menu organisation.",
-  "classesListClassroomHelpOptional": "Le choix d'une classe est facultatif : laissez vide pour rechercher tout le niveau.",
-  "classesListInvitationTitle": "Lancez une recherche dans le module Classes",
-  "classesListInvitationMessage": "Renseignez les filtres ci-dessus puis cliquez sur Rechercher pour afficher les élèves.",
-  "classesListResultsTitle": "Résultats de la recherche",
-  "classesListResultsLevelMode": "Résultats par niveau : {levelLabel}",
-  "@classesListResultsLevelMode": {
+  "classesListSearchHint": "",
+  "classesListValidationAtLeastOneCriterion": "Renseignez au moins un critère pour lancer la recherche.",
+  "classesListClassroomOptionalLabel": "Classe (optionnel)",
+  "classesListFirstNameOptionalLabel": "Prénom (optionnel)",
+  "classesListLastNameOptionalLabel": "Nom (optionnel)",
+  "classesListSurnameOptionalLabel": "Post-nom (optionnel)",
+  "classesListInitialEmptyTitle": "Aucune recherche en cours",
+  "classesListInitialEmptyMessage": "Renseignez au moins un critère pour afficher les élèves.",
+  "classesListNoMatchTitle": "Aucun élève ne correspond aux critères",
+  "classesListNoMatchMessage": "Essayez d'élargir vos filtres ou de modifier votre recherche.",
+  "classesListResultsSummary": "{count} élèves trouvés — {criteria}",
+  "@classesListResultsSummary": {
     "placeholders": {
-      "levelLabel": { "type": "String" }
+      "count": { "type": "int" },
+      "criteria": { "type": "String" }
     }
   },
-  "classesListResultsClassroomMode": "Résultats par classe : {classroomName}",
-  "@classesListResultsClassroomMode": {
+  "classesListResultsSummaryWithoutCriteria": "{count} élèves trouvés",
+  "@classesListResultsSummaryWithoutCriteria": {
     "placeholders": {
-      "classroomName": { "type": "String" }
+      "count": { "type": "int" }
     }
   },
+  "classesListClassroomChipLabel": "Classe",
   "classesListLoadingClassroomMembers": "Chargement des membres de la classe...",
   "classesListClassroomEmptyMessage": "Aucun élève n'est actuellement affecté à cette classe.",
   "classesListClassroomFilteredEmptyMessage": "Aucun élève de cette classe ne correspond aux filtres saisis.",
@@ -211,7 +212,8 @@
   "classesListExportSuccess": "Export copié dans le presse-papiers.",
   "classesListExportFailed": "Impossible de préparer l'export pour le moment.",
   "classesListExportNothingToExport": "Aucune donnée à exporter pour cette recherche.",
-  "subMenuClassesList": "Classes",
+  "classesListExportPdf": "Exporter en PDF",
+  "subMenuClassesList": "Listes de classe",
   "subMenuAttendance": "Présences",
   "subMenuDisciplinesList": "Disciplines",
   "profile": "Profil",
