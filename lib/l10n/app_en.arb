@@ -91,11 +91,11 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "subMenuOrganization": "Organization",
+  "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
     "description": "Organization sub-menu title"
   },
-  "classesOrganisationHeroTitle": "Classes organization",
+  "classesOrganisationHeroTitle": "Class composition",
   "classesOrganisationHeroSubtitle": "Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.",
   "classesOrganisationSearchTitle": "Level selection for class distribution",
   "classesOrganisationSearchHint": "Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.",
@@ -130,6 +130,69 @@
   "classesOrganisationTransferInProgress": "Transfer in progress...",
   "classesOrganisationTransferSuccess": "Transfer completed successfully.",
   "classesOrganisationTransferNoTarget": "No destination classroom is available.",
+  "classesOrganisationSelectCycleAndLevelTitle": "Select a cycle and a level",
+  "classesOrganisationSelectCycleAndLevelSubtitle": "Start by selecting a cycle, then a level to display class composition.",
+  "classesOrganisationSelectLevelTitle": "Select a level",
+  "classesOrganisationSelectLevelSubtitle": "Now select a level in the {cycleName} cycle.",
+  "@classesOrganisationSelectLevelSubtitle": {
+    "placeholders": {
+      "cycleName": { "type": "String" }
+    }
+  },
+  "classesOrganisationPendingTitle": "Level not distributed yet",
+  "classesOrganisationPendingSubtitle": "Run the initial distribution to create classes for this level.",
+  "classesOrganisationPendingStudentsToDistribute": "{count} students to distribute",
+  "@classesOrganisationPendingStudentsToDistribute": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationPendingPlannedClassrooms": "{count} planned classes",
+  "@classesOrganisationPendingPlannedClassrooms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationAppliedCriterionInfo": "Applied criterion: balanced distribution by gender (mixed school).",
+  "classesOrganisationSplitSummary": "{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}",
+  "@classesOrganisationSplitSummary": {
+    "placeholders": {
+      "studentsCount": { "type": "int" },
+      "classroomsCount": { "type": "int" },
+      "criterion": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomsSectionTitle": "Constituted classes",
+  "classesOrganisationUnassignedTitle": "Students to assign",
+  "classesOrganisationUnassignedTitleSuffix": " — added after distribution",
+  "classesOrganisationUnassignedBadge": "To assign",
+  "classesOrganisationUnassignedSummary": "{count} students waiting for assignment",
+  "@classesOrganisationUnassignedSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationNoMembers": "No student in this classroom.",
+  "classesOrganisationAssignAction": "Assign to a classroom",
+  "classesOrganisationAssignDialogTitle": "Assign to a classroom",
+  "classesOrganisationAssignDialogMessage": "Choose the destination classroom for {studentName}.",
+  "@classesOrganisationAssignDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomPopulation": "Current size: {count}",
+  "@classesOrganisationClassroomPopulation": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferConfirmMessage": "Do you confirm transferring {studentName} to this classroom?",
+  "@classesOrganisationTransferConfirmMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
   "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
 
 enum ClassroomStatus { initial, loading, success, failure }
 
@@ -41,6 +42,9 @@ class ClassroomState extends Equatable {
   final ClassroomErrorType membersErrorType;
   final ClassroomStatus distributionStatus;
   final ClassroomErrorType distributionErrorType;
+  final ClassroomStatus distributionOverviewStatus;
+  final ClassroomErrorType distributionOverviewErrorType;
+  final LevelDistributionOverview? distributionOverview;
   final ClassroomStatus reassignStatus;
   final ClassroomErrorType reassignErrorType;
   final String reassigningMemberId;
@@ -56,6 +60,9 @@ class ClassroomState extends Equatable {
     this.membersErrorType = ClassroomErrorType.none,
     this.distributionStatus = ClassroomStatus.initial,
     this.distributionErrorType = ClassroomErrorType.none,
+    this.distributionOverviewStatus = ClassroomStatus.initial,
+    this.distributionOverviewErrorType = ClassroomErrorType.none,
+    this.distributionOverview,
     this.reassignStatus = ClassroomStatus.initial,
     this.reassignErrorType = ClassroomErrorType.none,
     this.reassigningMemberId = '',
@@ -72,6 +79,9 @@ class ClassroomState extends Equatable {
     ClassroomErrorType? membersErrorType,
     ClassroomStatus? distributionStatus,
     ClassroomErrorType? distributionErrorType,
+    ClassroomStatus? distributionOverviewStatus,
+    ClassroomErrorType? distributionOverviewErrorType,
+    Object? distributionOverview = _undefined,
     ClassroomStatus? reassignStatus,
     ClassroomErrorType? reassignErrorType,
     String? reassigningMemberId,
@@ -86,6 +96,13 @@ class ClassroomState extends Equatable {
     membersErrorType: membersErrorType ?? this.membersErrorType,
     distributionStatus: distributionStatus ?? this.distributionStatus,
     distributionErrorType: distributionErrorType ?? this.distributionErrorType,
+    distributionOverviewStatus:
+        distributionOverviewStatus ?? this.distributionOverviewStatus,
+    distributionOverviewErrorType:
+        distributionOverviewErrorType ?? this.distributionOverviewErrorType,
+    distributionOverview: identical(distributionOverview, _undefined)
+        ? this.distributionOverview
+        : distributionOverview as LevelDistributionOverview?,
     reassignStatus: reassignStatus ?? this.reassignStatus,
     reassignErrorType: reassignErrorType ?? this.reassignErrorType,
     reassigningMemberId: reassigningMemberId ?? this.reassigningMemberId,
@@ -103,8 +120,13 @@ class ClassroomState extends Equatable {
     membersErrorType,
     distributionStatus,
     distributionErrorType,
+    distributionOverviewStatus,
+    distributionOverviewErrorType,
+    distributionOverview,
     reassignStatus,
     reassignErrorType,
     reassigningMemberId,
   ];
 }
+
+const _undefined = Object();

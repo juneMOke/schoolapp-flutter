@@ -53,6 +53,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
     final transparent = AppColors.surface.withValues(alpha: 0);
     final activeForeground = AppColors.textOnDark;
     final inactiveForeground = AppColors.textOnDark.withValues(alpha: 0.72);
+    final tooltipTitle = widget.menu.title.replaceAll('\n', ' ');
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -109,6 +110,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                         widget.isExpanded && constraints.maxWidth >= 110;
 
                     final expandedContent = Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       key: ValueKey<String>('menu-expanded-${widget.menu.id}'),
                       children: [
                         Icon(
@@ -123,8 +125,10 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                           Expanded(
                             child: Text(
                               widget.menu.title,
-                              maxLines: 1,
+                              maxLines: 2,
+                              softWrap: true,
                               overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.start,
                               style: TextStyle(
                                 color: isActive
                                     ? activeForeground
@@ -152,7 +156,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
 
                     final collapsedContent = Tooltip(
                       key: ValueKey<String>('menu-collapsed-${widget.menu.id}'),
-                      message: widget.menu.title,
+                      message: tooltipTitle,
                       excludeFromSemantics: true,
                       child: Center(
                         child: Icon(
@@ -260,21 +264,23 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                               const SizedBox(width: 10),
                             ],
                             Expanded(
-                              child: Text(
-                                subMenu.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: subMenu.isActive
-                                      ? activeForeground
-                                      : inactiveForeground,
-                                  fontSize: 13,
-                                  fontWeight: subMenu.isActive
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                ),
-                              ),
-                            ),
+                               child: Text(
+                                 subMenu.title,
+                                 maxLines: 2,
+                                 softWrap: true,
+                                 overflow: TextOverflow.ellipsis,
+                                 style: TextStyle(
+                                   color: subMenu.isActive
+                                       ? activeForeground
+                                       : inactiveForeground,
+                                   fontSize: 13,
+                                   fontWeight: subMenu.isActive
+                                       ? FontWeight.w600
+                                       : FontWeight.w500,
+                                   height: 1.3,
+                                 ),
+                               ),
+                             ),
                           ],
                         );
                       },

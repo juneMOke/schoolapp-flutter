@@ -4,14 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/classroom_with_members_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/level_distribution_overview_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_model.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/student/data/models/student_summary_model.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 class MockClassroomRemoteDataSource extends Mock
     implements ClassroomRemoteDataSource {}
@@ -82,6 +91,58 @@ const tClassroom = Classroom(
   totalCount: 32,
   femaleCount: 16,
   maleCount: 16,
+);
+
+final tStudentSummaryModel = StudentSummaryModel(
+  id: 'student-1',
+  firstName: 'John',
+  lastName: 'Doe',
+  surname: 'K',
+  dateOfBirth: '2012-01-01',
+  gender: 'MALE',
+);
+
+final tEnrollmentSummaryModel = EnrollmentSummaryModel(
+  enrollmentId: 'enrollment-1',
+  enrollmentCode: 'ENR-1',
+  status: 'COMPLETED',
+  student: tStudentSummaryModel,
+);
+
+const tClassroomWithMembersModel = ClassroomWithMembersModel(
+  classroom: tClassroomModel,
+  members: [tClassroomMemberModel],
+);
+
+final tLevelDistributionOverviewModel = LevelDistributionOverviewModel(
+  unassignedEnrollments: [tEnrollmentSummaryModel],
+  classrooms: [tClassroomWithMembersModel],
+);
+
+final tStudentSummary = StudentSummary(
+  id: 'student-1',
+  firstName: 'John',
+  lastName: 'Doe',
+  surname: 'K',
+  dateOfBirth: '2012-01-01',
+  gender: Gender.male,
+);
+
+final tEnrollmentSummary = EnrollmentSummary(
+  enrollmentId: 'enrollment-1',
+  enrollmentCode: 'ENR-1',
+  status: 'COMPLETED',
+  student: tStudentSummary,
+);
+
+const tClassroomWithMembers = ClassroomWithMembers(
+  classroom: tClassroom,
+  members: [tClassroomMember],
+);
+
+final tLevelDistributionOverview = LevelDistributionOverview(
+  unassignedEnrollments: [tEnrollmentSummary],
+  classrooms: [tClassroomWithMembers],
 );
 
 void main() {
@@ -305,6 +366,58 @@ void main() {
         result,
         const Left<Failure, List<ClassroomMember>>(
           ServerFailure('Invalid classroom member payload'),
+        ),
+      );
+    });
+  });
+
+  group('getLevelDistributionOverview', () {
+    test('returns Right(LevelDistributionOverview) when datasource succeeds', () async {
+      when(
+        () => mockRemoteDataSource.getLevelDistributionOverview(
+          tRequiredAuth,
+          tAcademicYearId,
+          tSchoolLevelId,
+        ),
+      ).thenAnswer((_) async => tLevelDistributionOverviewModel);
+
+      final result = await repository.getLevelDistributionOverview(
+        academicYearId: tAcademicYearId,
+        schoolLevelId: tSchoolLevelId,
+      );
+
+      result.fold(
+        (_) => fail('Expected Right but got Left'),
+        (overview) => expect(overview, tLevelDistributionOverview),
+      );
+      verify(
+        () => mockRemoteDataSource.getLevelDistributionOverview(
+          tRequiredAuth,
+          tAcademicYearId,
+          tSchoolLevelId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(mockRemoteDataSource);
+    });
+
+    test('returns Left(NetworkFailure) when DioException has no Failure', () async {
+      when(
+        () => mockRemoteDataSource.getLevelDistributionOverview(
+          tRequiredAuth,
+          tAcademicYearId,
+          tSchoolLevelId,
+        ),
+      ).thenThrow(_dioException(error: Exception('socket error')));
+
+      final result = await repository.getLevelDistributionOverview(
+        academicYearId: tAcademicYearId,
+        schoolLevelId: tSchoolLevelId,
+      );
+
+      expect(
+        result,
+        const Left<Failure, LevelDistributionOverview>(
+          NetworkFailure('Network error occurred'),
         ),
       );
     });

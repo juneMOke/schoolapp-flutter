@@ -43,11 +43,11 @@ class TopBarTitle extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                title,
+                title.replaceAll('\n', ' '),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.sidebarTitle.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.bleuArdoise,
                 ),
               ),
               if (isPreRegistrations)

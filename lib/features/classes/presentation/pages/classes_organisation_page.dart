@@ -7,15 +7,14 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
+import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
-import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_distribution_confirm_dialog.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_page_content.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -28,7 +27,8 @@ class ClassesOrganisationPage extends StatefulWidget {
 }
 
 class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
-  ClassesOrganisationSearchRequest? _lastRequest;
+  String? _selectedCycleId;
+  ClassesOrganisationLevelOption? _selectedLevel;
   ClassesOrganisationLevelOption? _lastDistributionLevel;
 
   @override
@@ -67,20 +67,17 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
                       key: AppConstants.bootstrapPayloadKey,
                     ),
                   );
-                  _handleSearch(
-                    ClassesOrganisationSearchRequest(
-                      firstName: '',
-                      lastName: '',
-                      surname: '',
-                      selectedLevel: distributedLevel.copyWith(
-                        splitIntoClassrooms: true,
-                      ),
-                    ),
+                  final updatedLevel = distributedLevel.copyWith(
+                    splitIntoClassrooms: true,
                   );
+                  setState(() {
+                    _selectedLevel = updatedLevel;
+                  });
+                  _loadOverviewIfNeeded(updatedLevel);
                 } else {
-                  final request = _lastRequest;
-                  if (request != null) {
-                    _handleSearch(request);
+                  final selectedLevel = _selectedLevel;
+                  if (selectedLevel != null) {
+                    _loadOverviewIfNeeded(selectedLevel);
                   }
                 }
               }
@@ -103,9 +100,9 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
                   context,
                   l10n.classesOrganisationTransferSuccess,
                 );
-                final request = _lastRequest;
-                if (request != null) {
-                  _handleSearch(request);
+                final selectedLevel = _selectedLevel;
+                if (selectedLevel != null) {
+                  _loadOverviewIfNeeded(selectedLevel);
                 }
               }
               if (state.reassignStatus == ClassroomStatus.failure) {
@@ -140,13 +137,18 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             final options = ClassesOrganisationPageHelpers.buildAcademicOptions(
               bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
             );
+            final cycles = ClassesOrganisationPageHelpers.buildCycleOptions(options);
 
             return ClassesOrganisationPageContent(
-              options: options,
-              lastRequest: _lastRequest,
-              onSearch: _handleSearch,
+              cycles: cycles,
+              selectedCycleId: _selectedCycleId,
+              selectedLevel: _selectedLevel,
+              isDistributing:
+                  context.watch<ClassroomBloc>().state.distributionStatus ==
+                  ClassroomStatus.loading,
               onDistributionRequested: _handleDistributionRequested,
-              onViewRequested: _onViewStudentRequested,
+              onCycleChanged: _handleCycleChanged,
+              onLevelChanged: _handleLevelChanged,
               onTransferTap: _handleReassignTap,
             );
           },
@@ -163,13 +165,25 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    final selectedLevel = _lastRequest?.selectedLevel;
+    final selectedLevel = _selectedLevel;
     if (selectedLevel == null) {
       return;
     }
 
-    final availableTargets = selectedLevel.classrooms
-        .where((classroom) => classroom.id != intent.classroomId)
+    final overview = classroomState.distributionOverview;
+    if (overview == null) {
+      return;
+    }
+
+    final availableTargets = overview.classrooms
+        .where((item) => item.classroom.id != intent.classroomId)
+        .map(
+          (item) => ClassroomReassignOption(
+            id: item.classroom.id,
+            name: _formatClassroomName(selectedLevel.schoolLevelName, item.classroom.name),
+            totalCount: item.members.length,
+          ),
+        )
         .toList(growable: false);
 
     if (availableTargets.isEmpty) {
@@ -187,9 +201,31 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     );
   }
 
-  void _handleSearch(ClassesOrganisationSearchRequest request) {
-    final level = request.selectedLevel;
+  void _handleCycleChanged(String? cycleId) {
+    setState(() {
+      _selectedCycleId = cycleId;
+      _selectedLevel = null;
+      _lastDistributionLevel = null;
+    });
+    context.read<ClassroomBloc>().add(const ClassroomResetRequested());
+  }
+
+  void _handleLevelChanged(ClassesOrganisationLevelOption? level) {
+    setState(() {
+      _selectedLevel = level;
+    });
+
     if (level == null) {
+      context.read<ClassroomBloc>().add(const ClassroomResetRequested());
+      return;
+    }
+
+    _loadOverviewIfNeeded(level);
+  }
+
+  void _loadOverviewIfNeeded(ClassesOrganisationLevelOption level) {
+    if (!level.splitIntoClassrooms) {
+      context.read<ClassroomBloc>().add(const ClassroomResetRequested());
       return;
     }
 
@@ -199,48 +235,20 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    setState(() {
-      _lastRequest = request;
-    });
-
-    if (level.splitIntoClassrooms) {
-      context.read<ClassroomBloc>().add(
-            ClassroomRequested(
-              schoolLevelGroupId: level.schoolLevelGroupId,
-              schoolLevelId: level.schoolLevelId,
-              academicYearId: academicYearId,
-            ),
-          );
-
-      final classroomIds = level.classrooms
-          .map((classroom) => classroom.id)
-          .toList(growable: false);
-
-      context.read<ClassroomBloc>().add(
-            ClassroomMembersBatchRequested(
-              classroomIds: classroomIds,
-              academicYearId: academicYearId,
-            ),
-          );
-      return;
-    }
-
-    context.read<ClassroomBloc>().add(const ClassroomResetRequested());
-    context.read<EnrollmentBloc>().add(
-          EnrollmentSummariesByAcademicInfoRequested(
-            firstName: request.firstName,
-            lastName: request.lastName,
-            surname: request.surname,
-            schoolLevelGroupId: level.schoolLevelGroupId,
+    context.read<ClassroomBloc>().add(
+          ClassroomDistributionOverviewRequested(
+            academicYearId: academicYearId,
             schoolLevelId: level.schoolLevelId,
           ),
         );
   }
 
-  Future<void> _handleDistributionRequested(
-    ClassroomDistributionCriterion criterion,
-    ClassesOrganisationLevelOption level,
-  ) async {
+  Future<void> _handleDistributionRequested() async {
+    final level = _selectedLevel;
+    if (level == null || level.splitIntoClassrooms) {
+      return;
+    }
+
     final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
     final academicYearId = bootstrap?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
@@ -264,13 +272,12 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             academicYearId: academicYearId,
             schoolLevelGroupId: level.schoolLevelGroupId,
             schoolLevelId: level.schoolLevelId,
-            distributionCriterion: criterion,
+            distributionCriterion: ClassroomDistributionCriterion.gender,
           ),
         );
   }
 
-  void _onViewStudentRequested(Object summary, String levelId) {
-    final l10n = AppLocalizations.of(context)!;
-    AppSnackBar.showInfo(context, l10n.classesOrganisationStudentDetailSoon);
+  String _formatClassroomName(String levelName, String classroomName) {
+    return '$levelName - $classroomName';
   }
 }

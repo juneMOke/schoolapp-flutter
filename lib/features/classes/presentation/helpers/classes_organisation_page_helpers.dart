@@ -20,14 +20,38 @@ class ClassesOrganisationPageHelpers {
       innerOrder: (levelBundle) => levelBundle.schoolLevel.displayOrder,
       mapItem: (groupBundle, levelBundle) => ClassesOrganisationLevelOption(
         schoolLevelGroupId: groupBundle.schoolLevelGroup.id,
+        schoolLevelGroupName: groupBundle.schoolLevelGroup.name,
         schoolLevelId: levelBundle.schoolLevel.id,
-        label: '${groupBundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
+        schoolLevelName: levelBundle.schoolLevel.name,
         splitIntoClassrooms: levelBundle.schoolLevel.splitIntoClassrooms,
         classrooms: levelBundle.classrooms,
       ),
     );
 
     return sortedOptions.where((option) => seen.add(option.key)).toList(growable: false);
+  }
+
+  static List<ClassesOrganisationCycleOption> buildCycleOptions(
+    List<ClassesOrganisationLevelOption> levels,
+  ) {
+    final grouped = <String, List<ClassesOrganisationLevelOption>>{};
+
+    for (final level in levels) {
+      grouped.putIfAbsent(level.schoolLevelGroupId, () => <ClassesOrganisationLevelOption>[])
+          .add(level);
+    }
+
+    final cycles = grouped.entries.map((entry) {
+      final sample = entry.value.first;
+      return ClassesOrganisationCycleOption(
+        id: entry.key,
+        label: sample.schoolLevelGroupName,
+        levels: entry.value,
+      );
+    }).toList(growable: false);
+
+    cycles.sort((a, b) => a.label.compareTo(b.label));
+    return cycles;
   }
 
   static String mapClassroomErrorToMessage(

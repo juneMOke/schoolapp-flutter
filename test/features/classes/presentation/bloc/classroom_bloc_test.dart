@@ -9,10 +9,16 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom.da
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 class MockGetClassroomsUseCase extends Mock implements GetClassroomsUseCase {}
 
@@ -21,6 +27,9 @@ class MockDistributeStudentsToClassroomsUseCase extends Mock
 
 class MockGetClassroomMembersUseCase extends Mock
     implements GetClassroomMembersUseCase {}
+
+class MockGetLevelDistributionOverviewUseCase extends Mock
+    implements GetLevelDistributionOverviewUseCase {}
 
 class MockReassignClassroomMemberUseCase extends Mock
     implements ReassignClassroomMemberUseCase {}
@@ -31,6 +40,32 @@ const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
 const tTargetClassroomId = 'classroom-2';
 const tClassroomMemberId = 'member-1';
+
+final tStudentSummary = StudentSummary(
+  id: 'student-1',
+  firstName: 'John',
+  lastName: 'Doe',
+  surname: 'K',
+  dateOfBirth: '2012-01-01',
+  gender: Gender.male,
+);
+
+final tEnrollmentSummary = EnrollmentSummary(
+  enrollmentId: 'enrollment-1',
+  enrollmentCode: 'ENR-1',
+  status: 'COMPLETED',
+  student: tStudentSummary,
+);
+
+const tClassroomWithMembers = ClassroomWithMembers(
+  classroom: tClassroom,
+  members: [tClassroomMember],
+);
+
+final tLevelDistributionOverview = LevelDistributionOverview(
+  unassignedEnrollments: [tEnrollmentSummary],
+  classrooms: [tClassroomWithMembers],
+);
 
 const tClassroomMember = ClassroomMember(
   id: 'member-1',
@@ -64,6 +99,8 @@ void main() {
   late MockGetClassroomMembersUseCase mockGetClassroomMembersUseCase;
   late MockDistributeStudentsToClassroomsUseCase
   mockDistributeStudentsToClassroomsUseCase;
+  late MockGetLevelDistributionOverviewUseCase
+  mockGetLevelDistributionOverviewUseCase;
   late MockReassignClassroomMemberUseCase mockReassignClassroomMemberUseCase;
 
   setUp(() {
@@ -71,6 +108,8 @@ void main() {
     mockGetClassroomMembersUseCase = MockGetClassroomMembersUseCase();
     mockDistributeStudentsToClassroomsUseCase =
         MockDistributeStudentsToClassroomsUseCase();
+    mockGetLevelDistributionOverviewUseCase =
+        MockGetLevelDistributionOverviewUseCase();
     mockReassignClassroomMemberUseCase = MockReassignClassroomMemberUseCase();
   });
 
@@ -79,6 +118,8 @@ void main() {
     getClassroomMembersUseCase: mockGetClassroomMembersUseCase,
     distributeStudentsToClassroomsUseCase:
         mockDistributeStudentsToClassroomsUseCase,
+    getLevelDistributionOverviewUseCase:
+        mockGetLevelDistributionOverviewUseCase,
     reassignClassroomMemberUseCase: mockReassignClassroomMemberUseCase,
   );
 
@@ -269,6 +310,62 @@ void main() {
         ClassroomState(
           membersStatus: ClassroomStatus.failure,
           membersErrorType: ClassroomErrorType.notFound,
+        ),
+      ],
+    );
+  });
+
+  group('ClassroomDistributionOverviewRequested', () {
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits overview [loading, success] when overview is loaded',
+      setUp: () {
+        when(
+          () => mockGetLevelDistributionOverviewUseCase(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => Right(tLevelDistributionOverview));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomDistributionOverviewRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => [
+        ClassroomState(distributionOverviewStatus: ClassroomStatus.loading),
+        ClassroomState(
+          distributionOverviewStatus: ClassroomStatus.success,
+          distributionOverview: tLevelDistributionOverview,
+        ),
+      ],
+    );
+
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits overview failure with notFound error type on NotFoundFailure',
+      setUp: () {
+        when(
+          () => mockGetLevelDistributionOverviewUseCase(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer(
+          (_) async => const Left(NotFoundFailure('Not found')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomDistributionOverviewRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => [
+        ClassroomState(distributionOverviewStatus: ClassroomStatus.loading),
+        ClassroomState(
+          distributionOverviewStatus: ClassroomStatus.failure,
+          distributionOverviewErrorType: ClassroomErrorType.notFound,
         ),
       ],
     );

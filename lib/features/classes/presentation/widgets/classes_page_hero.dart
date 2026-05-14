@@ -9,6 +9,7 @@ class ClassesPageHero extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final List<ClassesPageHeroChipData> chips;
+  final Color titleColor;
 
   const ClassesPageHero({
     super.key,
@@ -16,6 +17,7 @@ class ClassesPageHero extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.chips,
+    this.titleColor = AppColors.textPrimary,
   });
 
   @override
@@ -55,6 +57,7 @@ class ClassesPageHero extends StatelessWidget {
                       title: title,
                       subtitle: subtitle,
                       chips: chips,
+                      titleColor: titleColor,
                     ),
                   ],
                 )
@@ -65,6 +68,7 @@ class ClassesPageHero extends StatelessWidget {
                         title: title,
                         subtitle: subtitle,
                         chips: chips,
+                        titleColor: titleColor,
                       ),
                     ),
                     const SizedBox(width: AppDimensions.spacingM),
@@ -88,11 +92,13 @@ class _HeroContent extends StatelessWidget {
   final String title;
   final String subtitle;
   final List<ClassesPageHeroChipData> chips;
+  final Color titleColor;
 
   const _HeroContent({
     required this.title,
     required this.subtitle,
     required this.chips,
+    required this.titleColor,
   });
 
   @override
@@ -102,7 +108,7 @@ class _HeroContent extends StatelessWidget {
       children: [
         Text(
           title,
-          style: AppTextStyles.pageTitle.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.pageTitle.copyWith(color: titleColor),
         ),
         const SizedBox(height: AppDimensions.spacingS),
         Text(

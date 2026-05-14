@@ -66,6 +66,19 @@ class ClassroomMembersRequested extends ClassroomEvent {
   List<Object?> get props => [classroomId, academicYearId];
 }
 
+class ClassroomDistributionOverviewRequested extends ClassroomEvent {
+  final String academicYearId;
+  final String schoolLevelId;
+
+  const ClassroomDistributionOverviewRequested({
+    required this.academicYearId,
+    required this.schoolLevelId,
+  });
+
+  @override
+  List<Object?> get props => [academicYearId, schoolLevelId];
+}
+
 class ClassroomMembersBatchRequested extends ClassroomEvent {
   final List<String> classroomIds;
   final String academicYearId;

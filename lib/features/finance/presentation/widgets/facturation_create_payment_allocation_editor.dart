@@ -6,8 +6,8 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_distribution_tracker.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_allocation_item.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_distribution_tracker.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Section gérant la liste des allocations (ajout / suppression / sélection).

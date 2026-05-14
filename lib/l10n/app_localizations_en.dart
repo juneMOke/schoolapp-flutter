@@ -135,10 +135,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get subMenuOrganization => 'Organization';
+  String get subMenuOrganization => 'Class\ncomposition';
 
   @override
-  String get classesOrganisationHeroTitle => 'Classes organization';
+  String get classesOrganisationHeroTitle => 'Class composition';
 
   @override
   String get classesOrganisationHeroSubtitle => 'Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.';
@@ -209,6 +209,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classesOrganisationTransferNoTarget => 'No destination classroom is available.';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelTitle => 'Select a cycle and a level';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelSubtitle => 'Start by selecting a cycle, then a level to display class composition.';
+
+  @override
+  String get classesOrganisationSelectLevelTitle => 'Select a level';
+
+  @override
+  String classesOrganisationSelectLevelSubtitle(String cycleName) {
+    return 'Now select a level in the $cycleName cycle.';
+  }
+
+  @override
+  String get classesOrganisationPendingTitle => 'Level not distributed yet';
+
+  @override
+  String get classesOrganisationPendingSubtitle => 'Run the initial distribution to create classes for this level.';
+
+  @override
+  String classesOrganisationPendingStudentsToDistribute(int count) {
+    return '$count students to distribute';
+  }
+
+  @override
+  String classesOrganisationPendingPlannedClassrooms(int count) {
+    return '$count planned classes';
+  }
+
+  @override
+  String get classesOrganisationAppliedCriterionInfo => 'Applied criterion: balanced distribution by gender (mixed school).';
+
+  @override
+  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion) {
+    return '$studentsCount students distributed across $classroomsCount classes · Applied criterion: $criterion';
+  }
+
+  @override
+  String get classesOrganisationClassroomsSectionTitle => 'Constituted classes';
+
+  @override
+  String get classesOrganisationUnassignedTitle => 'Students to assign';
+
+  @override
+  String get classesOrganisationUnassignedTitleSuffix => ' — added after distribution';
+
+  @override
+  String get classesOrganisationUnassignedBadge => 'To assign';
+
+  @override
+  String classesOrganisationUnassignedSummary(int count) {
+    return '$count students waiting for assignment';
+  }
+
+  @override
+  String get classesOrganisationNoMembers => 'No student in this classroom.';
+
+  @override
+  String get classesOrganisationAssignAction => 'Assign to a classroom';
+
+  @override
+  String get classesOrganisationAssignDialogTitle => 'Assign to a classroom';
+
+  @override
+  String classesOrganisationAssignDialogMessage(String studentName) {
+    return 'Choose the destination classroom for $studentName.';
+  }
+
+  @override
+  String classesOrganisationClassroomPopulation(int count) {
+    return 'Current size: $count';
+  }
+
+  @override
+  String classesOrganisationTransferConfirmMessage(String studentName) {
+    return 'Do you confirm transferring $studentName to this classroom?';
+  }
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {

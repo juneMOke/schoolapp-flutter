@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/level_distribution_overview_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 
@@ -26,6 +27,13 @@ abstract class ClassroomRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Path('classroomId') String classroomId,
     @Query('academicYearId') String academicYearId,
+  );
+
+  @GET(AppConstants.classroomDistributionOverviewEndpoint)
+  Future<LevelDistributionOverviewModel> getLevelDistributionOverview(
+    @Extras() Map<String, dynamic> extras,
+    @Query('academicYearId') String academicYearId,
+    @Query('schoolLevelId') String schoolLevelId,
   );
 
   @POST(AppConstants.classroomsDistributeEndpoint)

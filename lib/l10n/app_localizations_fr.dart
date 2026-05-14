@@ -135,10 +135,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuBilling => 'Facturations';
 
   @override
-  String get subMenuOrganization => 'Organisation';
+  String get subMenuOrganization => 'Composition\ndes classes';
 
   @override
-  String get classesOrganisationHeroTitle => 'Organisation des classes';
+  String get classesOrganisationHeroTitle => 'Composition des classes';
 
   @override
   String get classesOrganisationHeroSubtitle => 'Repartissez les élèves d\'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.';
@@ -209,6 +209,85 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get classesOrganisationTransferNoTarget => 'Aucune sous-classe de destination disponible.';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelTitle => 'Sélectionnez un cycle et un niveau';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelSubtitle => 'Commencez par choisir un cycle, puis un niveau pour afficher la composition des classes.';
+
+  @override
+  String get classesOrganisationSelectLevelTitle => 'Sélectionnez un niveau';
+
+  @override
+  String classesOrganisationSelectLevelSubtitle(String cycleName) {
+    return 'Choisissez maintenant un niveau dans le cycle $cycleName.';
+  }
+
+  @override
+  String get classesOrganisationPendingTitle => 'Niveau non encore réparti';
+
+  @override
+  String get classesOrganisationPendingSubtitle => 'Lancez la répartition initiale pour constituer les classes de ce niveau.';
+
+  @override
+  String classesOrganisationPendingStudentsToDistribute(int count) {
+    return '$count élèves à répartir';
+  }
+
+  @override
+  String classesOrganisationPendingPlannedClassrooms(int count) {
+    return '$count classes prévues';
+  }
+
+  @override
+  String get classesOrganisationAppliedCriterionInfo => 'Critère appliqué : répartition équilibrée par genre (école mixte).';
+
+  @override
+  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion) {
+    return '$studentsCount élèves répartis en $classroomsCount classes · Critère appliqué : $criterion';
+  }
+
+  @override
+  String get classesOrganisationClassroomsSectionTitle => 'Classes constituées';
+
+  @override
+  String get classesOrganisationUnassignedTitle => 'Élèves à affecter';
+
+  @override
+  String get classesOrganisationUnassignedTitleSuffix => ' — arrivés après la répartition';
+
+  @override
+  String get classesOrganisationUnassignedBadge => 'À affecter';
+
+  @override
+  String classesOrganisationUnassignedSummary(int count) {
+    return '$count élèves en attente d\'affectation';
+  }
+
+  @override
+  String get classesOrganisationNoMembers => 'Aucun élève dans cette classe.';
+
+  @override
+  String get classesOrganisationAssignAction => 'Affecter à une classe';
+
+  @override
+  String get classesOrganisationAssignDialogTitle => 'Affecter à une classe';
+
+  @override
+  String classesOrganisationAssignDialogMessage(String studentName) {
+    return 'Choisissez la classe de destination pour $studentName.';
+  }
+
+  @override
+  String classesOrganisationClassroomPopulation(int count) {
+    return 'Effectif actuel : $count';
+  }
+
+  @override
+  String classesOrganisationTransferConfirmMessage(String studentName) {
+    return 'Confirmez-vous le transfert de $studentName vers cette classe ?';
+  }
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {

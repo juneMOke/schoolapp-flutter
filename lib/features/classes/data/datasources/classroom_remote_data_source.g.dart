@@ -100,6 +100,41 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
   }
 
   @override
+  Future<LevelDistributionOverviewModel> getLevelDistributionOverview(
+    Map<String, dynamic> extras,
+    String academicYearId,
+    String schoolLevelId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{
+      r'academicYearId': academicYearId,
+      r'schoolLevelId': schoolLevelId,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<LevelDistributionOverviewModel>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/classrooms/distribution-overview',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late LevelDistributionOverviewModel _value;
+    try {
+      _value = LevelDistributionOverviewModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<void> distributeStudentsToClassrooms(
     Map<String, dynamic> extras,
     DistributionRequestModel request,

@@ -24,6 +24,13 @@ class EnrollmentSummaryModel {
         ),
       );
 
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'enrollmentId': enrollmentId,
+    'enrollmentCode': enrollmentCode,
+    'status': status,
+    'studentSummaryDto': student.toJson(),
+  };
+
   EnrollmentSummary toEnrollmentSummary() => EnrollmentSummary(
     enrollmentId: enrollmentId,
     enrollmentCode: enrollmentCode,

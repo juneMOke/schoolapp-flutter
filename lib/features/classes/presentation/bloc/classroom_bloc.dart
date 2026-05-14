@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -12,6 +13,8 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final GetClassroomMembersUseCase _getClassroomMembersUseCase;
   final DistributeStudentsToClassroomsUseCase
   _distributeStudentsToClassroomsUseCase;
+  final GetLevelDistributionOverviewUseCase
+  _getLevelDistributionOverviewUseCase;
   final ReassignClassroomMemberUseCase _reassignClassroomMemberUseCase;
 
   ClassroomBloc({
@@ -19,15 +22,22 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     required GetClassroomMembersUseCase getClassroomMembersUseCase,
     required DistributeStudentsToClassroomsUseCase
     distributeStudentsToClassroomsUseCase,
+    required GetLevelDistributionOverviewUseCase
+    getLevelDistributionOverviewUseCase,
     required ReassignClassroomMemberUseCase reassignClassroomMemberUseCase,
   }) : _getClassroomsUseCase = getClassroomsUseCase,
        _getClassroomMembersUseCase = getClassroomMembersUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
+        _getLevelDistributionOverviewUseCase =
+            getLevelDistributionOverviewUseCase,
        _reassignClassroomMemberUseCase = reassignClassroomMemberUseCase,
        super(const ClassroomState()) {
     on<ClassroomRequested>(_onClassroomRequested);
     on<ClassroomMembersRequested>(_onClassroomMembersRequested);
+    on<ClassroomDistributionOverviewRequested>(
+      _onClassroomDistributionOverviewRequested,
+    );
     on<ClassroomMembersBatchRequested>(_onClassroomMembersBatchRequested);
     on<ClassroomDistributionRequested>(_onClassroomDistributionRequested);
     on<ClassroomMemberReassignRequested>(_onClassroomMemberReassignRequested);
@@ -104,6 +114,39 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
         state.copyWith(
           distributionStatus: ClassroomStatus.success,
           distributionErrorType: ClassroomErrorType.none,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onClassroomDistributionOverviewRequested(
+    ClassroomDistributionOverviewRequested event,
+    Emitter<ClassroomState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        distributionOverviewStatus: ClassroomStatus.loading,
+        distributionOverviewErrorType: ClassroomErrorType.none,
+      ),
+    );
+
+    final result = await _getLevelDistributionOverviewUseCase(
+      academicYearId: event.academicYearId,
+      schoolLevelId: event.schoolLevelId,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          distributionOverviewStatus: ClassroomStatus.failure,
+          distributionOverviewErrorType: _mapFailureToErrorType(failure),
+        ),
+      ),
+      (overview) => emit(
+        state.copyWith(
+          distributionOverviewStatus: ClassroomStatus.success,
+          distributionOverview: overview,
+          distributionOverviewErrorType: ClassroomErrorType.none,
         ),
       ),
     );

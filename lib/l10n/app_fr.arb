@@ -61,8 +61,8 @@
   "subMenuReRegistrations": "Réinscriptions",
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
-  "subMenuOrganization": "Organisation",
-  "classesOrganisationHeroTitle": "Organisation des classes",
+  "subMenuOrganization": "Composition\ndes classes",
+  "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
   "classesOrganisationSearchTitle": "Sélection du niveau à organiser",
   "classesOrganisationSearchHint": "Sélectionnez le cycle et le niveau à organiser, puis lancez la recherche pour afficher la répartition actuelle ou préparer la distribution en sous-classes.",
@@ -97,6 +97,69 @@
   "classesOrganisationTransferInProgress": "Transfert en cours...",
   "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
   "classesOrganisationTransferNoTarget": "Aucune sous-classe de destination disponible.",
+  "classesOrganisationSelectCycleAndLevelTitle": "Sélectionnez un cycle et un niveau",
+  "classesOrganisationSelectCycleAndLevelSubtitle": "Commencez par choisir un cycle, puis un niveau pour afficher la composition des classes.",
+  "classesOrganisationSelectLevelTitle": "Sélectionnez un niveau",
+  "classesOrganisationSelectLevelSubtitle": "Choisissez maintenant un niveau dans le cycle {cycleName}.",
+  "@classesOrganisationSelectLevelSubtitle": {
+    "placeholders": {
+      "cycleName": { "type": "String" }
+    }
+  },
+  "classesOrganisationPendingTitle": "Niveau non encore réparti",
+  "classesOrganisationPendingSubtitle": "Lancez la répartition initiale pour constituer les classes de ce niveau.",
+  "classesOrganisationPendingStudentsToDistribute": "{count} élèves à répartir",
+  "@classesOrganisationPendingStudentsToDistribute": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationPendingPlannedClassrooms": "{count} classes prévues",
+  "@classesOrganisationPendingPlannedClassrooms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationAppliedCriterionInfo": "Critère appliqué : répartition équilibrée par genre (école mixte).",
+  "classesOrganisationSplitSummary": "{studentsCount} élèves répartis en {classroomsCount} classes · Critère appliqué : {criterion}",
+  "@classesOrganisationSplitSummary": {
+    "placeholders": {
+      "studentsCount": { "type": "int" },
+      "classroomsCount": { "type": "int" },
+      "criterion": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomsSectionTitle": "Classes constituées",
+  "classesOrganisationUnassignedTitle": "Élèves à affecter",
+  "classesOrganisationUnassignedTitleSuffix": " — arrivés après la répartition",
+  "classesOrganisationUnassignedBadge": "À affecter",
+  "classesOrganisationUnassignedSummary": "{count} élèves en attente d'affectation",
+  "@classesOrganisationUnassignedSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
+  "classesOrganisationAssignAction": "Affecter à une classe",
+  "classesOrganisationAssignDialogTitle": "Affecter à une classe",
+  "classesOrganisationAssignDialogMessage": "Choisissez la classe de destination pour {studentName}.",
+  "@classesOrganisationAssignDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomPopulation": "Effectif actuel : {count}",
+  "@classesOrganisationClassroomPopulation": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferConfirmMessage": "Confirmez-vous le transfert de {studentName} vers cette classe ?",
+  "@classesOrganisationTransferConfirmMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
