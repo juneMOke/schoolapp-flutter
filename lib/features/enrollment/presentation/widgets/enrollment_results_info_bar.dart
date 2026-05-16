@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_pagination_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class PreRegistrationsInfoBar extends StatelessWidget {
+class EnrollmentResultsInfoBar extends StatelessWidget {
   final int count;
   final bool isLoading;
   final Future<void> Function()? onRefresh;
@@ -16,7 +17,7 @@ class PreRegistrationsInfoBar extends StatelessWidget {
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
 
-  const PreRegistrationsInfoBar({
+  const EnrollmentResultsInfoBar({
     super.key,
     required this.count,
     required this.isLoading,
@@ -89,27 +90,16 @@ class PreRegistrationsInfoBar extends StatelessWidget {
             ),
             const SizedBox(width: 6),
           ],
-          if (totalPages > 0) ...[
-            Text(
-              l10n.enrollmentPageIndicator(currentPage + 1, totalPages),
-              style: AppTypography.labelSmall.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
+          if (totalPages > 0)
+            EnrollmentPaginationBar(
+              currentPage: currentPage,
+              totalPages: totalPages,
+              isLoading: isLoading,
+              onPrevious: canGoPrevious && onPreviousPage != null
+                  ? onPreviousPage!
+                  : () {},
+              onNext: canGoNext && onNextPage != null ? onNextPage! : () {},
             ),
-            IconButton(
-              onPressed: canGoPrevious ? onPreviousPage : null,
-              icon: const Icon(Icons.chevron_left_rounded),
-              tooltip: l10n.previousPage,
-              color: AppColors.bleuArdoise,
-            ),
-            IconButton(
-              onPressed: canGoNext ? onNextPage : null,
-              icon: const Icon(Icons.chevron_right_rounded),
-              tooltip: l10n.nextPage,
-              color: AppColors.bleuArdoise,
-            ),
-          ],
           if (action != null) ...[
             action!,
             const SizedBox(width: 6),

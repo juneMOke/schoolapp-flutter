@@ -5,7 +5,6 @@ import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_pagination_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
@@ -15,6 +14,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   final EnrollmentSearchCommandHandler onSearchCommand;
   final EnrollmentDetailIntentFactory detailIntentFactory;
   final EnrollmentEmptyStateBuilder? emptyBeforeSearchBuilder;
+  final EnrollmentResultsSummaryBuilder? resultsSummaryBuilder;
   final bool Function(EnrollmentState state)? showEmptyBeforeSearchWhen;
   final String readyKey;
 
@@ -25,6 +25,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     required this.onSearchCommand,
     required this.detailIntentFactory,
     this.emptyBeforeSearchBuilder,
+    this.resultsSummaryBuilder,
     this.showEmptyBeforeSearchWhen,
     this.readyKey = 'enrollment-list-ready',
   });
@@ -47,10 +48,12 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSearchSection(screenCtx),
+          if (resultsSummaryBuilder != null) ...[
+            const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
+            _buildResultsSummarySection(screenCtx),
+          ],
           const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
           _buildResultsSection(),
-          const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
-          _buildPaginationSection(),
         ],
       ),
     );
@@ -104,28 +107,16 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     );
   }
 
-  Widget _buildPaginationSection() {
+  Widget _buildResultsSummarySection(
+    EnrollmentScreenContext screenCtx,
+  ) {
     return BlocBuilder<EnrollmentBloc, EnrollmentState>(
-      buildWhen: (previous, current) =>
-          previous.summariesPage != current.summariesPage ||
-          previous.summariesTotalPages != current.summariesTotalPages ||
-          previous.summariesStatus != current.summariesStatus,
       builder: (context, state) {
-        if (state.summariesTotalPages <= 1) {
+        final builder = resultsSummaryBuilder;
+        if (builder == null) {
           return const SizedBox.shrink();
         }
-
-        return EnrollmentPaginationBar(
-          currentPage: state.summariesPage,
-          totalPages: state.summariesTotalPages,
-          isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
-          onPrevious: () => context.read<EnrollmentBloc>().add(
-            EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
-          ),
-          onNext: () => context.read<EnrollmentBloc>().add(
-            EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
-          ),
-        );
+        return builder(context, state, screenCtx);
       },
     );
   }

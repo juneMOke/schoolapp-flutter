@@ -32,15 +32,23 @@ typedef EnrollmentEmptyStateBuilder = Widget Function(
   EnrollmentState state,
 );
 
+typedef EnrollmentResultsSummaryBuilder = Widget Function(
+  BuildContext context,
+  EnrollmentState state,
+  EnrollmentScreenContext screenCtx,
+);
+
 class EnrollmentScreenContext {
   final String schoolId;
   final String academicYearId;
   final bool isLoading;
+  final Future<void> Function()? onRefreshRequested;
 
   const EnrollmentScreenContext({
     required this.schoolId,
     required this.academicYearId,
     required this.isLoading,
+    this.onRefreshRequested,
   });
 }
 

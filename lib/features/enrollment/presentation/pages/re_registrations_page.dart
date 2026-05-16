@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_r
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_scaffold.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_results_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_invitation_card.dart';
 
@@ -47,6 +48,30 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         bootstrapBuilder: _buildPreviousYearBootstrap,
         searchSectionBuilder: _buildAcademicSearchSection,
         onSearchCommand: EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
+        resultsSummaryBuilder: (context, state, screenCtx) {
+          if (state.summariesQueryType != EnrollmentSummaryQueryType.byAcademicInfo) {
+            return const SizedBox.shrink();
+          }
+
+          return EnrollmentResultsInfoBar(
+            count: state.summariesTotalElements,
+            isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
+            onRefresh: () async {
+              context.read<EnrollmentBloc>().add(
+                const EnrollmentSummariesRefreshRequested(),
+              );
+            },
+            showStatusBadge: false,
+            currentPage: state.summariesPage,
+            totalPages: state.summariesTotalPages,
+            onPreviousPage: () => context.read<EnrollmentBloc>().add(
+              EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+            ),
+            onNextPage: () => context.read<EnrollmentBloc>().add(
+              EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+            ),
+          );
+        },
         detailIntentFactory: (summary) => EnrollmentDetailIntent.reRegistration(
           enrollmentId: summary.enrollmentId,
           studentId: summary.student.id,

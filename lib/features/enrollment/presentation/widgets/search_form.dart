@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
@@ -17,6 +16,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SearchForm extends StatefulWidget {
   final String academicYearId;
   final String status;
+  final bool isLoading;
+  final EnrollmentSearchDispatcher dispatch;
   final bool showStatusFilter;
   final ValueChanged<String>? onStatusChanged;
 
@@ -24,6 +25,8 @@ class SearchForm extends StatefulWidget {
     super.key,
     required this.academicYearId,
     required this.status,
+    required this.isLoading,
+    required this.dispatch,
     this.showStatusFilter = false,
     this.onStatusChanged,
   });
@@ -107,17 +110,13 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   Widget _buildActionButtons(BuildContext context, AppLocalizations l10n) {
-    final isSummariesLoading = context.select(
-      (EnrollmentBloc bloc) =>
-          bloc.state.summariesStatus == EnrollmentLoadStatus.loading,
-    );
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
     final hasAllNames = _hasAllNameField();
     final isActionLocked = _isActionLocked();
     final isSearchEnabled =
-        (hasAllNames || hasDate) && !isSummariesLoading && !isActionLocked;
+        (hasAllNames || hasDate) && !widget.isLoading && !isActionLocked;
     final isClearEnabled =
-        _hasAnyCriteria() && !isSummariesLoading && !isActionLocked;
+        _hasAnyCriteria() && !widget.isLoading && !isActionLocked;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -162,56 +161,21 @@ class _SearchFormState extends State<SearchForm> {
 
   void _performSearch() {
     if (_isActionLocked()) return;
-    final isSummariesLoading =
-        context.read<EnrollmentBloc>().state.summariesStatus ==
-        EnrollmentLoadStatus.loading;
-    if (isSummariesLoading) return;
+    if (widget.isLoading) return;
 
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
     final hasAllNames = _hasAllNameField();
 
-    if (!hasAllNames && !hasDate) {
-      return;
-    }
-
-    if (hasAllNames && hasDate) {
-      _markActionTriggered();
-      context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesByStudentNamesAndDateOfBirthRequested(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          surname: _surnameController.text.trim(),
-          dateOfBirth: _dateOfBirthController.text.trim(),
-          status: widget.status,
-          academicYearId: widget.academicYearId,
-          page: 0,
-        ),
-      );
-      return;
-    }
-
-    if (hasAllNames) {
-      _markActionTriggered();
-      context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesByStudentNameRequested(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          surname: _surnameController.text.trim(),
-          status: widget.status,
-          academicYearId: widget.academicYearId,
-          page: 0,
-        ),
-      );
-      return;
-    }
+    if (!hasAllNames && !hasDate) return;
 
     _markActionTriggered();
-    context.read<EnrollmentBloc>().add(
-      EnrollmentSummariesByDateOfBirthRequested(
+    widget.dispatch(
+      StandardSearchCommand(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        surname: _surnameController.text.trim(),
         dateOfBirth: _dateOfBirthController.text.trim(),
         status: widget.status,
-        academicYearId: widget.academicYearId,
-        page: 0,
       ),
     );
   }
@@ -231,10 +195,7 @@ class _SearchFormState extends State<SearchForm> {
 
   void _clearSearch() {
     if (_isActionLocked()) return;
-    final isSummariesLoading =
-        context.read<EnrollmentBloc>().state.summariesStatus ==
-        EnrollmentLoadStatus.loading;
-    if (isSummariesLoading) return;
+    if (widget.isLoading) return;
 
     _firstNameController.clear();
     _lastNameController.clear();
@@ -243,13 +204,7 @@ class _SearchFormState extends State<SearchForm> {
     setState(() {});
 
     _markActionTriggered();
-    context.read<EnrollmentBloc>().add(
-      EnrollmentSummariesRequested(
-        status: widget.status,
-        academicYearId: widget.academicYearId,
-        page: 0,
-      ),
-    );
+    widget.dispatch(StandardSearchCommand(status: widget.status));
   }
 
   bool _isActionLocked() {
