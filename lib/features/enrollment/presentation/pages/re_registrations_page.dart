@@ -44,7 +44,9 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
-      scrollable: false,
+      // Cette page contient un formulaire + tableau + pagination: elle doit
+      // rester scrollable pour absorber les variations de hauteur (ex: clavier).
+      scrollable: true,
       child: BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
         builder: (context, bootstrapState) {
           final schoolId = context.select(
