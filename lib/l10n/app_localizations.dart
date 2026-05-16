@@ -3545,11 +3545,41 @@ abstract class AppLocalizations {
   /// **'Date'**
   String get attendanceDateLabel;
 
+  /// No description provided for @attendanceCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get attendanceCycleLabel;
+
+  /// No description provided for @attendanceLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get attendanceLevelLabel;
+
+  /// No description provided for @attendanceClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get attendanceClassLabel;
+
+  /// No description provided for @attendanceShowClassAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Show class'**
+  String get attendanceShowClassAction;
+
   /// No description provided for @attendanceInvitationMessage.
   ///
   /// In en, this message translates to:
   /// **'Run a search to display attendance for the selected class.'**
   String get attendanceInvitationMessage;
+
+  /// No description provided for @attendanceEmptySelectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class and a date to take attendance.'**
+  String get attendanceEmptySelectionMessage;
 
   /// No description provided for @attendanceLoadingMessage.
   ///
@@ -3611,6 +3641,12 @@ abstract class AppLocalizations {
   /// **'Attendance records were saved successfully.'**
   String get attendanceSaveSuccess;
 
+  /// No description provided for @attendanceValidateCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate attendance'**
+  String get attendanceValidateCallAction;
+
   /// No description provided for @attendancePendingChanges.
   ///
   /// In en, this message translates to:
@@ -3646,6 +3682,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose the attendance date'**
   String get attendanceDateTooltip;
+
+  /// No description provided for @attendanceStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance in progress'**
+  String get attendanceStatusInProgress;
+
+  /// No description provided for @attendanceStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to validate'**
+  String get attendanceStatusReady;
+
+  /// No description provided for @attendancePresentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendancePresentCount;
+
+  /// No description provided for @attendanceAbsentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceAbsentCount;
+
+  /// No description provided for @attendanceTotalCountCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get attendanceTotalCountCompact;
+
+  /// No description provided for @attendanceDefaultPresenceHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'All students are marked present by default. Tap Absent to report an exception.'**
+  String get attendanceDefaultPresenceHelper;
+
+  /// No description provided for @attendanceReadyToValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'No absence is missing a reason. You can validate attendance.'**
+  String get attendanceReadyToValidate;
+
+  /// No description provided for @attendanceMissingReasonsStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} absence(s) without reason - complete required'**
+  String attendanceMissingReasonsStatus(int count);
+
+  /// No description provided for @attendanceAllPresentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm attendance'**
+  String get attendanceAllPresentConfirmTitle;
+
+  /// No description provided for @attendanceAllPresentConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you confirm that all {count} students are present?'**
+  String attendanceAllPresentConfirmMessage(int count);
 
   /// No description provided for @attendanceTotalCount.
   ///
@@ -3736,6 +3832,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a reason for this absence.'**
   String get attendanceReasonRequiredError;
+
+  /// No description provided for @attendanceReasonRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason required for an absence.'**
+  String get attendanceReasonRequiredHint;
 
   /// No description provided for @attendanceReasonDisabledHint.
   ///
@@ -3911,6 +4013,12 @@ abstract class AppLocalizations {
   /// **'Back to disciplines'**
   String get disciplinaryDetailBackLabel;
 
+  /// No description provided for @disciplinaryFollowUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary follow-up'**
+  String get disciplinaryFollowUpTitle;
+
   /// No description provided for @disciplinaryHeroTitle.
   ///
   /// In en, this message translates to:
@@ -3941,6 +4049,24 @@ abstract class AppLocalizations {
   /// **'Disciplinary cases'**
   String get disciplinaryTabCasesLabel;
 
+  /// No description provided for @disciplinaryTabAttendanceHistoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance history'**
+  String get disciplinaryTabAttendanceHistoryLabel;
+
+  /// No description provided for @disciplinaryAttendanceHistoryComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance history will be delivered in a future feature.'**
+  String get disciplinaryAttendanceHistoryComingSoon;
+
+  /// No description provided for @disciplinaryUnknownValue.
+  ///
+  /// In en, this message translates to:
+  /// **'-'**
+  String get disciplinaryUnknownValue;
+
   /// No description provided for @disciplinaryCaseCreateAction.
   ///
   /// In en, this message translates to:
@@ -3952,6 +4078,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Document a new disciplinary incident for this student.'**
   String get disciplinaryCaseCreateCtaSubtitle;
+
+  /// No description provided for @disciplinaryCasesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} recorded cases - {open} open'**
+  String disciplinaryCasesSummary(int total, int open);
 
   /// No description provided for @disciplinaryCasesTableTitleColumn.
   ///
@@ -3970,6 +4102,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Actions'**
   String get disciplinaryCasesTableActionColumn;
+
+  /// No description provided for @disciplinaryCasesDateUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Date unavailable'**
+  String get disciplinaryCasesDateUnavailable;
 
   /// No description provided for @disciplinaryCaseViewLabel.
   ///
@@ -4156,6 +4294,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open'**
   String get disciplinaryCaseStatusOpen;
+
+  /// No description provided for @disciplinaryCaseStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get disciplinaryCaseStatusInProgress;
+
+  /// No description provided for @disciplinaryCaseStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get disciplinaryCaseStatusClosed;
 
   /// No description provided for @disciplinaryCaseStatusUnknown.
   ///

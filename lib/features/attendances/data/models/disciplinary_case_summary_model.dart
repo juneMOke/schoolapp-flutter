@@ -18,6 +18,7 @@ class DisciplinaryCaseSummaryModel extends Equatable {
   final String title;
   final String status;
   final String content;
+  final DateTime? disciplinaryCaseDate;
 
   const DisciplinaryCaseSummaryModel({
     required this.id,
@@ -30,6 +31,7 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     required this.title,
     required this.status,
     required this.content,
+    this.disciplinaryCaseDate,
   });
 
   factory DisciplinaryCaseSummaryModel.fromJson(Map<String, dynamic> json) =>
@@ -48,6 +50,7 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     title: title,
     status: DisciplinaryCaseStatusX.fromApiValue(status),
     content: content,
+    disciplinaryCaseDate: disciplinaryCaseDate,
   );
 
   @override
@@ -62,5 +65,6 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     title,
     status,
     content,
+    disciplinaryCaseDate,
   ];
 }

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_search_fields.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceSearchForm extends StatefulWidget {
   final List<AttendanceCycleOption> options;
@@ -36,7 +34,9 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
       return;
     }
 
-    if (_selectedCycle != null && _selectedLevel != null && _selectedClassroom != null) {
+    if (_selectedCycle != null &&
+        _selectedLevel != null &&
+        _selectedClassroom != null) {
       return;
     }
 
@@ -137,13 +137,11 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.classesSectionSurface,
+        color: AppColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
         border: Border.all(color: AppColors.border),
         boxShadow: const [
@@ -154,55 +152,40 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.attendanceSearchTitle,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: AppDimensions.spacingS),
-          Text(
-            l10n.attendanceSearchHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          AttendanceSearchFields(
-            cycleOptions: widget.options,
-            selectedCycleId: _selectedCycleId,
-            levelOptions: _levelOptions,
-            selectedLevelKey: _selectedLevelKey,
-            classroomOptions: _selectedLevel?.classrooms ?? const [],
-            selectedClassroomId: _selectedClassroomId,
-            selectedDate: _selectedDate,
-            isSearching: widget.isSearching,
-            canSearch: _canSearch,
-            onCycleChanged: (value) {
-              setState(() {
-                _selectedCycleId = value;
-                _selectedLevelKey = null;
-                _selectedClassroomId = null;
-              });
-            },
-            onLevelChanged: (value) {
-              setState(() {
-                _selectedLevelKey = value;
-                _selectedClassroomId = null;
-              });
-            },
-            onClassroomChanged: (value) {
-              setState(() => _selectedClassroomId = value);
-            },
-            onPickDate: _pickDate,
-            onSearch: () {
-              final request = _request;
-              if (request == null) {
-                return;
-              }
-              widget.onSearch(request);
-            },
-          ),
-        ],
+      child: AttendanceSearchFields(
+        cycleOptions: widget.options,
+        selectedCycleId: _selectedCycleId,
+        levelOptions: _levelOptions,
+        selectedLevelKey: _selectedLevelKey,
+        classroomOptions: _selectedLevel?.classrooms ?? const [],
+        selectedClassroomId: _selectedClassroomId,
+        selectedDate: _selectedDate,
+        isSearching: widget.isSearching,
+        canSearch: _canSearch,
+        onCycleChanged: (value) {
+          setState(() {
+            _selectedCycleId = value;
+            _selectedLevelKey = null;
+            _selectedClassroomId = null;
+          });
+        },
+        onLevelChanged: (value) {
+          setState(() {
+            _selectedLevelKey = value;
+            _selectedClassroomId = null;
+          });
+        },
+        onClassroomChanged: (value) {
+          setState(() => _selectedClassroomId = value);
+        },
+        onPickDate: _pickDate,
+        onSearch: () {
+          final request = _request;
+          if (request == null) {
+            return;
+          }
+          widget.onSearch(request);
+        },
       ),
     );
   }

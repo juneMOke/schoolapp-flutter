@@ -829,7 +829,12 @@
   "attendanceSearchTitle": "Attendance Search",
   "attendanceSearchHint": "Select cycle, level, class and date to display attendance records.",
   "attendanceDateLabel": "Date",
+  "attendanceCycleLabel": "Cycle",
+  "attendanceLevelLabel": "Level",
+  "attendanceClassLabel": "Class",
+  "attendanceShowClassAction": "Show class",
   "attendanceInvitationMessage": "Run a search to display attendance for the selected class.",
+  "attendanceEmptySelectionMessage": "Select a class and a date to take attendance.",
   "attendanceLoadingMessage": "Loading attendance records...",
   "attendanceEmptyMessage": "No attendance found for these filters.",
   "attendanceExportAction": "Export",
@@ -840,12 +845,37 @@
   "attendanceSaveTooltip": "Save all entered changes",
   "attendanceSaveValidationHint": "Fix absent rows without a reason before saving.",
   "attendanceSaveSuccess": "Attendance records were saved successfully.",
+  "attendanceValidateCallAction": "Validate attendance",
   "attendancePendingChanges": "Pending changes",
   "attendancePendingInvalidChanges": "Fixes required",
   "attendanceRowModifiedLabel": "Modified",
   "attendanceUnsavedChangesTitle": "Unsaved changes",
   "attendanceUnsavedChangesMessage": "A new search will discard unsaved changes. Do you want to continue?",
   "attendanceDateTooltip": "Choose the attendance date",
+  "attendanceStatusInProgress": "Attendance in progress",
+  "attendanceStatusReady": "Ready to validate",
+  "attendancePresentCount": "Present",
+  "attendanceAbsentCount": "Absent",
+  "attendanceTotalCountCompact": "Total",
+  "attendanceDefaultPresenceHelper": "All students are marked present by default. Tap Absent to report an exception.",
+  "attendanceReadyToValidate": "No absence is missing a reason. You can validate attendance.",
+  "attendanceMissingReasonsStatus": "{count} absence(s) without reason - complete required",
+  "@attendanceMissingReasonsStatus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceAllPresentConfirmTitle": "Confirm attendance",
+  "attendanceAllPresentConfirmMessage": "Do you confirm that all {count} students are present?",
+  "@attendanceAllPresentConfirmMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attendanceTotalCount": "Total students",
   "attendanceGirlsCount": "Girls",
   "attendanceBoysCount": "Boys",
@@ -871,6 +901,7 @@
   "attendanceAbsentValue": "Absent",
   "attendanceReadOnlyHint": "Read-only informational status",
   "attendanceReasonRequiredError": "Please select a reason for this absence.",
+  "attendanceReasonRequiredHint": "Reason required for an absence.",
   "attendanceReasonDisabledHint": "Reason is required only when the student is absent.",
   "attendanceNoteDisabledHint": "Note is optional only when the student is absent.",
   "attendanceNotePlaceholder": "Add details if needed",
@@ -902,16 +933,32 @@
    "signOutAction": "Sign out",
 
    "disciplinaryDetailBackLabel": "Back to disciplines",
+   "disciplinaryFollowUpTitle": "Disciplinary follow-up",
    "disciplinaryHeroTitle": "Disciplinary case file detail",
    "disciplinaryHeroChipCases": "Disciplinary cases",
    "disciplinaryDetailContextErrorTitle": "Detail context unavailable",
    "disciplinaryDetailContextErrorMessage": "Required context for this detail view is missing. Go back to the list and open the detail again.",
    "disciplinaryTabCasesLabel": "Disciplinary cases",
+   "disciplinaryTabAttendanceHistoryLabel": "Attendance history",
+   "disciplinaryAttendanceHistoryComingSoon": "Attendance history will be delivered in a future feature.",
+   "disciplinaryUnknownValue": "-",
    "disciplinaryCaseCreateAction": "New case",
    "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
+   "disciplinaryCasesSummary": "{total} recorded cases - {open} open",
+   "@disciplinaryCasesSummary": {
+     "placeholders": {
+       "total": {
+         "type": "int"
+       },
+       "open": {
+         "type": "int"
+       }
+     }
+   },
    "disciplinaryCasesTableTitleColumn": "Title",
    "disciplinaryCasesTableStatusColumn": "Status",
    "disciplinaryCasesTableActionColumn": "Actions",
+   "disciplinaryCasesDateUnavailable": "Date unavailable",
    "disciplinaryCaseViewLabel": "View case",
    "disciplinaryCasesLoadingMessage": "Loading disciplinary cases...",
    "disciplinaryCasesEmptyMessage": "No disciplinary cases for this student.",
@@ -943,6 +990,8 @@
    "disciplinaryCasesAuthError": "An authentication error prevents loading cases.",
    "disciplinaryCasesUnknownError": "An unexpected error occurred.",
    "disciplinaryCaseStatusOpen": "Open",
+   "disciplinaryCaseStatusInProgress": "In progress",
+   "disciplinaryCaseStatusClosed": "Closed",
    "disciplinaryCaseStatusUnknown": "Unknown",
 
    "enrollmentStatusPreRegistered": "Pre-registered",

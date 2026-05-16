@@ -16,20 +16,23 @@ class AttendanceRecordsTable extends StatelessWidget {
       AttendanceRecordsLayoutMode.cardsOnly;
 
   final List<AttendanceEditableRow> rows;
-  final Set<String> modifiedStudentIds;
+  final bool scrollable;
 
   const AttendanceRecordsTable({
     super.key,
     required this.rows,
-    required this.modifiedStudentIds,
+    this.scrollable = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final cardList = AttendanceRecordsMobileList(
-      key: ValueKey('attendance-cards-${rows.length}-${modifiedStudentIds.length}'),
+      key: ValueKey('attendance-cards-${rows.length}-$scrollable'),
       rows: rows,
-      modifiedStudentIds: modifiedStudentIds,
+      shrinkWrap: !scrollable,
+      physics: scrollable
+          ? const ClampingScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
     );
 
     return AnimatedSwitcher(
@@ -44,7 +47,7 @@ class AttendanceRecordsTable extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
           border: Border.all(color: AppColors.border),
         ),
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        padding: const EdgeInsets.all(AppDimensions.spacingS),
         child: switch (_layoutMode) {
           AttendanceRecordsLayoutMode.cardsOnly => cardList,
           // Reserved for a denser desktop card treatment if we need it in v2.

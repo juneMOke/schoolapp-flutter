@@ -13,6 +13,7 @@ class DisciplinaryCaseSummary extends Equatable {
   final String title;
   final DisciplinaryCaseStatus status;
   final String content;
+  final DateTime? disciplinaryCaseDate;
 
   const DisciplinaryCaseSummary({
     required this.id,
@@ -25,6 +26,7 @@ class DisciplinaryCaseSummary extends Equatable {
     required this.title,
     required this.status,
     required this.content,
+    this.disciplinaryCaseDate,
   });
 
   @override
@@ -39,5 +41,6 @@ class DisciplinaryCaseSummary extends Equatable {
     title,
     status,
     content,
+    disciplinaryCaseDate,
   ];
 }

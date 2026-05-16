@@ -6,7 +6,6 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
-import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_page_header.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_section.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_search_form.dart';
 
@@ -43,24 +42,25 @@ class AttendancePageContent extends StatelessWidget {
         switchInCurve: AppMotion.outCurve,
         switchOutCurve: AppMotion.inCurve,
         child: Column(
-          key: ValueKey<String>('attendance-${lastRequest != null}'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AttendancePageHeader(),
-            const SizedBox(height: AppDimensions.spacingM),
             BlocBuilder<AttendanceBloc, AttendanceState>(
-                buildWhen: AttendancePageHelpers.buildWhenSearchFormChanges,
+              buildWhen: AttendancePageHelpers.buildWhenSearchFormChanges,
               builder: (context, state) {
                 return AttendanceSearchForm(
                   options: options,
-                    isSearching: state.fetchStatus == AttendanceStatus.loading ||
-                        state.saveStatus == AttendanceStatus.loading,
+                  isSearching:
+                      state.fetchStatus == AttendanceStatus.loading ||
+                      state.saveStatus == AttendanceStatus.loading,
                   onSearch: onSearch,
                 );
               },
             ),
             const SizedBox(height: AppDimensions.spacingM),
             AttendanceResultsSection(
+              key: ValueKey<String>(
+                'attendance-results-${lastRequest != null}',
+              ),
               lastRequest: lastRequest,
               onExportPressed: onExportPressed,
               onRetry: onRetry,

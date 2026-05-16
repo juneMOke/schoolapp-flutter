@@ -8,11 +8,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class AttendanceDateButton extends StatelessWidget {
   final DateTime date;
   final Future<void> Function() onPickDate;
+  final double width;
 
   const AttendanceDateButton({
     super.key,
     required this.date,
     required this.onPickDate,
+    this.width = AppDimensions.classesOrganisationCompactFieldWidth,
   });
 
   @override
@@ -21,7 +23,7 @@ class AttendanceDateButton extends StatelessWidget {
     final dateLabel = MaterialLocalizations.of(context).formatMediumDate(date);
 
     return SizedBox(
-      width: AppDimensions.classesOrganisationCompactFieldWidth,
+      width: width,
       child: Tooltip(
         message: l10n.attendanceDateTooltip,
         child: OutlinedButton.icon(
@@ -32,11 +34,15 @@ class AttendanceDateButton extends StatelessWidget {
             children: [
               Text(
                 l10n.attendanceDateLabel,
-                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               Text(
                 dateLabel,
-                style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
@@ -90,13 +96,17 @@ class AttendanceSearchButton extends StatelessWidget {
                 ),
               )
             : const Icon(Icons.search),
-        label: Text(l10n.search),
+        label: Text(l10n.attendanceShowClassAction),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.indigo,
+          backgroundColor: AppColors.terreCuite,
           foregroundColor: AppColors.surface,
           disabledBackgroundColor: AppColors.classesDisabledBg,
           disabledForegroundColor: AppColors.classesDisabledFg,
           minimumSize: Size(isCompact ? 0 : 140, AppDimensions.minTouchTarget),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingM,
+            vertical: AppDimensions.spacingS,
+          ),
         ),
       ),
     );

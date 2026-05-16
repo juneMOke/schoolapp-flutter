@@ -19,13 +19,41 @@ class AttendancePresenceSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final selectedBackground = value ? AppColors.success : AppColors.danger;
 
     return Semantics(
       label: l10n.attendancePresenceStatusLabel,
-      value: value
-          ? l10n.attendancePresentValue
-          : l10n.attendanceAbsentValue,
-      child: Switch.adaptive(value: value, onChanged: onChanged),
+      value: value ? l10n.attendancePresentValue : l10n.attendanceAbsentValue,
+      child: SegmentedButton<bool>(
+        segments: [
+          ButtonSegment<bool>(
+            value: true,
+            label: Text(l10n.attendancePresentValue),
+          ),
+          ButtonSegment<bool>(
+            value: false,
+            label: Text(l10n.attendanceAbsentValue),
+          ),
+        ],
+        selected: {value},
+        onSelectionChanged: (selection) {
+          final target = selection.firstOrNull;
+          if (target == null || target == value) {
+            return;
+          }
+          onChanged(target);
+        },
+        style: SegmentedButton.styleFrom(
+          backgroundColor: AppColors.background,
+          selectedBackgroundColor: selectedBackground.withValues(alpha: 0.18),
+          selectedForegroundColor: selectedBackground,
+          foregroundColor: AppColors.textSecondary,
+          side: const BorderSide(color: AppColors.border),
+          textStyle: AppTextStyles.caption.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -49,6 +77,10 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final hasMissingReason = enabled && showValidationError;
+    final accent = hasMissingReason
+        ? AppColors.terreCuite.withValues(alpha: 0.65)
+        : AppColors.border;
 
     return DropdownButtonFormField<AbsenceReason>(
       initialValue: value,
@@ -57,23 +89,29 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
       style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: l10n.attendanceTableAbsenceReason,
-        errorText: enabled && showValidationError
-            ? l10n.attendanceReasonRequiredError
-            : null,
-        helperText: enabled ? null : l10n.attendanceReasonDisabledHint,
+        helperText: enabled
+            ? (hasMissingReason ? l10n.attendanceReasonRequiredHint : null)
+            : l10n.attendanceReasonDisabledHint,
         filled: true,
-        fillColor: enabled ? AppColors.background : AppColors.financeDetailMutedSurface,
+        fillColor: enabled
+            ? AppColors.background
+            : AppColors.financeDetailMutedSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: accent),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: accent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
+          borderSide: BorderSide(
+            color: hasMissingReason
+                ? AppColors.terreCuite
+                : AppColors.classesFocusRing,
+            width: 1.6,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingS,
@@ -84,7 +122,9 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
           .map(
             (reason) => DropdownMenuItem<AbsenceReason>(
               value: reason,
-              child: Text(AttendancePageHelpers.absenceReasonLabel(l10n, reason)),
+              child: Text(
+                AttendancePageHelpers.absenceReasonLabel(l10n, reason),
+              ),
             ),
           )
           .toList(growable: false),
@@ -110,7 +150,8 @@ class AttendanceAbsenceNoteField extends StatefulWidget {
       _AttendanceAbsenceNoteFieldState();
 }
 
-class _AttendanceAbsenceNoteFieldState extends State<AttendanceAbsenceNoteField> {
+class _AttendanceAbsenceNoteFieldState
+    extends State<AttendanceAbsenceNoteField> {
   late final TextEditingController _controller;
 
   @override
@@ -122,7 +163,8 @@ class _AttendanceAbsenceNoteFieldState extends State<AttendanceAbsenceNoteField>
   @override
   void didUpdateWidget(covariant AttendanceAbsenceNoteField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value == widget.value && oldWidget.enabled == widget.enabled) {
+    if (oldWidget.value == widget.value &&
+        oldWidget.enabled == widget.enabled) {
       return;
     }
 
@@ -158,7 +200,9 @@ class _AttendanceAbsenceNoteFieldState extends State<AttendanceAbsenceNoteField>
         hintText: l10n.attendanceNotePlaceholder,
         helperText: widget.enabled ? null : l10n.attendanceNoteDisabledHint,
         filled: true,
-        fillColor: widget.enabled ? AppColors.background : AppColors.financeDetailMutedSurface,
+        fillColor: widget.enabled
+            ? AppColors.background
+            : AppColors.financeDetailMutedSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
           borderSide: const BorderSide(color: AppColors.border),
@@ -169,7 +213,10 @@ class _AttendanceAbsenceNoteFieldState extends State<AttendanceAbsenceNoteField>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
+          borderSide: const BorderSide(
+            color: AppColors.classesFocusRing,
+            width: 1.6,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingS,

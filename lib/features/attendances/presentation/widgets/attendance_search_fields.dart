@@ -48,47 +48,64 @@ class AttendanceSearchFields extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final fields = [
       _AttendanceDropdownField(
-        width: AppDimensions.classesOrganisationCompactFieldWidth,
-        label: l10n.targetCycleLabel,
+        width: AppDimensions.attendanceCycleFieldWidth,
+        label: l10n.attendanceCycleLabel,
         selectedValue: selectedCycleId,
         items: cycleOptions
-            .map((option) => DropdownMenuItem<String>(
-                  value: option.id,
-                  child: Text(option.label, overflow: TextOverflow.ellipsis),
-                ))
+            .map(
+              (option) => DropdownMenuItem<String>(
+                value: option.id,
+                child: Text(option.label, overflow: TextOverflow.ellipsis),
+              ),
+            )
             .toList(growable: false),
         onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
       ),
       _AttendanceDropdownField(
-        width: AppDimensions.classesOrganisationCompactFieldWidth,
-        label: l10n.targetLevelLabel,
+        width: AppDimensions.attendanceLevelFieldWidth,
+        label: l10n.attendanceLevelLabel,
         selectedValue: selectedLevelKey,
         items: levelOptions
-            .map((option) => DropdownMenuItem<String>(
-                  value: option.key,
-                  child: Text(option.label, overflow: TextOverflow.ellipsis),
-                ))
+            .map(
+              (option) => DropdownMenuItem<String>(
+                value: option.key,
+                child: Text(option.label, overflow: TextOverflow.ellipsis),
+              ),
+            )
             .toList(growable: false),
         onChanged: levelOptions.isEmpty ? null : onLevelChanged,
       ),
       _AttendanceDropdownField(
-        width: AppDimensions.classesOrganisationCompactSelectWidth,
-        label: l10n.classesOrganisationClassroomFieldLabel,
+        width: AppDimensions.attendanceClassFieldWidth,
+        label: l10n.attendanceClassLabel,
         selectedValue: selectedClassroomId,
         items: classroomOptions
-            .map((classroom) => DropdownMenuItem<String>(
-                  value: classroom.id,
-                  child: Text(classroom.name, overflow: TextOverflow.ellipsis),
-                ))
+            .map(
+              (classroom) => DropdownMenuItem<String>(
+                value: classroom.id,
+                child: Text(classroom.name, overflow: TextOverflow.ellipsis),
+              ),
+            )
             .toList(growable: false),
         onChanged: classroomOptions.isEmpty ? null : onClassroomChanged,
       ),
-      AttendanceDateButton(date: selectedDate, onPickDate: onPickDate),
+      AttendanceDateButton(
+        date: selectedDate,
+        onPickDate: onPickDate,
+        width: AppDimensions.attendanceDateFieldWidth,
+      ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < AppBreakpoints.formMediumMin;
+        final canRenderSingleLineSelectors =
+            constraints.maxWidth >=
+            (AppDimensions.attendanceCycleFieldWidth +
+                AppDimensions.attendanceLevelFieldWidth +
+                AppDimensions.attendanceClassFieldWidth +
+                AppDimensions.attendanceDateFieldWidth +
+                (AppDimensions.spacingS * 3));
 
         return AnimatedContainer(
           duration: AppMotion.medium,
@@ -96,19 +113,36 @@ class AttendanceSearchFields extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Wrap(
-                spacing: AppDimensions.spacingS,
-                runSpacing: AppDimensions.spacingS,
-                children: fields,
-              ),
+              if (canRenderSingleLineSelectors)
+                Row(
+                  children: [
+                    fields[0],
+                    const SizedBox(width: AppDimensions.spacingS),
+                    fields[1],
+                    const SizedBox(width: AppDimensions.spacingS),
+                    fields[2],
+                    const SizedBox(width: AppDimensions.spacingS),
+                    fields[3],
+                  ],
+                )
+              else
+                Wrap(
+                  spacing: AppDimensions.spacingS,
+                  runSpacing: AppDimensions.spacingS,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: fields,
+                ),
               const SizedBox(height: AppDimensions.spacingS),
-              SizedBox(
-                width: isCompact ? double.infinity : null,
-                child: AttendanceSearchButton(
-                  isSearching: isSearching,
-                  canSearch: canSearch,
-                  onSearch: onSearch,
-                  isCompact: isCompact,
+              Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: isCompact ? double.infinity : null,
+                  child: AttendanceSearchButton(
+                    isSearching: isSearching,
+                    canSearch: canSearch,
+                    onSearch: onSearch,
+                    isCompact: isCompact,
+                  ),
                 ),
               ),
             ],
@@ -164,11 +198,14 @@ class _AttendanceDropdownField extends StatelessWidget {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-        borderSide: const BorderSide(color: AppColors.classesFocusRing, width: 1.6),
+        borderSide: const BorderSide(
+          color: AppColors.classesFocusRing,
+          width: 1.6,
+        ),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingM,
+        vertical: AppDimensions.spacingS,
       ),
     );
   }

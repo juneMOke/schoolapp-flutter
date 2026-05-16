@@ -35,8 +35,7 @@ class ClassesListPolicyResolver {
   static ClassesListPolicy fromIntent(ClassesListIntent intent) {
     return switch (intent.origin) {
       ClassesListOrigin.classesList => const DefaultClassesListPolicy(),
-      ClassesListOrigin.disciplinesList =>
-        const DisciplinesClassesListPolicy(),
+      ClassesListOrigin.disciplinesList => const DisciplinesClassesListPolicy(),
     };
   }
 }
@@ -90,6 +89,7 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
       academicYearId: academicYearId,
       levelName: _resolveLevelName(request),
       levelGroupName: _resolveLevelGroupName(request),
+      classroomName: _resolveClassroomName(request),
     );
 
     context.push(
@@ -116,6 +116,7 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
       academicYearId: member.academicYearId,
       levelName: _resolveLevelName(request),
       levelGroupName: _resolveLevelGroupName(request),
+      classroomName: _resolveClassroomName(request),
     );
 
     context.push(
@@ -153,4 +154,7 @@ class DisciplinesClassesListPolicy extends ClassesListPolicy {
 
   String _resolveLevelGroupName(ClassesListSearchRequest? request) =>
       request?.selectedLevel?.schoolLevelGroupName.trim() ?? '';
+
+  String _resolveClassroomName(ClassesListSearchRequest? request) =>
+      request?.selectedClassroom?.name.trim() ?? '';
 }

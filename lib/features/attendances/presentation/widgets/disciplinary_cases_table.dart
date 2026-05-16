@@ -59,7 +59,9 @@ class DisciplinaryCasesTable extends StatelessWidget {
     AppLocalizations l10n, {
     required bool isCompact,
   }) {
-    final topPadding = isCompact ? AppDimensions.spacingM : AppDimensions.spacingS;
+    final topPadding = isCompact
+        ? AppDimensions.spacingM
+        : AppDimensions.spacingS;
 
     return Column(
       children: [
@@ -86,25 +88,13 @@ class DisciplinaryCasesTable extends StatelessWidget {
                 ),
                 const SizedBox(width: AppDimensions.spacingM),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text(
                     l10n.disciplinaryCasesTableStatusColumn,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingM),
-                SizedBox(
-                  width: AppDimensions.minTouchTarget + AppDimensions.spacingM,
-                  child: Text(
-                    l10n.disciplinaryCasesTableActionColumn,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -120,21 +110,31 @@ class DisciplinaryCasesTable extends StatelessWidget {
               AppDimensions.spacingM,
             ),
             itemCount: cases.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppDimensions.spacingS),
+            separatorBuilder: (_, _) =>
+                const SizedBox(height: AppDimensions.spacingS),
             itemBuilder: (context, index) {
               final caseData = cases[index];
               return _AnimatedCaseRow(
                 delay: Duration(milliseconds: 50 * index),
-                child: Container(
-                  padding: const EdgeInsets.all(AppDimensions.spacingM),
-                  decoration: BoxDecoration(
-                    color: AppColors.disciplinaryDetailInfoSurface,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-                    border: Border.all(color: AppColors.border),
+                    onTap: () => onViewCase(caseData),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppDimensions.spacingM),
+                      decoration: BoxDecoration(
+                        color: AppColors.disciplinaryDetailInfoSurface,
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.spacingM,
+                        ),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: isCompact
+                          ? _buildCompactRow(context, caseData, l10n)
+                          : _buildDesktopRow(context, caseData, l10n),
+                    ),
                   ),
-                  child: isCompact
-                      ? _buildCompactRow(caseData, l10n)
-                      : _buildDesktopRow(caseData, l10n),
                 ),
               );
             },
@@ -145,9 +145,12 @@ class DisciplinaryCasesTable extends StatelessWidget {
   }
 
   Widget _buildCompactRow(
+    BuildContext context,
     DisciplinaryCaseSummary caseData,
     AppLocalizations l10n,
   ) {
+    final formattedDate = _formatCaseDate(context, caseData, l10n);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,158 +158,197 @@ class DisciplinaryCasesTable extends StatelessWidget {
           caseData.title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.bodyStrong.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingXS),
+        Text(
+          formattedDate,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppDimensions.spacingS),
-        _buildStatusBadge(caseData, l10n),
-        const SizedBox(height: AppDimensions.spacingS),
-        Align(
-          alignment: Alignment.centerRight,
-          child: IconButton(
-            style: IconButton.styleFrom(
-              minimumSize: const Size(
-                AppDimensions.minTouchTarget,
-                AppDimensions.minTouchTarget,
-              ),
-              backgroundColor: AppColors.disciplinaryDetailAccentSoft,
-              foregroundColor: AppColors.disciplinaryDetailAccent,
-              side: BorderSide(
-                color: AppColors.disciplinaryDetailAccent.withValues(alpha: 0.2),
-              ),
+        Row(
+          children: [
+            Expanded(child: _buildStatusBadge(caseData, l10n)),
+            const SizedBox(width: AppDimensions.spacingS),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
             ),
-            icon: const Icon(Icons.visibility_outlined),
-            tooltip: l10n.disciplinaryCaseViewLabel,
-            onPressed: () => onViewCase(caseData),
-          ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildDesktopRow(
+    BuildContext context,
     DisciplinaryCaseSummary caseData,
     AppLocalizations l10n,
   ) {
+    final formattedDate = _formatCaseDate(context, caseData, l10n);
+
     return Row(
       children: [
         Expanded(
-          flex: 5,
-          child: Text(
-            caseData.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimary),
+          flex: 6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                caseData.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyStrong.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingXS),
+              Text(
+                formattedDate,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: AppDimensions.spacingM),
-        Expanded(flex: 3, child: _buildStatusBadge(caseData, l10n)),
-        const SizedBox(width: AppDimensions.spacingM),
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(
-              AppDimensions.minTouchTarget,
-              AppDimensions.minTouchTarget,
-            ),
-            foregroundColor: AppColors.disciplinaryDetailAccent,
-            backgroundColor: AppColors.disciplinaryDetailAccentSoft,
-            side: BorderSide(
-              color: AppColors.disciplinaryDetailAccent.withValues(alpha: 0.2),
-            ),
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              Expanded(child: _buildStatusBadge(caseData, l10n)),
+              const SizedBox(width: AppDimensions.spacingS),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textSecondary,
+              ),
+            ],
           ),
-          onPressed: () => onViewCase(caseData),
-          icon: const Icon(Icons.visibility_outlined),
-          label: Text(l10n.disciplinaryCaseViewLabel),
         ),
       ],
     );
   }
 
-   Widget _buildStatusBadge(
-     DisciplinaryCaseSummary caseData,
-     AppLocalizations l10n,
-   ) {
-     final statusColor = caseData.status.getColor();
-     return Container(
-       padding: const EdgeInsets.symmetric(
-         horizontal: AppDimensions.spacingS,
-         vertical: AppDimensions.spacingXS,
-       ),
-       decoration: BoxDecoration(
-         color: statusColor.withValues(alpha: 0.14),
-         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-         border: Border.all(color: statusColor.withValues(alpha: 0.28)),
-       ),
-       child: Text(
-         caseData.status.getDisplayName(l10n),
-         style: AppTextStyles.caption.copyWith(
-           color: statusColor,
-           fontWeight: FontWeight.w700,
-         ),
-       ),
-     );
-   }
- }
+  Widget _buildStatusBadge(
+    DisciplinaryCaseSummary caseData,
+    AppLocalizations l10n,
+  ) {
+    final statusColor = caseData.status.getColor();
+    final statusIcon = switch (caseData.status) {
+      DisciplinaryCaseStatus.open => Icons.folder_open_outlined,
+      DisciplinaryCaseStatus.inProgress => Icons.timelapse_rounded,
+      DisciplinaryCaseStatus.closed => Icons.check_circle_outline_rounded,
+      DisciplinaryCaseStatus.unknown => Icons.help_outline_rounded,
+    };
 
- /// Wrapper animé pour les lignes de cas (fade-in + slide)
- class _AnimatedCaseRow extends StatefulWidget {
-   final Widget child;
-   final Duration delay;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingS,
+        vertical: AppDimensions.spacingXS,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
+        border: Border.all(color: statusColor.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            statusIcon,
+            size: AppDimensions.detailMiniIconSize,
+            color: statusColor,
+          ),
+          const SizedBox(width: AppDimensions.spacingXS),
+          Flexible(
+            child: Text(
+              caseData.status.getDisplayName(l10n),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(
+                color: statusColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-   const _AnimatedCaseRow({
-     required this.child,
-     required this.delay,
-   });
+  String _formatCaseDate(
+    BuildContext context,
+    DisciplinaryCaseSummary caseData,
+    AppLocalizations l10n,
+  ) {
+    final date = caseData.disciplinaryCaseDate;
+    if (date == null) {
+      return l10n.disciplinaryCasesDateUnavailable;
+    }
+    return MaterialLocalizations.of(context).formatMediumDate(date);
+  }
+}
 
-   @override
-   State<_AnimatedCaseRow> createState() => _AnimatedCaseRowState();
- }
+/// Wrapper animé pour les lignes de cas (fade-in + slide)
+class _AnimatedCaseRow extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
 
- class _AnimatedCaseRowState extends State<_AnimatedCaseRow>
-     with SingleTickerProviderStateMixin {
-   late AnimationController _animationController;
-   late Animation<double> _fadeAnimation;
-   late Animation<Offset> _slideAnimation;
+  const _AnimatedCaseRow({required this.child, required this.delay});
 
-   @override
-   void initState() {
-     super.initState();
-     _animationController = AnimationController(
-       duration: AppMotion.standard,
-       vsync: this,
-     );
+  @override
+  State<_AnimatedCaseRow> createState() => _AnimatedCaseRowState();
+}
 
-     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-       CurvedAnimation(parent: _animationController, curve: AppMotion.outCurve),
-     );
+class _AnimatedCaseRowState extends State<_AnimatedCaseRow>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
-     _slideAnimation = Tween<Offset>(
-       begin: const Offset(0.0, 0.1),
-       end: Offset.zero,
-     ).animate(
-       CurvedAnimation(parent: _animationController, curve: AppMotion.outCurve),
-     );
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AppMotion.standard,
+      vsync: this,
+    );
 
-     Future.delayed(widget.delay, () {
-       if (mounted) {
-         _animationController.forward();
-       }
-     });
-   }
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: AppMotion.outCurve),
+    );
 
-   @override
-   void dispose() {
-     _animationController.dispose();
-     super.dispose();
-   }
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: AppMotion.outCurve,
+          ),
+        );
 
-   @override
-   Widget build(BuildContext context) {
-     return FadeTransition(
-       opacity: _fadeAnimation,
-       child: SlideTransition(
-         position: _slideAnimation,
-         child: widget.child,
-       ),
-     );
-   }
- }
+    Future.delayed(widget.delay, () {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
+    );
+  }
+}

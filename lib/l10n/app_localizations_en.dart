@@ -1829,7 +1829,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceDateLabel => 'Date';
 
   @override
+  String get attendanceCycleLabel => 'Cycle';
+
+  @override
+  String get attendanceLevelLabel => 'Level';
+
+  @override
+  String get attendanceClassLabel => 'Class';
+
+  @override
+  String get attendanceShowClassAction => 'Show class';
+
+  @override
   String get attendanceInvitationMessage => 'Run a search to display attendance for the selected class.';
+
+  @override
+  String get attendanceEmptySelectionMessage => 'Select a class and a date to take attendance.';
 
   @override
   String get attendanceLoadingMessage => 'Loading attendance records...';
@@ -1862,6 +1877,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceSaveSuccess => 'Attendance records were saved successfully.';
 
   @override
+  String get attendanceValidateCallAction => 'Validate attendance';
+
+  @override
   String get attendancePendingChanges => 'Pending changes';
 
   @override
@@ -1878,6 +1896,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendanceDateTooltip => 'Choose the attendance date';
+
+  @override
+  String get attendanceStatusInProgress => 'Attendance in progress';
+
+  @override
+  String get attendanceStatusReady => 'Ready to validate';
+
+  @override
+  String get attendancePresentCount => 'Present';
+
+  @override
+  String get attendanceAbsentCount => 'Absent';
+
+  @override
+  String get attendanceTotalCountCompact => 'Total';
+
+  @override
+  String get attendanceDefaultPresenceHelper => 'All students are marked present by default. Tap Absent to report an exception.';
+
+  @override
+  String get attendanceReadyToValidate => 'No absence is missing a reason. You can validate attendance.';
+
+  @override
+  String attendanceMissingReasonsStatus(int count) {
+    return '$count absence(s) without reason - complete required';
+  }
+
+  @override
+  String get attendanceAllPresentConfirmTitle => 'Confirm attendance';
+
+  @override
+  String attendanceAllPresentConfirmMessage(int count) {
+    return 'Do you confirm that all $count students are present?';
+  }
 
   @override
   String get attendanceTotalCount => 'Total students';
@@ -1925,6 +1977,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendanceReasonRequiredError => 'Please select a reason for this absence.';
+
+  @override
+  String get attendanceReasonRequiredHint => 'Reason required for an absence.';
 
   @override
   String get attendanceReasonDisabledHint => 'Reason is required only when the student is absent.';
@@ -2014,6 +2069,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryDetailBackLabel => 'Back to disciplines';
 
   @override
+  String get disciplinaryFollowUpTitle => 'Disciplinary follow-up';
+
+  @override
   String get disciplinaryHeroTitle => 'Disciplinary case file detail';
 
   @override
@@ -2029,10 +2087,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryTabCasesLabel => 'Disciplinary cases';
 
   @override
+  String get disciplinaryTabAttendanceHistoryLabel => 'Attendance history';
+
+  @override
+  String get disciplinaryAttendanceHistoryComingSoon => 'Attendance history will be delivered in a future feature.';
+
+  @override
+  String get disciplinaryUnknownValue => '-';
+
+  @override
   String get disciplinaryCaseCreateAction => 'New case';
 
   @override
   String get disciplinaryCaseCreateCtaSubtitle => 'Document a new disciplinary incident for this student.';
+
+  @override
+  String disciplinaryCasesSummary(int total, int open) {
+    return '$total recorded cases - $open open';
+  }
 
   @override
   String get disciplinaryCasesTableTitleColumn => 'Title';
@@ -2042,6 +2114,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disciplinaryCasesTableActionColumn => 'Actions';
+
+  @override
+  String get disciplinaryCasesDateUnavailable => 'Date unavailable';
 
   @override
   String get disciplinaryCaseViewLabel => 'View case';
@@ -2135,6 +2210,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disciplinaryCaseStatusOpen => 'Open';
+
+  @override
+  String get disciplinaryCaseStatusInProgress => 'In progress';
+
+  @override
+  String get disciplinaryCaseStatusClosed => 'Closed';
 
   @override
   String get disciplinaryCaseStatusUnknown => 'Unknown';

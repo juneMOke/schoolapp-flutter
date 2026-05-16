@@ -788,7 +788,12 @@
   "attendanceSearchTitle": "Recherche des présences",
   "attendanceSearchHint": "Sélectionnez cycle, niveau, classe et date pour afficher les enregistrements.",
   "attendanceDateLabel": "Date",
+  "attendanceCycleLabel": "Cycle",
+  "attendanceLevelLabel": "Niveau",
+  "attendanceClassLabel": "Classe",
+  "attendanceShowClassAction": "Afficher la classe",
   "attendanceInvitationMessage": "Lancez une recherche pour afficher les présences de la classe sélectionnée.",
+  "attendanceEmptySelectionMessage": "Sélectionnez une classe et une date pour faire l'appel.",
   "attendanceLoadingMessage": "Chargement des présences en cours...",
   "attendanceEmptyMessage": "Aucune présence trouvée pour ces critères.",
   "attendanceExportAction": "Exporter",
@@ -799,12 +804,37 @@
   "attendanceSaveTooltip": "Enregistrer toutes les modifications saisies",
   "attendanceSaveValidationHint": "Corrigez les lignes absentes sans motif avant d'enregistrer.",
   "attendanceSaveSuccess": "Les présences ont été enregistrées avec succès.",
+  "attendanceValidateCallAction": "Valider l'appel",
   "attendancePendingChanges": "Modifications en attente",
   "attendancePendingInvalidChanges": "Corrections requises",
   "attendanceRowModifiedLabel": "Modifiée",
   "attendanceUnsavedChangesTitle": "Modifications non enregistrées",
   "attendanceUnsavedChangesMessage": "Une nouvelle recherche supprimera les changements non enregistrés. Voulez-vous continuer ?",
   "attendanceDateTooltip": "Choisir la date des présences",
+  "attendanceStatusInProgress": "Appel en cours",
+  "attendanceStatusReady": "Prêt à valider",
+  "attendancePresentCount": "Présents",
+  "attendanceAbsentCount": "Absents",
+  "attendanceTotalCountCompact": "Total",
+  "attendanceDefaultPresenceHelper": "Tous les élèves sont présents par défaut. Tapez Absent pour signaler une exception.",
+  "attendanceReadyToValidate": "Aucune absence sans motif. Vous pouvez valider l'appel.",
+  "attendanceMissingReasonsStatus": "{count} absence(s) sans motif — à compléter",
+  "@attendanceMissingReasonsStatus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceAllPresentConfirmTitle": "Confirmer l'appel",
+  "attendanceAllPresentConfirmMessage": "Confirmez-vous que les {count} élèves sont présents ?",
+  "@attendanceAllPresentConfirmMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "attendanceTotalCount": "Effectif total",
   "attendanceGirlsCount": "Effectif filles",
   "attendanceBoysCount": "Effectif garçons",
@@ -830,6 +860,7 @@
   "attendanceAbsentValue": "Absent",
   "attendanceReadOnlyHint": "Statut consultatif en lecture seule",
   "attendanceReasonRequiredError": "Veuillez sélectionner un motif pour cette absence.",
+  "attendanceReasonRequiredHint": "Motif requis pour une absence.",
   "attendanceReasonDisabledHint": "Le motif est requis seulement pour une absence.",
   "attendanceNoteDisabledHint": "La note est facultative seulement pour une absence.",
   "attendanceNotePlaceholder": "Ajouter une précision si nécessaire",
@@ -861,16 +892,32 @@
    "signOutAction": "Se déconnecter",
 
    "disciplinaryDetailBackLabel": "Retour aux disciplines",
+   "disciplinaryFollowUpTitle": "Suivi disciplinaire",
    "disciplinaryHeroTitle": "Détail du dossier disciplinaire",
    "disciplinaryHeroChipCases": "Cas disciplinaires",
    "disciplinaryDetailContextErrorTitle": "Contexte de détail indisponible",
    "disciplinaryDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
    "disciplinaryTabCasesLabel": "Cas disciplinaires",
+   "disciplinaryTabAttendanceHistoryLabel": "Historique de présences",
+   "disciplinaryAttendanceHistoryComingSoon": "L'historique de présences sera ajouté dans une prochaine feature.",
+   "disciplinaryUnknownValue": "-",
    "disciplinaryCaseCreateAction": "Nouveau cas",
    "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
+   "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
+   "@disciplinaryCasesSummary": {
+     "placeholders": {
+       "total": {
+         "type": "int"
+       },
+       "open": {
+         "type": "int"
+       }
+     }
+   },
    "disciplinaryCasesTableTitleColumn": "Titre",
    "disciplinaryCasesTableStatusColumn": "Statut",
    "disciplinaryCasesTableActionColumn": "Actions",
+   "disciplinaryCasesDateUnavailable": "Date non disponible",
    "disciplinaryCaseViewLabel": "Voir le cas",
    "disciplinaryCasesLoadingMessage": "Chargement des cas disciplinaires...",
    "disciplinaryCasesEmptyMessage": "Aucun cas disciplinaire pour cet élève.",
@@ -902,6 +949,8 @@
    "disciplinaryCasesAuthError": "Une erreur d'authentification empêche le chargement des cas.",
    "disciplinaryCasesUnknownError": "Une erreur inattendue est survenue.",
    "disciplinaryCaseStatusOpen": "Ouvert",
+   "disciplinaryCaseStatusInProgress": "En cours",
+   "disciplinaryCaseStatusClosed": "Clôturé",
    "disciplinaryCaseStatusUnknown": "Inconnu",
 
    "enrollmentStatusPreRegistered": "Pré-inscrit",

@@ -19,6 +19,9 @@ DisciplinaryCaseSummaryModel _$DisciplinaryCaseSummaryModelFromJson(
   title: json['title'] as String,
   status: json['status'] as String,
   content: json['content'] as String,
+  disciplinaryCaseDate: json['disciplinaryCaseDate'] == null
+      ? null
+      : DateTime.parse(json['disciplinaryCaseDate'] as String),
 );
 
 Map<String, dynamic> _$DisciplinaryCaseSummaryModelToJson(
@@ -34,4 +37,5 @@ Map<String, dynamic> _$DisciplinaryCaseSummaryModelToJson(
   'title': instance.title,
   'status': instance.status,
   'content': instance.content,
+  'disciplinaryCaseDate': instance.disciplinaryCaseDate?.toIso8601String(),
 };

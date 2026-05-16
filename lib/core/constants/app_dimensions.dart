@@ -45,4 +45,15 @@ class AppDimensions {
   static const classesOrganisationShadowBlur = 14.0;
   static const classesOrganisationShadowOffsetY = 8.0;
   static const minTouchTarget = 48.0;
+
+  // Attendance page tokens
+  static const attendanceStudentAvatarSize = 30.0;
+  static const attendanceResultsPanelMinHeight = 360.0;
+  static const attendanceResultsPanelMaxHeight = 620.0;
+  static const attendanceCounterValueFontSize = 16.0;
+  static const attendanceCycleFieldWidth = 170.0;
+  static const attendanceLevelFieldWidth = 170.0;
+  static const attendanceClassFieldWidth = 210.0;
+  static const attendanceDateFieldWidth = 190.0;
+  static const attendanceCounterColumnWidth = 72.0;
 }

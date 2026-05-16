@@ -9,6 +9,7 @@ class DisciplinaryStudentDetailIntent extends Equatable {
   final String academicYearId;
   final String levelName;
   final String levelGroupName;
+  final String classroomName;
 
   const DisciplinaryStudentDetailIntent({
     required this.studentId,
@@ -19,6 +20,7 @@ class DisciplinaryStudentDetailIntent extends Equatable {
     required this.academicYearId,
     required this.levelName,
     required this.levelGroupName,
+    this.classroomName = '',
   });
 
   const DisciplinaryStudentDetailIntent.invalid({
@@ -33,11 +35,11 @@ class DisciplinaryStudentDetailIntent extends Equatable {
          academicYearId: academicYearId,
          levelName: '',
          levelGroupName: '',
+         classroomName: '',
        );
 
   bool get hasDisplayContext =>
-      studentFirstName.trim().isNotEmpty &&
-      studentLastName.trim().isNotEmpty;
+      studentFirstName.trim().isNotEmpty && studentLastName.trim().isNotEmpty;
 
   DisciplinaryStudentDetailIntent withRouteParams({
     required String studentId,
@@ -51,6 +53,7 @@ class DisciplinaryStudentDetailIntent extends Equatable {
     academicYearId: academicYearId,
     levelName: levelName,
     levelGroupName: levelGroupName,
+    classroomName: classroomName,
   );
 
   static DisciplinaryStudentDetailIntent fromRouteContext({
@@ -81,5 +84,6 @@ class DisciplinaryStudentDetailIntent extends Equatable {
     academicYearId,
     levelName,
     levelGroupName,
+    classroomName,
   ];
 }

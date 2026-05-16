@@ -36,7 +36,9 @@ class _PresencesPageState extends State<PresencesPage> {
       }
 
       context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(key: AppConstants.bootstrapPayloadKey),
+        const BootstrapContextLocalRequested(
+          key: AppConstants.bootstrapPayloadKey,
+        ),
       );
     });
   }

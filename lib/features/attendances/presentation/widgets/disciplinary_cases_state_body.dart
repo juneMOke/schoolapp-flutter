@@ -8,12 +8,7 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/dis
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-enum DisciplinaryCasesBodyStatus {
-  loading,
-  empty,
-  error,
-  success,
-}
+enum DisciplinaryCasesBodyStatus { loading, empty, error, success }
 
 class DisciplinaryCasesStateBody extends StatelessWidget {
   final DisciplinaryCasesBodyStatus status;
@@ -21,6 +16,7 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback? onRetry;
   final void Function(DisciplinaryCaseSummary) onViewCase;
+
   /// Callback optionnel affiché dans l'état vide pour inviter à créer un cas.
   final VoidCallback? onCreateCase;
 
@@ -103,26 +99,13 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
                       ),
                       const SizedBox(width: AppDimensions.spacingM),
                       Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: Text(
                           l10n.disciplinaryCasesTableStatusColumn,
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.w700,
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: AppDimensions.spacingM),
-                      SizedBox(
-                        width: AppDimensions.minTouchTarget +
-                            AppDimensions.spacingM,
-                        child: Text(
-                          l10n.disciplinaryCasesTableActionColumn,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
@@ -276,10 +259,7 @@ class _SkeletonCaseRow extends StatefulWidget {
   final Duration delay;
   final bool isCompact;
 
-  const _SkeletonCaseRow({
-    required this.delay,
-    required this.isCompact,
-  });
+  const _SkeletonCaseRow({required this.delay, required this.isCompact});
 
   @override
   State<_SkeletonCaseRow> createState() => _SkeletonCaseRowState();
@@ -298,8 +278,10 @@ class _SkeletonCaseRowState extends State<_SkeletonCaseRow>
       vsync: this,
     );
 
-    _shimmerAnimation =
-        Tween<double>(begin: -1.0, end: 2.0).animate(_shimmerController);
+    _shimmerAnimation = Tween<double>(
+      begin: -1.0,
+      end: 2.0,
+    ).animate(_shimmerController);
 
     Future.delayed(widget.delay, () {
       if (mounted) {
@@ -361,7 +343,7 @@ class _SkeletonCaseRowState extends State<_SkeletonCaseRow>
     return Row(
       children: [
         Expanded(
-          flex: 5,
+          flex: 6,
           child: _ShimmerBox(
             shimmerAnimation: _shimmerAnimation,
             height: 20,
@@ -370,18 +352,12 @@ class _SkeletonCaseRowState extends State<_SkeletonCaseRow>
         ),
         const SizedBox(width: AppDimensions.spacingM),
         Expanded(
-          flex: 3,
+          flex: 4,
           child: _ShimmerBox(
             shimmerAnimation: _shimmerAnimation,
             height: 20,
             width: double.infinity,
           ),
-        ),
-        const SizedBox(width: AppDimensions.spacingM),
-        _ShimmerBox(
-          shimmerAnimation: _shimmerAnimation,
-          height: 40,
-          width: 100,
         ),
       ],
     );
