@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,32 +23,16 @@ class ReRegistrationAcademicOption {
   String get key => '$schoolLevelGroupId::$schoolLevelId';
 }
 
-class ReRegistrationSearchRequest {
-  final String firstName;
-  final String lastName;
-  final String surname;
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
-
-  const ReRegistrationSearchRequest({
-    required this.firstName,
-    required this.lastName,
-    required this.surname,
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
-  });
-}
-
 class ReRegistrationSearchForm extends StatefulWidget {
   final List<ReRegistrationAcademicOption> options;
   final bool isLoading;
-  final ValueChanged<ReRegistrationSearchRequest> onSearch;
+  final EnrollmentSearchDispatcher dispatch;
 
   const ReRegistrationSearchForm({
     super.key,
     required this.options,
     required this.isLoading,
-    required this.onSearch,
+    required this.dispatch,
   });
 
   @override
@@ -79,55 +63,24 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     final canSearch =
         !widget.isLoading && (_hasRequiredNames() || selectedKey != null);
 
-    return SearchFormCard(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const spacing = 10.0;
-          final isWide = constraints.maxWidth >= AppBreakpoints.formWideMin;
-          final isMedium = constraints.maxWidth >= AppBreakpoints.formMediumMin;
-          final columns = isMedium ? 3 : 1;
-
-          final nameFields = _buildNameFields(l10n);
-          final academicDropdown = _buildAcademicDropdown(
-            l10n: l10n,
-            uniqueOptions: uniqueOptions,
-            selectedKey: selectedKey,
-          );
-          final actions = _buildActions(l10n: l10n, canSearch: canSearch);
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SearchFormTitle(label: l10n.subMenuReRegistrations),
-              const SizedBox(height: 6),
-              Text(
-                l10n.reRegistrationSearchHint,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (isWide)
-                _WideLayout(
-                  spacing: spacing,
-                  nameFields: nameFields,
-                  academicDropdown: academicDropdown,
-                  actions: actions,
-                )
-              else
-                _CompactLayout(
-                  spacing: spacing,
-                  columns: columns,
-                  availableWidth: constraints.maxWidth,
-                  nameFields: nameFields,
-                  academicDropdown: academicDropdown,
-                  actions: actions,
-                ),
-            ],
-          );
-        },
+    return SearchFormResponsiveView(
+      title: SearchFormTitle(label: l10n.subMenuReRegistrations),
+      subtitle: Text(
+        l10n.reRegistrationSearchHint,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textSecondary,
+          height: 1.35,
+        ),
       ),
+      fields: [
+        ..._buildNameFields(l10n),
+        _buildAcademicDropdown(
+          l10n: l10n,
+          uniqueOptions: uniqueOptions,
+          selectedKey: selectedKey,
+        ),
+      ],
+      actions: _buildActions(l10n: l10n, canSearch: canSearch),
     );
   }
 
@@ -215,30 +168,51 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     required AppLocalizations l10n,
     required bool canSearch,
   }) {
-    return ElevatedButton.icon(
-      onPressed: canSearch ? _submit : null,
-      icon: widget.isLoading
-          ? const SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.textOnDark,
-              ),
-            )
-          : const Icon(Icons.search_rounded, size: 14),
-      label: Text(l10n.search),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.bleuArdoise,
-        foregroundColor: AppColors.textOnDark,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        minimumSize: const Size(112, AppDimensions.minTouchTarget),
-        textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-        disabledBackgroundColor: AppColors.stateDisabled,
-        disabledForegroundColor: AppColors.textMuted,
-      ),
+    final isClearEnabled = _hasAnyCriteria() && !widget.isLoading;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 10,
+      children: [
+        OutlinedButton.icon(
+          onPressed: isClearEnabled ? _clearSearch : null,
+          icon: const Icon(Icons.refresh_rounded, size: 14),
+          label: Text(l10n.clear),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+            side: const BorderSide(color: AppColors.border),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+          ),
+        ),
+        ElevatedButton.icon(
+          onPressed: canSearch ? _submit : null,
+          icon: widget.isLoading
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.textOnDark,
+                  ),
+                )
+              : const Icon(Icons.search_rounded, size: 14),
+          label: Text(l10n.search),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.bleuArdoise,
+            foregroundColor: AppColors.textOnDark,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+            disabledBackgroundColor: AppColors.stateDisabled,
+            disabledForegroundColor: AppColors.textMuted,
+          ),
+        ),
+      ],
     );
   }
 
@@ -268,6 +242,20 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
       _lastNameController.text.trim().isNotEmpty &&
       _surnameController.text.trim().isNotEmpty;
 
+  bool _hasAnyCriteria() =>
+      _firstNameController.text.trim().isNotEmpty ||
+      _lastNameController.text.trim().isNotEmpty ||
+      _surnameController.text.trim().isNotEmpty ||
+      _selectedAcademicOptionKey != null;
+
+  void _clearSearch() {
+    if (widget.isLoading) return;
+    _firstNameController.clear();
+    _lastNameController.clear();
+    _surnameController.clear();
+    setState(() => _selectedAcademicOptionKey = null);
+  }
+
   void _submit() {
     final uniqueOptions = _buildUniqueOptions();
     final selectedKey =
@@ -280,8 +268,8 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     final selectedOption = uniqueOptions
         .where((o) => o.key == selectedKey)
         .firstOrNull;
-    widget.onSearch(
-      ReRegistrationSearchRequest(
+    widget.dispatch(
+      AcademicInfoSearchCommand(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         surname: _surnameController.text.trim(),
@@ -297,74 +285,5 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     _lastNameController.dispose();
     _surnameController.dispose();
     super.dispose();
-  }
-}
-
-// ─── Layouts ──────────────────────────────────────────────────────────────────
-
-class _WideLayout extends StatelessWidget {
-  final double spacing;
-  final List<Widget> nameFields;
-  final Widget academicDropdown;
-  final Widget actions;
-
-  const _WideLayout({
-    required this.spacing,
-    required this.nameFields,
-    required this.academicDropdown,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        ...nameFields.expand(
-          (f) => [Expanded(child: f), SizedBox(width: spacing)],
-        ),
-        Expanded(child: academicDropdown),
-        const SizedBox(width: 14),
-        actions,
-      ],
-    );
-  }
-}
-
-class _CompactLayout extends StatelessWidget {
-  final double spacing;
-  final int columns;
-  final double availableWidth;
-  final List<Widget> nameFields;
-  final Widget academicDropdown;
-  final Widget actions;
-
-  const _CompactLayout({
-    required this.spacing,
-    required this.columns,
-    required this.availableWidth,
-    required this.nameFields,
-    required this.academicDropdown,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fieldWidth = ((availableWidth - (columns - 1) * spacing) / columns)
-        .clamp(170.0, 360.0);
-
-    return Wrap(
-      spacing: spacing,
-      runSpacing: spacing,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        ...nameFields.map((f) => SizedBox(width: fieldWidth, child: f)),
-        SizedBox(width: fieldWidth, child: academicDropdown),
-        SizedBox(
-          width: availableWidth,
-          child: Align(alignment: Alignment.centerRight, child: actions),
-        ),
-      ],
-    );
   }
 }

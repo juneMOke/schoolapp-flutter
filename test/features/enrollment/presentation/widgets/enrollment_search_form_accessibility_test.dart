@@ -63,7 +63,7 @@ void main() {
           ReRegistrationSearchForm(
             options: const [],
             isLoading: false,
-            onSearch: (_) {},
+            dispatch: (_) {},
           ),
         ),
       );

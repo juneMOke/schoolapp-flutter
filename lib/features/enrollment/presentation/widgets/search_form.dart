@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_wide_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SearchForm extends StatefulWidget {
@@ -46,70 +44,58 @@ class _SearchFormState extends State<SearchForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final statusDropdown = widget.showStatusFilter
+        ? SearchFormStatusDropdown(
+            selectedStatus: widget.status,
+            onChanged: (value) => widget.onStatusChanged?.call(value),
+          )
+        : null;
 
-    return SearchFormCard(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const spacing = 10.0;
-          final isWide = constraints.maxWidth >= AppBreakpoints.formWideMin;
-          final isMedium = constraints.maxWidth >= AppBreakpoints.formMediumMin;
-          final columns = isMedium ? 3 : 1;
-          final title = SearchFormTitle(label: l10n.searchStudents);
-          final actions = _buildActionButtons(context, l10n);
-          final statusDropdown = widget.showStatusFilter
-              ? SearchFormStatusDropdown(
-                  selectedStatus: widget.status,
-                  onChanged: (value) => widget.onStatusChanged?.call(value),
-                )
-              : null;
-
-          if (isWide) {
-            return SearchFormWideLayout(
-              title: title,
-              spacing: spacing,
-              firstNameController: _firstNameController,
-              lastNameController: _lastNameController,
-              surnameController: _surnameController,
-              dateOfBirthController: _dateOfBirthController,
-              firstNameLabel: l10n.firstName,
-              lastNameLabel: l10n.lastName,
-              surnameLabel: l10n.surname,
-              dateOfBirthLabel: l10n.dateOfBirth,
-              onFieldChanged: (_) => _onFieldChanged(),
-              onDateTap: () => _selectDate(context),
-              actions: actions,
-              statusDropdown: statusDropdown,
-            );
-          }
-
-          final calculatedWidth =
-              (constraints.maxWidth - ((columns - 1) * spacing)) / columns;
-          final fieldWidth = calculatedWidth.clamp(170.0, 360.0).toDouble();
-
-          return SearchFormCompactLayout(
-            title: title,
-            spacing: spacing,
-            fieldWidth: fieldWidth,
-            availableWidth: constraints.maxWidth,
-            firstNameController: _firstNameController,
-            lastNameController: _lastNameController,
-            surnameController: _surnameController,
-            dateOfBirthController: _dateOfBirthController,
-            firstNameLabel: l10n.firstName,
-            lastNameLabel: l10n.lastName,
-            surnameLabel: l10n.surname,
-            dateOfBirthLabel: l10n.dateOfBirth,
-            onFieldChanged: (_) => _onFieldChanged(),
-            onDateTap: () => _selectDate(context),
-            actions: actions,
-            statusDropdown: statusDropdown,
-          );
-        },
-      ),
+    return SearchFormResponsiveView(
+      title: SearchFormTitle(label: l10n.searchStudents),
+      fields: _buildFields(l10n, statusDropdown),
+      actions: _buildActionButtons(l10n),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, AppLocalizations l10n) {
+  List<Widget> _buildFields(AppLocalizations l10n, Widget? statusDropdown) {
+    final fields = <Widget>[
+      SearchFormInput(
+        controller: _firstNameController,
+        label: l10n.firstName,
+        prefixIcon: const Icon(Icons.person_outline, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _lastNameController,
+        label: l10n.lastName,
+        prefixIcon: const Icon(Icons.badge_outlined, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _surnameController,
+        label: l10n.surname,
+        prefixIcon: const Icon(Icons.account_circle_outlined, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _dateOfBirthController,
+        label: l10n.dateOfBirth,
+        prefixIcon: const Icon(Icons.cake_outlined, size: 16),
+        suffixIcon: const Icon(Icons.calendar_today_rounded, size: 16),
+        readOnly: true,
+        onTap: () => _selectDate(context),
+      ),
+    ];
+
+    if (statusDropdown != null) {
+      return [statusDropdown, ...fields];
+    }
+
+    return fields;
+  }
+
+  Widget _buildActionButtons(AppLocalizations l10n) {
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
     final hasAllNames = _hasAllNameField();
     final isActionLocked = _isActionLocked();

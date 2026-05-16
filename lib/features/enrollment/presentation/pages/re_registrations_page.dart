@@ -142,15 +142,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     return ReRegistrationSearchForm(
       options: academicOptions,
       isLoading: ctx.isLoading,
-      onSearch: (request) => dispatch(
-        AcademicInfoSearchCommand(
-          firstName: request.firstName,
-          lastName: request.lastName,
-          surname: request.surname,
-          schoolLevelGroupId: request.schoolLevelGroupId,
-          schoolLevelId: request.schoolLevelId,
-        ),
-      ),
+      dispatch: dispatch,
     );
   }
 }
