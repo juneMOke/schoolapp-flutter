@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
@@ -17,6 +18,9 @@ class EditableField extends StatelessWidget {
   final bool isChanged;
   final bool readOnly;
   final String? hintText;
+  final TextInputType? keyboardType;
+  final TextInputAction textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
 
   const EditableField({
     super.key,
@@ -30,6 +34,9 @@ class EditableField extends StatelessWidget {
     this.isChanged = false,
     this.readOnly = false,
     this.hintText,
+    this.keyboardType,
+    this.textInputAction = TextInputAction.next,
+    this.inputFormatters,
   });
 
   @override
@@ -51,14 +58,16 @@ class EditableField extends StatelessWidget {
             valueListenable: controller,
             builder: (context, value, _) {
               final hasText = value.text.trim().isNotEmpty;
+              final effectiveInputFormatters =
+                  inputFormatters ??
+                  const [FirstLetterUppercaseTextInputFormatter()];
               return TextFormField(
                 controller: controller,
-                textInputAction: TextInputAction.next,
+                keyboardType: keyboardType,
+                textInputAction: textInputAction,
                 textCapitalization: textCapitalization,
                 style: AppTypography.formValueMedium,
-                inputFormatters: const [
-                  FirstLetterUppercaseTextInputFormatter(),
-                ],
+                inputFormatters: effectiveInputFormatters,
                 readOnly: readOnly,
                 decoration: buildInputDecoration(
                   hintText: hintText ?? l10n.enterFieldHint(label),

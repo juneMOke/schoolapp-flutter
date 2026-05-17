@@ -467,7 +467,7 @@
       }
     }
   },
-  "savePersonalInfo": "Enregistrer",
+  "savePersonalInfo": "Enregistrer les informations personnelles",
   "savingPersonalInfo": "Enregistrement en cours...",
   "personalInfoSaveSuccess": "Informations personnelles mises à jour avec succès.",
   "personalInfoSaveError": "Erreur lors de la mise à jour : {message}",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/fields/dropdown_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validated_year_selector.dart';
@@ -179,6 +180,15 @@ class PreviousYearFields extends StatelessWidget {
                       width: double.infinity,
                       label: l10n.averageLabel,
                       controller: prevRateController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textCapitalization: TextCapitalization.none,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[0-9.,]'),
+                        ),
+                      ],
                       helpMessage: l10n.averageLabelHelp,
                       requiredField: true,
                       errorText: prevRateError,
@@ -192,6 +202,9 @@ class PreviousYearFields extends StatelessWidget {
                       width: double.infinity,
                       label: l10n.rankingLabel,
                       controller: prevRankController,
+                      keyboardType: TextInputType.number,
+                      textCapitalization: TextCapitalization.none,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       helpMessage: l10n.rankingLabelHelp,
                       requiredField: true,
                       errorText: prevRankError,

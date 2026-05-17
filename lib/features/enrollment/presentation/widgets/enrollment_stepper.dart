@@ -261,7 +261,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                   },
                 );
 
-                final content = SingleChildScrollView(
+                return Padding(
+                  padding: const EdgeInsets.all(AppTheme.defaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -273,32 +274,31 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                             _onBreadcrumbStepTap(target, currentStep),
                       ),
                       const SizedBox(height: 12),
-                      StepPageCard(
-                        key: ValueKey(currentStep),
-                        title: stepCardTitles[currentStep],
-                        subtitle: stepCardSubtitles[currentStep],
-                        child: _buildStepContent(steps[currentStep]),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              StepPageCard(
+                                key: ValueKey(currentStep),
+                                title: stepCardTitles[currentStep],
+                                subtitle: stepCardSubtitles[currentStep],
+                                child: _buildStepContent(steps[currentStep]),
+                              ),
+                              if (currentStep != _totalSteps - 1) ...[
+                                const SizedBox(height: 12),
+                                controls,
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
-                      if (currentStep != _totalSteps - 1) ...[
+                      if (currentStep == _totalSteps - 1) ...[
                         const SizedBox(height: 12),
                         controls,
                       ],
                     ],
                   ),
-                );
-
-                return Padding(
-                  padding: const EdgeInsets.all(AppTheme.defaultPadding),
-                  child: currentStep == _totalSteps - 1
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: content),
-                            const SizedBox(height: 12),
-                            controls,
-                          ],
-                        )
-                      : content,
                 );
               },
             );
@@ -310,13 +310,13 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   List<String> _stepTitles(AppLocalizations l10n) {
     return [
-      l10n.wizardStepShortPersonal,
-      l10n.wizardStepShortAddress,
-      l10n.wizardStepShortPrevious,
-      l10n.wizardStepShortTarget,
-      l10n.wizardStepShortCharges,
-      l10n.wizardStepShortGuardian,
-      l10n.wizardStepShortSummary,
+      l10n.personalInformation,
+      l10n.address,
+      l10n.previousYear,
+      l10n.targetYear,
+      l10n.studentChargesStepTitle,
+      l10n.guardianInformation,
+      l10n.summary,
     ];
   }
 
@@ -631,7 +631,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       silent: true,
     );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
-    _flowBloc.add(const EnrollmentStepperCurrentStepChanged(_totalSteps - 1));
     _resetContentScroll();
   }
 
