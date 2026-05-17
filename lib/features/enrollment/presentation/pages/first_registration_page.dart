@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
@@ -67,14 +66,6 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
               onRefresh: screenCtx.onRefreshRequested,
               statusLabel: _effectiveStatus,
               showStatusBadge: false,
-              currentPage: state.summariesPage,
-              totalPages: state.summariesTotalPages,
-              onPreviousPage: () => context.read<EnrollmentBloc>().add(
-                EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
-              ),
-              onNextPage: () => context.read<EnrollmentBloc>().add(
-                EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
-              ),
             ),
         detailIntentFactory: (summary) => EnrollmentDetailIntent(
           origin: EnrollmentDetailOrigin.firstRegistration,

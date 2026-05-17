@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_pagination_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentResultsInfoBar extends StatelessWidget {
@@ -12,10 +11,6 @@ class EnrollmentResultsInfoBar extends StatelessWidget {
   final String? statusLabel;
   final bool showStatusBadge;
   final Widget? action;
-  final int currentPage;
-  final int totalPages;
-  final VoidCallback? onPreviousPage;
-  final VoidCallback? onNextPage;
 
   const EnrollmentResultsInfoBar({
     super.key,
@@ -25,27 +20,18 @@ class EnrollmentResultsInfoBar extends StatelessWidget {
     this.statusLabel,
     this.showStatusBadge = true,
     this.action,
-    this.currentPage = 0,
-    this.totalPages = 0,
-    this.onPreviousPage,
-    this.onNextPage,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final canGoPrevious = !isLoading && onPreviousPage != null && currentPage > 0;
-    final canGoNext =
-        !isLoading && onNextPage != null && currentPage + 1 < totalPages;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surfaceAlt,
+        color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brMd,
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -90,33 +76,20 @@ class EnrollmentResultsInfoBar extends StatelessWidget {
             ),
             const SizedBox(width: 6),
           ],
-          if (totalPages > 0)
-            EnrollmentPaginationBar(
-              currentPage: currentPage,
-              totalPages: totalPages,
-              isLoading: isLoading,
-              onPrevious: canGoPrevious && onPreviousPage != null
-                  ? onPreviousPage!
-                  : () {},
-              onNext: canGoNext && onNextPage != null ? onNextPage! : () {},
-            ),
-          if (action != null) ...[
-            action!,
-            const SizedBox(width: 6),
-          ],
+          if (action != null) ...[action!, const SizedBox(width: 6)],
           Tooltip(
             message: l10n.refresh,
             child: IconButton(
-              onPressed:
-                  isLoading || onRefresh == null ? null : () => onRefresh!(),
-              icon:
-                  isLoading
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Icon(Icons.refresh_rounded),
+              onPressed: isLoading || onRefresh == null
+                  ? null
+                  : () => onRefresh!(),
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded),
               color: AppColors.bleuArdoise,
             ),
           ),

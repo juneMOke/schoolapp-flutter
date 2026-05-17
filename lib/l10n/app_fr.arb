@@ -965,9 +965,12 @@
 
    "statusSynced": "À jour",
    "statusSyncing": "Synchro…",
-   "statusOffline": "Hors ligne",
-   "statusPendingUpload": "À envoyer",
-   "statusSyncConflict": "Conflit",
+    "statusOffline": "Hors ligne",
+    "statusPendingUpload": "À envoyer",
+    "statusSyncConflict": "Conflit",
 
-   "componentGalleryTitle": "Galerie de composants"
+    "previous": "Précédent",
+    "next": "Suivant",
+
+    "componentGalleryTitle": "Galerie de composants"
 }

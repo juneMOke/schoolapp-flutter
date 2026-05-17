@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
@@ -21,7 +20,10 @@ class PreRegistrationsPage extends StatelessWidget {
       child: EnrollmentListingPageScaffold(
         readyKey: 'pre-reg-content',
         bootstrapBuilder: (context, onReady) =>
-            EnrollmentCurrentYearBootstrapBuilder(status: _status, onReady: onReady),
+            EnrollmentCurrentYearBootstrapBuilder(
+              status: _status,
+              onReady: onReady,
+            ),
         searchSectionBuilder: (context, screenCtx, dispatch) => SearchForm(
           academicYearId: screenCtx.academicYearId,
           status: _status,
@@ -37,19 +39,11 @@ class PreRegistrationsPage extends StatelessWidget {
               onRefresh: screenCtx.onRefreshRequested,
               statusLabel: _status,
               showStatusBadge: false,
-              currentPage: state.summariesPage,
-              totalPages: state.summariesTotalPages,
-              onPreviousPage: () => context.read<EnrollmentBloc>().add(
-                EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
-              ),
-              onNextPage: () => context.read<EnrollmentBloc>().add(
-                EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
-              ),
             ),
         detailIntentFactory: (summary) =>
             EnrollmentDetailIntent.preRegistration(
-          enrollmentId: summary.enrollmentId,
-        ),
+              enrollmentId: summary.enrollmentId,
+            ),
       ),
     );
   }

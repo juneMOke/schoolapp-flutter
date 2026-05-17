@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table_container.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
 class EnrollmentListingPageScaffold extends StatelessWidget {
@@ -87,10 +87,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
           return emptyBeforeSearchBuilder!(context, state);
         }
 
-        return EnrollmentDataTable(
-          isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
-          enrollments: state.summaries,
-          totalCount: state.summariesTotalElements,
+        return EnrollmentDataTableContainer(
           onViewRequested: (summary) {
             final intent = detailIntentFactory(summary);
             context.push(

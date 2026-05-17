@@ -1005,10 +1005,13 @@
    "statusAbsentUnjustified": "Absent",
 
    "statusSynced": "Up to date",
-   "statusSyncing": "Syncing…",
-   "statusOffline": "Offline",
-   "statusPendingUpload": "Pending upload",
-   "statusSyncConflict": "Conflict",
+    "statusSyncing": "Syncing…",
+    "statusOffline": "Offline",
+    "statusPendingUpload": "Pending upload",
+    "statusSyncConflict": "Conflict",
 
-   "componentGalleryTitle": "Component gallery"
+    "previous": "Previous",
+    "next": "Next",
+
+    "componentGalleryTitle": "Component gallery"
 }

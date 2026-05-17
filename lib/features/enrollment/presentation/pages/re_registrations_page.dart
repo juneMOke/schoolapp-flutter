@@ -47,9 +47,11 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         readyKey: 're-reg-content',
         bootstrapBuilder: _buildPreviousYearBootstrap,
         searchSectionBuilder: _buildAcademicSearchSection,
-        onSearchCommand: EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
+        onSearchCommand:
+            EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
         resultsSummaryBuilder: (context, state, screenCtx) {
-          if (state.summariesQueryType != EnrollmentSummaryQueryType.byAcademicInfo) {
+          if (state.summariesQueryType !=
+              EnrollmentSummaryQueryType.byAcademicInfo) {
             return const SizedBox.shrink();
           }
 
@@ -62,14 +64,6 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
               );
             },
             showStatusBadge: false,
-            currentPage: state.summariesPage,
-            totalPages: state.summariesTotalPages,
-            onPreviousPage: () => context.read<EnrollmentBloc>().add(
-              EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
-            ),
-            onNextPage: () => context.read<EnrollmentBloc>().add(
-              EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
-            ),
           );
         },
         detailIntentFactory: (summary) => EnrollmentDetailIntent.reRegistration(
@@ -77,7 +71,8 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
           studentId: summary.student.id,
         ),
         showEmptyBeforeSearchWhen: (state) =>
-            state.summariesQueryType != EnrollmentSummaryQueryType.byAcademicInfo,
+            state.summariesQueryType !=
+            EnrollmentSummaryQueryType.byAcademicInfo,
         emptyBeforeSearchBuilder: (_, __) =>
             const ReRegistrationSearchInvitationCard(),
       ),
