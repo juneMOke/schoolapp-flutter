@@ -6,13 +6,14 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address_step.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info_step.dart';
@@ -23,8 +24,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/stud
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/summary_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/target_academic_info_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class EnrollmentStepper extends StatefulWidget {
   final EnrollmentDetail enrollmentDetail;
@@ -161,7 +162,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final stepTitles = _stepTitles(l10n);
-    final stepCardTitles = _stepCardTitles(l10n);
     final stepCardSubtitles = _stepCardSubtitles(l10n);
     final steps = _stepContents();
 
@@ -257,7 +257,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                     _flowBloc.add(
                       EnrollmentStepperCurrentStepChanged(currentStep + 1),
                     );
-                    _resetContentScroll();
                   },
                 );
 
@@ -281,9 +280,9 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                             children: [
                               StepPageCard(
                                 key: ValueKey(currentStep),
-                                title: stepCardTitles[currentStep],
+                                title: stepTitles[currentStep],
                                 subtitle: stepCardSubtitles[currentStep],
-                                child: _buildStepContent(steps[currentStep]),
+                                child: steps[currentStep],
                               ),
                               if (currentStep != _totalSteps - 1) ...[
                                 const SizedBox(height: 12),
@@ -309,18 +308,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   }
 
   List<String> _stepTitles(AppLocalizations l10n) {
-    return [
-      l10n.personalInformation,
-      l10n.address,
-      l10n.previousYear,
-      l10n.targetYear,
-      l10n.studentChargesStepTitle,
-      l10n.guardianInformation,
-      l10n.summary,
-    ];
-  }
-
-  List<String> _stepCardTitles(AppLocalizations l10n) {
     return [
       l10n.personalInformation,
       l10n.address,
@@ -435,7 +422,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   void _onSummaryEditRequested(int step) {
     final boundedStep = step.clamp(0, _totalSteps - 2);
     _flowBloc.add(EnrollmentStepperCurrentStepChanged(boundedStep));
-    _resetContentScroll();
   }
 
   String _resolveStudentId() {
@@ -463,7 +449,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
   void _onBreadcrumbStepTap(int targetStep, int currentStep) {
     if (targetStep <= currentStep) {
       _flowBloc.add(EnrollmentStepperCurrentStepChanged(targetStep));
-      _resetContentScroll();
       return;
     }
     _showHint(AppLocalizations.of(context)!.stepForwardHint);
@@ -596,7 +581,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       if (_isEnrollmentAlreadyCompleted) {
         final l10n = AppLocalizations.of(context)!;
         AppSnackBar.showInfo(context, l10n.completedEnrollmentRedirecting);
-        _redirectToFirstRegistrationFromHome();
+        EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(context);
         return;
       }
 
@@ -618,10 +603,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     }
   }
 
-  void _resetContentScroll() {
-    // Le scroll est maintenant géré par le SingleChildScrollView parent.
-  }
-
   void _refreshAfterSave() {
     if (!mounted) return;
     final enrollmentBloc = context.read<EnrollmentBloc>();
@@ -631,10 +612,5 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       silent: true,
     );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
-    _resetContentScroll();
-  }
-
-  Widget _buildStepContent(Widget stepContent) {
-    return stepContent;
   }
 }

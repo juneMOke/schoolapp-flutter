@@ -27,7 +27,7 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             AppTheme.primaryColor.withValues(alpha: 0.14),
-            const Color(0xFF10B981).withValues(alpha: 0.12),
+            AppTheme.primaryColor.withValues(alpha: 0.06),
           ],
         ),
         border: Border.all(
