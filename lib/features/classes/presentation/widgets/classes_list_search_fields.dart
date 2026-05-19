@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
@@ -56,115 +57,123 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= AppBreakpoints.formMediumMin;
+        const spacing = AppDimensions.spacingS;
+
+        final dropdownFields = [
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(1),
+            child: ClassesListSearchDropdownField<String>(
+              value: selectedCycleId,
+              label: cycleLabel,
+              icon: Icons.account_tree_outlined,
+              items: cycleOptions
+                  .map((o) => DropdownMenuItem<String>(
+                        value: o.id,
+                        child: Text(o.label, overflow: TextOverflow.ellipsis),
+                      ))
+                  .toList(growable: false),
+              onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
+            ),
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(2),
+            child: ClassesListSearchDropdownField<String>(
+              value: selectedLevelKey,
+              label: levelLabel,
+              icon: Icons.school_outlined,
+              items: levelOptions
+                  .map((o) => DropdownMenuItem<String>(
+                        value: o.key,
+                        child: Text(o.label, overflow: TextOverflow.ellipsis),
+                      ))
+                  .toList(growable: false),
+              onChanged: levelOptions.isEmpty ? null : onLevelChanged,
+            ),
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(3),
+            child: ClassesListSearchDropdownField<String>(
+              value: selectedClassroomId,
+              label: classroomLabel,
+              icon: Icons.meeting_room_outlined,
+              items: classroomOptions
+                  .map((c) => DropdownMenuItem<String>(
+                        value: c.id,
+                        child: Text(c.name, overflow: TextOverflow.ellipsis),
+                      ))
+                  .toList(growable: false),
+              onChanged: classroomEnabled ? onClassroomChanged : null,
+            ),
+          ),
+        ];
+
+        final textFields = [
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(4),
+            child: ClassesListSearchTextField(
+              controller: firstNameController,
+              label: firstNameLabel,
+              icon: Icons.person_outline_rounded,
+              onChanged: onFirstNameChanged,
+            ),
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(5),
+            child: ClassesListSearchTextField(
+              controller: lastNameController,
+              label: lastNameLabel,
+              icon: Icons.badge_outlined,
+              onChanged: onLastNameChanged,
+            ),
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(6),
+            child: ClassesListSearchTextField(
+              controller: surnameController,
+              label: surnameLabel,
+              icon: Icons.account_circle_outlined,
+              onChanged: onSurnameChanged,
+            ),
+          ),
+        ];
+
+        if (isWide) {
+          return Column(
+            children: [
+              _buildRow(dropdownFields, spacing),
+              const SizedBox(height: spacing),
+              _buildRow(textFields, spacing),
+            ],
+          );
+        }
+
+        // Compact : wrap automatique, largeur min par champ
+        final fieldWidth = ((constraints.maxWidth - spacing) / 2)
+            .clamp(170.0, 360.0)
+            .toDouble();
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            ...dropdownFields.map((f) => SizedBox(width: fieldWidth, child: f)),
+            ...textFields.map((f) => SizedBox(width: fieldWidth, child: f)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(List<Widget> children, double spacing) {
+    return Row(
       children: [
-        Row(
-          children: [
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(1),
-              child: Expanded(
-                child: ClassesListSearchDropdownField<String>(
-                  value: selectedCycleId,
-                  label: cycleLabel,
-                  icon: Icons.account_tree_outlined,
-                  items: cycleOptions
-                      .map(
-                        (option) => DropdownMenuItem<String>(
-                          value: option.id,
-                          child: Text(option.label, overflow: TextOverflow.ellipsis),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(2),
-              child: Expanded(
-                child: ClassesListSearchDropdownField<String>(
-                  value: selectedLevelKey,
-                  label: levelLabel,
-                  icon: Icons.school_outlined,
-                  items: levelOptions
-                      .map(
-                        (option) => DropdownMenuItem<String>(
-                          value: option.key,
-                          child: Text(option.label, overflow: TextOverflow.ellipsis),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: levelOptions.isEmpty ? null : onLevelChanged,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(3),
-              child: Expanded(
-                child: ClassesListSearchDropdownField<String>(
-                  value: selectedClassroomId,
-                  label: classroomLabel,
-                  icon: Icons.meeting_room_outlined,
-                  items: classroomOptions
-                      .map(
-                        (classroom) => DropdownMenuItem<String>(
-                          value: classroom.id,
-                          child: Text(
-                            classroom.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: classroomEnabled ? onClassroomChanged : null,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppDimensions.spacingS),
-        Row(
-          children: [
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(4),
-              child: Expanded(
-                child: ClassesListSearchTextField(
-                  controller: firstNameController,
-                  label: firstNameLabel,
-                  icon: Icons.person_outline_rounded,
-                  onChanged: onFirstNameChanged,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(5),
-              child: Expanded(
-                child: ClassesListSearchTextField(
-                  controller: lastNameController,
-                  label: lastNameLabel,
-                  icon: Icons.badge_outlined,
-                  onChanged: onLastNameChanged,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(6),
-              child: Expanded(
-                child: ClassesListSearchTextField(
-                  controller: surnameController,
-                  label: surnameLabel,
-                  icon: Icons.account_circle_outlined,
-                  onChanged: onSurnameChanged,
-                ),
-              ),
-            ),
-          ],
-        ),
+        for (var i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i < children.length - 1) SizedBox(width: spacing),
+        ],
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 
 class ClassesListSearchActions extends StatelessWidget {
   final VoidCallback onReset;
@@ -21,68 +22,51 @@ class ClassesListSearchActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       spacing: AppDimensions.spacingS,
-      runSpacing: AppDimensions.spacingS,
       children: [
         FocusTraversalOrder(
           order: const NumericFocusOrder(7),
-          child: Semantics(
-            button: true,
-            enabled: true,
-            label: clearLabel,
-            child: Tooltip(
-              message: clearLabel,
-              child: TextButton.icon(
-                onPressed: onReset,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(clearLabel),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.textSecondary,
-                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                  textStyle: AppTextStyles.action,
-                ),
-              ),
+          child: OutlinedButton.icon(
+            onPressed: onReset,
+            icon: const Icon(Icons.refresh_rounded, size: 14),
+            label: Text(clearLabel),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: const Size(112, AppDimensions.minTouchTarget),
+              textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+              shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
             ),
           ),
         ),
         FocusTraversalOrder(
           order: const NumericFocusOrder(8),
-          child: Semantics(
-            button: true,
-            enabled: onSearch != null,
-            label: searchLabel,
-            child: Tooltip(
-              message: searchLabel,
-              child: FilledButton.icon(
-                onPressed: onSearch,
-                icon: isSearching
-                    ? const SizedBox(
-                        width: AppDimensions.detailMiniIconSize,
-                        height: AppDimensions.detailMiniIconSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.surface,
-                        ),
-                      )
-                    : const Icon(Icons.search_rounded),
-                label: Text(searchLabel),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.terreCuite,
-                  foregroundColor: AppColors.blancCasse,
-                  disabledBackgroundColor: AppColors.classesDisabledBg,
-                  disabledForegroundColor: AppColors.classesDisabledFg,
-                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.spacingM,
-                    vertical: AppDimensions.spacingS,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-                  ),
-                  textStyle: AppTextStyles.action,
-                ),
-              ),
+          child: ElevatedButton.icon(
+            onPressed: onSearch,
+            icon: isSearching
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.textOnDark,
+                    ),
+                  )
+                : const Icon(Icons.search_rounded, size: 14),
+            label: Text(searchLabel),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.bleuArdoise,
+              foregroundColor: AppColors.textOnDark,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: const Size(112, AppDimensions.minTouchTarget),
+              textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+              shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+              disabledBackgroundColor: AppColors.stateDisabled,
+              disabledForegroundColor: AppColors.textMuted,
             ),
           ),
         ),

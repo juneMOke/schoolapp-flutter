@@ -6,7 +6,6 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_results_toolbar.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_state_card.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_students_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -75,39 +74,17 @@ class ClassesListClassroomResults extends StatelessWidget {
     List<ClassesListStudentRow> rows,
     Map<String, ClassroomMember> byId,
   ) {
-    if (state.membersStatus == ClassroomStatus.loading) {
-      return ClassesListStateCard(
-        key: const ValueKey('classes-list-classroom-loading'),
-        icon: Icons.hourglass_top_rounded,
-        title: l10n.classesListLoadingClassroomMembers,
-        message: l10n.classesListLoadingClassroomMembers,
-      );
-    }
-
-    if (state.membersStatus == ClassroomStatus.failure) {
-      return ClassesListStateCard(
-        key: const ValueKey('classes-list-classroom-error'),
-        icon: Icons.error_outline_rounded,
-        title: l10n.classesOrganisationErrorUnknown,
-        message: ClassesListPageHelpers.mapClassroomErrorToMessage(
-          l10n,
-          state.membersErrorType,
-        ),
-      );
-    }
-
-    if (rows.isEmpty) {
-      return ClassesListStateCard(
-        key: const ValueKey('classes-list-classroom-empty'),
-        icon: Icons.groups_outlined,
-        title: l10n.classesListNoMatchTitle,
-        message: l10n.classesListNoMatchMessage,
-      );
-    }
-
     return ClassesListStudentsTable(
-      key: const ValueKey('classes-list-classroom-table'),
+      key: ValueKey(state.membersStatus),
       rows: rows,
+      isLoading: state.membersStatus == ClassroomStatus.loading,
+      isError: state.membersStatus == ClassroomStatus.failure,
+      loadingLabel: l10n.classesListLoadingClassroomMembers,
+      errorLabel: ClassesListPageHelpers.mapClassroomErrorToMessage(
+        l10n,
+        state.membersErrorType,
+      ),
+      emptyLabel: l10n.classesListNoMatchMessage,
       onViewRequested: (row) {
         final member = byId[row.id];
         if (member != null) {

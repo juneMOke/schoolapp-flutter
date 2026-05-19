@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
 class ClassesListSearchFeedbackBanner extends StatelessWidget {
   final String message;
@@ -66,8 +68,14 @@ class ClassesListSearchDropdownField<T> extends StatelessWidget {
     return DropdownButtonFormField<T>(
       initialValue: value,
       isExpanded: true,
+      isDense: true,
+      icon: const Icon(
+        Icons.keyboard_arrow_down_rounded,
+        size: 18,
+        color: AppColors.textSecondary,
+      ),
+      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
       decoration: classesListSearchInputDecoration(label: label, icon: icon),
-      style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
       items: items,
       onChanged: onChanged,
     );
@@ -93,8 +101,9 @@ class ClassesListSearchTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       textCapitalization: TextCapitalization.words,
+      inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
       onChanged: onChanged,
-      style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+      style: const TextStyle(fontSize: 13),
       decoration: classesListSearchInputDecoration(label: label, icon: icon),
     );
   }
@@ -106,26 +115,24 @@ InputDecoration classesListSearchInputDecoration({
 }) {
   return InputDecoration(
     labelText: label,
-    labelStyle: const TextStyle(color: AppColors.bleuArdoise),
+    labelStyle: const TextStyle(fontSize: 12),
     filled: true,
-    fillColor: AppColors.surfaceRaised,
-    prefixIcon: Icon(icon, color: AppColors.bleuArdoise),
-    floatingLabelStyle: const TextStyle(color: AppColors.bleuArdoise),
+    fillColor: AppColors.surfaceAlt,
+    prefixIcon: Icon(icon),
+    prefixIconConstraints: const BoxConstraints(minWidth: 34),
+    isDense: true,
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+      borderRadius: BorderRadius.circular(AppRadius.sm.x),
       borderSide: BorderSide.none,
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-      borderSide: const BorderSide(color: AppColors.border),
+      borderRadius: BorderRadius.circular(AppRadius.sm.x),
+      borderSide: BorderSide.none,
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-      borderSide: const BorderSide(color: AppColors.bleuArdoise, width: 1.6),
+      borderRadius: BorderRadius.circular(AppRadius.sm.x),
+      borderSide: const BorderSide(color: AppColors.bleuArdoise, width: 1.4),
     ),
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: AppDimensions.spacingS,
-      vertical: AppDimensions.spacingM,
-    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   );
 }

@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
+    as core_avatar;
+import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_students_table_components.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+enum _ClassesListSortColumn { lastName, surname, firstName }
 
 class ClassesListStudentsTable extends StatefulWidget {
   final List<ClassesListStudentRow> rows;
   final ValueChanged<ClassesListStudentRow> onViewRequested;
+  final bool isLoading;
+  final bool isError;
+  final String? loadingLabel;
+  final String? errorLabel;
+  final String? emptyLabel;
 
   const ClassesListStudentsTable({
     super.key,
     required this.rows,
     required this.onViewRequested,
+    this.isLoading = false,
+    this.isError = false,
+    this.loadingLabel,
+    this.errorLabel,
+    this.emptyLabel,
   });
 
   @override
@@ -20,8 +32,7 @@ class ClassesListStudentsTable extends StatefulWidget {
 }
 
 class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
-  ClassesListStudentsSortColumn _sortColumn =
-      ClassesListStudentsSortColumn.lastName;
+  _ClassesListSortColumn _sortColumn = _ClassesListSortColumn.lastName;
   bool _sortAscending = true;
 
   List<ClassesListStudentRow> get _sortedRows {
@@ -40,69 +51,97 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
     final l10n = AppLocalizations.of(context)!;
     final rows = _sortedRows;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.financeDetailShadow,
-            blurRadius: AppDimensions.classesOrganisationShadowBlur,
-            offset: Offset(0, AppDimensions.spacingS),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ClassesListStudentsTableHeader(
-            l10n: l10n,
-            sortColumn: _sortColumn,
-            sortAscending: _sortAscending,
-            onSortChanged: _onSortChanged,
-          ),
-          const Divider(height: 1, thickness: 1, color: AppColors.border),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: rows.length,
-            separatorBuilder: (_, index) =>
-                const Divider(height: 1, thickness: 1, color: AppColors.border),
-            itemBuilder: (context, index) {
-              final row = rows[index];
-              return ClassesListStudentsDataRow(
-                key: ValueKey<String>('student-row-${rows[index].id}'),
-                row: row,
-                isEven: index.isEven,
-                onViewRequested: widget.onViewRequested,
-              );
-            },
-          ),
-        ],
+    return DataTableView(
+      rows: _buildRows(rows, l10n),
+      config: DataTableViewConfig(
+        columns: _buildColumns(l10n),
+        isLoading: widget.isLoading,
+        isError: widget.isError,
+        loadingLabel: widget.loadingLabel ?? l10n.loadingStudents,
+        errorLabel: widget.errorLabel ?? l10n.classesOrganisationErrorUnknown,
+        sortColumnIndex: _sortColumn.index,
+        sortAscending: _sortAscending,
+        onSortChanged: _onSortChanged,
+        emptyLabel: widget.emptyLabel ?? l10n.classesListNoMatchMessage,
+        footer: DataTableFooterConfig(
+          label: l10n.enrollmentResultsCount(rows.length),
+        ),
       ),
     );
   }
 
-  void _onSortChanged(ClassesListStudentsSortColumn column) {
-    setState(() {
-      if (_sortColumn == column) {
-        _sortAscending = !_sortAscending;
-        return;
-      }
+  List<DataTableColumnDef> _buildColumns(AppLocalizations l10n) {
+    return [
+      DataTableColumnDef(
+        label: l10n.lastName,
+        flex: 3,
+        sortable: true,
+        sortIndex: _ClassesListSortColumn.lastName.index,
+      ),
+      DataTableColumnDef(
+        label: l10n.surname,
+        flex: 3,
+        sortable: true,
+        sortIndex: _ClassesListSortColumn.surname.index,
+      ),
+      DataTableColumnDef(
+        label: l10n.firstName,
+        flex: 3,
+        sortable: true,
+        sortIndex: _ClassesListSortColumn.firstName.index,
+      ),
+    ];
+  }
 
-      _sortColumn = column;
-      _sortAscending = true;
+  List<DataTableRowSpec> _buildRows(
+    List<ClassesListStudentRow> rows,
+    AppLocalizations l10n,
+  ) {
+    return rows
+        .map(
+          (row) => DataTableRowSpec(
+            id: row.id,
+            displayName: '${row.lastName} ${row.firstName}',
+            leading: core_avatar.StudentAvatar(
+              firstName: row.firstName,
+              lastName: row.lastName,
+              size: 28,
+            ),
+            cells: [
+              DataTableCellSpec(
+                text: row.lastName,
+                variant: DataTableCellTextVariant.strong,
+              ),
+              DataTableCellSpec(text: row.surname),
+              DataTableCellSpec(text: row.firstName),
+            ],
+            trailing: DataTableTrailingSpec(
+              type: DataTableTrailingType.eye,
+              tooltip: l10n.viewDetails,
+              onTap: () => widget.onViewRequested(row),
+            ),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  void _onSortChanged(int column, bool ascending) {
+    if (column < 0 || column >= _ClassesListSortColumn.values.length) return;
+
+    setState(() {
+      _sortColumn = _ClassesListSortColumn.values[column];
+      _sortAscending = ascending;
     });
   }
 
   String _valueFor(
     ClassesListStudentRow row,
-    ClassesListStudentsSortColumn column,
+    _ClassesListSortColumn column,
   ) {
     return switch (column) {
-      ClassesListStudentsSortColumn.lastName => row.lastName.toLowerCase(),
-      ClassesListStudentsSortColumn.surname => row.surname.toLowerCase(),
-      ClassesListStudentsSortColumn.firstName => row.firstName.toLowerCase(),
+      _ClassesListSortColumn.lastName => row.lastName.toLowerCase(),
+      _ClassesListSortColumn.surname => row.surname.toLowerCase(),
+      _ClassesListSortColumn.firstName => row.firstName.toLowerCase(),
     };
   }
 }

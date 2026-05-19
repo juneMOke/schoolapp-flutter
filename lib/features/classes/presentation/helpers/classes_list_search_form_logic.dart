@@ -79,6 +79,11 @@ class ClassesListSearchFormLogic {
     return null;
   }
 
+  /// Le bouton Rechercher est actif si et seulement si :
+  /// - le cycle ET le niveau sont sélectionnés (condition minimale obligatoire)
+  ///
+  /// En plus de cette base, classroom et/ou un nom peuvent être ajoutés sans
+  /// modifier la règle d'activation (ils affinent la recherche, pas l'activent).
   static bool hasAtLeastOneCriterion({
     required ClassesListCycleOption? selectedCycle,
     required ClassesListLevelOption? selectedLevel,
@@ -87,14 +92,8 @@ class ClassesListSearchFormLogic {
     required String lastName,
     required String surname,
   }) {
-    final hasNames = [firstName, lastName, surname]
-        .map((value) => value.trim())
-        .any((value) => value.isNotEmpty);
-
-    return hasNames ||
-        selectedCycle != null ||
-        selectedLevel != null ||
-        (selectedClassroomId?.trim().isNotEmpty ?? false);
+    // Cycle + niveau sont requis dans tous les cas
+    return selectedCycle != null && selectedLevel != null;
   }
 }
 
