@@ -92,6 +92,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       totalPages: widget.totalPages,
       onPrevious: widget.onPreviousPage!,
       onNext: widget.onNextPage!,
+      isLoading: widget.isLoading,
       pageLabel: widget.pageLabelBuilder,
     );
   }

@@ -34,7 +34,8 @@ class EnrollmentDataTableContainer extends StatelessWidget {
             errorLabel: state.errorMessage,
             emptyLabel: _buildEmptyLabel(state, l10n),
             showPagination: true,
-            currentPage: state.summariesPage,
+            // summariesPage est 0-based dans le BLoC → +1 pour le widget (1-based)
+            currentPage: state.summariesPage + 1,
             totalPages: state.summariesTotalPages,
             onPreviousPage: () => context.read<EnrollmentBloc>().add(
               EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
@@ -42,6 +43,7 @@ class EnrollmentDataTableContainer extends StatelessWidget {
             onNextPage: () => context.read<EnrollmentBloc>().add(
               EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
             ),
+            // current est déjà 1-based ici, pas besoin de +1
             pageLabelBuilder: (current, total) =>
                 l10n.enrollmentPageIndicator(current, total),
             onViewRequested: onViewRequested,

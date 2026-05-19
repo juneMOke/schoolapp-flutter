@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_data_table.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_pagination_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_invitation_card.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Point d'entrée public de la section résultats de la page Facturation.
-///
+/// Adapte l'état BLoC vers la config de [FacturationDataTable].
+/// 
 /// Responsabilité unique : écouter [EnrollmentBloc] et router vers le bon
-/// widget selon l'état courant. Toute logique de rendu est déléguée.
+/// widget selon l'état courant. Tout rendu est déléguée à [FacturationDataTable].
 class FacturationStudentTable extends StatelessWidget {
   /// Appelé quand l'icône "œil" est tapée.
   /// [levelId] provient du dernier critère de recherche stocké dans l'état BLoC.
   final void Function(EnrollmentSummary summary, String levelId)
-  onViewRequested;
+      onViewRequested;
 
   const FacturationStudentTable({super.key, required this.onViewRequested});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocBuilder<EnrollmentBloc, EnrollmentState>(
       buildWhen: _shouldBuild,
       builder: (context, state) {
@@ -32,46 +32,55 @@ class FacturationStudentTable extends StatelessWidget {
         }
 
         final levelId = state.lastSummariesQuery?.schoolLevelId ?? '';
-        final isLoading = state.summariesStatus == EnrollmentLoadStatus.loading;
+        final isLoading =
+            state.summariesStatus == EnrollmentLoadStatus.loading;
+        final isError = state.summariesStatus == EnrollmentLoadStatus.failure;
 
-        return Container(
-          color: AppColors.surfaceRaised,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FacturationDataTable(
-                isLoading: isLoading,
-                summaries: state.summaries,
-                onViewRequested: (s) => onViewRequested(s, levelId),
-              ),
-              const SizedBox(height: AppDimensions.spacingS),
-              if (state.summariesTotalPages > 1)
-                FacturationPaginationBar(
-                  currentPage: state.summariesPage,
-                  totalPages: state.summariesTotalPages,
-                  isLoading: isLoading,
-                  onPrevious: () => context.read<EnrollmentBloc>().add(
-                    EnrollmentSummariesPageRequested(
-                      page: state.summariesPage - 1,
-                    ),
-                  ),
-                  onNext: () => context.read<EnrollmentBloc>().add(
-                    EnrollmentSummariesPageRequested(
-                      page: state.summariesPage + 1,
-                    ),
-                  ),
-                ),
-            ],
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: FacturationDataTable(
+            key: ValueKey(state.summariesStatus),
+            summaries: state.summaries,
+            totalCount: state.summariesTotalElements,
+            isLoading: isLoading,
+            isError: isError,
+            loadingLabel: l10n.loadingStudents,
+            errorLabel: state.errorMessage,
+            emptyLabel: _buildEmptyLabel(state, l10n),
+            showPagination: true,
+            currentPage: state.summariesPage + 1,
+            totalPages: state.summariesTotalPages,
+            onPreviousPage: () => context.read<EnrollmentBloc>().add(
+              EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+            ),
+            onNextPage: () => context.read<EnrollmentBloc>().add(
+              EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+            ),
+            pageLabelBuilder: (current, total) =>
+                l10n.enrollmentPageIndicator(current, total),
+            onViewRequested: (s) => onViewRequested(s, levelId),
           ),
         );
       },
     );
   }
 
+  String _buildEmptyLabel(EnrollmentState state, AppLocalizations l10n) {
+    return switch (state.summariesStatus) {
+      EnrollmentLoadStatus.initial => l10n.noResultsFound,
+      EnrollmentLoadStatus.success => l10n.facturationNoResultsDescription,
+      _ => l10n.facturationNoResultsDescription,
+    };
+  }
+
   static bool _shouldBuild(EnrollmentState prev, EnrollmentState curr) =>
       prev.summariesQueryType != curr.summariesQueryType ||
       prev.summariesStatus != curr.summariesStatus ||
       prev.summaries != curr.summaries ||
+      prev.summariesTotalElements != curr.summariesTotalElements ||
       prev.summariesTotalPages != curr.summariesTotalPages ||
-      prev.summariesPage != curr.summariesPage;
+      prev.summariesPage != curr.summariesPage ||
+      prev.errorMessage != curr.errorMessage;
 }

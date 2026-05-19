@@ -93,8 +93,16 @@ class DataTableRowSpec {
 }
 
 /// Configuration de pagination uniforme pour les tableaux.
+///
+/// Convention : [currentPage] et [totalPages] sont **1-based**.
+/// - Page 1 = première page (première page visible pour l'utilisateur).
+/// - Les BLoCs stockent généralement une page 0-based ; les containers
+///   doivent faire `summariesPage + 1` avant de passer la valeur ici.
 class DataTablePaginationConfig {
+  /// Page courante, **1-based** (1 = première page).
   final int currentPage;
+
+  /// Nombre total de pages, **1-based**.
   final int totalPages;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
