@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_info_widgets.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
@@ -21,6 +22,7 @@ class GuardianInfoStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+  final EnrollmentStepSubmitController? stepController;
 
   const GuardianInfoStep({
     super.key,
@@ -31,6 +33,7 @@ class GuardianInfoStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    this.stepController,
   });
 
   @override
@@ -80,6 +83,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   ParentSummary _buildDraftParent() {
@@ -152,6 +157,12 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   @override
   void didUpdateWidget(covariant GuardianInfoStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
+
     if (oldWidget.parentDetails != widget.parentDetails) {
       _syncFromParentDetails(widget.parentDetails, resetSnapshot: true);
       _pendingParentIds.clear();
@@ -168,6 +179,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _parentBloc.close();
     super.dispose();
   }

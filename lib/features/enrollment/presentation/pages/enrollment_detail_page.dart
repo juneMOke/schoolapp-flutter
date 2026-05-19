@@ -17,7 +17,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/deta
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_read_only_banner.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailPage extends StatefulWidget {
@@ -214,7 +214,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
                     const SizedBox(height: 12),
                   ],
                   Expanded(
-                    child: EnrollmentStepper(
+                    child: EnrollmentStepperScope(
                       enrollmentDetail: detail,
                       detailIntent: _effectiveIntent,
                       detailPolicy: _policy,

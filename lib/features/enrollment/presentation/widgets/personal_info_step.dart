@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
@@ -25,6 +26,7 @@ class PersonalInfoStep extends StatefulWidget {
   final bool isEditable;
   final EnrollmentDetailIntent detailIntent;
   final EnrollmentDetailPolicy detailPolicy;
+  final EnrollmentStepSubmitController? stepController;
 
   const PersonalInfoStep({
     super.key,
@@ -36,6 +38,7 @@ class PersonalInfoStep extends StatefulWidget {
     this.isEditable = true,
     required this.detailIntent,
     required this.detailPolicy,
+    this.stepController,
   });
 
   @override
@@ -106,6 +109,8 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   void _onTextFieldChanged() {
@@ -123,6 +128,12 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   @override
   void didUpdateWidget(covariant PersonalInfoStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
+
     if (oldWidget.studentDetail != widget.studentDetail) {
       _initializeFromStudent(widget.studentDetail);
       _isSaving = false;
@@ -220,6 +231,7 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _firstNameController.removeListener(_onTextFieldChanged);
     _lastNameController.removeListener(_onTextFieldChanged);
     _surnameController.removeListener(_onTextFieldChanged);

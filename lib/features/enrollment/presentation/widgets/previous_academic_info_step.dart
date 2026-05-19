@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/enro
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ class PreviousAcademicInfoStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+  final EnrollmentStepSubmitController? stepController;
 
   const PreviousAcademicInfoStep({
     super.key,
@@ -26,6 +28,7 @@ class PreviousAcademicInfoStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    this.stepController,
   });
 
   @override
@@ -198,6 +201,8 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   Future<void> _loadCyclesCatalog() async {
@@ -285,6 +290,12 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   @override
   void didUpdateWidget(covariant PreviousAcademicInfoStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
+
     if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
       _syncFromEnrollmentDetail(widget.enrollmentDetail, resetSnapshot: true);
       final catalog = _cyclesCatalog;
@@ -303,6 +314,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _prevSchoolController.removeListener(_onFieldChanged);
     _prevRateController.removeListener(_onFieldChanged);
     _prevRankController.removeListener(_onFieldChanged);

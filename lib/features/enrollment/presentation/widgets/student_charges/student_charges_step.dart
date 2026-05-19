@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_widgets.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
@@ -18,6 +19,7 @@ class StudentChargesStep extends StatefulWidget {
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final bool isEditable;
+  final EnrollmentStepSubmitController? stepController;
 
   const StudentChargesStep({
     super.key,
@@ -27,6 +29,7 @@ class StudentChargesStep extends StatefulWidget {
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.isEditable = true,
+    this.stepController,
   });
 
   @override
@@ -62,11 +65,18 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   @override
   void didUpdateWidget(covariant StudentChargesStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
 
     final identifiersChanged =
         oldWidget.studentId != widget.studentId ||
@@ -87,6 +97,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _controller.dispose();
     _studentChargesBloc.close();
     super.dispose();

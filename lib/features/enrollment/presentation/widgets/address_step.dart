@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_form_content.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
@@ -19,6 +20,7 @@ class AddressStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+  final EnrollmentStepSubmitController? stepController;
 
   const AddressStep({
     super.key,
@@ -28,6 +30,7 @@ class AddressStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    this.stepController,
   });
 
   @override
@@ -337,6 +340,8 @@ class AddressStepState extends State<AddressStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   void _emitStepState() {
@@ -462,6 +467,12 @@ class AddressStepState extends State<AddressStep> {
   @override
   void didUpdateWidget(covariant AddressStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
+
     if (oldWidget.studentDetail != widget.studentDetail) {
       _syncFromStudent(widget.studentDetail, resetSnapshot: true);
       final catalog = _geoCatalog;
@@ -481,6 +492,7 @@ class AddressStepState extends State<AddressStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _cityController.removeListener(_onFieldChanged);
     _districtController.removeListener(_onFieldChanged);
     _municipalityController.removeListener(_onFieldChanged);
