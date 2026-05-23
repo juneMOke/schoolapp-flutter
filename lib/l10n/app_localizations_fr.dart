@@ -1004,7 +1004,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get savePersonalInfo => 'Enregistrer';
+  String get savePersonalInfo => 'Enregistrer les informations personnelles';
 
   @override
   String get savingPersonalInfo => 'Enregistrement en cours...';
@@ -2258,4 +2258,75 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get componentGalleryTitle => 'Galerie de composants';
+
+  @override
+  String get enrollmentStatsDashboardTitle => 'Vue d\'ensemble – Année scolaire';
+
+  @override
+  String get enrollmentStatsPeriodYear => 'Année';
+
+  @override
+  String get enrollmentStatsPeriodMonth => 'Mois';
+
+  @override
+  String get enrollmentStatsPeriodWeek => 'Semaine';
+
+  @override
+  String get enrollmentStatsKpiTotal => 'Total';
+
+  @override
+  String get enrollmentStatsKpiFirst => 'Premières inscriptions';
+
+  @override
+  String get enrollmentStatsKpiRe => 'Réinscriptions';
+
+  @override
+  String get enrollmentStatsKpiPre => 'Pré-inscriptions';
+
+  @override
+  String get enrollmentStatsKpiInProgress => 'En cours';
+
+  @override
+  String get enrollmentStatsSectionEvolution => 'Évolution';
+
+  @override
+  String get enrollmentStatsSectionCycle => 'Par cycle';
+
+  @override
+  String get enrollmentStatsSectionGender => 'Par genre';
+
+  @override
+  String get enrollmentStatsSectionEvolutionEnrollments => 'Evolution des Inscritions';
+
+  @override
+  String get enrollmentStatsSectionLevelEvolution => 'Evolution par niveau';
+
+  @override
+  String get enrollmentStatsSectionGenderEvolution => 'Evolution par genre';
+
+  @override
+  String get enrollmentStatsGenderMale => 'Garçons';
+
+  @override
+  String get enrollmentStatsGenderFemale => 'Filles';
+
+  @override
+  String get enrollmentStatsGenderOther => 'Autre';
+
+  @override
+  String get enrollmentStatsNoData => 'Aucune donnée pour cette période';
+
+  @override
+  String get enrollmentStatsLoadingError => 'Impossible de charger les statistiques';
+
+  @override
+  String get enrollmentStatsRetry => 'Réessayer';
+
+  @override
+  String get enrollmentStatsStudents => 'élèves';
+
+  @override
+  String enrollmentStatsPercent(int percent) {
+    return '$percent %';
+  }
 }

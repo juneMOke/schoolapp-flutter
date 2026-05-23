@@ -8,6 +8,8 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
@@ -124,6 +126,7 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildMainContent(BuildContext context, NavigationState state) {
     final hidePageBreadcrumb =
+        state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
@@ -193,6 +196,10 @@ class _HomePageView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     switch (state.selectedSubMenuId) {
+      case MenuConstants.inscriptionsDashboardId:
+        return const EnrollmentStatsDashboardScope(
+          child: EnrollmentStatsDashboardPage(),
+        );
       case MenuConstants.preInscriptionsId:
         return const EnrollmentFeatureScope(child: PreRegistrationsPage());
       case MenuConstants.reInscriptionsId:

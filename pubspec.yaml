@@ -50,6 +50,7 @@ dependencies:
   flutter_native_splash: ^2.4.4
   url_launcher: ^6.3.2
   flutter_svg: ^2.2.3
+  fl_chart: ^0.69.0
 
 
 dev_dependencies:

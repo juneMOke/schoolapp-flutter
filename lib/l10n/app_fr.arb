@@ -80,16 +80,24 @@
   "classesOrganisationClassroomStats": "{total} élèves - Filles: {girls} - Garçons: {boys}",
   "@classesOrganisationClassroomStats": {
     "placeholders": {
-      "total": { "type": "int" },
-      "girls": { "type": "int" },
-      "boys": { "type": "int" }
+      "total": {
+        "type": "int"
+      },
+      "girls": {
+        "type": "int"
+      },
+      "boys": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationTransferDialogTitle": "Transférer l'élève",
   "classesOrganisationTransferDialogMessage": "Choisissez la sous-classe de destination pour {studentName}.",
   "@classesOrganisationTransferDialogMessage": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationTransferTargetLabel": "Sous-classe de destination",
@@ -103,7 +111,9 @@
   "classesOrganisationSelectLevelSubtitle": "Choisissez maintenant un niveau dans le cycle {cycleName}.",
   "@classesOrganisationSelectLevelSubtitle": {
     "placeholders": {
-      "cycleName": { "type": "String" }
+      "cycleName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationPendingTitle": "Niveau non encore réparti",
@@ -111,22 +121,32 @@
   "classesOrganisationPendingStudentsToDistribute": "{count} élèves à répartir",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationPendingPlannedClassrooms": "{count} classes prévues",
   "@classesOrganisationPendingPlannedClassrooms": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationAppliedCriterionInfo": "Critère appliqué : répartition équilibrée par genre (école mixte).",
   "classesOrganisationSplitSummary": "{studentsCount} élèves répartis en {classroomsCount} classes · Critère appliqué : {criterion}",
   "@classesOrganisationSplitSummary": {
     "placeholders": {
-      "studentsCount": { "type": "int" },
-      "classroomsCount": { "type": "int" },
-      "criterion": { "type": "String" }
+      "studentsCount": {
+        "type": "int"
+      },
+      "classroomsCount": {
+        "type": "int"
+      },
+      "criterion": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationClassroomsSectionTitle": "Classes constituées",
@@ -136,7 +156,9 @@
   "classesOrganisationUnassignedSummary": "{count} élèves en attente d'affectation",
   "@classesOrganisationUnassignedSummary": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
@@ -145,25 +167,33 @@
   "classesOrganisationAssignDialogMessage": "Choisissez la classe de destination pour {studentName}.",
   "@classesOrganisationAssignDialogMessage": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationClassroomPopulation": "Effectif actuel : {count}",
   "@classesOrganisationClassroomPopulation": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationTransferConfirmMessage": "Confirmez-vous le transfert de {studentName} vers cette classe ?",
   "@classesOrganisationTransferConfirmMessage": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "studentName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationStudentDetailSoon": "Le détail élève sera disponible au prochain lot.",
@@ -194,14 +224,20 @@
   "classesListResultsSummary": "{count} élèves trouvés — {criteria}",
   "@classesListResultsSummary": {
     "placeholders": {
-      "count": { "type": "int" },
-      "criteria": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "criteria": {
+        "type": "String"
+      }
     }
   },
   "classesListResultsSummaryWithoutCriteria": "{count} élèves trouvés",
   "@classesListResultsSummaryWithoutCriteria": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesListClassroomChipLabel": "Classe",
@@ -259,15 +295,23 @@
   "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{résultat} other{résultats}} sur {totalCount}",
   "@enrollmentPageFooter": {
     "placeholders": {
-      "pageCount": { "type": "int" },
-      "totalCount": { "type": "int" }
+      "pageCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
     }
   },
   "enrollmentPageIndicator": "Page {current} / {total}",
   "@enrollmentPageIndicator": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "refresh": "Actualiser",
@@ -308,7 +352,9 @@
   "guardianUnlinkError": "Erreur lors de la suppression du tuteur : {message}",
   "@guardianUnlinkError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "schoolFees": "Frais Scolaires",
@@ -324,7 +370,6 @@
   "nextPage": "Page suivante",
   "previousPage": "Page précédente",
   "finish": "Terminer",
-
   "personalInfoSubtitle": "Informations personnelles modifiables",
   "firstNameHelp": "Le prénom officiel de l'élève.",
   "lastNameHelp": "Le nom de famille de l'élève.",
@@ -349,7 +394,6 @@
   "dateHint": "jj/mm/aaaa",
   "genderMale": "Masculin",
   "genderFemale": "Féminin",
-
   "city": "Ville",
   "cityHelp": "Ville de résidence de l'élève.",
   "district": "District",
@@ -363,7 +407,6 @@
   "addressComplementaryPlaceholder": "Ex: 10, Avenue La source",
   "fullAddress": "Adresse complète",
   "fullAddressHelp": "Adresse complète de résidence.",
-
   "academicYearLabel": "Année scolaire",
   "academicYearLabelHelp": "Année scolaire de référence.",
   "schoolLabel": "École",
@@ -388,12 +431,13 @@
   "optionLabel": "Option",
   "optionLabelHelp": "Option ou spécialisation souhaitée.",
   "toDefine": "À définir",
-
   "primaryGuardian": "Tuteur Principal",
   "guardianNumber": "Tuteur {number}",
   "@guardianNumber": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "noGuardianInfo": "Aucune information de tuteur disponible",
@@ -410,7 +454,6 @@
   "relationshipAunt": "Tante",
   "relationshipGrandparent": "Grand-parent",
   "relationshipOther": "Autre",
-
   "stepPersonalInfoSubtitle": "Informations générales de l'élève",
   "stepAddressSubtitle": "Localisation et adresse complète",
   "stepAcademicSubtitle": "Historique académique et objectifs",
@@ -428,8 +471,12 @@
   "stepIndicator": "Étape {current} / {total}",
   "@stepIndicator": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "stepForwardHint": "Cliquez sur Continuer pour avancer étape par étape.",
@@ -446,7 +493,9 @@
   "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
   "@enrollmentStatusUpdateError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
@@ -508,7 +557,9 @@
   },
   "@personalInfoSaveError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "enrollmentStatusFilterLabel": "Statut",
@@ -523,7 +574,6 @@
   "enrollmentReadOnlyMessage": "Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.",
   "enrollmentEditableTitle": "Mode édition",
   "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
-
   "studentChargesStepTitle": "Charges de l'élève",
   "studentChargesStepSubtitle": "Montants financiers appliqués à l'élève",
   "studentChargesLoading": "Chargement des charges de l'élève...",
@@ -576,7 +626,6 @@
   "studentChargeFeeCodeRefund": "Remboursement",
   "studentChargeFeeCodeOther": "Autre",
   "studentChargeFeeCodeFallback": "Frais scolaire",
-
   "facturationSearchTitle": "Rechercher les élèves",
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",
   "facturationSearchInvitationTitle": "Aucune recherche en cours",
@@ -584,7 +633,6 @@
   "facturationViewChargesLabel": "Voir les charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
-
   "facturationDetailBackLabel": "Retour aux facturations",
   "facturationDetailContextErrorTitle": "Contexte de détail indisponible",
   "facturationDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
@@ -780,7 +828,6 @@
   "facturationCreatePaymentAuthError": "Une erreur d'authentification est survenue.",
   "facturationCreatePaymentUnknownError": "Une erreur inattendue est survenue.",
   "facturationCreatePaymentNoChargesAvailable": "Aucune charge non réglée disponible pour cet élève.",
-
   "attendanceHeroTitle": "Présences",
   "attendanceHeroSubtitle": "Consultez les présences par classe et date pour un suivi quotidien fiable.",
   "attendanceHeroChipClass": "Recherche par classe",
@@ -886,91 +933,111 @@
   "absenceReasonParentalLeave": "Congé parental",
   "absenceReasonWorkLeave": "Congé professionnel",
   "absenceReasonOther": "Autre",
-
-   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
-   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
-   "signOutAction": "Se déconnecter",
-
-   "disciplinaryDetailBackLabel": "Retour aux disciplines",
-   "disciplinaryFollowUpTitle": "Suivi disciplinaire",
-   "disciplinaryHeroTitle": "Détail du dossier disciplinaire",
-   "disciplinaryHeroChipCases": "Cas disciplinaires",
-   "disciplinaryDetailContextErrorTitle": "Contexte de détail indisponible",
-   "disciplinaryDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
-   "disciplinaryTabCasesLabel": "Cas disciplinaires",
-   "disciplinaryTabAttendanceHistoryLabel": "Historique de présences",
-   "disciplinaryAttendanceHistoryComingSoon": "L'historique de présences sera ajouté dans une prochaine feature.",
-   "disciplinaryUnknownValue": "-",
-   "disciplinaryCaseCreateAction": "Nouveau cas",
-   "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
-   "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
-   "@disciplinaryCasesSummary": {
-     "placeholders": {
-       "total": {
-         "type": "int"
-       },
-       "open": {
-         "type": "int"
-       }
-     }
-   },
-   "disciplinaryCasesTableTitleColumn": "Titre",
-   "disciplinaryCasesTableStatusColumn": "Statut",
-   "disciplinaryCasesTableActionColumn": "Actions",
-   "disciplinaryCasesDateUnavailable": "Date non disponible",
-   "disciplinaryCaseViewLabel": "Voir le cas",
-   "disciplinaryCasesLoadingMessage": "Chargement des cas disciplinaires...",
-   "disciplinaryCasesEmptyMessage": "Aucun cas disciplinaire pour cet élève.",
-   "disciplinaryCaseViewDialogTitle": "Détail du cas disciplinaire",
-   "disciplinaryCaseViewDialogSectionTitle": "Informations du cas",
-   "disciplinaryCaseViewDialogTitleField": "Titre",
-   "disciplinaryCaseViewDialogStatusField": "Statut",
-   "disciplinaryCaseViewDialogContentField": "Contenu",
-   "disciplinaryCaseViewDialogLoadingMessage": "Chargement du détail du cas...",
-   "disciplinaryCaseViewDialogErrorMessage": "Impossible de charger le détail du cas",
-   "disciplinaryCaseCreateDialogTitle": "Créer un cas disciplinaire",
-   "disciplinaryCaseCreateDialogTitleField": "Titre du cas",
-   "disciplinaryCaseCreateDialogTitleHint": "Décrivez brièvement le cas",
-   "disciplinaryCaseCreateDialogContentField": "Contenu",
-   "disciplinaryCaseCreateDialogContentHint": "Détails du cas disciplinaire",
-   "disciplinaryCaseCreateDialogCaseDateField": "Date du cas",
-   "disciplinaryCaseCreateDialogCaseDateHint": "Sélectionner la date",
-   "disciplinaryCaseCreateDialogSubmitAction": "Créer le cas",
-   "disciplinaryCaseCreateDialogCreatingMessage": "Création en cours...",
-   "disciplinaryCaseCreateDialogSuccessMessage": "Cas disciplinaire créé avec succès.",
-   "disciplinaryCaseCreateDialogRequiredFieldError": "Ce champ est obligatoire.",
-   "disciplinaryCasesNetworkError": "Vérifiez votre connexion internet puis réessayez.",
-   "disciplinaryCasesNotFound": "Aucun cas disciplinaire trouvé.",
-   "disciplinaryCasesValidationError": "Les données demandées sont invalides.",
-   "disciplinaryCasesUnauthorizedError": "Vous n'êtes pas autorisé à consulter ces cas.",
-   "disciplinaryCasesInvalidCredentialsError": "Vos identifiants ne permettent pas d'accéder aux cas.",
-   "disciplinaryCasesServerError": "Le serveur est indisponible. Réessayez plus tard.",
-   "disciplinaryCasesStorageError": "Une erreur de stockage local est survenue.",
-   "disciplinaryCasesAuthError": "Une erreur d'authentification empêche le chargement des cas.",
-   "disciplinaryCasesUnknownError": "Une erreur inattendue est survenue.",
-   "disciplinaryCaseStatusOpen": "Ouvert",
-   "disciplinaryCaseStatusInProgress": "En cours",
-   "disciplinaryCaseStatusClosed": "Clôturé",
-   "disciplinaryCaseStatusUnknown": "Inconnu",
-
-   "enrollmentStatusPreRegistered": "Pré-inscrit",
-
-   "statusPaid": "Payé",
-   "statusPartial": "Partiel",
-   "statusOverdue": "En retard",
-
-   "statusPresent": "Présent",
-   "statusAbsentJustified": "Justifié",
-   "statusAbsentUnjustified": "Absent",
-
-   "statusSynced": "À jour",
-   "statusSyncing": "Synchro…",
-    "statusOffline": "Hors ligne",
-    "statusPendingUpload": "À envoyer",
-    "statusSyncConflict": "Conflit",
-
-    "previous": "Précédent",
-    "next": "Suivant",
-
-    "componentGalleryTitle": "Galerie de composants"
+  "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
+  "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",
+  "signOutAction": "Se déconnecter",
+  "disciplinaryDetailBackLabel": "Retour aux disciplines",
+  "disciplinaryFollowUpTitle": "Suivi disciplinaire",
+  "disciplinaryHeroTitle": "Détail du dossier disciplinaire",
+  "disciplinaryHeroChipCases": "Cas disciplinaires",
+  "disciplinaryDetailContextErrorTitle": "Contexte de détail indisponible",
+  "disciplinaryDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
+  "disciplinaryTabCasesLabel": "Cas disciplinaires",
+  "disciplinaryTabAttendanceHistoryLabel": "Historique de présences",
+  "disciplinaryAttendanceHistoryComingSoon": "L'historique de présences sera ajouté dans une prochaine feature.",
+  "disciplinaryUnknownValue": "-",
+  "disciplinaryCaseCreateAction": "Nouveau cas",
+  "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
+  "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
+  "@disciplinaryCasesSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "open": {
+        "type": "int"
+      }
+    }
+  },
+  "disciplinaryCasesTableTitleColumn": "Titre",
+  "disciplinaryCasesTableStatusColumn": "Statut",
+  "disciplinaryCasesTableActionColumn": "Actions",
+  "disciplinaryCasesDateUnavailable": "Date non disponible",
+  "disciplinaryCaseViewLabel": "Voir le cas",
+  "disciplinaryCasesLoadingMessage": "Chargement des cas disciplinaires...",
+  "disciplinaryCasesEmptyMessage": "Aucun cas disciplinaire pour cet élève.",
+  "disciplinaryCaseViewDialogTitle": "Détail du cas disciplinaire",
+  "disciplinaryCaseViewDialogSectionTitle": "Informations du cas",
+  "disciplinaryCaseViewDialogTitleField": "Titre",
+  "disciplinaryCaseViewDialogStatusField": "Statut",
+  "disciplinaryCaseViewDialogContentField": "Contenu",
+  "disciplinaryCaseViewDialogLoadingMessage": "Chargement du détail du cas...",
+  "disciplinaryCaseViewDialogErrorMessage": "Impossible de charger le détail du cas",
+  "disciplinaryCaseCreateDialogTitle": "Créer un cas disciplinaire",
+  "disciplinaryCaseCreateDialogTitleField": "Titre du cas",
+  "disciplinaryCaseCreateDialogTitleHint": "Décrivez brièvement le cas",
+  "disciplinaryCaseCreateDialogContentField": "Contenu",
+  "disciplinaryCaseCreateDialogContentHint": "Détails du cas disciplinaire",
+  "disciplinaryCaseCreateDialogCaseDateField": "Date du cas",
+  "disciplinaryCaseCreateDialogCaseDateHint": "Sélectionner la date",
+  "disciplinaryCaseCreateDialogSubmitAction": "Créer le cas",
+  "disciplinaryCaseCreateDialogCreatingMessage": "Création en cours...",
+  "disciplinaryCaseCreateDialogSuccessMessage": "Cas disciplinaire créé avec succès.",
+  "disciplinaryCaseCreateDialogRequiredFieldError": "Ce champ est obligatoire.",
+  "disciplinaryCasesNetworkError": "Vérifiez votre connexion internet puis réessayez.",
+  "disciplinaryCasesNotFound": "Aucun cas disciplinaire trouvé.",
+  "disciplinaryCasesValidationError": "Les données demandées sont invalides.",
+  "disciplinaryCasesUnauthorizedError": "Vous n'êtes pas autorisé à consulter ces cas.",
+  "disciplinaryCasesInvalidCredentialsError": "Vos identifiants ne permettent pas d'accéder aux cas.",
+  "disciplinaryCasesServerError": "Le serveur est indisponible. Réessayez plus tard.",
+  "disciplinaryCasesStorageError": "Une erreur de stockage local est survenue.",
+  "disciplinaryCasesAuthError": "Une erreur d'authentification empêche le chargement des cas.",
+  "disciplinaryCasesUnknownError": "Une erreur inattendue est survenue.",
+  "disciplinaryCaseStatusOpen": "Ouvert",
+  "disciplinaryCaseStatusInProgress": "En cours",
+  "disciplinaryCaseStatusClosed": "Clôturé",
+  "disciplinaryCaseStatusUnknown": "Inconnu",
+  "enrollmentStatusPreRegistered": "Pré-inscrit",
+  "statusPaid": "Payé",
+  "statusPartial": "Partiel",
+  "statusOverdue": "En retard",
+  "statusPresent": "Présent",
+  "statusAbsentJustified": "Justifié",
+  "statusAbsentUnjustified": "Absent",
+  "statusSynced": "À jour",
+  "statusSyncing": "Synchro…",
+  "statusOffline": "Hors ligne",
+  "statusPendingUpload": "À envoyer",
+  "statusSyncConflict": "Conflit",
+  "componentGalleryTitle": "Galerie de composants",
+  "enrollmentStatsDashboardTitle": "Vue d'ensemble – Année scolaire",
+  "enrollmentStatsPeriodYear": "Année",
+  "enrollmentStatsPeriodMonth": "Mois",
+  "enrollmentStatsPeriodWeek": "Semaine",
+  "enrollmentStatsKpiTotal": "Total",
+  "enrollmentStatsKpiFirst": "Premières inscriptions",
+  "enrollmentStatsKpiRe": "Réinscriptions",
+  "enrollmentStatsKpiPre": "Pré-inscriptions",
+  "enrollmentStatsKpiInProgress": "En cours",
+  "enrollmentStatsSectionEvolution": "Évolution",
+  "enrollmentStatsSectionCycle": "Par cycle",
+  "enrollmentStatsSectionGender": "Par genre",
+  "enrollmentStatsSectionEvolutionEnrollments": "Evolution des Inscritions",
+  "enrollmentStatsSectionLevelEvolution": "Evolution par niveau",
+  "enrollmentStatsSectionGenderEvolution": "Evolution par genre",
+  "enrollmentStatsGenderMale": "Garçons",
+  "enrollmentStatsGenderFemale": "Filles",
+  "enrollmentStatsGenderOther": "Autre",
+  "enrollmentStatsNoData": "Aucune donnée pour cette période",
+  "enrollmentStatsLoadingError": "Impossible de charger les statistiques",
+  "enrollmentStatsRetry": "Réessayer",
+  "enrollmentStatsStudents": "élèves",
+  "enrollmentStatsPercent": "{percent} %",
+  "@enrollmentStatsPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -1013,5 +1013,36 @@
     "previous": "Previous",
     "next": "Next",
 
-    "componentGalleryTitle": "Component gallery"
+    "componentGalleryTitle": "Component gallery",
+
+    "enrollmentStatsDashboardTitle": "Enrollment Dashboard",
+    "enrollmentStatsPeriodYear": "Year",
+    "enrollmentStatsPeriodMonth": "Month",
+    "enrollmentStatsPeriodWeek": "Week",
+    "enrollmentStatsKpiTotal": "Total",
+    "enrollmentStatsKpiFirst": "First enrollments",
+    "enrollmentStatsKpiRe": "Re-enrollments",
+    "enrollmentStatsKpiPre": "Pre-enrollments",
+    "enrollmentStatsKpiInProgress": "In progress",
+    "enrollmentStatsSectionEvolution": "Evolution",
+    "enrollmentStatsSectionCycle": "By cycle",
+    "enrollmentStatsSectionGender": "By gender",
+    "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
+    "enrollmentStatsSectionLevelEvolution": "Evolution by level",
+    "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
+    "enrollmentStatsGenderMale": "Boys",
+    "enrollmentStatsGenderFemale": "Girls",
+    "enrollmentStatsGenderOther": "Other",
+    "enrollmentStatsNoData": "No data available for this period",
+    "enrollmentStatsLoadingError": "Unable to load statistics",
+    "enrollmentStatsRetry": "Retry",
+    "enrollmentStatsStudents": "students",
+    "enrollmentStatsPercent": "{percent} %",
+    "@enrollmentStatsPercent": {
+      "placeholders": {
+        "percent": {
+          "type": "int"
+        }
+      }
+    }
 }

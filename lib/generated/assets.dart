@@ -6,10 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 class Assets {
   Assets._();
 
-  static const String addressGeoCatalog =
-      'assets/catalogs/address_geo_catalog.json';
-  static const String educationCyclesCatalog =
-      'assets/catalogs/education_cycles_catalog.json';
+  static const String addressGeoCatalog = 'assets/catalogs/address_geo_catalog.json';
+  static const String educationCyclesCatalog = 'assets/catalogs/education_cycles_catalog.json';
   static const $AssetsAssetsGen assets = $AssetsAssetsGen();
   static const $AssetsLibGen lib = $AssetsLibGen();
 }
@@ -41,16 +39,11 @@ class $AssetsDataGen {
 class $AssetsDatasourcesGen {
   const $AssetsDatasourcesGen();
 
-  final String authLocalDataSource =
-      'lib/features/auth/data/datasources/auth_local_data_source.dart';
-  final String authRemoteDataSource =
-      'lib/features/auth/data/datasources/auth_remote_data_source.dart';
-  final String authRemoteDataSourceG =
-      'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
-  final String forgotPasswordRemoteDataSource =
-      'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
-  final String forgotPasswordRemoteDataSourceG =
-      'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
+  final String authLocalDataSource = 'lib/features/auth/data/datasources/auth_local_data_source.dart';
+  final String authRemoteDataSource = 'lib/features/auth/data/datasources/auth_remote_data_source.dart';
+  final String authRemoteDataSourceG = 'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
+  final String forgotPasswordRemoteDataSource = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+  final String forgotPasswordRemoteDataSourceG = 'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
 }
 
 class $AssetsAssetsGen {
@@ -72,53 +65,45 @@ class $AssetsClairGen {
   const $AssetsClairGen();
 
   final SvgGenImage logoHorizontalCouleur = const SvgGenImage(
-    'assets/branding/clair/logo_horizontal_couleur.svg',
-  );
+      'assets/branding/clair/logo_horizontal_couleur.svg');
   final SvgGenImage symboleCouleur = const SvgGenImage(
-    'assets/branding/clair/symbole_couleur.svg',
-  );
+      'assets/branding/clair/symbole_couleur.svg');
 }
 
 class $AssetsFonceGen {
   const $AssetsFonceGen();
 
   final SvgGenImage logoHorizontalFondFonce = const SvgGenImage(
-    'assets/branding/fonce/logo_horizontal_fond_fonce.svg',
-  );
+      'assets/branding/fonce/logo_horizontal_fond_fonce.svg');
   final SvgGenImage symboleFondFonce = const SvgGenImage(
-    'assets/branding/fonce/symbole_fond_fonce.svg',
-  );
+      'assets/branding/fonce/symbole_fond_fonce.svg');
 }
 
 class $AssetsProfondGen {
   const $AssetsProfondGen();
 
   final SvgGenImage logoHorizontalCouleur = const SvgGenImage(
-    'assets/branding/profond/logo_horizontal_couleur.svg',
-  );
+      'assets/branding/profond/logo_horizontal_couleur.svg');
   final SvgGenImage symboleMonochrome = const SvgGenImage(
-    'assets/branding/profond/symbole_monochrome.svg',
-  );
+      'assets/branding/profond/symbole_monochrome.svg');
   final SvgGenImage symboleSilhouetteBlanche = const SvgGenImage(
-    'assets/branding/profond/symbole_silhouette_blanche.svg',
-  );
+      'assets/branding/profond/symbole_silhouette_blanche.svg');
 }
 
 class $AssetsSplashGen {
   const $AssetsSplashGen();
 
   final AssetGenImage icLauncherXxxhdpi192pxTransparent = const AssetGenImage(
-    'assets/branding/splash/ic_launcher_xxxhdpi_192px_transparent.png',
-  );
+      'assets/branding/splash/ic_launcher_xxxhdpi_192px_transparent.png');
   final AssetGenImage splashLogo2048 = const AssetGenImage(
-    'assets/branding/splash/splash_logo_2048.png',
-  );
+      'assets/branding/splash/splash_logo_2048.png');
 }
 
 class AssetGenImage {
   const AssetGenImage(this._assetName, {this.size, this.flavors = const {}});
 
   final String _assetName;
+
 
   final Size? size;
   final Set<String> flavors;
@@ -176,8 +161,15 @@ class AssetGenImage {
     );
   }
 
-  ImageProvider provider({AssetBundle? bundle, String? package}) {
-    return AssetImage(_assetName, bundle: bundle, package: package);
+  ImageProvider provider({
+    AssetBundle? bundle,
+    String? package,
+  }) {
+    return AssetImage(
+      _assetName,
+      bundle: bundle,
+      package: package,
+    );
   }
 
   Widget custom({
@@ -249,3 +241,4 @@ class SvgGenImage {
 
   String get keyName => _assetName;
 }
+

@@ -1322,7 +1322,7 @@ abstract class AppLocalizations {
   /// No description provided for @next.
   ///
   /// In en, this message translates to:
-  /// **'Continue'**
+  /// **'Next'**
   String get next;
 
   /// No description provided for @previous.
@@ -4390,6 +4390,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Component gallery'**
   String get componentGalleryTitle;
+
+  /// No description provided for @enrollmentStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Dashboard'**
+  String get enrollmentStatsDashboardTitle;
+
+  /// No description provided for @enrollmentStatsPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get enrollmentStatsPeriodYear;
+
+  /// No description provided for @enrollmentStatsPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get enrollmentStatsPeriodMonth;
+
+  /// No description provided for @enrollmentStatsPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get enrollmentStatsPeriodWeek;
+
+  /// No description provided for @enrollmentStatsKpiTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get enrollmentStatsKpiTotal;
+
+  /// No description provided for @enrollmentStatsKpiFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First enrollments'**
+  String get enrollmentStatsKpiFirst;
+
+  /// No description provided for @enrollmentStatsKpiRe.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrollments'**
+  String get enrollmentStatsKpiRe;
+
+  /// No description provided for @enrollmentStatsKpiPre.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-enrollments'**
+  String get enrollmentStatsKpiPre;
+
+  /// No description provided for @enrollmentStatsKpiInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get enrollmentStatsKpiInProgress;
+
+  /// No description provided for @enrollmentStatsSectionEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution'**
+  String get enrollmentStatsSectionEvolution;
+
+  /// No description provided for @enrollmentStatsSectionCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle'**
+  String get enrollmentStatsSectionCycle;
+
+  /// No description provided for @enrollmentStatsSectionGender.
+  ///
+  /// In en, this message translates to:
+  /// **'By gender'**
+  String get enrollmentStatsSectionGender;
+
+  /// No description provided for @enrollmentStatsSectionEvolutionEnrollments.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment evolution'**
+  String get enrollmentStatsSectionEvolutionEnrollments;
+
+  /// No description provided for @enrollmentStatsSectionLevelEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution by level'**
+  String get enrollmentStatsSectionLevelEvolution;
+
+  /// No description provided for @enrollmentStatsSectionGenderEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution by gender'**
+  String get enrollmentStatsSectionGenderEvolution;
+
+  /// No description provided for @enrollmentStatsGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get enrollmentStatsGenderMale;
+
+  /// No description provided for @enrollmentStatsGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get enrollmentStatsGenderFemale;
+
+  /// No description provided for @enrollmentStatsGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get enrollmentStatsGenderOther;
+
+  /// No description provided for @enrollmentStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get enrollmentStatsNoData;
+
+  /// No description provided for @enrollmentStatsLoadingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load statistics'**
+  String get enrollmentStatsLoadingError;
+
+  /// No description provided for @enrollmentStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentStatsRetry;
+
+  /// No description provided for @enrollmentStatsStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'students'**
+  String get enrollmentStatsStudents;
+
+  /// No description provided for @enrollmentStatsPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} %'**
+  String enrollmentStatsPercent(int percent);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
