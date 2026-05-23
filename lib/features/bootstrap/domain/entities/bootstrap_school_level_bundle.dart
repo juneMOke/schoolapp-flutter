@@ -14,6 +14,16 @@ class BootstrapSchoolLevelBundle extends Equatable {
     required this.tariffs,
   });
 
+  BootstrapSchoolLevelBundle copyWith({
+    BootstrapSchoolLevel? schoolLevel,
+    List<BootstrapClassroom>? classrooms,
+    List<BootstrapTariff>? tariffs,
+  }) => BootstrapSchoolLevelBundle(
+    schoolLevel: schoolLevel ?? this.schoolLevel,
+    classrooms: classrooms ?? this.classrooms,
+    tariffs: tariffs ?? this.tariffs,
+  );
+
   @override
   List<Object?> get props => [schoolLevel, classrooms, tariffs];
 }

@@ -28,3 +28,16 @@ class BootstrapContextLocalRequested extends BootstrapContextEvent {
 class BootstrapContextResetRequested extends BootstrapContextEvent {
   const BootstrapContextResetRequested();
 }
+
+class BootstrapContextSchoolLevelSplitPatched extends BootstrapContextEvent {
+  final String schoolLevelId;
+  final String key;
+
+  const BootstrapContextSchoolLevelSplitPatched({
+    required this.schoolLevelId,
+    required this.key,
+  });
+
+  @override
+  List<Object?> get props => [schoolLevelId, key];
+}

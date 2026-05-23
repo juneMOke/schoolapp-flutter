@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_email_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_phone_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/editable_field.dart';
+import 'package:school_app_flutter/core/components/fields/editable_field.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class GuardianFieldsGrid extends StatelessWidget {
@@ -22,6 +24,8 @@ class GuardianFieldsGrid extends StatelessWidget {
   final ValueChanged<RelationshipType> onRelationshipTypeChanged;
   final bool relationshipChanged;
   final bool isEditable;
+  final bool isPrimary;
+  final ValueChanged<bool?>? onPrimaryChanged;
 
   const GuardianFieldsGrid({
     super.key,
@@ -39,6 +43,8 @@ class GuardianFieldsGrid extends StatelessWidget {
     required this.onRelationshipTypeChanged,
     this.relationshipChanged = false,
     this.isEditable = true,
+    this.isPrimary = false,
+    this.onPrimaryChanged,
   });
 
   String _relationshipLabel(BuildContext context, RelationshipType type) {
@@ -54,37 +60,21 @@ class GuardianFieldsGrid extends StatelessWidget {
     };
   }
 
-  IconData _relationshipIcon(RelationshipType type) {
-    return switch (type) {
-      RelationshipType.father => Icons.man,
-      RelationshipType.mother => Icons.woman,
-      RelationshipType.guardian => Icons.supervisor_account,
-      RelationshipType.uncle => Icons.man_2,
-      RelationshipType.aunt => Icons.woman_2,
-      RelationshipType.grandparent => Icons.elderly,
-      RelationshipType.other => Icons.person,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final successColor = AppTheme.secondaryColor;
-    final surfaceColor = AppTheme.surfaceColor;
-    final textSecondaryColor = AppTheme.textSecondaryColor;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 16.0;
+        const spacing = AppSpacing.md;
         final width = constraints.maxWidth >= 640
             ? (constraints.maxWidth - spacing) / 2
             : constraints.maxWidth;
 
         return Wrap(
           spacing: spacing,
-          runSpacing: 14,
+          runSpacing: AppSpacing.md,
           children: [
             EditableField(
               width: width,
@@ -126,115 +116,88 @@ class GuardianFieldsGrid extends StatelessWidget {
               label: l10n.emailLabel,
               helpMessage: l10n.emailLabelHelp,
               controller: emailController,
-              requiredField: true,
+              requiredField: false,
               isChanged: emailChanged,
               readOnly: !isEditable,
+              trailingLabel: l10n.guardianEmailOptionalInline,
             ),
             SizedBox(
               width: constraints.maxWidth,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: surfaceColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: relationshipChanged
-                        ? successColor.withValues(alpha: 0.35)
-                        : Colors.grey.withValues(alpha: 0.2),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: AppColors.border.withValues(alpha: 0.7),
+              ),
+            ),
+            SizedBox(
+              width: width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormFieldLabel(
+                    label: l10n.guardianRelationshipLabel,
+                    requiredField: true,
+                    helpMessage: '',
+                    labelColor: relationshipChanged ? AppColors.success : null,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      l10n.guardianRelationshipLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: relationshipChanged
-                            ? successColor
-                            : textSecondaryColor,
+                  const SizedBox(height: AppSpacing.xs),
+                  DropdownButtonFormField<RelationshipType>(
+                    initialValue: selectedRelationshipType,
+                    items: RelationshipType.values
+                        .map(
+                          (type) => DropdownMenuItem<RelationshipType>(
+                            value: type,
+                            child: Text(_relationshipLabel(context, type)),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: isEditable
+                        ? (value) {
+                            if (value == null) return;
+                            onRelationshipTypeChanged(value);
+                          }
+                        : null,
+                    decoration: buildInputDecoration(
+                      hintText: l10n.guardianRelationshipLabel,
+                      isChanged: relationshipChanged,
+                      prefixIcon: const Icon(
+                        Icons.family_restroom_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    LayoutBuilder(
-                      builder: (context, chipConstraints) {
-                        final itemsPerRow = chipConstraints.maxWidth < 400
-                            ? 4
-                            : RelationshipType.values.length;
-                        final chipWidth =
-                            (chipConstraints.maxWidth -
-                                    (itemsPerRow - 1) * 6.0) /
-                                itemsPerRow;
-
-                        return Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: RelationshipType.values.map((type) {
-                            final isSelected = selectedRelationshipType == type;
-                            final activeColor = relationshipChanged
-                                ? successColor
-                                : primaryColor;
-
-                            return GestureDetector(
-                              onTap: isEditable
-                                  ? () => onRelationshipTypeChanged(type)
-                                  : null,
-                              child: AnimatedContainer(
-                                duration: AppMotion.fast,
-                                curve: AppMotion.outCurve,
-                                width: chipWidth,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? activeColor.withValues(alpha: 0.1)
-                                      : AppTheme.backgroundColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? activeColor
-                                        : Colors.grey.withValues(alpha: 0.2),
-                                    width: isSelected ? 1.5 : 1,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _relationshipIcon(type),
-                                      size: 20,
-                                      color: isSelected
-                                          ? activeColor
-                                          : textSecondaryColor,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _relationshipLabel(context, type),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.normal,
-                                        color: isSelected
-                                            ? activeColor
-                                            : AppTheme.textPrimaryColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
                     ),
-                  ],
-                ),
+                    dropdownColor: AppColors.surface,
+                    icon: const Icon(
+                      Icons.expand_more_rounded,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: width,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.guardianMarkAsPrimary,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Checkbox(
+                    value: isPrimary,
+                    onChanged: isEditable ? onPrimaryChanged : null,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ],
               ),
             ),
           ],

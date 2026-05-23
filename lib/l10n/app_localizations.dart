@@ -338,13 +338,499 @@ abstract class AppLocalizations {
   /// Organization sub-menu title
   ///
   /// In en, this message translates to:
-  /// **'Organization'**
+  /// **'Class\ncomposition'**
   String get subMenuOrganization;
+
+  /// No description provided for @classesOrganisationHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition'**
+  String get classesOrganisationHeroTitle;
+
+  /// No description provided for @classesOrganisationHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.'**
+  String get classesOrganisationHeroSubtitle;
+
+  /// No description provided for @classesOrganisationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Level selection for class distribution'**
+  String get classesOrganisationSearchTitle;
+
+  /// No description provided for @classesOrganisationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.'**
+  String get classesOrganisationSearchHint;
+
+  /// No description provided for @classesOrganisationClassroomFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom'**
+  String get classesOrganisationClassroomFieldLabel;
+
+  /// No description provided for @classesOrganisationDistributionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution criterion'**
+  String get classesOrganisationDistributionLabel;
+
+  /// No description provided for @classesOrganisationDistributionByGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute by gender'**
+  String get classesOrganisationDistributionByGender;
+
+  /// No description provided for @classesOrganisationDistributionByPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute by average'**
+  String get classesOrganisationDistributionByPercentage;
+
+  /// No description provided for @classesOrganisationDistributionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute'**
+  String get classesOrganisationDistributionAction;
+
+  /// No description provided for @classesOrganisationDistributionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm distribution'**
+  String get classesOrganisationDistributionConfirmTitle;
+
+  /// No description provided for @classesOrganisationDistributionConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to distribute students for this level?'**
+  String get classesOrganisationDistributionConfirmMessage;
+
+  /// No description provided for @classesOrganisationDistributionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution completed successfully.'**
+  String get classesOrganisationDistributionSuccess;
+
+  /// No description provided for @classesOrganisationSplitInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Split mode enabled: classroom grid with members and stats.'**
+  String get classesOrganisationSplitInfo;
+
+  /// No description provided for @classesOrganisationNonSplitInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-split mode enabled: student list for the selected level.'**
+  String get classesOrganisationNonSplitInfo;
+
+  /// No description provided for @classesOrganisationNoClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'No classroom is available for this level.'**
+  String get classesOrganisationNoClassrooms;
+
+  /// No description provided for @classesOrganisationClassroomStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} students - Girls: {girls} - Boys: {boys}'**
+  String classesOrganisationClassroomStats(int total, int girls, int boys);
+
+  /// No description provided for @classesOrganisationTransferDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer student'**
+  String get classesOrganisationTransferDialogTitle;
+
+  /// No description provided for @classesOrganisationTransferDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the destination classroom for {studentName}.'**
+  String classesOrganisationTransferDialogMessage(String studentName);
+
+  /// No description provided for @classesOrganisationTransferTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination classroom'**
+  String get classesOrganisationTransferTargetLabel;
+
+  /// No description provided for @classesOrganisationTransferAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get classesOrganisationTransferAction;
+
+  /// No description provided for @classesOrganisationTransferInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer in progress...'**
+  String get classesOrganisationTransferInProgress;
+
+  /// No description provided for @classesOrganisationTransferSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer completed successfully.'**
+  String get classesOrganisationTransferSuccess;
+
+  /// No description provided for @classesOrganisationTransferNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'No destination classroom is available.'**
+  String get classesOrganisationTransferNoTarget;
+
+  /// No description provided for @classesOrganisationSelectCycleAndLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cycle and a level'**
+  String get classesOrganisationSelectCycleAndLevelTitle;
+
+  /// No description provided for @classesOrganisationSelectCycleAndLevelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by selecting a cycle, then a level to display class composition.'**
+  String get classesOrganisationSelectCycleAndLevelSubtitle;
+
+  /// No description provided for @classesOrganisationSelectLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a level'**
+  String get classesOrganisationSelectLevelTitle;
+
+  /// No description provided for @classesOrganisationSelectLevelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Now select a level in the {cycleName} cycle.'**
+  String classesOrganisationSelectLevelSubtitle(String cycleName);
+
+  /// No description provided for @classesOrganisationPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Level not distributed yet'**
+  String get classesOrganisationPendingTitle;
+
+  /// No description provided for @classesOrganisationPendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run the initial distribution to create classes for this level.'**
+  String get classesOrganisationPendingSubtitle;
+
+  /// No description provided for @classesOrganisationPendingStudentsToDistribute.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students to distribute'**
+  String classesOrganisationPendingStudentsToDistribute(int count);
+
+  /// No description provided for @classesOrganisationPendingPlannedClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} planned classes'**
+  String classesOrganisationPendingPlannedClassrooms(int count);
+
+  /// No description provided for @classesOrganisationAppliedCriterionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied criterion: balanced distribution by gender (mixed school).'**
+  String get classesOrganisationAppliedCriterionInfo;
+
+  /// No description provided for @classesOrganisationSplitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}'**
+  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion);
+
+  /// No description provided for @classesOrganisationClassroomsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Constituted classes'**
+  String get classesOrganisationClassroomsSectionTitle;
+
+  /// No description provided for @classesOrganisationUnassignedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students to assign'**
+  String get classesOrganisationUnassignedTitle;
+
+  /// No description provided for @classesOrganisationUnassignedTitleSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' — added after distribution'**
+  String get classesOrganisationUnassignedTitleSuffix;
+
+  /// No description provided for @classesOrganisationUnassignedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'To assign'**
+  String get classesOrganisationUnassignedBadge;
+
+  /// No description provided for @classesOrganisationUnassignedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students waiting for assignment'**
+  String classesOrganisationUnassignedSummary(int count);
+
+  /// No description provided for @classesOrganisationNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this classroom.'**
+  String get classesOrganisationNoMembers;
+
+  /// No description provided for @classesOrganisationAssignAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to a classroom'**
+  String get classesOrganisationAssignAction;
+
+  /// No description provided for @classesOrganisationAssignDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to a classroom'**
+  String get classesOrganisationAssignDialogTitle;
+
+  /// No description provided for @classesOrganisationAssignDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the destination classroom for {studentName}.'**
+  String classesOrganisationAssignDialogMessage(String studentName);
+
+  /// No description provided for @classesOrganisationClassroomPopulation.
+  ///
+  /// In en, this message translates to:
+  /// **'Current size: {count}'**
+  String classesOrganisationClassroomPopulation(int count);
+
+  /// No description provided for @classesOrganisationTransferConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you confirm transferring {studentName} to this classroom?'**
+  String classesOrganisationTransferConfirmMessage(String studentName);
+
+  /// No description provided for @classesOrganisationLoadingClassroomsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading members for {count} classrooms...'**
+  String classesOrganisationLoadingClassroomsCount(int count);
+
+  /// No description provided for @classesOrganisationStudentDetailSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Student details will be available in the next batch.'**
+  String get classesOrganisationStudentDetailSoon;
+
+  /// No description provided for @classesOrganisationErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection.'**
+  String get classesOrganisationErrorNetwork;
+
+  /// No description provided for @classesOrganisationErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No data found for these criteria.'**
+  String get classesOrganisationErrorNotFound;
+
+  /// No description provided for @classesOrganisationErrorValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Some entered information is invalid.'**
+  String get classesOrganisationErrorValidation;
+
+  /// No description provided for @classesOrganisationErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Access is not authorized.'**
+  String get classesOrganisationErrorUnauthorized;
+
+  /// No description provided for @classesOrganisationErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credentials.'**
+  String get classesOrganisationErrorInvalidCredentials;
+
+  /// No description provided for @classesOrganisationErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error, try again later.'**
+  String get classesOrganisationErrorServer;
+
+  /// No description provided for @classesOrganisationErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local storage error.'**
+  String get classesOrganisationErrorStorage;
+
+  /// No description provided for @classesOrganisationErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Session is not valid, please sign in again.'**
+  String get classesOrganisationErrorAuth;
+
+  /// No description provided for @classesOrganisationErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get classesOrganisationErrorUnknown;
+
+  /// No description provided for @classesListHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class lists'**
+  String get classesListHeroTitle;
+
+  /// No description provided for @classesListHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickly search students by cycle, level or classroom, then export the displayed results.'**
+  String get classesListHeroSubtitle;
+
+  /// No description provided for @classesListHeroFilterChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-criteria search by identity and level.'**
+  String get classesListHeroFilterChip;
+
+  /// No description provided for @classesListHeroClassroomChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional classroom filtering for the current school year.'**
+  String get classesListHeroClassroomChip;
+
+  /// No description provided for @classesListSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search form'**
+  String get classesListSearchTitle;
+
+  /// No description provided for @classesListSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get classesListSearchHint;
+
+  /// No description provided for @classesListValidationAtLeastOneCriterion.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide at least one criterion to run a search.'**
+  String get classesListValidationAtLeastOneCriterion;
+
+  /// No description provided for @classesListClassroomOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom (optional)'**
+  String get classesListClassroomOptionalLabel;
+
+  /// No description provided for @classesListFirstNameOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First name (optional)'**
+  String get classesListFirstNameOptionalLabel;
+
+  /// No description provided for @classesListLastNameOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name (optional)'**
+  String get classesListLastNameOptionalLabel;
+
+  /// No description provided for @classesListSurnameOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Surname (optional)'**
+  String get classesListSurnameOptionalLabel;
+
+  /// No description provided for @classesListInitialEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No search in progress'**
+  String get classesListInitialEmptyTitle;
+
+  /// No description provided for @classesListInitialEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in at least one criterion to display students.'**
+  String get classesListInitialEmptyMessage;
+
+  /// No description provided for @classesListNoMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches the criteria'**
+  String get classesListNoMatchTitle;
+
+  /// No description provided for @classesListNoMatchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try broadening your filters or adjusting your search.'**
+  String get classesListNoMatchMessage;
+
+  /// No description provided for @classesListResultsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students found — {criteria}'**
+  String classesListResultsSummary(int count, String criteria);
+
+  /// No description provided for @classesListResultsSummaryWithoutCriteria.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students found'**
+  String classesListResultsSummaryWithoutCriteria(int count);
+
+  /// No description provided for @classesListClassroomChipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom'**
+  String get classesListClassroomChipLabel;
+
+  /// No description provided for @classesListLoadingClassroomMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading classroom members...'**
+  String get classesListLoadingClassroomMembers;
+
+  /// No description provided for @classesListClassroomEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is currently assigned to this classroom.'**
+  String get classesListClassroomEmptyMessage;
+
+  /// No description provided for @classesListClassroomFilteredEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this classroom matches the entered filters.'**
+  String get classesListClassroomFilteredEmptyMessage;
+
+  /// No description provided for @classesListStudentDetailSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Student details will be available in a future release.'**
+  String get classesListStudentDetailSoon;
+
+  /// No description provided for @classesListExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export copied to clipboard.'**
+  String get classesListExportSuccess;
+
+  /// No description provided for @classesListExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to prepare the export right now.'**
+  String get classesListExportFailed;
+
+  /// No description provided for @classesListExportNothingToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no data to export for this search.'**
+  String get classesListExportNothingToExport;
+
+  /// No description provided for @classesListExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get classesListExportPdf;
 
   /// Classes list sub-menu title
   ///
   /// In en, this message translates to:
-  /// **'Classes List'**
+  /// **'Class lists'**
   String get subMenuClassesList;
 
   /// Attendance sub-menu title
@@ -376,6 +862,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
+
+  /// No description provided for @homeTopBarPendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending files follow-up'**
+  String get homeTopBarPendingSubtitle;
+
+  /// No description provided for @homeTopBarNotificationsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get homeTopBarNotificationsTooltip;
+
+  /// No description provided for @homeUserMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'User menu'**
+  String get homeUserMenuTooltip;
+
+  /// No description provided for @homeSidebarCollapseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse menu'**
+  String get homeSidebarCollapseTooltip;
+
+  /// No description provided for @homeSidebarExpandTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand menu'**
+  String get homeSidebarExpandTooltip;
+
+  /// No description provided for @homeSidebarFooterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School dashboard'**
+  String get homeSidebarFooterLabel;
+
+  /// No description provided for @homeSidebarNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Main navigation'**
+  String get homeSidebarNavigationLabel;
 
   /// No description provided for @pageUnderConstruction.
   ///
@@ -569,6 +1097,54 @@ abstract class AppLocalizations {
   /// **'Student not specified'**
   String get enrollmentUnknownStudent;
 
+  /// No description provided for @firstRegistrationNewEnrollmentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New enrollment'**
+  String get firstRegistrationNewEnrollmentAction;
+
+  /// No description provided for @enrollmentDetailLoadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading enrollment file'**
+  String get enrollmentDetailLoadingTitle;
+
+  /// No description provided for @enrollmentDetailLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait while enrollment details are being loaded.'**
+  String get enrollmentDetailLoadingMessage;
+
+  /// No description provided for @enrollmentDetailLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load enrollment file'**
+  String get enrollmentDetailLoadErrorTitle;
+
+  /// No description provided for @enrollmentDetailLoadErrorFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading enrollment details.'**
+  String get enrollmentDetailLoadErrorFallback;
+
+  /// No description provided for @enrollmentDetailRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentDetailRetryAction;
+
+  /// No description provided for @enrollmentDetailNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Details not found'**
+  String get enrollmentDetailNotFoundTitle;
+
+  /// No description provided for @enrollmentDetailNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrollment file does not exist or is no longer available.'**
+  String get enrollmentDetailNotFoundMessage;
+
   /// No description provided for @gender.
   ///
   /// In en, this message translates to:
@@ -629,6 +1205,36 @@ abstract class AppLocalizations {
   /// **'Relationship'**
   String get guardianRelationshipLabel;
 
+  /// No description provided for @guardianMarkAsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as primary guardian'**
+  String get guardianMarkAsPrimary;
+
+  /// No description provided for @guardianPrimaryRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one primary guardian is required'**
+  String get guardianPrimaryRequiredHint;
+
+  /// No description provided for @guardianPrincipalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get guardianPrincipalBadge;
+
+  /// No description provided for @guardianToggleCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open or close guardian card'**
+  String get guardianToggleCard;
+
+  /// No description provided for @guardianEmailOptionalInline.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get guardianEmailOptionalInline;
+
   /// No description provided for @guardianDeleteAction.
   ///
   /// In en, this message translates to:
@@ -676,6 +1282,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Summary'**
   String get summary;
+
+  /// No description provided for @summaryYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get summaryYes;
+
+  /// No description provided for @summaryNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get summaryNo;
+
+  /// No description provided for @summaryChargesTotalDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total due'**
+  String get summaryChargesTotalDue;
+
+  /// No description provided for @summaryChargesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts are unavailable for now.'**
+  String get summaryChargesUnavailable;
+
+  /// No description provided for @summaryValidationNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before validation'**
+  String get summaryValidationNoticeTitle;
+
+  /// No description provided for @summaryValidationNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.'**
+  String get summaryValidationNoticeBody;
 
   /// No description provided for @next.
   ///
@@ -965,6 +1607,12 @@ abstract class AppLocalizations {
   /// **'Year validated'**
   String get yearValidated;
 
+  /// No description provided for @yearValidatedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicates whether the student validated the previous school year.'**
+  String get yearValidatedHelp;
+
   /// No description provided for @yearNotValidated.
   ///
   /// In en, this message translates to:
@@ -1162,6 +1810,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Final enrollment summary'**
   String get stepSummarySubtitle;
+
+  /// No description provided for @wizardStepShortPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get wizardStepShortPersonal;
+
+  /// No description provided for @wizardStepShortAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get wizardStepShortAddress;
+
+  /// No description provided for @wizardStepShortPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get wizardStepShortPrevious;
+
+  /// No description provided for @wizardStepShortTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get wizardStepShortTarget;
+
+  /// No description provided for @wizardStepShortCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees'**
+  String get wizardStepShortCharges;
+
+  /// No description provided for @wizardStepShortGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardians'**
+  String get wizardStepShortGuardian;
+
+  /// No description provided for @wizardStepShortSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get wizardStepShortSummary;
 
   /// No description provided for @stepIndicator.
   ///
@@ -1529,6 +2219,18 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get studentChargesAmountColumn;
 
+  /// No description provided for @studentChargesLabelColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge label'**
+  String get studentChargesLabelColumn;
+
+  /// No description provided for @studentChargesActionsColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get studentChargesActionsColumn;
+
   /// No description provided for @studentChargesAmountPaidLabel.
   ///
   /// In en, this message translates to:
@@ -1558,6 +2260,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please save charge changes before continuing.'**
   String get studentChargesSaveHintBeforeContinue;
+
+  /// No description provided for @studentChargesTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get studentChargesTotalLabel;
+
+  /// No description provided for @studentChargesHelperText.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts can be updated later from the student\'s profile.'**
+  String get studentChargesHelperText;
 
   /// No description provided for @studentChargesNetworkError.
   ///
@@ -1616,7 +2330,7 @@ abstract class AppLocalizations {
   /// No description provided for @studentChargeStatusDue.
   ///
   /// In en, this message translates to:
-  /// **'Due'**
+  /// **'To settle'**
   String get studentChargeStatusDue;
 
   /// No description provided for @studentChargeStatusPartial.
@@ -1631,35 +2345,149 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get studentChargeStatusPaid;
 
-  /// No description provided for @facturationPageHeaderTitle.
+  /// No description provided for @studentChargeFeeCodeTuition.
   ///
   /// In en, this message translates to:
-  /// **'Student Billing'**
-  String get facturationPageHeaderTitle;
+  /// **'Tuition'**
+  String get studentChargeFeeCodeTuition;
 
-  /// No description provided for @facturationPageHeaderSubtitle.
+  /// No description provided for @studentChargeFeeCodeRegistration.
   ///
   /// In en, this message translates to:
-  /// **'Search a student by name or class level to view and manage their school fees.'**
-  String get facturationPageHeaderSubtitle;
+  /// **'Registration'**
+  String get studentChargeFeeCodeRegistration;
 
-  /// No description provided for @facturationPageHeaderChipByName.
+  /// No description provided for @studentChargeFeeCodeEnrollment.
   ///
   /// In en, this message translates to:
-  /// **'Search by name'**
-  String get facturationPageHeaderChipByName;
+  /// **'Enrollment'**
+  String get studentChargeFeeCodeEnrollment;
 
-  /// No description provided for @facturationPageHeaderChipByLevel.
+  /// No description provided for @studentChargeFeeCodeApplication.
   ///
   /// In en, this message translates to:
-  /// **'Filter by level'**
-  String get facturationPageHeaderChipByLevel;
+  /// **'Application'**
+  String get studentChargeFeeCodeApplication;
 
-  /// No description provided for @facturationPageHeaderChipViewCharges.
+  /// No description provided for @studentChargeFeeCodeAdmission.
   ///
   /// In en, this message translates to:
-  /// **'View charges'**
-  String get facturationPageHeaderChipViewCharges;
+  /// **'Admission'**
+  String get studentChargeFeeCodeAdmission;
+
+  /// No description provided for @studentChargeFeeCodeCanteen.
+  ///
+  /// In en, this message translates to:
+  /// **'Canteen'**
+  String get studentChargeFeeCodeCanteen;
+
+  /// No description provided for @studentChargeFeeCodeTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get studentChargeFeeCodeTransport;
+
+  /// No description provided for @studentChargeFeeCodeBoarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding'**
+  String get studentChargeFeeCodeBoarding;
+
+  /// No description provided for @studentChargeFeeCodeBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Books & Materials'**
+  String get studentChargeFeeCodeBooks;
+
+  /// No description provided for @studentChargeFeeCodeUniform.
+  ///
+  /// In en, this message translates to:
+  /// **'Uniform'**
+  String get studentChargeFeeCodeUniform;
+
+  /// No description provided for @studentChargeFeeCodeExamination.
+  ///
+  /// In en, this message translates to:
+  /// **'Examination'**
+  String get studentChargeFeeCodeExamination;
+
+  /// No description provided for @studentChargeFeeCodeLabFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Laboratory Fee'**
+  String get studentChargeFeeCodeLabFee;
+
+  /// No description provided for @studentChargeFeeCodeActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Fee'**
+  String get studentChargeFeeCodeActivity;
+
+  /// No description provided for @studentChargeFeeCodeSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports Fee'**
+  String get studentChargeFeeCodeSports;
+
+  /// No description provided for @studentChargeFeeCodeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Fee'**
+  String get studentChargeFeeCodeLibrary;
+
+  /// No description provided for @studentChargeFeeCodeTechnology.
+  ///
+  /// In en, this message translates to:
+  /// **'Technology / IT Fee'**
+  String get studentChargeFeeCodeTechnology;
+
+  /// No description provided for @studentChargeFeeCodeDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Development / Infrastructure Fee'**
+  String get studentChargeFeeCodeDevelopment;
+
+  /// No description provided for @studentChargeFeeCodeInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get studentChargeFeeCodeInsurance;
+
+  /// No description provided for @studentChargeFeeCodeSecurityDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Deposit'**
+  String get studentChargeFeeCodeSecurityDeposit;
+
+  /// No description provided for @studentChargeFeeCodeProcessingFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Fee'**
+  String get studentChargeFeeCodeProcessingFee;
+
+  /// No description provided for @studentChargeFeeCodeLatePaymentFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Late Payment Fee'**
+  String get studentChargeFeeCodeLatePaymentFee;
+
+  /// No description provided for @studentChargeFeeCodeRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get studentChargeFeeCodeRefund;
+
+  /// No description provided for @studentChargeFeeCodeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get studentChargeFeeCodeOther;
+
+  /// No description provided for @studentChargeFeeCodeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'School fee'**
+  String get studentChargeFeeCodeFallback;
 
   /// No description provided for @facturationSearchTitle.
   ///
@@ -1676,13 +2504,13 @@ abstract class AppLocalizations {
   /// No description provided for @facturationSearchInvitationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Start a billing search'**
+  /// **'No search in progress'**
   String get facturationSearchInvitationTitle;
 
   /// No description provided for @facturationSearchInvitationMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select a level or enter a student name then click Search to display records.'**
+  /// **'Enter a name or level above to display matching students.'**
   String get facturationSearchInvitationMessage;
 
   /// No description provided for @facturationViewChargesLabel.
@@ -1766,14 +2594,32 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailInfoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Billing detail'**
+  /// **'Financial record'**
   String get facturationDetailInfoTitle;
 
   /// No description provided for @facturationDetailInfoSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Review recent payments and student charge status for the selected academic year.'**
+  /// **'Review recent payments and student charge status for this student.'**
   String get facturationDetailInfoSubtitle;
+
+  /// No description provided for @facturationDetailHeaderKpiTotalDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total due'**
+  String get facturationDetailHeaderKpiTotalDue;
+
+  /// No description provided for @facturationDetailHeaderKpiAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get facturationDetailHeaderKpiAlreadyPaid;
+
+  /// No description provided for @facturationDetailHeaderKpiRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining due'**
+  String get facturationDetailHeaderKpiRemaining;
 
   /// No description provided for @facturationDetailInfoChipPayments.
   ///
@@ -1790,14 +2636,20 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailPaymentsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Recent payments'**
+  /// **'Payments'**
   String get facturationDetailPaymentsSectionTitle;
 
   /// No description provided for @facturationDetailPaymentsSectionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment history recorded for this student.'**
+  /// **'Recorded payment history for this student.'**
   String get facturationDetailPaymentsSectionSubtitle;
+
+  /// No description provided for @facturationDetailPaymentsRecordedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}'**
+  String facturationDetailPaymentsRecordedCount(num count);
 
   /// No description provided for @facturationDetailCollectPaymentAction.
   ///
@@ -1820,13 +2672,13 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailPaymentPayerColumn.
   ///
   /// In en, this message translates to:
-  /// **'Payer details'**
+  /// **'Payer'**
   String get facturationDetailPaymentPayerColumn;
 
   /// No description provided for @facturationDetailPaymentPaidAtColumn.
   ///
   /// In en, this message translates to:
-  /// **'Paid at'**
+  /// **'Date'**
   String get facturationDetailPaymentPaidAtColumn;
 
   /// No description provided for @facturationDetailPaymentAmountColumn.
@@ -1846,6 +2698,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View payment detail'**
   String get facturationDetailViewPaymentLabel;
+
+  /// No description provided for @facturationDetailViewChargeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View charge detail'**
+  String get facturationDetailViewChargeLabel;
 
   /// No description provided for @facturationPaymentDetailHeroTitle.
   ///
@@ -1976,7 +2834,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailChargesSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Student charges'**
+  /// **'Charges'**
   String get facturationDetailChargesSectionTitle;
 
   /// No description provided for @facturationDetailChargesSectionSubtitle.
@@ -1984,6 +2842,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Breakdown of expected, paid and remaining amounts.'**
   String get facturationDetailChargesSectionSubtitle;
+
+  /// No description provided for @facturationDetailChargesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle'**
+  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount);
 
   /// No description provided for @facturationDetailChargesRetry.
   ///
@@ -2006,19 +2870,19 @@ abstract class AppLocalizations {
   /// No description provided for @facturationDetailChargeExpectedAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Expected amount'**
+  /// **'Expected'**
   String get facturationDetailChargeExpectedAmountColumn;
 
   /// No description provided for @facturationDetailChargePaidAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Paid amount'**
+  /// **'Paid'**
   String get facturationDetailChargePaidAmountColumn;
 
   /// No description provided for @facturationDetailChargeRemainingAmountColumn.
   ///
   /// In en, this message translates to:
-  /// **'Remaining amount'**
+  /// **'Remaining'**
   String get facturationDetailChargeRemainingAmountColumn;
 
   /// No description provided for @facturationDetailChargeStatusColumn.
@@ -2026,6 +2890,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get facturationDetailChargeStatusColumn;
+
+  /// No description provided for @facturationDetailChargeTotalsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get facturationDetailChargeTotalsLabel;
 
   /// No description provided for @facturationPaymentsNetworkError.
   ///
@@ -2092,6 +2962,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate and download the receipt for this payment'**
   String get facturationPrintReceiptSubtitle;
+
+  /// No description provided for @facturationPaymentDownloadPdfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get facturationPaymentDownloadPdfLabel;
 
   /// No description provided for @facturationPrintStatementsLabel.
   ///
@@ -2164,6 +3040,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Breakdown of payments allocated to this charge.'**
   String get facturationChargeDetailAllocationsSectionSubtitle;
+
+  /// No description provided for @facturationChargeDetailAllocationLabelColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation'**
+  String get facturationChargeDetailAllocationLabelColumn;
 
   /// No description provided for @facturationChargeDetailAllocationsTotalLabel.
   ///
@@ -2315,6 +3197,54 @@ abstract class AppLocalizations {
   /// **'This field is required'**
   String get facturationCreatePaymentPayerFieldRequired;
 
+  /// No description provided for @facturationCreatePaymentDetailsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details'**
+  String get facturationCreatePaymentDetailsSectionTitle;
+
+  /// No description provided for @facturationCreatePaymentDetailsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the received amount, currency and payment date.'**
+  String get facturationCreatePaymentDetailsSectionSubtitle;
+
+  /// No description provided for @facturationCreatePaymentReceivedAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get facturationCreatePaymentReceivedAmountLabel;
+
+  /// No description provided for @facturationCreatePaymentReceivedAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: 200'**
+  String get facturationCreatePaymentReceivedAmountHint;
+
+  /// No description provided for @facturationCreatePaymentCurrencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get facturationCreatePaymentCurrencyLabel;
+
+  /// No description provided for @facturationCreatePaymentCurrencyReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple currencies detected: read-only value.'**
+  String get facturationCreatePaymentCurrencyReadOnlyHint;
+
+  /// No description provided for @facturationCreatePaymentCurrencyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency unavailable'**
+  String get facturationCreatePaymentCurrencyUnavailable;
+
+  /// No description provided for @facturationCreatePaymentDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment date'**
+  String get facturationCreatePaymentDateLabel;
+
   /// No description provided for @facturationCreatePaymentAllocationSectionTitle.
   ///
   /// In en, this message translates to:
@@ -2399,6 +3329,24 @@ abstract class AppLocalizations {
   /// **'After payment'**
   String get facturationCreatePaymentAfterLabel;
 
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm removal'**
+  String get facturationCreatePaymentRemoveAllocationConfirmTitle;
+
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to remove allocation #{allocationIndex}? This action cannot be undone.'**
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex);
+
+  /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get facturationCreatePaymentRemoveAllocationConfirmAction;
+
   /// No description provided for @facturationCreatePaymentSubmitLabel.
   ///
   /// In en, this message translates to:
@@ -2465,6 +3413,36 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get facturationCreatePaymentStatusLabel;
 
+  /// No description provided for @facturationCreatePaymentChargeImpactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact on charge'**
+  String get facturationCreatePaymentChargeImpactTitle;
+
+  /// No description provided for @facturationCreatePaymentChargeRemainingHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining on this charge: {remainingAmount}'**
+  String facturationCreatePaymentChargeRemainingHelper(String remainingAmount);
+
+  /// No description provided for @facturationCreatePaymentPayAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay all'**
+  String get facturationCreatePaymentPayAllAction;
+
+  /// No description provided for @facturationCreatePaymentDistributionTrackerIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one allocation to compute total payments.'**
+  String get facturationCreatePaymentDistributionTrackerIdle;
+
+  /// No description provided for @facturationCreatePaymentFooterTotalPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Total payments: {allocatedAmount}'**
+  String facturationCreatePaymentFooterTotalPayments(String allocatedAmount);
+
   /// No description provided for @facturationCreatePaymentNetworkError.
   ///
   /// In en, this message translates to:
@@ -2525,6 +3503,492 @@ abstract class AppLocalizations {
   /// **'No unpaid charges available for this student.'**
   String get facturationCreatePaymentNoChargesAvailable;
 
+  /// No description provided for @attendanceHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceHeroTitle;
+
+  /// No description provided for @attendanceHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View class attendance by date for reliable daily tracking.'**
+  String get attendanceHeroSubtitle;
+
+  /// No description provided for @attendanceHeroChipClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class-based search'**
+  String get attendanceHeroChipClass;
+
+  /// No description provided for @attendanceHeroChipDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date filter'**
+  String get attendanceHeroChipDate;
+
+  /// No description provided for @attendanceSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Search'**
+  String get attendanceSearchTitle;
+
+  /// No description provided for @attendanceSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select cycle, level, class and date to display attendance records.'**
+  String get attendanceSearchHint;
+
+  /// No description provided for @attendanceDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get attendanceDateLabel;
+
+  /// No description provided for @attendanceCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get attendanceCycleLabel;
+
+  /// No description provided for @attendanceLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get attendanceLevelLabel;
+
+  /// No description provided for @attendanceClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get attendanceClassLabel;
+
+  /// No description provided for @attendanceShowClassAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Show class'**
+  String get attendanceShowClassAction;
+
+  /// No description provided for @attendanceInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a search to display attendance for the selected class.'**
+  String get attendanceInvitationMessage;
+
+  /// No description provided for @attendanceEmptySelectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class and a date to take attendance.'**
+  String get attendanceEmptySelectionMessage;
+
+  /// No description provided for @attendanceLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading attendance records...'**
+  String get attendanceLoadingMessage;
+
+  /// No description provided for @attendanceEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance found for these filters.'**
+  String get attendanceEmptyMessage;
+
+  /// No description provided for @attendanceExportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get attendanceExportAction;
+
+  /// No description provided for @attendanceExportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare result export'**
+  String get attendanceExportTooltip;
+
+  /// No description provided for @attendanceExportSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Export will be available soon.'**
+  String get attendanceExportSoon;
+
+  /// No description provided for @attendanceSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get attendanceSaveAction;
+
+  /// No description provided for @attendanceSavingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get attendanceSavingAction;
+
+  /// No description provided for @attendanceSaveTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all entered changes'**
+  String get attendanceSaveTooltip;
+
+  /// No description provided for @attendanceSaveValidationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix absent rows without a reason before saving.'**
+  String get attendanceSaveValidationHint;
+
+  /// No description provided for @attendanceSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance records were saved successfully.'**
+  String get attendanceSaveSuccess;
+
+  /// No description provided for @attendanceValidateCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate attendance'**
+  String get attendanceValidateCallAction;
+
+  /// No description provided for @attendancePendingChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending changes'**
+  String get attendancePendingChanges;
+
+  /// No description provided for @attendancePendingInvalidChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes required'**
+  String get attendancePendingInvalidChanges;
+
+  /// No description provided for @attendanceRowModifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get attendanceRowModifiedLabel;
+
+  /// No description provided for @attendanceUnsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get attendanceUnsavedChangesTitle;
+
+  /// No description provided for @attendanceUnsavedChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A new search will discard unsaved changes. Do you want to continue?'**
+  String get attendanceUnsavedChangesMessage;
+
+  /// No description provided for @attendanceDateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the attendance date'**
+  String get attendanceDateTooltip;
+
+  /// No description provided for @attendanceStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance in progress'**
+  String get attendanceStatusInProgress;
+
+  /// No description provided for @attendanceStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to validate'**
+  String get attendanceStatusReady;
+
+  /// No description provided for @attendancePresentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendancePresentCount;
+
+  /// No description provided for @attendanceAbsentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceAbsentCount;
+
+  /// No description provided for @attendanceTotalCountCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get attendanceTotalCountCompact;
+
+  /// No description provided for @attendanceDefaultPresenceHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'All students are marked present by default. Tap Absent to report an exception.'**
+  String get attendanceDefaultPresenceHelper;
+
+  /// No description provided for @attendanceReadyToValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'No absence is missing a reason. You can validate attendance.'**
+  String get attendanceReadyToValidate;
+
+  /// No description provided for @attendanceMissingReasonsStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} absence(s) without reason - complete required'**
+  String attendanceMissingReasonsStatus(int count);
+
+  /// No description provided for @attendanceAllPresentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm attendance'**
+  String get attendanceAllPresentConfirmTitle;
+
+  /// No description provided for @attendanceAllPresentConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you confirm that all {count} students are present?'**
+  String attendanceAllPresentConfirmMessage(int count);
+
+  /// No description provided for @attendanceTotalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total students'**
+  String get attendanceTotalCount;
+
+  /// No description provided for @attendanceGirlsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get attendanceGirlsCount;
+
+  /// No description provided for @attendanceBoysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get attendanceBoysCount;
+
+  /// No description provided for @attendanceCriteriaSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Class: {classroomName} · Date: {formattedDate}'**
+  String attendanceCriteriaSummary(String classroomName, String formattedDate);
+
+  /// No description provided for @attendanceTableLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get attendanceTableLastName;
+
+  /// No description provided for @attendanceTableMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get attendanceTableMiddleName;
+
+  /// No description provided for @attendanceTableFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get attendanceTableFirstName;
+
+  /// No description provided for @attendanceTablePresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendanceTablePresent;
+
+  /// No description provided for @attendanceTableAbsenceReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get attendanceTableAbsenceReason;
+
+  /// No description provided for @attendanceTableAbsenceReasonNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get attendanceTableAbsenceReasonNote;
+
+  /// No description provided for @attendancePresenceStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance status'**
+  String get attendancePresenceStatusLabel;
+
+  /// No description provided for @attendancePresentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendancePresentValue;
+
+  /// No description provided for @attendanceAbsentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceAbsentValue;
+
+  /// No description provided for @attendanceReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only informational status'**
+  String get attendanceReadOnlyHint;
+
+  /// No description provided for @attendanceReasonRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason for this absence.'**
+  String get attendanceReasonRequiredError;
+
+  /// No description provided for @attendanceReasonRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason required for an absence.'**
+  String get attendanceReasonRequiredHint;
+
+  /// No description provided for @attendanceReasonDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason is required only when the student is absent.'**
+  String get attendanceReasonDisabledHint;
+
+  /// No description provided for @attendanceNoteDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note is optional only when the student is absent.'**
+  String get attendanceNoteDisabledHint;
+
+  /// No description provided for @attendanceNotePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details if needed'**
+  String get attendanceNotePlaceholder;
+
+  /// No description provided for @attendanceNoMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get attendanceNoMiddleName;
+
+  /// No description provided for @attendanceNoAbsenceReason.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason'**
+  String get attendanceNoAbsenceReason;
+
+  /// No description provided for @attendanceNoAbsenceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No note'**
+  String get attendanceNoAbsenceNote;
+
+  /// No description provided for @attendanceErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get attendanceErrorNetwork;
+
+  /// No description provided for @attendanceErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance resource was found.'**
+  String get attendanceErrorNotFound;
+
+  /// No description provided for @attendanceErrorValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted data is invalid.'**
+  String get attendanceErrorValidation;
+
+  /// No description provided for @attendanceErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to access this resource.'**
+  String get attendanceErrorUnauthorized;
+
+  /// No description provided for @attendanceErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to attendance.'**
+  String get attendanceErrorInvalidCredentials;
+
+  /// No description provided for @attendanceErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server is unavailable. Please try again later.'**
+  String get attendanceErrorServer;
+
+  /// No description provided for @attendanceErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'A local storage error occurred.'**
+  String get attendanceErrorStorage;
+
+  /// No description provided for @attendanceErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error occurred.'**
+  String get attendanceErrorAuth;
+
+  /// No description provided for @attendanceErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get attendanceErrorUnknown;
+
+  /// No description provided for @absenceReasonSickness.
+  ///
+  /// In en, this message translates to:
+  /// **'Sickness'**
+  String get absenceReasonSickness;
+
+  /// No description provided for @absenceReasonFamilyEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Family emergency'**
+  String get absenceReasonFamilyEmergency;
+
+  /// No description provided for @absenceReasonPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get absenceReasonPersonal;
+
+  /// No description provided for @absenceReasonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get absenceReasonUnknown;
+
+  /// No description provided for @absenceReasonVacation.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation'**
+  String get absenceReasonVacation;
+
+  /// No description provided for @absenceReasonUnderGraduateLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Study leave'**
+  String get absenceReasonUnderGraduateLeave;
+
+  /// No description provided for @absenceReasonMarriageLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage leave'**
+  String get absenceReasonMarriageLeave;
+
+  /// No description provided for @absenceReasonParentalLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Parental leave'**
+  String get absenceReasonParentalLeave;
+
+  /// No description provided for @absenceReasonWorkLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Work leave'**
+  String get absenceReasonWorkLeave;
+
+  /// No description provided for @absenceReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get absenceReasonOther;
+
   /// No description provided for @bootstrapContextUnavailableTitle.
   ///
   /// In en, this message translates to:
@@ -2542,6 +4006,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get signOutAction;
+
+  /// No description provided for @disciplinaryDetailBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to disciplines'**
+  String get disciplinaryDetailBackLabel;
+
+  /// No description provided for @disciplinaryFollowUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary follow-up'**
+  String get disciplinaryFollowUpTitle;
+
+  /// No description provided for @disciplinaryHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case file detail'**
+  String get disciplinaryHeroTitle;
+
+  /// No description provided for @disciplinaryHeroChipCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary cases'**
+  String get disciplinaryHeroChipCases;
+
+  /// No description provided for @disciplinaryDetailContextErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail context unavailable'**
+  String get disciplinaryDetailContextErrorTitle;
+
+  /// No description provided for @disciplinaryDetailContextErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Required context for this detail view is missing. Go back to the list and open the detail again.'**
+  String get disciplinaryDetailContextErrorMessage;
+
+  /// No description provided for @disciplinaryTabCasesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary cases'**
+  String get disciplinaryTabCasesLabel;
+
+  /// No description provided for @disciplinaryTabAttendanceHistoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance history'**
+  String get disciplinaryTabAttendanceHistoryLabel;
+
+  /// No description provided for @disciplinaryAttendanceHistoryComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance history will be delivered in a future feature.'**
+  String get disciplinaryAttendanceHistoryComingSoon;
+
+  /// No description provided for @disciplinaryUnknownValue.
+  ///
+  /// In en, this message translates to:
+  /// **'-'**
+  String get disciplinaryUnknownValue;
+
+  /// No description provided for @disciplinaryCaseCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New case'**
+  String get disciplinaryCaseCreateAction;
+
+  /// No description provided for @disciplinaryCaseCreateCtaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document a new disciplinary incident for this student.'**
+  String get disciplinaryCaseCreateCtaSubtitle;
+
+  /// No description provided for @disciplinaryCasesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} recorded cases - {open} open'**
+  String disciplinaryCasesSummary(int total, int open);
+
+  /// No description provided for @disciplinaryCasesTableTitleColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get disciplinaryCasesTableTitleColumn;
+
+  /// No description provided for @disciplinaryCasesTableStatusColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get disciplinaryCasesTableStatusColumn;
+
+  /// No description provided for @disciplinaryCasesTableActionColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get disciplinaryCasesTableActionColumn;
+
+  /// No description provided for @disciplinaryCasesDateUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Date unavailable'**
+  String get disciplinaryCasesDateUnavailable;
+
+  /// No description provided for @disciplinaryCaseViewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View case'**
+  String get disciplinaryCaseViewLabel;
+
+  /// No description provided for @disciplinaryCasesLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading disciplinary cases...'**
+  String get disciplinaryCasesLoadingMessage;
+
+  /// No description provided for @disciplinaryCasesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No disciplinary cases for this student.'**
+  String get disciplinaryCasesEmptyMessage;
+
+  /// No description provided for @disciplinaryCaseViewDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case detail'**
+  String get disciplinaryCaseViewDialogTitle;
+
+  /// No description provided for @disciplinaryCaseViewDialogSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Case information'**
+  String get disciplinaryCaseViewDialogSectionTitle;
+
+  /// No description provided for @disciplinaryCaseViewDialogTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get disciplinaryCaseViewDialogTitleField;
+
+  /// No description provided for @disciplinaryCaseViewDialogStatusField.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get disciplinaryCaseViewDialogStatusField;
+
+  /// No description provided for @disciplinaryCaseViewDialogContentField.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get disciplinaryCaseViewDialogContentField;
+
+  /// No description provided for @disciplinaryCaseViewDialogLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading case detail...'**
+  String get disciplinaryCaseViewDialogLoadingMessage;
+
+  /// No description provided for @disciplinaryCaseViewDialogErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load case detail'**
+  String get disciplinaryCaseViewDialogErrorMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create disciplinary case'**
+  String get disciplinaryCaseCreateDialogTitle;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Case title'**
+  String get disciplinaryCaseCreateDialogTitleField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a brief case description'**
+  String get disciplinaryCaseCreateDialogTitleHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogContentField.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get disciplinaryCaseCreateDialogContentField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case details'**
+  String get disciplinaryCaseCreateDialogContentHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCaseDateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Case date'**
+  String get disciplinaryCaseCreateDialogCaseDateField;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCaseDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get disciplinaryCaseCreateDialogCaseDateHint;
+
+  /// No description provided for @disciplinaryCaseCreateDialogSubmitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create case'**
+  String get disciplinaryCaseCreateDialogSubmitAction;
+
+  /// No description provided for @disciplinaryCaseCreateDialogCreatingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get disciplinaryCaseCreateDialogCreatingMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case created successfully.'**
+  String get disciplinaryCaseCreateDialogSuccessMessage;
+
+  /// No description provided for @disciplinaryCaseCreateDialogRequiredFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get disciplinaryCaseCreateDialogRequiredFieldError;
+
+  /// No description provided for @disciplinaryCasesNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get disciplinaryCasesNetworkError;
+
+  /// No description provided for @disciplinaryCasesNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No disciplinary cases found.'**
+  String get disciplinaryCasesNotFound;
+
+  /// No description provided for @disciplinaryCasesValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested data is invalid.'**
+  String get disciplinaryCasesValidationError;
+
+  /// No description provided for @disciplinaryCasesUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to access these cases.'**
+  String get disciplinaryCasesUnauthorizedError;
+
+  /// No description provided for @disciplinaryCasesInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your credentials do not allow access to cases.'**
+  String get disciplinaryCasesInvalidCredentialsError;
+
+  /// No description provided for @disciplinaryCasesServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Server is unavailable. Please try again later.'**
+  String get disciplinaryCasesServerError;
+
+  /// No description provided for @disciplinaryCasesStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local storage error occurred.'**
+  String get disciplinaryCasesStorageError;
+
+  /// No description provided for @disciplinaryCasesAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading cases.'**
+  String get disciplinaryCasesAuthError;
+
+  /// No description provided for @disciplinaryCasesUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get disciplinaryCasesUnknownError;
+
+  /// No description provided for @disciplinaryCaseStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get disciplinaryCaseStatusOpen;
+
+  /// No description provided for @disciplinaryCaseStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get disciplinaryCaseStatusInProgress;
+
+  /// No description provided for @disciplinaryCaseStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get disciplinaryCaseStatusClosed;
+
+  /// No description provided for @disciplinaryCaseStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get disciplinaryCaseStatusUnknown;
+
+  /// No description provided for @enrollmentStatusPreRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-registered'**
+  String get enrollmentStatusPreRegistered;
+
+  /// No description provided for @statusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get statusPaid;
+
+  /// No description provided for @statusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get statusPartial;
+
+  /// No description provided for @statusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get statusOverdue;
+
+  /// No description provided for @statusPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get statusPresent;
+
+  /// No description provided for @statusAbsentJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get statusAbsentJustified;
+
+  /// No description provided for @statusAbsentUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get statusAbsentUnjustified;
+
+  /// No description provided for @statusSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get statusSynced;
+
+  /// No description provided for @statusSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get statusSyncing;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get statusOffline;
+
+  /// No description provided for @statusPendingUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending upload'**
+  String get statusPendingUpload;
+
+  /// No description provided for @statusSyncConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict'**
+  String get statusSyncConflict;
+
+  /// No description provided for @componentGalleryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Component gallery'**
+  String get componentGalleryTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

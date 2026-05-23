@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 enum EnrollmentDetailAccessMode { readOnly, editable }
@@ -13,12 +15,8 @@ class EnrollmentReadOnlyBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isEditable = mode == EnrollmentDetailAccessMode.editable;
-    final accentColor = isEditable
-        ? const Color(0xFF059669)
-        : const Color(0xFFEA580C);
-    final iconColor = isEditable
-        ? const Color(0xFF047857)
-        : const Color(0xFFB45309);
+    final accentColor = isEditable ? AppColors.success : AppColors.warning;
+    final iconColor = accentColor;
     final title = isEditable
         ? l10n.enrollmentEditableTitle
         : l10n.enrollmentReadOnlyTitle;
@@ -30,14 +28,8 @@ class EnrollmentReadOnlyBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          colors: [
-            isEditable ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED),
-            (isEditable ? const Color(0xFFD1FAE5) : const Color(0xFFFFEDD5))
-                .withValues(alpha: 0.88),
-          ],
-        ),
+        color: accentColor.withValues(alpha: 0.12),
+        borderRadius: AppRadius.brMd,
         border: Border.all(color: accentColor.withValues(alpha: 0.22)),
       ),
       child: Row(
@@ -48,7 +40,7 @@ class EnrollmentReadOnlyBanner extends StatelessWidget {
             height: 28,
             decoration: BoxDecoration(
               color: accentColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.brSm,
             ),
             child: Icon(
               isEditable ? Icons.edit_rounded : Icons.visibility_outlined,
@@ -63,19 +55,16 @@ class EnrollmentReadOnlyBanner extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimaryColor,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   message,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: AppTypography.bodySmall.copyWith(
                     height: 1.35,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

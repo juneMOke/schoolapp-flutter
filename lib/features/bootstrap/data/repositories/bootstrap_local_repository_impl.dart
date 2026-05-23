@@ -83,6 +83,8 @@ class BootstrapLocalRepositoryImpl implements BootstrapLocalRepository {
                         name: levelBundle.schoolLevel.name,
                         code: levelBundle.schoolLevel.code,
                         displayOrder: levelBundle.schoolLevel.displayOrder,
+                        splitIntoClassrooms:
+                            levelBundle.schoolLevel.splitIntoClassrooms,
                       ),
                       classrooms: levelBundle.classrooms
                           .map(

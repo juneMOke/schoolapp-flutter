@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -25,10 +30,10 @@ class AuthFlowShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.surface,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth >= 800) {
+          if (constraints.maxWidth >= AppBreakpoints.authWideMin) {
             return _AuthWideLayout(
               title: title,
               subtitle: subtitle,
@@ -137,7 +142,7 @@ class _AuthNarrowLayout extends StatelessWidget {
           right: -50,
           child: _DecorativeCircle(
             size: 220,
-            color: AppTheme.primaryColor.withValues(alpha: 0.07),
+            color: AppColors.bleuArdoise.withValues(alpha: 0.07),
           ),
         ),
         Positioned(
@@ -145,7 +150,7 @@ class _AuthNarrowLayout extends StatelessWidget {
           left: -50,
           child: _DecorativeCircle(
             size: 140,
-            color: AppTheme.accentIndigo.withValues(alpha: 0.06),
+            color: AppColors.info.withValues(alpha: 0.06),
           ),
         ),
         Positioned(
@@ -153,7 +158,7 @@ class _AuthNarrowLayout extends StatelessWidget {
           right: -40,
           child: _DecorativeCircle(
             size: 160,
-            color: const Color(0xFF10B981).withValues(alpha: 0.06),
+            color: AppColors.terreCuite.withValues(alpha: 0.06),
           ),
         ),
         SafeArea(
@@ -198,113 +203,111 @@ class _AuthBrandingPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A73E8), Color(0xFF6366F1), Color(0xFF1E3A8A)],
+    return Semantics(
+      container: true,
+      child: Container(
+        decoration: const BoxDecoration(color: AppColors.surfaceDark),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -90,
+              right: -90,
+              child: _DecorativeCircle(
+                size: 300,
+                color: AppColors.textOnDark.withValues(alpha: 0.05),
+              ),
+            ),
+            Positioned(
+              bottom: -70,
+              left: -70,
+              child: _DecorativeCircle(
+                size: 240,
+                color: AppColors.textOnDark.withValues(alpha: 0.04),
+              ),
+            ),
+            Positioned(
+              top: 220,
+              left: 30,
+              child: _DecorativeCircle(
+                size: 110,
+                color: AppColors.textOnDark.withValues(alpha: 0.04),
+              ),
+            ),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 48,
+                      vertical: 40,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.textOnDark.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: AppRadius.brLg,
+                            ),
+                            child: const Icon(
+                              Icons.school_rounded,
+                              size: 48,
+                              color: AppColors.textOnDark,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          Text(
+                            l10n.schoolApp,
+                            style: AppTextStyles.detailHeroTitle.copyWith(
+                              color: AppColors.textOnDark,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            subtitle,
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.textOnDark.withValues(
+                                alpha: 0.75,
+                              ),
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 52),
+                          _FeatureBullet(
+                            icon: Icons.how_to_reg_outlined,
+                            label: l10n.menuInscriptions,
+                          ),
+                          _FeatureBullet(
+                            icon: Icons.account_balance_wallet_outlined,
+                            label: l10n.menuFinances,
+                          ),
+                          _FeatureBullet(
+                            icon: Icons.class_outlined,
+                            label: l10n.menuClasses,
+                          ),
+                          _FeatureBullet(
+                            icon: Icons.gavel_outlined,
+                            label: l10n.menuDisciplines,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -90,
-            right: -90,
-            child: _DecorativeCircle(
-              size: 300,
-              color: Colors.white.withValues(alpha: 0.05),
-            ),
-          ),
-          Positioned(
-            bottom: -70,
-            left: -70,
-            child: _DecorativeCircle(
-              size: 240,
-              color: Colors.white.withValues(alpha: 0.04),
-            ),
-          ),
-          Positioned(
-            top: 220,
-            left: 30,
-            child: _DecorativeCircle(
-              size: 110,
-              color: Colors.white.withValues(alpha: 0.04),
-            ),
-          ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 48,
-                    vertical: 40,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(
-                            Icons.school_rounded,
-                            size: 48,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Text(
-                          l10n.schoolApp,
-                          style: const TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withValues(alpha: 0.75),
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 52),
-                        _FeatureBullet(
-                          icon: Icons.how_to_reg_outlined,
-                          label: l10n.menuInscriptions,
-                        ),
-                        _FeatureBullet(
-                          icon: Icons.account_balance_wallet_outlined,
-                          label: l10n.menuFinances,
-                        ),
-                        _FeatureBullet(
-                          icon: Icons.class_outlined,
-                          label: l10n.menuClasses,
-                        ),
-                        _FeatureBullet(
-                          icon: Icons.gavel_outlined,
-                          label: l10n.menuDisciplines,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -324,25 +327,14 @@ class _AuthMobileHeader extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF1A73E8), Color(0xFF6366F1)],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryColor.withValues(alpha: 0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+          decoration: const BoxDecoration(
+            color: AppColors.bleuArdoise,
+            borderRadius: AppRadius.brLg,
           ),
           child: const Icon(
             Icons.school_rounded,
             size: 44,
-            color: Colors.white,
+            color: AppColors.textOnDark,
           ),
         ),
         const SizedBox(height: 20),
@@ -350,7 +342,7 @@ class _AuthMobileHeader extends StatelessWidget {
           l10n.schoolApp,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimaryColor,
+            color: AppColors.textPrimary,
             letterSpacing: -0.5,
           ),
         ),
@@ -360,7 +352,7 @@ class _AuthMobileHeader extends StatelessWidget {
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimaryColor,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -368,7 +360,7 @@ class _AuthMobileHeader extends StatelessWidget {
           subtitle,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.textSecondaryColor,
+            color: AppColors.textSecondary,
             height: 1.45,
           ),
         ),
@@ -395,90 +387,72 @@ class AuthFlowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.primaryColor.withValues(alpha: 0.10),
-                  AppTheme.accentIndigo.withValues(alpha: 0.07),
+    return Semantics(
+      container: true,
+      child: Container(
+        decoration: AppElevation.surface3,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.vertical(top: AppRadius.md),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.bleuArdoise.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.brSm,
+                    ),
+                    child: Icon(icon, size: 20, color: AppColors.bleuArdoise),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.sectionTitle.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (topAccessory != null) ...[
+                    topAccessory!,
+                    const SizedBox(height: 18),
+                  ],
+                  child,
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 20, color: AppTheme.primaryColor),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimaryColor,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (topAccessory != null) ...[
-                  topAccessory!,
-                  const SizedBox(height: 18),
-                ],
-                child,
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -495,20 +469,20 @@ class AuthInfoPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AppColors.surfaceAlt,
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppTheme.primaryColor),
+          Icon(icon, size: 16, color: AppColors.bleuArdoise),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
               style: const TextStyle(
                 fontSize: 13,
-                color: AppTheme.textPrimaryColor,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -526,39 +500,42 @@ class _AuthBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return InkWell(
-      onTap: () {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.goNamed(AppRoutesNames.login);
-        }
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.arrow_back_rounded,
-              size: 18,
-              color: AppTheme.textPrimaryColor,
+    return Semantics(
+      button: true,
+      child: Tooltip(
+        message: l10n.previous,
+        child: OutlinedButton.icon(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.goNamed(AppRoutesNames.login);
+            }
+          },
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            size: AppDimensions.detailMiniIconSize,
+            color: AppColors.textPrimary,
+          ),
+          label: Text(
+            l10n.previous,
+            style: AppTextStyles.action.copyWith(color: AppColors.textPrimary),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(
+              AppDimensions.minTouchTarget,
+              AppDimensions.minTouchTarget,
             ),
-            const SizedBox(width: 6),
-            Text(
-              l10n.previous,
-              style: const TextStyle(
-                color: AppTheme.textPrimaryColor,
-                fontWeight: FontWeight.w600,
-              ),
+            side: const BorderSide(color: AppColors.border),
+            backgroundColor: AppColors.surfaceRaised.withValues(alpha: 0.92),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.spacingS),
             ),
-          ],
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingS,
+              vertical: AppDimensions.spacingS,
+            ),
+          ),
         ),
       ),
     );
@@ -580,17 +557,17 @@ class _FeatureBullet extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
+              color: AppColors.textOnDark.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: Colors.white),
+            child: Icon(icon, size: 16, color: AppColors.textOnDark),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
+                color: AppColors.textOnDark.withValues(alpha: 0.85),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -610,10 +587,12 @@ class _DecorativeCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    return ExcludeSemantics(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
     );
   }
 }

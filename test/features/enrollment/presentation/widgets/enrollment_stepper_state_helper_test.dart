@@ -117,9 +117,17 @@ void main() {
       },
     );
 
-    test('isGuardianInfoValid retourne false quand email est vide', () {
+    test('isGuardianInfoValid retourne true quand email est vide', () {
       final result = EnrollmentStepperStateHelper.isGuardianInfoValid(
         <ParentSummary>[_buildParentSummary(email: ' ')],
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('isGuardianInfoValid retourne false quand email est invalide', () {
+      final result = EnrollmentStepperStateHelper.isGuardianInfoValid(
+        <ParentSummary>[_buildParentSummary(email: 'email-invalide')],
       );
 
       expect(result, isFalse);
@@ -279,6 +287,7 @@ StudentDetail _buildStudentDetail({
       name: '6eme',
       code: '6E',
       displayOrder: 1,
+      splitIntoClassrooms: false,
     ),
     schoolLevelGroup: const SchoolLevelGroup(
       id: 'group-1',

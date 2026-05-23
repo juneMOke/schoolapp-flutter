@@ -15,5 +15,6 @@ class BootstrapCurrentYearBloc
     on<BootstrapContextRemoteCurrentYearRequested>(onLoadRemoteCurrentYear);
     on<BootstrapContextLocalRequested>(onLoadLocal);
     on<BootstrapContextResetRequested>(onReset);
+    on<BootstrapContextSchoolLevelSplitPatched>(onPatchSchoolLevelSplit);
   }
 }

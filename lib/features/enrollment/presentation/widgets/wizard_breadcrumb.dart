@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class WizardBreadcrumb extends StatelessWidget {
@@ -19,12 +21,14 @@ class WizardBreadcrumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,36 +36,33 @@ class WizardBreadcrumb extends StatelessWidget {
           Row(
             children: [
               Text(
-                AppLocalizations.of(context)!.stepIndicator(
+                l10n.stepIndicator(
                   currentStep + 1,
                   titles.length,
                 ),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimaryColor,
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 6,
-                    backgroundColor: const Color(0xFFE5E7EB),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppTheme.primaryColor,
-                    ),
+                    minHeight: 3,
+                    backgroundColor: AppColors.border,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.bleuArdoise),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           Wrap(
-            spacing: 6,
-            runSpacing: 8,
+            spacing: 4,
+            runSpacing: 4,
             children: List.generate(titles.length, (index) {
               final isDone = index < currentStep;
               final isCurrent = index == currentStep;
@@ -84,58 +85,64 @@ class WizardBreadcrumb extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 6,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
                             color: isCurrent
-                                ? AppTheme.primaryColor
+                                ? AppColors.bleuArdoise
                                 : isDone
-                                    ? AppTheme.primaryColor.withValues(alpha: 0.14)
-                                    : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(18),
+                                    ? AppColors.bleuArdoise.withValues(alpha: 0.10)
+                                    : AppColors.surfaceAlt,
+                            borderRadius: const BorderRadius.all(Radius.circular(18)),
+                            border: isCurrent
+                                ? null
+                                : Border.all(
+                                    color: isDone
+                                        ? AppColors.bleuArdoise.withValues(alpha: 0.14)
+                                        : AppColors.border,
+                                  ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                width: 16,
-                                height: 16,
+                                width: 12,
+                                height: 12,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isCurrent
-                                      ? Colors.white.withValues(alpha: 0.22)
+                                      ? AppColors.textOnDark.withValues(alpha: 0.22)
                                       : isDone
-                                          ? AppTheme.primaryColor.withValues(
-                                              alpha: 0.18,
+                                          ? AppColors.bleuArdoise.withValues(
+                                              alpha: 0.16,
                                             )
-                                          : const Color(0xFFE5E7EB),
+                                          : AppColors.border,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
                                   isDone ? '✓' : '${index + 1}',
-                                  style: TextStyle(
-                                    fontSize: 10,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    fontSize: 8,
                                     fontWeight: FontWeight.w700,
                                     color: isCurrent
-                                        ? Colors.white
+                                        ? AppColors.textOnDark
                                         : isDone
-                                            ? AppTheme.primaryColor
-                                            : const Color(0xFF6B7280),
+                                            ? AppColors.bleuArdoise
+                                            : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 5),
                               Text(
                                 titles[index],
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: AppTypography.labelSmall.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isCurrent
-                                      ? Colors.white
+                                      ? AppColors.textOnDark
                                       : isDone
-                                          ? AppTheme.primaryColor
-                                          : const Color(0xFF6B7280),
+                                          ? AppColors.bleuArdoise
+                                          : AppColors.textSecondary.withValues(alpha: 0.75),
                                 ),
                               ),
                             ],
@@ -146,11 +153,11 @@ class WizardBreadcrumb extends StatelessWidget {
                   ),
                   if (index < titles.length - 1)
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 1),
                       child: Icon(
                         Icons.chevron_right_rounded,
-                        size: 16,
-                        color: Color(0xFF9CA3AF),
+                        size: 12,
+                        color: AppColors.textMuted,
                       ),
                     ),
                 ],

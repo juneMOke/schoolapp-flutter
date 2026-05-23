@@ -3,13 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_state_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charges_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -39,26 +38,11 @@ class FacturationDetailChargesSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return FinanceSectionCard(
-      gradientColors: const [
-        AppColors.financeDetailChargesSurface,
-        AppColors.financeDetailChargesSurfaceAlt,
-      ],
-      borderColor: AppColors.financeDetailChargesAccent.withValues(alpha: 0.18),
+      backgroundColor: AppColors.surfaceRaised,
+      borderColor: AppColors.border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FinanceSectionHeader(
-            icon: Icons.receipt_long_outlined,
-            title: l10n.facturationDetailChargesSectionTitle,
-            accent: AppColors.financeDetailChargesAccent,
-            accentSoft: AppColors.financeDetailChargesAccentSoft,
-          ),
-          const SizedBox(height: AppDimensions.spacingXS),
-          Text(
-            l10n.facturationDetailChargesSectionSubtitle,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
           BlocConsumer<StudentChargesBloc, StudentChargesState>(
             listenWhen: (prev, curr) =>
                 prev.status != curr.status || prev.errorType != curr.errorType,
@@ -75,51 +59,126 @@ class FacturationDetailChargesSection extends StatelessWidget {
                 prev.studentCharges != curr.studentCharges ||
                 prev.errorType != curr.errorType,
             builder: (context, state) {
-              return AnimatedSwitcher(
-                duration: FinanceMotion.standard,
-                switchInCurve: FinanceMotion.outCurve,
-                switchOutCurve: FinanceMotion.inCurve,
-                child: () {
-                  if (state.status == StudentChargesStatus.loading) {
-                    return const Center(
-                      key: ValueKey('charges-loading'),
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+              final partialCount = state.studentCharges
+                  .where(
+                    (charge) => charge.status == StudentChargeStatus.partial,
+                  )
+                  .length;
+              final dueCount = state.studentCharges
+                  .where((charge) => charge.status == StudentChargeStatus.due)
+                  .length;
 
-                  if (state.status == StudentChargesStatus.failure) {
-                    return FinanceStateCard(
-                      key: const ValueKey('charges-error'),
-                      message: state.errorType.localizedMessage(l10n),
-                      icon: Icons.error_outline,
-                      accent: AppColors.warning,
-                      accentSoft: AppColors.financeDetailWarningSoft,
-                      actionLabel: l10n.facturationDetailChargesRetry,
-                      onAction: () => _retry(context),
-                    );
-                  }
+              final subtitle = state.status == StudentChargesStatus.success
+                  ? l10n.facturationDetailChargesSummary(
+                      state.studentCharges.length,
+                      partialCount,
+                      dueCount,
+                    )
+                  : l10n.facturationDetailChargesSectionSubtitle;
 
-                  if (state.studentCharges.isEmpty) {
-                    return FinanceStateCard(
-                      key: const ValueKey('charges-empty'),
-                      message: l10n.facturationDetailChargesEmpty,
-                      icon: Icons.inbox_outlined,
-                      accent: AppColors.textSecondary,
-                      accentSoft: AppColors.financeDetailMutedSurface,
-                    );
-                  }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(subtitle: subtitle),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  const Divider(height: 1, color: AppColors.border),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  AnimatedSwitcher(
+                    duration: FinanceMotion.standard,
+                    switchInCurve: FinanceMotion.outCurve,
+                    switchOutCurve: FinanceMotion.inCurve,
+                    child: () {
+                      if (state.status == StudentChargesStatus.loading) {
+                        return const Center(
+                          key: ValueKey('charges-loading'),
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                  return FacturationChargesTable(
-                    key: const ValueKey('charges-table'),
-                    charges: state.studentCharges,
-                    onViewRequested: onViewChargeRequested,
-                  );
-                }(),
+                      if (state.status == StudentChargesStatus.failure) {
+                        return StateCard(
+                          key: const ValueKey('charges-error'),
+                          message: state.errorType.localizedMessage(l10n),
+                          icon: Icons.error_outline,
+                          accent: AppColors.warning,
+                          accentSoft: AppColors.financeDetailWarningSoft,
+                          actionLabel: l10n.facturationDetailChargesRetry,
+                          onAction: () => _retry(context),
+                        );
+                      }
+
+                      if (state.studentCharges.isEmpty) {
+                        return StateCard(
+                          key: const ValueKey('charges-empty'),
+                          message: l10n.facturationDetailChargesEmpty,
+                          icon: Icons.inbox_outlined,
+                          accent: AppColors.textSecondary,
+                          accentSoft: AppColors.surfaceAlt,
+                        );
+                      }
+
+                      return FacturationChargesTable(
+                        key: const ValueKey('charges-table'),
+                        charges: state.studentCharges,
+                        onViewRequested: onViewChargeRequested,
+                      );
+                    }(),
+                  ),
+                ],
               );
             },
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String subtitle;
+
+  const _SectionHeader({required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          width: AppDimensions.spacingXL,
+          height: AppDimensions.spacingXL,
+          child: Icon(
+            Icons.receipt_long_outlined,
+            size: AppDimensions.detailHeaderIconSize,
+            color: AppColors.bleuArdoise,
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingM),
+        Expanded(
+          child: Row(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.facturationDetailChargesSectionTitle,
+                style: AppTextStyles.sectionTitle.copyWith(
+                  color: AppColors.bleuArdoise,
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Expanded(
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

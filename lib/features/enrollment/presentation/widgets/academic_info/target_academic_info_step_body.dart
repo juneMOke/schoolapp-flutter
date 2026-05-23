@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/target_year_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TargetAcademicInfoStepBody extends StatelessWidget {
@@ -47,14 +49,12 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      children: <Widget>[
-        AcademicInfoCard(
-          icon: Icons.flag_outlined,
-          iconColor: Colors.green[600]!,
-          title: l10n.targetYear,
-          titleColor: Colors.green[600]!,
-          child: TargetYearFields(
+    return Padding(
+      padding: const EdgeInsets.all(AppTheme.defaultPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TargetYearFields(
             l10n: l10n,
             bootstrap: bootstrap,
             currYearController: currYearController,
@@ -69,44 +69,44 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
             onLevelChanged: onLevelChanged,
             isEditable: isEditable,
           ),
-        ),
-        if (showInlineSaveButton) ...<Widget>[
-          const SizedBox(height: 24),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: (isLoading || !canSave) ? null : onSave,
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.save_outlined),
-              label: Text(
-                isLoading ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 12,
+          if (showInlineSaveButton) ...<Widget>[
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: (isLoading || !canSave) ? null : onSave,
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textOnDark,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(
+                  isLoading ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
                 ),
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                style: FilledButton.styleFrom(
+                  backgroundColor: canSave ? AppColors.info : null,
+                  foregroundColor: AppColors.textOnDark,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  elevation: canSave ? 6 : 0,
+                  shadowColor: AppColors.info.withValues(alpha: 0.45),
                 ),
-                elevation: canSave ? 6 : 0,
-                shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
               ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

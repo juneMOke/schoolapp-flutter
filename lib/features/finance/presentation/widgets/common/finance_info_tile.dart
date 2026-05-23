@@ -12,6 +12,7 @@ class FinanceInfoTile extends StatelessWidget {
   final Color borderColor;
   final Color valueColor;
   final double? valueFontSize;
+  final TextStyle? valueStyle;
 
   const FinanceInfoTile({
     super.key,
@@ -22,6 +23,7 @@ class FinanceInfoTile extends StatelessWidget {
     this.borderColor = AppColors.border,
     this.valueColor = AppColors.textPrimary,
     this.valueFontSize,
+    this.valueStyle,
   });
 
   @override
@@ -47,10 +49,11 @@ class FinanceInfoTile extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingXS),
             Text(
               value,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: valueColor,
-                fontSize: valueFontSize,
-              ),
+              style: valueStyle ??
+                  AppTextStyles.bodyStrong.copyWith(
+                    color: valueColor,
+                    fontSize: valueFontSize,
+                  ),
             ),
           ],
         ),

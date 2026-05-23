@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 class EteeloValidationButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -19,46 +21,29 @@ class EteeloValidationButton extends StatelessWidget {
       height: 48,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: isLoading
-              ? null
-              : const LinearGradient(
-                  colors: [Color(0xFF1A73E8), Color(0xFF6366F1)],
-                ),
-          borderRadius: BorderRadius.circular(10),
-          color: isLoading ? const Color(0xFFD1D5DB) : null,
-          boxShadow: isLoading
-              ? null
-              : [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          color: isLoading ? AppColors.stateDisabled : AppColors.terreCuite,
+          borderRadius: AppRadius.brSm,
         ),
         child: ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.textOnDark,
             disabledBackgroundColor: Colors.transparent,
-            disabledForegroundColor: Colors.white70,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+            disabledForegroundColor: AppColors.textOnDark.withValues(
+              alpha: 0.7,
             ),
-            textStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+            textStyle: AppTypography.labelLarge.copyWith(letterSpacing: 0.3),
           ),
           child: isLoading
               ? const SizedBox(
-                  width: 20, height: 20,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: AppColors.textOnDark,
                   ),
                 )
               : Text(label),

@@ -135,10 +135,279 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuBilling => 'Billing';
 
   @override
-  String get subMenuOrganization => 'Organization';
+  String get subMenuOrganization => 'Class\ncomposition';
 
   @override
-  String get subMenuClassesList => 'Classes List';
+  String get classesOrganisationHeroTitle => 'Class composition';
+
+  @override
+  String get classesOrganisationHeroSubtitle => 'Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.';
+
+  @override
+  String get classesOrganisationSearchTitle => 'Level selection for class distribution';
+
+  @override
+  String get classesOrganisationSearchHint => 'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.';
+
+  @override
+  String get classesOrganisationClassroomFieldLabel => 'Classroom';
+
+  @override
+  String get classesOrganisationDistributionLabel => 'Distribution criterion';
+
+  @override
+  String get classesOrganisationDistributionByGender => 'Distribute by gender';
+
+  @override
+  String get classesOrganisationDistributionByPercentage => 'Distribute by average';
+
+  @override
+  String get classesOrganisationDistributionAction => 'Distribute';
+
+  @override
+  String get classesOrganisationDistributionConfirmTitle => 'Confirm distribution';
+
+  @override
+  String get classesOrganisationDistributionConfirmMessage => 'Do you want to distribute students for this level?';
+
+  @override
+  String get classesOrganisationDistributionSuccess => 'Distribution completed successfully.';
+
+  @override
+  String get classesOrganisationSplitInfo => 'Split mode enabled: classroom grid with members and stats.';
+
+  @override
+  String get classesOrganisationNonSplitInfo => 'Non-split mode enabled: student list for the selected level.';
+
+  @override
+  String get classesOrganisationNoClassrooms => 'No classroom is available for this level.';
+
+  @override
+  String classesOrganisationClassroomStats(int total, int girls, int boys) {
+    return '$total students - Girls: $girls - Boys: $boys';
+  }
+
+  @override
+  String get classesOrganisationTransferDialogTitle => 'Transfer student';
+
+  @override
+  String classesOrganisationTransferDialogMessage(String studentName) {
+    return 'Choose the destination classroom for $studentName.';
+  }
+
+  @override
+  String get classesOrganisationTransferTargetLabel => 'Destination classroom';
+
+  @override
+  String get classesOrganisationTransferAction => 'Transfer';
+
+  @override
+  String get classesOrganisationTransferInProgress => 'Transfer in progress...';
+
+  @override
+  String get classesOrganisationTransferSuccess => 'Transfer completed successfully.';
+
+  @override
+  String get classesOrganisationTransferNoTarget => 'No destination classroom is available.';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelTitle => 'Select a cycle and a level';
+
+  @override
+  String get classesOrganisationSelectCycleAndLevelSubtitle => 'Start by selecting a cycle, then a level to display class composition.';
+
+  @override
+  String get classesOrganisationSelectLevelTitle => 'Select a level';
+
+  @override
+  String classesOrganisationSelectLevelSubtitle(String cycleName) {
+    return 'Now select a level in the $cycleName cycle.';
+  }
+
+  @override
+  String get classesOrganisationPendingTitle => 'Level not distributed yet';
+
+  @override
+  String get classesOrganisationPendingSubtitle => 'Run the initial distribution to create classes for this level.';
+
+  @override
+  String classesOrganisationPendingStudentsToDistribute(int count) {
+    return '$count students to distribute';
+  }
+
+  @override
+  String classesOrganisationPendingPlannedClassrooms(int count) {
+    return '$count planned classes';
+  }
+
+  @override
+  String get classesOrganisationAppliedCriterionInfo => 'Applied criterion: balanced distribution by gender (mixed school).';
+
+  @override
+  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion) {
+    return '$studentsCount students distributed across $classroomsCount classes · Applied criterion: $criterion';
+  }
+
+  @override
+  String get classesOrganisationClassroomsSectionTitle => 'Constituted classes';
+
+  @override
+  String get classesOrganisationUnassignedTitle => 'Students to assign';
+
+  @override
+  String get classesOrganisationUnassignedTitleSuffix => ' — added after distribution';
+
+  @override
+  String get classesOrganisationUnassignedBadge => 'To assign';
+
+  @override
+  String classesOrganisationUnassignedSummary(int count) {
+    return '$count students waiting for assignment';
+  }
+
+  @override
+  String get classesOrganisationNoMembers => 'No student in this classroom.';
+
+  @override
+  String get classesOrganisationAssignAction => 'Assign to a classroom';
+
+  @override
+  String get classesOrganisationAssignDialogTitle => 'Assign to a classroom';
+
+  @override
+  String classesOrganisationAssignDialogMessage(String studentName) {
+    return 'Choose the destination classroom for $studentName.';
+  }
+
+  @override
+  String classesOrganisationClassroomPopulation(int count) {
+    return 'Current size: $count';
+  }
+
+  @override
+  String classesOrganisationTransferConfirmMessage(String studentName) {
+    return 'Do you confirm transferring $studentName to this classroom?';
+  }
+
+  @override
+  String classesOrganisationLoadingClassroomsCount(int count) {
+    return 'Loading members for $count classrooms...';
+  }
+
+  @override
+  String get classesOrganisationStudentDetailSoon => 'Student details will be available in the next batch.';
+
+  @override
+  String get classesOrganisationErrorNetwork => 'Check your internet connection.';
+
+  @override
+  String get classesOrganisationErrorNotFound => 'No data found for these criteria.';
+
+  @override
+  String get classesOrganisationErrorValidation => 'Some entered information is invalid.';
+
+  @override
+  String get classesOrganisationErrorUnauthorized => 'Access is not authorized.';
+
+  @override
+  String get classesOrganisationErrorInvalidCredentials => 'Invalid credentials.';
+
+  @override
+  String get classesOrganisationErrorServer => 'Server error, try again later.';
+
+  @override
+  String get classesOrganisationErrorStorage => 'Local storage error.';
+
+  @override
+  String get classesOrganisationErrorAuth => 'Session is not valid, please sign in again.';
+
+  @override
+  String get classesOrganisationErrorUnknown => 'An error occurred.';
+
+  @override
+  String get classesListHeroTitle => 'Class lists';
+
+  @override
+  String get classesListHeroSubtitle => 'Quickly search students by cycle, level or classroom, then export the displayed results.';
+
+  @override
+  String get classesListHeroFilterChip => 'Multi-criteria search by identity and level.';
+
+  @override
+  String get classesListHeroClassroomChip => 'Optional classroom filtering for the current school year.';
+
+  @override
+  String get classesListSearchTitle => 'Search form';
+
+  @override
+  String get classesListSearchHint => '';
+
+  @override
+  String get classesListValidationAtLeastOneCriterion => 'Provide at least one criterion to run a search.';
+
+  @override
+  String get classesListClassroomOptionalLabel => 'Classroom (optional)';
+
+  @override
+  String get classesListFirstNameOptionalLabel => 'First name (optional)';
+
+  @override
+  String get classesListLastNameOptionalLabel => 'Last name (optional)';
+
+  @override
+  String get classesListSurnameOptionalLabel => 'Surname (optional)';
+
+  @override
+  String get classesListInitialEmptyTitle => 'No search in progress';
+
+  @override
+  String get classesListInitialEmptyMessage => 'Fill in at least one criterion to display students.';
+
+  @override
+  String get classesListNoMatchTitle => 'No student matches the criteria';
+
+  @override
+  String get classesListNoMatchMessage => 'Try broadening your filters or adjusting your search.';
+
+  @override
+  String classesListResultsSummary(int count, String criteria) {
+    return '$count students found — $criteria';
+  }
+
+  @override
+  String classesListResultsSummaryWithoutCriteria(int count) {
+    return '$count students found';
+  }
+
+  @override
+  String get classesListClassroomChipLabel => 'Classroom';
+
+  @override
+  String get classesListLoadingClassroomMembers => 'Loading classroom members...';
+
+  @override
+  String get classesListClassroomEmptyMessage => 'No student is currently assigned to this classroom.';
+
+  @override
+  String get classesListClassroomFilteredEmptyMessage => 'No student in this classroom matches the entered filters.';
+
+  @override
+  String get classesListStudentDetailSoon => 'Student details will be available in a future release.';
+
+  @override
+  String get classesListExportSuccess => 'Export copied to clipboard.';
+
+  @override
+  String get classesListExportFailed => 'Unable to prepare the export right now.';
+
+  @override
+  String get classesListExportNothingToExport => 'There is no data to export for this search.';
+
+  @override
+  String get classesListExportPdf => 'Export as PDF';
+
+  @override
+  String get subMenuClassesList => 'Class lists';
 
   @override
   String get subMenuAttendance => 'Attendance';
@@ -154,6 +423,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home => 'Home';
+
+  @override
+  String get homeTopBarPendingSubtitle => 'Pending files follow-up';
+
+  @override
+  String get homeTopBarNotificationsTooltip => 'Notifications';
+
+  @override
+  String get homeUserMenuTooltip => 'User menu';
+
+  @override
+  String get homeSidebarCollapseTooltip => 'Collapse menu';
+
+  @override
+  String get homeSidebarExpandTooltip => 'Expand menu';
+
+  @override
+  String get homeSidebarFooterLabel => 'School dashboard';
+
+  @override
+  String get homeSidebarNavigationLabel => 'Main navigation';
 
   @override
   String get pageUnderConstruction => 'This page is under development';
@@ -271,6 +561,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentUnknownStudent => 'Student not specified';
 
   @override
+  String get firstRegistrationNewEnrollmentAction => 'New enrollment';
+
+  @override
+  String get enrollmentDetailLoadingTitle => 'Loading enrollment file';
+
+  @override
+  String get enrollmentDetailLoadingMessage => 'Please wait while enrollment details are being loaded.';
+
+  @override
+  String get enrollmentDetailLoadErrorTitle => 'Unable to load enrollment file';
+
+  @override
+  String get enrollmentDetailLoadErrorFallback => 'An error occurred while loading enrollment details.';
+
+  @override
+  String get enrollmentDetailRetryAction => 'Retry';
+
+  @override
+  String get enrollmentDetailNotFoundTitle => 'Details not found';
+
+  @override
+  String get enrollmentDetailNotFoundMessage => 'This enrollment file does not exist or is no longer available.';
+
+  @override
   String get gender => 'Gender';
 
   @override
@@ -301,6 +615,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianRelationshipLabel => 'Relationship';
 
   @override
+  String get guardianMarkAsPrimary => 'Set as primary guardian';
+
+  @override
+  String get guardianPrimaryRequiredHint => 'At least one primary guardian is required';
+
+  @override
+  String get guardianPrincipalBadge => 'Primary';
+
+  @override
+  String get guardianToggleCard => 'Open or close guardian card';
+
+  @override
+  String get guardianEmailOptionalInline => '(optional)';
+
+  @override
   String get guardianDeleteAction => 'Remove this guardian';
 
   @override
@@ -325,6 +654,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summary => 'Summary';
+
+  @override
+  String get summaryYes => 'Yes';
+
+  @override
+  String get summaryNo => 'No';
+
+  @override
+  String get summaryChargesTotalDue => 'Total due';
+
+  @override
+  String get summaryChargesUnavailable => 'Amounts are unavailable for now.';
+
+  @override
+  String get summaryValidationNoticeTitle => 'Before validation';
+
+  @override
+  String get summaryValidationNoticeBody => 'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.';
 
   @override
   String get next => 'Continue';
@@ -473,6 +820,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearValidated => 'Year validated';
 
   @override
+  String get yearValidatedHelp => 'Indicates whether the student validated the previous school year.';
+
+  @override
   String get yearNotValidated => 'Not validated';
 
   @override
@@ -572,6 +922,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stepSummarySubtitle => 'Final enrollment summary';
+
+  @override
+  String get wizardStepShortPersonal => 'Personal';
+
+  @override
+  String get wizardStepShortAddress => 'Address';
+
+  @override
+  String get wizardStepShortPrevious => 'Previous';
+
+  @override
+  String get wizardStepShortTarget => 'Target';
+
+  @override
+  String get wizardStepShortCharges => 'Fees';
+
+  @override
+  String get wizardStepShortGuardian => 'Guardians';
+
+  @override
+  String get wizardStepShortSummary => 'Summary';
 
   @override
   String stepIndicator(int current, int total) {
@@ -771,6 +1142,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargesAmountColumn => 'Amount';
 
   @override
+  String get studentChargesLabelColumn => 'Charge label';
+
+  @override
+  String get studentChargesActionsColumn => 'Actions';
+
+  @override
   String get studentChargesAmountPaidLabel => 'Paid amount';
 
   @override
@@ -784,6 +1161,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentChargesSaveHintBeforeContinue => 'Please save charge changes before continuing.';
+
+  @override
+  String get studentChargesTotalLabel => 'Total';
+
+  @override
+  String get studentChargesHelperText => 'Amounts can be updated later from the student\'s profile.';
 
   @override
   String get studentChargesNetworkError => 'Unable to load charges. Please check your internet connection.';
@@ -813,7 +1196,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargesUnknownError => 'An unexpected error occurred while loading charges.';
 
   @override
-  String get studentChargeStatusDue => 'Due';
+  String get studentChargeStatusDue => 'To settle';
 
   @override
   String get studentChargeStatusPartial => 'Partial';
@@ -822,19 +1205,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargeStatusPaid => 'Paid';
 
   @override
-  String get facturationPageHeaderTitle => 'Student Billing';
+  String get studentChargeFeeCodeTuition => 'Tuition';
 
   @override
-  String get facturationPageHeaderSubtitle => 'Search a student by name or class level to view and manage their school fees.';
+  String get studentChargeFeeCodeRegistration => 'Registration';
 
   @override
-  String get facturationPageHeaderChipByName => 'Search by name';
+  String get studentChargeFeeCodeEnrollment => 'Enrollment';
 
   @override
-  String get facturationPageHeaderChipByLevel => 'Filter by level';
+  String get studentChargeFeeCodeApplication => 'Application';
 
   @override
-  String get facturationPageHeaderChipViewCharges => 'View charges';
+  String get studentChargeFeeCodeAdmission => 'Admission';
+
+  @override
+  String get studentChargeFeeCodeCanteen => 'Canteen';
+
+  @override
+  String get studentChargeFeeCodeTransport => 'Transport';
+
+  @override
+  String get studentChargeFeeCodeBoarding => 'Boarding';
+
+  @override
+  String get studentChargeFeeCodeBooks => 'Books & Materials';
+
+  @override
+  String get studentChargeFeeCodeUniform => 'Uniform';
+
+  @override
+  String get studentChargeFeeCodeExamination => 'Examination';
+
+  @override
+  String get studentChargeFeeCodeLabFee => 'Laboratory Fee';
+
+  @override
+  String get studentChargeFeeCodeActivity => 'Activity Fee';
+
+  @override
+  String get studentChargeFeeCodeSports => 'Sports Fee';
+
+  @override
+  String get studentChargeFeeCodeLibrary => 'Library Fee';
+
+  @override
+  String get studentChargeFeeCodeTechnology => 'Technology / IT Fee';
+
+  @override
+  String get studentChargeFeeCodeDevelopment => 'Development / Infrastructure Fee';
+
+  @override
+  String get studentChargeFeeCodeInsurance => 'Insurance';
+
+  @override
+  String get studentChargeFeeCodeSecurityDeposit => 'Security Deposit';
+
+  @override
+  String get studentChargeFeeCodeProcessingFee => 'Processing Fee';
+
+  @override
+  String get studentChargeFeeCodeLatePaymentFee => 'Late Payment Fee';
+
+  @override
+  String get studentChargeFeeCodeRefund => 'Refund';
+
+  @override
+  String get studentChargeFeeCodeOther => 'Other';
+
+  @override
+  String get studentChargeFeeCodeFallback => 'School fee';
 
   @override
   String get facturationSearchTitle => 'Search Students';
@@ -843,10 +1283,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationSearchHint => 'Enter First name, Last name, Surname and/or Cycle/Level to filter results.';
 
   @override
-  String get facturationSearchInvitationTitle => 'Start a billing search';
+  String get facturationSearchInvitationTitle => 'No search in progress';
 
   @override
-  String get facturationSearchInvitationMessage => 'Select a level or enter a student name then click Search to display records.';
+  String get facturationSearchInvitationMessage => 'Enter a name or level above to display matching students.';
 
   @override
   String get facturationViewChargesLabel => 'View charges';
@@ -888,10 +1328,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationDetailStudentLevel => 'Level';
 
   @override
-  String get facturationDetailInfoTitle => 'Billing detail';
+  String get facturationDetailInfoTitle => 'Financial record';
 
   @override
-  String get facturationDetailInfoSubtitle => 'Review recent payments and student charge status for the selected academic year.';
+  String get facturationDetailInfoSubtitle => 'Review recent payments and student charge status for this student.';
+
+  @override
+  String get facturationDetailHeaderKpiTotalDue => 'Total due';
+
+  @override
+  String get facturationDetailHeaderKpiAlreadyPaid => 'Already paid';
+
+  @override
+  String get facturationDetailHeaderKpiRemaining => 'Remaining due';
 
   @override
   String get facturationDetailInfoChipPayments => 'Payments';
@@ -900,10 +1349,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationDetailInfoChipCharges => 'Charges';
 
   @override
-  String get facturationDetailPaymentsSectionTitle => 'Recent payments';
+  String get facturationDetailPaymentsSectionTitle => 'Payments';
 
   @override
-  String get facturationDetailPaymentsSectionSubtitle => 'Payment history recorded for this student.';
+  String get facturationDetailPaymentsSectionSubtitle => 'Recorded payment history for this student.';
+
+  @override
+  String facturationDetailPaymentsRecordedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments recorded',
+      one: '1 payment recorded',
+      zero: 'No payment recorded',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get facturationDetailCollectPaymentAction => 'Collect payment';
@@ -915,10 +1376,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationDetailPaymentsEmpty => 'No payment has been recorded for this student.';
 
   @override
-  String get facturationDetailPaymentPayerColumn => 'Payer details';
+  String get facturationDetailPaymentPayerColumn => 'Payer';
 
   @override
-  String get facturationDetailPaymentPaidAtColumn => 'Paid at';
+  String get facturationDetailPaymentPaidAtColumn => 'Date';
 
   @override
   String get facturationDetailPaymentAmountColumn => 'Amount';
@@ -928,6 +1389,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationDetailViewPaymentLabel => 'View payment detail';
+
+  @override
+  String get facturationDetailViewChargeLabel => 'View charge detail';
 
   @override
   String get facturationPaymentDetailHeroTitle => 'Payment detail';
@@ -993,10 +1457,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentAllocationsUnknownError => 'An unexpected error occurred while loading allocations.';
 
   @override
-  String get facturationDetailChargesSectionTitle => 'Student charges';
+  String get facturationDetailChargesSectionTitle => 'Charges';
 
   @override
   String get facturationDetailChargesSectionSubtitle => 'Breakdown of expected, paid and remaining amounts.';
+
+  @override
+  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalCount,
+      locale: localeName,
+      other: '$totalCount charges',
+      one: '1 charge',
+      zero: '0 charge',
+    );
+    return '$_temp0 · $partialCount partial, $dueCount to settle';
+  }
 
   @override
   String get facturationDetailChargesRetry => 'Retry';
@@ -1008,16 +1484,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationDetailChargeLabelColumn => 'Label';
 
   @override
-  String get facturationDetailChargeExpectedAmountColumn => 'Expected amount';
+  String get facturationDetailChargeExpectedAmountColumn => 'Expected';
 
   @override
-  String get facturationDetailChargePaidAmountColumn => 'Paid amount';
+  String get facturationDetailChargePaidAmountColumn => 'Paid';
 
   @override
-  String get facturationDetailChargeRemainingAmountColumn => 'Remaining amount';
+  String get facturationDetailChargeRemainingAmountColumn => 'Remaining';
 
   @override
   String get facturationDetailChargeStatusColumn => 'Status';
+
+  @override
+  String get facturationDetailChargeTotalsLabel => 'Totals';
 
   @override
   String get facturationPaymentsNetworkError => 'Unable to load payments. Please check your internet connection.';
@@ -1051,6 +1530,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPrintReceiptSubtitle => 'Generate and download the receipt for this payment';
+
+  @override
+  String get facturationPaymentDownloadPdfLabel => 'Download PDF';
 
   @override
   String get facturationPrintStatementsLabel => 'Print statements';
@@ -1087,6 +1569,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationChargeDetailAllocationsSectionSubtitle => 'Breakdown of payments allocated to this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationLabelColumn => 'Allocation';
 
   @override
   String get facturationChargeDetailAllocationsTotalLabel => 'Allocated total';
@@ -1164,6 +1649,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentPayerFieldRequired => 'This field is required';
 
   @override
+  String get facturationCreatePaymentDetailsSectionTitle => 'Payment details';
+
+  @override
+  String get facturationCreatePaymentDetailsSectionSubtitle => 'Enter the received amount, currency and payment date.';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountLabel => 'Amount received';
+
+  @override
+  String get facturationCreatePaymentReceivedAmountHint => 'E.g.: 200';
+
+  @override
+  String get facturationCreatePaymentCurrencyLabel => 'Currency';
+
+  @override
+  String get facturationCreatePaymentCurrencyReadOnlyHint => 'Multiple currencies detected: read-only value.';
+
+  @override
+  String get facturationCreatePaymentCurrencyUnavailable => 'Currency unavailable';
+
+  @override
+  String get facturationCreatePaymentDateLabel => 'Payment date';
+
+  @override
   String get facturationCreatePaymentAllocationSectionTitle => 'Payment allocations';
 
   @override
@@ -1206,6 +1715,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentAfterLabel => 'After payment';
 
   @override
+  String get facturationCreatePaymentRemoveAllocationConfirmTitle => 'Confirm removal';
+
+  @override
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex) {
+    return 'Do you really want to remove allocation #$allocationIndex? This action cannot be undone.';
+  }
+
+  @override
+  String get facturationCreatePaymentRemoveAllocationConfirmAction => 'Remove';
+
+  @override
   String get facturationCreatePaymentSubmitLabel => 'Validate payment';
 
   @override
@@ -1239,6 +1759,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentStatusLabel => 'Status';
 
   @override
+  String get facturationCreatePaymentChargeImpactTitle => 'Impact on charge';
+
+  @override
+  String facturationCreatePaymentChargeRemainingHelper(String remainingAmount) {
+    return 'Remaining on this charge: $remainingAmount';
+  }
+
+  @override
+  String get facturationCreatePaymentPayAllAction => 'Pay all';
+
+  @override
+  String get facturationCreatePaymentDistributionTrackerIdle => 'Enter at least one allocation to compute total payments.';
+
+  @override
+  String facturationCreatePaymentFooterTotalPayments(String allocatedAmount) {
+    return 'Total payments: $allocatedAmount';
+  }
+
+  @override
   String get facturationCreatePaymentNetworkError => 'Check your connection and try again.';
 
   @override
@@ -1269,6 +1808,255 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentNoChargesAvailable => 'No unpaid charges available for this student.';
 
   @override
+  String get attendanceHeroTitle => 'Attendance';
+
+  @override
+  String get attendanceHeroSubtitle => 'View class attendance by date for reliable daily tracking.';
+
+  @override
+  String get attendanceHeroChipClass => 'Class-based search';
+
+  @override
+  String get attendanceHeroChipDate => 'Date filter';
+
+  @override
+  String get attendanceSearchTitle => 'Attendance Search';
+
+  @override
+  String get attendanceSearchHint => 'Select cycle, level, class and date to display attendance records.';
+
+  @override
+  String get attendanceDateLabel => 'Date';
+
+  @override
+  String get attendanceCycleLabel => 'Cycle';
+
+  @override
+  String get attendanceLevelLabel => 'Level';
+
+  @override
+  String get attendanceClassLabel => 'Class';
+
+  @override
+  String get attendanceShowClassAction => 'Show class';
+
+  @override
+  String get attendanceInvitationMessage => 'Run a search to display attendance for the selected class.';
+
+  @override
+  String get attendanceEmptySelectionMessage => 'Select a class and a date to take attendance.';
+
+  @override
+  String get attendanceLoadingMessage => 'Loading attendance records...';
+
+  @override
+  String get attendanceEmptyMessage => 'No attendance found for these filters.';
+
+  @override
+  String get attendanceExportAction => 'Export';
+
+  @override
+  String get attendanceExportTooltip => 'Prepare result export';
+
+  @override
+  String get attendanceExportSoon => 'Export will be available soon.';
+
+  @override
+  String get attendanceSaveAction => 'Save';
+
+  @override
+  String get attendanceSavingAction => 'Saving...';
+
+  @override
+  String get attendanceSaveTooltip => 'Save all entered changes';
+
+  @override
+  String get attendanceSaveValidationHint => 'Fix absent rows without a reason before saving.';
+
+  @override
+  String get attendanceSaveSuccess => 'Attendance records were saved successfully.';
+
+  @override
+  String get attendanceValidateCallAction => 'Validate attendance';
+
+  @override
+  String get attendancePendingChanges => 'Pending changes';
+
+  @override
+  String get attendancePendingInvalidChanges => 'Fixes required';
+
+  @override
+  String get attendanceRowModifiedLabel => 'Modified';
+
+  @override
+  String get attendanceUnsavedChangesTitle => 'Unsaved changes';
+
+  @override
+  String get attendanceUnsavedChangesMessage => 'A new search will discard unsaved changes. Do you want to continue?';
+
+  @override
+  String get attendanceDateTooltip => 'Choose the attendance date';
+
+  @override
+  String get attendanceStatusInProgress => 'Attendance in progress';
+
+  @override
+  String get attendanceStatusReady => 'Ready to validate';
+
+  @override
+  String get attendancePresentCount => 'Present';
+
+  @override
+  String get attendanceAbsentCount => 'Absent';
+
+  @override
+  String get attendanceTotalCountCompact => 'Total';
+
+  @override
+  String get attendanceDefaultPresenceHelper => 'All students are marked present by default. Tap Absent to report an exception.';
+
+  @override
+  String get attendanceReadyToValidate => 'No absence is missing a reason. You can validate attendance.';
+
+  @override
+  String attendanceMissingReasonsStatus(int count) {
+    return '$count absence(s) without reason - complete required';
+  }
+
+  @override
+  String get attendanceAllPresentConfirmTitle => 'Confirm attendance';
+
+  @override
+  String attendanceAllPresentConfirmMessage(int count) {
+    return 'Do you confirm that all $count students are present?';
+  }
+
+  @override
+  String get attendanceTotalCount => 'Total students';
+
+  @override
+  String get attendanceGirlsCount => 'Girls';
+
+  @override
+  String get attendanceBoysCount => 'Boys';
+
+  @override
+  String attendanceCriteriaSummary(String classroomName, String formattedDate) {
+    return 'Class: $classroomName · Date: $formattedDate';
+  }
+
+  @override
+  String get attendanceTableLastName => 'Last name';
+
+  @override
+  String get attendanceTableMiddleName => 'Middle name';
+
+  @override
+  String get attendanceTableFirstName => 'First name';
+
+  @override
+  String get attendanceTablePresent => 'Present';
+
+  @override
+  String get attendanceTableAbsenceReason => 'Reason';
+
+  @override
+  String get attendanceTableAbsenceReasonNote => 'Note';
+
+  @override
+  String get attendancePresenceStatusLabel => 'Attendance status';
+
+  @override
+  String get attendancePresentValue => 'Present';
+
+  @override
+  String get attendanceAbsentValue => 'Absent';
+
+  @override
+  String get attendanceReadOnlyHint => 'Read-only informational status';
+
+  @override
+  String get attendanceReasonRequiredError => 'Please select a reason for this absence.';
+
+  @override
+  String get attendanceReasonRequiredHint => 'Reason required for an absence.';
+
+  @override
+  String get attendanceReasonDisabledHint => 'Reason is required only when the student is absent.';
+
+  @override
+  String get attendanceNoteDisabledHint => 'Note is optional only when the student is absent.';
+
+  @override
+  String get attendanceNotePlaceholder => 'Add details if needed';
+
+  @override
+  String get attendanceNoMiddleName => 'Not provided';
+
+  @override
+  String get attendanceNoAbsenceReason => 'No reason';
+
+  @override
+  String get attendanceNoAbsenceNote => 'No note';
+
+  @override
+  String get attendanceErrorNetwork => 'Check your internet connection and try again.';
+
+  @override
+  String get attendanceErrorNotFound => 'No attendance resource was found.';
+
+  @override
+  String get attendanceErrorValidation => 'Submitted data is invalid.';
+
+  @override
+  String get attendanceErrorUnauthorized => 'You are not authorized to access this resource.';
+
+  @override
+  String get attendanceErrorInvalidCredentials => 'Your credentials do not allow access to attendance.';
+
+  @override
+  String get attendanceErrorServer => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get attendanceErrorStorage => 'A local storage error occurred.';
+
+  @override
+  String get attendanceErrorAuth => 'An authentication error occurred.';
+
+  @override
+  String get attendanceErrorUnknown => 'An unexpected error occurred.';
+
+  @override
+  String get absenceReasonSickness => 'Sickness';
+
+  @override
+  String get absenceReasonFamilyEmergency => 'Family emergency';
+
+  @override
+  String get absenceReasonPersonal => 'Personal';
+
+  @override
+  String get absenceReasonUnknown => 'Unknown';
+
+  @override
+  String get absenceReasonVacation => 'Vacation';
+
+  @override
+  String get absenceReasonUnderGraduateLeave => 'Study leave';
+
+  @override
+  String get absenceReasonMarriageLeave => 'Marriage leave';
+
+  @override
+  String get absenceReasonParentalLeave => 'Parental leave';
+
+  @override
+  String get absenceReasonWorkLeave => 'Work leave';
+
+  @override
+  String get absenceReasonOther => 'Other';
+
+  @override
   String get bootstrapContextUnavailableTitle => 'Enrollment context unavailable';
 
   @override
@@ -1276,4 +2064,198 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signOutAction => 'Sign out';
+
+  @override
+  String get disciplinaryDetailBackLabel => 'Back to disciplines';
+
+  @override
+  String get disciplinaryFollowUpTitle => 'Disciplinary follow-up';
+
+  @override
+  String get disciplinaryHeroTitle => 'Disciplinary case file detail';
+
+  @override
+  String get disciplinaryHeroChipCases => 'Disciplinary cases';
+
+  @override
+  String get disciplinaryDetailContextErrorTitle => 'Detail context unavailable';
+
+  @override
+  String get disciplinaryDetailContextErrorMessage => 'Required context for this detail view is missing. Go back to the list and open the detail again.';
+
+  @override
+  String get disciplinaryTabCasesLabel => 'Disciplinary cases';
+
+  @override
+  String get disciplinaryTabAttendanceHistoryLabel => 'Attendance history';
+
+  @override
+  String get disciplinaryAttendanceHistoryComingSoon => 'Attendance history will be delivered in a future feature.';
+
+  @override
+  String get disciplinaryUnknownValue => '-';
+
+  @override
+  String get disciplinaryCaseCreateAction => 'New case';
+
+  @override
+  String get disciplinaryCaseCreateCtaSubtitle => 'Document a new disciplinary incident for this student.';
+
+  @override
+  String disciplinaryCasesSummary(int total, int open) {
+    return '$total recorded cases - $open open';
+  }
+
+  @override
+  String get disciplinaryCasesTableTitleColumn => 'Title';
+
+  @override
+  String get disciplinaryCasesTableStatusColumn => 'Status';
+
+  @override
+  String get disciplinaryCasesTableActionColumn => 'Actions';
+
+  @override
+  String get disciplinaryCasesDateUnavailable => 'Date unavailable';
+
+  @override
+  String get disciplinaryCaseViewLabel => 'View case';
+
+  @override
+  String get disciplinaryCasesLoadingMessage => 'Loading disciplinary cases...';
+
+  @override
+  String get disciplinaryCasesEmptyMessage => 'No disciplinary cases for this student.';
+
+  @override
+  String get disciplinaryCaseViewDialogTitle => 'Disciplinary case detail';
+
+  @override
+  String get disciplinaryCaseViewDialogSectionTitle => 'Case information';
+
+  @override
+  String get disciplinaryCaseViewDialogTitleField => 'Title';
+
+  @override
+  String get disciplinaryCaseViewDialogStatusField => 'Status';
+
+  @override
+  String get disciplinaryCaseViewDialogContentField => 'Content';
+
+  @override
+  String get disciplinaryCaseViewDialogLoadingMessage => 'Loading case detail...';
+
+  @override
+  String get disciplinaryCaseViewDialogErrorMessage => 'Unable to load case detail';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitle => 'Create disciplinary case';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleField => 'Case title';
+
+  @override
+  String get disciplinaryCaseCreateDialogTitleHint => 'Give a brief case description';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentField => 'Content';
+
+  @override
+  String get disciplinaryCaseCreateDialogContentHint => 'Disciplinary case details';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateField => 'Case date';
+
+  @override
+  String get disciplinaryCaseCreateDialogCaseDateHint => 'Select date';
+
+  @override
+  String get disciplinaryCaseCreateDialogSubmitAction => 'Create case';
+
+  @override
+  String get disciplinaryCaseCreateDialogCreatingMessage => 'Creating...';
+
+  @override
+  String get disciplinaryCaseCreateDialogSuccessMessage => 'Disciplinary case created successfully.';
+
+  @override
+  String get disciplinaryCaseCreateDialogRequiredFieldError => 'This field is required.';
+
+  @override
+  String get disciplinaryCasesNetworkError => 'Check your internet connection and try again.';
+
+  @override
+  String get disciplinaryCasesNotFound => 'No disciplinary cases found.';
+
+  @override
+  String get disciplinaryCasesValidationError => 'Requested data is invalid.';
+
+  @override
+  String get disciplinaryCasesUnauthorizedError => 'You are not authorized to access these cases.';
+
+  @override
+  String get disciplinaryCasesInvalidCredentialsError => 'Your credentials do not allow access to cases.';
+
+  @override
+  String get disciplinaryCasesServerError => 'Server is unavailable. Please try again later.';
+
+  @override
+  String get disciplinaryCasesStorageError => 'A local storage error occurred.';
+
+  @override
+  String get disciplinaryCasesAuthError => 'An authentication error prevents loading cases.';
+
+  @override
+  String get disciplinaryCasesUnknownError => 'An unexpected error occurred.';
+
+  @override
+  String get disciplinaryCaseStatusOpen => 'Open';
+
+  @override
+  String get disciplinaryCaseStatusInProgress => 'In progress';
+
+  @override
+  String get disciplinaryCaseStatusClosed => 'Closed';
+
+  @override
+  String get disciplinaryCaseStatusUnknown => 'Unknown';
+
+  @override
+  String get enrollmentStatusPreRegistered => 'Pre-registered';
+
+  @override
+  String get statusPaid => 'Paid';
+
+  @override
+  String get statusPartial => 'Partial';
+
+  @override
+  String get statusOverdue => 'Overdue';
+
+  @override
+  String get statusPresent => 'Present';
+
+  @override
+  String get statusAbsentJustified => 'Justified';
+
+  @override
+  String get statusAbsentUnjustified => 'Absent';
+
+  @override
+  String get statusSynced => 'Up to date';
+
+  @override
+  String get statusSyncing => 'Syncing…';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get statusPendingUpload => 'Pending upload';
+
+  @override
+  String get statusSyncConflict => 'Conflict';
+
+  @override
+  String get componentGalleryTitle => 'Component gallery';
 }

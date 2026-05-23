@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_card_header.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_fields_grid.dart';
@@ -15,7 +17,9 @@ typedef ParentItemValueChanged =
 class ParentItem extends StatefulWidget {
   final ParentSummary parent;
   final bool isPrimary;
-  final int number;
+  final bool isExpanded;
+  final VoidCallback? onToggleExpanded;
+  final ValueChanged<bool?>? onPrimaryChanged;
   final ParentItemStateChanged? onFormStateChanged;
   final ParentItemValueChanged? onValueChanged;
   final VoidCallback? onRemoveRequested;
@@ -25,7 +29,9 @@ class ParentItem extends StatefulWidget {
     super.key,
     required this.parent,
     required this.isPrimary,
-    required this.number,
+    required this.isExpanded,
+    this.onToggleExpanded,
+    this.onPrimaryChanged,
     this.onFormStateChanged,
     this.onValueChanged,
     this.onRemoveRequested,
@@ -162,16 +168,6 @@ class _ParentItemState extends State<ParentItem> {
     _emitAll();
   }
 
-  String _getInitials() {
-    final f = widget.parent.firstName.isNotEmpty
-        ? widget.parent.firstName[0]
-        : '';
-    final l = widget.parent.lastName.isNotEmpty
-        ? widget.parent.lastName[0]
-        : '';
-    return '$f$l'.toUpperCase();
-  }
-
   @override
   void dispose() {
     _firstNameController.removeListener(_onFieldChanged);
@@ -190,95 +186,93 @@ class _ParentItemState extends State<ParentItem> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final state = _currentState();
     final changed = state.changedFields;
-    const deleteColor = Color(0xFFDC2626); // rouge sémantique, constant
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.surface,
+        borderRadius: AppRadius.brMd,
         border: Border.all(
-          color: widget.isPrimary
-              ? AppTheme.primaryColor.withValues(alpha: 0.35)
-              : const Color(0xFFE5E7EB),
-          width: widget.isPrimary ? 1.5 : 1,
+          color: widget.isExpanded
+              ? AppColors.bleuArdoise
+              : AppColors.border,
+          width: widget.isExpanded ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // ── Header compact ──────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 8, 0),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.xs,
+              AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: GuardianCardHeader(
                     parent: widget.parent,
                     isPrimary: widget.isPrimary,
-                    number: widget.number,
-                    initials: _getInitials(),
+                    isExpanded: widget.isExpanded,
+                    onToggle: widget.onToggleExpanded,
                   ),
                 ),
                 if (widget.onRemoveRequested != null)
-                  TextButton.icon(
+                  IconButton(
                     onPressed: widget.onRemoveRequested,
+                    tooltip: AppLocalizations.of(context)!.guardianDeleteAction,
                     icon: const Icon(
                       Icons.delete_outline_rounded,
-                      size: 16,
-                      color: deleteColor,
-                    ),
-                    label: Text(
-                      l10n.guardianDeleteAction,
-                      style: const TextStyle(
-                        color: deleteColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: deleteColor,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      color: AppColors.error,
                     ),
                   ),
               ],
             ),
           ),
-          const Divider(height: 20, thickness: 1, indent: 14, endIndent: 14),
-          // ── Champs ──────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            child: GuardianFieldsGrid(
-              firstNameController: _firstNameController,
-              lastNameController: _lastNameController,
-              surnameController: _surnameController,
-              phoneController: _phoneController,
-              emailController: _emailController,
-              firstNameChanged: changed['firstName'] ?? false,
-              lastNameChanged: changed['lastName'] ?? false,
-              surnameChanged: changed['surname'] ?? false,
-              phoneChanged: changed['phoneNumber'] ?? false,
-              emailChanged: changed['email'] ?? false,
-              selectedRelationshipType: _selectedRelationshipType,
-              onRelationshipTypeChanged: _onRelationshipChanged,
-              relationshipChanged: changed['relationshipType'] ?? false,
-              isEditable: widget.isEditable,
+          if (widget.isExpanded) ...[
+            const Divider(
+              height: 1,
+              thickness: 1,
+              indent: AppSpacing.sm,
+              endIndent: AppSpacing.sm,
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.sm,
+              ),
+              child: GuardianFieldsGrid(
+                firstNameController: _firstNameController,
+                lastNameController: _lastNameController,
+                surnameController: _surnameController,
+                phoneController: _phoneController,
+                emailController: _emailController,
+                firstNameChanged: changed['firstName'] ?? false,
+                lastNameChanged: changed['lastName'] ?? false,
+                surnameChanged: changed['surname'] ?? false,
+                phoneChanged: changed['phoneNumber'] ?? false,
+                emailChanged: changed['email'] ?? false,
+                selectedRelationshipType: _selectedRelationshipType,
+                onRelationshipTypeChanged: _onRelationshipChanged,
+                relationshipChanged: changed['relationshipType'] ?? false,
+                isEditable: widget.isEditable,
+                isPrimary: widget.isPrimary,
+                onPrimaryChanged: widget.onPrimaryChanged,
+              ),
+            ),
+          ],
         ],
       ),
     );

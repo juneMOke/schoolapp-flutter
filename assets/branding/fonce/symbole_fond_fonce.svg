@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>ETEELO CONNECT - symbole fond foncé</title>
+  <path d="M 100 8 A 92 92 0 0 1 100 192" fill="none" stroke="#D9A24E" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="100" cy="100" r="72" fill="#FAFAF7"/>
+  <g fill="#0E2D42">
+    <rect x="71" y="60" width="16" height="80"/>
+    <rect x="71" y="60" width="58" height="14"/>
+    <rect x="71" y="93" width="44" height="14"/>
+    <rect x="71" y="126" width="58" height="14"/>
+  </g>
+</svg>

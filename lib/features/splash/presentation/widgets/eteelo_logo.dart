@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 
 class EteeloTechLogo extends StatelessWidget {
   const EteeloTechLogo({super.key});
 
-  static const Color primaryBlue = Color(0xFF1A73E8);
-  static const Color secondaryGreen = Color(0xFF34A853);
-  static const Color slateBlue = Color(0xFF2E3B4E); // Couleur plus moderne (bleu-gris sombre)
+  static const Color primaryBlue = AppColors.bleuArdoise;
+  static const Color secondaryGreen = AppColors.terreCuite;
+  static const Color slateBlue = AppColors.bleuProfond;
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +30,7 @@ class EteeloTechLogo extends StatelessWidget {
                       color: slateBlue,
                       height: 1.0,
                     ),
-                    children: [
-                      TextSpan(text: 'ETEELO'),
-                    ],
+                    children: [TextSpan(text: 'ETEELO')],
                   ),
                 ),
                 Positioned(
@@ -50,11 +50,9 @@ class EteeloTechLogo extends StatelessWidget {
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [primaryBlue, secondaryGreen],
-                ),
-                borderRadius: BorderRadius.circular(8),
+              decoration: const BoxDecoration(
+                color: secondaryGreen,
+                borderRadius: AppRadius.brSm,
               ),
               child: const Text(
                 'CONNECT',
@@ -62,7 +60,7 @@ class EteeloTechLogo extends StatelessWidget {
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 8.0,
-                  color: Colors.white,
+                  color: AppColors.textOnDark,
                 ),
               ),
             ),
@@ -84,53 +82,39 @@ class _TechIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Dynamic background with gradient
+          // Dynamic background
           Container(
             width: 90,
             height: 90,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  EteeloTechLogo.primaryBlue.withValues(alpha: 0.15),
-                  EteeloTechLogo.secondaryGreen.withValues(alpha: 0.15),
-                ],
-              ),
+              color: EteeloTechLogo.primaryBlue.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
           // Outer circuit ring (simplified)
           CustomPaint(
             size: const Size(100, 100),
-            painter: _CircuitPainter(EteeloTechLogo.primaryBlue, EteeloTechLogo.secondaryGreen),
+            painter: _CircuitPainter(
+              EteeloTechLogo.primaryBlue,
+              EteeloTechLogo.secondaryGreen,
+            ),
           ),
           // Central icon with modern styling
           Container(
             width: 45,
             height: 45,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [EteeloTechLogo.primaryBlue, EteeloTechLogo.secondaryGreen],
-              ),
+            decoration: const BoxDecoration(
+              color: EteeloTechLogo.primaryBlue,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: EteeloTechLogo.primaryBlue.withValues(alpha: 0.4),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
             ),
             child: const Icon(
               Icons.bolt_rounded,
-              color: Colors.white,
+              color: AppColors.textOnDark,
               size: 28,
             ),
           ),
           // Pulse effect (simulated with nodes)
-          for (int i = 0; i < 4; i++)
-            _PositionedNode(index: i),
+          for (int i = 0; i < 4; i++) _PositionedNode(index: i),
         ],
       ),
     );
@@ -144,7 +128,7 @@ class _PositionedNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double radius = 35;
-    
+
     return Positioned(
       top: 50 + radius * (index < 2 ? -0.7 : 0.7) - 6,
       left: 50 + radius * (index % 3 == 0 ? -0.7 : 0.7) - 6,
@@ -152,12 +136,11 @@ class _PositionedNode extends StatelessWidget {
         width: 12,
         height: 12,
         decoration: BoxDecoration(
-          color: index % 2 == 0 ? EteeloTechLogo.primaryBlue : EteeloTechLogo.secondaryGreen,
+          color: index % 2 == 0
+              ? EteeloTechLogo.primaryBlue
+              : EteeloTechLogo.secondaryGreen,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 4),
-          ],
+          border: Border.all(color: AppColors.textOnDark, width: 2),
         ),
       ),
     );
@@ -176,7 +159,7 @@ class _CircuitPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final center = Offset(size.width / 2, size.height / 2);
-    
+
     // Draw connecting lines with gradients
     for (int i = 0; i < 4; i++) {
       paint.color = i % 2 == 0
@@ -184,14 +167,14 @@ class _CircuitPainter extends CustomPainter {
           : color2.withValues(alpha: 0.5);
       final double endX = i < 2 ? size.width * 0.25 : size.width * 0.75;
       final double endY = i % 2 == 0 ? size.height * 0.25 : size.height * 0.75;
-      
+
       final path = Path()
         ..moveTo(center.dx, center.dy)
         ..lineTo(endX, endY);
-      
+
       canvas.drawPath(path, paint);
     }
-    
+
     // Draw an outer circle dash-like
     paint.strokeWidth = 1;
     canvas.drawCircle(center, 42, paint..color = color1.withValues(alpha: 0.2));

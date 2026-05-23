@@ -46,69 +46,80 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
+      buildWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.errorMessage != current.errorMessage,
       builder: (context, state) {
         final isLoading = state.status == AuthStatus.loading;
         final l10n = AppLocalizations.of(context)!;
 
         return Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              EteeloEmailInput(
-                controller: _emailController,
-                label: l10n.email,
-                validator: (value) => validateEmail(context, value),
-                enabled: !isLoading,
-              ),
-              const SizedBox(height: 16),
-              EteeloPasswordInput(
-                controller: _passwordController,
-                label: l10n.password,
-                validator: (value) => validatePassword(context, value),
-                enabled: !isLoading,
-                onFieldSubmitted: (_) => _submit(),
-              ),
-              const SizedBox(height: 16),
-              if (state.status == AuthStatus.failure &&
-                  state.errorMessage != null) ...[
-                AuthErrorBanner(message: state.errorMessage!),
-                const SizedBox(height: 12),
-              ],
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          context.read<ForgotPasswordBloc>().add(
-                            const ForgotPasswordFlowResetRequested(),
-                          );
-                          context.goNamed(AppRoutesNames.forgotPasswordEmail);
-                        },
-                  icon: const Icon(Icons.help_outline_rounded, size: 14),
-                  label: Text(l10n.forgotPassword),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.primaryColor,
-                    textStyle: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+          child: FocusTraversalGroup(
+            child: AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  EteeloEmailInput(
+                    controller: _emailController,
+                    label: l10n.email,
+                    validator: (value) => validateEmail(context, value),
+                    enabled: !isLoading,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.username, AutofillHints.email],
+                  ),
+                  const SizedBox(height: 16),
+                  EteeloPasswordInput(
+                    controller: _passwordController,
+                    label: l10n.password,
+                    validator: (value) => validatePassword(context, value),
+                    enabled: !isLoading,
+                    onFieldSubmitted: (_) => _submit(),
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                  ),
+                  const SizedBox(height: 16),
+                  if (state.status == AuthStatus.failure &&
+                      state.errorMessage != null) ...[
+                    AuthErrorBanner(message: state.errorMessage!),
+                    const SizedBox(height: 12),
+                  ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              context.read<ForgotPasswordBloc>().add(
+                                const ForgotPasswordFlowResetRequested(),
+                              );
+                              context.goNamed(AppRoutesNames.forgotPasswordEmail);
+                            },
+                      icon: const Icon(Icons.help_outline_rounded, size: 14),
+                      label: Text(l10n.forgotPassword),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.primaryColor,
+                        textStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  EteeloValidationButton(
+                    onPressed: _submit,
+                    label: l10n.signIn,
+                    isLoading: isLoading,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              EteeloValidationButton(
-                onPressed: _submit,
-                label: l10n.signIn,
-                isLoading: isLoading,
-              ),
-            ],
+            ),
           ),
         );
       },

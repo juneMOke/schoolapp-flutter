@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 class EnrollmentDetailAppBarTitle extends StatelessWidget {
   final String titleLabel;
@@ -47,9 +48,7 @@ class EnrollmentDetailAppBarTitle extends StatelessWidget {
           children: [
             Text(
               titleLabel,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
+              style: AppTypography.displayMedium.copyWith(
                 color: AppTheme.textPrimaryColor,
               ),
             ),

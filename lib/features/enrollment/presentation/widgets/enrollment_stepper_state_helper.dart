@@ -75,9 +75,10 @@ class EnrollmentStepperStateHelper {
           (parent) =>
               parent.firstName.trim().isNotEmpty &&
               parent.lastName.trim().isNotEmpty &&
-              parent.identificationNumber.trim().isNotEmpty &&
               parent.phoneNumber.trim().isNotEmpty &&
-              parent.email.trim().isNotEmpty,
+              (parent.email.trim().isEmpty ||
+                  RegExp(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+                      .hasMatch(parent.email.trim())),
         );
   }
 

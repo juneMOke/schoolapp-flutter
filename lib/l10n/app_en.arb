@@ -91,11 +91,162 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
-  "subMenuOrganization": "Organization",
+  "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
     "description": "Organization sub-menu title"
   },
-  "subMenuClassesList": "Classes List",
+  "classesOrganisationHeroTitle": "Class composition",
+  "classesOrganisationHeroSubtitle": "Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.",
+  "classesOrganisationSearchTitle": "Level selection for class distribution",
+  "classesOrganisationSearchHint": "Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.",
+  "classesOrganisationClassroomFieldLabel": "Classroom",
+  "classesOrganisationDistributionLabel": "Distribution criterion",
+  "classesOrganisationDistributionByGender": "Distribute by gender",
+  "classesOrganisationDistributionByPercentage": "Distribute by average",
+  "classesOrganisationDistributionAction": "Distribute",
+  "classesOrganisationDistributionConfirmTitle": "Confirm distribution",
+  "classesOrganisationDistributionConfirmMessage": "Do you want to distribute students for this level?",
+  "classesOrganisationDistributionSuccess": "Distribution completed successfully.",
+  "classesOrganisationSplitInfo": "Split mode enabled: classroom grid with members and stats.",
+  "classesOrganisationNonSplitInfo": "Non-split mode enabled: student list for the selected level.",
+  "classesOrganisationNoClassrooms": "No classroom is available for this level.",
+  "classesOrganisationClassroomStats": "{total} students - Girls: {girls} - Boys: {boys}",
+  "@classesOrganisationClassroomStats": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "girls": { "type": "int" },
+      "boys": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferDialogTitle": "Transfer student",
+  "classesOrganisationTransferDialogMessage": "Choose the destination classroom for {studentName}.",
+  "@classesOrganisationTransferDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationTransferTargetLabel": "Destination classroom",
+  "classesOrganisationTransferAction": "Transfer",
+  "classesOrganisationTransferInProgress": "Transfer in progress...",
+  "classesOrganisationTransferSuccess": "Transfer completed successfully.",
+  "classesOrganisationTransferNoTarget": "No destination classroom is available.",
+  "classesOrganisationSelectCycleAndLevelTitle": "Select a cycle and a level",
+  "classesOrganisationSelectCycleAndLevelSubtitle": "Start by selecting a cycle, then a level to display class composition.",
+  "classesOrganisationSelectLevelTitle": "Select a level",
+  "classesOrganisationSelectLevelSubtitle": "Now select a level in the {cycleName} cycle.",
+  "@classesOrganisationSelectLevelSubtitle": {
+    "placeholders": {
+      "cycleName": { "type": "String" }
+    }
+  },
+  "classesOrganisationPendingTitle": "Level not distributed yet",
+  "classesOrganisationPendingSubtitle": "Run the initial distribution to create classes for this level.",
+  "classesOrganisationPendingStudentsToDistribute": "{count} students to distribute",
+  "@classesOrganisationPendingStudentsToDistribute": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationPendingPlannedClassrooms": "{count} planned classes",
+  "@classesOrganisationPendingPlannedClassrooms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationAppliedCriterionInfo": "Applied criterion: balanced distribution by gender (mixed school).",
+  "classesOrganisationSplitSummary": "{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}",
+  "@classesOrganisationSplitSummary": {
+    "placeholders": {
+      "studentsCount": { "type": "int" },
+      "classroomsCount": { "type": "int" },
+      "criterion": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomsSectionTitle": "Constituted classes",
+  "classesOrganisationUnassignedTitle": "Students to assign",
+  "classesOrganisationUnassignedTitleSuffix": " — added after distribution",
+  "classesOrganisationUnassignedBadge": "To assign",
+  "classesOrganisationUnassignedSummary": "{count} students waiting for assignment",
+  "@classesOrganisationUnassignedSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationNoMembers": "No student in this classroom.",
+  "classesOrganisationAssignAction": "Assign to a classroom",
+  "classesOrganisationAssignDialogTitle": "Assign to a classroom",
+  "classesOrganisationAssignDialogMessage": "Choose the destination classroom for {studentName}.",
+  "@classesOrganisationAssignDialogMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationClassroomPopulation": "Current size: {count}",
+  "@classesOrganisationClassroomPopulation": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationTransferConfirmMessage": "Do you confirm transferring {studentName} to this classroom?",
+  "@classesOrganisationTransferConfirmMessage": {
+    "placeholders": {
+      "studentName": { "type": "String" }
+    }
+  },
+  "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
+  "@classesOrganisationLoadingClassroomsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesOrganisationStudentDetailSoon": "Student details will be available in the next batch.",
+  "classesOrganisationErrorNetwork": "Check your internet connection.",
+  "classesOrganisationErrorNotFound": "No data found for these criteria.",
+  "classesOrganisationErrorValidation": "Some entered information is invalid.",
+  "classesOrganisationErrorUnauthorized": "Access is not authorized.",
+  "classesOrganisationErrorInvalidCredentials": "Invalid credentials.",
+  "classesOrganisationErrorServer": "Server error, try again later.",
+  "classesOrganisationErrorStorage": "Local storage error.",
+  "classesOrganisationErrorAuth": "Session is not valid, please sign in again.",
+  "classesOrganisationErrorUnknown": "An error occurred.",
+  "classesListHeroTitle": "Class lists",
+  "classesListHeroSubtitle": "Quickly search students by cycle, level or classroom, then export the displayed results.",
+  "classesListHeroFilterChip": "Multi-criteria search by identity and level.",
+  "classesListHeroClassroomChip": "Optional classroom filtering for the current school year.",
+  "classesListSearchTitle": "Search form",
+  "classesListSearchHint": "",
+  "classesListValidationAtLeastOneCriterion": "Provide at least one criterion to run a search.",
+  "classesListClassroomOptionalLabel": "Classroom (optional)",
+  "classesListFirstNameOptionalLabel": "First name (optional)",
+  "classesListLastNameOptionalLabel": "Last name (optional)",
+  "classesListSurnameOptionalLabel": "Surname (optional)",
+  "classesListInitialEmptyTitle": "No search in progress",
+  "classesListInitialEmptyMessage": "Fill in at least one criterion to display students.",
+  "classesListNoMatchTitle": "No student matches the criteria",
+  "classesListNoMatchMessage": "Try broadening your filters or adjusting your search.",
+  "classesListResultsSummary": "{count} students found — {criteria}",
+  "@classesListResultsSummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "criteria": { "type": "String" }
+    }
+  },
+  "classesListResultsSummaryWithoutCriteria": "{count} students found",
+  "@classesListResultsSummaryWithoutCriteria": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "classesListClassroomChipLabel": "Classroom",
+  "classesListLoadingClassroomMembers": "Loading classroom members...",
+  "classesListClassroomEmptyMessage": "No student is currently assigned to this classroom.",
+  "classesListClassroomFilteredEmptyMessage": "No student in this classroom matches the entered filters.",
+  "classesListStudentDetailSoon": "Student details will be available in a future release.",
+  "classesListExportSuccess": "Export copied to clipboard.",
+  "classesListExportFailed": "Unable to prepare the export right now.",
+  "classesListExportNothingToExport": "There is no data to export for this search.",
+  "classesListExportPdf": "Export as PDF",
+  "subMenuClassesList": "Class lists",
   "@subMenuClassesList": {
     "description": "Classes list sub-menu title"
   },
@@ -110,6 +261,13 @@
   "profile": "Profile",
   "settings": "Settings",
   "home": "Home",
+  "homeTopBarPendingSubtitle": "Pending files follow-up",
+  "homeTopBarNotificationsTooltip": "Notifications",
+  "homeUserMenuTooltip": "User menu",
+  "homeSidebarCollapseTooltip": "Collapse menu",
+  "homeSidebarExpandTooltip": "Expand menu",
+  "homeSidebarFooterLabel": "School dashboard",
+  "homeSidebarNavigationLabel": "Main navigation",
   "pageUnderConstruction": "This page is under development",
   "preRegistrations": "Pre-Registrations",
   "searchStudents": "Search Students",
@@ -161,6 +319,14 @@
   "enrollmentCode": "Enrollment Code",
   "enrollmentDetailTitle": "Enrollment file",
   "enrollmentUnknownStudent": "Student not specified",
+  "firstRegistrationNewEnrollmentAction": "New enrollment",
+  "enrollmentDetailLoadingTitle": "Loading enrollment file",
+  "enrollmentDetailLoadingMessage": "Please wait while enrollment details are being loaded.",
+  "enrollmentDetailLoadErrorTitle": "Unable to load enrollment file",
+  "enrollmentDetailLoadErrorFallback": "An error occurred while loading enrollment details.",
+  "enrollmentDetailRetryAction": "Retry",
+  "enrollmentDetailNotFoundTitle": "Details not found",
+  "enrollmentDetailNotFoundMessage": "This enrollment file does not exist or is no longer available.",
   "gender": "Gender",
   "actions": "Actions",
   "personalInformation": "Personal Information",
@@ -171,6 +337,11 @@
   "guardianAddAction": "Add guardian/contact",
   "guardianSaveAction": "Save",
   "guardianRelationshipLabel": "Relationship",
+  "guardianMarkAsPrimary": "Set as primary guardian",
+  "guardianPrimaryRequiredHint": "At least one primary guardian is required",
+  "guardianPrincipalBadge": "Primary",
+  "guardianToggleCard": "Open or close guardian card",
+  "guardianEmailOptionalInline": "(optional)",
   "guardianDeleteAction": "Remove this guardian",
   "guardianDeleteConfirmTitle": "Confirm removal",
   "guardianDeleteConfirmMessage": "Do you really want to remove this guardian? This action cannot be undone.",
@@ -184,6 +355,12 @@
   },
   "schoolFees": "School Fees",
   "summary": "Summary",
+  "summaryYes": "Yes",
+  "summaryNo": "No",
+  "summaryChargesTotalDue": "Total due",
+  "summaryChargesUnavailable": "Amounts are unavailable for now.",
+  "summaryValidationNoticeTitle": "Before validation",
+  "summaryValidationNoticeBody": "You certify that the information is accurate. The file will move to validated status and a receipt can be generated.",
   "next": "Continue",
   "previous": "Previous",
   "nextPage": "Next page",
@@ -242,6 +419,7 @@
   "rankingLabel": "Ranking",
   "rankingLabelHelp": "Class ranking.",
   "yearValidated": "Year validated",
+  "yearValidatedHelp": "Indicates whether the student validated the previous school year.",
   "yearNotValidated": "Not validated",
   "currentAcademicYearLabel": "Academic year",
   "currentAcademicYearHelp": "Target academic year.",
@@ -282,6 +460,13 @@
   "stepAcademicTargetSubtitle": "Target year academic objectives",
   "stepGuardianSubtitle": "Legal guardians and contacts",
   "stepSummarySubtitle": "Final enrollment summary",
+  "wizardStepShortPersonal": "Personal",
+  "wizardStepShortAddress": "Address",
+  "wizardStepShortPrevious": "Previous",
+  "wizardStepShortTarget": "Target",
+  "wizardStepShortCharges": "Fees",
+  "wizardStepShortGuardian": "Guardians",
+  "wizardStepShortSummary": "Summary",
   "stepIndicator": "Step {current} / {total}",
   "@stepIndicator": {
     "placeholders": {
@@ -388,11 +573,15 @@
   "studentChargesEmpty": "No charges are available for this student.",
   "studentChargesUnavailable": "Student charges cannot be loaded without a student or target level.",
   "studentChargesAmountColumn": "Amount",
+  "studentChargesLabelColumn": "Charge label",
+  "studentChargesActionsColumn": "Actions",
   "studentChargesAmountPaidLabel": "Paid amount",
   "studentChargesSaveAction": "Save charges",
   "studentChargesSavingAction": "Saving charges...",
   "studentChargesSaveSuccess": "Charges saved successfully.",
   "studentChargesSaveHintBeforeContinue": "Please save charge changes before continuing.",
+  "studentChargesTotalLabel": "Total",
+  "studentChargesHelperText": "Amounts can be updated later from the student's profile.",
   "studentChargesNetworkError": "Unable to load charges. Please check your internet connection.",
   "studentChargesNotFound": "No charges were found for this student.",
   "studentChargesValidationError": "The requested charge data is invalid.",
@@ -402,19 +591,37 @@
   "studentChargesStorageError": "A local error prevents charges from being displayed.",
   "studentChargesAuthError": "An authentication error prevents charges from loading.",
   "studentChargesUnknownError": "An unexpected error occurred while loading charges.",
-  "studentChargeStatusDue": "Due",
+  "studentChargeStatusDue": "To settle",
   "studentChargeStatusPartial": "Partial",
   "studentChargeStatusPaid": "Paid",
-  "facturationPageHeaderTitle": "Student Billing",
-  "facturationPageHeaderSubtitle": "Search a student by name or class level to view and manage their school fees.",
-  "facturationPageHeaderChipByName": "Search by name",
-  "facturationPageHeaderChipByLevel": "Filter by level",
-  "facturationPageHeaderChipViewCharges": "View charges",
-
+  "studentChargeFeeCodeTuition": "Tuition",
+  "studentChargeFeeCodeRegistration": "Registration",
+  "studentChargeFeeCodeEnrollment": "Enrollment",
+  "studentChargeFeeCodeApplication": "Application",
+  "studentChargeFeeCodeAdmission": "Admission",
+  "studentChargeFeeCodeCanteen": "Canteen",
+  "studentChargeFeeCodeTransport": "Transport",
+  "studentChargeFeeCodeBoarding": "Boarding",
+  "studentChargeFeeCodeBooks": "Books & Materials",
+  "studentChargeFeeCodeUniform": "Uniform",
+  "studentChargeFeeCodeExamination": "Examination",
+  "studentChargeFeeCodeLabFee": "Laboratory Fee",
+  "studentChargeFeeCodeActivity": "Activity Fee",
+  "studentChargeFeeCodeSports": "Sports Fee",
+  "studentChargeFeeCodeLibrary": "Library Fee",
+  "studentChargeFeeCodeTechnology": "Technology / IT Fee",
+  "studentChargeFeeCodeDevelopment": "Development / Infrastructure Fee",
+  "studentChargeFeeCodeInsurance": "Insurance",
+  "studentChargeFeeCodeSecurityDeposit": "Security Deposit",
+  "studentChargeFeeCodeProcessingFee": "Processing Fee",
+  "studentChargeFeeCodeLatePaymentFee": "Late Payment Fee",
+  "studentChargeFeeCodeRefund": "Refund",
+  "studentChargeFeeCodeOther": "Other",
+  "studentChargeFeeCodeFallback": "School fee",
   "facturationSearchTitle": "Search Students",
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",
-  "facturationSearchInvitationTitle": "Start a billing search",
-  "facturationSearchInvitationMessage": "Select a level or enter a student name then click Search to display records.",
+  "facturationSearchInvitationTitle": "No search in progress",
+  "facturationSearchInvitationMessage": "Enter a name or level above to display matching students.",
   "facturationViewChargesLabel": "View charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
@@ -429,20 +636,30 @@
   "facturationDetailStudentSurname": "Surname",
   "facturationDetailStudentLevelGroup": "Level group",
   "facturationDetailStudentLevel": "Level",
-  "facturationDetailInfoTitle": "Billing detail",
-  "facturationDetailInfoSubtitle": "Review recent payments and student charge status for the selected academic year.",
+  "facturationDetailInfoTitle": "Financial record",
+  "facturationDetailInfoSubtitle": "Review recent payments and student charge status for this student.",
+  "facturationDetailHeaderKpiTotalDue": "Total due",
+  "facturationDetailHeaderKpiAlreadyPaid": "Already paid",
+  "facturationDetailHeaderKpiRemaining": "Remaining due",
   "facturationDetailInfoChipPayments": "Payments",
   "facturationDetailInfoChipCharges": "Charges",
-  "facturationDetailPaymentsSectionTitle": "Recent payments",
-  "facturationDetailPaymentsSectionSubtitle": "Payment history recorded for this student.",
+  "facturationDetailPaymentsSectionTitle": "Payments",
+  "facturationDetailPaymentsSectionSubtitle": "Recorded payment history for this student.",
+  "facturationDetailPaymentsRecordedCount": "{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}",
+  "@facturationDetailPaymentsRecordedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "facturationDetailCollectPaymentAction": "Collect payment",
   "facturationDetailPaymentsRetry": "Retry",
   "facturationDetailPaymentsEmpty": "No payment has been recorded for this student.",
-  "facturationDetailPaymentPayerColumn": "Payer details",
-  "facturationDetailPaymentPaidAtColumn": "Paid at",
+  "facturationDetailPaymentPayerColumn": "Payer",
+  "facturationDetailPaymentPaidAtColumn": "Date",
   "facturationDetailPaymentAmountColumn": "Amount",
   "facturationDetailPaymentActionsColumn": "Actions",
   "facturationDetailViewPaymentLabel": "View payment detail",
+  "facturationDetailViewChargeLabel": "View charge detail",
   "facturationPaymentDetailHeroTitle": "Payment detail",
   "facturationPaymentDetailHeroSubtitle": "Review this payment information and the breakdown of allocated amounts.",
   "facturationPaymentInfoSectionTitle": "Payment information",
@@ -464,15 +681,24 @@
   "facturationPaymentAllocationsStorageError": "A local error prevents allocations from being displayed.",
   "facturationPaymentAllocationsAuthError": "An authentication error prevents allocations from loading.",
   "facturationPaymentAllocationsUnknownError": "An unexpected error occurred while loading allocations.",
-  "facturationDetailChargesSectionTitle": "Student charges",
+  "facturationDetailChargesSectionTitle": "Charges",
   "facturationDetailChargesSectionSubtitle": "Breakdown of expected, paid and remaining amounts.",
+  "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle",
+  "@facturationDetailChargesSummary": {
+    "placeholders": {
+      "totalCount": {},
+      "partialCount": {},
+      "dueCount": {}
+    }
+  },
   "facturationDetailChargesRetry": "Retry",
   "facturationDetailChargesEmpty": "No charge was found for this student.",
   "facturationDetailChargeLabelColumn": "Label",
-  "facturationDetailChargeExpectedAmountColumn": "Expected amount",
-  "facturationDetailChargePaidAmountColumn": "Paid amount",
-  "facturationDetailChargeRemainingAmountColumn": "Remaining amount",
+  "facturationDetailChargeExpectedAmountColumn": "Expected",
+  "facturationDetailChargePaidAmountColumn": "Paid",
+  "facturationDetailChargeRemainingAmountColumn": "Remaining",
   "facturationDetailChargeStatusColumn": "Status",
+  "facturationDetailChargeTotalsLabel": "Totals",
   "facturationPaymentsNetworkError": "Unable to load payments. Please check your internet connection.",
   "facturationPaymentsNotFound": "No payment was found for this student.",
   "facturationPaymentsValidationError": "Requested payment data is invalid.",
@@ -484,6 +710,7 @@
   "facturationPaymentsUnknownError": "An unexpected error occurred while loading payments.",
   "facturationPrintReceiptLabel": "Print receipt",
   "facturationPrintReceiptSubtitle": "Generate and download the receipt for this payment",
+  "facturationPaymentDownloadPdfLabel": "Download PDF",
   "facturationPrintStatementsLabel": "Print statements",
   "facturationPrintStatementsSubtitle": "Generate and download the billing statements for this student",
   "facturationChargeDetailBackLabel": "Back to billing detail",
@@ -496,6 +723,7 @@
   "facturationChargeDetailStatusLabel": "Status",
   "facturationChargeDetailAllocationsSectionTitle": "Allocations for this charge",
   "facturationChargeDetailAllocationsSectionSubtitle": "Breakdown of payments allocated to this charge.",
+  "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Allocated total",
   "facturationChargeDetailAllocationsEmpty": "No allocation was found for this charge.",
   "facturationChargeDetailAllocationsRetry": "Retry",
@@ -521,6 +749,14 @@
   "facturationCreatePaymentPayerMiddleNameLabel": "Surname (optional)",
   "facturationCreatePaymentPayerMiddleNameHint": "Enter surname",
   "facturationCreatePaymentPayerFieldRequired": "This field is required",
+  "facturationCreatePaymentDetailsSectionTitle": "Payment details",
+  "facturationCreatePaymentDetailsSectionSubtitle": "Enter the received amount, currency and payment date.",
+  "facturationCreatePaymentReceivedAmountLabel": "Amount received",
+  "facturationCreatePaymentReceivedAmountHint": "E.g.: 200",
+  "facturationCreatePaymentCurrencyLabel": "Currency",
+  "facturationCreatePaymentCurrencyReadOnlyHint": "Multiple currencies detected: read-only value.",
+  "facturationCreatePaymentCurrencyUnavailable": "Currency unavailable",
+  "facturationCreatePaymentDateLabel": "Payment date",
   "facturationCreatePaymentAllocationSectionTitle": "Payment allocations",
   "facturationCreatePaymentAllocationSectionSubtitle": "Associate an amount to one or more student charges.",
   "facturationCreatePaymentAddAllocationLabel": "Add allocation",
@@ -535,6 +771,16 @@
   "facturationCreatePaymentAmountMustBePositive": "Amount must be greater than zero",
   "facturationCreatePaymentBeforeLabel": "Before payment",
   "facturationCreatePaymentAfterLabel": "After payment",
+  "facturationCreatePaymentRemoveAllocationConfirmTitle": "Confirm removal",
+  "facturationCreatePaymentRemoveAllocationConfirmMessage": "Do you really want to remove allocation #{allocationIndex}? This action cannot be undone.",
+  "@facturationCreatePaymentRemoveAllocationConfirmMessage": {
+    "placeholders": {
+      "allocationIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "facturationCreatePaymentRemoveAllocationConfirmAction": "Remove",
   "facturationCreatePaymentSubmitLabel": "Validate payment",
   "facturationCreatePaymentNoAllocations": "Add at least one allocation to validate the payment.",
   "facturationCreatePaymentConfirmTitle": "Confirm payment",
@@ -546,6 +792,25 @@
   "facturationCreatePaymentPaidLabel": "Already paid",
   "facturationCreatePaymentRemainingLabel": "Remaining",
   "facturationCreatePaymentStatusLabel": "Status",
+  "facturationCreatePaymentChargeImpactTitle": "Impact on charge",
+  "facturationCreatePaymentChargeRemainingHelper": "Remaining on this charge: {remainingAmount}",
+  "@facturationCreatePaymentChargeRemainingHelper": {
+    "placeholders": {
+      "remainingAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentPayAllAction": "Pay all",
+  "facturationCreatePaymentDistributionTrackerIdle": "Enter at least one allocation to compute total payments.",
+  "facturationCreatePaymentFooterTotalPayments": "Total payments: {allocatedAmount}",
+  "@facturationCreatePaymentFooterTotalPayments": {
+    "placeholders": {
+      "allocatedAmount": {
+        "type": "String"
+      }
+    }
+  },
   "facturationCreatePaymentNetworkError": "Check your connection and try again.",
   "facturationCreatePaymentNotFoundError": "The requested resource was not found.",
   "facturationCreatePaymentValidationError": "Submitted data is invalid. Please review the form.",
@@ -557,7 +822,196 @@
   "facturationCreatePaymentUnknownError": "An unexpected error occurred.",
   "facturationCreatePaymentNoChargesAvailable": "No unpaid charges available for this student.",
 
-  "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
-  "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
-  "signOutAction": "Sign out"
+  "attendanceHeroTitle": "Attendance",
+  "attendanceHeroSubtitle": "View class attendance by date for reliable daily tracking.",
+  "attendanceHeroChipClass": "Class-based search",
+  "attendanceHeroChipDate": "Date filter",
+  "attendanceSearchTitle": "Attendance Search",
+  "attendanceSearchHint": "Select cycle, level, class and date to display attendance records.",
+  "attendanceDateLabel": "Date",
+  "attendanceCycleLabel": "Cycle",
+  "attendanceLevelLabel": "Level",
+  "attendanceClassLabel": "Class",
+  "attendanceShowClassAction": "Show class",
+  "attendanceInvitationMessage": "Run a search to display attendance for the selected class.",
+  "attendanceEmptySelectionMessage": "Select a class and a date to take attendance.",
+  "attendanceLoadingMessage": "Loading attendance records...",
+  "attendanceEmptyMessage": "No attendance found for these filters.",
+  "attendanceExportAction": "Export",
+  "attendanceExportTooltip": "Prepare result export",
+  "attendanceExportSoon": "Export will be available soon.",
+  "attendanceSaveAction": "Save",
+  "attendanceSavingAction": "Saving...",
+  "attendanceSaveTooltip": "Save all entered changes",
+  "attendanceSaveValidationHint": "Fix absent rows without a reason before saving.",
+  "attendanceSaveSuccess": "Attendance records were saved successfully.",
+  "attendanceValidateCallAction": "Validate attendance",
+  "attendancePendingChanges": "Pending changes",
+  "attendancePendingInvalidChanges": "Fixes required",
+  "attendanceRowModifiedLabel": "Modified",
+  "attendanceUnsavedChangesTitle": "Unsaved changes",
+  "attendanceUnsavedChangesMessage": "A new search will discard unsaved changes. Do you want to continue?",
+  "attendanceDateTooltip": "Choose the attendance date",
+  "attendanceStatusInProgress": "Attendance in progress",
+  "attendanceStatusReady": "Ready to validate",
+  "attendancePresentCount": "Present",
+  "attendanceAbsentCount": "Absent",
+  "attendanceTotalCountCompact": "Total",
+  "attendanceDefaultPresenceHelper": "All students are marked present by default. Tap Absent to report an exception.",
+  "attendanceReadyToValidate": "No absence is missing a reason. You can validate attendance.",
+  "attendanceMissingReasonsStatus": "{count} absence(s) without reason - complete required",
+  "@attendanceMissingReasonsStatus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceAllPresentConfirmTitle": "Confirm attendance",
+  "attendanceAllPresentConfirmMessage": "Do you confirm that all {count} students are present?",
+  "@attendanceAllPresentConfirmMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceTotalCount": "Total students",
+  "attendanceGirlsCount": "Girls",
+  "attendanceBoysCount": "Boys",
+  "attendanceCriteriaSummary": "Class: {classroomName} · Date: {formattedDate}",
+  "@attendanceCriteriaSummary": {
+    "placeholders": {
+      "classroomName": {
+        "type": "String"
+      },
+      "formattedDate": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceTableLastName": "Last name",
+  "attendanceTableMiddleName": "Middle name",
+  "attendanceTableFirstName": "First name",
+  "attendanceTablePresent": "Present",
+  "attendanceTableAbsenceReason": "Reason",
+  "attendanceTableAbsenceReasonNote": "Note",
+  "attendancePresenceStatusLabel": "Attendance status",
+  "attendancePresentValue": "Present",
+  "attendanceAbsentValue": "Absent",
+  "attendanceReadOnlyHint": "Read-only informational status",
+  "attendanceReasonRequiredError": "Please select a reason for this absence.",
+  "attendanceReasonRequiredHint": "Reason required for an absence.",
+  "attendanceReasonDisabledHint": "Reason is required only when the student is absent.",
+  "attendanceNoteDisabledHint": "Note is optional only when the student is absent.",
+  "attendanceNotePlaceholder": "Add details if needed",
+  "attendanceNoMiddleName": "Not provided",
+  "attendanceNoAbsenceReason": "No reason",
+  "attendanceNoAbsenceNote": "No note",
+  "attendanceErrorNetwork": "Check your internet connection and try again.",
+  "attendanceErrorNotFound": "No attendance resource was found.",
+  "attendanceErrorValidation": "Submitted data is invalid.",
+  "attendanceErrorUnauthorized": "You are not authorized to access this resource.",
+  "attendanceErrorInvalidCredentials": "Your credentials do not allow access to attendance.",
+  "attendanceErrorServer": "Server is unavailable. Please try again later.",
+  "attendanceErrorStorage": "A local storage error occurred.",
+  "attendanceErrorAuth": "An authentication error occurred.",
+  "attendanceErrorUnknown": "An unexpected error occurred.",
+  "absenceReasonSickness": "Sickness",
+  "absenceReasonFamilyEmergency": "Family emergency",
+  "absenceReasonPersonal": "Personal",
+  "absenceReasonUnknown": "Unknown",
+  "absenceReasonVacation": "Vacation",
+  "absenceReasonUnderGraduateLeave": "Study leave",
+  "absenceReasonMarriageLeave": "Marriage leave",
+  "absenceReasonParentalLeave": "Parental leave",
+  "absenceReasonWorkLeave": "Work leave",
+  "absenceReasonOther": "Other",
+
+   "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
+   "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
+   "signOutAction": "Sign out",
+
+   "disciplinaryDetailBackLabel": "Back to disciplines",
+   "disciplinaryFollowUpTitle": "Disciplinary follow-up",
+   "disciplinaryHeroTitle": "Disciplinary case file detail",
+   "disciplinaryHeroChipCases": "Disciplinary cases",
+   "disciplinaryDetailContextErrorTitle": "Detail context unavailable",
+   "disciplinaryDetailContextErrorMessage": "Required context for this detail view is missing. Go back to the list and open the detail again.",
+   "disciplinaryTabCasesLabel": "Disciplinary cases",
+   "disciplinaryTabAttendanceHistoryLabel": "Attendance history",
+   "disciplinaryAttendanceHistoryComingSoon": "Attendance history will be delivered in a future feature.",
+   "disciplinaryUnknownValue": "-",
+   "disciplinaryCaseCreateAction": "New case",
+   "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
+   "disciplinaryCasesSummary": "{total} recorded cases - {open} open",
+   "@disciplinaryCasesSummary": {
+     "placeholders": {
+       "total": {
+         "type": "int"
+       },
+       "open": {
+         "type": "int"
+       }
+     }
+   },
+   "disciplinaryCasesTableTitleColumn": "Title",
+   "disciplinaryCasesTableStatusColumn": "Status",
+   "disciplinaryCasesTableActionColumn": "Actions",
+   "disciplinaryCasesDateUnavailable": "Date unavailable",
+   "disciplinaryCaseViewLabel": "View case",
+   "disciplinaryCasesLoadingMessage": "Loading disciplinary cases...",
+   "disciplinaryCasesEmptyMessage": "No disciplinary cases for this student.",
+   "disciplinaryCaseViewDialogTitle": "Disciplinary case detail",
+   "disciplinaryCaseViewDialogSectionTitle": "Case information",
+   "disciplinaryCaseViewDialogTitleField": "Title",
+   "disciplinaryCaseViewDialogStatusField": "Status",
+   "disciplinaryCaseViewDialogContentField": "Content",
+   "disciplinaryCaseViewDialogLoadingMessage": "Loading case detail...",
+   "disciplinaryCaseViewDialogErrorMessage": "Unable to load case detail",
+   "disciplinaryCaseCreateDialogTitle": "Create disciplinary case",
+   "disciplinaryCaseCreateDialogTitleField": "Case title",
+   "disciplinaryCaseCreateDialogTitleHint": "Give a brief case description",
+   "disciplinaryCaseCreateDialogContentField": "Content",
+   "disciplinaryCaseCreateDialogContentHint": "Disciplinary case details",
+   "disciplinaryCaseCreateDialogCaseDateField": "Case date",
+   "disciplinaryCaseCreateDialogCaseDateHint": "Select date",
+   "disciplinaryCaseCreateDialogSubmitAction": "Create case",
+   "disciplinaryCaseCreateDialogCreatingMessage": "Creating...",
+   "disciplinaryCaseCreateDialogSuccessMessage": "Disciplinary case created successfully.",
+   "disciplinaryCaseCreateDialogRequiredFieldError": "This field is required.",
+   "disciplinaryCasesNetworkError": "Check your internet connection and try again.",
+   "disciplinaryCasesNotFound": "No disciplinary cases found.",
+   "disciplinaryCasesValidationError": "Requested data is invalid.",
+   "disciplinaryCasesUnauthorizedError": "You are not authorized to access these cases.",
+   "disciplinaryCasesInvalidCredentialsError": "Your credentials do not allow access to cases.",
+   "disciplinaryCasesServerError": "Server is unavailable. Please try again later.",
+   "disciplinaryCasesStorageError": "A local storage error occurred.",
+   "disciplinaryCasesAuthError": "An authentication error prevents loading cases.",
+   "disciplinaryCasesUnknownError": "An unexpected error occurred.",
+   "disciplinaryCaseStatusOpen": "Open",
+   "disciplinaryCaseStatusInProgress": "In progress",
+   "disciplinaryCaseStatusClosed": "Closed",
+   "disciplinaryCaseStatusUnknown": "Unknown",
+
+   "enrollmentStatusPreRegistered": "Pre-registered",
+
+   "statusPaid": "Paid",
+   "statusPartial": "Partial",
+   "statusOverdue": "Overdue",
+
+   "statusPresent": "Present",
+   "statusAbsentJustified": "Justified",
+   "statusAbsentUnjustified": "Absent",
+
+   "statusSynced": "Up to date",
+    "statusSyncing": "Syncing…",
+    "statusOffline": "Offline",
+    "statusPendingUpload": "Pending upload",
+    "statusSyncConflict": "Conflict",
+
+    "previous": "Previous",
+    "next": "Next",
+
+    "componentGalleryTitle": "Component gallery"
 }

@@ -13,6 +13,16 @@ class Bootstrap extends Equatable {
     required this.schoolLevelGroups,
   });
 
+  Bootstrap copyWith({
+    String? schoolId,
+    BootstrapAcademicYear? academicYear,
+    List<BootstrapSchoolLevelGroupBundle>? schoolLevelGroups,
+  }) => Bootstrap(
+    schoolId: schoolId ?? this.schoolId,
+    academicYear: academicYear ?? this.academicYear,
+    schoolLevelGroups: schoolLevelGroups ?? this.schoolLevelGroups,
+  );
+
   @override
   List<Object?> get props => [schoolId, academicYear, schoolLevelGroups];
 }

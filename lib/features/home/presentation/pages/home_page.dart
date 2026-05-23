@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -59,7 +68,8 @@ class _HomePageView extends StatelessWidget {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < 768;
+          final isMobile =
+              constraints.maxWidth < AppBreakpoints.homeMobileMax;
 
           if (isMobile) {
             return _buildMobileLayout();
@@ -73,6 +83,11 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildDesktopLayout() {
     return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (previous, current) =>
+          previous.isSidebarExpanded != current.isSidebarExpanded ||
+          previous.currentTitle != current.currentTitle ||
+          previous.selectedMenuId != current.selectedMenuId ||
+          previous.selectedSubMenuId != current.selectedSubMenuId,
       builder: (context, state) {
         return Row(
           children: [
@@ -93,6 +108,10 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildMobileLayout() {
     return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (previous, current) =>
+          previous.currentTitle != current.currentTitle ||
+          previous.selectedMenuId != current.selectedMenuId ||
+          previous.selectedSubMenuId != current.selectedSubMenuId,
       builder: (context, state) {
         return Scaffold(
           appBar: const TopBar(),
@@ -108,17 +127,21 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
-        state.selectedSubMenuId == MenuConstants.facturationsId;
+        state.selectedSubMenuId == MenuConstants.facturationsId ||
+        state.selectedSubMenuId == MenuConstants.organisationId ||
+        state.selectedSubMenuId == MenuConstants.classesListId ||
+        state.selectedSubMenuId == MenuConstants.presencesId ||
+        state.selectedSubMenuId == MenuConstants.disciplinesListId;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppTheme.largePadding),
+      padding: const EdgeInsets.all(AppDimensions.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!hidePageBreadcrumb) ...[
             _buildBreadcrumb(context, state),
-            const SizedBox(height: AppTheme.largePadding),
+            const SizedBox(height: AppDimensions.spacingL),
           ],
           Expanded(child: _buildContentArea(context, state)),
         ],
@@ -132,10 +155,7 @@ class _HomePageView extends StatelessWidget {
       children: [
         Text(
           l10n.home,
-          style: const TextStyle(
-            color: AppTheme.textSecondaryColor,
-            fontSize: 14,
-          ),
+          style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
         ),
         if (state.selectedMenuId != null) ...[
           const Text(
@@ -146,10 +166,7 @@ class _HomePageView extends StatelessWidget {
             state.menuItems
                 .firstWhere((menu) => menu.id == state.selectedMenuId)
                 .title,
-            style: const TextStyle(
-              color: AppTheme.textSecondaryColor,
-              fontSize: 14,
-            ),
+            style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
           ),
         ],
         if (state.selectedSubMenuId != null) ...[
@@ -159,10 +176,8 @@ class _HomePageView extends StatelessWidget {
           ),
           Text(
             state.currentTitle,
-            style: const TextStyle(
+            style: AppTextStyles.bodyStrong.copyWith(
               color: AppTheme.textPrimaryColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -186,6 +201,18 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentFeatureScope(child: FirstRegistrationPage());
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(child: FacturationPage());
+      case MenuConstants.organisationId:
+        return const ClassesFeatureScope(child: ClassesOrganisationPage());
+      case MenuConstants.classesListId:
+        return const ClassesFeatureScope(
+          child: ClassesListPage(intent: ClassesListIntent.classesList()),
+        );
+      case MenuConstants.presencesId:
+        return const AttendanceFeatureScope(child: PresencesPage());
+      case MenuConstants.disciplinesListId:
+        return const ClassesFeatureScope(
+          child: ClassesListPage(intent: ClassesListIntent.disciplinesList()),
+        );
       default:
         return Container(
           width: double.infinity,
@@ -200,7 +227,7 @@ class _HomePageView extends StatelessWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.all(AppTheme.largePadding),
+          padding: const EdgeInsets.all(AppDimensions.spacingL),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -210,20 +237,17 @@ class _HomePageView extends StatelessWidget {
                   size: 64,
                   color: AppTheme.textSecondaryColor,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppDimensions.spacingM),
                 Text(
                   state.currentTitle,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  style: AppTextStyles.pageTitle.copyWith(
                     color: AppTheme.textPrimaryColor,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppDimensions.spacingS),
                 Text(
                   l10n.pageUnderConstruction,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: AppTextStyles.body.copyWith(
                     color: AppTheme.textSecondaryColor,
                   ),
                 ),

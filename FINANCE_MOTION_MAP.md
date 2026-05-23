@@ -50,6 +50,17 @@ les usages existants du module Finance.
 | `WizardBreadcrumb` | Opacite steps futures | `fast` |
 | `FormFieldLabel` | Affichage tooltip d'aide | `tooltipShowDuration` |
 
+### Lot 4 - Attendance polish
+
+| Widget | Type d'animation | Token(s) |
+|---|---|---|
+| `AttendancePageContent` | Entree de page | `entrance` + `outCurve` |
+| `AttendanceResultsSection` | Switch loading/error/empty/success | `standard` + `outCurve`/`inCurve` |
+| `AttendanceRecordsTable` | Switch table desktop / cartes mobile | `standard` + `outCurve`/`inCurve` |
+| `AttendanceResultsToolbar` | Reflow toolbar stats/export | `medium` + `outCurve` |
+| `AttendanceSearchFields` | Reflow du formulaire | `medium` + `outCurve` |
+| `AttendanceSearchButton` | Feedback recherche / spinner | `fast` + `outCurve`/`inCurve` |
+
 ## Regles d'usage (transverses)
 
 1. **Entree de page/detail**: `AppMotion.entrance`.
@@ -61,10 +72,10 @@ les usages existants du module Finance.
 
 ## Checklist de validation par lot
 
-- [ ] Aucune nouvelle `Duration(...)` hardcodee sur les fichiers du lot
-- [ ] Mapping widget -> token renseigne dans ce document
-- [ ] Courbes d'entree/sortie coherentes sur les switches d'etat
-- [ ] Pas de regression UX visible (hover, switch, transitions shell)
+- [x] Aucune nouvelle `Duration(...)` hardcodee sur les fichiers du lot
+- [x] Mapping widget -> token renseigne dans ce document
+- [x] Courbes d'entree/sortie coherentes sur les switches d'etat
+- [x] Pas de regression UX visible (hover, switch, transitions shell)
 
 ## Rappel du mapping Finance existant
 

@@ -17,6 +17,7 @@ abstract class BootstrapContextBloc<E extends BootstrapContextEvent>
   final GetRemoteBootstrapCurrentYearUseCase? _getRemoteCurrentYearUseCase;
   final GetRemoteBootstrapPreviousYearUseCase? _getRemotePreviousYearUseCase;
   final GetLocalBootstrapUseCase _getLocalBootstrapUseCase;
+  final SaveLocalBootstrapUseCase _saveLocalBootstrapUseCase;
 
   BootstrapContextBloc({
     GetRemoteBootstrapCurrentYearUseCase? getRemoteCurrentYearUseCase,
@@ -27,6 +28,7 @@ abstract class BootstrapContextBloc<E extends BootstrapContextEvent>
   }) : _getRemoteCurrentYearUseCase = getRemoteCurrentYearUseCase,
        _getRemotePreviousYearUseCase = getRemotePreviousYearUseCase,
        _getLocalBootstrapUseCase = getLocalBootstrapUseCase,
+       _saveLocalBootstrapUseCase = saveLocalBootstrapUseCase,
        super(const BootstrapContextState.initial());
 
   Future<void> onLoadRemoteCurrentYear(
@@ -122,5 +124,34 @@ abstract class BootstrapContextBloc<E extends BootstrapContextEvent>
   ) {
     emit(const BootstrapContextState.initial());
     return Future.value();
+  }
+
+  Future<void> onPatchSchoolLevelSplit(
+    BootstrapContextSchoolLevelSplitPatched event,
+    Emitter<BootstrapContextState> emit,
+  ) async {
+    final current = state.bootstrap;
+    if (current == null) return;
+
+    final patched = current.copyWith(
+      schoolLevelGroups: current.schoolLevelGroups.map((groupBundle) {
+        final patchedLevels = groupBundle.schoolLevels.map((levelBundle) {
+          if (levelBundle.schoolLevel.id != event.schoolLevelId) {
+            return levelBundle;
+          }
+          return levelBundle.copyWith(
+            schoolLevel: levelBundle.schoolLevel.copyWith(
+              splitIntoClassrooms: true,
+            ),
+          );
+        }).toList();
+
+        return groupBundle.copyWith(schoolLevels: patchedLevels);
+      }).toList(),
+    );
+
+    await _saveLocalBootstrapUseCase(bootstrap: patched, key: event.key);
+
+    emit(state.copyWith(bootstrap: patched));
   }
 }

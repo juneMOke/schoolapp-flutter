@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -40,7 +41,7 @@ class GuardianPhoneField extends StatelessWidget {
             label: label,
             requiredField: requiredField,
             helpMessage: helpMessage,
-            labelColor: isChanged ? const Color(0xFF15803D) : null,
+            labelColor: isChanged ? AppColors.success : null,
           ),
           const SizedBox(height: 6),
           ValueListenableBuilder<TextEditingValue>(
@@ -52,6 +53,7 @@ class GuardianPhoneField extends StatelessWidget {
                 controller: controller,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.phone,
+                style: AppTypography.formValueMedium,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
                     RegExp(r'[0-9+()\- ]'),
@@ -65,7 +67,7 @@ class GuardianPhoneField extends StatelessWidget {
                   prefixIcon: const Icon(
                     Icons.phone_outlined,
                     size: 16,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppColors.textSecondary,
                   ),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -77,19 +79,9 @@ class GuardianPhoneField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                            color: AppTheme.textSecondaryColor,
+                              color: AppColors.textSecondary,
                           ),
                         ),
-                      Icon(
-                        readOnly
-                            ? Icons.lock_outline_rounded
-                            : Icons.mode_edit_outline_rounded,
-                        size: 16,
-                        color: readOnly
-                            ? AppTheme.textSecondaryColor
-                            : AppTheme.primaryColor,
-                      ),
-                      const SizedBox(width: 8),
                     ],
                   ),
                 ),

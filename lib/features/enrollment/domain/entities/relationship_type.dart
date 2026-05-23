@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
+
 enum RelationshipType {
   father,
   mother,
@@ -26,4 +29,16 @@ enum RelationshipType {
         return RelationshipType.other;
     }
   }
+}
+
+extension RelationshipTypeColorExtension on RelationshipType {
+  Color getColor() => switch (this) {
+    RelationshipType.father => AppColors.relationshipFather,
+    RelationshipType.mother => AppColors.relationshipMother,
+    RelationshipType.guardian => AppColors.relationshipGuardian,
+    RelationshipType.uncle => AppColors.relationshipUncle,
+    RelationshipType.aunt => AppColors.relationshipAunt,
+    RelationshipType.grandparent => AppColors.relationshipGrandparent,
+    RelationshipType.other => AppColors.relationshipOther,
+  };
 }

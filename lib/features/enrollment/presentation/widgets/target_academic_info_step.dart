@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
@@ -21,6 +22,7 @@ class TargetAcademicInfoStep extends StatefulWidget {
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
   final bool isEditable;
+  final EnrollmentStepSubmitController? stepController;
 
   const TargetAcademicInfoStep({
     super.key,
@@ -31,6 +33,7 @@ class TargetAcademicInfoStep extends StatefulWidget {
     this.flowStepIndex,
     this.onRefreshRequested,
     this.isEditable = true,
+    this.stepController,
   });
 
   @override
@@ -89,6 +92,8 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
       if (!mounted) return;
       _emitStepState();
     });
+
+    widget.stepController?.bind(submitForm);
   }
 
   void _syncFromStudentDetail(
@@ -112,6 +117,12 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   @override
   void didUpdateWidget(covariant TargetAcademicInfoStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.stepController != widget.stepController) {
+      oldWidget.stepController?.unbind(submitForm);
+      widget.stepController?.bind(submitForm);
+    }
+
     if (oldWidget.studentDetail != widget.studentDetail) {
       _syncFromStudentDetail(widget.studentDetail, resetSnapshot: true);
       _bootstrapDefaultsApplied = false;
@@ -127,6 +138,7 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
 
   @override
   void dispose() {
+    widget.stepController?.unbind(submitForm);
     _currYearController.dispose();
     _targetOptionController.dispose();
     _studentBloc.close();

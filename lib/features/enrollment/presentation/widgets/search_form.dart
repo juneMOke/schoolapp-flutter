@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_compact_layout.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_wide_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SearchForm extends StatefulWidget {
   final String academicYearId;
   final String status;
+  final bool isLoading;
+  final EnrollmentSearchDispatcher dispatch;
   final bool showStatusFilter;
   final ValueChanged<String>? onStatusChanged;
 
@@ -19,6 +23,8 @@ class SearchForm extends StatefulWidget {
     super.key,
     required this.academicYearId,
     required this.status,
+    required this.isLoading,
+    required this.dispatch,
     this.showStatusFilter = false,
     this.onStatusChanged,
   });
@@ -38,142 +44,97 @@ class _SearchFormState extends State<SearchForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final statusDropdown = widget.showStatusFilter
+        ? SearchFormStatusDropdown(
+            selectedStatus: widget.status,
+            onChanged: (value) => widget.onStatusChanged?.call(value),
+          )
+        : null;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const spacing = 10.0;
-          final isWide = constraints.maxWidth >= 1280;
-          final isMedium = constraints.maxWidth >= 860;
-          final columns = isMedium ? 3 : 1;
-          final title = SearchFormTitle(label: l10n.searchStudents);
-          final actions = _buildActionButtons(context, l10n);
-          final statusDropdown = widget.showStatusFilter
-              ? SearchFormStatusDropdown(
-                  selectedStatus: widget.status,
-                  onChanged: (value) => widget.onStatusChanged?.call(value),
-                )
-              : null;
-
-          if (isWide) {
-            return SearchFormWideLayout(
-              title: title,
-              spacing: spacing,
-              firstNameController: _firstNameController,
-              lastNameController: _lastNameController,
-              surnameController: _surnameController,
-              dateOfBirthController: _dateOfBirthController,
-              firstNameLabel: l10n.firstName,
-              lastNameLabel: l10n.lastName,
-              surnameLabel: l10n.surname,
-              dateOfBirthLabel: l10n.dateOfBirth,
-              onFieldChanged: (_) => _onFieldChanged(),
-              onDateTap: () => _selectDate(context),
-              actions: actions,
-              statusDropdown: statusDropdown,
-            );
-          }
-
-          final calculatedWidth =
-              (constraints.maxWidth - ((columns - 1) * spacing)) / columns;
-          final fieldWidth = calculatedWidth.clamp(170.0, 360.0).toDouble();
-
-          return SearchFormCompactLayout(
-            title: title,
-            spacing: spacing,
-            fieldWidth: fieldWidth,
-            availableWidth: constraints.maxWidth,
-            firstNameController: _firstNameController,
-            lastNameController: _lastNameController,
-            surnameController: _surnameController,
-            dateOfBirthController: _dateOfBirthController,
-            firstNameLabel: l10n.firstName,
-            lastNameLabel: l10n.lastName,
-            surnameLabel: l10n.surname,
-            dateOfBirthLabel: l10n.dateOfBirth,
-            onFieldChanged: (_) => _onFieldChanged(),
-            onDateTap: () => _selectDate(context),
-            actions: actions,
-            statusDropdown: statusDropdown,
-          );
-        },
-      ),
+    return SearchFormResponsiveView(
+      title: SearchFormTitle(label: l10n.searchStudents),
+      fields: _buildFields(l10n, statusDropdown),
+      actions: _buildActionButtons(l10n),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, AppLocalizations l10n) {
-    final isSummariesLoading = context.select(
-      (EnrollmentBloc bloc) =>
-          bloc.state.summariesStatus == EnrollmentLoadStatus.loading,
-    );
+  List<Widget> _buildFields(AppLocalizations l10n, Widget? statusDropdown) {
+    final fields = <Widget>[
+      SearchFormInput(
+        controller: _firstNameController,
+        label: l10n.firstName,
+        prefixIcon: const Icon(Icons.person_outline, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _lastNameController,
+        label: l10n.lastName,
+        prefixIcon: const Icon(Icons.badge_outlined, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _surnameController,
+        label: l10n.surname,
+        prefixIcon: const Icon(Icons.account_circle_outlined, size: 16),
+        onChanged: (_) => _onFieldChanged(),
+      ),
+      SearchFormInput(
+        controller: _dateOfBirthController,
+        label: l10n.dateOfBirth,
+        prefixIcon: const Icon(Icons.cake_outlined, size: 16),
+        suffixIcon: const Icon(Icons.calendar_today_rounded, size: 16),
+        readOnly: true,
+        onTap: () => _selectDate(context),
+      ),
+    ];
+
+    if (statusDropdown != null) {
+      return [statusDropdown, ...fields];
+    }
+
+    return fields;
+  }
+
+  Widget _buildActionButtons(AppLocalizations l10n) {
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
     final hasAllNames = _hasAllNameField();
     final isActionLocked = _isActionLocked();
     final isSearchEnabled =
-        (hasAllNames || hasDate) && !isSummariesLoading && !isActionLocked;
+        (hasAllNames || hasDate) && !widget.isLoading && !isActionLocked;
     final isClearEnabled =
-        _hasAnyCriteria() && !isSummariesLoading && !isActionLocked;
+        _hasAnyCriteria() && !widget.isLoading && !isActionLocked;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: 10,
       children: [
-        ElevatedButton.icon(
-          onPressed: isSearchEnabled ? _performSearch : null,
-          icon: const Icon(Icons.search_rounded, size: 14),
-          label: Text(l10n.search),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryColor,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, 40),
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
-            disabledBackgroundColor: Colors.grey[300],
-            disabledForegroundColor: Colors.grey,
-          ),
-        ),
-        const SizedBox(width: 6),
         OutlinedButton.icon(
           onPressed: isClearEnabled ? _clearSearch : null,
           icon: const Icon(Icons.refresh_rounded, size: 14),
           label: Text(l10n.clear),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.textSecondaryColor,
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
+            foregroundColor: AppColors.textSecondary,
+            side: const BorderSide(color: AppColors.border),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, 40),
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+          ),
+        ),
+        ElevatedButton.icon(
+          onPressed: isSearchEnabled ? _performSearch : null,
+          icon: const Icon(Icons.search_rounded, size: 14),
+          label: Text(l10n.search),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.bleuArdoise,
+            foregroundColor: AppColors.textOnDark,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: const Size(112, AppDimensions.minTouchTarget),
+            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+            disabledBackgroundColor: AppColors.stateDisabled,
+            disabledForegroundColor: AppColors.textMuted,
           ),
         ),
       ],
@@ -186,56 +147,21 @@ class _SearchFormState extends State<SearchForm> {
 
   void _performSearch() {
     if (_isActionLocked()) return;
-    final isSummariesLoading =
-        context.read<EnrollmentBloc>().state.summariesStatus ==
-        EnrollmentLoadStatus.loading;
-    if (isSummariesLoading) return;
+    if (widget.isLoading) return;
 
     final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
     final hasAllNames = _hasAllNameField();
 
-    if (!hasAllNames && !hasDate) {
-      return;
-    }
-
-    if (hasAllNames && hasDate) {
-      _markActionTriggered();
-      context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesByStudentNamesAndDateOfBirthRequested(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          surname: _surnameController.text.trim(),
-          dateOfBirth: _dateOfBirthController.text.trim(),
-          status: widget.status,
-          academicYearId: widget.academicYearId,
-          page: 0,
-        ),
-      );
-      return;
-    }
-
-    if (hasAllNames) {
-      _markActionTriggered();
-      context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesByStudentNameRequested(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          surname: _surnameController.text.trim(),
-          status: widget.status,
-          academicYearId: widget.academicYearId,
-          page: 0,
-        ),
-      );
-      return;
-    }
+    if (!hasAllNames && !hasDate) return;
 
     _markActionTriggered();
-    context.read<EnrollmentBloc>().add(
-      EnrollmentSummariesByDateOfBirthRequested(
+    widget.dispatch(
+      StandardSearchCommand(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        surname: _surnameController.text.trim(),
         dateOfBirth: _dateOfBirthController.text.trim(),
         status: widget.status,
-        academicYearId: widget.academicYearId,
-        page: 0,
       ),
     );
   }
@@ -255,10 +181,7 @@ class _SearchFormState extends State<SearchForm> {
 
   void _clearSearch() {
     if (_isActionLocked()) return;
-    final isSummariesLoading =
-        context.read<EnrollmentBloc>().state.summariesStatus ==
-        EnrollmentLoadStatus.loading;
-    if (isSummariesLoading) return;
+    if (widget.isLoading) return;
 
     _firstNameController.clear();
     _lastNameController.clear();
@@ -267,13 +190,7 @@ class _SearchFormState extends State<SearchForm> {
     setState(() {});
 
     _markActionTriggered();
-    context.read<EnrollmentBloc>().add(
-      EnrollmentSummariesRequested(
-        status: widget.status,
-        academicYearId: widget.academicYearId,
-        page: 0,
-      ),
-    );
+    widget.dispatch(StandardSearchCommand(status: widget.status));
   }
 
   bool _isActionLocked() {

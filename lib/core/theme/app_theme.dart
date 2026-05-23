@@ -1,33 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/extensions/status_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF1A73E8);
-  static const Color secondaryColor = Color(0xFF34A853);
-  static const Color backgroundColor = Color(0xFFF7F9FF);
-  static const Color surfaceColor = Colors.white;
-  static const Color sidebarColor = Color(0xFF2E3B4E);
-  static const Color sidebarGradientTop = Color(0xFF1F2A3D);
-  static const Color sidebarGradientBottom = Color(0xFF253349);
-  static const Color accentBlue = Color(0xFF3B82F6);
-  static const Color accentIndigo = Color(0xFF6366F1);
-  static const Color activeMenuColor = Color(0xFF1A73E8);
-  static const Color textPrimaryColor = Color(0xFF1F2937);
-  static const Color textSecondaryColor = Color(0xFF6B7280);
+  AppTheme._();
 
-  // Dimensions
-  static const double sidebarWidth = 280.0;
-  static const double sidebarCollapsedWidth = 70.0;
-  static const double topBarHeight = 64.0;
-  static const double defaultPadding = 16.0;
-  static const double largePadding = 24.0;
+  // Compat legacy - a migrer progressivement vers les tokens AppColors/AppSpacing
+  static const Color primaryColor = AppColors.bleuArdoise;
+  static const Color secondaryColor = AppColors.terreCuite;
+  static const Color backgroundColor = AppColors.surface;
+  static const Color surfaceColor = AppColors.surface;
+  static const Color sidebarColor = AppColors.surfaceDark;
+  static const Color sidebarGradientTop = AppColors.bleuProfond;
+  static const Color sidebarGradientBottom = AppColors.bleuArdoise;
+  static const Color accentBlue = AppColors.bleuArdoise;
+  static const Color accentIndigo = AppColors.info;
+  static const Color activeMenuColor = AppColors.bleuArdoise;
+  static const Color textPrimaryColor = AppColors.textPrimary;
+  static const Color textSecondaryColor = AppColors.textSecondary;
 
-  static ThemeData get theme => ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-    scaffoldBackgroundColor: backgroundColor,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: surfaceColor,
-      elevation: 1,
-      iconTheme: IconThemeData(color: textPrimaryColor),
-    ),
+  static const double sidebarWidth = 280;
+  static const double sidebarCollapsedWidth = 70;
+  static const double topBarHeight = 64;
+  static const double defaultPadding = AppSpacing.lg;
+  static const double largePadding = AppSpacing.xl;
+
+  static const ColorScheme _lightColorScheme = ColorScheme(
+    brightness: Brightness.light,
+    primary: AppColors.bleuArdoise,
+    onPrimary: AppColors.blancCasse,
+    secondary: AppColors.terreCuite,
+    onSecondary: AppColors.blancCasse,
+    tertiary: AppColors.orDoux,
+    onTertiary: AppColors.noirChaud,
+    error: AppColors.error,
+    onError: AppColors.blancCasse,
+    surface: AppColors.surface,
+    onSurface: AppColors.textPrimary,
   );
+
+  static ThemeData get light => ThemeData(
+    useMaterial3: true,
+    colorScheme: _lightColorScheme,
+    scaffoldBackgroundColor: AppColors.surface,
+    splashFactory: NoSplash.splashFactory,
+    textTheme: const TextTheme(
+      displayLarge: AppTypography.displayLarge,
+      displayMedium: AppTypography.displayMedium,
+      headlineLarge: AppTypography.headlineLarge,
+      headlineMedium: AppTypography.headlineMedium,
+      titleLarge: AppTypography.titleLarge,
+      titleMedium: AppTypography.titleMedium,
+      titleSmall: AppTypography.titleSmall,
+      bodyLarge: AppTypography.bodyLarge,
+      bodyMedium: AppTypography.bodyMedium,
+      bodySmall: AppTypography.bodySmall,
+      labelLarge: AppTypography.labelLarge,
+      labelMedium: AppTypography.labelMedium,
+      labelSmall: AppTypography.labelSmall,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: false,
+    ),
+    cardTheme: const CardThemeData(
+      elevation: 0,
+      color: AppColors.surfaceAlt,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+      surfaceTintColor: Colors.transparent,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.terreCuite,
+        foregroundColor: AppColors.blancCasse,
+        minimumSize: const Size(double.infinity, 56),
+        shape: const StadiumBorder(),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.bleuArdoise,
+        side: const BorderSide(color: AppColors.bleuArdoise, width: 1.5),
+        minimumSize: const Size(double.infinity, 56),
+        shape: const StadiumBorder(),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.bleuArdoise,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+      ),
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.surface,
+      border: OutlineInputBorder(
+        borderRadius: AppRadius.brSm,
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: AppRadius.brSm,
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: AppRadius.brSm,
+        borderSide: BorderSide(color: AppColors.bleuArdoise, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: AppRadius.brSm,
+        borderSide: BorderSide(color: AppColors.error, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: AppRadius.brSm,
+        borderSide: BorderSide(color: AppColors.error, width: 1.5),
+      ),
+    ),
+    dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1),
+    extensions: const [StatusColors.light],
+  );
+
+  static ThemeData get dark => light;
+
+  static ThemeData get theme => light;
 }

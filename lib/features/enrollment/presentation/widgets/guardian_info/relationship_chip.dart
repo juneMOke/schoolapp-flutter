@@ -9,7 +9,7 @@ class RelationshipChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor();
+    final color = relationshipType.getColor();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -35,16 +35,6 @@ class RelationshipChip extends StatelessWidget {
     );
   }
 
-  Color _getColor() => switch (relationshipType) {
-    RelationshipType.father     => Colors.blue[600]!,
-    RelationshipType.mother     => Colors.pink[600]!,
-    RelationshipType.guardian   => Colors.purple[600]!,
-    RelationshipType.uncle      => Colors.orange[600]!,
-    RelationshipType.aunt       => Colors.deepPurple[400]!,
-    RelationshipType.grandparent => Colors.teal[600]!,
-    RelationshipType.other      => Colors.grey[600]!,
-  };
-
   IconData _getIcon() => switch (relationshipType) {
     RelationshipType.father     => Icons.man,
     RelationshipType.mother     => Icons.woman,
@@ -68,3 +58,4 @@ class RelationshipChip extends StatelessWidget {
     };
   }
 }
+

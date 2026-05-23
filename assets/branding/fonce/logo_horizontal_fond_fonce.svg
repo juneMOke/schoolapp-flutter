@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <title>ETEELO CONNECT - logo horizontal fond foncé</title>
+  <defs>
+    <style type="text/css"><![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
+      .et-eteelo { font-family: 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 64px; fill: #FFFFFF; letter-spacing: 3px; }
+      .et-connect { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 18px; fill: #D9A24E; letter-spacing: 7px; }
+    ]]></style>
+  </defs>
+
+  <g transform="translate(0,0)">
+    <path d="M 100 8 A 92 92 0 0 1 100 192" fill="none" stroke="#D9A24E" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="100" cy="100" r="72" fill="#FAFAF7"/>
+    <g fill="#0E2D42">
+      <rect x="71" y="60" width="16" height="80"/>
+      <rect x="71" y="60" width="58" height="14"/>
+      <rect x="71" y="93" width="44" height="14"/>
+      <rect x="71" y="126" width="58" height="14"/>
+    </g>
+  </g>
+
+  <g transform="translate(220, 0)">
+    <text x="0" y="118" class="et-eteelo">ETEELO</text>
+    <text x="3" y="148" class="et-connect">CONNECT</text>
+  </g>
+</svg>

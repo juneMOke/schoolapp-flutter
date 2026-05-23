@@ -8,6 +8,8 @@ class EteeloPasswordInput extends StatefulWidget {
   final String? Function(String?)? validator;
   final bool enabled;
   final Function(String)? onFieldSubmitted;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
 
   const EteeloPasswordInput({
     super.key,
@@ -16,6 +18,8 @@ class EteeloPasswordInput extends StatefulWidget {
     this.validator,
     this.enabled = true,
     this.onFieldSubmitted,
+    this.textInputAction,
+    this.autofillHints,
   });
 
   @override
@@ -30,6 +34,8 @@ class _EteeloPasswordInputState extends State<EteeloPasswordInput> {
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscurePassword,
+      textInputAction: widget.textInputAction,
+      autofillHints: widget.autofillHints,
       enabled: widget.enabled,
       validator: widget.validator,
       onFieldSubmitted: widget.onFieldSubmitted,

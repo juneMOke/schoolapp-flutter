@@ -1,52 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_footer.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_header.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_menu_item.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (previous, current) =>
+          previous.isSidebarExpanded != current.isSidebarExpanded ||
+          previous.menuItems != current.menuItems,
       builder: (context, state) {
-        return AnimatedContainer(
-          duration: AppMotion.layout,
-          curve: AppMotion.outCurve,
-          width: state.isSidebarExpanded
-              ? AppTheme.sidebarWidth
-              : AppTheme.sidebarCollapsedWidth,
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppTheme.sidebarGradientTop,
-                  AppTheme.sidebarColor,
-                  AppTheme.sidebarGradientBottom,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 14,
-                  offset: Offset(3, 0),
+        return Semantics(
+          container: true,
+          label: l10n.homeSidebarNavigationLabel,
+          explicitChildNodes: true,
+          child: AnimatedContainer(
+            duration: AppMotion.layout,
+            curve: AppMotion.outCurve,
+            width: state.isSidebarExpanded
+                ? AppTheme.sidebarWidth
+                : AppTheme.sidebarCollapsedWidth,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceDark,
+                border: Border(
+                  right: BorderSide(color: AppColors.borderStrong),
                 ),
-              ],
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  SidebarHeader(isExpanded: state.isSidebarExpanded),
-                  const SizedBox(height: 6),
-                  Expanded(child: _buildMenuList(context, state)),
-                  SidebarFooter(isExpanded: state.isSidebarExpanded),
-                ],
+              ),
+              child: SafeArea(
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: Column(
+                    children: [
+                      FocusTraversalOrder(
+                        order: const NumericFocusOrder(1),
+                        child: SidebarHeader(isExpanded: state.isSidebarExpanded),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingXS + 2),
+                      Expanded(
+                        child: FocusTraversalOrder(
+                          order: const NumericFocusOrder(2),
+                          child: _buildMenuList(context, state),
+                        ),
+                      ),
+                      FocusTraversalOrder(
+                        order: const NumericFocusOrder(3),
+                        child: SidebarFooter(isExpanded: state.isSidebarExpanded),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -59,9 +74,16 @@ class Sidebar extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: state.menuItems.length,
+      semanticChildCount: state.menuItems.length,
       itemBuilder: (context, index) {
         final menu = state.menuItems[index];
-        return SidebarMenuItem(menu: menu, isExpanded: state.isSidebarExpanded);
+        return IndexedSemantics(
+          index: index,
+          child: SidebarMenuItem(
+            menu: menu,
+            isExpanded: state.isSidebarExpanded,
+          ),
+        );
       },
     );
   }

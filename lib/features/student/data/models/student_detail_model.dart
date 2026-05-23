@@ -112,6 +112,7 @@ class StudentDetailModel {
       name: '',
       code: '',
       displayOrder: 0,
+      splitIntoClassrooms: false,
     ),
     schoolLevelGroup: SchoolLevelGroup(
       id: schoolLevelGroupId,

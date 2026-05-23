@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_info_tile.dart';
@@ -35,15 +36,10 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
 
   double get _remainingInCents => expectedAmountInCents - amountPaidInCents;
 
-  String _fmt(double cents) {
-    final major = (cents / 100).toStringAsFixed(2);
-    final parts = major.split('.');
-    final whole = parts.first.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => ' ',
-    );
-    return '$whole.${parts.last} $currency';
-  }
+  String _fmt(double cents) => formatMonetaryAmountWithCurrency(
+        amount: cents / 100,
+        currency: currency,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -79,37 +75,40 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentExpectedLabel,
                     value: _fmt(expectedAmountInCents),
+                    backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.07),
+                    borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
+                    valueColor: AppColors.bleuArdoise,
                   ),
                   FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentPaidLabel,
                     value: _fmt(amountPaidInCents),
-                    backgroundColor: accentColor.withValues(alpha: 0.07),
-                    borderColor: accentColor.withValues(alpha: 0.18),
-                    valueColor: accentColor,
+                    backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.07),
+                    borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
+                    valueColor: AppColors.bleuArdoise,
                   ),
                   FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentRemainingLabel,
                     value: _fmt(_remainingInCents.clamp(0, double.infinity)),
                     backgroundColor: (_remainingInCents > 0
-                            ? AppColors.warning
+                            ? AppColors.terreCuite
                             : AppColors.success)
                         .withValues(alpha: 0.07),
                     borderColor: (_remainingInCents > 0
-                            ? AppColors.warning
+                            ? AppColors.terreCuite
                             : AppColors.success)
                         .withValues(alpha: 0.18),
                     valueColor:
-                        _remainingInCents > 0 ? AppColors.warning : AppColors.success,
+                        _remainingInCents > 0 ? AppColors.terreCuite : AppColors.success,
                   ),
                   FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentStatusLabel,
                     value: status.localizedLabel(l10n),
-                    backgroundColor: status.badgeColor.withValues(alpha: 0.07),
-                    borderColor: status.badgeColor.withValues(alpha: 0.18),
-                    valueColor: status.badgeColor,
+                    backgroundColor: AppColors.terreCuite.withValues(alpha: 0.07),
+                    borderColor: AppColors.terreCuite.withValues(alpha: 0.18),
+                    valueColor: AppColors.terreCuite,
                   ),
                 ],
               );

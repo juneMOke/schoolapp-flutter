@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/guardian_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
@@ -12,6 +15,10 @@ class GuardianInfoStepBody extends StatelessWidget {
   final ParentItemValueChanged onItemValueChanged;
   final VoidCallback? onAddParent;
   final ValueChanged<String>? onRemoveParent;
+  final ValueChanged<String>? onOpenParent;
+  final ValueChanged<String>? onPrimaryParentChanged;
+  final String? expandedParentId;
+  final String? primaryParentId;
   final bool isLoading;
   final bool canSave;
   final bool showInlineSaveButton;
@@ -25,6 +32,10 @@ class GuardianInfoStepBody extends StatelessWidget {
     required this.onItemValueChanged,
     this.onAddParent,
     this.onRemoveParent,
+    this.onOpenParent,
+    this.onPrimaryParentChanged,
+    this.expandedParentId,
+    this.primaryParentId,
     this.isLoading = false,
     this.canSave = false,
     this.showInlineSaveButton = true,
@@ -37,37 +48,47 @@ class GuardianInfoStepBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final canAddParent = isEditable && !isLoading;
 
-    final addButton = FilledButton.tonalIcon(
+    final addButton = SecondaryButton(
       onPressed: canAddParent ? onAddParent : null,
-      icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-      label: Text(l10n.guardianAddAction),
-      style: FilledButton.styleFrom(
-        foregroundColor: AppTheme.primaryColor,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      ),
+      icon: Icons.person_add_alt_1_rounded,
+      label: l10n.guardianAddAction,
+      fullWidth: false,
     );
 
     return AbsorbPointer(
       absorbing: isLoading,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
           Container(
-            padding: const EdgeInsets.all(AppTheme.defaultPadding),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
+              color: AppColors.surface,
+              borderRadius: AppRadius.brMd,
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    l10n.guardianInformation,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimaryColor,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.guardianInformation,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.guardianPrimaryRequiredHint,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 addButton,
@@ -103,8 +124,14 @@ class GuardianInfoStepBody extends StatelessWidget {
                 ),
                 child: ParentItem(
                   parent: parent,
-                  isPrimary: index == 0,
-                  number: index + 1,
+                  isPrimary: primaryParentId == parent.id,
+                  isExpanded: expandedParentId == parent.id,
+                  onToggleExpanded: () => onOpenParent?.call(parent.id),
+                  onPrimaryChanged: (checked) {
+                    if (checked == true) {
+                      onPrimaryParentChanged?.call(parent.id);
+                    }
+                  },
                   onFormStateChanged: onItemStateChanged,
                   onValueChanged: onItemValueChanged,
                   onRemoveRequested: isEditable
@@ -123,19 +150,25 @@ class GuardianInfoStepBody extends StatelessWidget {
                     ? const SizedBox(
                         height: 18,
                         width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textOnDark,
+                        ),
                       )
                     : const Icon(Icons.save_outlined, size: 18),
                 label: Text(l10n.guardianSaveAction),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.terreCuite,
+                  foregroundColor: AppColors.textOnDark,
+                  shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+                  elevation: 0,
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

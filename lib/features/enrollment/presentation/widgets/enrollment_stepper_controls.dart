@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
+import 'package:school_app_flutter/core/components/buttons/stepper_actions_bar.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepperControls extends StatelessWidget {
   final int currentStep;
   final bool isLast;
+  final bool isSummaryStep;
   final bool canSave;
   final bool canContinue;
   final bool showSaveAction;
@@ -18,6 +23,7 @@ class EnrollmentStepperControls extends StatelessWidget {
     super.key,
     required this.currentStep,
     required this.isLast,
+    required this.isSummaryStep,
     required this.canSave,
     required this.canContinue,
     required this.showSaveAction,
@@ -31,58 +37,51 @@ class EnrollmentStepperControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final trailingActionBuilders = <WidgetBuilder>[
+      if (showSaveAction)
+        (_) => SecondaryButton(
+          label: saveLabel,
+          icon: Icons.save_outlined,
+          onPressed: canSave ? onSave : null,
+          isLoading: savingNow,
+          fullWidth: false,
+        ),
+      // Au dernier step, le bouton "Valider l'inscription" (Save) remplace
+      // le bouton "Terminer" — on ne l'affiche donc pas en doublon.
+      if (!(isLast && showSaveAction))
+        (_) => PrimaryButton(
+          label: isLast ? l10n.finish : l10n.next,
+          icon: isLast
+              ? Icons.check_circle_outline
+              : Icons.arrow_forward_rounded,
+          onPressed: canContinue ? onContinue : null,
+          fullWidth: false,
+        ),
+    ];
 
-    return Row(
-      children: [
-        if (currentStep > 0)
-          OutlinedButton.icon(
-            onPressed: onPrevious,
-            icon: const Icon(Icons.arrow_back_rounded, size: 16),
-            label: Text(l10n.previous),
-          ),
-        const Spacer(),
-        if (showSaveAction) ...[
-          FilledButton.icon(
-            onPressed: canSave ? onSave : null,
-            icon: savingNow
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save_outlined, size: 16),
-            label: Text(saveLabel),
-            style: FilledButton.styleFrom(
-              backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-              foregroundColor: Colors.white,
-              elevation: canSave ? 6 : 0,
-              shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-        ],
-        // Au dernier step, le bouton "Valider l'inscription" (Save) remplace
-        // le bouton "Terminer" — on ne l'affiche donc pas en doublon.
-        if (!(isLast && showSaveAction))
-          ElevatedButton.icon(
-            onPressed: canContinue ? onContinue : null,
-            icon: Icon(
-              isLast ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
-              size: 16,
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            ),
-            label: Text(isLast ? l10n.finish : l10n.next),
-          ),
-      ],
+    final actionsBar = StepperActionsBar(
+      leadingActionBuilder: currentStep > 0
+          ? (_) => SecondaryButton(
+              label: l10n.previous,
+              icon: Icons.arrow_back_rounded,
+              onPressed: onPrevious,
+              fullWidth: false,
+            )
+          : null,
+      trailingActionBuilders: trailingActionBuilders,
+    );
+
+    if (!isSummaryStep) {
+      return actionsBar;
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceRaised,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: SafeArea(top: false, child: actionsBar),
     );
   }
 }

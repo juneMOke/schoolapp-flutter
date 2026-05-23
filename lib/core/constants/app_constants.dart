@@ -46,6 +46,16 @@ class AppConstants {
   static const String enrollmentPreviewByStudentEndpoint =
       '/api/v1/enrollments/students/{studentId}/preview';
 
+  static const String classroomsEndpoint = '/api/v1/classrooms';
+  static const String classroomMembersEndpoint =
+      '/api/v1/classrooms/{classroomId}/members';
+  static const String classroomMemberReassignEndpoint =
+      '/api/v1/classrooms/{classroomId}/members/{classroomMemberId}';
+  static const String classroomDistributionOverviewEndpoint =
+      '/api/v1/classrooms/distribution-overview';
+  static const String classroomsDistributeEndpoint =
+      '/api/v1/classrooms/distribute';
+
   static const String academicYearBySchoolEndpoint =
       '/api/v1/academic-years/current';
 
@@ -87,6 +97,14 @@ class AppConstants {
 
   static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
+
+  // ─── Attendance ────────────────────────────────────────────────────────────
+  static const String attendanceEndpoint = '/api/v1/attendances';
+  static const String attendanceByClassroomEndpoint =
+      '/api/v1/attendances/classes/{classroomId}';
+  static const String disciplinaryCasesEndpoint = '/api/v1/disciplinary-cases';
+  static const String disciplinaryCaseByIdEndpoint =
+      '/api/v1/disciplinary-cases/{caseId}';
 
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.

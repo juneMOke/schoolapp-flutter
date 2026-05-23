@@ -6,6 +6,7 @@ class BootstrapSchoolLevelModel {
   final String name;
   final String code;
   final int displayOrder;
+  final bool splitIntoClassrooms;
 
   const BootstrapSchoolLevelModel({
     required this.id,
@@ -13,6 +14,7 @@ class BootstrapSchoolLevelModel {
     required this.name,
     required this.code,
     required this.displayOrder,
+    required this.splitIntoClassrooms,
   });
 
   factory BootstrapSchoolLevelModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class BootstrapSchoolLevelModel {
       name: json['name'] as String,
       code: json['code'] as String,
       displayOrder: json['displayOrder'] as int? ?? 0,
+      splitIntoClassrooms: json['splitIntoClassrooms'] as bool? ?? false,
     );
   }
 
@@ -31,6 +34,7 @@ class BootstrapSchoolLevelModel {
     'name': name,
     'code': code,
     'displayOrder': displayOrder,
+    'splitIntoClassrooms': splitIntoClassrooms,
   };
 
   BootstrapSchoolLevel toEntity() {
@@ -40,6 +44,7 @@ class BootstrapSchoolLevelModel {
       name: name,
       code: code,
       displayOrder: displayOrder,
+      splitIntoClassrooms: splitIntoClassrooms,
     );
   }
 }

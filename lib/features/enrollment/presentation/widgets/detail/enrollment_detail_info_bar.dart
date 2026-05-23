@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/extensions/enrollment_status_l10n_extension.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDetailInfoBar extends StatelessWidget {
@@ -27,7 +27,7 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             AppTheme.primaryColor.withValues(alpha: 0.14),
-            const Color(0xFF10B981).withValues(alpha: 0.12),
+            AppTheme.primaryColor.withValues(alpha: 0.06),
           ],
         ),
         border: Border.all(
@@ -82,21 +82,7 @@ class EnrollmentDetailInfoBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              status.localizedLabel(l10n),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-          ),
+          EnrollmentStatusBadge(status: status),
         ],
       ),
     );

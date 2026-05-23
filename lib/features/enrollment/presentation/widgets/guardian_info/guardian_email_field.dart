@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -14,6 +15,7 @@ class GuardianEmailField extends StatelessWidget {
   final bool isChanged;
   final bool readOnly;
   final String? errorText;
+  final String? trailingLabel;
 
   const GuardianEmailField({
     super.key,
@@ -25,6 +27,7 @@ class GuardianEmailField extends StatelessWidget {
     this.isChanged = false,
     this.readOnly = false,
     this.errorText,
+    this.trailingLabel,
   });
 
   @override
@@ -36,11 +39,24 @@ class GuardianEmailField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FormFieldLabel(
-            label: label,
-            requiredField: requiredField,
-            helpMessage: helpMessage,
-            labelColor: isChanged ? const Color(0xFF15803D) : null,
+          Row(
+            children: [
+              Expanded(
+                child: FormFieldLabel(
+                  label: label,
+                  requiredField: requiredField,
+                  helpMessage: helpMessage,
+                  labelColor: isChanged ? AppColors.success : null,
+                ),
+              ),
+              if (trailingLabel != null && trailingLabel!.trim().isNotEmpty)
+                Text(
+                  trailingLabel!,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMuted,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 6),
           ValueListenableBuilder<TextEditingValue>(
@@ -53,6 +69,7 @@ class GuardianEmailField extends StatelessWidget {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
+                style: AppTypography.formValueMedium,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(RegExp(r'\s')),
                 ],
@@ -64,7 +81,7 @@ class GuardianEmailField extends StatelessWidget {
                   prefixIcon: const Icon(
                     Icons.alternate_email_rounded,
                     size: 16,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppColors.textSecondary,
                   ),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -76,19 +93,9 @@ class GuardianEmailField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                            color: AppTheme.textSecondaryColor,
+                              color: AppColors.textSecondary,
                           ),
                         ),
-                      Icon(
-                        readOnly
-                            ? Icons.lock_outline_rounded
-                            : Icons.mode_edit_outline_rounded,
-                        size: 16,
-                        color: readOnly
-                            ? AppTheme.textSecondaryColor
-                            : AppTheme.primaryColor,
-                      ),
-                      const SizedBox(width: 8),
                     ],
                   ),
                 ),

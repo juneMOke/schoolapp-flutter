@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/form_field_label.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
 
 class AddressDropdownField extends StatelessWidget {
@@ -64,15 +65,15 @@ class AddressDropdownField extends StatelessWidget {
                     child: Text(
                       option,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTypography.formValueMedium,
                     ),
                   ),
                 )
                 .toList(growable: false),
             onChanged: (!enabled || options.isEmpty) ? null : onChanged,
+            style: AppTypography.formValueMedium.copyWith(
+              color: AppTheme.textPrimaryColor,
+            ),
             decoration: buildInputDecoration(
               hintText: label,
               errorText: errorText,
