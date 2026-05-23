@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_data_table.dart';
@@ -37,9 +38,9 @@ class FacturationStudentTable extends StatelessWidget {
         final isError = state.summariesStatus == EnrollmentLoadStatus.failure;
 
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
+          duration: AppMotion.layout,
+          switchInCurve: AppMotion.outCurve,
+          switchOutCurve: AppMotion.inCurve,
           child: FacturationDataTable(
             key: ValueKey(state.summariesStatus),
             summaries: state.summaries,
