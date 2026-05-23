@@ -67,15 +67,15 @@ const _tStudentSummary = StudentSummary(
   gender: Gender.male,
 );
 
-final _tEnrollmentSummary = EnrollmentSummary(
+const _tEnrollmentSummary = EnrollmentSummary(
   enrollmentId: 'enrollment-1',
   enrollmentCode: 'ENR-001',
   status: 'PENDING',
   student: _tStudentSummary,
 );
 
-final _tEnrollmentSummaryPage = EnrollmentSummaryPage(
-  content: [_tEnrollmentSummary],
+const _tEnrollmentSummaryPage = EnrollmentSummaryPage(
+  content: <EnrollmentSummary>[_tEnrollmentSummary],
   page: 0,
   size: 10,
   totalElements: 1,
@@ -192,7 +192,7 @@ void main() {
             page: 0,
             size: 10,
           ),
-        ).thenAnswer((_) async => Right(_tEnrollmentSummaryPage));
+        ).thenAnswer((_) async => const Right(_tEnrollmentSummaryPage));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -334,7 +334,7 @@ void main() {
             page: 0,
             size: 10,
           ),
-        ).thenAnswer((_) async => Right(_tEnrollmentSummaryPage));
+        ).thenAnswer((_) async => const Right(_tEnrollmentSummaryPage));
       },
       build: buildBloc,
       act: (bloc) async {
@@ -598,7 +598,7 @@ void main() {
             nationality: nationality,
             gender: gender,
           ),
-        ).thenAnswer((_) async => Right(_tEnrollmentSummary));
+        ).thenAnswer((_) async => const Right(_tEnrollmentSummary));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -727,7 +727,7 @@ void main() {
             enrollmentId: enrollmentId,
             status: status,
           ),
-        ).thenAnswer((_) async => Right(_tEnrollmentSummary));
+        ).thenAnswer((_) async => const Right(_tEnrollmentSummary));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(

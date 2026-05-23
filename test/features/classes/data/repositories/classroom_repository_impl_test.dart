@@ -93,7 +93,7 @@ const tClassroom = Classroom(
   maleCount: 16,
 );
 
-final tStudentSummaryModel = StudentSummaryModel(
+const tStudentSummaryModel = StudentSummaryModel(
   id: 'student-1',
   firstName: 'John',
   lastName: 'Doe',
@@ -115,11 +115,11 @@ const tClassroomWithMembersModel = ClassroomWithMembersModel(
 );
 
 final tLevelDistributionOverviewModel = LevelDistributionOverviewModel(
-  unassignedEnrollments: [tEnrollmentSummaryModel],
-  classrooms: [tClassroomWithMembersModel],
+  unassignedEnrollments: <EnrollmentSummaryModel>[tEnrollmentSummaryModel],
+  classrooms: const <ClassroomWithMembersModel>[tClassroomWithMembersModel],
 );
 
-final tStudentSummary = StudentSummary(
+const tStudentSummary = StudentSummary(
   id: 'student-1',
   firstName: 'John',
   lastName: 'Doe',
@@ -128,7 +128,7 @@ final tStudentSummary = StudentSummary(
   gender: Gender.male,
 );
 
-final tEnrollmentSummary = EnrollmentSummary(
+const tEnrollmentSummary = EnrollmentSummary(
   enrollmentId: 'enrollment-1',
   enrollmentCode: 'ENR-1',
   status: 'COMPLETED',
@@ -140,9 +140,9 @@ const tClassroomWithMembers = ClassroomWithMembers(
   members: [tClassroomMember],
 );
 
-final tLevelDistributionOverview = LevelDistributionOverview(
-  unassignedEnrollments: [tEnrollmentSummary],
-  classrooms: [tClassroomWithMembers],
+const tLevelDistributionOverview = LevelDistributionOverview(
+  unassignedEnrollments: <EnrollmentSummary>[tEnrollmentSummary],
+  classrooms: <ClassroomWithMembers>[tClassroomWithMembers],
 );
 
 void main() {

@@ -20,11 +20,11 @@ void main() {
   testWidgets('EnrollmentDataTable renders EnrollmentStatusBadge in each row', (
     tester,
   ) async {
-    final enrollment = EnrollmentSummary(
+    const enrollment = EnrollmentSummary(
       enrollmentId: 'enr-1',
       enrollmentCode: 'ENR-001',
       status: 'VALIDATED',
-      student: const StudentSummary(
+      student: StudentSummary(
         id: 'stu-1',
         firstName: 'Jean',
         lastName: 'Kanku',
@@ -37,7 +37,7 @@ void main() {
     await tester.pumpWidget(
       buildHarness(
         EnrollmentDataTable(
-          enrollments: [enrollment],
+          enrollments: const <EnrollmentSummary>[enrollment],
           onViewRequested: (_) {},
         ),
       ),

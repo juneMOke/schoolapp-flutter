@@ -55,7 +55,7 @@ class _EnrollmentCurrentYearBootstrapBuilderState
   Widget build(BuildContext context) {
     return BlocListener<BootstrapCurrentYearBloc, BootstrapContextState>(
       listenWhen: (previous, current) => previous.status != current.status,
-      listener: (_, __) => _requestSummariesIfContextAvailable(),
+      listener: (_, _) => _requestSummariesIfContextAvailable(),
       child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
         builder: (context, bootstrapState) {
           final academicYearId = bootstrapState.bootstrap?.academicYear.id ?? '';

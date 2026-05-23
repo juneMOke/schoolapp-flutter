@@ -72,13 +72,13 @@ void main() {
     ],
   );
 
-  final overview = LevelDistributionOverview(
-    unassignedEnrollments: [
+  const overview = LevelDistributionOverview(
+    unassignedEnrollments: <EnrollmentSummary>[
       EnrollmentSummary(
         enrollmentId: 'enr-1',
         enrollmentCode: 'ENR-1',
         status: 'COMPLETED',
-        student: const StudentSummary(
+        student: StudentSummary(
           id: 'student-1',
           firstName: 'Jane',
           lastName: 'Doe',
@@ -88,7 +88,7 @@ void main() {
         ),
       ),
     ],
-    classrooms: const [
+    classrooms: <ClassroomWithMembers>[
       ClassroomWithMembers(
         classroom: Classroom(
           id: 'class-1',
@@ -105,7 +105,7 @@ void main() {
           femaleCount: 1,
           maleCount: 0,
         ),
-        members: [
+        members: <ClassroomMember>[
           ClassroomMember(
             id: 'member-1',
             studentId: 'student-2',
@@ -224,7 +224,7 @@ void main() {
       tester,
       selectedCycle: cycle,
       selectedLevel: splitLevel,
-      blocState: ClassroomState(
+      blocState: const ClassroomState(
         distributionOverviewStatus: ClassroomStatus.success,
         distributionOverview: overview,
       ),

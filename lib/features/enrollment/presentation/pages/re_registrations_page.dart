@@ -73,7 +73,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         showEmptyBeforeSearchWhen: (state) =>
             state.summariesQueryType !=
             EnrollmentSummaryQueryType.byAcademicInfo,
-        emptyBeforeSearchBuilder: (_, __) =>
+        emptyBeforeSearchBuilder: (_, _) =>
             const ReRegistrationSearchInvitationCard(),
       ),
     );

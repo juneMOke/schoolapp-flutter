@@ -189,16 +189,14 @@ class StepSubmitResult {
   const StepSubmitResult.blocked({
     this.infoKey,
     this.errorKey,
-    bool consumeNavigation = false,
-  }) : status = StepSubmitStatus.blocked,
-       consumeNavigation = consumeNavigation;
+    this.consumeNavigation = false,
+  }) : status = StepSubmitStatus.blocked;
 
   const StepSubmitResult.completed({
     this.infoKey,
-    bool consumeNavigation = true,
+    this.consumeNavigation = true,
   }) : status = StepSubmitStatus.completed,
-       errorKey = null,
-       consumeNavigation = consumeNavigation;
+       errorKey = null;
 }
 
 enum StepContinueStatus {

@@ -41,7 +41,7 @@ const tClassroomId = 'classroom-1';
 const tTargetClassroomId = 'classroom-2';
 const tClassroomMemberId = 'member-1';
 
-final tStudentSummary = StudentSummary(
+const tStudentSummary = StudentSummary(
   id: 'student-1',
   firstName: 'John',
   lastName: 'Doe',
@@ -50,7 +50,7 @@ final tStudentSummary = StudentSummary(
   gender: Gender.male,
 );
 
-final tEnrollmentSummary = EnrollmentSummary(
+const tEnrollmentSummary = EnrollmentSummary(
   enrollmentId: 'enrollment-1',
   enrollmentCode: 'ENR-1',
   status: 'COMPLETED',
@@ -62,9 +62,9 @@ const tClassroomWithMembers = ClassroomWithMembers(
   members: [tClassroomMember],
 );
 
-final tLevelDistributionOverview = LevelDistributionOverview(
-  unassignedEnrollments: [tEnrollmentSummary],
-  classrooms: [tClassroomWithMembers],
+const tLevelDistributionOverview = LevelDistributionOverview(
+  unassignedEnrollments: <EnrollmentSummary>[tEnrollmentSummary],
+  classrooms: <ClassroomWithMembers>[tClassroomWithMembers],
 );
 
 const tClassroomMember = ClassroomMember(
@@ -324,7 +324,7 @@ void main() {
             academicYearId: tAcademicYearId,
             schoolLevelId: tSchoolLevelId,
           ),
-        ).thenAnswer((_) async => Right(tLevelDistributionOverview));
+        ).thenAnswer((_) async => const Right(tLevelDistributionOverview));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -333,7 +333,7 @@ void main() {
           schoolLevelId: tSchoolLevelId,
         ),
       ),
-      expect: () => [
+      expect: () => const [
         ClassroomState(distributionOverviewStatus: ClassroomStatus.loading),
         ClassroomState(
           distributionOverviewStatus: ClassroomStatus.success,
@@ -361,7 +361,7 @@ void main() {
           schoolLevelId: tSchoolLevelId,
         ),
       ),
-      expect: () => [
+      expect: () => const [
         ClassroomState(distributionOverviewStatus: ClassroomStatus.loading),
         ClassroomState(
           distributionOverviewStatus: ClassroomStatus.failure,

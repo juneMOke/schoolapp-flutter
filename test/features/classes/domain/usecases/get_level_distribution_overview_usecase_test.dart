@@ -17,7 +17,7 @@ class MockClassroomRepository extends Mock implements ClassroomRepository {}
 const tAcademicYearId = 'year-1';
 const tSchoolLevelId = 'level-1';
 
-final tStudentSummary = StudentSummary(
+const tStudentSummary = StudentSummary(
   id: 'student-1',
   firstName: 'John',
   lastName: 'Doe',
@@ -26,7 +26,7 @@ final tStudentSummary = StudentSummary(
   gender: Gender.male,
 );
 
-final tEnrollmentSummary = EnrollmentSummary(
+const tEnrollmentSummary = EnrollmentSummary(
   enrollmentId: 'enrollment-1',
   enrollmentCode: 'ENR-1',
   status: 'COMPLETED',
@@ -65,9 +65,9 @@ const tClassroomWithMembers = ClassroomWithMembers(
   members: [tClassroomMember],
 );
 
-final tLevelDistributionOverview = LevelDistributionOverview(
-  unassignedEnrollments: [tEnrollmentSummary],
-  classrooms: [tClassroomWithMembers],
+const tLevelDistributionOverview = LevelDistributionOverview(
+  unassignedEnrollments: <EnrollmentSummary>[tEnrollmentSummary],
+  classrooms: <ClassroomWithMembers>[tClassroomWithMembers],
 );
 
 void main() {
@@ -85,7 +85,7 @@ void main() {
         academicYearId: tAcademicYearId,
         schoolLevelId: tSchoolLevelId,
       ),
-    ).thenAnswer((_) async => Right(tLevelDistributionOverview));
+    ).thenAnswer((_) async => const Right(tLevelDistributionOverview));
 
     final result = await useCase(
       academicYearId: tAcademicYearId,

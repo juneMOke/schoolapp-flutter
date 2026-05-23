@@ -7,7 +7,7 @@ class EnrollmentSummary extends Equatable {
   final String status;
   final StudentSummary student;
 
-  EnrollmentSummary({
+  const EnrollmentSummary({
     required this.enrollmentId,
     required this.enrollmentCode,
     required this.status,
