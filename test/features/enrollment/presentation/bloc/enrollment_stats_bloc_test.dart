@@ -18,14 +18,14 @@ final tStats = EnrollmentStats(
     periodEnd: DateTime.utc(2026, 6, 30),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
   ),
-  kpis: EnrollmentKpis(
+  kpis: const EnrollmentKpis(
     totalEnrollments: KpiValue(value: 120),
     firstEnrollments: KpiValue(value: 90, percentOfTotal: 75),
     reEnrollments: KpiValue(value: 20, percentOfTotal: 17),
     preEnrollments: KpiValue(value: 10, percentOfTotal: 8),
     inProgress: KpiValue(value: 5),
   ),
-  evolution: EnrollmentEvolution(
+  evolution: const EnrollmentEvolution(
     granularity: EvolutionGranularity.month,
     currentBucketIndex: 8,
     buckets: <EvolutionBucket>[
@@ -33,7 +33,7 @@ final tStats = EnrollmentStats(
       EvolutionBucket(key: '2026-05', value: 18, isCurrent: true),
     ],
   ),
-  distributionByCycle: CycleDistribution(
+  distributionByCycle: const CycleDistribution(
     cycles: <CycleStat>[
       CycleStat(
         code: 'PRIMARY',
@@ -42,7 +42,7 @@ final tStats = EnrollmentStats(
       ),
     ],
   ),
-  distributionByGender: GenderDistribution(
+  distributionByGender: const GenderDistribution(
     total: 120,
     segments: <GenderSegment>[
       GenderSegment(code: GenderSegmentCode.male, value: 62, percent: 52),

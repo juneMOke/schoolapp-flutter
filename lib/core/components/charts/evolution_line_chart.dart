@@ -46,7 +46,7 @@ class EvolutionLineChart extends StatelessWidget {
             show: true,
             drawVerticalLine: false,
             horizontalInterval: (topY / 4).clamp(1, double.infinity),
-            getDrawingHorizontalLine: (_) => FlLine(
+            getDrawingHorizontalLine: (_) => const FlLine(
               color: AppColors.enrollmentStatsChartGrid,
               strokeWidth: 1,
             ),
@@ -100,7 +100,7 @@ class EvolutionLineChart extends StatelessWidget {
                 show: true,
                 checkToShowDot: (spot, _) =>
                     points[spot.x.toInt()].isHighlighted,
-                getDotPainter: (_, __, ___, ____) => FlDotCirclePainter(
+                getDotPainter: (_, _, _, _) => FlDotCirclePainter(
                   radius: 5,
                   color: highlightColor,
                   strokeWidth: 2,
