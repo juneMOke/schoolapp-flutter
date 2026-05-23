@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/create_enrollment_request_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_detail_model.dart';
+import 'package:school_app_flutter/features/enrollment/data/models/enrollment_stats_response_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_page_model.dart';
 import 'package:school_app_flutter/features/enrollment/data/models/enrollment_summary_model.dart';
 
@@ -96,5 +97,13 @@ abstract class EnrollmentRemoteDataSource {
   Future<EnrollmentDetailModel> getEnrollmentDetail(
     @Extras() Map<String, dynamic> extras,
     @Path('enrollmentId') String enrollmentId,
+  );
+
+  @GET(AppConstants.enrollmentStatsEndpoint)
+  Future<EnrollmentStatsResponseModel> getEnrollmentStats(
+    @Extras() Map<String, dynamic> extras,
+    @Query('period') String period,
+    @Query('month') String? month,
+    @Query('week') String? week,
   );
 }

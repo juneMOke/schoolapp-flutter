@@ -1,0 +1,14 @@
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/cycle_distribution.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/cycle_stat.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/enrollment_evolution.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/enrollment_kpis.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/enrollment_stats.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/enrollment_stats_period.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/evolution_bucket.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/evolution_granularity.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/gender_distribution.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/gender_segment.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/gender_segment_code.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/kpi_value.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/level_stat.dart';
+export 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_stats/stats_context.dart';
