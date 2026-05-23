@@ -104,19 +104,19 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
     return [
       DataTableColumnDef(
         label: l10n.lastName,
-        flex: 2,
+        flex: 3,
         sortable: true,
         sortIndex: _FacturationSortColumn.lastName.index,
       ),
       DataTableColumnDef(
         label: l10n.surname,
-        flex: 2,
+        flex: 3,
         sortable: true,
         sortIndex: _FacturationSortColumn.surname.index,
       ),
       DataTableColumnDef(
         label: l10n.firstName,
-        flex: 2,
+        flex: 3,
         sortable: true,
         sortIndex: _FacturationSortColumn.firstName.index,
       ),

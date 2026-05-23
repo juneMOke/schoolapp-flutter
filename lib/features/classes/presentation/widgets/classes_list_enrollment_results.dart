@@ -25,9 +25,7 @@ class ClassesListEnrollmentResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final byId = {
-      for (final summary in state.summaries) summary.student.id: summary,
-    };
+    final byId = {for (final summary in state.summaries) summary.student.id: summary};
     final rows = state.summaries
         .map(
           (summary) => ClassesListStudentRow(
@@ -55,9 +53,7 @@ class ClassesListEnrollmentResults extends StatelessWidget {
       children: [
         ClassesListResultsToolbar(
           summary: summary,
-          canExport:
-              state.summariesStatus == EnrollmentLoadStatus.success &&
-              rows.isNotEmpty,
+          canExport: state.summariesStatus == EnrollmentLoadStatus.success && rows.isNotEmpty,
           onExportPressed: onExportPressed,
         ),
         const SizedBox(height: AppDimensions.spacingM),
