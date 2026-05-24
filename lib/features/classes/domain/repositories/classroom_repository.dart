@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_di
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_stats.dart';
 
 abstract class ClassroomRepository {
   Future<Either<Failure, List<Classroom>>> getClassroomsByLevelAndAcademicYear({
@@ -17,7 +18,8 @@ abstract class ClassroomRepository {
     required String academicYearId,
   });
 
-  Future<Either<Failure, LevelDistributionOverview>> getLevelDistributionOverview({
+  Future<Either<Failure, LevelDistributionOverview>>
+  getLevelDistributionOverview({
     required String academicYearId,
     required String schoolLevelId,
   });
@@ -33,4 +35,6 @@ abstract class ClassroomRepository {
     required String classroomMemberId,
     required String targetClassroomId,
   });
+
+  Future<Either<Failure, ClassroomStats>> getClassroomStats();
 }

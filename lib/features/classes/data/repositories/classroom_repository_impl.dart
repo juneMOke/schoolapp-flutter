@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_di
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_stats.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
 
 class ClassroomRepositoryImpl implements ClassroomRepository {
@@ -73,7 +74,8 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
   }
 
   @override
-  Future<Either<Failure, LevelDistributionOverview>> getLevelDistributionOverview({
+  Future<Either<Failure, LevelDistributionOverview>>
+  getLevelDistributionOverview({
     required String academicYearId,
     required String schoolLevelId,
   }) async {
@@ -92,6 +94,23 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
       return const Left(NetworkFailure('Network error occurred'));
     } on FormatException catch (_) {
       return const Left(ServerFailure('Invalid level distribution payload'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ClassroomStats>> getClassroomStats() async {
+    try {
+      final model = await remoteDataSource.getClassroomStats(requiredAuth);
+      return Right(model.toEntity());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } on FormatException catch (_) {
+      return const Left(ServerFailure('Invalid classroom stats payload'));
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
