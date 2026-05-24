@@ -17,9 +17,9 @@ class NumberFormatterHelper {
       final millions = value / 1000000;
       // Affiche 1 décimale si < 10M, pas de décimale sinon
       if (millions.abs() < 10) {
-        return millions.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '') + 'M';
+        return '${millions.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}M';
       }
-      return millions.toStringAsFixed(0) + 'M';
+      return '${millions.toStringAsFixed(0)}M';
     }
     
     // Pour les milliers
@@ -27,9 +27,9 @@ class NumberFormatterHelper {
       final thousands = value / 1000;
       // Affiche 1 décimale si < 10K, pas de décimale sinon
       if (thousands.abs() < 10) {
-        return thousands.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '') + 'K';
+        return '${thousands.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}K';
       }
-      return thousands.toStringAsFixed(0) + 'K';
+      return '${thousands.toStringAsFixed(0)}K';
     }
     
     // Pour les valeurs < 1000
