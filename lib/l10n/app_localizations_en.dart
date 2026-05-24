@@ -674,12 +674,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get summaryValidationNoticeBody => 'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.';
 
   @override
-  String get next => 'Next';
-
-  @override
-  String get previous => 'Previous';
-
-  @override
   String get nextPage => 'Next page';
 
   @override
@@ -2257,6 +2251,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSyncConflict => 'Conflict';
 
   @override
+  String get previous => 'Previous';
+
+  @override
+  String get next => 'Next';
+
+  @override
   String get componentGalleryTitle => 'Component gallery';
 
   @override
@@ -2356,6 +2356,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String enrollmentStatsContextSchoolYear(String schoolYear) {
     return 'Overview - School year $schoolYear';
   }
+
+  @override
+  String get classesStatsDashboardTitle => 'Classes Overview - School year';
+
+  @override
+  String get classesStatsSchoolYearUnavailable => 'School year unavailable';
+
+  @override
+  String classesStatsHeaderA11yLabel(String schoolYear) {
+    return 'Classes dashboard, school year $schoolYear';
+  }
+
+  @override
+  String get classesStatsKpiTotalStudents => 'TOTAL STUDENTS';
+
+  @override
+  String get classesStatsKpiActiveGirls => 'TOTAL GIRLS';
+
+  @override
+  String get classesStatsKpiActiveBoys => 'BOYS';
+
+  @override
+  String get classesStatsKpiInactiveStudents => 'TOTAL INACTIVE STUDENTS';
+
+  @override
+  String get classesStatsSectionCycleDistribution => 'Active students distribution by cycle';
+
+  @override
+  String classesStatsSectionLevelDistribution(String cycleCode) {
+    return 'Levels distribution - $cycleCode';
+  }
+
+  @override
+  String get classesStatsSectionClassroomDetail => 'Classrooms detail';
+
+  @override
+  String get classesStatsDetailColumnClassroom => 'Classroom';
+
+  @override
+  String get classesStatsDetailColumnCycle => 'Cycle';
+
+  @override
+  String get classesStatsDetailColumnLevel => 'Level';
+
+  @override
+  String get classesStatsDetailColumnTotal => 'Total';
+
+  @override
+  String get classesStatsDetailColumnGirls => 'Girls';
+
+  @override
+  String get classesStatsDetailColumnBoys => 'Boys';
+
+  @override
+  String get classesStatsNoData => 'No data available for this period';
+
+  @override
+  String get classesStatsKpiBandA11yLabel => 'Classes key performance indicators band';
+
+  @override
+  String get classesStatsCycleChartA11yLabel => 'Chart of active students distribution by cycle';
+
+  @override
+  String classesStatsLevelChartA11yLabel(String cycleCode) {
+    return 'Chart of active students distribution by level for cycle $cycleCode';
+  }
+
+  @override
+  String get classesStatsDetailA11yLabel => 'Detailed classrooms table with gender breakdown';
+
+  @override
+  String get classesStatsLoadingA11yLabel => 'Loading classes statistics';
+
+  @override
+  String get classesStatsErrorTitle => 'Loading error';
+
+  @override
+  String get classesStatsRetry => 'Retry';
+
+  @override
+  String get classesStatsRetryHint => 'Retry loading classes statistics';
+
+  @override
+  String classesStatsErrorA11yLabel(String message) {
+    return 'Classes statistics loading error: $message';
+  }
+
+  @override
+  String get classesStatsNetworkError => 'Unable to load classes statistics. Check your internet connection.';
+
+  @override
+  String get classesStatsNotFoundError => 'No classes statistics available.';
+
+  @override
+  String get classesStatsValidationError => 'The requested parameters are invalid.';
+
+  @override
+  String get classesStatsUnauthorizedError => 'You are not authorized to view these statistics.';
+
+  @override
+  String get classesStatsInvalidCredentialsError => 'Invalid session, please sign in again.';
+
+  @override
+  String get classesStatsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get classesStatsStorageError => 'A local error prevents displaying statistics.';
+
+  @override
+  String get classesStatsAuthError => 'An authentication error prevents loading statistics.';
+
+  @override
+  String get classesStatsUnknownError => 'An unexpected error occurred while loading statistics.';
 
   @override
   String get financeStatsDashboardTitle => 'Overview - School year';

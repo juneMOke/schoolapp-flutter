@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_s
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -72,8 +73,7 @@ class _HomePageView extends StatelessWidget {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isMobile =
-              constraints.maxWidth < AppBreakpoints.homeMobileMax;
+          final isMobile = constraints.maxWidth < AppBreakpoints.homeMobileMax;
 
           if (isMobile) {
             return _buildMobileLayout();
@@ -130,6 +130,7 @@ class _HomePageView extends StatelessWidget {
     final hidePageBreadcrumb =
         state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
         state.selectedSubMenuId == MenuConstants.financesDashboardId ||
+        state.selectedSubMenuId == MenuConstants.classesDashboardId ||
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
@@ -161,7 +162,9 @@ class _HomePageView extends StatelessWidget {
       children: [
         Text(
           l10n.home,
-          style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
+          style: AppTextStyles.body.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
         ),
         if (state.selectedMenuId != null) ...[
           const Text(
@@ -172,7 +175,9 @@ class _HomePageView extends StatelessWidget {
             state.menuItems
                 .firstWhere((menu) => menu.id == state.selectedMenuId)
                 .title,
-            style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
+            style: AppTextStyles.body.copyWith(
+              color: AppTheme.textSecondaryColor,
+            ),
           ),
         ],
         if (state.selectedSubMenuId != null) ...[
@@ -215,6 +220,8 @@ class _HomePageView extends StatelessWidget {
         return const FinanceStatsDashboardScope(
           child: FinanceStatsDashboardPage(),
         );
+      case MenuConstants.classesDashboardId:
+        return const ClassesFeatureScope(child: ClassesStatsDashboardPage());
       case MenuConstants.organisationId:
         return const ClassesFeatureScope(child: ClassesOrganisationPage());
       case MenuConstants.classesListId:

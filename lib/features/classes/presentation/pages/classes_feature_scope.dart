@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 
 class ClassesFeatureScope extends StatefulWidget {
@@ -18,6 +19,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   late final EnrollmentBloc _enrollmentBloc;
   late final BootstrapCurrentYearBloc _bootstrapCurrentYearBloc;
   late final ClassroomBloc _classroomBloc;
+  late final ClassroomStatsBloc _classroomStatsBloc;
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
     _enrollmentBloc = GetIt.instance<EnrollmentBloc>();
     _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
     _classroomBloc = GetIt.instance<ClassroomBloc>();
+    _classroomStatsBloc = GetIt.instance<ClassroomStatsBloc>();
   }
 
   @override
@@ -32,6 +35,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
     _enrollmentBloc.close();
     _bootstrapCurrentYearBloc.close();
     _classroomBloc.close();
+    _classroomStatsBloc.close();
     super.dispose();
   }
 
@@ -44,6 +48,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
           value: _bootstrapCurrentYearBloc,
         ),
         BlocProvider<ClassroomBloc>.value(value: _classroomBloc),
+        BlocProvider<ClassroomStatsBloc>.value(value: _classroomStatsBloc),
       ],
       child: widget.child,
     );

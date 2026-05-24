@@ -1071,6 +1071,69 @@
         }
       }
     },
+    "classesStatsDashboardTitle": "Classes Overview - School year",
+    "classesStatsSchoolYearUnavailable": "School year unavailable",
+    "classesStatsHeaderA11yLabel": "Classes dashboard, school year {schoolYear}",
+    "@classesStatsHeaderA11yLabel": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsKpiTotalStudents": "TOTAL STUDENTS",
+    "classesStatsKpiActiveGirls": "TOTAL GIRLS",
+    "classesStatsKpiActiveBoys": "BOYS",
+    "classesStatsKpiInactiveStudents": "TOTAL INACTIVE STUDENTS",
+    "classesStatsSectionCycleDistribution": "Active students distribution by cycle",
+    "classesStatsSectionLevelDistribution": "Levels distribution - {cycleCode}",
+    "@classesStatsSectionLevelDistribution": {
+      "placeholders": {
+        "cycleCode": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsSectionClassroomDetail": "Classrooms detail",
+    "classesStatsDetailColumnClassroom": "Classroom",
+    "classesStatsDetailColumnCycle": "Cycle",
+    "classesStatsDetailColumnLevel": "Level",
+    "classesStatsDetailColumnTotal": "Total",
+    "classesStatsDetailColumnGirls": "Girls",
+    "classesStatsDetailColumnBoys": "Boys",
+    "classesStatsNoData": "No data available for this period",
+    "classesStatsKpiBandA11yLabel": "Classes key performance indicators band",
+    "classesStatsCycleChartA11yLabel": "Chart of active students distribution by cycle",
+    "classesStatsLevelChartA11yLabel": "Chart of active students distribution by level for cycle {cycleCode}",
+    "@classesStatsLevelChartA11yLabel": {
+      "placeholders": {
+        "cycleCode": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsDetailA11yLabel": "Detailed classrooms table with gender breakdown",
+    "classesStatsLoadingA11yLabel": "Loading classes statistics",
+    "classesStatsErrorTitle": "Loading error",
+    "classesStatsRetry": "Retry",
+    "classesStatsRetryHint": "Retry loading classes statistics",
+    "classesStatsErrorA11yLabel": "Classes statistics loading error: {message}",
+    "@classesStatsErrorA11yLabel": {
+      "placeholders": {
+        "message": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsNetworkError": "Unable to load classes statistics. Check your internet connection.",
+    "classesStatsNotFoundError": "No classes statistics available.",
+    "classesStatsValidationError": "The requested parameters are invalid.",
+    "classesStatsUnauthorizedError": "You are not authorized to view these statistics.",
+    "classesStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+    "classesStatsServerError": "The server is currently unavailable.",
+    "classesStatsStorageError": "A local error prevents displaying statistics.",
+    "classesStatsAuthError": "An authentication error prevents loading statistics.",
+    "classesStatsUnknownError": "An unexpected error occurred while loading statistics.",
     "financeStatsDashboardTitle": "Overview - School year",
       "financeStatsSchoolYearUnavailable": "School year unavailable",
       "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",

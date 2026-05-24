@@ -1319,18 +1319,6 @@ abstract class AppLocalizations {
   /// **'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.'**
   String get summaryValidationNoticeBody;
 
-  /// No description provided for @next.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get next;
-
-  /// No description provided for @previous.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous'**
-  String get previous;
-
   /// No description provided for @nextPage.
   ///
   /// In en, this message translates to:
@@ -4385,6 +4373,18 @@ abstract class AppLocalizations {
   /// **'Conflict'**
   String get statusSyncConflict;
 
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
   /// No description provided for @componentGalleryTitle.
   ///
   /// In en, this message translates to:
@@ -4570,6 +4570,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Overview - School year {schoolYear}'**
   String enrollmentStatsContextSchoolYear(String schoolYear);
+
+  /// No description provided for @classesStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes Overview - School year'**
+  String get classesStatsDashboardTitle;
+
+  /// No description provided for @classesStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get classesStatsSchoolYearUnavailable;
+
+  /// No description provided for @classesStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes dashboard, school year {schoolYear}'**
+  String classesStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @classesStatsKpiTotalStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL STUDENTS'**
+  String get classesStatsKpiTotalStudents;
+
+  /// No description provided for @classesStatsKpiActiveGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL GIRLS'**
+  String get classesStatsKpiActiveGirls;
+
+  /// No description provided for @classesStatsKpiActiveBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'BOYS'**
+  String get classesStatsKpiActiveBoys;
+
+  /// No description provided for @classesStatsKpiInactiveStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL INACTIVE STUDENTS'**
+  String get classesStatsKpiInactiveStudents;
+
+  /// No description provided for @classesStatsSectionCycleDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Active students distribution by cycle'**
+  String get classesStatsSectionCycleDistribution;
+
+  /// No description provided for @classesStatsSectionLevelDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels distribution - {cycleCode}'**
+  String classesStatsSectionLevelDistribution(String cycleCode);
+
+  /// No description provided for @classesStatsSectionClassroomDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Classrooms detail'**
+  String get classesStatsSectionClassroomDetail;
+
+  /// No description provided for @classesStatsDetailColumnClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom'**
+  String get classesStatsDetailColumnClassroom;
+
+  /// No description provided for @classesStatsDetailColumnCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get classesStatsDetailColumnCycle;
+
+  /// No description provided for @classesStatsDetailColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get classesStatsDetailColumnLevel;
+
+  /// No description provided for @classesStatsDetailColumnTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get classesStatsDetailColumnTotal;
+
+  /// No description provided for @classesStatsDetailColumnGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get classesStatsDetailColumnGirls;
+
+  /// No description provided for @classesStatsDetailColumnBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get classesStatsDetailColumnBoys;
+
+  /// No description provided for @classesStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get classesStatsNoData;
+
+  /// No description provided for @classesStatsKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes key performance indicators band'**
+  String get classesStatsKpiBandA11yLabel;
+
+  /// No description provided for @classesStatsCycleChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart of active students distribution by cycle'**
+  String get classesStatsCycleChartA11yLabel;
+
+  /// No description provided for @classesStatsLevelChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart of active students distribution by level for cycle {cycleCode}'**
+  String classesStatsLevelChartA11yLabel(String cycleCode);
+
+  /// No description provided for @classesStatsDetailA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed classrooms table with gender breakdown'**
+  String get classesStatsDetailA11yLabel;
+
+  /// No description provided for @classesStatsLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading classes statistics'**
+  String get classesStatsLoadingA11yLabel;
+
+  /// No description provided for @classesStatsErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get classesStatsErrorTitle;
+
+  /// No description provided for @classesStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get classesStatsRetry;
+
+  /// No description provided for @classesStatsRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry loading classes statistics'**
+  String get classesStatsRetryHint;
+
+  /// No description provided for @classesStatsErrorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes statistics loading error: {message}'**
+  String classesStatsErrorA11yLabel(String message);
+
+  /// No description provided for @classesStatsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load classes statistics. Check your internet connection.'**
+  String get classesStatsNetworkError;
+
+  /// No description provided for @classesStatsNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes statistics available.'**
+  String get classesStatsNotFoundError;
+
+  /// No description provided for @classesStatsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested parameters are invalid.'**
+  String get classesStatsValidationError;
+
+  /// No description provided for @classesStatsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to view these statistics.'**
+  String get classesStatsUnauthorizedError;
+
+  /// No description provided for @classesStatsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid session, please sign in again.'**
+  String get classesStatsInvalidCredentialsError;
+
+  /// No description provided for @classesStatsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get classesStatsServerError;
+
+  /// No description provided for @classesStatsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents displaying statistics.'**
+  String get classesStatsStorageError;
+
+  /// No description provided for @classesStatsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading statistics.'**
+  String get classesStatsAuthError;
+
+  /// No description provided for @classesStatsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading statistics.'**
+  String get classesStatsUnknownError;
 
   /// No description provided for @financeStatsDashboardTitle.
   ///
