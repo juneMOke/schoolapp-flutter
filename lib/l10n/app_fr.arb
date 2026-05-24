@@ -1039,5 +1039,118 @@
         "type": "int"
       }
     }
-  }
+  },
+  "financeStatsDashboardTitle": "Vue d'ensemble — Année scolaire",
+  "financeStatsSchoolYearUnavailable": "Année scolaire indisponible",
+  "financeStatsContextSchoolYear": "Vue d'ensemble — Année scolaire {schoolYear}",
+  "@financeStatsContextSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsPeriodWeekCurrent": "Cette semaine",
+  "financeStatsPeriodMonthCurrent": "Ce mois",
+  "financeStatsPeriodYearCurrent": "Cette année",
+  "financeStatsKpiCollected": "Total encaissé",
+  "financeStatsKpiExpected": "Total attendu",
+  "financeStatsKpiOutstanding": "Reste à recouvrer",
+  "financeStatsKpiCollectionRate": "Taux de recouvrement",
+  "financeStatsPercentOfTotal": "{percent}% du total",
+  "@financeStatsPercentOfTotal": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "financeStatsSectionEvolution": "Évolution des encaissements",
+  "financeStatsLegendCurrentPeriod": "Période en cours",
+  "financeStatsLegendOtherPeriods": "Autres périodes",
+  "financeStatsSectionFeeTypeDistribution": "Répartition par type de frais",
+  "financeStatsFeeTypeCollected": "Encaissé : {amount}",
+  "@financeStatsFeeTypeCollected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsFeeTypeExpected": "Attendu : {amount}",
+  "@financeStatsFeeTypeExpected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsFeeTypeRate": "Taux : {rate}%",
+  "@financeStatsFeeTypeRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "financeStatsNoData": "Aucune donnée disponible pour cette période",
+  "financeStatsNoDataHint": "Essayez une autre période pour afficher davantage d'informations.",
+  "financeStatsErrorTitle": "Erreur de chargement",
+  "financeStatsRetry": "Réessayer",
+  "financeStatsRetryHint": "Relancer le chargement des statistiques financières",
+  "financeStatsLoadingA11yLabel": "Chargement des statistiques financières en cours",
+  "financeStatsHeaderA11yLabel": "Tableau de bord finance, année scolaire {schoolYear}",
+  "@financeStatsHeaderA11yLabel": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsPeriodFilterA11yLabel": "Filtre temporel des statistiques financières, période active : {selectedPeriod}",
+  "@financeStatsPeriodFilterA11yLabel": {
+    "placeholders": {
+      "selectedPeriod": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsKpiBandA11yLabel": "Bandeau des indicateurs clés financiers",
+  "financeStatsEvolutionChartA11yLabel": "Graphique d'évolution des montants encaissés",
+  "financeStatsFeeTypeSectionA11yLabel": "Répartition des montants par type de frais",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, encaissé {collected}, attendu {expected}, taux {rate}%",
+  "@financeStatsFeeTypeItemA11yLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "collected": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "financeStatsErrorA11yLabel": "Erreur de chargement des statistiques financières : {message}",
+  "@financeStatsErrorA11yLabel": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsEmptyA11yLabel": "Aucune donnée financière disponible pour cette période",
+  "financeStatsNetworkError": "Impossible de charger les statistiques finance. Vérifiez votre connexion internet.",
+  "financeStatsNotFoundError": "Aucune statistique finance disponible.",
+  "financeStatsValidationError": "Les paramètres demandés sont invalides.",
+  "financeStatsUnauthorizedError": "Vous n'êtes pas autorisé à consulter ces statistiques.",
+  "financeStatsInvalidCredentialsError": "Session invalide, reconnectez-vous.",
+  "financeStatsServerError": "Le serveur est indisponible pour le moment.",
+  "financeStatsStorageError": "Une erreur locale empêche l'affichage des statistiques.",
+  "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
+  "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques."
 }

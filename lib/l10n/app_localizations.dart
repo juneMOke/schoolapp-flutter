@@ -4528,6 +4528,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{percent} %'**
   String enrollmentStatsPercent(int percent);
+
+  /// No description provided for @financeStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year'**
+  String get financeStatsDashboardTitle;
+
+  /// No description provided for @financeStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get financeStatsSchoolYearUnavailable;
+
+  /// No description provided for @financeStatsContextSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year {schoolYear}'**
+  String financeStatsContextSchoolYear(String schoolYear);
+
+  /// No description provided for @financeStatsPeriodWeekCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get financeStatsPeriodWeekCurrent;
+
+  /// No description provided for @financeStatsPeriodMonthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get financeStatsPeriodMonthCurrent;
+
+  /// No description provided for @financeStatsPeriodYearCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get financeStatsPeriodYearCurrent;
+
+  /// No description provided for @financeStatsKpiCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total collected'**
+  String get financeStatsKpiCollected;
+
+  /// No description provided for @financeStatsKpiExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total expected'**
+  String get financeStatsKpiExpected;
+
+  /// No description provided for @financeStatsKpiOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get financeStatsKpiOutstanding;
+
+  /// No description provided for @financeStatsKpiCollectionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection rate'**
+  String get financeStatsKpiCollectionRate;
+
+  /// No description provided for @financeStatsPercentOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of total'**
+  String financeStatsPercentOfTotal(int percent);
+
+  /// No description provided for @financeStatsSectionEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection evolution'**
+  String get financeStatsSectionEvolution;
+
+  /// No description provided for @financeStatsLegendCurrentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Current period'**
+  String get financeStatsLegendCurrentPeriod;
+
+  /// No description provided for @financeStatsLegendOtherPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Other periods'**
+  String get financeStatsLegendOtherPeriods;
+
+  /// No description provided for @financeStatsSectionFeeTypeDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution by fee type'**
+  String get financeStatsSectionFeeTypeDistribution;
+
+  /// No description provided for @financeStatsFeeTypeCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected: {amount}'**
+  String financeStatsFeeTypeCollected(String amount);
+
+  /// No description provided for @financeStatsFeeTypeExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected: {amount}'**
+  String financeStatsFeeTypeExpected(String amount);
+
+  /// No description provided for @financeStatsFeeTypeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: {rate}%'**
+  String financeStatsFeeTypeRate(int rate);
+
+  /// No description provided for @financeStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get financeStatsNoData;
+
+  /// No description provided for @financeStatsNoDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another period to display more insights.'**
+  String get financeStatsNoDataHint;
+
+  /// No description provided for @financeStatsErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get financeStatsErrorTitle;
+
+  /// No description provided for @financeStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get financeStatsRetry;
+
+  /// No description provided for @financeStatsRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload finance statistics'**
+  String get financeStatsRetryHint;
+
+  /// No description provided for @financeStatsLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics are loading'**
+  String get financeStatsLoadingA11yLabel;
+
+  /// No description provided for @financeStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance dashboard, school year {schoolYear}'**
+  String financeStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @financeStatsPeriodFilterA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics time filter, active period: {selectedPeriod}'**
+  String financeStatsPeriodFilterA11yLabel(String selectedPeriod);
+
+  /// No description provided for @financeStatsKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial key performance indicators band'**
+  String get financeStatsKpiBandA11yLabel;
+
+  /// No description provided for @financeStatsEvolutionChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection amount evolution chart'**
+  String get financeStatsEvolutionChartA11yLabel;
+
+  /// No description provided for @financeStatsFeeTypeSectionA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution of amounts by fee type'**
+  String get financeStatsFeeTypeSectionA11yLabel;
+
+  /// No description provided for @financeStatsFeeTypeItemA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type {code}, collected {collected}, expected {expected}, rate {rate}%'**
+  String financeStatsFeeTypeItemA11yLabel(String code, String collected, String expected, int rate);
+
+  /// No description provided for @financeStatsErrorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics loading error: {message}'**
+  String financeStatsErrorA11yLabel(String message);
+
+  /// No description provided for @financeStatsEmptyA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No finance data available for this period'**
+  String get financeStatsEmptyA11yLabel;
+
+  /// No description provided for @financeStatsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load finance statistics. Check your internet connection.'**
+  String get financeStatsNetworkError;
+
+  /// No description provided for @financeStatsNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'No finance statistics available.'**
+  String get financeStatsNotFoundError;
+
+  /// No description provided for @financeStatsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested parameters are invalid.'**
+  String get financeStatsValidationError;
+
+  /// No description provided for @financeStatsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to view these statistics.'**
+  String get financeStatsUnauthorizedError;
+
+  /// No description provided for @financeStatsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid session, please sign in again.'**
+  String get financeStatsInvalidCredentialsError;
+
+  /// No description provided for @financeStatsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get financeStatsServerError;
+
+  /// No description provided for @financeStatsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents displaying statistics.'**
+  String get financeStatsStorageError;
+
+  /// No description provided for @financeStatsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading statistics.'**
+  String get financeStatsAuthError;
+
+  /// No description provided for @financeStatsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading statistics.'**
+  String get financeStatsUnknownError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

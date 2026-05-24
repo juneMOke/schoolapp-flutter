@@ -2329,4 +2329,145 @@ class AppLocalizationsFr extends AppLocalizations {
   String enrollmentStatsPercent(int percent) {
     return '$percent %';
   }
+
+  @override
+  String get financeStatsDashboardTitle => 'Vue d\'ensemble — Année scolaire';
+
+  @override
+  String get financeStatsSchoolYearUnavailable => 'Année scolaire indisponible';
+
+  @override
+  String financeStatsContextSchoolYear(String schoolYear) {
+    return 'Vue d\'ensemble — Année scolaire $schoolYear';
+  }
+
+  @override
+  String get financeStatsPeriodWeekCurrent => 'Cette semaine';
+
+  @override
+  String get financeStatsPeriodMonthCurrent => 'Ce mois';
+
+  @override
+  String get financeStatsPeriodYearCurrent => 'Cette année';
+
+  @override
+  String get financeStatsKpiCollected => 'Total encaissé';
+
+  @override
+  String get financeStatsKpiExpected => 'Total attendu';
+
+  @override
+  String get financeStatsKpiOutstanding => 'Reste à recouvrer';
+
+  @override
+  String get financeStatsKpiCollectionRate => 'Taux de recouvrement';
+
+  @override
+  String financeStatsPercentOfTotal(int percent) {
+    return '$percent% du total';
+  }
+
+  @override
+  String get financeStatsSectionEvolution => 'Évolution des encaissements';
+
+  @override
+  String get financeStatsLegendCurrentPeriod => 'Période en cours';
+
+  @override
+  String get financeStatsLegendOtherPeriods => 'Autres périodes';
+
+  @override
+  String get financeStatsSectionFeeTypeDistribution => 'Répartition par type de frais';
+
+  @override
+  String financeStatsFeeTypeCollected(String amount) {
+    return 'Encaissé : $amount';
+  }
+
+  @override
+  String financeStatsFeeTypeExpected(String amount) {
+    return 'Attendu : $amount';
+  }
+
+  @override
+  String financeStatsFeeTypeRate(int rate) {
+    return 'Taux : $rate%';
+  }
+
+  @override
+  String get financeStatsNoData => 'Aucune donnée disponible pour cette période';
+
+  @override
+  String get financeStatsNoDataHint => 'Essayez une autre période pour afficher davantage d\'informations.';
+
+  @override
+  String get financeStatsErrorTitle => 'Erreur de chargement';
+
+  @override
+  String get financeStatsRetry => 'Réessayer';
+
+  @override
+  String get financeStatsRetryHint => 'Relancer le chargement des statistiques financières';
+
+  @override
+  String get financeStatsLoadingA11yLabel => 'Chargement des statistiques financières en cours';
+
+  @override
+  String financeStatsHeaderA11yLabel(String schoolYear) {
+    return 'Tableau de bord finance, année scolaire $schoolYear';
+  }
+
+  @override
+  String financeStatsPeriodFilterA11yLabel(String selectedPeriod) {
+    return 'Filtre temporel des statistiques financières, période active : $selectedPeriod';
+  }
+
+  @override
+  String get financeStatsKpiBandA11yLabel => 'Bandeau des indicateurs clés financiers';
+
+  @override
+  String get financeStatsEvolutionChartA11yLabel => 'Graphique d\'évolution des montants encaissés';
+
+  @override
+  String get financeStatsFeeTypeSectionA11yLabel => 'Répartition des montants par type de frais';
+
+  @override
+  String financeStatsFeeTypeItemA11yLabel(String code, String collected, String expected, int rate) {
+    return 'Type $code, encaissé $collected, attendu $expected, taux $rate%';
+  }
+
+  @override
+  String financeStatsErrorA11yLabel(String message) {
+    return 'Erreur de chargement des statistiques financières : $message';
+  }
+
+  @override
+  String get financeStatsEmptyA11yLabel => 'Aucune donnée financière disponible pour cette période';
+
+  @override
+  String get financeStatsNetworkError => 'Impossible de charger les statistiques finance. Vérifiez votre connexion internet.';
+
+  @override
+  String get financeStatsNotFoundError => 'Aucune statistique finance disponible.';
+
+  @override
+  String get financeStatsValidationError => 'Les paramètres demandés sont invalides.';
+
+  @override
+  String get financeStatsUnauthorizedError => 'Vous n\'êtes pas autorisé à consulter ces statistiques.';
+
+  @override
+  String get financeStatsInvalidCredentialsError => 'Session invalide, reconnectez-vous.';
+
+  @override
+  String get financeStatsServerError => 'Le serveur est indisponible pour le moment.';
+
+  @override
+  String get financeStatsStorageError => 'Une erreur locale empêche l\'affichage des statistiques.';
+
+  @override
+  String get financeStatsAuthError => 'Une erreur d\'authentification empêche le chargement des statistiques.';
+
+  @override
+  String get financeStatsUnknownError => 'Une erreur inattendue est survenue lors du chargement des statistiques.';
 }

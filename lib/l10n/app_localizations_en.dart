@@ -2329,4 +2329,145 @@ class AppLocalizationsEn extends AppLocalizations {
   String enrollmentStatsPercent(int percent) {
     return '$percent %';
   }
+
+  @override
+  String get financeStatsDashboardTitle => 'Overview - School year';
+
+  @override
+  String get financeStatsSchoolYearUnavailable => 'School year unavailable';
+
+  @override
+  String financeStatsContextSchoolYear(String schoolYear) {
+    return 'Overview - School year $schoolYear';
+  }
+
+  @override
+  String get financeStatsPeriodWeekCurrent => 'This week';
+
+  @override
+  String get financeStatsPeriodMonthCurrent => 'This month';
+
+  @override
+  String get financeStatsPeriodYearCurrent => 'This year';
+
+  @override
+  String get financeStatsKpiCollected => 'Total collected';
+
+  @override
+  String get financeStatsKpiExpected => 'Total expected';
+
+  @override
+  String get financeStatsKpiOutstanding => 'Outstanding';
+
+  @override
+  String get financeStatsKpiCollectionRate => 'Collection rate';
+
+  @override
+  String financeStatsPercentOfTotal(int percent) {
+    return '$percent% of total';
+  }
+
+  @override
+  String get financeStatsSectionEvolution => 'Collection evolution';
+
+  @override
+  String get financeStatsLegendCurrentPeriod => 'Current period';
+
+  @override
+  String get financeStatsLegendOtherPeriods => 'Other periods';
+
+  @override
+  String get financeStatsSectionFeeTypeDistribution => 'Distribution by fee type';
+
+  @override
+  String financeStatsFeeTypeCollected(String amount) {
+    return 'Collected: $amount';
+  }
+
+  @override
+  String financeStatsFeeTypeExpected(String amount) {
+    return 'Expected: $amount';
+  }
+
+  @override
+  String financeStatsFeeTypeRate(int rate) {
+    return 'Rate: $rate%';
+  }
+
+  @override
+  String get financeStatsNoData => 'No data available for this period';
+
+  @override
+  String get financeStatsNoDataHint => 'Try another period to display more insights.';
+
+  @override
+  String get financeStatsErrorTitle => 'Loading error';
+
+  @override
+  String get financeStatsRetry => 'Retry';
+
+  @override
+  String get financeStatsRetryHint => 'Reload finance statistics';
+
+  @override
+  String get financeStatsLoadingA11yLabel => 'Finance statistics are loading';
+
+  @override
+  String financeStatsHeaderA11yLabel(String schoolYear) {
+    return 'Finance dashboard, school year $schoolYear';
+  }
+
+  @override
+  String financeStatsPeriodFilterA11yLabel(String selectedPeriod) {
+    return 'Finance statistics time filter, active period: $selectedPeriod';
+  }
+
+  @override
+  String get financeStatsKpiBandA11yLabel => 'Financial key performance indicators band';
+
+  @override
+  String get financeStatsEvolutionChartA11yLabel => 'Collection amount evolution chart';
+
+  @override
+  String get financeStatsFeeTypeSectionA11yLabel => 'Distribution of amounts by fee type';
+
+  @override
+  String financeStatsFeeTypeItemA11yLabel(String code, String collected, String expected, int rate) {
+    return 'Type $code, collected $collected, expected $expected, rate $rate%';
+  }
+
+  @override
+  String financeStatsErrorA11yLabel(String message) {
+    return 'Finance statistics loading error: $message';
+  }
+
+  @override
+  String get financeStatsEmptyA11yLabel => 'No finance data available for this period';
+
+  @override
+  String get financeStatsNetworkError => 'Unable to load finance statistics. Check your internet connection.';
+
+  @override
+  String get financeStatsNotFoundError => 'No finance statistics available.';
+
+  @override
+  String get financeStatsValidationError => 'The requested parameters are invalid.';
+
+  @override
+  String get financeStatsUnauthorizedError => 'You are not authorized to view these statistics.';
+
+  @override
+  String get financeStatsInvalidCredentialsError => 'Invalid session, please sign in again.';
+
+  @override
+  String get financeStatsServerError => 'The server is currently unavailable.';
+
+  @override
+  String get financeStatsStorageError => 'A local error prevents displaying statistics.';
+
+  @override
+  String get financeStatsAuthError => 'An authentication error prevents loading statistics.';
+
+  @override
+  String get financeStatsUnknownError => 'An unexpected error occurred while loading statistics.';
 }

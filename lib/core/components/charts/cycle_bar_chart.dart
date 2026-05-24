@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 
 /// Graphique en barres verticales générique pour une distribution par catégories.
 class CycleBarChart extends StatelessWidget {
@@ -34,16 +35,16 @@ class CycleBarChart extends StatelessWidget {
             touchTooltipData: BarTouchTooltipData(
               getTooltipColor: (_) => AppColors.surfaceDark,
               tooltipRoundedRadius: 8,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final item = items[group.x.toInt()];
-                return BarTooltipItem(
-                  '${item.label}\n${rod.toY.toInt()}',
-                  AppTextStyles.caption.copyWith(
-                    color: AppColors.textOnDark,
-                    fontWeight: FontWeight.w600,
-                  ),
-                );
-              },
+               getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                 final item = items[group.x.toInt()];
+                 return BarTooltipItem(
+                   '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
+                   AppTextStyles.caption.copyWith(
+                     color: AppColors.textOnDark,
+                     fontWeight: FontWeight.w600,
+                   ),
+                 );
+               },
             ),
           ),
           gridData: FlGridData(
@@ -64,7 +65,7 @@ class CycleBarChart extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 36,
                 getTitlesWidget: (value, meta) => Text(
-                  value.toInt().toString(),
+                  NumberFormatterHelper.formatYAxisLabel(value),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
                   ),

@@ -30,6 +30,8 @@ import 'package:school_app_flutter/features/finance/presentation/pages/facturati
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -200,6 +202,12 @@ class AppRouter {
         ShellRoute(
           builder: (context, state, child) => FinanceFeatureScope(child: child),
           routes: [
+            GoRoute(
+              path: AppRoutesNames.financesDashboard,
+              builder: (context, state) => const FinanceStatsDashboardScope(
+                child: FinanceStatsDashboardPage(),
+              ),
+            ),
             GoRoute(
               path: AppRoutesNames.facturations,
               builder: (context, state) => const FacturationPage(),

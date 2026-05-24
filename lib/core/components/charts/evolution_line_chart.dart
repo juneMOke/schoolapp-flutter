@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/charts/line_chart_point.dart'
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 
 /// Graphique en ligne générique pour visualiser une évolution dans le temps.
 ///
@@ -60,7 +61,7 @@ class EvolutionLineChart extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 36,
                 getTitlesWidget: (value, meta) => Text(
-                  value.toInt().toString(),
+                  NumberFormatterHelper.formatYAxisLabel(value),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
                   ),

@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_re
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
@@ -127,6 +129,7 @@ class _HomePageView extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, NavigationState state) {
     final hidePageBreadcrumb =
         state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
+        state.selectedSubMenuId == MenuConstants.financesDashboardId ||
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
@@ -208,6 +211,10 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentFeatureScope(child: FirstRegistrationPage());
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(child: FacturationPage());
+      case MenuConstants.financesDashboardId:
+        return const FinanceStatsDashboardScope(
+          child: FinanceStatsDashboardPage(),
+        );
       case MenuConstants.organisationId:
         return const ClassesFeatureScope(child: ClassesOrganisationPage());
       case MenuConstants.classesListId:

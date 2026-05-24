@@ -1044,5 +1044,118 @@
           "type": "int"
         }
       }
-    }
+      },
+      "financeStatsDashboardTitle": "Overview - School year",
+      "financeStatsSchoolYearUnavailable": "School year unavailable",
+      "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",
+      "@financeStatsContextSchoolYear": {
+        "placeholders": {
+          "schoolYear": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsPeriodWeekCurrent": "This week",
+      "financeStatsPeriodMonthCurrent": "This month",
+      "financeStatsPeriodYearCurrent": "This year",
+      "financeStatsKpiCollected": "Total collected",
+      "financeStatsKpiExpected": "Total expected",
+      "financeStatsKpiOutstanding": "Outstanding",
+      "financeStatsKpiCollectionRate": "Collection rate",
+      "financeStatsPercentOfTotal": "{percent}% of total",
+      "@financeStatsPercentOfTotal": {
+        "placeholders": {
+          "percent": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsSectionEvolution": "Collection evolution",
+      "financeStatsLegendCurrentPeriod": "Current period",
+      "financeStatsLegendOtherPeriods": "Other periods",
+      "financeStatsSectionFeeTypeDistribution": "Distribution by fee type",
+      "financeStatsFeeTypeCollected": "Collected: {amount}",
+      "@financeStatsFeeTypeCollected": {
+        "placeholders": {
+          "amount": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsFeeTypeExpected": "Expected: {amount}",
+      "@financeStatsFeeTypeExpected": {
+        "placeholders": {
+          "amount": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsFeeTypeRate": "Rate: {rate}%",
+      "@financeStatsFeeTypeRate": {
+        "placeholders": {
+          "rate": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsNoData": "No data available for this period",
+      "financeStatsNoDataHint": "Try another period to display more insights.",
+      "financeStatsErrorTitle": "Loading error",
+      "financeStatsRetry": "Retry",
+      "financeStatsRetryHint": "Reload finance statistics",
+      "financeStatsLoadingA11yLabel": "Finance statistics are loading",
+      "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
+      "@financeStatsHeaderA11yLabel": {
+        "placeholders": {
+          "schoolYear": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsPeriodFilterA11yLabel": "Finance statistics time filter, active period: {selectedPeriod}",
+      "@financeStatsPeriodFilterA11yLabel": {
+        "placeholders": {
+          "selectedPeriod": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
+      "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
+      "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
+      "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
+      "@financeStatsFeeTypeItemA11yLabel": {
+        "placeholders": {
+          "code": {
+            "type": "String"
+          },
+          "collected": {
+            "type": "String"
+          },
+          "expected": {
+            "type": "String"
+          },
+          "rate": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
+      "@financeStatsErrorA11yLabel": {
+        "placeholders": {
+          "message": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsEmptyA11yLabel": "No finance data available for this period",
+      "financeStatsNetworkError": "Unable to load finance statistics. Check your internet connection.",
+      "financeStatsNotFoundError": "No finance statistics available.",
+      "financeStatsValidationError": "The requested parameters are invalid.",
+      "financeStatsUnauthorizedError": "You are not authorized to view these statistics.",
+      "financeStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+      "financeStatsServerError": "The server is currently unavailable.",
+      "financeStatsStorageError": "A local error prevents displaying statistics.",
+      "financeStatsAuthError": "An authentication error prevents loading statistics.",
+      "financeStatsUnknownError": "An unexpected error occurred while loading statistics."
 }
