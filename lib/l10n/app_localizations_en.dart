@@ -2331,6 +2331,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get enrollmentStatsPeriodWeekCurrent => 'This week';
+
+  @override
+  String get enrollmentStatsPeriodMonthCurrent => 'This month';
+
+  @override
+  String get enrollmentStatsPeriodYearCurrent => 'This year';
+
+  @override
+  String get enrollmentStatsSchoolYearUnavailable => 'School year unavailable';
+
+  @override
+  String enrollmentStatsHeaderA11yLabel(String schoolYear) {
+    return 'Enrollment dashboard, school year $schoolYear';
+  }
+
+  @override
+  String enrollmentStatsPeriodFilterA11yLabel(String selectedPeriod) {
+    return 'Enrollment statistics time filter, active period: $selectedPeriod';
+  }
+
+  @override
+  String enrollmentStatsContextSchoolYear(String schoolYear) {
+    return 'Overview - School year $schoolYear';
+  }
+
+  @override
   String get financeStatsDashboardTitle => 'Overview - School year';
 
   @override

@@ -4529,6 +4529,48 @@ abstract class AppLocalizations {
   /// **'{percent} %'**
   String enrollmentStatsPercent(int percent);
 
+  /// No description provided for @enrollmentStatsPeriodWeekCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get enrollmentStatsPeriodWeekCurrent;
+
+  /// No description provided for @enrollmentStatsPeriodMonthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get enrollmentStatsPeriodMonthCurrent;
+
+  /// No description provided for @enrollmentStatsPeriodYearCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get enrollmentStatsPeriodYearCurrent;
+
+  /// No description provided for @enrollmentStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get enrollmentStatsSchoolYearUnavailable;
+
+  /// No description provided for @enrollmentStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment dashboard, school year {schoolYear}'**
+  String enrollmentStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @enrollmentStatsPeriodFilterA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment statistics time filter, active period: {selectedPeriod}'**
+  String enrollmentStatsPeriodFilterA11yLabel(String selectedPeriod);
+
+  /// No description provided for @enrollmentStatsContextSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year {schoolYear}'**
+  String enrollmentStatsContextSchoolYear(String schoolYear);
+
   /// No description provided for @financeStatsDashboardTitle.
   ///
   /// In en, this message translates to:

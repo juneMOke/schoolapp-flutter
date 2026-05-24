@@ -1040,6 +1040,34 @@
       }
     }
   },
+  "enrollmentStatsPeriodWeekCurrent": "Cette semaine",
+  "enrollmentStatsPeriodMonthCurrent": "Ce mois",
+  "enrollmentStatsPeriodYearCurrent": "Cette année",
+  "enrollmentStatsSchoolYearUnavailable": "Année scolaire indisponible",
+  "enrollmentStatsHeaderA11yLabel": "Tableau de bord des inscriptions, année scolaire {schoolYear}",
+  "@enrollmentStatsHeaderA11yLabel": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentStatsPeriodFilterA11yLabel": "Filtre temporel des statistiques d'inscription, période active : {selectedPeriod}",
+  "@enrollmentStatsPeriodFilterA11yLabel": {
+    "placeholders": {
+      "selectedPeriod": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentStatsContextSchoolYear": "Vue d'ensemble — Année scolaire {schoolYear}",
+  "@enrollmentStatsContextSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
   "financeStatsDashboardTitle": "Vue d'ensemble — Année scolaire",
   "financeStatsSchoolYearUnavailable": "Année scolaire indisponible",
   "financeStatsContextSchoolYear": "Vue d'ensemble — Année scolaire {schoolYear}",

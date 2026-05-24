@@ -33,7 +33,8 @@ class _EnrollmentStatsDashboardPageState
     return AppPageBackground(
       scrollable: true,
       child: BlocConsumer<EnrollmentStatsBloc, EnrollmentStatsState>(
-        listenWhen: (prev, curr) => prev.status != curr.status,
+        listenWhen: (prev, curr) =>
+            prev.status != curr.status || prev.errorType != curr.errorType,
         listener: (context, state) {
           if (state.status == EnrollmentStatsStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -46,16 +47,26 @@ class _EnrollmentStatsDashboardPageState
           }
         },
         buildWhen: (prev, curr) =>
-            prev.status != curr.status || prev.stats != curr.stats,
+            prev.status != curr.status ||
+            prev.stats != curr.stats ||
+            prev.selectedPeriod != curr.selectedPeriod,
         builder: (context, state) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EnrollmentStatsDashboardHeader(l10n: l10n, state: state),
               const SizedBox(height: AppDimensions.spacingL),
-              const EnrollmentStatsPeriodFilter(),
+              _EnrollmentStatsContextFilterRow(state: state),
               const SizedBox(height: AppDimensions.spacingL),
-              _buildBody(context, state, l10n),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: KeyedSubtree(
+                  key: ValueKey<EnrollmentStatsStatus>(state.status),
+                  child: _buildBody(context, state, l10n),
+                ),
+              ),
             ],
           );
         },
@@ -80,5 +91,38 @@ class _EnrollmentStatsDashboardPageState
       ),
       EnrollmentStatsStatus.initial => const SizedBox.shrink(),
     };
+  }
+}
+
+class _EnrollmentStatsContextFilterRow extends StatelessWidget {
+  final EnrollmentStatsState state;
+
+  const _EnrollmentStatsContextFilterRow({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final schoolYear =
+        state.stats?.context.schoolYear ?? l10n.enrollmentStatsSchoolYearUnavailable;
+
+    return Semantics(
+      container: true,
+      label: l10n.enrollmentStatsContextSchoolYear(schoolYear),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: AppDimensions.spacingM,
+        spacing: AppDimensions.spacingM,
+        children: [
+          ExcludeSemantics(
+            child: Text(
+              l10n.enrollmentStatsContextSchoolYear(schoolYear),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const EnrollmentStatsPeriodFilter(),
+        ],
+      ),
+    );
   }
 }

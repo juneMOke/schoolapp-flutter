@@ -1044,8 +1044,36 @@
           "type": "int"
         }
       }
-      },
-      "financeStatsDashboardTitle": "Overview - School year",
+    },
+    "enrollmentStatsPeriodWeekCurrent": "This week",
+    "enrollmentStatsPeriodMonthCurrent": "This month",
+    "enrollmentStatsPeriodYearCurrent": "This year",
+    "enrollmentStatsSchoolYearUnavailable": "School year unavailable",
+    "enrollmentStatsHeaderA11yLabel": "Enrollment dashboard, school year {schoolYear}",
+    "@enrollmentStatsHeaderA11yLabel": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "enrollmentStatsPeriodFilterA11yLabel": "Enrollment statistics time filter, active period: {selectedPeriod}",
+    "@enrollmentStatsPeriodFilterA11yLabel": {
+      "placeholders": {
+        "selectedPeriod": {
+          "type": "String"
+        }
+      }
+    },
+    "enrollmentStatsContextSchoolYear": "Overview - School year {schoolYear}",
+    "@enrollmentStatsContextSchoolYear": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "financeStatsDashboardTitle": "Overview - School year",
       "financeStatsSchoolYearUnavailable": "School year unavailable",
       "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",
       "@financeStatsContextSchoolYear": {

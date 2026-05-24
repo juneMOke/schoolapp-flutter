@@ -66,6 +66,7 @@ class AppDimensions {
   static const enrollmentStatsChartBorderRadius = 8.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
   static const enrollmentStatsDonutCenterRadius = 48.0;
+  static const enrollmentStatsHeaderTitleFontSize = 20.0;
 
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;

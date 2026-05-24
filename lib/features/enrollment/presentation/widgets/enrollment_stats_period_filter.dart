@@ -15,26 +15,36 @@ class EnrollmentStatsPeriodFilter extends StatelessWidget {
     return BlocBuilder<EnrollmentStatsBloc, EnrollmentStatsState>(
       buildWhen: (prev, curr) => prev.selectedPeriod != curr.selectedPeriod,
       builder: (context, state) {
-        return SegmentedTabFilter<EnrollmentStatsPeriod>(
-          options: [
-            SegmentedTabOption(
-              label: l10n.enrollmentStatsPeriodYear,
-              value: EnrollmentStatsPeriod.year,
-            ),
-            SegmentedTabOption(
-              label: l10n.enrollmentStatsPeriodMonth,
-              value: EnrollmentStatsPeriod.month,
-            ),
-            SegmentedTabOption(
-              label: l10n.enrollmentStatsPeriodWeek,
-              value: EnrollmentStatsPeriod.week,
-            ),
-          ],
-          selected: state.selectedPeriod,
-          onSelected: (period) =>
-              context.read<EnrollmentStatsBloc>().add(
-                    EnrollmentStatsRequested(period: period),
-                  ),
+        final selectedPeriodLabel = switch (state.selectedPeriod) {
+          EnrollmentStatsPeriod.week => l10n.enrollmentStatsPeriodWeekCurrent,
+          EnrollmentStatsPeriod.month => l10n.enrollmentStatsPeriodMonthCurrent,
+          EnrollmentStatsPeriod.year => l10n.enrollmentStatsPeriodYearCurrent,
+        };
+
+        return Semantics(
+          container: true,
+          label: l10n.enrollmentStatsPeriodFilterA11yLabel(selectedPeriodLabel),
+          child: SegmentedTabFilter<EnrollmentStatsPeriod>(
+            options: [
+              SegmentedTabOption(
+                label: l10n.enrollmentStatsPeriodWeekCurrent,
+                value: EnrollmentStatsPeriod.week,
+              ),
+              SegmentedTabOption(
+                label: l10n.enrollmentStatsPeriodMonthCurrent,
+                value: EnrollmentStatsPeriod.month,
+              ),
+              SegmentedTabOption(
+                label: l10n.enrollmentStatsPeriodYearCurrent,
+                value: EnrollmentStatsPeriod.year,
+              ),
+            ],
+            selected: state.selectedPeriod,
+            onSelected: (period) =>
+                context.read<EnrollmentStatsBloc>().add(
+                      EnrollmentStatsRequested(period: period),
+                    ),
+          ),
         );
       },
     );
