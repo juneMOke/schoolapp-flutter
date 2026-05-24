@@ -361,8 +361,6 @@
   "summaryChargesUnavailable": "Amounts are unavailable for now.",
   "summaryValidationNoticeTitle": "Before validation",
   "summaryValidationNoticeBody": "You certify that the information is accurate. The file will move to validated status and a receipt can be generated.",
-  "next": "Continue",
-  "previous": "Previous",
   "nextPage": "Next page",
   "previousPage": "Previous page",
   "finish": "Finish",
