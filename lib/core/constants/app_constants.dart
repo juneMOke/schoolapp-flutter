@@ -80,6 +80,7 @@ class AppConstants {
       '/api/v1/finance/student-charges/{chargeId}/allocations';
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
+  static const String financeStatsEndpoint = '/api/v1/finance-stats';
 
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =

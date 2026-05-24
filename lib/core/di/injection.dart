@@ -92,12 +92,14 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/create_payment_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_stats_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
@@ -655,6 +657,10 @@ Future<void> configureDependencies() async {
     () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
   );
 
+  getIt.registerFactory<GetFinanceStatsUseCase>(
+    () => GetFinanceStatsUseCase(getIt<FinanceRepository>()),
+  );
+
   getIt.registerFactory<GetStudentChargesUseCase>(
     () => GetStudentChargesUseCase(getIt<StudentChargesRepository>()),
   );
@@ -691,6 +697,12 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<FinanceBloc>(
     () => FinanceBloc(getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>()),
+  );
+
+  getIt.registerFactory<FinanceStatsBloc>(
+    () => FinanceStatsBloc(
+      getFinanceStatsUseCase: getIt<GetFinanceStatsUseCase>(),
+    ),
   );
 
   getIt.registerFactory<StudentChargesBloc>(

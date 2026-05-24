@@ -82,7 +82,7 @@ void main() {
         (_) => fail('Expected Right but got Left'),
         (stats) {
           expect(stats.context.schoolYear, '2025-2026');
-          expect(stats.context.period, EnrollmentStatsPeriod.year);
+          expect(stats.context.period, 'year');
           expect(stats.kpis.totalEnrollments.value, 120);
           expect(stats.distributionByGender.segments.first.code, GenderSegmentCode.male);
         },

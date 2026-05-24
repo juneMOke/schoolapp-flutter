@@ -13,7 +13,7 @@ class MockGetEnrollmentStatsUseCase extends Mock
 final tStats = EnrollmentStats(
   context: StatsContext(
     schoolYear: '2025-2026',
-    period: EnrollmentStatsPeriod.year,
+    period: 'year',
     periodStart: DateTime.utc(2025, 9, 1),
     periodEnd: DateTime.utc(2026, 6, 30),
     generatedAt: DateTime.utc(2026, 5, 23, 8),
