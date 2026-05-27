@@ -2,9 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/attendance_repository_impl.dart';
@@ -121,9 +122,12 @@ import 'package:school_app_flutter/features/student/presentation/bloc/student_bl
 
 final GetIt getIt = GetIt.instance;
 
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({
+  EnvConfig? envConfig,
+  String bootstrapBoxName = 'bootstrap_box',
+}) async {
   await Hive.initFlutter();
-  final bootstrapBox = await Hive.openBox<String>('bootstrap_box');
+  final bootstrapBox = await Hive.openBox<String>(bootstrapBoxName);
 
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
@@ -134,18 +138,25 @@ Future<void> configureDependencies() async {
     instanceName: 'bootstrapBox',
   );
 
+  final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
+  getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
+
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    );
+    final envConfig = getIt<EnvConfig>();
+    final dio = createDioClient(envConfig);
+
+    if (envConfig.enableVerboseNetworkLogging) {
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestBody: true,
+          requestHeader: true,
+          responseBody: true,
+          responseHeader: true,
+          error: true,
+        ),
+      );
+    }
 
     dio.interceptors.add(
       InterceptorsWrapper(

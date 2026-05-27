@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 
-Dio createDioClient() {
+Dio createDioClient(EnvConfig envConfig) {
   return Dio(
     BaseOptions(
-      baseUrl: AppConstants.baseUrl,
+      baseUrl: envConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: <String, String>{

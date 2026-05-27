@@ -2,6 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/config/app_environment.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
@@ -71,7 +73,13 @@ void main() {
   });
 
   setUp(() async {
-    await configureDependencies();
+    await configureDependencies(
+      envConfig: EnvConfig.forTesting(
+        appEnvironment: AppEnvironment.dev.label,
+        apiBaseUrl: 'http://127.0.0.1:8080',
+      ),
+      bootstrapBoxName: 'bootstrap_box_enrollment_stats_test',
+    );
 
     mockRemoteDataSource = MockEnrollmentRemoteDataSource();
 

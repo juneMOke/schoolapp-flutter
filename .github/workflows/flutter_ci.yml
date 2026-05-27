@@ -2,12 +2,32 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, develop, 'feature/**', 'fix/**' ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, develop ]
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Job 1 — Validation des variables d'environnement (fail fast)
+  # ─────────────────────────────────────────────────────────────────
+  validate-env:
+    name: Validate env config (dev smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate DEV env variables
+        run: |
+          bash scripts/validate_env.sh \
+            --env=dev \
+            --api-base-url="${{ secrets.DEV_API_BASE_URL || 'http://localhost:8080' }}"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 2 — Analyse statique + tests
+  # ─────────────────────────────────────────────────────────────────
   analyze-and-test:
+    name: Analyze & Test
+    needs: validate-env
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,6 +43,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
       - name: Motion tokens check (no hardcoded Duration in UI scope)
         run: bash scripts/check_motion_tokens.sh
 
@@ -30,4 +56,11 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: flutter test --coverage
+
+      - name: Upload coverage (optional)
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false

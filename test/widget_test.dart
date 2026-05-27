@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/config/app_environment.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/main.dart';
 import 'test_helpers/widget_test_utils.dart';
@@ -9,7 +11,13 @@ void main() {
 
   setUpAll(() async {
     await installCommonTestPluginMocks();
-    await configureDependencies();
+    await configureDependencies(
+      envConfig: EnvConfig.forTesting(
+        appEnvironment: AppEnvironment.dev.label,
+        apiBaseUrl: 'http://127.0.0.1:8080',
+      ),
+      bootstrapBoxName: 'bootstrap_box_widget_test',
+    );
   });
 
   tearDownAll(() async {

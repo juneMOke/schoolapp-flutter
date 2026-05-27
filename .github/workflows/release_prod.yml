@@ -1,0 +1,220 @@
+name: Release Production
+
+# Déclenchement uniquement manuel + approbation via GitHub Environments
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_prod:
+        description: 'Confirmer "je veux releaser en PRODUCTION" (taper prod)'
+        required: true
+        type: string
+      build_android:
+        description: 'Inclure le build Android (App Bundle)'
+        required: false
+        type: boolean
+        default: true
+      build_ios:
+        description: 'Inclure le build iOS (IPA)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Job 0 — Garde-fou : confirmation manuelle
+  # ─────────────────────────────────────────────────────────────────
+  guard:
+    name: Guard — Confirmation prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la confirmation manuelle
+        run: |
+          if [[ "${{ inputs.confirm_prod }}" != "prod" ]]; then
+            echo "❌ Confirmation incorrecte. Vous devez taper 'prod' pour lancer la release."
+            exit 1
+          fi
+          echo "✅ Confirmation reçue — release production autorisée."
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 1 — Validation fail-fast des variables prod
+  # ─────────────────────────────────────────────────────────────────
+  validate-env:
+    name: Validate PROD env variables
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate PROD environment
+        run: |
+          bash scripts/validate_env.sh \
+            --env=prod \
+            --api-base-url="${{ secrets.PROD_API_BASE_URL }}"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 2 — Analyze + Tests (obligatoire avant release)
+  # ─────────────────────────────────────────────────────────────────
+  analyze-and-test:
+    name: Analyze & Test (release gate)
+    needs: validate-env
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Motion tokens check
+        run: bash scripts/check_motion_tokens.sh
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 3 — Build Android prod (App Bundle)
+  # ─────────────────────────────────────────────────────────────────
+  build-android-prod:
+    name: Build Android prod (App Bundle)
+    needs: analyze-and-test
+    if: ${{ inputs.build_android == true || inputs.build_android == 'true' }}
+    runs-on: ubuntu-latest
+    # L'environnement "prod" doit être configuré avec une approbation requise
+    # dans Settings > Environments > prod de votre repo GitHub
+    environment: prod
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Build App Bundle PROD
+        run: |
+          flutter build appbundle \
+            --flavor prod \
+            --release \
+            --dart-define=APP_ENV=prod \
+            --dart-define=API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}"
+
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-prod-aab-${{ github.sha }}
+          path: build/app/outputs/bundle/**/*.aab
+          retention-days: 90
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 4 — Build iOS prod (macOS runner)
+  # ─────────────────────────────────────────────────────────────────
+  build-ios-prod:
+    name: Build iOS prod (IPA)
+    needs: analyze-and-test
+    if: ${{ inputs.build_ios == true || inputs.build_ios == 'true' }}
+    runs-on: macos-latest
+    environment: prod
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      # ── A configurer avec votre setup de signing ──
+      # Voir build_ios.yml pour les options Fastlane match / certificats secrets.
+
+      - name: Build iOS PROD (no codesign — configurer le signing pour activer IPA)
+        run: |
+          flutter build ios \
+            --flavor prod \
+            --release \
+            --no-codesign \
+            --dart-define=APP_ENV=prod \
+            --dart-define=API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}"
+
+      # Décommenter quand le signing est prêt :
+      # - name: Build IPA PROD
+      #   run: |
+      #     flutter build ipa \
+      #       --flavor prod \
+      #       --export-method app-store \
+      #       --dart-define=APP_ENV=prod \
+      #       --dart-define=API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}"
+      #
+      # - name: Upload IPA artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-prod-ipa-${{ github.sha }}
+      #     path: build/ios/ipa/*.ipa
+      #     retention-days: 90
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 5 — Résumé de release
+  # ─────────────────────────────────────────────────────────────────
+  release-summary:
+    name: Release summary
+    needs: [ build-android-prod, build-ios-prod ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Résumé
+        run: |
+          echo "## 🚀 Release Production" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cible | Statut |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Android App Bundle | ${{ needs.build-android-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| iOS IPA            | ${{ needs.build-ios-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit** : \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Déclenché par** : \`${{ github.actor }}\`" >> "$GITHUB_STEP_SUMMARY"

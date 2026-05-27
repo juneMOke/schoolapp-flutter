@@ -1,7 +1,14 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String baseUrl = 'http://10.0.2.2:8080';
+  static const String appEnvironmentDefineKey = 'APP_ENV';
+  static const String apiBaseUrlDefineKey = 'API_BASE_URL';
+  static const String showEnvironmentBannerDefineKey =
+      'SHOW_ENVIRONMENT_BANNER';
+  static const String enableVerboseNetworkLoggingDefineKey =
+      'ENABLE_VERBOSE_NETWORK_LOGGING';
+  static const String defaultAppEnvironment = 'dev';
+
   static const String loginEndpoint = '/api/v1/auth/login';
   static const String generateOtpEndpoint = '/api/v1/auth/otp/generate';
   static const String validateOtpEndpoint = '/api/v1/auth/otp/validate';

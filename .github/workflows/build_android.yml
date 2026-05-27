@@ -1,0 +1,149 @@
+name: Build Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      build_type:
+        description: 'Type de build'
+        required: true
+        type: choice
+        default: apk
+        options:
+          - apk
+          - appbundle
+
+  # Déclenchement automatique sur develop → build dev
+  push:
+    branches: [ develop ]
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Job 1 — Résoudre les variables selon l'environnement
+  # ─────────────────────────────────────────────────────────────────
+  resolve-config:
+    name: Resolve config
+    runs-on: ubuntu-latest
+    outputs:
+      app_env: ${{ steps.config.outputs.app_env }}
+      api_base_url: ${{ steps.config.outputs.api_base_url }}
+      flavor: ${{ steps.config.outputs.flavor }}
+    steps:
+      - name: Resolve environment variables
+        id: config
+        run: |
+          # Détermine l'environnement : input manuel OU auto sur develop → dev
+          ENV="${{ inputs.environment }}"
+          if [[ -z "$ENV" ]]; then
+            ENV="dev"
+          fi
+
+          case "$ENV" in
+            dev)
+              API_URL="${{ secrets.DEV_API_BASE_URL }}"
+              ;;
+            staging)
+              API_URL="${{ secrets.STAGING_API_BASE_URL }}"
+              ;;
+            prod)
+              API_URL="${{ secrets.PROD_API_BASE_URL }}"
+              ;;
+          esac
+
+          echo "app_env=$ENV"       >> "$GITHUB_OUTPUT"
+          echo "api_base_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "flavor=$ENV"         >> "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 2 — Validation fail-fast
+  # ─────────────────────────────────────────────────────────────────
+  validate-env:
+    name: Validate env (${{ needs.resolve-config.outputs.app_env }})
+    needs: resolve-config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate environment variables
+        run: |
+          bash scripts/validate_env.sh \
+            --env="${{ needs.resolve-config.outputs.app_env }}" \
+            --api-base-url="${{ needs.resolve-config.outputs.api_base_url }}"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 3 — Build Android
+  # ─────────────────────────────────────────────────────────────────
+  build-android:
+    name: Build Android ${{ needs.resolve-config.outputs.flavor }} (${{ inputs.build_type || 'apk' }})
+    needs: [ resolve-config, validate-env ]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-config.outputs.app_env }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Build APK
+        if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
+        run: |
+          flutter build apk \
+            --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+            --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+
+      - name: Build App Bundle
+        if: ${{ inputs.build_type == 'appbundle' }}
+        run: |
+          flutter build appbundle \
+            --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+            --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+
+      - name: Upload APK artifact
+        if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+      - name: Upload App Bundle artifact
+        if: ${{ inputs.build_type == 'appbundle' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
+          path: build/app/outputs/bundle/**/*.aab
+          retention-days: 30
