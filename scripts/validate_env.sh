@@ -71,6 +71,8 @@ if [[ ! "$API_BASE_URL" =~ ^https?:// ]]; then
   exit 1
 fi
 
+SCHEME="$(echo "$API_BASE_URL" | sed -E 's|^(https?)://.*$|\1|')"
+
 # Vérifier qu'il y a un host non vide après le schéma
 HOST="$(echo "$API_BASE_URL" | sed -E 's|^https?://||' | cut -d '/' -f1 | cut -d ':' -f1)"
 if [[ -z "$HOST" ]]; then
@@ -94,6 +96,12 @@ fi
 
 if [[ "$APP_ENV" == "staging" ]] && [[ "$API_BASE_URL" =~ (localhost|127\.0\.0\.1|10\.0\.) ]]; then
   err "Incohérence : APP_ENV=staging mais API_BASE_URL pointe vers localhost/loopback."
+  exit 1
+fi
+
+if [[ "$APP_ENV" != "dev" ]] && [[ "$SCHEME" != "https" ]]; then
+  err "API_BASE_URL doit utiliser HTTPS pour l'environnement '${APP_ENV}'."
+  err "Valeur reçue : ${API_BASE_URL}"
   exit 1
 fi
 

@@ -49,6 +49,68 @@ flutter build appbundle --flavor staging --dart-define=APP_ENV=staging --dart-de
 flutter build appbundle --flavor prod --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://api.example.com
 ```
 
+## Signature Android release (option B recommandee)
+
+Le projet utilise une signature release Android via secrets GitHub Actions pour les builds `prod` (et les builds `appbundle`).
+
+### Secrets GitHub requis
+
+- `ANDROID_RELEASE_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+### Correspondance CI vers local
+
+- CI: `ANDROID_RELEASE_KEYSTORE_BASE64` -> keystore reconstruit temporairement dans le runner
+- Local: keystore present sur disque (pas besoin de base64)
+- CI et local partagent la meme identite cryptographique (meme keystore, meme alias, meme mots de passe)
+
+### Commandes utiles pour preparer les secrets
+
+```bash
+keytool -genkeypair -v -keystore upload-keystore.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+base64 -w 0 upload-keystore.jks > upload-keystore.base64
+```
+
+### Usage local (hors CI)
+
+Créer `android/key.properties` (fichier ignore par git) :
+
+```properties
+storeFile=/chemin/absolu/vers/upload-keystore.jks
+storePassword=...
+keyAlias=upload
+keyPassword=...
+```
+
+### Build release local signe (Android)
+
+```bash
+flutter build apk --flavor prod --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://api.example.com
+flutter build appbundle --flavor prod --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://api.example.com
+```
+
+### Alternative locale sans `key.properties`
+
+Le `build.gradle.kts` supporte aussi un fallback via variables d'environnement shell :
+
+- `ANDROID_KEYSTORE_PATH`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+Exemple :
+
+```bash
+export ANDROID_KEYSTORE_PATH=/home/you/.android/upload-keystore.jks
+export ANDROID_KEYSTORE_PASSWORD='...'
+export ANDROID_KEY_ALIAS='upload'
+export ANDROID_KEY_PASSWORD='...'
+
+flutter build appbundle --flavor prod --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://api.example.com
+```
+
 ## Build iOS
 
 Les schemes partagés attendus sont `dev`, `staging`, `prod`.
@@ -74,3 +136,19 @@ flutter build ipa --flavor prod --release --dart-define=APP_ENV=prod --dart-defi
 - Faire échouer le pipeline si `APP_ENV` ou `API_BASE_URL` est manquant
 - Garder les variables injectées centralisées via `EnvConfig`
 - Garder ce document aligné avec `android/app/build.gradle.kts` et `ios/Runner.xcodeproj/project.pbxproj`
+
+## Formatage Dart (B4)
+
+Le CI valide le formatage Dart avec :
+
+```bash
+dart format --output=none --set-exit-if-changed .
+```
+
+Pour le confort local, un hook `pre-commit` est versionné dans `.githooks/pre-commit`.
+
+Installation locale du hook :
+
+```bash
+bash scripts/install_git_hooks.sh
+```

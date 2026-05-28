@@ -116,13 +116,45 @@ jobs:
       - name: Generate localizations
         run: flutter gen-l10n
 
+      - name: Prepare Android release signing
+        if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [[ -z "$ANDROID_RELEASE_KEYSTORE_BASE64" || -z "$ANDROID_KEYSTORE_PASSWORD" || -z "$ANDROID_KEY_ALIAS" || -z "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "Secrets de signing Android manquants (ANDROID_RELEASE_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD)."
+            exit 1
+          fi
+
+          KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
+          echo -n "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          cat > android/key.properties <<EOF
+          storeFile=$KEYSTORE_PATH
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          EOF
+
       - name: Build APK
         if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
         run: |
-          flutter build apk \
-            --flavor "${{ needs.resolve-config.outputs.flavor }}" \
-            --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-            --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+          if [[ "${{ needs.resolve-config.outputs.app_env }}" == "prod" ]]; then
+            flutter build apk \
+              --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+              --release \
+              --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+              --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+          else
+            flutter build apk \
+              --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+              --debug \
+              --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+              --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+          fi
 
       - name: Build App Bundle
         if: ${{ inputs.build_type == 'appbundle' }}

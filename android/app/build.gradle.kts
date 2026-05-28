@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,7 +8,42 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+}
+
+val keystorePath =
+    (keystoreProperties["storeFile"] as String?)
+        ?: System.getenv("ANDROID_KEYSTORE_PATH")
+val keystorePassword =
+    (keystoreProperties["storePassword"] as String?)
+        ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val keyAlias =
+    (keystoreProperties["keyAlias"] as String?)
+        ?: System.getenv("ANDROID_KEY_ALIAS")
+val keyPassword =
+    (keystoreProperties["keyPassword"] as String?)
+        ?: System.getenv("ANDROID_KEY_PASSWORD")
+
 android {
+    signingConfigs {
+        create("release") {
+            if (
+                !keystorePath.isNullOrBlank() &&
+                !keystorePassword.isNullOrBlank() &&
+                !keyAlias.isNullOrBlank() &&
+                !keyPassword.isNullOrBlank()
+            ) {
+                storeFile = file(keystorePath)
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     namespace = "com.junethink.school_app_flutter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -55,9 +93,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

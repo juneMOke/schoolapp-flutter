@@ -75,6 +75,13 @@ class EnvConfig {
       );
     }
 
+    if (environment != AppEnvironment.dev && parsedUri.scheme != 'https') {
+      throw StateError(
+        'API_BASE_URL doit utiliser HTTPS pour ${environment.label}. '
+        'Valeur reçue: $apiBaseUrl',
+      );
+    }
+
     return EnvConfig._(
       environment: environment,
       apiBaseUri: parsedUri,
@@ -104,8 +111,6 @@ class EnvConfig {
         return false;
     }
 
-    throw StateError(
-      'Valeur booléenne invalide: $rawValue',
-    );
+    throw StateError('Valeur booléenne invalide: $rawValue');
   }
 }
