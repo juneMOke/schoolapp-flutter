@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# .githooks/pre-push
+#
+# Verifications lourdes avant chaque push :
+#   1. flutter analyze -- analyse statique complete
+#   2. flutter test    -- suite de tests unitaires
+#
+# Ces verifications sont intentionnellement dans pre-push (pas pre-commit)
+# car elles sont plus longues. La CI les executera aussi en parallele.
+#
+# Installation : bash scripts/install_git_hooks.sh
+set -euo pipefail
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+ERRORS=0
+# -----------------------------------------------------------------
+# 1. flutter analyze
+# -----------------------------------------------------------------
+echo "[pre-push] flutter analyze..."
+if flutter analyze; then
+  echo "[pre-push] OK Analyze OK."
+else
+  echo "[pre-push] FAILED Analyze FAILED -- push bloque."
+  ERRORS=$((ERRORS + 1))
+fi
+# -----------------------------------------------------------------
+# 2. flutter test
+# -----------------------------------------------------------------
+echo "[pre-push] flutter test..."
+if flutter test; then
+  echo "[pre-push] OK Tests OK."
+else
+  echo "[pre-push] FAILED Tests FAILED -- push bloque."
+  ERRORS=$((ERRORS + 1))
+fi
+# -----------------------------------------------------------------
+# Resume
+# -----------------------------------------------------------------
+if [[ $ERRORS -gt 0 ]]; then
+  echo ""
+  echo "[pre-push] FAILED $ERRORS erreur(s) -- corrigez puis relancez git push."
+  echo "           (Pour sauter en urgence : git push --no-verify)"
+  exit 1
+fi
+echo "[pre-push] OK Toutes les verifications ont reussi."

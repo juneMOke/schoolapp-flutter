@@ -1,20 +1,57 @@
 #!/usr/bin/env bash
+# .githooks/pre-commit
+#
+# Vérifications rapides avant chaque commit :
+#   1. Format Dart — auto-formate et re-stage les fichiers .dart stagés
+#   2. Motion tokens — absence de Duration() hardcodées dans le scope UI
+#
+# Installation : bash scripts/install_git_hooks.sh
+
 set -euo pipefail
 
-# Auto-format only staged Dart files, then re-stage them.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+ERRORS=0
+
+# ─────────────────────────────────────────────────────────────────
+# 1. Format Dart — auto-formatte les fichiers stagés puis les re-stage
+# ─────────────────────────────────────────────────────────────────
+echo "[pre-commit] Formatting staged Dart files..."
+
 staged_dart_files="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.dart$' || true)"
 
 if [[ -z "$staged_dart_files" ]]; then
-  exit 0
+  echo "[pre-commit] Aucun fichier .dart stagé — format ignoré."
+else
+  while IFS= read -r file_path; do
+    if [[ -f "$file_path" ]]; then
+      dart format "$file_path"
+      git add "$file_path"
+    fi
+  done <<< "$staged_dart_files"
+  echo "[pre-commit] ✅ Dart format OK."
 fi
 
-echo "[pre-commit] Formatting staged Dart files..."
+# ─────────────────────────────────────────────────────────────────
+# 2. Motion tokens — pas de Duration() hardcodée dans le scope UI
+# ─────────────────────────────────────────────────────────────────
+echo "[pre-commit] Motion tokens check..."
 
-while IFS= read -r file_path; do
-  if [[ -f "$file_path" ]]; then
-    dart format "$file_path"
-    git add "$file_path"
-  fi
-done <<< "$staged_dart_files"
+if bash scripts/check_motion_tokens.sh; then
+  echo "[pre-commit] ✅ Motion tokens OK."
+else
+  echo "[pre-commit] ❌ Motion tokens FAILED — commit bloqué."
+  ERRORS=$((ERRORS + 1))
+fi
 
-echo "[pre-commit] Dart format complete."
+# ─────────────────────────────────────────────────────────────────
+# Résumé
+# ─────────────────────────────────────────────────────────────────
+if [[ $ERRORS -gt 0 ]]; then
+  echo ""
+  echo "[pre-commit] ✗ $ERRORS erreur(s) — corrigez puis relancez \`git commit\`."
+  exit 1
+fi
+
+echo "[pre-commit] ✓ Toutes les vérifications ont réussi."

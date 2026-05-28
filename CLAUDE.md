@@ -19,6 +19,9 @@ flutter gen-l10n                                                  # après modif
 flutter analyze
 flutter test
 flutter run
+
+# Première fois après clone — activer les hooks locaux Git
+bash scripts/install_git_hooks.sh
 ```
 
 Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When Build Runner Fails").

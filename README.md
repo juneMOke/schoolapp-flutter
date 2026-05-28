@@ -15,13 +15,35 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-To force the app to generate l10n files, run the following command in the terminal:
+## Setup après clone
+
+```bash
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
+flutter gen-l10n
+
+# Activer les hooks Git locaux (à faire une seule fois)
+bash scripts/install_git_hooks.sh
+```
+
+## Hooks Git locaux
+
+| Hook | Déclencheur | Ce qu'il fait |
+|---|---|---|
+| `pre-commit` | `git commit` | Format Dart auto + motion tokens check |
+| `pre-push` | `git push` | `flutter analyze` + `flutter test` |
+
+Bypass : `git commit --no-verify` / `git push --no-verify`
+
+## Commandes utiles
+
+Forcer la regénération des fichiers de localisation :
 
 ```bash
 flutter gen-l10n
 ```
 
-To force the app to generate retrofit files, run the following command in the terminal:
+Forcer la regénération des fichiers Retrofit / JSON :
 
 ```bash
 flutter pub run build_runner build --delete-conflicting-outputs

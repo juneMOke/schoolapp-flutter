@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stats_dashboard_header.dart';
@@ -59,7 +60,7 @@ class _EnrollmentStatsDashboardPageState
               _EnrollmentStatsContextFilterRow(state: state),
               const SizedBox(height: AppDimensions.spacingL),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
+                duration: AppMotion.standard,
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: KeyedSubtree(

@@ -389,7 +389,26 @@ flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 flutter gen-l10n
 flutter run
+
+# Première fois après clone — activer les hooks locaux Git
+bash scripts/install_git_hooks.sh
 ```
+
+### Git Hooks locaux
+
+Le projet fournit des hooks Git dans `.githooks/` :
+
+| Hook | Déclencheur | Vérifications |
+|---|---|---|
+| `pre-commit` | `git commit` | Format Dart (auto-stage) + motion tokens check |
+| `pre-push` | `git push` | `flutter analyze` + `flutter test` |
+
+Activation (une seule fois après clone) :
+```bash
+bash scripts/install_git_hooks.sh
+```
+
+Bypass en urgence : `git commit --no-verify` / `git push --no-verify`.
 
 ### Debugging Tips
 

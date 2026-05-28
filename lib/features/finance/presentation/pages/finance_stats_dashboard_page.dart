@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/finance_stats_error_l10n_extension.dart';
@@ -55,7 +56,7 @@ class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
               _FinanceStatsContextFilterRow(state: state),
               const SizedBox(height: AppDimensions.spacingL),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
+                duration: AppMotion.standard,
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: KeyedSubtree(
