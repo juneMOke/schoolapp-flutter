@@ -49,7 +49,8 @@ class FinanceInfoTile extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingXS),
             Text(
               value,
-              style: valueStyle ??
+              style:
+                  valueStyle ??
                   AppTextStyles.bodyStrong.copyWith(
                     color: valueColor,
                     fontSize: valueFontSize,

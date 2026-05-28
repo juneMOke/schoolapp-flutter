@@ -19,5 +19,12 @@ class StudentSummary extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, firstName, lastName, surname, dateOfBirth, gender];
+  List<Object?> get props => [
+    id,
+    firstName,
+    lastName,
+    surname,
+    dateOfBirth,
+    gender,
+  ];
 }

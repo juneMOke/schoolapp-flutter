@@ -76,12 +76,7 @@ class ClassesOrganisationSearchRequest extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-    firstName,
-    lastName,
-    surname,
-    selectedLevel,
-  ];
+  List<Object?> get props => [firstName, lastName, surname, selectedLevel];
 }
 
 class ClassroomMemberReassignIntent extends Equatable {

@@ -28,7 +28,9 @@ class ClassesOrganisationPageHelpers {
       ),
     );
 
-    return sortedOptions.where((option) => seen.add(option.key)).toList(growable: false);
+    return sortedOptions
+        .where((option) => seen.add(option.key))
+        .toList(growable: false);
   }
 
   static List<ClassesOrganisationCycleOption> buildCycleOptions(
@@ -37,18 +39,24 @@ class ClassesOrganisationPageHelpers {
     final grouped = <String, List<ClassesOrganisationLevelOption>>{};
 
     for (final level in levels) {
-      grouped.putIfAbsent(level.schoolLevelGroupId, () => <ClassesOrganisationLevelOption>[])
+      grouped
+          .putIfAbsent(
+            level.schoolLevelGroupId,
+            () => <ClassesOrganisationLevelOption>[],
+          )
           .add(level);
     }
 
-    final cycles = grouped.entries.map((entry) {
-      final sample = entry.value.first;
-      return ClassesOrganisationCycleOption(
-        id: entry.key,
-        label: sample.schoolLevelGroupName,
-        levels: entry.value,
-      );
-    }).toList(growable: false);
+    final cycles = grouped.entries
+        .map((entry) {
+          final sample = entry.value.first;
+          return ClassesOrganisationCycleOption(
+            id: entry.key,
+            label: sample.schoolLevelGroupName,
+            levels: entry.value,
+          );
+        })
+        .toList(growable: false);
 
     cycles.sort((a, b) => a.label.compareTo(b.label));
     return cycles;

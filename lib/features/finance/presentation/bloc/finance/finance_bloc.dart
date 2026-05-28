@@ -11,8 +11,8 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   final GetFeeTariffsUseCase _getFeeTariffsUseCase;
 
   FinanceBloc({required GetFeeTariffsUseCase getFeeTariffsUseCase})
-      : _getFeeTariffsUseCase = getFeeTariffsUseCase,
-        super(const FinanceState()) {
+    : _getFeeTariffsUseCase = getFeeTariffsUseCase,
+      super(const FinanceState()) {
     on<FinanceFeeTariffsRequested>(_onFeeTariffsRequested);
   }
 

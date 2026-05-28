@@ -8,14 +8,14 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Adapte l'état BLoC vers la config de [FacturationDataTable].
-/// 
+///
 /// Responsabilité unique : écouter [EnrollmentBloc] et router vers le bon
 /// widget selon l'état courant. Tout rendu est déléguée à [FacturationDataTable].
 class FacturationStudentTable extends StatelessWidget {
   /// Appelé quand l'icône "œil" est tapée.
   /// [levelId] provient du dernier critère de recherche stocké dans l'état BLoC.
   final void Function(EnrollmentSummary summary, String levelId)
-      onViewRequested;
+  onViewRequested;
 
   const FacturationStudentTable({super.key, required this.onViewRequested});
 
@@ -33,8 +33,7 @@ class FacturationStudentTable extends StatelessWidget {
         }
 
         final levelId = state.lastSummariesQuery?.schoolLevelId ?? '';
-        final isLoading =
-            state.summariesStatus == EnrollmentLoadStatus.loading;
+        final isLoading = state.summariesStatus == EnrollmentLoadStatus.loading;
         final isError = state.summariesStatus == EnrollmentLoadStatus.failure;
 
         return AnimatedSwitcher(

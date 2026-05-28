@@ -28,7 +28,9 @@ class FacturationPaymentFooterActions extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surfaceRaised,
             border: Border(
-              top: BorderSide(color: AppColors.borderStrong.withValues(alpha: 0.2)),
+              top: BorderSide(
+                color: AppColors.borderStrong.withValues(alpha: 0.2),
+              ),
             ),
           ),
           child: SafeArea(

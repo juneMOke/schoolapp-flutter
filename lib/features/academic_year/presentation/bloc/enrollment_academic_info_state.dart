@@ -16,9 +16,9 @@ class EnrollmentAcademicInfoState extends Equatable {
   });
 
   const EnrollmentAcademicInfoState.initial()
-      : status = EnrollmentAcademicInfoStatus.initial,
-        updatedDetail = null,
-        errorMessage = null;
+    : status = EnrollmentAcademicInfoStatus.initial,
+      updatedDetail = null,
+      errorMessage = null;
 
   EnrollmentAcademicInfoState copyWith({
     EnrollmentAcademicInfoStatus? status,

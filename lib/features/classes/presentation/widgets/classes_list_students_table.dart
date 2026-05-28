@@ -28,7 +28,8 @@ class ClassesListStudentsTable extends StatefulWidget {
   });
 
   @override
-  State<ClassesListStudentsTable> createState() => _ClassesListStudentsTableState();
+  State<ClassesListStudentsTable> createState() =>
+      _ClassesListStudentsTableState();
 }
 
 class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
@@ -134,10 +135,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
     });
   }
 
-  String _valueFor(
-    ClassesListStudentRow row,
-    _ClassesListSortColumn column,
-  ) {
+  String _valueFor(ClassesListStudentRow row, _ClassesListSortColumn column) {
     return switch (column) {
       _ClassesListSortColumn.lastName => row.lastName.toLowerCase(),
       _ClassesListSortColumn.surname => row.surname.toLowerCase(),

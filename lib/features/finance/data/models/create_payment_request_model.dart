@@ -51,6 +51,8 @@ class CreatePaymentRequestModel {
     'payerFirstName': payerFirstName,
     'payerLastName': payerLastName,
     'payerMiddleName': payerMiddleName,
-    'allocations': allocations.map((allocation) => allocation.toJson()).toList(),
+    'allocations': allocations
+        .map((allocation) => allocation.toJson())
+        .toList(),
   };
 }

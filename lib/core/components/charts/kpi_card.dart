@@ -19,10 +19,7 @@ class KpiCard extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, scale, child) => Opacity(
         opacity: scale,
-        child: Transform.scale(
-          scale: scale,
-          child: child,
-        ),
+        child: Transform.scale(scale: scale, child: child),
       ),
       child: Container(
         height: AppDimensions.enrollmentStatsKpiCardHeight,
@@ -31,10 +28,10 @@ class KpiCard extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: AppColors.enrollmentStatsCardSurface,
-          borderRadius: BorderRadius.circular(AppDimensions.enrollmentStatsChartRadius),
-          border: Border(
-            left: BorderSide(color: data.accent, width: 3),
+          borderRadius: BorderRadius.circular(
+            AppDimensions.enrollmentStatsChartRadius,
           ),
+          border: Border(left: BorderSide(color: data.accent, width: 3)),
           boxShadow: [
             BoxShadow(
               color: AppColors.textPrimary.withValues(alpha: 0.04),
@@ -65,7 +62,9 @@ class KpiCard extends StatelessWidget {
                 if (data.percent != null)
                   Text(
                     '${data.percent} %',
-                    style: AppTextStyles.badge.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.badge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -76,7 +75,9 @@ class KpiCard extends StatelessWidget {
             ),
             Text(
               data.label,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

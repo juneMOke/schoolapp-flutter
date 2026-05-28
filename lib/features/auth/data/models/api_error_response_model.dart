@@ -15,7 +15,8 @@ class ApiErrorResponseModel {
       ApiErrorResponseModel(
         status: json['status'] as int?,
         message: json['message'] as String?,
-        errors: (json['errors'] as List<dynamic>?)
+        errors:
+            (json['errors'] as List<dynamic>?)
                 ?.map(
                   (e) =>
                       ApiErrorDetailModel.fromJson(e as Map<String, dynamic>),

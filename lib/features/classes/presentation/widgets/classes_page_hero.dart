@@ -106,10 +106,7 @@ class _HeroContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: AppTextStyles.pageTitle.copyWith(color: titleColor),
-        ),
+        Text(title, style: AppTextStyles.pageTitle.copyWith(color: titleColor)),
         const SizedBox(height: AppDimensions.spacingS),
         Text(
           subtitle,
@@ -121,9 +118,7 @@ class _HeroContent extends StatelessWidget {
             spacing: AppDimensions.spacingS,
             runSpacing: AppDimensions.spacingS,
             children: chips
-                .map(
-                  (chip) => _HeroChip(icon: chip.icon, label: chip.label),
-                )
+                .map((chip) => _HeroChip(icon: chip.icon, label: chip.label))
                 .toList(growable: false),
           ),
         ],

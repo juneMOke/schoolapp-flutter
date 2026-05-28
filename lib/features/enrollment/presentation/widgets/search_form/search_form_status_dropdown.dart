@@ -52,9 +52,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
     const borderSide = BorderSide(color: AppColors.border);
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-      ),
+      decoration: BoxDecoration(borderRadius: borderRadius),
       child: DropdownButtonFormField<String>(
         initialValue: selectedValue,
         borderRadius: borderRadius,
@@ -103,9 +101,8 @@ class SearchFormStatusDropdown extends StatelessWidget {
         ),
         isExpanded: true,
         itemHeight: null,
-        selectedItemBuilder: (context) => options
-            .map((o) => _buildSelectedStatusItem(o, l10n))
-            .toList(),
+        selectedItemBuilder: (context) =>
+            options.map((o) => _buildSelectedStatusItem(o, l10n)).toList(),
         items: options
             .map(
               (o) => DropdownMenuItem<String>(
@@ -126,8 +123,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
   }
 
   Widget _buildStatusItem(
-    _StatusOption option,
-    {
+    _StatusOption option, {
     required AppLocalizations l10n,
     required bool isSelected,
   }) {
@@ -175,10 +171,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedStatusItem(
-    _StatusOption option,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildSelectedStatusItem(_StatusOption option, AppLocalizations l10n) {
     return Align(
       alignment: Alignment.centerLeft,
       child: _buildEnrollmentStatusBadge(
@@ -211,10 +204,7 @@ class SearchFormStatusDropdown extends StatelessWidget {
         size: size,
       ),
       EnrollmentStatus.financialCompleted =>
-        StatusBadge.enrollmentFinancialCompleted(
-          label: label,
-          size: size,
-        ),
+        StatusBadge.enrollmentFinancialCompleted(label: label, size: size),
       EnrollmentStatus.completed => StatusBadge.enrollmentCompleted(
         label: label,
         size: size,

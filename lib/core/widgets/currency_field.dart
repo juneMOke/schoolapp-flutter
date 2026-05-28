@@ -85,10 +85,7 @@ class CurrencyField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-          borderSide: const BorderSide(
-            color: AppColors.bleuArdoise,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.bleuArdoise, width: 2),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.spacingS),

@@ -19,7 +19,9 @@ class FinanceStatsResponseModel {
 
   factory FinanceStatsResponseModel.fromJson(Map<String, dynamic> json) {
     return FinanceStatsResponseModel(
-      context: StatsContextModel.fromJson(json['context'] as Map<String, dynamic>),
+      context: StatsContextModel.fromJson(
+        json['context'] as Map<String, dynamic>,
+      ),
       kpis: FinanceKpisModel.fromJson(json['kpis'] as Map<String, dynamic>),
       evolution: FinanceEvolutionModel.fromJson(
         json['evolution'] as Map<String, dynamic>,

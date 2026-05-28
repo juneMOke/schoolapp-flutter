@@ -1,4 +1,1 @@
-enum ClassesListOrigin {
-  classesList,
-  disciplinesList,
-}
+enum ClassesListOrigin { classesList, disciplinesList }

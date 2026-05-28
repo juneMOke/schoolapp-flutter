@@ -18,7 +18,9 @@ class FinanceStatsChartCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
-        borderRadius: BorderRadius.circular(AppDimensions.enrollmentStatsChartRadius),
+        borderRadius: BorderRadius.circular(
+          AppDimensions.enrollmentStatsChartRadius,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: 0.04),
@@ -33,7 +35,9 @@ class FinanceStatsChartCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Container(height: 1, color: AppColors.border),

@@ -25,9 +25,7 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: KpiBand(cards: cards),
-        ),
+        home: Scaffold(body: KpiBand(cards: cards)),
       ),
     );
 

@@ -23,7 +23,8 @@ class GenderDonutChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < AppBreakpoints.detailCompactMax;
+        final isCompact =
+            constraints.maxWidth < AppBreakpoints.detailCompactMax;
         return SizedBox(
           height: AppDimensions.enrollmentStatsChartSectionHeight,
           child: isCompact
@@ -54,111 +55,108 @@ class GenderDonutChart extends StatelessWidget {
   }
 
   Widget _buildDonut() => Stack(
-        alignment: Alignment.center,
+    alignment: Alignment.center,
+    children: [
+      PieChart(
+        PieChartData(
+          sections: sections.map(_toSection).toList(),
+          centerSpaceRadius: AppDimensions.enrollmentStatsDonutCenterRadius,
+          sectionsSpace: 2,
+          startDegreeOffset: -90,
+        ),
+      ),
+      Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          PieChart(
-            PieChartData(
-              sections: sections.map(_toSection).toList(),
-              centerSpaceRadius: AppDimensions.enrollmentStatsDonutCenterRadius,
-              sectionsSpace: 2,
-              startDegreeOffset: -90,
+          Text(
+            '$total',
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '$total',
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                centerLabel,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+          Text(
+            centerLabel,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
-      );
+      ),
+    ],
+  );
 
   Widget _buildLegendWrap() => Wrap(
-        spacing: AppDimensions.spacingS,
-        runSpacing: AppDimensions.spacingXS,
-        children: sections
-            .map(
-              (s) => Tooltip(
-                message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.spacingS,
-                    vertical: AppDimensions.spacingXS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: s.color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '${s.label} ${s.percent.toInt()}%',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+    spacing: AppDimensions.spacingS,
+    runSpacing: AppDimensions.spacingXS,
+    children: sections
+        .map(
+          (s) => Tooltip(
+            message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingS,
+                vertical: AppDimensions.spacingXS,
+              ),
+              decoration: BoxDecoration(
+                color: s.color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '${s.label} ${s.percent.toInt()}%',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            )
-            .toList(),
-      );
+            ),
+          ),
+        )
+        .toList(),
+  );
 
   PieChartSectionData _toSection(DonutChartSection s) => PieChartSectionData(
-        value: s.percent,
-        color: s.color,
-        title: '',
-        radius: 38,
-      );
+    value: s.percent,
+    color: s.color,
+    title: '',
+    radius: 38,
+  );
 
   Widget _toLegendItem(DonutChartSection s) => Tooltip(
-        message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppDimensions.spacingXS),
-          child: Row(
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: s.color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      s.label,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    Text(
-                      '${s.count}  ·  ${s.percent.toInt()} %',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    message: '${s.label}: ${s.count} (${s.percent.toInt()}%)',
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.spacingXS),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: s.color, shape: BoxShape.circle),
           ),
-        ),
-      );
+          const SizedBox(width: AppDimensions.spacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  s.label,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Text(
+                  '${s.count}  ·  ${s.percent.toInt()} %',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

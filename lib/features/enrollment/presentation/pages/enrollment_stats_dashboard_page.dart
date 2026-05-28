@@ -81,7 +81,9 @@ class _EnrollmentStatsDashboardPageState
   ) {
     return switch (state.status) {
       EnrollmentStatsStatus.loading => const EnrollmentStatsLoadingView(),
-      EnrollmentStatsStatus.success => EnrollmentStatsSuccessView(stats: state.stats!),
+      EnrollmentStatsStatus.success => EnrollmentStatsSuccessView(
+        stats: state.stats!,
+      ),
       EnrollmentStatsStatus.error => EnrollmentStatsErrorView(
         message: state.errorMessage ?? l10n.enrollmentStatsLoadingError,
         onRetry: () => context.read<EnrollmentStatsBloc>().add(
@@ -103,7 +105,8 @@ class _EnrollmentStatsContextFilterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final schoolYear =
-        state.stats?.context.schoolYear ?? l10n.enrollmentStatsSchoolYearUnavailable;
+        state.stats?.context.schoolYear ??
+        l10n.enrollmentStatsSchoolYearUnavailable;
 
     return Semantics(
       container: true,

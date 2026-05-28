@@ -34,7 +34,9 @@ class FinanceStatsEvolutionSection extends StatelessWidget {
         BarChartItem(
           label: _shortKey(bucket.key),
           value: bucket.value.toDouble(),
-          color: bucket.isCurrent ? AppColors.terreCuite : AppColors.bleuArdoise,
+          color: bucket.isCurrent
+              ? AppColors.terreCuite
+              : AppColors.bleuArdoise,
         ),
     ];
 

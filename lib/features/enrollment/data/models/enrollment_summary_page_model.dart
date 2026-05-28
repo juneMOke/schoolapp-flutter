@@ -20,7 +20,10 @@ class EnrollmentSummaryPageModel {
     final rawContent = json['content'] as List<dynamic>?;
     return EnrollmentSummaryPageModel(
       content: (rawContent ?? const <dynamic>[])
-          .map((item) => EnrollmentSummaryModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                EnrollmentSummaryModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
       page: json['page'] as int? ?? 0,
       size: json['size'] as int? ?? 0,
@@ -30,7 +33,9 @@ class EnrollmentSummaryPageModel {
   }
 
   EnrollmentSummaryPage toEnrollmentSummaryPage() => EnrollmentSummaryPage(
-    content: content.map((item) => item.toEnrollmentSummary()).toList(growable: false),
+    content: content
+        .map((item) => item.toEnrollmentSummary())
+        .toList(growable: false),
     page: page,
     size: size,
     totalElements: totalElements,

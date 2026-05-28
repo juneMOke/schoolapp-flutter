@@ -1,5 +1,5 @@
 /// Helper pour formater les grands nombres en K (milliers) et M (millions)
-/// 
+///
 /// Exemples:
 /// - 500 → "500"
 /// - 1500 → "1.5K"
@@ -11,7 +11,7 @@ class NumberFormatterHelper {
   /// avec K pour les milliers et M pour les millions
   static String formatYAxisLabel(double value) {
     final absValue = value.abs();
-    
+
     // Pour les millions
     if (absValue >= 1000000) {
       final millions = value / 1000000;
@@ -21,7 +21,7 @@ class NumberFormatterHelper {
       }
       return '${millions.toStringAsFixed(0)}M';
     }
-    
+
     // Pour les milliers
     if (absValue >= 1000) {
       final thousands = value / 1000;
@@ -31,7 +31,7 @@ class NumberFormatterHelper {
       }
       return '${thousands.toStringAsFixed(0)}K';
     }
-    
+
     // Pour les valeurs < 1000
     return value.toInt().toString();
   }

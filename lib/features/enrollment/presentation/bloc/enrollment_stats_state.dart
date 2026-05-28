@@ -46,7 +46,9 @@ class EnrollmentStatsState extends Equatable {
     Object? selectedWeek = _undefined,
   }) => EnrollmentStatsState(
     status: status ?? this.status,
-    stats: identical(stats, _undefined) ? this.stats : stats as EnrollmentStats?,
+    stats: identical(stats, _undefined)
+        ? this.stats
+        : stats as EnrollmentStats?,
     errorType: errorType ?? this.errorType,
     errorMessage: identical(errorMessage, _undefined)
         ? this.errorMessage

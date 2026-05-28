@@ -155,8 +155,8 @@ class ClassesOrganisationSplitResults extends StatelessWidget {
             final columns = width >= 1080
                 ? 3
                 : width >= 700
-                    ? 2
-                    : 1;
+                ? 2
+                : 1;
 
             return GridView.builder(
               shrinkWrap: true,

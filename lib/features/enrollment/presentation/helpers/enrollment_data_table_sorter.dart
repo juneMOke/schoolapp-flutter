@@ -4,7 +4,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 enum EnrollmentSortColumn { lastName, surname, firstName, dateOfBirth }
 
 /// Service stateless pour gérer le tri des résumés d'inscription.
-/// 
+///
 /// Extrait la logique tri de [EnrollmentDataTable] pour la rendre
 /// testable et réutilisable.
 class EnrollmentDataTableSorter {

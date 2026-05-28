@@ -50,8 +50,7 @@ class StudentChargesState extends Equatable {
     errorType: errorType ?? this.errorType,
     allocationsStatus: allocationsStatus ?? this.allocationsStatus,
     allocationsByChargeId: allocationsByChargeId ?? this.allocationsByChargeId,
-    allocationsErrorType:
-        allocationsErrorType ?? this.allocationsErrorType,
+    allocationsErrorType: allocationsErrorType ?? this.allocationsErrorType,
     updatingChargeId: identical(updatingChargeId, _undefined)
         ? this.updatingChargeId
         : updatingChargeId as String?,

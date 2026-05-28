@@ -99,8 +99,11 @@ void main() {
 
     final unlinkBloc = MockParentBloc();
     when(() => unlinkBloc.state).thenReturn(const ParentState.initial());
-    whenListen(unlinkBloc, controller.stream,
-        initialState: const ParentState.initial());
+    whenListen(
+      unlinkBloc,
+      controller.stream,
+      initialState: const ParentState.initial(),
+    );
 
     // Redirige l'injection vers ce bloc.
     await getIt.reset();
@@ -121,8 +124,9 @@ void main() {
 
     // Simule la réponse succès de l'API.
     controller.add(
-      const ParentState.initial()
-          .copyWith(status: ParentUpdateStatus.unlinkSuccess),
+      const ParentState.initial().copyWith(
+        status: ParentUpdateStatus.unlinkSuccess,
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -135,26 +139,25 @@ void main() {
     await controller.close();
   });
 
-  testWidgets(
-    'dismiss de la popup sans confirmer conserve le tuteur',
-    (tester) async {
-      await pumpGuardianStep(tester);
+  testWidgets('dismiss de la popup sans confirmer conserve le tuteur', (
+    tester,
+  ) async {
+    await pumpGuardianStep(tester);
 
-      const parentItemKey = ValueKey<String>('parent-item-parent-1');
-      expect(find.byKey(parentItemKey), findsOneWidget);
+    const parentItemKey = ValueKey<String>('parent-item-parent-1');
+    expect(find.byKey(parentItemKey), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
-      await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
+    await tester.pumpAndSettle();
 
-      expect(find.text('Confirmer la suppression'), findsOneWidget);
+    expect(find.text('Confirmer la suppression'), findsOneWidget);
 
-      // Tap sur la barrière modale (hors dialog) pour fermer sans confirmer.
-      await tester.tapAt(const Offset(10, 10));
-      await tester.pumpAndSettle();
+    // Tap sur la barrière modale (hors dialog) pour fermer sans confirmer.
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Confirmer la suppression'), findsNothing);
-      expect(find.byKey(parentItemKey), findsOneWidget);
-      expect(find.text('Aucune information de tuteur disponible'), findsNothing);
-    },
-  );
+    expect(find.text('Confirmer la suppression'), findsNothing);
+    expect(find.byKey(parentItemKey), findsOneWidget);
+    expect(find.text('Aucune information de tuteur disponible'), findsNothing);
+  });
 }

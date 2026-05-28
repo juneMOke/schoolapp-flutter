@@ -53,12 +53,21 @@ class _DisciplinaryCaseViewDialogState
           switchInCurve: AppMotion.outCurve,
           switchOutCurve: AppMotion.inCurve,
           child: switch (state.detailStatus) {
-            DisciplinaryCaseStatusState.loading =>
-              _buildLoading(l10n, key: const ValueKey('loading')),
-            DisciplinaryCaseStatusState.success =>
-              _buildContent(context, l10n, state, key: const ValueKey('success')),
-            DisciplinaryCaseStatusState.failure =>
-              _buildError(context, l10n, key: const ValueKey('error')),
+            DisciplinaryCaseStatusState.loading => _buildLoading(
+              l10n,
+              key: const ValueKey('loading'),
+            ),
+            DisciplinaryCaseStatusState.success => _buildContent(
+              context,
+              l10n,
+              state,
+              key: const ValueKey('success'),
+            ),
+            DisciplinaryCaseStatusState.failure => _buildError(
+              context,
+              l10n,
+              key: const ValueKey('error'),
+            ),
             DisciplinaryCaseStatusState.initial => const SizedBox.shrink(),
           },
         ),
@@ -94,9 +103,7 @@ class _DisciplinaryCaseViewDialogState
             const SizedBox(height: AppDimensions.spacingM),
             Text(
               l10n.disciplinaryCaseViewDialogLoadingMessage,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -213,8 +220,9 @@ class _DisciplinaryCaseViewDialogState
                     padding: const EdgeInsets.all(AppDimensions.spacingM),
                     decoration: BoxDecoration(
                       color: AppColors.background,
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.spacingM),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.spacingM,
+                      ),
                       border: Border.all(color: AppColors.border),
                     ),
                     child: Text(
@@ -234,9 +242,7 @@ class _DisciplinaryCaseViewDialogState
             padding: const EdgeInsets.all(AppDimensions.spacingM),
             decoration: const BoxDecoration(
               color: AppColors.surface,
-              border: Border(
-                top: BorderSide(color: AppColors.border),
-              ),
+              border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -260,8 +266,11 @@ class _DisciplinaryCaseViewDialogState
     );
   }
 
-  Widget _buildError(BuildContext context, AppLocalizations l10n,
-      {required ValueKey key}) {
+  Widget _buildError(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required ValueKey key,
+  }) {
     return KeyedSubtree(
       key: key,
       child: Padding(
@@ -307,10 +316,7 @@ class _DisciplinaryCaseViewDialogState
     );
   }
 
-  Widget _buildDetailRow({
-    required String label,
-    required Widget child,
-  }) {
+  Widget _buildDetailRow({required String label, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

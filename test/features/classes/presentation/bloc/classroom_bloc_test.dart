@@ -350,9 +350,7 @@ void main() {
             academicYearId: tAcademicYearId,
             schoolLevelId: tSchoolLevelId,
           ),
-        ).thenAnswer(
-          (_) async => const Left(NotFoundFailure('Not found')),
-        );
+        ).thenAnswer((_) async => const Left(NotFoundFailure('Not found')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(

@@ -14,7 +14,8 @@ class FinanceStatsDashboardScope extends StatefulWidget {
       _FinanceStatsDashboardScopeState();
 }
 
-class _FinanceStatsDashboardScopeState extends State<FinanceStatsDashboardScope> {
+class _FinanceStatsDashboardScopeState
+    extends State<FinanceStatsDashboardScope> {
   late final FinanceStatsBloc _bloc;
 
   @override

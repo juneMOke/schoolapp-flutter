@@ -11,7 +11,9 @@ class GenderDistributionModel {
     return GenderDistributionModel(
       total: (json['total'] as num).toInt(),
       segments: (json['segments'] as List<dynamic>)
-          .map((item) => GenderSegmentModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => GenderSegmentModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }

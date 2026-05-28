@@ -40,10 +40,9 @@ class EnrollmentStatsPeriodFilter extends StatelessWidget {
               ),
             ],
             selected: state.selectedPeriod,
-            onSelected: (period) =>
-                context.read<EnrollmentStatsBloc>().add(
-                      EnrollmentStatsRequested(period: period),
-                    ),
+            onSelected: (period) => context.read<EnrollmentStatsBloc>().add(
+              EnrollmentStatsRequested(period: period),
+            ),
           ),
         );
       },

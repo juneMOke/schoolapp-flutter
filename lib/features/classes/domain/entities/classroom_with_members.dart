@@ -6,10 +6,7 @@ class ClassroomWithMembers extends Equatable {
   final Classroom classroom;
   final List<ClassroomMember> members;
 
-  const ClassroomWithMembers({
-    required this.classroom,
-    required this.members,
-  });
+  const ClassroomWithMembers({required this.classroom, required this.members});
 
   @override
   List<Object?> get props => [classroom, members];

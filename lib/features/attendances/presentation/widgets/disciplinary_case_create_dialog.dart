@@ -174,210 +174,214 @@ class _DisciplinaryCaseCreateDialogState
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
-          _buildHeader(context, l10n, isLoading),
-          // Content
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.spacingM),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.disciplinaryCaseCreateDialogTitleField,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
+        _buildHeader(context, l10n, isLoading),
+        // Content
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.spacingM),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.disciplinaryCaseCreateDialogTitleField,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    TextFormField(
-                      controller: _titleController,
-                      enabled: !isLoading,
-                      decoration: _inputDecoration(
-                        labelText: l10n.disciplinaryCaseCreateDialogTitleField,
-                        hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
-                        }
-                        return null;
-                      },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingXS),
+                  TextFormField(
+                    controller: _titleController,
+                    enabled: !isLoading,
+                    decoration: _inputDecoration(
+                      labelText: l10n.disciplinaryCaseCreateDialogTitleField,
+                      hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
                     ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    Text(
-                      l10n.disciplinaryCaseCreateDialogContentField,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n
+                            .disciplinaryCaseCreateDialogRequiredFieldError;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  Text(
+                    l10n.disciplinaryCaseCreateDialogContentField,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    TextFormField(
-                      controller: _contentController,
-                      enabled: !isLoading,
-                      decoration: _inputDecoration(
-                        labelText: l10n.disciplinaryCaseCreateDialogContentField,
-                        hintText: l10n.disciplinaryCaseCreateDialogContentHint,
-                      ),
-                      minLines: 3,
-                      maxLines: 5,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
-                        }
-                        return null;
-                      },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingXS),
+                  TextFormField(
+                    controller: _contentController,
+                    enabled: !isLoading,
+                    decoration: _inputDecoration(
+                      labelText: l10n.disciplinaryCaseCreateDialogContentField,
+                      hintText: l10n.disciplinaryCaseCreateDialogContentHint,
                     ),
-                    const SizedBox(height: AppDimensions.spacingM),
-                    Text(
-                      l10n.disciplinaryCaseCreateDialogCaseDateField,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    minLines: 3,
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n
+                            .disciplinaryCaseCreateDialogRequiredFieldError;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  Text(
+                    l10n.disciplinaryCaseCreateDialogCaseDateField,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: AppDimensions.spacingXS),
-                    AnimatedOpacity(
-                      duration: AppMotion.fast,
-                      curve: AppMotion.outCurve,
-                      opacity: isLoading ? 0.65 : 1,
-                      child: InkWell(
-                        onTap: isLoading ? null : () => _selectDate(context),
-                        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-                        child: AnimatedContainer(
-                          duration: AppMotion.medium,
-                          curve: AppMotion.outCurve,
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppDimensions.spacingM),
-                          decoration: BoxDecoration(
-                            color: AppColors.disciplinaryDetailAccentSoft,
-                            borderRadius: BorderRadius.circular(
-                              AppDimensions.spacingM,
-                            ),
-                            border: Border.all(
-                              color: AppColors.disciplinaryDetailAccent.withValues(
-                                alpha: isLoading ? 0.12 : 0.2,
-                              ),
-                            ),
+                  ),
+                  const SizedBox(height: AppDimensions.spacingXS),
+                  AnimatedOpacity(
+                    duration: AppMotion.fast,
+                    curve: AppMotion.outCurve,
+                    opacity: isLoading ? 0.65 : 1,
+                    child: InkWell(
+                      onTap: isLoading ? null : () => _selectDate(context),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.spacingM,
+                      ),
+                      child: AnimatedContainer(
+                        duration: AppMotion.medium,
+                        curve: AppMotion.outCurve,
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppDimensions.spacingM),
+                        decoration: BoxDecoration(
+                          color: AppColors.disciplinaryDetailAccentSoft,
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.spacingM,
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today_outlined,
-                                size: AppDimensions.detailMiniIconSize,
-                                color: AppColors.disciplinaryDetailAccent,
-                              ),
-                              const SizedBox(width: AppDimensions.spacingS),
-                              Expanded(
-                                child: AnimatedSwitcher(
-                                  duration: AppMotion.fast,
-                                  switchInCurve: AppMotion.outCurve,
-                                  switchOutCurve: AppMotion.inCurve,
-                                  child: Text(
-                                    _formatSelectedDate(context),
-                                    key: ValueKey(_selectedDate),
-                                    style: AppTextStyles.bodyStrong.copyWith(
-                                      color: AppColors.textPrimary,
-                                    ),
+                          border: Border.all(
+                            color: AppColors.disciplinaryDetailAccent
+                                .withValues(alpha: isLoading ? 0.12 : 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: AppDimensions.detailMiniIconSize,
+                              color: AppColors.disciplinaryDetailAccent,
+                            ),
+                            const SizedBox(width: AppDimensions.spacingS),
+                            Expanded(
+                              child: AnimatedSwitcher(
+                                duration: AppMotion.fast,
+                                switchInCurve: AppMotion.outCurve,
+                                switchOutCurve: AppMotion.inCurve,
+                                child: Text(
+                                  _formatSelectedDate(context),
+                                  key: ValueKey(_selectedDate),
+                                  style: AppTextStyles.bodyStrong.copyWith(
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
-                              const Icon(
-                                Icons.expand_more_rounded,
-                                color: AppColors.textSecondary,
-                              ),
-                            ],
-                          ),
+                            ),
+                            const Icon(
+                              Icons.expand_more_rounded,
+                              color: AppColors.textSecondary,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          // Footer
-          Container(
-            padding: const EdgeInsets.all(AppDimensions.spacingM),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Semantics(
-                  label: l10n.cancel,
-                  button: true,
-                  child: TextButton(
-                    onPressed: isLoading ? null : () => Navigator.pop(context),
-                    child: Text(
-                      l10n.cancel,
-                      style: AppTextStyles.action.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingS),
-                Semantics(
-                  label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                  button: true,
-                  enabled: !isLoading,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.disciplinaryDetailAccent,
-                      foregroundColor: AppColors.surface,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.spacingM,
-                        vertical: AppDimensions.spacingS,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppDimensions.spacingM),
-                      ),
-                    ),
-                    onPressed: isLoading ? null : () => _submit(context),
-                    icon: AnimatedSwitcher(
-                      duration: AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: isLoading
-                          ? const SizedBox(
-                              key: ValueKey('loading-icon'),
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.surface,
-                                ),
-                              ),
-                            )
-                          : const Icon(
-                              Icons.add_task_outlined,
-                              key: ValueKey('submit-icon'),
-                            ),
-                    ),
-                    label: AnimatedSwitcher(
-                      duration: AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: Text(
-                        isLoading
-                            ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                            : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                        key: ValueKey(isLoading),
-                        style: AppTextStyles.action,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        ),
+        // Footer
+        Container(
+          padding: const EdgeInsets.all(AppDimensions.spacingM),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: AppColors.border)),
           ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Semantics(
+                label: l10n.cancel,
+                button: true,
+                child: TextButton(
+                  onPressed: isLoading ? null : () => Navigator.pop(context),
+                  child: Text(
+                    l10n.cancel,
+                    style: AppTextStyles.action.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingS),
+              Semantics(
+                label: l10n.disciplinaryCaseCreateDialogSubmitAction,
+                button: true,
+                enabled: !isLoading,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.disciplinaryDetailAccent,
+                    foregroundColor: AppColors.surface,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.spacingM,
+                      vertical: AppDimensions.spacingS,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.spacingM,
+                      ),
+                    ),
+                  ),
+                  onPressed: isLoading ? null : () => _submit(context),
+                  icon: AnimatedSwitcher(
+                    duration: AppMotion.fast,
+                    switchInCurve: AppMotion.outCurve,
+                    switchOutCurve: AppMotion.inCurve,
+                    child: isLoading
+                        ? const SizedBox(
+                            key: ValueKey('loading-icon'),
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.surface,
+                              ),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.add_task_outlined,
+                            key: ValueKey('submit-icon'),
+                          ),
+                  ),
+                  label: AnimatedSwitcher(
+                    duration: AppMotion.fast,
+                    switchInCurve: AppMotion.outCurve,
+                    switchOutCurve: AppMotion.inCurve,
+                    child: Text(
+                      isLoading
+                          ? l10n.disciplinaryCaseCreateDialogCreatingMessage
+                          : l10n.disciplinaryCaseCreateDialogSubmitAction,
+                      key: ValueKey(isLoading),
+                      style: AppTextStyles.action,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

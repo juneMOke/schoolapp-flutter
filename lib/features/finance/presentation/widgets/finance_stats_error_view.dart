@@ -34,11 +34,16 @@ class FinanceStatsErrorView extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.error_outline_rounded, color: AppColors.danger),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.danger,
+                ),
                 const SizedBox(width: AppDimensions.spacingS),
                 Text(
                   l10n.financeStatsErrorTitle,
-                  style: AppTextStyles.sectionTitle.copyWith(color: AppColors.danger),
+                  style: AppTextStyles.sectionTitle.copyWith(
+                    color: AppColors.danger,
+                  ),
                 ),
               ],
             ),

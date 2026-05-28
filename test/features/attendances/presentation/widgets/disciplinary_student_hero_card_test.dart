@@ -33,9 +33,8 @@ void main() {
   }
 
   Finder richTextContaining(String text) => find.byWidgetPredicate(
-        (widget) =>
-            widget is RichText && widget.text.toPlainText().contains(text),
-      );
+    (widget) => widget is RichText && widget.text.toPlainText().contains(text),
+  );
 
   testWidgets(
     'affiche l avatar texte, le nom complet et les badges cycle/niveau',
@@ -62,23 +61,23 @@ void main() {
   testWidgets(
     'utilise le fallback pour le nom, l initiale et les badges si vide',
     (tester) async {
-    await tester.pumpWidget(
-      buildTestSubject(
-        firstName: '',
-        lastName: '',
-        middleName: ' ',
-        levelName: '',
-        levelGroupName: '',
-        unknownValue: '-',
-      ),
-    );
+      await tester.pumpWidget(
+        buildTestSubject(
+          firstName: '',
+          lastName: '',
+          middleName: ' ',
+          levelName: '',
+          levelGroupName: '',
+          unknownValue: '-',
+        ),
+      );
 
-    expect(find.text('-'), findsOneWidget);
-    expect(find.text('?'), findsOneWidget);
-    expect(find.byIcon(Icons.gavel_outlined), findsNothing);
-    expect(richTextContaining('Cycle · -'), findsOneWidget);
-    expect(richTextContaining('Niveau · -'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+      expect(find.text('-'), findsOneWidget);
+      expect(find.text('?'), findsOneWidget);
+      expect(find.byIcon(Icons.gavel_outlined), findsNothing);
+      expect(richTextContaining('Cycle · -'), findsOneWidget);
+      expect(richTextContaining('Niveau · -'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     },
   );
 }

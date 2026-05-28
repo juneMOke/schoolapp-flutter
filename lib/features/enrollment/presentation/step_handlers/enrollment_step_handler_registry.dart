@@ -66,7 +66,9 @@ class EnrollmentStepHandlerRegistry {
 
     return EnrollmentStepFlowPlan(
       handlers: handlers,
-      initialStepStates: Map<int, StepFormState>.unmodifiable(initialStepStates),
+      initialStepStates: Map<int, StepFormState>.unmodifiable(
+        initialStepStates,
+      ),
     );
   }
 
@@ -76,7 +78,9 @@ class EnrollmentStepHandlerRegistry {
     final handlers = <EnrollmentStepHandler>[
       PersonalInfoStepHandler(controller: dependencies.personalInfoController),
       AddressStepHandler(controller: dependencies.addressController),
-      PreviousAcademicStepHandler(controller: dependencies.academicInfoController),
+      PreviousAcademicStepHandler(
+        controller: dependencies.academicInfoController,
+      ),
       TargetAcademicStepHandler(
         controller: dependencies.academicTargetInfoController,
       ),
@@ -85,8 +89,7 @@ class EnrollmentStepHandlerRegistry {
       ),
       GuardianStepHandler(controller: dependencies.guardianInfoController),
       SummaryStepHandler(),
-    ]
-      ..sort((a, b) => a.order.compareTo(b.order));
+    ]..sort((a, b) => a.order.compareTo(b.order));
 
     return List<EnrollmentStepHandler>.unmodifiable(handlers);
   }

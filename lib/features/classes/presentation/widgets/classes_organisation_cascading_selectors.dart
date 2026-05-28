@@ -69,7 +69,9 @@ class ClassesOrganisationCascadingSelectors extends StatelessWidget {
               child: Text(
                 option.label,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           )
@@ -99,7 +101,9 @@ class ClassesOrganisationCascadingSelectors extends StatelessWidget {
               child: Text(
                 option.schoolLevelName,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           )
@@ -119,7 +123,10 @@ class ClassesOrganisationCascadingSelectors extends StatelessWidget {
     );
   }
 
-  InputDecoration _fieldDecoration({required String label, required IconData icon}) {
+  InputDecoration _fieldDecoration({
+    required String label,
+    required IconData icon,
+  }) {
     return InputDecoration(
       labelText: label,
       filled: true,

@@ -19,7 +19,10 @@ class FinanceStatsKpiBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final totalByFeeType = distribution.items.fold<int>(0, (sum, e) => sum + e.expected);
+    final totalByFeeType = distribution.items.fold<int>(
+      0,
+      (sum, e) => sum + e.expected,
+    );
 
     final items = [
       _KpiCellData(
@@ -62,25 +65,27 @@ class FinanceStatsKpiBand extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-          if (constraints.maxWidth < 780) {
-            final useSingleColumn = constraints.maxWidth < 480;
-            final availableWidth = useSingleColumn
-                ? constraints.maxWidth
-                : (constraints.maxWidth - AppDimensions.spacingM) / 2;
-            final safeWidth = availableWidth < 220 ? constraints.maxWidth : availableWidth;
+            if (constraints.maxWidth < 780) {
+              final useSingleColumn = constraints.maxWidth < 480;
+              final availableWidth = useSingleColumn
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth - AppDimensions.spacingM) / 2;
+              final safeWidth = availableWidth < 220
+                  ? constraints.maxWidth
+                  : availableWidth;
 
-            return Wrap(
-              spacing: AppDimensions.spacingM,
-              runSpacing: AppDimensions.spacingM,
-              children: [
-                for (final item in items)
-                  SizedBox(
-                    width: safeWidth,
-                    child: _FinanceStatsKpiCell(data: item),
-                  ),
-              ],
-            );
-          }
+              return Wrap(
+                spacing: AppDimensions.spacingM,
+                runSpacing: AppDimensions.spacingM,
+                children: [
+                  for (final item in items)
+                    SizedBox(
+                      width: safeWidth,
+                      child: _FinanceStatsKpiCell(data: item),
+                    ),
+                ],
+              );
+            }
 
             return Row(
               children: [
@@ -150,7 +155,9 @@ class _FinanceStatsKpiCell extends StatelessWidget {
           children: [
             Text(
               data.label,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingXS),
             Text(
@@ -164,7 +171,9 @@ class _FinanceStatsKpiCell extends StatelessWidget {
               const SizedBox(height: AppDimensions.spacingXS),
               Text(
                 data.subtitle!,
-                style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
           ],

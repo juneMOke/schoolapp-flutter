@@ -17,7 +17,9 @@ class BootstrapRemoteRepositoryImpl implements BootstrapRemoteRepository {
   @override
   Future<Either<Failure, Bootstrap>> getBootstrapCurrentYear() async {
     try {
-      final model = await remoteDataSource.getBootstrapCurrentYear(requiredAuth);
+      final model = await remoteDataSource.getBootstrapCurrentYear(
+        requiredAuth,
+      );
       return Right(model.toEntity());
     } on DioException catch (e) {
       if (e.error is Failure) {
@@ -32,7 +34,9 @@ class BootstrapRemoteRepositoryImpl implements BootstrapRemoteRepository {
   @override
   Future<Either<Failure, Bootstrap>> getBootstrapPreviousYear() async {
     try {
-      final model = await remoteDataSource.getBootstrapPreviousYear(requiredAuth);
+      final model = await remoteDataSource.getBootstrapPreviousYear(
+        requiredAuth,
+      );
       return Right(model.toEntity());
     } on DioException catch (e) {
       if (e.error is Failure) {

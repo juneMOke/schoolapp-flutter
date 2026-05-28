@@ -149,15 +149,16 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
     );
   }
 
-  PaymentsErrorType _mapFailureToErrorType(Failure failure) => switch (failure) {
-    NetworkFailure() => PaymentsErrorType.network,
-    NotFoundFailure() => PaymentsErrorType.notFound,
-    ValidationFailure() => PaymentsErrorType.validation,
-    UnauthorizedFailure() => PaymentsErrorType.unauthorized,
-    InvalidCredentialsFailure() => PaymentsErrorType.invalidCredentials,
-    ServerFailure() => PaymentsErrorType.server,
-    StorageFailure() => PaymentsErrorType.storage,
-    AuthFailure() => PaymentsErrorType.auth,
-    _ => PaymentsErrorType.unknown,
-  };
+  PaymentsErrorType _mapFailureToErrorType(Failure failure) =>
+      switch (failure) {
+        NetworkFailure() => PaymentsErrorType.network,
+        NotFoundFailure() => PaymentsErrorType.notFound,
+        ValidationFailure() => PaymentsErrorType.validation,
+        UnauthorizedFailure() => PaymentsErrorType.unauthorized,
+        InvalidCredentialsFailure() => PaymentsErrorType.invalidCredentials,
+        ServerFailure() => PaymentsErrorType.server,
+        StorageFailure() => PaymentsErrorType.storage,
+        AuthFailure() => PaymentsErrorType.auth,
+        _ => PaymentsErrorType.unknown,
+      };
 }

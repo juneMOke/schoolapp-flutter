@@ -33,7 +33,9 @@ class AddressStepHandler extends BaseEnrollmentStepHandler {
     return StepFormState(
       dirty: false,
       saving: false,
-      valid: EnrollmentStepperStateHelper.isAddressValid(context.detail.studentDetail),
+      valid: EnrollmentStepperStateHelper.isAddressValid(
+        context.detail.studentDetail,
+      ),
     );
   }
 

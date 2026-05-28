@@ -9,23 +9,19 @@ abstract final class DisciplinaryCaseHelpers {
   static String mapErrorType(
     AppLocalizations l10n,
     DisciplinaryCaseErrorType errorType,
-  ) =>
-      switch (errorType) {
-        DisciplinaryCaseErrorType.network =>
-          l10n.disciplinaryCasesNetworkError,
-        DisciplinaryCaseErrorType.notFound => l10n.disciplinaryCasesNotFound,
-        DisciplinaryCaseErrorType.validation =>
-          l10n.disciplinaryCasesValidationError,
-        DisciplinaryCaseErrorType.unauthorized =>
-          l10n.disciplinaryCasesUnauthorizedError,
-        DisciplinaryCaseErrorType.invalidCredentials =>
-          l10n.disciplinaryCasesInvalidCredentialsError,
-        DisciplinaryCaseErrorType.server => l10n.disciplinaryCasesServerError,
-        DisciplinaryCaseErrorType.storage =>
-          l10n.disciplinaryCasesStorageError,
-        DisciplinaryCaseErrorType.auth => l10n.disciplinaryCasesAuthError,
-        DisciplinaryCaseErrorType.none ||
-        DisciplinaryCaseErrorType.unknown =>
-          l10n.disciplinaryCasesUnknownError,
-      };
+  ) => switch (errorType) {
+    DisciplinaryCaseErrorType.network => l10n.disciplinaryCasesNetworkError,
+    DisciplinaryCaseErrorType.notFound => l10n.disciplinaryCasesNotFound,
+    DisciplinaryCaseErrorType.validation =>
+      l10n.disciplinaryCasesValidationError,
+    DisciplinaryCaseErrorType.unauthorized =>
+      l10n.disciplinaryCasesUnauthorizedError,
+    DisciplinaryCaseErrorType.invalidCredentials =>
+      l10n.disciplinaryCasesInvalidCredentialsError,
+    DisciplinaryCaseErrorType.server => l10n.disciplinaryCasesServerError,
+    DisciplinaryCaseErrorType.storage => l10n.disciplinaryCasesStorageError,
+    DisciplinaryCaseErrorType.auth => l10n.disciplinaryCasesAuthError,
+    DisciplinaryCaseErrorType.none ||
+    DisciplinaryCaseErrorType.unknown => l10n.disciplinaryCasesUnknownError,
+  };
 }

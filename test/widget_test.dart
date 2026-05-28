@@ -28,7 +28,12 @@ void main() {
   testWidgets('App smoke test - renders without error', (
     WidgetTester tester,
   ) async {
-    await pumpBounded(tester, const MyApp(), frames: 2, step: const Duration(milliseconds: 150));
+    await pumpBounded(
+      tester,
+      const MyApp(),
+      frames: 2,
+      step: const Duration(milliseconds: 150),
+    );
     expect(find.byType(MyApp), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -39,7 +44,12 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(320, 568));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-    await pumpBounded(tester, const MyApp(), frames: 2, step: const Duration(milliseconds: 150));
+    await pumpBounded(
+      tester,
+      const MyApp(),
+      frames: 2,
+      step: const Duration(milliseconds: 150),
+    );
 
     expect(find.byType(MyApp), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -51,7 +61,12 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1200, 420));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-    await pumpBounded(tester, const MyApp(), frames: 2, step: const Duration(milliseconds: 150));
+    await pumpBounded(
+      tester,
+      const MyApp(),
+      frames: 2,
+      step: const Duration(milliseconds: 150),
+    );
 
     expect(find.byType(MyApp), findsOneWidget);
     expect(tester.takeException(), isNull);

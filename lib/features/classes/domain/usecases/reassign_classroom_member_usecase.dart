@@ -10,9 +10,8 @@ class ReassignClassroomMemberUseCase {
   Future<Either<Failure, void>> call({
     required String classroomMemberId,
     required String targetClassroomId,
-  }) =>
-      _repository.reassignClassroomMember(
-        classroomMemberId: classroomMemberId,
-        targetClassroomId: targetClassroomId,
-      );
+  }) => _repository.reassignClassroomMember(
+    classroomMemberId: classroomMemberId,
+    targetClassroomId: targetClassroomId,
+  );
 }

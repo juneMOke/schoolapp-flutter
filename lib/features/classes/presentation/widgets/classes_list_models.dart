@@ -41,14 +41,14 @@ class ClassesListLevelOption extends Equatable {
 
   @override
   List<Object?> get props => [
-        schoolLevelGroupId,
-        schoolLevelGroupName,
-        schoolLevelId,
-        label,
-        displayOrder,
-        splitIntoClassrooms,
-        classrooms,
-      ];
+    schoolLevelGroupId,
+    schoolLevelGroupName,
+    schoolLevelId,
+    label,
+    displayOrder,
+    splitIntoClassrooms,
+    classrooms,
+  ];
 }
 
 class ClassesListSearchRequest extends Equatable {
@@ -76,19 +76,21 @@ class ClassesListSearchRequest extends Equatable {
   bool get targetsClassroom => selectedClassroom != null;
 
   bool get hasAcademicFilters =>
-      selectedCycle != null || selectedLevel != null || selectedClassroom != null;
+      selectedCycle != null ||
+      selectedLevel != null ||
+      selectedClassroom != null;
 
   bool get hasAnyCriteria => hasNameFilters || hasAcademicFilters;
 
   @override
   List<Object?> get props => [
-        firstName,
-        lastName,
-        surname,
-        selectedCycle,
-        selectedLevel,
-        selectedClassroom,
-      ];
+    firstName,
+    lastName,
+    surname,
+    selectedCycle,
+    selectedLevel,
+    selectedClassroom,
+  ];
 }
 
 class ClassesListStudentRow extends Equatable {

@@ -47,7 +47,5 @@ abstract class PaymentsRepository {
   });
 
   Future<Either<Failure, List<PaymentAllocation>>>
-  getPaymentAllocationsByPaymentId({
-    required String paymentId,
-  });
+  getPaymentAllocationsByPaymentId({required String paymentId});
 }

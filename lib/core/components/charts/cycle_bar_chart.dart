@@ -35,16 +35,16 @@ class CycleBarChart extends StatelessWidget {
             touchTooltipData: BarTouchTooltipData(
               getTooltipColor: (_) => AppColors.surfaceDark,
               tooltipRoundedRadius: 8,
-               getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                 final item = items[group.x.toInt()];
-                 return BarTooltipItem(
-                   '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
-                   AppTextStyles.caption.copyWith(
-                     color: AppColors.textOnDark,
-                     fontWeight: FontWeight.w600,
-                   ),
-                 );
-               },
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final item = items[group.x.toInt()];
+                return BarTooltipItem(
+                  '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
+                  AppTextStyles.caption.copyWith(
+                    color: AppColors.textOnDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              },
             ),
           ),
           gridData: FlGridData(
@@ -58,8 +58,12 @@ class CycleBarChart extends StatelessWidget {
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -82,7 +86,9 @@ class CycleBarChart extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                   return Padding(
-                    padding: const EdgeInsets.only(top: AppDimensions.spacingXS),
+                    padding: const EdgeInsets.only(
+                      top: AppDimensions.spacingXS,
+                    ),
                     child: Text(
                       items[idx].label,
                       style: AppTextStyles.caption.copyWith(

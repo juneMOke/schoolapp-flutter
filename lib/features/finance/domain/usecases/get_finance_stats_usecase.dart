@@ -12,6 +12,5 @@ class GetFinanceStatsUseCase {
     FinanceStatsPeriod period = FinanceStatsPeriod.year,
     String? month,
     String? week,
-  }) =>
-      _repository.getFinanceStats(period: period, month: month, week: week);
+  }) => _repository.getFinanceStats(period: period, month: month, week: week);
 }

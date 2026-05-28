@@ -18,7 +18,8 @@ class EnrollmentStatsDashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final schoolYear = state.stats?.context.schoolYear;
-    final effectiveSchoolYear = schoolYear ?? l10n.enrollmentStatsSchoolYearUnavailable;
+    final effectiveSchoolYear =
+        schoolYear ?? l10n.enrollmentStatsSchoolYearUnavailable;
 
     return Semantics(
       container: true,
@@ -51,13 +52,16 @@ class EnrollmentStatsDashboardHeader extends StatelessWidget {
                     l10n.enrollmentStatsDashboardTitle,
                     style: AppTextStyles.totalAmountLora.copyWith(
                       color: AppColors.bleuArdoise,
-                      fontSize: AppDimensions.enrollmentStatsHeaderTitleFontSize,
+                      fontSize:
+                          AppDimensions.enrollmentStatsHeaderTitleFontSize,
                     ),
                   ),
                   const SizedBox(height: AppDimensions.spacingXS),
                   Text(
                     effectiveSchoolYear,
-                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),

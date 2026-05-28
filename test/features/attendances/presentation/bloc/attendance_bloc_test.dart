@@ -15,7 +15,8 @@ import 'package:school_app_flutter/features/attendances/presentation/models/atte
 
 class MockGetAttendanceUseCase extends Mock implements GetAttendanceUseCase {}
 
-class MockUpdateAttendanceUseCase extends Mock implements UpdateAttendanceUseCase {}
+class MockUpdateAttendanceUseCase extends Mock
+    implements UpdateAttendanceUseCase {}
 
 final tDate = DateTime(2026, 5, 1);
 
@@ -88,9 +89,7 @@ void main() {
         ),
       ),
       expect: () => [
-        const AttendanceState(
-          fetchStatus: AttendanceStatus.loading,
-        ),
+        const AttendanceState(fetchStatus: AttendanceStatus.loading),
         AttendanceState(
           fetchStatus: AttendanceStatus.success,
           records: [tRecord],

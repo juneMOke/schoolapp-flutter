@@ -18,5 +18,12 @@ class AcademicFee extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, name, amount, description, levelId, academicYearId];
+  List<Object?> get props => [
+    id,
+    name,
+    amount,
+    description,
+    levelId,
+    academicYearId,
+  ];
 }

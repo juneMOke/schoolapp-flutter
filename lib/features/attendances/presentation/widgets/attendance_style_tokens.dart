@@ -13,14 +13,22 @@ class AttendanceStyleTokens {
     horizontal: AppDimensions.spacingM,
     vertical: AppDimensions.spacingS,
   );
-  static const EdgeInsets cardPaddingDefault = EdgeInsets.all(AppDimensions.spacingM);
+  static const EdgeInsets cardPaddingDefault = EdgeInsets.all(
+    AppDimensions.spacingM,
+  );
 
   static const Size saveButtonMinSize = Size(176, AppDimensions.minTouchTarget);
-  static const Size exportButtonMinSize = Size(152, AppDimensions.minTouchTarget);
+  static const Size exportButtonMinSize = Size(
+    152,
+    AppDimensions.minTouchTarget,
+  );
 
   static const bool tooltipPreferBelow = false;
 
-  static Color cardBackground({required bool isPresent, required bool hasError}) {
+  static Color cardBackground({
+    required bool isPresent,
+    required bool hasError,
+  }) {
     if (hasError) {
       return AppColors.financeDetailDangerSoft.withValues(alpha: 0.28);
     }

@@ -31,9 +31,9 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
         Expanded(
           child: RichText(
             text: TextSpan(
-                text: widget.label,
-                style: AppTypography.labelFormMedium.copyWith(
-                    fontWeight: FontWeight.w700,
+              text: widget.label,
+              style: AppTypography.labelFormMedium.copyWith(
+                fontWeight: FontWeight.w700,
                 color: widget.labelColor ?? AppColors.textSecondary,
               ),
               children: [
@@ -56,7 +56,10 @@ class _FormFieldLabelState extends State<FormFieldLabel> {
               color: AppColors.textPrimary.withValues(alpha: 0.9),
               borderRadius: AppRadius.brSm,
             ),
-            textStyle: const TextStyle(color: AppColors.textOnDark, fontSize: 12),
+            textStyle: const TextStyle(
+              color: AppColors.textOnDark,
+              fontSize: 12,
+            ),
             child: const MouseRegion(
               cursor: SystemMouseCursors.help,
               child: SizedBox(

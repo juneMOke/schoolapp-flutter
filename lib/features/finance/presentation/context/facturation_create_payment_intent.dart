@@ -42,8 +42,9 @@ class FacturationCreatePaymentIntent extends Equatable {
       levelName.trim().isNotEmpty &&
       levelGroupName.trim().isNotEmpty;
 
-  List<StudentCharge> get unpaidCharges =>
-      studentCharges.where((c) => c.status != StudentChargeStatus.paid).toList();
+  List<StudentCharge> get unpaidCharges => studentCharges
+      .where((c) => c.status != StudentChargeStatus.paid)
+      .toList();
 
   FacturationCreatePaymentIntent withRouteParams({
     required String studentId,

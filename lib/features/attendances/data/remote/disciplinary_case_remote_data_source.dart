@@ -13,7 +13,8 @@ abstract class DisciplinaryCaseRemoteDataSource {
       _DisciplinaryCaseRemoteDataSource;
 
   @GET(AppConstants.disciplinaryCasesEndpoint)
-  Future<List<DisciplinaryCaseSummaryModel>> fetchDisciplinaryCasesByStudentAndYear(
+  Future<List<DisciplinaryCaseSummaryModel>>
+  fetchDisciplinaryCasesByStudentAndYear(
     @Extras() Map<String, dynamic> extras,
     @Query('studentId') String studentId,
     @Query('academicYearId') String academicYearId,

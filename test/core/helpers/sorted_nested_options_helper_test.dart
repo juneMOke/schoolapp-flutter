@@ -35,25 +35,27 @@ void main() {
         ),
       ];
 
-      final result = SortedNestedOptionsHelper.buildFlat<_Outer, _Inner, String>(
-        outers: outers,
-        outerOrder: (outer) => outer.order,
-        inners: (outer) => outer.inners,
-        innerOrder: (inner) => inner.order,
-        mapItem: (outer, inner) => '${outer.order}:${inner.value}',
-      );
+      final result =
+          SortedNestedOptionsHelper.buildFlat<_Outer, _Inner, String>(
+            outers: outers,
+            outerOrder: (outer) => outer.order,
+            inners: (outer) => outer.inners,
+            innerOrder: (inner) => inner.order,
+            mapItem: (outer, inner) => '${outer.order}:${inner.value}',
+          );
 
       expect(result, ['1:A2', '1:A3', '2:B1', '2:B4']);
     });
 
     test('returns empty list when input is empty', () {
-      final result = SortedNestedOptionsHelper.buildFlat<_Outer, _Inner, String>(
-        outers: const [],
-        outerOrder: (outer) => outer.order,
-        inners: (outer) => outer.inners,
-        innerOrder: (inner) => inner.order,
-        mapItem: (outer, inner) => inner.value,
-      );
+      final result =
+          SortedNestedOptionsHelper.buildFlat<_Outer, _Inner, String>(
+            outers: const [],
+            outerOrder: (outer) => outer.order,
+            inners: (outer) => outer.inners,
+            innerOrder: (inner) => inner.order,
+            mapItem: (outer, inner) => inner.value,
+          );
 
       expect(result, isEmpty);
     });

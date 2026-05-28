@@ -62,7 +62,8 @@ import 'app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('fr')
+    Locale('fr'),
   ];
 
   /// No description provided for @hello.
@@ -537,7 +540,11 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}'**
-  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion);
+  String classesOrganisationSplitSummary(
+    int studentsCount,
+    int classroomsCount,
+    String criterion,
+  );
 
   /// No description provided for @classesOrganisationClassroomsSectionTitle.
   ///
@@ -2835,7 +2842,11 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle'**
-  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount);
+  String facturationDetailChargesSummary(
+    num totalCount,
+    Object partialCount,
+    Object dueCount,
+  );
 
   /// No description provided for @facturationDetailChargesRetry.
   ///
@@ -3327,7 +3338,9 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Do you really want to remove allocation #{allocationIndex}? This action cannot be undone.'**
-  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex);
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(
+    int allocationIndex,
+  );
 
   /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmAction.
   ///
@@ -4959,7 +4972,12 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Type {code}, collected {collected}, expected {expected}, rate {rate}%'**
-  String financeStatsFeeTypeItemA11yLabel(String code, String collected, String expected, int rate);
+  String financeStatsFeeTypeItemA11yLabel(
+    String code,
+    String collected,
+    String expected,
+    int rate,
+  );
 
   /// No description provided for @financeStatsErrorA11yLabel.
   ///
@@ -5028,7 +5046,8 @@ abstract class AppLocalizations {
   String get financeStatsUnknownError;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -5037,25 +5056,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'fr': return AppLocalizationsFr();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

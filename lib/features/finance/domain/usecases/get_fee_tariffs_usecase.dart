@@ -8,8 +8,6 @@ class GetFeeTariffsUseCase {
 
   const GetFeeTariffsUseCase(this._repository);
 
-  Future<Either<Failure, List<FeeTariff>>> call({
-    required String levelId,
-  }) =>
+  Future<Either<Failure, List<FeeTariff>>> call({required String levelId}) =>
       _repository.getFeeTariffsByLevel(levelId: levelId);
 }

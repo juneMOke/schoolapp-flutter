@@ -7,10 +7,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 class EnrollmentStatsEmptyChartState extends StatelessWidget {
   final String message;
 
-  const EnrollmentStatsEmptyChartState({
-    super.key,
-    required this.message,
-  });
+  const EnrollmentStatsEmptyChartState({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

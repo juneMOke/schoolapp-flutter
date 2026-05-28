@@ -4,17 +4,14 @@ import 'package:school_app_flutter/features/academic_year/data/models/academic_y
 
 class AcademicYearStorageService {
   static const String _academicYearKey = 'academic_year';
-  
+
   final FlutterSecureStorage _storage;
 
   const AcademicYearStorageService(this._storage);
 
   Future<void> saveAcademicYear(AcademicYearModel academicYear) async {
     final jsonString = jsonEncode(academicYear.toJson());
-    await _storage.write(
-      key: _academicYearKey,
-      value: jsonString,
-    );
+    await _storage.write(key: _academicYearKey, value: jsonString);
   }
 
   Future<AcademicYearModel?> readAcademicYear() async {

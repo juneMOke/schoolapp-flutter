@@ -11,9 +11,7 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: Center(
-          child: SizedBox(width: 420, child: child),
-        ),
+        body: Center(child: SizedBox(width: 420, child: child)),
       ),
     );
   }

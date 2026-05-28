@@ -143,10 +143,7 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         ),
         focusedBorder: const OutlineInputBorder(
           borderRadius: AppRadius.brSm,
-          borderSide: BorderSide(
-            color: AppColors.bleuArdoise,
-            width: 1.4,
-          ),
+          borderSide: BorderSide(color: AppColors.bleuArdoise, width: 1.4),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
@@ -183,7 +180,9 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
             side: const BorderSide(color: AppColors.border),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            textStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
           ),
         ),
@@ -206,7 +205,9 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            textStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
             disabledBackgroundColor: AppColors.stateDisabled,
             disabledForegroundColor: AppColors.textMuted,

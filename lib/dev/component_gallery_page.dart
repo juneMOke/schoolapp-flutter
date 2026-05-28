@@ -68,10 +68,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             isLoading: _primaryLoading,
           ),
           const SizedBox(height: AppSpacing.sm),
-          const PrimaryButton(
-            label: 'Désactivé',
-            onPressed: null,
-          ),
+          const PrimaryButton(label: 'Désactivé', onPressed: null),
           const SizedBox(height: AppSpacing.sm),
           PrimaryButton(
             label: 'Supprimer définitivement',
@@ -110,10 +107,7 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
             isLoading: _secondaryLoading,
           ),
           const SizedBox(height: AppSpacing.sm),
-          const SecondaryButton(
-            label: 'Désactivé',
-            onPressed: null,
-          ),
+          const SecondaryButton(label: 'Désactivé', onPressed: null),
           const SizedBox(height: AppSpacing.xl),
 
           // ----------------------------------------------------------------
@@ -222,7 +216,9 @@ class _ComponentGalleryPageState extends State<ComponentGalleryPage> {
               StatusBadge.enrollmentPreRegistered(label: 'Pré-inscrit'),
               StatusBadge.enrollmentInProgress(label: 'En cours'),
               StatusBadge.enrollmentAdminCompleted(label: 'Complété (Admin)'),
-              StatusBadge.enrollmentFinancialCompleted(label: 'Complété (Fin.)'),
+              StatusBadge.enrollmentFinancialCompleted(
+                label: 'Complété (Fin.)',
+              ),
               StatusBadge.enrollmentCompleted(label: 'Complété'),
               StatusBadge.enrollmentCancelled(label: 'Annulé'),
               StatusBadge.enrollmentValidated(label: 'Validée'),
@@ -287,9 +283,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
     );
   }
 }
@@ -309,9 +305,9 @@ class _AvatarLabel extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textMuted,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: AppColors.textMuted),
         ),
       ],
     );

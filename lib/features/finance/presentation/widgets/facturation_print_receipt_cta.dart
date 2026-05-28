@@ -30,7 +30,9 @@ class FacturationPrintReceiptCta extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             color: AppColors.surfaceRaised,
-            borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.sectionCardRadius,
+            ),
             border: Border.all(color: AppColors.border),
           ),
           child: Padding(

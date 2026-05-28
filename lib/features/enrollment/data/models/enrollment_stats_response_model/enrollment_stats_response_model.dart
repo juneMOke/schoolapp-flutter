@@ -22,7 +22,9 @@ class EnrollmentStatsResponseModel {
 
   factory EnrollmentStatsResponseModel.fromJson(Map<String, dynamic> json) {
     return EnrollmentStatsResponseModel(
-      context: StatsContextModel.fromJson(json['context'] as Map<String, dynamic>),
+      context: StatsContextModel.fromJson(
+        json['context'] as Map<String, dynamic>,
+      ),
       kpis: EnrollmentKpisModel.fromJson(json['kpis'] as Map<String, dynamic>),
       evolution: EnrollmentEvolutionModel.fromJson(
         json['evolution'] as Map<String, dynamic>,

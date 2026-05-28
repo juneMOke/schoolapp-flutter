@@ -19,10 +19,10 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     required UpdateParentUseCase updateParentUseCase,
     required CreateParentUseCase createParentUseCase,
     required UnlinkParentUseCase unlinkParentUseCase,
-  })  : _updateParentUseCase = updateParentUseCase,
-        _createParentUseCase = createParentUseCase,
-        _unlinkParentUseCase = unlinkParentUseCase,
-        super(const ParentState.initial()) {
+  }) : _updateParentUseCase = updateParentUseCase,
+       _createParentUseCase = createParentUseCase,
+       _unlinkParentUseCase = unlinkParentUseCase,
+       super(const ParentState.initial()) {
     on<ParentUpdateRequested>(_onParentUpdateRequested);
     on<ParentCreateRequested>(_onParentCreateRequested);
     on<ParentUnlinkRequested>(_onParentUnlinkRequested);
@@ -40,11 +40,13 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     ParentUpdateRequested event,
     Emitter<ParentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: ParentUpdateStatus.loading,
-      operation: ParentOperation.update,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: ParentUpdateStatus.loading,
+        operation: ParentOperation.update,
+        errorMessage: null,
+      ),
+    );
 
     final result = await _updateParentUseCase(
       parentId: event.parentId,
@@ -57,15 +59,19 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: ParentUpdateStatus.failure,
-        errorMessage: failure.message,
-      )),
-      (updatedParent) => emit(state.copyWith(
-        status: ParentUpdateStatus.success,
-        updatedParent: updatedParent,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedParent) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.success,
+          updatedParent: updatedParent,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -73,11 +79,13 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     ParentCreateRequested event,
     Emitter<ParentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: ParentUpdateStatus.loading,
-      operation: ParentOperation.create,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: ParentUpdateStatus.loading,
+        operation: ParentOperation.create,
+        errorMessage: null,
+      ),
+    );
 
     final result = await _createParentUseCase(
       studentId: event.studentId,
@@ -90,15 +98,19 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: ParentUpdateStatus.failure,
-        errorMessage: failure.message,
-      )),
-      (createdParent) => emit(state.copyWith(
-        status: ParentUpdateStatus.success,
-        updatedParent: createdParent,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (createdParent) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.success,
+          updatedParent: createdParent,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -106,11 +118,13 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     ParentUnlinkRequested event,
     Emitter<ParentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: ParentUpdateStatus.loading,
-      operation: ParentOperation.unlink,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: ParentUpdateStatus.loading,
+        operation: ParentOperation.unlink,
+        errorMessage: null,
+      ),
+    );
 
     final result = await _unlinkParentUseCase(
       studentId: event.studentId,
@@ -118,15 +132,19 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: ParentUpdateStatus.unlinkFailure,
-        errorMessage: failure.message,
-      )),
-      (_) => emit(state.copyWith(
-        status: ParentUpdateStatus.unlinkSuccess,
-        updatedParent: null,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.unlinkFailure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          status: ParentUpdateStatus.unlinkSuccess,
+          updatedParent: null,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 }

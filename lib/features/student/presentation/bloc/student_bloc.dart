@@ -20,10 +20,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required UpdateStudentPersonalInfoUseCase updatePersonalInfoUseCase,
     required UpdateStudentAddressUseCase updateAddressUseCase,
     UpdateStudentAcademicInfoUseCase? updateAcademicInfoUseCase,
-  })  : _updatePersonalInfoUseCase = updatePersonalInfoUseCase,
-        _updateAddressUseCase = updateAddressUseCase,
-        _updateAcademicInfoUseCase = updateAcademicInfoUseCase,
-        super(const StudentState.initial()) {
+  }) : _updatePersonalInfoUseCase = updatePersonalInfoUseCase,
+       _updateAddressUseCase = updateAddressUseCase,
+       _updateAcademicInfoUseCase = updateAcademicInfoUseCase,
+       super(const StudentState.initial()) {
     on<StudentPersonalInfoUpdateRequested>(_onPersonalInfoUpdateRequested);
     on<StudentAddressUpdateRequested>(_onAddressUpdateRequested);
     on<StudentAcademicInfoUpdateRequested>(_onAcademicInfoUpdateRequested);
@@ -41,11 +41,13 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     StudentPersonalInfoUpdateRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: StudentUpdateStatus.loading,
-      operation: StudentUpdateOperation.personalInfo,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: StudentUpdateStatus.loading,
+        operation: StudentUpdateOperation.personalInfo,
+        errorMessage: null,
+      ),
+    );
     final result = await _updatePersonalInfoUseCase(
       studentId: event.studentId,
       firstName: event.firstName,
@@ -57,17 +59,21 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       nationality: event.nationality,
     );
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: StudentUpdateStatus.failure,
-        operation: StudentUpdateOperation.personalInfo,
-        errorMessage: failure.message,
-      )),
-      (updatedStudent) => emit(state.copyWith(
-        status: StudentUpdateStatus.success,
-        operation: StudentUpdateOperation.personalInfo,
-        updatedStudent: updatedStudent,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.failure,
+          operation: StudentUpdateOperation.personalInfo,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedStudent) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.success,
+          operation: StudentUpdateOperation.personalInfo,
+          updatedStudent: updatedStudent,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -75,11 +81,13 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     StudentAddressUpdateRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: StudentUpdateStatus.loading,
-      operation: StudentUpdateOperation.address,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: StudentUpdateStatus.loading,
+        operation: StudentUpdateOperation.address,
+        errorMessage: null,
+      ),
+    );
     final result = await _updateAddressUseCase(
       studentId: event.studentId,
       city: event.city,
@@ -89,17 +97,21 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       address: event.address,
     );
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: StudentUpdateStatus.failure,
-        operation: StudentUpdateOperation.address,
-        errorMessage: failure.message,
-      )),
-      (updatedStudent) => emit(state.copyWith(
-        status: StudentUpdateStatus.success,
-        operation: StudentUpdateOperation.address,
-        updatedStudent: updatedStudent,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.failure,
+          operation: StudentUpdateOperation.address,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedStudent) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.success,
+          operation: StudentUpdateOperation.address,
+          updatedStudent: updatedStudent,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -107,18 +119,22 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     StudentAcademicInfoUpdateRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(state.copyWith(
-      status: StudentUpdateStatus.loading,
-      operation: StudentUpdateOperation.academicInfo,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: StudentUpdateStatus.loading,
+        operation: StudentUpdateOperation.academicInfo,
+        errorMessage: null,
+      ),
+    );
     final updateUseCase = _updateAcademicInfoUseCase;
     if (updateUseCase == null) {
-      emit(state.copyWith(
-        status: StudentUpdateStatus.failure,
-        operation: StudentUpdateOperation.academicInfo,
-        errorMessage: 'Academic info update use case is not configured',
-      ));
+      emit(
+        state.copyWith(
+          status: StudentUpdateStatus.failure,
+          operation: StudentUpdateOperation.academicInfo,
+          errorMessage: 'Academic info update use case is not configured',
+        ),
+      );
       return;
     }
     final result = await updateUseCase(
@@ -127,17 +143,21 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       schoolLevelGroupId: event.schoolLevelGroupId,
     );
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: StudentUpdateStatus.failure,
-        operation: StudentUpdateOperation.academicInfo,
-        errorMessage: failure.message,
-      )),
-      (updatedAcademicInfo) => emit(state.copyWith(
-        status: StudentUpdateStatus.success,
-        operation: StudentUpdateOperation.academicInfo,
-        updatedAcademicInfo: updatedAcademicInfo,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.failure,
+          operation: StudentUpdateOperation.academicInfo,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedAcademicInfo) => emit(
+        state.copyWith(
+          status: StudentUpdateStatus.success,
+          operation: StudentUpdateOperation.academicInfo,
+          updatedAcademicInfo: updatedAcademicInfo,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 }

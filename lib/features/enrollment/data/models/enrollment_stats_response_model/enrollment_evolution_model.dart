@@ -19,9 +19,8 @@ class EnrollmentEvolutionModel {
       currentBucketIndex: (json['currentBucketIndex'] as num).toInt(),
       buckets: (json['buckets'] as List<dynamic>)
           .map(
-            (bucket) => EvolutionBucketModel.fromJson(
-              bucket as Map<String, dynamic>,
-            ),
+            (bucket) =>
+                EvolutionBucketModel.fromJson(bucket as Map<String, dynamic>),
           )
           .toList(growable: false),
     );

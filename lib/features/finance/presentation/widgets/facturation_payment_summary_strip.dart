@@ -56,7 +56,9 @@ class FacturationPaymentSummaryStrip extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 780;
-        final dividerWidth = compact ? AppDimensions.spacingS : AppDimensions.spacingM;
+        final dividerWidth = compact
+            ? AppDimensions.spacingS
+            : AppDimensions.spacingM;
 
         return Container(
           width: double.infinity,
@@ -67,7 +69,9 @@ class FacturationPaymentSummaryStrip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: AppColors.surfaceRaised,
-            borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.sectionCardRadius,
+            ),
             border: Border.all(
               color: AppColors.borderStrong.withValues(alpha: 0.3),
             ),
@@ -92,10 +96,7 @@ class FacturationPaymentSummaryStrip extends StatelessWidget {
                   color: AppColors.border,
                 ),
                 Expanded(
-                  child: _SummaryCell(
-                    label: paidAtLabel,
-                    value: fullDate,
-                  ),
+                  child: _SummaryCell(label: paidAtLabel, value: fullDate),
                 ),
                 VerticalDivider(
                   width: dividerWidth,
@@ -146,7 +147,8 @@ class _SummaryCell extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           softWrap: false,
-          style: valueStyle ??
+          style:
+              valueStyle ??
               AppTextStyles.body.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,

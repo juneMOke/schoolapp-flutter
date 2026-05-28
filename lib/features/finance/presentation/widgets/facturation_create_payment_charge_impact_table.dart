@@ -75,81 +75,83 @@ class FacturationCreatePaymentChargeImpactTable extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
-           SingleChildScrollView(
-             scrollDirection: Axis.horizontal,
-             child: LayoutBuilder(
-               builder: (context, constraints) {
-                 final width = constraints.maxWidth.isFinite
-                     ? constraints.maxWidth
-                     : AppDimensions.detailTableMinWidth;
-                 return SizedBox(
-                   width: width > AppDimensions.detailTableMinWidth
-                       ? width
-                       : AppDimensions.detailTableMinWidth,
-                   child: Column(
-                     children: [
-                       Row(
-                         children: [
-                           const SizedBox(width: AppDimensions.detailTableLabelColumnWidth),
-                           Expanded(
-                             child: Text(
-                               l10n.facturationCreatePaymentExpectedLabel,
-                               style: AppTextStyles.tableHeader.copyWith(
-                                 color: AppColors.textSecondary,
-                               ),
-                             ),
-                           ),
-                           Expanded(
-                             child: Text(
-                               l10n.facturationCreatePaymentPaidLabel,
-                               style: AppTextStyles.tableHeader.copyWith(
-                                 color: AppColors.textSecondary,
-                               ),
-                             ),
-                           ),
-                           Expanded(
-                             child: Text(
-                               l10n.facturationCreatePaymentRemainingLabel,
-                               style: AppTextStyles.tableHeader.copyWith(
-                                 color: AppColors.textSecondary,
-                               ),
-                             ),
-                           ),
-                           Expanded(
-                             child: Text(
-                               l10n.facturationCreatePaymentStatusLabel,
-                               style: AppTextStyles.tableHeader.copyWith(
-                                 color: AppColors.textSecondary,
-                               ),
-                             ),
-                           ),
-                         ],
-                       ),
-                       const SizedBox(height: AppDimensions.spacingXS),
-                       _ImpactRow(
-                         label: l10n.facturationCreatePaymentBeforeLabel,
-                         expected: _formatAmount(expectedAmountInCents),
-                         paid: _formatAmount(beforePaidInCents),
-                         remaining: _formatAmount(beforeRemaining),
-                         status: _statusBadge(beforeStatus, l10n),
-                       ),
-                       const SizedBox(height: AppDimensions.spacingXS),
-                       _ImpactRow(
-                         label: l10n.facturationCreatePaymentAfterLabel,
-                         expected: _formatAmount(expectedAmountInCents),
-                         paid: _formatAmount(afterPaidInCents),
-                         remaining: _formatAmount(afterRemaining),
-                         status: _statusBadge(afterStatus, l10n),
-                         highlightPaid: true,
-                         highlightRemaining: true,
-                         highlightStatus: true,
-                       ),
-                     ],
-                   ),
-                 );
-               },
-             ),
-           ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth.isFinite
+                    ? constraints.maxWidth
+                    : AppDimensions.detailTableMinWidth;
+                return SizedBox(
+                  width: width > AppDimensions.detailTableMinWidth
+                      ? width
+                      : AppDimensions.detailTableMinWidth,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: AppDimensions.detailTableLabelColumnWidth,
+                          ),
+                          Expanded(
+                            child: Text(
+                              l10n.facturationCreatePaymentExpectedLabel,
+                              style: AppTextStyles.tableHeader.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              l10n.facturationCreatePaymentPaidLabel,
+                              style: AppTextStyles.tableHeader.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              l10n.facturationCreatePaymentRemainingLabel,
+                              style: AppTextStyles.tableHeader.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              l10n.facturationCreatePaymentStatusLabel,
+                              style: AppTextStyles.tableHeader.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      _ImpactRow(
+                        label: l10n.facturationCreatePaymentBeforeLabel,
+                        expected: _formatAmount(expectedAmountInCents),
+                        paid: _formatAmount(beforePaidInCents),
+                        remaining: _formatAmount(beforeRemaining),
+                        status: _statusBadge(beforeStatus, l10n),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      _ImpactRow(
+                        label: l10n.facturationCreatePaymentAfterLabel,
+                        expected: _formatAmount(expectedAmountInCents),
+                        paid: _formatAmount(afterPaidInCents),
+                        remaining: _formatAmount(afterRemaining),
+                        status: _statusBadge(afterStatus, l10n),
+                        highlightPaid: true,
+                        highlightRemaining: true,
+                        highlightStatus: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -180,10 +182,10 @@ class _ImpactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-       children: [
-         SizedBox(
-           width: AppDimensions.detailTableLabelColumnWidth,
-           child: Text(
+      children: [
+        SizedBox(
+          width: AppDimensions.detailTableLabelColumnWidth,
+          child: Text(
             label,
             style: AppTextStyles.caption.copyWith(
               color: AppColors.textSecondary,

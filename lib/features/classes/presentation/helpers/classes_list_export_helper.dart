@@ -45,8 +45,7 @@ class ClassesListExportHelper {
     return buffer.toString();
   }
 
-  static String _row(List<String> values) =>
-      values.map(_escapeCell).join(';');
+  static String _row(List<String> values) => values.map(_escapeCell).join(';');
 
   static String _escapeCell(String value) {
     final normalized = value.replaceAll('"', '""').trim();

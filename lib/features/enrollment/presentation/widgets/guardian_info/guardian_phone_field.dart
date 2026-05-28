@@ -55,9 +55,7 @@ class GuardianPhoneField extends StatelessWidget {
                 keyboardType: TextInputType.phone,
                 style: AppTypography.formValueMedium,
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'[0-9+()\- ]'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
                 ],
                 readOnly: readOnly,
                 decoration: buildInputDecoration(
@@ -79,7 +77,7 @@ class GuardianPhoneField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                              color: AppColors.textSecondary,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                     ],

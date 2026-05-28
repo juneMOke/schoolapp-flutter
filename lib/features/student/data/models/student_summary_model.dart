@@ -25,7 +25,7 @@ class StudentSummaryModel {
         lastName: json['lastName'] as String,
         surname: json['surname'] as String,
         dateOfBirth: json['dateOfBirth'] as String,
-        gender:'MALE',
+        gender: 'MALE',
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{

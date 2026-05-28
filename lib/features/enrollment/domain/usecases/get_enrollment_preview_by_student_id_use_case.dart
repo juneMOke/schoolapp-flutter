@@ -8,9 +8,7 @@ class GetEnrollmentPreviewByStudentIdUseCase {
 
   const GetEnrollmentPreviewByStudentIdUseCase(this._repository);
 
-  Future<Either<Failure, EnrollmentDetail>> call({
-    required String studentId,
-  }) {
+  Future<Either<Failure, EnrollmentDetail>> call({required String studentId}) {
     return _repository.getEnrollmentPreviewByStudentId(studentId: studentId);
   }
 }

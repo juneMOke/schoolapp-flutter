@@ -78,7 +78,8 @@ class FacturationChargeDetailAllocationsTable extends StatelessWidget {
                         );
                       }
                       return _TotalAllocationRow(
-                        label: l10n.facturationChargeDetailAllocationsTotalLabel,
+                        label:
+                            l10n.facturationChargeDetailAllocationsTotalLabel,
                         amount: _formatAmount(totalInCents),
                       );
                     },
@@ -139,10 +140,7 @@ class _AllocationRow extends StatelessWidget {
   final PaymentAllocation allocation;
   final String Function(double) formatAmount;
 
-  const _AllocationRow({
-    required this.allocation,
-    required this.formatAmount,
-  });
+  const _AllocationRow({required this.allocation, required this.formatAmount});
 
   String _allocationLabel(AppLocalizations l10n) =>
       allocation.feeCode.localizedFeeLabel(l10n);
@@ -193,10 +191,7 @@ class _TotalAllocationRow extends StatelessWidget {
   final String label;
   final String amount;
 
-  const _TotalAllocationRow({
-    required this.label,
-    required this.amount,
-  });
+  const _TotalAllocationRow({required this.label, required this.amount});
 
   @override
   Widget build(BuildContext context) {

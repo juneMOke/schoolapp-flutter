@@ -8,10 +8,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SidebarFooter extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarFooter({
-    super.key,
-    required this.isExpanded,
-  });
+  const SidebarFooter({super.key, required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +17,16 @@ class SidebarFooter extends StatelessWidget {
     return AnimatedContainer(
       duration: AppMotion.standard,
       curve: AppMotion.outCurve,
-      margin: EdgeInsets.fromLTRB(isExpanded ? 12 : 8, 8, isExpanded ? 12 : 8, 12),
-      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 12 : 6, vertical: 10),
+      margin: EdgeInsets.fromLTRB(
+        isExpanded ? 12 : 8,
+        8,
+        isExpanded ? 12 : 8,
+        12,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isExpanded ? 12 : 6,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
         color: AppColors.textOnDark.withValues(alpha: 0.06),
         borderRadius: AppRadius.brMd,
@@ -42,7 +47,7 @@ class SidebarFooter extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.verified_outlined,
-                         color: AppColors.textOnDark,
+                        color: AppColors.textOnDark,
                         size: 16,
                       ),
                       const SizedBox(width: 8),
@@ -61,7 +66,7 @@ class SidebarFooter extends StatelessWidget {
                 : const Icon(
                     key: ValueKey('sidebar-footer-collapsed'),
                     Icons.verified_outlined,
-                     color: AppColors.textOnDark,
+                    color: AppColors.textOnDark,
                     size: 16,
                   ),
           ),

@@ -39,7 +39,9 @@ class SegmentedTabFilter<T> extends StatelessWidget {
       height: AppDimensions.enrollmentStatsPeriodFilterHeight,
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt,
-        borderRadius: BorderRadius.circular(AppDimensions.enrollmentStatsChartRadius),
+        borderRadius: BorderRadius.circular(
+          AppDimensions.enrollmentStatsChartRadius,
+        ),
         border: Border.all(color: AppColors.border),
       ),
       padding: const EdgeInsets.all(3),
@@ -66,7 +68,9 @@ class SegmentedTabFilter<T> extends StatelessWidget {
                 borderRadius: BorderRadius.circular(9),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.enrollmentStatsAccent.withValues(alpha: 0.18),
+                    color: AppColors.enrollmentStatsAccent.withValues(
+                      alpha: 0.18,
+                    ),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

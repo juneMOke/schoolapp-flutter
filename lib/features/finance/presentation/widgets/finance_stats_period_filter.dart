@@ -41,7 +41,9 @@ class FinanceStatsPeriodFilter extends StatelessWidget {
             ],
             selected: state.selectedPeriod,
             onSelected: (period) {
-              context.read<FinanceStatsBloc>().add(FinanceStatsRequested(period: period));
+              context.read<FinanceStatsBloc>().add(
+                FinanceStatsRequested(period: period),
+              );
             },
           ),
         );

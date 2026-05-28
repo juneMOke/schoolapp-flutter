@@ -156,12 +156,10 @@ class EnrollmentState extends Equatable {
       preview: identical(preview, _undefined)
           ? this.preview
           : preview as EnrollmentDetail?,
-      createdEnrollmentSummary:
-          identical(createdEnrollmentSummary, _undefined)
+      createdEnrollmentSummary: identical(createdEnrollmentSummary, _undefined)
           ? this.createdEnrollmentSummary
           : createdEnrollmentSummary as EnrollmentSummary?,
-      updatedEnrollmentSummary:
-          identical(updatedEnrollmentSummary, _undefined)
+      updatedEnrollmentSummary: identical(updatedEnrollmentSummary, _undefined)
           ? this.updatedEnrollmentSummary
           : updatedEnrollmentSummary as EnrollmentSummary?,
       errorMessage: identical(errorMessage, _undefined)

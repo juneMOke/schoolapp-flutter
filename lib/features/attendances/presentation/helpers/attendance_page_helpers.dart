@@ -101,8 +101,8 @@ class AttendancePageHelpers {
     AttendanceErrorType.server => l10n.attendanceErrorServer,
     AttendanceErrorType.storage => l10n.attendanceErrorStorage,
     AttendanceErrorType.auth => l10n.attendanceErrorAuth,
-    AttendanceErrorType.none || AttendanceErrorType.unknown =>
-      l10n.attendanceErrorUnknown,
+    AttendanceErrorType.none ||
+    AttendanceErrorType.unknown => l10n.attendanceErrorUnknown,
   };
 
   static String absenceReasonLabel(

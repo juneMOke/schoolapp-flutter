@@ -22,9 +22,9 @@ class ClassroomWithMembersModel extends Equatable {
   Map<String, dynamic> toJson() => _$ClassroomWithMembersModelToJson(this);
 
   ClassroomWithMembers toEntity() => ClassroomWithMembers(
-        classroom: classroom.toEntity(),
-        members: members.map((member) => member.toEntity()).toList(growable: false),
-      );
+    classroom: classroom.toEntity(),
+    members: members.map((member) => member.toEntity()).toList(growable: false),
+  );
 
   @override
   List<Object?> get props => [classroom, members];

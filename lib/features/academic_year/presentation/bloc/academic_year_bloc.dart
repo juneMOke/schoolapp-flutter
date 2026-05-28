@@ -37,9 +37,16 @@ class AcademicYearBloc extends Bloc<AcademicYearEvent, AcademicYearState> {
     AcademicYearRemoteRequested event,
     Emitter<AcademicYearState> emit,
   ) async {
-    emit(state.copyWith(status: AcademicYearLoadStatus.loading, errorMessage: null));
+    emit(
+      state.copyWith(
+        status: AcademicYearLoadStatus.loading,
+        errorMessage: null,
+      ),
+    );
 
-    final result = await _getRemoteAcademicYearUseCase(schoolId: event.schoolId);
+    final result = await _getRemoteAcademicYearUseCase(
+      schoolId: event.schoolId,
+    );
 
     await result.fold(
       (failure) async {
@@ -68,7 +75,12 @@ class AcademicYearBloc extends Bloc<AcademicYearEvent, AcademicYearState> {
     AcademicYearLocalRequested event,
     Emitter<AcademicYearState> emit,
   ) async {
-    emit(state.copyWith(status: AcademicYearLoadStatus.loading, errorMessage: null));
+    emit(
+      state.copyWith(
+        status: AcademicYearLoadStatus.loading,
+        errorMessage: null,
+      ),
+    );
 
     final result = await _getLocalAcademicYearUseCase();
 

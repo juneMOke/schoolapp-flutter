@@ -9,7 +9,8 @@ import 'package:school_app_flutter/features/finance/data/models/finance_stats_re
 import 'package:school_app_flutter/features/finance/data/repositories/finance_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
 
-class MockFinanceRemoteDataSource extends Mock implements FinanceRemoteDataSource {}
+class MockFinanceRemoteDataSource extends Mock
+    implements FinanceRemoteDataSource {}
 
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 
@@ -39,8 +40,16 @@ final tFinanceStatsResponseModel = FinanceStatsResponseModel(
     granularity: 'week',
     currentBucketIndex: 1,
     buckets: <FinanceEvolutionBucketModel>[
-      FinanceEvolutionBucketModel(key: '2026-W20', value: 50000, isCurrent: false),
-      FinanceEvolutionBucketModel(key: '2026-W21', value: 100000, isCurrent: true),
+      FinanceEvolutionBucketModel(
+        key: '2026-W20',
+        value: 50000,
+        isCurrent: false,
+      ),
+      FinanceEvolutionBucketModel(
+        key: '2026-W21',
+        value: 100000,
+        isCurrent: true,
+      ),
     ],
   ),
   distributionByFeeType: const FeeTypeDistributionModel(
@@ -98,14 +107,11 @@ void main() {
         month: '2026-05',
       );
 
-      result.fold(
-        (_) => fail('Expected Right but got Left'),
-        (stats) {
-          expect(stats.context.schoolYear, '2025-2026');
-          expect(stats.kpis.collectionRate, 75);
-          expect(stats.distributionByFeeType.items.first.code, 'TUITION');
-        },
-      );
+      result.fold((_) => fail('Expected Right but got Left'), (stats) {
+        expect(stats.context.schoolYear, '2025-2026');
+        expect(stats.kpis.collectionRate, 75);
+        expect(stats.distributionByFeeType.items.first.code, 'TUITION');
+      });
 
       verify(
         () => mockRemoteDataSource.getFinanceStats(
@@ -120,7 +126,12 @@ void main() {
     test('returns Left(Failure) when DioException carries Failure', () async {
       const failure = ValidationFailure('Invalid request data');
       when(
-        () => mockRemoteDataSource.getFinanceStats(tRequiredAuth, 'week', null, '2026-W21'),
+        () => mockRemoteDataSource.getFinanceStats(
+          tRequiredAuth,
+          'week',
+          null,
+          '2026-W21',
+        ),
       ).thenThrow(_dioException(error: failure));
 
       final result = await repository.getFinanceStats(

@@ -18,7 +18,8 @@ class FinanceStatsDashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final schoolYear = state.stats?.context.schoolYear;
-    final effectiveSchoolYear = schoolYear ?? l10n.financeStatsSchoolYearUnavailable;
+    final effectiveSchoolYear =
+        schoolYear ?? l10n.financeStatsSchoolYearUnavailable;
 
     return Semantics(
       container: true,
@@ -57,7 +58,9 @@ class FinanceStatsDashboardHeader extends StatelessWidget {
                   const SizedBox(height: AppDimensions.spacingXS),
                   Text(
                     effectiveSchoolYear,
-                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),

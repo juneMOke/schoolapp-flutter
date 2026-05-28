@@ -78,13 +78,16 @@ void main() {
       expect(intent.levelName, 'Grade 1');
     });
 
-    test('fromRouteContext should create invalid intent when extra is null', () {
-      final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
-        studentId: '123',
-        academicYearId: 'year-2024',
-        extra: null,
-      );
-      expect(intent.hasDisplayContext, false);
-    });
+    test(
+      'fromRouteContext should create invalid intent when extra is null',
+      () {
+        final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
+          studentId: '123',
+          academicYearId: 'year-2024',
+          extra: null,
+        );
+        expect(intent.hasDisplayContext, false);
+      },
+    );
   });
 }

@@ -48,14 +48,18 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
   Future<StepSubmitResult> submit(HandlerSubmitContext context) async {
     final status = context.detail.enrollmentDetail.status;
     if (status == EnrollmentStatus.completed) {
-      AppSnackBar.showInfo(context.context, context.l10n.completedEnrollmentRedirecting);
+      AppSnackBar.showInfo(
+        context.context,
+        context.l10n.completedEnrollmentRedirecting,
+      );
       EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
         context.context,
       );
       return const StepSubmitResult.completed(consumeNavigation: true);
     }
 
-    if (context.enrollmentState.statusUpdateStatus == EnrollmentLoadStatus.loading) {
+    if (context.enrollmentState.statusUpdateStatus ==
+        EnrollmentLoadStatus.loading) {
       return const StepSubmitResult.blocked();
     }
 

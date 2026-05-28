@@ -11,9 +11,6 @@ class UnlinkParentUseCase {
     required String studentId,
     required String parentId,
   }) {
-    return _repository.unlinkParent(
-      studentId: studentId,
-      parentId: parentId,
-    );
+    return _repository.unlinkParent(studentId: studentId, parentId: parentId);
   }
 }

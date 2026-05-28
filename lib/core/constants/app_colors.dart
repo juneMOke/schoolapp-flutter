@@ -156,18 +156,19 @@ class AppColors {
   static const classesChipBoysFg = tokens.AppColors.classesChipBoysFg;
   static const classesChipTotalBg = tokens.AppColors.classesChipTotalBg;
   static const classesChipTotalFg = tokens.AppColors.classesChipTotalFg;
-   static const classesFocusRing = tokens.AppColors.classesFocusRing;
-   static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
-   static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
+  static const classesFocusRing = tokens.AppColors.classesFocusRing;
+  static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
+  static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
 
-   // Relationship colours
-   static const relationshipFather = tokens.AppColors.relationshipFather;
-   static const relationshipMother = tokens.AppColors.relationshipMother;
-   static const relationshipGuardian = tokens.AppColors.relationshipGuardian;
-   static const relationshipUncle = tokens.AppColors.relationshipUncle;
-   static const relationshipAunt = tokens.AppColors.relationshipAunt;
-   static const relationshipGrandparent = tokens.AppColors.relationshipGrandparent;
-   static const relationshipOther = tokens.AppColors.relationshipOther;
+  // Relationship colours
+  static const relationshipFather = tokens.AppColors.relationshipFather;
+  static const relationshipMother = tokens.AppColors.relationshipMother;
+  static const relationshipGuardian = tokens.AppColors.relationshipGuardian;
+  static const relationshipUncle = tokens.AppColors.relationshipUncle;
+  static const relationshipAunt = tokens.AppColors.relationshipAunt;
+  static const relationshipGrandparent =
+      tokens.AppColors.relationshipGrandparent;
+  static const relationshipOther = tokens.AppColors.relationshipOther;
 
   static const success = tokens.AppColors.success;
   static const warning = tokens.AppColors.warning;
@@ -176,17 +177,23 @@ class AppColors {
 
   // Enrollment stats dashboard palette
   static const enrollmentStatsAccent = tokens.AppColors.enrollmentStatsAccent;
-  static const enrollmentStatsAccentSoft = tokens.AppColors.enrollmentStatsAccentSoft;
+  static const enrollmentStatsAccentSoft =
+      tokens.AppColors.enrollmentStatsAccentSoft;
   static const enrollmentStatsFirst = tokens.AppColors.enrollmentStatsFirst;
-  static const enrollmentStatsFirstSoft = tokens.AppColors.enrollmentStatsFirstSoft;
+  static const enrollmentStatsFirstSoft =
+      tokens.AppColors.enrollmentStatsFirstSoft;
   static const enrollmentStatsRe = tokens.AppColors.enrollmentStatsRe;
   static const enrollmentStatsReSoft = tokens.AppColors.enrollmentStatsReSoft;
   static const enrollmentStatsPre = tokens.AppColors.enrollmentStatsPre;
   static const enrollmentStatsPreSoft = tokens.AppColors.enrollmentStatsPreSoft;
-  static const enrollmentStatsInProgress = tokens.AppColors.enrollmentStatsInProgress;
-  static const enrollmentStatsInProgressSoft = tokens.AppColors.enrollmentStatsInProgressSoft;
+  static const enrollmentStatsInProgress =
+      tokens.AppColors.enrollmentStatsInProgress;
+  static const enrollmentStatsInProgressSoft =
+      tokens.AppColors.enrollmentStatsInProgressSoft;
   static const enrollmentStatsMale = tokens.AppColors.enrollmentStatsMale;
   static const enrollmentStatsFemale = tokens.AppColors.enrollmentStatsFemale;
-  static const enrollmentStatsCardSurface = tokens.AppColors.enrollmentStatsCardSurface;
-  static const enrollmentStatsChartGrid = tokens.AppColors.enrollmentStatsChartGrid;
+  static const enrollmentStatsCardSurface =
+      tokens.AppColors.enrollmentStatsCardSurface;
+  static const enrollmentStatsChartGrid =
+      tokens.AppColors.enrollmentStatsChartGrid;
 }

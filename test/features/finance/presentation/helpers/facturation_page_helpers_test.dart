@@ -28,35 +28,47 @@ void main() {
 
       final result = FacturationPageHelpers.buildAcademicOptions(bundles);
 
-      expect(result.map((o) => o.key).toList(growable: false), ['g1::l3', 'g2::l1', 'g2::l2']);
-      expect(
-        result.map((o) => o.label).toList(growable: false),
-        ['Cycle One - Level Three', 'Cycle Two - Level One', 'Cycle Two - Level Two'],
-      );
+      expect(result.map((o) => o.key).toList(growable: false), [
+        'g1::l3',
+        'g2::l1',
+        'g2::l2',
+      ]);
+      expect(result.map((o) => o.label).toList(growable: false), [
+        'Cycle One - Level Three',
+        'Cycle Two - Level One',
+        'Cycle Two - Level Two',
+      ]);
     });
 
-    test('deduplicates duplicate group-level keys and keeps first sorted occurrence', () {
-      final bundles = [
-        _bundle(
-          groupId: 'g1',
-          groupName: 'Cycle First',
-          groupOrder: 1,
-          levels: const [_LevelData(id: 'l1', name: 'Level Original', order: 1)],
-        ),
-        _bundle(
-          groupId: 'g1',
-          groupName: 'Cycle Duplicate',
-          groupOrder: 5,
-          levels: const [_LevelData(id: 'l1', name: 'Level Duplicate', order: 1)],
-        ),
-      ];
+    test(
+      'deduplicates duplicate group-level keys and keeps first sorted occurrence',
+      () {
+        final bundles = [
+          _bundle(
+            groupId: 'g1',
+            groupName: 'Cycle First',
+            groupOrder: 1,
+            levels: const [
+              _LevelData(id: 'l1', name: 'Level Original', order: 1),
+            ],
+          ),
+          _bundle(
+            groupId: 'g1',
+            groupName: 'Cycle Duplicate',
+            groupOrder: 5,
+            levels: const [
+              _LevelData(id: 'l1', name: 'Level Duplicate', order: 1),
+            ],
+          ),
+        ];
 
-      final result = FacturationPageHelpers.buildAcademicOptions(bundles);
+        final result = FacturationPageHelpers.buildAcademicOptions(bundles);
 
-      expect(result, hasLength(1));
-      expect(result.first.key, 'g1::l1');
-      expect(result.first.label, 'Cycle First - Level Original');
-    });
+        expect(result, hasLength(1));
+        expect(result.first.key, 'g1::l1');
+        expect(result.first.label, 'Cycle First - Level Original');
+      },
+    );
   });
 }
 

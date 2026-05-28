@@ -35,10 +35,14 @@ class FacturationCreatePaymentSubmitSection extends StatelessWidget {
           child: (!hasAllocations && !isSubmitted)
               ? Padding(
                   key: const ValueKey('no_allocations_warning'),
-                  padding: const EdgeInsets.only(bottom: AppDimensions.spacingM),
+                  padding: const EdgeInsets.only(
+                    bottom: AppDimensions.spacingM,
+                  ),
                   child: Text(
                     l10n.facturationCreatePaymentNoAllocations,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.danger,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 )

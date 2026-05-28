@@ -28,9 +28,10 @@ class TopBarTitle extends StatelessWidget {
     final leadingIcon = switch (selectedSubMenuId) {
       MenuConstants.classesListId => Icons.view_list_rounded,
       MenuConstants.organisationId => Icons.grid_view_rounded,
-      _ => isPreRegistrations
-          ? Icons.assignment_outlined
-          : Icons.dashboard_customize_outlined,
+      _ =>
+        isPreRegistrations
+            ? Icons.assignment_outlined
+            : Icons.dashboard_customize_outlined,
     };
 
     return Row(
@@ -42,11 +43,7 @@ class TopBarTitle extends StatelessWidget {
             color: AppColors.bleuArdoise,
             borderRadius: AppRadius.brSm,
           ),
-          child: Icon(
-            leadingIcon,
-            size: 18,
-            color: AppColors.textOnDark,
-          ),
+          child: Icon(leadingIcon, size: 18, color: AppColors.textOnDark),
         ),
         const SizedBox(width: AppDimensions.spacingS),
         Expanded(

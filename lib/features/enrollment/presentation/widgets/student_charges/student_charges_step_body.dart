@@ -39,7 +39,9 @@ class StudentChargesStepBody extends StatelessWidget {
   });
 
   double _draftAmountFor(StudentCharge charge) {
-    final parsed = parseMonetaryAmount(amountControllers[charge.id]?.text ?? '');
+    final parsed = parseMonetaryAmount(
+      amountControllers[charge.id]?.text ?? '',
+    );
     return parsed ?? charge.expectedAmountInCents;
   }
 

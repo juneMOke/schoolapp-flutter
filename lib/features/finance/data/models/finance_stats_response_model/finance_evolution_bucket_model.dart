@@ -25,9 +25,6 @@ class FinanceEvolutionBucketModel {
     'isCurrent': isCurrent,
   };
 
-  FinanceEvolutionBucket toEntity() => FinanceEvolutionBucket(
-    key: key,
-    value: value,
-    isCurrent: isCurrent,
-  );
+  FinanceEvolutionBucket toEntity() =>
+      FinanceEvolutionBucket(key: key, value: value, isCurrent: isCurrent);
 }

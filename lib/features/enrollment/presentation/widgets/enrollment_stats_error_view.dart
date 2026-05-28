@@ -28,7 +28,9 @@ class EnrollmentStatsErrorView extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingM),
             Text(
               message,
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppDimensions.spacingL),

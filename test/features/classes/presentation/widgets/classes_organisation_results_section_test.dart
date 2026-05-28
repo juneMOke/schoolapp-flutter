@@ -175,37 +175,42 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('affiche empty state global quand aucun cycle n est selectionne', (
+  testWidgets(
+    'affiche empty state global quand aucun cycle n est selectionne',
+    (tester) async {
+      await pumpSection(tester, selectedCycle: null, selectedLevel: null);
+
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              (widget.data ?? '').toLowerCase().contains('cycle') &&
+              (widget.data ?? '').toLowerCase().contains('niveau'),
+        ),
+        findsWidgets,
+      );
+    },
+  );
+
+  testWidgets(
+    'affiche empty state niveau quand cycle selectionne sans niveau',
+    (tester) async {
+      await pumpSection(tester, selectedCycle: cycle, selectedLevel: null);
+
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              (widget.data ?? '').toLowerCase().contains('niveau'),
+        ),
+        findsWidgets,
+      );
+    },
+  );
+
+  testWidgets('affiche la carte non reparti quand niveau split=false', (
     tester,
   ) async {
-    await pumpSection(tester, selectedCycle: null, selectedLevel: null);
-
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            (widget.data ?? '').toLowerCase().contains('cycle') &&
-            (widget.data ?? '').toLowerCase().contains('niveau'),
-      ),
-      findsWidgets,
-    );
-  });
-
-  testWidgets('affiche empty state niveau quand cycle selectionne sans niveau', (
-    tester,
-  ) async {
-    await pumpSection(tester, selectedCycle: cycle, selectedLevel: null);
-
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Text && (widget.data ?? '').toLowerCase().contains('niveau'),
-      ),
-      findsWidgets,
-    );
-  });
-
-  testWidgets('affiche la carte non reparti quand niveau split=false', (tester) async {
     await pumpSection(
       tester,
       selectedCycle: cycle,
@@ -217,22 +222,23 @@ void main() {
     expect(find.byIcon(Icons.auto_awesome_outlined), findsWidgets);
   });
 
-  testWidgets('affiche la zone a affecter quand overview contient des non affectes', (
-    tester,
-  ) async {
-    await pumpSection(
-      tester,
-      selectedCycle: cycle,
-      selectedLevel: splitLevel,
-      blocState: const ClassroomState(
-        distributionOverviewStatus: ClassroomStatus.success,
-        distributionOverview: overview,
-      ),
-    );
+  testWidgets(
+    'affiche la zone a affecter quand overview contient des non affectes',
+    (tester) async {
+      await pumpSection(
+        tester,
+        selectedCycle: cycle,
+        selectedLevel: splitLevel,
+        blocState: const ClassroomState(
+          distributionOverviewStatus: ClassroomStatus.success,
+          distributionOverview: overview,
+        ),
+      );
 
-    expect(
-      find.byType(ClassesOrganisationUnassignedMembersSection),
-      findsOneWidget,
-    );
-  });
+      expect(
+        find.byType(ClassesOrganisationUnassignedMembersSection),
+        findsOneWidget,
+      );
+    },
+  );
 }

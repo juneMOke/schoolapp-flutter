@@ -76,9 +76,7 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.enrollmentDetail != widget.enrollmentDetail) {
       final flowPlan = _buildFlowPlan(widget.enrollmentDetail);
-      _flowBloc.add(
-        EnrollmentStepperStatesSynced(flowPlan.initialStepStates),
-      );
+      _flowBloc.add(EnrollmentStepperStatesSynced(flowPlan.initialStepStates));
     }
   }
 

@@ -34,7 +34,9 @@ class DisciplinaryCaseCreateCta extends StatelessWidget {
                 AppColors.disciplinaryDetailTeal,
               ],
             ),
-            borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.sectionCardRadius,
+            ),
             boxShadow: const [
               BoxShadow(
                 color: AppColors.disciplinaryDetailShadow,

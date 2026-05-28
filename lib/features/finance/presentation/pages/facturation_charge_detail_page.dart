@@ -24,10 +24,11 @@ class FacturationChargeDetailPage extends StatelessWidget {
   const FacturationChargeDetailPage({super.key, required this.intent});
 
   String _studentFullName(AppLocalizations l10n) {
-    final fullName = [intent.lastName, intent.firstName, intent.surname]
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty)
-        .join(' ');
+    final fullName = [
+      intent.lastName,
+      intent.firstName,
+      intent.surname,
+    ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
     return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
   }
 
@@ -44,9 +45,9 @@ class FacturationChargeDetailPage extends StatelessWidget {
 
   void _onPrintStatementsRequested(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.pageUnderConstruction)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.pageUnderConstruction)));
   }
 
   bool _hasAllocations(StudentChargesState state) {
@@ -86,9 +87,7 @@ class FacturationChargeDetailPage extends StatelessWidget {
         final bloc = getIt<StudentChargesBloc>();
         if (intent.chargeId.trim().isNotEmpty) {
           bloc.add(
-            StudentChargePaymentAllocationsRequested(
-              chargeId: intent.chargeId,
-            ),
+            StudentChargePaymentAllocationsRequested(chargeId: intent.chargeId),
           );
         }
         return bloc;
@@ -99,21 +98,24 @@ class FacturationChargeDetailPage extends StatelessWidget {
           subtitle: '$studentFullName · $studentSubtitle',
           fallbackRoute: AppRoutesNames.facturations,
         ),
-        bottomNavigationBar: BlocBuilder<StudentChargesBloc, StudentChargesState>(
-          buildWhen: (prev, curr) => prev.allocationsStatus != curr.allocationsStatus,
-          builder: (context, state) {
-            if (!_hasAllocations(state)) {
-              return const SizedBox.shrink();
-            }
-            return _buildEntrance(
-              intervalStart: 0.4,
-              child: FacturationChargeFooterActions(
-                printLabel: l10n.facturationPrintStatementsLabel,
-                onPrintStatements: () => _onPrintStatementsRequested(context),
-              ),
-            );
-          },
-        ),
+        bottomNavigationBar:
+            BlocBuilder<StudentChargesBloc, StudentChargesState>(
+              buildWhen: (prev, curr) =>
+                  prev.allocationsStatus != curr.allocationsStatus,
+              builder: (context, state) {
+                if (!_hasAllocations(state)) {
+                  return const SizedBox.shrink();
+                }
+                return _buildEntrance(
+                  intervalStart: 0.4,
+                  child: FacturationChargeFooterActions(
+                    printLabel: l10n.facturationPrintStatementsLabel,
+                    onPrintStatements: () =>
+                        _onPrintStatementsRequested(context),
+                  ),
+                );
+              },
+            ),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =
@@ -152,14 +154,14 @@ class FacturationChargeDetailPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: blockSpacing),
-                       _buildEntrance(
-                         intervalStart: 0.2,
-                         child: FacturationChargeAllocationsSection(
-                           chargeId: intent.chargeId,
-                           paidAmountInCents: intent.amountPaidInCents,
-                           currency: intent.currency,
-                         ),
-                       ),
+                      _buildEntrance(
+                        intervalStart: 0.2,
+                        child: FacturationChargeAllocationsSection(
+                          chargeId: intent.chargeId,
+                          paidAmountInCents: intent.amountPaidInCents,
+                          currency: intent.currency,
+                        ),
+                      ),
                     ],
                   ),
                 if (intent.hasDisplayContext)

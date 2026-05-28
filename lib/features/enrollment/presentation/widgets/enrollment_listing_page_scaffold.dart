@@ -59,9 +59,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchSection(
-    EnrollmentScreenContext screenCtx,
-  ) {
+  Widget _buildSearchSection(EnrollmentScreenContext screenCtx) {
     return BlocBuilder<EnrollmentBloc, EnrollmentState>(
       buildWhen: (previous, current) =>
           previous.summariesStatus != current.summariesStatus,
@@ -104,9 +102,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsSummarySection(
-    EnrollmentScreenContext screenCtx,
-  ) {
+  Widget _buildResultsSummarySection(EnrollmentScreenContext screenCtx) {
     return BlocBuilder<EnrollmentBloc, EnrollmentState>(
       builder: (context, state) {
         final builder = resultsSummaryBuilder;

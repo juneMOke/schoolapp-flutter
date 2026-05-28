@@ -85,17 +85,23 @@ class _FeeTypeCard extends StatelessWidget {
             children: [
               Text(
                 item.code,
-                style: AppTextStyles.sectionTitle.copyWith(color: AppColors.bleuArdoise),
+                style: AppTextStyles.sectionTitle.copyWith(
+                  color: AppColors.bleuArdoise,
+                ),
               ),
               const SizedBox(height: AppDimensions.spacingS),
               Text(
                 l10n.financeStatsFeeTypeCollected(_formatCents(item.collected)),
-                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppDimensions.spacingXS),
               Text(
                 l10n.financeStatsFeeTypeExpected(_formatCents(item.expected)),
-                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppDimensions.spacingS),
               ClipRRect(
@@ -105,14 +111,18 @@ class _FeeTypeCard extends StatelessWidget {
                   minHeight: AppDimensions.financeStatsFeeTypeProgressHeight,
                   backgroundColor: AppColors.surfaceAlt,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    item.collectionRate >= 70 ? AppColors.bleuArdoise : AppColors.warning,
+                    item.collectionRate >= 70
+                        ? AppColors.bleuArdoise
+                        : AppColors.warning,
                   ),
                 ),
               ),
               const SizedBox(height: AppDimensions.spacingXS),
               Text(
                 l10n.financeStatsFeeTypeRate(item.collectionRate),
-                style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.bodyStrong.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
@@ -120,6 +130,7 @@ class _FeeTypeCard extends StatelessWidget {
       ),
     );
   }
- 
-  String _formatCents(int amountInCents) => formatMonetaryAmount(amountInCents / 100);
+
+  String _formatCents(int amountInCents) =>
+      formatMonetaryAmount(amountInCents / 100);
 }

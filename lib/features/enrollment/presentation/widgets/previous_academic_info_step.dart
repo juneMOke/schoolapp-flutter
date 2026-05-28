@@ -249,8 +249,10 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   }) {
     _isHydratingFromDetail = true;
     try {
-      _selectedYear =
-          _resolveYear(detail.previousAcademicYear, _buildYearOptions());
+      _selectedYear = _resolveYear(
+        detail.previousAcademicYear,
+        _buildYearOptions(),
+      );
       _prevSchoolController.text = detail.previousSchoolName;
       _selectedCycle = detail.previousSchoolLevelGroup.isNotEmpty
           ? detail.previousSchoolLevelGroup
@@ -534,29 +536,23 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                   setState(() => _validatedPreviousYear = value);
                   _recomputeFormState();
                 },
-                prevYearError:
-                    showValidation && (year ?? '').isEmpty
+                prevYearError: showValidation && (year ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.academicYearLabel)
                     : null,
                 prevSchoolError:
-                    showValidation &&
-                        _prevSchoolController.text.trim().isEmpty
+                    showValidation && _prevSchoolController.text.trim().isEmpty
                     ? l10n.requiredFieldError(l10n.schoolLabel)
                     : null,
-                prevCycleError:
-                    showValidation && (cycle ?? '').isEmpty
+                prevCycleError: showValidation && (cycle ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.schoolCycle)
                     : null,
-                prevLevelError:
-                    showValidation && (level ?? '').isEmpty
+                prevLevelError: showValidation && (level ?? '').isEmpty
                     ? l10n.requiredFieldError(l10n.schoolLevelLabel)
                     : null,
                 prevRateError:
                     showValidation &&
                         (_prevRateController.text.trim().isEmpty ||
-                            double.tryParse(
-                                  _prevRateController.text.trim(),
-                                ) ==
+                            double.tryParse(_prevRateController.text.trim()) ==
                                 null)
                     ? (_prevRateController.text.trim().isEmpty
                           ? l10n.requiredFieldError(l10n.averageLabel)
@@ -571,8 +567,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                           ? l10n.requiredFieldError(l10n.rankingLabel)
                           : l10n.invalidNumberFieldError(l10n.rankingLabel))
                     : null,
-                prevYearChanged:
-                    (_selectedYear ?? '') != _initialPrevYear,
+                prevYearChanged: (_selectedYear ?? '') != _initialPrevYear,
                 prevSchoolChanged:
                     _prevSchoolController.text.trim() != _initialPrevSchool,
                 prevCycleChanged:

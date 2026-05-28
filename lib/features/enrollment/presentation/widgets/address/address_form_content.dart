@@ -187,7 +187,9 @@ class AddressFormContent extends StatelessWidget {
                     foregroundColor: AppColors.textOnDark,
                     elevation: 0,
                     minimumSize: const Size(164, 44),
-                    shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppRadius.brMd,
+                    ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,

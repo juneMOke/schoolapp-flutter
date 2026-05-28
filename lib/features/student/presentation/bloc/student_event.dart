@@ -34,15 +34,15 @@ class StudentPersonalInfoUpdateRequested extends StudentEvent {
 
   @override
   List<Object?> get props => [
-        studentId,
-        firstName,
-        lastName,
-        surname,
-        dateOfBirth,
-        gender,
-        birthPlace,
-        nationality,
-      ];
+    studentId,
+    firstName,
+    lastName,
+    surname,
+    dateOfBirth,
+    gender,
+    birthPlace,
+    nationality,
+  ];
 }
 
 class StudentAddressUpdateRequested extends StudentEvent {

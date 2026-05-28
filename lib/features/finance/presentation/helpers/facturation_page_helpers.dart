@@ -17,10 +17,13 @@ class FacturationPageHelpers {
       mapItem: (bundle, levelBundle) => FacturationLevelOption(
         schoolLevelGroupId: bundle.schoolLevelGroup.id,
         schoolLevelId: levelBundle.schoolLevel.id,
-        label: '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
+        label:
+            '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
       ),
     );
 
-    return sortedOptions.where((option) => seen.add(option.key)).toList(growable: false);
+    return sortedOptions
+        .where((option) => seen.add(option.key))
+        .toList(growable: false);
   }
 }

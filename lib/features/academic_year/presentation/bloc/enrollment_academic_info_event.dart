@@ -36,7 +36,7 @@ class EnrollmentAcademicInfoUpdateRequested
     this.previousRank,
     required this.validatedPreviousYear,
     this.transferReason,
-    this.cancellationReason
+    this.cancellationReason,
   });
 
   @override
@@ -51,6 +51,6 @@ class EnrollmentAcademicInfoUpdateRequested
     previousRank,
     validatedPreviousYear,
     transferReason,
-    cancellationReason
+    cancellationReason,
   ];
 }

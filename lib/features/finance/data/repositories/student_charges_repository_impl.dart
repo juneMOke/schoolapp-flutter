@@ -38,8 +38,7 @@ class StudentChargesRepositoryImpl implements StudentChargesRepository {
   }
 
   @override
-  Future<Either<Failure, List<StudentCharge>>>
-  getStudentChargesByAcademicYear({
+  Future<Either<Failure, List<StudentCharge>>> getStudentChargesByAcademicYear({
     required String studentId,
     required String academicYearId,
   }) async {

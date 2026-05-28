@@ -11,7 +11,8 @@ class GetPaymentAllocationsUseCase {
 
   Future<Either<Failure, List<PaymentAllocation>>> call(
     GetPaymentAllocationsParams params,
-  ) => _repository.getPaymentAllocationsByPaymentId(paymentId: params.paymentId);
+  ) =>
+      _repository.getPaymentAllocationsByPaymentId(paymentId: params.paymentId);
 }
 
 class GetPaymentAllocationsParams extends Equatable {

@@ -58,12 +58,19 @@ class StateCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: AppDimensions.detailHeaderIconSize, color: accent),
+              Icon(
+                icon,
+                size: AppDimensions.detailHeaderIconSize,
+                color: accent,
+              ),
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
                 child: Text(
                   message,
-                  style: AppTextStyles.body.copyWith(color: accent, height: 1.3),
+                  style: AppTextStyles.body.copyWith(
+                    color: accent,
+                    height: 1.3,
+                  ),
                 ),
               ),
             ],

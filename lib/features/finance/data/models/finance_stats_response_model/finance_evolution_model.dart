@@ -39,9 +39,10 @@ class FinanceEvolutionModel {
     buckets: buckets.map((bucket) => bucket.toEntity()).toList(growable: false),
   );
 
-  FinanceEvolutionGranularity _parseGranularity(String value) => switch (value) {
-    'week' => FinanceEvolutionGranularity.week,
-    'day' => FinanceEvolutionGranularity.day,
-    _ => FinanceEvolutionGranularity.month,
-  };
+  FinanceEvolutionGranularity _parseGranularity(String value) =>
+      switch (value) {
+        'week' => FinanceEvolutionGranularity.week,
+        'day' => FinanceEvolutionGranularity.day,
+        _ => FinanceEvolutionGranularity.month,
+      };
 }

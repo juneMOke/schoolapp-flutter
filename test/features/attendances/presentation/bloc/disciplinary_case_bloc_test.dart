@@ -53,7 +53,8 @@ final tDate = DateTime(2026, 4, 30);
 
 void main() {
   late MockGetDisciplinaryCaseListUseCase mockGetDisciplinaryCaseListUseCase;
-  late MockGetDisciplinaryCaseDetailUseCase mockGetDisciplinaryCaseDetailUseCase;
+  late MockGetDisciplinaryCaseDetailUseCase
+  mockGetDisciplinaryCaseDetailUseCase;
   late MockCreateDisciplinaryCaseUseCase mockCreateDisciplinaryCaseUseCase;
 
   setUp(() {

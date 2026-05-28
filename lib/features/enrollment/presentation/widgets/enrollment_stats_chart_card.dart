@@ -19,7 +19,9 @@ class EnrollmentStatsChartCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.enrollmentStatsCardSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.enrollmentStatsChartRadius),
+        borderRadius: BorderRadius.circular(
+          AppDimensions.enrollmentStatsChartRadius,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: 0.04),

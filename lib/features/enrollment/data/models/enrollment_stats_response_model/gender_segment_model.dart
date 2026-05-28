@@ -26,11 +26,8 @@ class GenderSegmentModel {
     'percent': percent,
   };
 
-  GenderSegment toEntity() => GenderSegment(
-    code: _parseCode(code),
-    value: value,
-    percent: percent,
-  );
+  GenderSegment toEntity() =>
+      GenderSegment(code: _parseCode(code), value: value, percent: percent);
 
   GenderSegmentCode _parseCode(String value) => switch (value) {
     'MALE' => GenderSegmentCode.male,

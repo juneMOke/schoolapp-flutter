@@ -79,13 +79,13 @@ class ParentItemValue extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
-        firstName,
-        lastName,
-        surname,
-        phoneNumber,
-        email,
-        relationshipType,
-      ];
+    firstName,
+    lastName,
+    surname,
+    phoneNumber,
+    email,
+    relationshipType,
+  ];
 }
 
 class ParentItemFormState extends Equatable {
@@ -100,9 +100,9 @@ class ParentItemFormState extends Equatable {
   });
 
   const ParentItemFormState.initial()
-      : valid = false,
-        dirty = false,
-        changedFields = const <String, bool>{};
+    : valid = false,
+      dirty = false,
+      changedFields = const <String, bool>{};
 
   @override
   List<Object?> get props => <Object?>[valid, dirty, changedFields];

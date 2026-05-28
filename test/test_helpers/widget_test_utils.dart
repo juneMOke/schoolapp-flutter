@@ -13,18 +13,18 @@ const MethodChannel pathProviderChannel = MethodChannel(
 Future<void> installCommonTestPluginMocks() async {
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(secureStorageChannel, (
-    MethodCall methodCall,
-  ) async {
-    if (methodCall.method == 'read') return null;
-    return null;
-  });
+        MethodCall methodCall,
+      ) async {
+        if (methodCall.method == 'read') return null;
+        return null;
+      });
 
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(pathProviderChannel, (
-    MethodCall methodCall,
-  ) async {
-    return '/tmp';
-  });
+        MethodCall methodCall,
+      ) async {
+        return '/tmp';
+      });
 }
 
 Future<void> removeCommonTestPluginMocks() async {

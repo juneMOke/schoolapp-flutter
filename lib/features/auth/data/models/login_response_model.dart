@@ -23,9 +23,9 @@ class LoginResponseModel {
       );
 
   AuthSession toAuthSession() => AuthSession(
-        accessToken: accessToken,
-        tokenType: tokenType,
-        expiresIn: expiresIn,
-        user: user.toAuthenticatedUser(),
-      );
+    accessToken: accessToken,
+    tokenType: tokenType,
+    expiresIn: expiresIn,
+    user: user.toAuthenticatedUser(),
+  );
 }

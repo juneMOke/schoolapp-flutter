@@ -23,11 +23,11 @@ class StudentState extends Equatable {
   });
 
   const StudentState.initial()
-      : status = StudentUpdateStatus.initial,
-        operation = StudentUpdateOperation.none,
-        updatedStudent = null,
-        updatedAcademicInfo = null,
-        errorMessage = null;
+    : status = StudentUpdateStatus.initial,
+      operation = StudentUpdateOperation.none,
+      updatedStudent = null,
+      updatedAcademicInfo = null,
+      errorMessage = null;
 
   StudentState copyWith({
     StudentUpdateStatus? status,
@@ -42,7 +42,8 @@ class StudentState extends Equatable {
       updatedStudent: identical(updatedStudent, _undefinedStudent)
           ? this.updatedStudent
           : updatedStudent as StudentDetail?,
-      updatedAcademicInfo: identical(updatedAcademicInfo, _undefinedAcademicInfo)
+      updatedAcademicInfo:
+          identical(updatedAcademicInfo, _undefinedAcademicInfo)
           ? this.updatedAcademicInfo
           : updatedAcademicInfo as StudentAcademicInfo?,
       errorMessage: identical(errorMessage, _undefinedStudent)

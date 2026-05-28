@@ -13,7 +13,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 
 class EnrollmentCurrentYearBootstrapBuilder extends StatefulWidget {
   final String status;
-  final Widget Function(BuildContext context, EnrollmentScreenContext ctx) onReady;
+  final Widget Function(BuildContext context, EnrollmentScreenContext ctx)
+  onReady;
 
   const EnrollmentCurrentYearBootstrapBuilder({
     super.key,
@@ -41,7 +42,9 @@ class _EnrollmentCurrentYearBootstrapBuilderState
   }
 
   @override
-  void didUpdateWidget(covariant EnrollmentCurrentYearBootstrapBuilder oldWidget) {
+  void didUpdateWidget(
+    covariant EnrollmentCurrentYearBootstrapBuilder oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.status != widget.status) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,7 +61,8 @@ class _EnrollmentCurrentYearBootstrapBuilderState
       listener: (_, _) => _requestSummariesIfContextAvailable(),
       child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
         builder: (context, bootstrapState) {
-          final academicYearId = bootstrapState.bootstrap?.academicYear.id ?? '';
+          final academicYearId =
+              bootstrapState.bootstrap?.academicYear.id ?? '';
           final schoolId = context.select(
             (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
           );
@@ -147,7 +151,9 @@ class _EnrollmentCurrentYearBootstrapBuilderState
 
   void _emitBootstrapCurrentYear() {
     context.read<BootstrapCurrentYearBloc>().add(
-      const BootstrapContextLocalRequested(key: AppConstants.bootstrapPayloadKey),
+      const BootstrapContextLocalRequested(
+        key: AppConstants.bootstrapPayloadKey,
+      ),
     );
   }
 }

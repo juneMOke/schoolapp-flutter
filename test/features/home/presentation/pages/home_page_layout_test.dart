@@ -35,7 +35,9 @@ void main() {
     await tester.pumpWidget(buildHarness());
     await tester.pumpAndSettle();
 
-    final scaffolds = tester.widgetList<Scaffold>(find.byType(Scaffold)).toList();
+    final scaffolds = tester
+        .widgetList<Scaffold>(find.byType(Scaffold))
+        .toList();
     final hasDrawer = scaffolds.any((scaffold) => scaffold.drawer != null);
     expect(hasDrawer, isTrue);
     expect(find.byTooltip('Notifications'), findsOneWidget);

@@ -30,7 +30,8 @@ class NationalityDropdownField extends StatefulWidget {
   });
 
   @override
-  State<NationalityDropdownField> createState() => _NationalityDropdownFieldState();
+  State<NationalityDropdownField> createState() =>
+      _NationalityDropdownFieldState();
 }
 
 class _NationalityDropdownFieldState extends State<NationalityDropdownField> {
@@ -87,7 +88,9 @@ class _NationalityDropdownFieldState extends State<NationalityDropdownField> {
         borderRadius: BorderRadius.circular(10),
         child: ListTile(
           dense: true,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           leading: Icon(
             isSelected ? Icons.check_circle_rounded : Icons.public_rounded,
             size: 16,

@@ -3,7 +3,8 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_academic_info_response.dart';
 
 abstract class EnrollmentAcademicInfoRepository {
-  Future<Either<Failure, EnrollmentAcademicInfoResponse>> updateEnrollmentAcademicInfo({
+  Future<Either<Failure, EnrollmentAcademicInfoResponse>>
+  updateEnrollmentAcademicInfo({
     required String enrollmentId,
     required String academicYearId,
     required String previousSchoolName,
@@ -14,6 +15,6 @@ abstract class EnrollmentAcademicInfoRepository {
     int? previousRank,
     required bool validatedPreviousYear,
     String? transferReason,
-    String? cancellationReason
+    String? cancellationReason,
   });
 }

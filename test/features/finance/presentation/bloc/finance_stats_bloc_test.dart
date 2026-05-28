@@ -8,7 +8,8 @@ import 'package:school_app_flutter/features/finance/domain/entities/finance_stat
 import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_stats_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 
-class MockGetFinanceStatsUseCase extends Mock implements GetFinanceStatsUseCase {}
+class MockGetFinanceStatsUseCase extends Mock
+    implements GetFinanceStatsUseCase {}
 
 final tStats = FinanceStats(
   context: StatsContext(
@@ -70,14 +71,22 @@ void main() {
       act: (bloc) => bloc.add(const FinanceStatsRequested()),
       expect: () => [
         isA<FinanceStatsState>()
-            .having((state) => state.status, 'status', FinanceStatsStatus.loading)
+            .having(
+              (state) => state.status,
+              'status',
+              FinanceStatsStatus.loading,
+            )
             .having(
               (state) => state.errorType,
               'errorType',
               FinanceStatsErrorType.none,
             ),
         isA<FinanceStatsState>()
-            .having((state) => state.status, 'status', FinanceStatsStatus.success)
+            .having(
+              (state) => state.status,
+              'status',
+              FinanceStatsStatus.success,
+            )
             .having((state) => state.stats, 'stats', tStats),
       ],
     );

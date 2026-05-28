@@ -37,7 +37,9 @@ class AttendanceEditableRow extends Equatable {
         studentGender: record.studentGender,
         present: record.present,
         absenceReason: record.present ? null : record.absenceReason,
-        absenceReasonNote: record.present ? '' : (record.absenceReasonNote ?? ''),
+        absenceReasonNote: record.present
+            ? ''
+            : (record.absenceReasonNote ?? ''),
       );
 
   AttendanceEditableRow copyWith({
@@ -69,8 +71,8 @@ class AttendanceEditableRow extends Equatable {
     absenceReasonNote: present
         ? null
         : absenceReasonNote.trim().isEmpty
-            ? null
-            : absenceReasonNote.trim(),
+        ? null
+        : absenceReasonNote.trim(),
   );
 
   bool get requiresAbsenceReason => !present;
