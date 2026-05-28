@@ -12,7 +12,7 @@ on:
           - staging
           - prod
       export_method:
-        description: 'Méthode d'export Xcode'
+        description: "Méthode d'export Xcode"
         required: true
         type: choice
         default: development
@@ -20,6 +20,10 @@ on:
           - development
           - ad-hoc
           - app-store
+      version_tag:
+        description: 'Tag SemVer à utiliser pour prod (ex: v1.2.3)'
+        required: false
+        type: string
 
 # NOTE : Les runners macOS sont facturés. Ce workflow est déclenché
 # manuellement uniquement pour économiser les minutes.
@@ -65,6 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate environment variables
         run: |
@@ -85,6 +91,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -100,6 +108,22 @@ jobs:
 
       - name: Generate localizations
         run: flutter gen-l10n
+
+      - name: Require version tag for prod
+        if: ${{ needs.resolve-config.outputs.app_env == 'prod' && inputs.version_tag == '' }}
+        run: |
+          echo "Un version_tag est requis pour un build prod (ex: v1.2.3)."
+          exit 1
+
+      - name: Resolve Flutter version
+        id: version
+        env:
+          APP_ENV: ${{ needs.resolve-config.outputs.app_env }}
+          VERSION_TAG: ${{ inputs.version_tag }}
+        run: |
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
 
       # ── Signing (ajuster selon votre setup certificates/provisioning) ──
       #
@@ -130,6 +154,8 @@ jobs:
           flutter build ios \
             --flavor "${{ needs.resolve-config.outputs.flavor }}" \
             --no-codesign \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
             --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
 

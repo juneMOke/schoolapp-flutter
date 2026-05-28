@@ -19,6 +19,10 @@ on:
         options:
           - apk
           - appbundle
+      version_tag:
+        description: 'Tag SemVer à utiliser pour prod (ex: v1.2.3)'
+        required: false
+        type: string
 
   # Déclenchement automatique sur develop → build dev
   push:
@@ -74,6 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate environment variables
         run: |
@@ -94,6 +100,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -115,6 +123,22 @@ jobs:
 
       - name: Generate localizations
         run: flutter gen-l10n
+
+      - name: Require version tag for prod
+        if: ${{ needs.resolve-config.outputs.app_env == 'prod' && inputs.version_tag == '' }}
+        run: |
+          echo "Un version_tag est requis pour un build prod (ex: v1.2.3)."
+          exit 1
+
+      - name: Resolve Flutter version
+        id: version
+        env:
+          APP_ENV: ${{ needs.resolve-config.outputs.app_env }}
+          VERSION_TAG: ${{ inputs.version_tag }}
+        run: |
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
 
       - name: Prepare Android release signing
         if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
@@ -146,12 +170,16 @@ jobs:
             flutter build apk \
               --flavor "${{ needs.resolve-config.outputs.flavor }}" \
               --release \
+              --build-name "${{ steps.version.outputs.build_name }}" \
+              --build-number "${{ steps.version.outputs.build_number }}" \
               --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
               --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
           else
             flutter build apk \
               --flavor "${{ needs.resolve-config.outputs.flavor }}" \
               --debug \
+              --build-name "${{ steps.version.outputs.build_name }}" \
+              --build-number "${{ steps.version.outputs.build_number }}" \
               --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
               --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
           fi
@@ -161,6 +189,8 @@ jobs:
         run: |
           flutter build appbundle \
             --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
             --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
 
