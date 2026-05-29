@@ -78,8 +78,9 @@ class EvolutionLineChart extends StatelessWidget {
                 reservedSize: 24,
                 getTitlesWidget: (value, meta) {
                   final idx = value.toInt();
-                  if (idx < 0 || idx >= points.length)
+                  if (idx < 0 || idx >= points.length) {
                     return const SizedBox.shrink();
+                  }
                   return Text(
                     points[idx].label,
                     style: AppTextStyles.caption.copyWith(
