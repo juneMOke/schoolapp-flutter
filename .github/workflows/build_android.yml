@@ -178,25 +178,39 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [[ -z "$ANDROID_RELEASE_KEYSTORE_BASE64" || -z "$ANDROID_KEYSTORE_PASSWORD" || -z "$ANDROID_KEY_ALIAS" || -z "$ANDROID_KEY_PASSWORD" ]]; then
+          trim() {
+            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+          }
+
+          KEYSTORE_B64="$(printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | tr -d '\r\n' | trim)"
+          KEYSTORE_PASSWORD="$(printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | trim)"
+          KEY_ALIAS="$(printf '%s' "$ANDROID_KEY_ALIAS" | trim)"
+          KEY_PASSWORD="$(printf '%s' "$ANDROID_KEY_PASSWORD" | trim)"
+
+          if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
             echo "Secrets de signing Android manquants (ANDROID_RELEASE_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD)."
             exit 1
           fi
 
           KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
-          echo -n "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
+
+          if [[ ! -s "$KEYSTORE_PATH" ]]; then
+            echo "Le keystore décodé est vide ou invalide. Vérifiez ANDROID_RELEASE_KEYSTORE_BASE64."
+            exit 1
+          fi
 
           # Rend ces variables disponibles aux étapes suivantes (flutter build / gradle).
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
-          echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
 
           cat > android/key.properties <<EOF
           storeFile=$KEYSTORE_PATH
-          storePassword=$ANDROID_KEYSTORE_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          keyPassword=$ANDROID_KEY_PASSWORD
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
           EOF
 
           # Compatibilité: certains contextes gradle peuvent lire key.properties à la racine repo.
