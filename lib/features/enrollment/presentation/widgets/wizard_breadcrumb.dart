@@ -36,10 +36,7 @@ class WizardBreadcrumb extends StatelessWidget {
           Row(
             children: [
               Text(
-                l10n.stepIndicator(
-                  currentStep + 1,
-                  titles.length,
-                ),
+                l10n.stepIndicator(currentStep + 1, titles.length),
                 style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
@@ -53,7 +50,9 @@ class WizardBreadcrumb extends StatelessWidget {
                     value: progress,
                     minHeight: 3,
                     backgroundColor: AppColors.border,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.bleuArdoise),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.bleuArdoise,
+                    ),
                   ),
                 ),
               ),
@@ -92,14 +91,18 @@ class WizardBreadcrumb extends StatelessWidget {
                             color: isCurrent
                                 ? AppColors.bleuArdoise
                                 : isDone
-                                    ? AppColors.bleuArdoise.withValues(alpha: 0.10)
-                                    : AppColors.surfaceAlt,
-                            borderRadius: const BorderRadius.all(Radius.circular(18)),
+                                ? AppColors.bleuArdoise.withValues(alpha: 0.10)
+                                : AppColors.surfaceAlt,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(18),
+                            ),
                             border: isCurrent
                                 ? null
                                 : Border.all(
                                     color: isDone
-                                        ? AppColors.bleuArdoise.withValues(alpha: 0.14)
+                                        ? AppColors.bleuArdoise.withValues(
+                                            alpha: 0.14,
+                                          )
                                         : AppColors.border,
                                   ),
                           ),
@@ -112,12 +115,14 @@ class WizardBreadcrumb extends StatelessWidget {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isCurrent
-                                      ? AppColors.textOnDark.withValues(alpha: 0.22)
+                                      ? AppColors.textOnDark.withValues(
+                                          alpha: 0.22,
+                                        )
                                       : isDone
-                                          ? AppColors.bleuArdoise.withValues(
-                                              alpha: 0.16,
-                                            )
-                                          : AppColors.border,
+                                      ? AppColors.bleuArdoise.withValues(
+                                          alpha: 0.16,
+                                        )
+                                      : AppColors.border,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
@@ -128,8 +133,8 @@ class WizardBreadcrumb extends StatelessWidget {
                                     color: isCurrent
                                         ? AppColors.textOnDark
                                         : isDone
-                                            ? AppColors.bleuArdoise
-                                            : AppColors.textSecondary,
+                                        ? AppColors.bleuArdoise
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -141,8 +146,10 @@ class WizardBreadcrumb extends StatelessWidget {
                                   color: isCurrent
                                       ? AppColors.textOnDark
                                       : isDone
-                                          ? AppColors.bleuArdoise
-                                          : AppColors.textSecondary.withValues(alpha: 0.75),
+                                      ? AppColors.bleuArdoise
+                                      : AppColors.textSecondary.withValues(
+                                          alpha: 0.75,
+                                        ),
                                 ),
                               ),
                             ],

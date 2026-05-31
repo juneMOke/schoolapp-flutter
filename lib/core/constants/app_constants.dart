@@ -1,7 +1,14 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String baseUrl = 'http://10.0.2.2:8080';
+  static const String appEnvironmentDefineKey = 'APP_ENV';
+  static const String apiBaseUrlDefineKey = 'API_BASE_URL';
+  static const String showEnvironmentBannerDefineKey =
+      'SHOW_ENVIRONMENT_BANNER';
+  static const String enableVerboseNetworkLoggingDefineKey =
+      'ENABLE_VERBOSE_NETWORK_LOGGING';
+  static const String defaultAppEnvironment = 'dev';
+
   static const String loginEndpoint = '/api/v1/auth/login';
   static const String generateOtpEndpoint = '/api/v1/auth/otp/generate';
   static const String validateOtpEndpoint = '/api/v1/auth/otp/validate';
@@ -46,6 +53,8 @@ class AppConstants {
   static const String enrollmentPreviewByStudentEndpoint =
       '/api/v1/enrollments/students/{studentId}/preview';
 
+  static const String enrollmentStatsEndpoint = '/api/v1/enrollment-stats';
+
   static const String classroomsEndpoint = '/api/v1/classrooms';
   static const String classroomMembersEndpoint =
       '/api/v1/classrooms/{classroomId}/members';
@@ -53,6 +62,7 @@ class AppConstants {
       '/api/v1/classrooms/{classroomId}/members/{classroomMemberId}';
   static const String classroomDistributionOverviewEndpoint =
       '/api/v1/classrooms/distribution-overview';
+  static const String classroomStatsEndpoint = '/api/v1/classroom-stats';
   static const String classroomsDistributeEndpoint =
       '/api/v1/classrooms/distribute';
 
@@ -78,6 +88,7 @@ class AppConstants {
       '/api/v1/finance/student-charges/{chargeId}/allocations';
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
+  static const String financeStatsEndpoint = '/api/v1/finance-stats';
 
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =

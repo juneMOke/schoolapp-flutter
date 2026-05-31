@@ -97,8 +97,9 @@ class AddressStepState extends State<AddressStep> {
     );
   }
 
-  ({String neighborhood, String additionalAddress})
-  _buildInitialAddressParts(StudentDetail student) {
+  ({String neighborhood, String additionalAddress}) _buildInitialAddressParts(
+    StudentDetail student,
+  ) {
     final neighborhood = student.neighborhood.trim();
     if (neighborhood.isEmpty) {
       return _splitAddressValue(student.address);

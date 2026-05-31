@@ -5,10 +5,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class TopBarNotificationButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const TopBarNotificationButton({
-    super.key,
-    required this.onPressed,
-  });
+  const TopBarNotificationButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

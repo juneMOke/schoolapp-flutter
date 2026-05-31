@@ -16,7 +16,9 @@ InputDecoration financeInputDecoration({
     labelStyle: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
     hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
     filled: true,
-    fillColor: readOnly ? AppColors.financeDetailMutedSurface : AppColors.surface,
+    fillColor: readOnly
+        ? AppColors.financeDetailMutedSurface
+        : AppColors.surface,
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppDimensions.spacingM,
       vertical: AppDimensions.spacingM,

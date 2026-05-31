@@ -20,7 +20,7 @@ class ClassesOrganisationMembersLoadingIndicator extends StatelessWidget {
       builder: (context, classroomState) {
         final shouldShow =
             classroomState.membersStatus == ClassroomStatus.loading &&
-                classroomState.membersLoadingCount > 0;
+            classroomState.membersLoadingCount > 0;
 
         return AnimatedSwitcher(
           duration: AppMotion.fast,
@@ -45,7 +45,8 @@ class ClassesOrganisationMembersLoadingIndicator extends StatelessWidget {
                           l10n.classesOrganisationLoadingClassroomsCount(
                             classroomState.membersLoadingCount,
                           ),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.onSurfaceVariant,

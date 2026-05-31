@@ -43,7 +43,9 @@ class FacturationChargeSummaryStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.borderStrong.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: AppColors.borderStrong.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,11 +136,7 @@ class _KpiCell extends StatelessWidget {
   final String value;
   final Color? valueColor;
 
-  const _KpiCell({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+  const _KpiCell({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {

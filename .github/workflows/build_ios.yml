@@ -1,0 +1,183 @@
+name: Build iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      export_method:
+        description: "Méthode d'export Xcode"
+        required: true
+        type: choice
+        default: development
+        options:
+          - development
+          - ad-hoc
+          - app-store
+      version_tag:
+        description: 'Tag SemVer à utiliser pour prod (ex: v1.2.3)'
+        required: false
+        type: string
+
+# NOTE : Les runners macOS sont facturés. Ce workflow est déclenché
+# manuellement uniquement pour économiser les minutes.
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Job 1 — Résoudre les variables selon l'environnement
+  # ─────────────────────────────────────────────────────────────────
+  resolve-config:
+    name: Resolve config
+    runs-on: ubuntu-latest
+    outputs:
+      app_env: ${{ steps.config.outputs.app_env }}
+      api_base_url: ${{ steps.config.outputs.api_base_url }}
+      flavor: ${{ steps.config.outputs.flavor }}
+    steps:
+      - name: Resolve environment variables
+        id: config
+        run: |
+          ENV="${{ inputs.environment }}"
+          case "$ENV" in
+            dev)
+              API_URL="${{ secrets.DEV_API_BASE_URL }}"
+              ;;
+            staging)
+              API_URL="${{ secrets.STAGING_API_BASE_URL }}"
+              ;;
+            prod)
+              API_URL="${{ secrets.PROD_API_BASE_URL }}"
+              ;;
+          esac
+
+          echo "app_env=$ENV"          >> "$GITHUB_OUTPUT"
+          echo "api_base_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "flavor=$ENV"           >> "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 2 — Validation fail-fast (sur ubuntu pour économiser macOS)
+  # ─────────────────────────────────────────────────────────────────
+  validate-env:
+    name: Validate env (${{ needs.resolve-config.outputs.app_env }})
+    needs: resolve-config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate environment variables
+        run: |
+          bash scripts/validate_env.sh \
+            --env="${{ needs.resolve-config.outputs.app_env }}" \
+            --api-base-url="${{ needs.resolve-config.outputs.api_base_url }}"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 3 — Build iOS (macOS runner)
+  # ─────────────────────────────────────────────────────────────────
+  build-ios:
+    name: Build iOS ${{ needs.resolve-config.outputs.flavor }}
+    needs: [ resolve-config, validate-env ]
+    runs-on: macos-latest
+    environment: ${{ needs.resolve-config.outputs.app_env }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Require version tag for prod
+        if: ${{ needs.resolve-config.outputs.app_env == 'prod' && inputs.version_tag == '' }}
+        run: |
+          echo "Un version_tag est requis pour un build prod (ex: v1.2.3)."
+          exit 1
+
+      - name: Resolve Flutter version
+        id: version
+        env:
+          APP_ENV: ${{ needs.resolve-config.outputs.app_env }}
+          VERSION_TAG: ${{ inputs.version_tag }}
+        run: |
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
+
+      # ── Signing (ajuster selon votre setup certificates/provisioning) ──
+      #
+      # OPTION A : Fastlane match (recommandé)
+      # - name: Install Fastlane
+      #   run: gem install fastlane
+      # - name: Sync certificates
+      #   run: fastlane match ${{ inputs.export_method == 'app-store' && 'appstore' || 'development' }}
+      #   env:
+      #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      #     MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      #
+      # OPTION B : Certificat/provisioning profile uploadé comme secret
+      # - name: Import certificates
+      #   uses: apple-actions/import-codesign-certs@v2
+      #   with:
+      #     p12-file-base64: ${{ secrets.IOS_CERTIFICATES_P12_BASE64 }}
+      #     p12-password: ${{ secrets.IOS_CERTIFICATES_P12_PASSWORD }}
+      # - name: Install provisioning profile
+      #   run: |
+      #     PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+      #     echo -n "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > $PP_PATH
+      #     mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+      #     cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build iOS (no codesign, pour valider la compilation)
+        run: |
+          flutter build ios \
+            --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+            --no-codesign \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
+            --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+            --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+
+      # Décommenter quand le signing est configuré :
+      # - name: Build IPA
+      #   run: |
+      #     flutter build ipa \
+      #       --flavor "${{ needs.resolve-config.outputs.flavor }}" \
+      #       --export-method "${{ inputs.export_method }}" \
+      #       --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
+      #       --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+      #
+      # - name: Upload IPA artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-ipa-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
+      #     path: build/ios/ipa/*.ipa
+      #     retention-days: 30
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
+          path: build/ios/iphoneos/*.app
+          retention-days: 14

@@ -14,8 +14,8 @@ class EnrollmentAcademicInfoBloc
 
   EnrollmentAcademicInfoBloc({
     required UpdateEnrollmentAcademicInfoUseCase updateUseCase,
-  })  : _updateUseCase = updateUseCase,
-        super(const EnrollmentAcademicInfoState.initial()) {
+  }) : _updateUseCase = updateUseCase,
+       super(const EnrollmentAcademicInfoState.initial()) {
     on<EnrollmentAcademicInfoUpdateRequested>(_onUpdateRequested);
     on<EnrollmentAcademicInfoStateReset>(_onStateReset);
   }
@@ -31,10 +31,12 @@ class EnrollmentAcademicInfoBloc
     EnrollmentAcademicInfoUpdateRequested event,
     Emitter<EnrollmentAcademicInfoState> emit,
   ) async {
-    emit(state.copyWith(
-      status: EnrollmentAcademicInfoStatus.loading,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: EnrollmentAcademicInfoStatus.loading,
+        errorMessage: null,
+      ),
+    );
 
     final result = await _updateUseCase(
       studentId: event.enrollmentId,
@@ -51,15 +53,19 @@ class EnrollmentAcademicInfoBloc
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: EnrollmentAcademicInfoStatus.failure,
-        errorMessage: failure.message,
-      )),
-      (updatedDetail) => emit(state.copyWith(
-        status: EnrollmentAcademicInfoStatus.success,
-        updatedDetail: updatedDetail,
-        errorMessage: null,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: EnrollmentAcademicInfoStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedDetail) => emit(
+        state.copyWith(
+          status: EnrollmentAcademicInfoStatus.success,
+          updatedDetail: updatedDetail,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 }

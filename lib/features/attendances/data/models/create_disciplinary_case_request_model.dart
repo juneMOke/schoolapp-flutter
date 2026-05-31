@@ -12,7 +12,10 @@ class CreateDisciplinaryCaseRequestModel extends Equatable {
   final String studentLastName;
   final String? studentMiddleName;
   final String studentGender;
-  @JsonKey(fromJson: DateOnlyJsonHelper.fromJson, toJson: DateOnlyJsonHelper.toJson)
+  @JsonKey(
+    fromJson: DateOnlyJsonHelper.fromJson,
+    toJson: DateOnlyJsonHelper.toJson,
+  )
   final DateTime disciplinaryCaseDate;
   final String academicYearId;
   final String title;
@@ -54,8 +57,7 @@ class CreateDisciplinaryCaseRequestModel extends Equatable {
 
   factory CreateDisciplinaryCaseRequestModel.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      _$CreateDisciplinaryCaseRequestModelFromJson(json);
+  ) => _$CreateDisciplinaryCaseRequestModelFromJson(json);
 
   Map<String, dynamic> toJson() =>
       _$CreateDisciplinaryCaseRequestModelToJson(this);

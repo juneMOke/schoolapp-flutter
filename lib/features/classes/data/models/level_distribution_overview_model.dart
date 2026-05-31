@@ -22,11 +22,13 @@ class LevelDistributionOverviewModel extends Equatable {
   Map<String, dynamic> toJson() => _$LevelDistributionOverviewModelToJson(this);
 
   LevelDistributionOverview toEntity() => LevelDistributionOverview(
-        unassignedEnrollments: unassignedEnrollments
-            .map((enrollment) => enrollment.toEnrollmentSummary())
-            .toList(growable: false),
-        classrooms: classrooms.map((classroom) => classroom.toEntity()).toList(growable: false),
-      );
+    unassignedEnrollments: unassignedEnrollments
+        .map((enrollment) => enrollment.toEnrollmentSummary())
+        .toList(growable: false),
+    classrooms: classrooms
+        .map((classroom) => classroom.toEntity())
+        .toList(growable: false),
+  );
 
   @override
   List<Object?> get props => [unassignedEnrollments, classrooms];

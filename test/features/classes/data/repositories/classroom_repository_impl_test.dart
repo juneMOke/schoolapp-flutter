@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_with_members_model.dart';
+import 'package:school_app_flutter/features/classes/data/models/classroom_stats_response_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
@@ -13,6 +14,7 @@ import 'package:school_app_flutter/features/classes/data/models/reassign_classro
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_stats.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
@@ -38,6 +40,130 @@ const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
 const tClassroomMemberId = 'member-1';
 const tTargetClassroomId = 'classroom-2';
+
+final tClassroomStatsResponseModel = ClassroomStatsResponseModel(
+  context: ClassroomStatsContextModel(
+    academicYearId: tAcademicYearId,
+    academicYearName: '2025-2026',
+    generatedAt: DateTime.utc(2026, 5, 24, 10),
+  ),
+  kpis: const ClassroomKpisModel(
+    totalActive: 120,
+    activeGirls: 62,
+    activeBoys: 58,
+    inactive: 8,
+  ),
+  distributionByCycle: const [
+    CycleDistributionItemModel(
+      cycleId: 'cycle-1',
+      cycleCode: 'PRIMARY',
+      total: 120,
+      levels: [
+        LevelDistributionItemModel(
+          levelId: tSchoolLevelId,
+          levelCode: 'P1',
+          total: 120,
+        ),
+      ],
+    ),
+  ],
+  detail: const ClassroomDetailModel(
+    school: SchoolDetailModel(
+      totalStudents: 120,
+      girls: 62,
+      boys: 58,
+      cycles: [
+        CycleDetailModel(
+          cycleId: 'cycle-1',
+          cycleCode: 'PRIMARY',
+          totalStudents: 120,
+          girls: 62,
+          boys: 58,
+          levels: [
+            LevelDetailModel(
+              levelId: tSchoolLevelId,
+              levelCode: 'P1',
+              totalStudents: 120,
+              girls: 62,
+              boys: 58,
+              classrooms: [
+                ClassroomItemModel(
+                  classroomId: tClassroomId,
+                  name: 'A1',
+                  totalStudents: 35,
+                  girls: 18,
+                  boys: 17,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+);
+
+final tClassroomStats = ClassroomStats(
+  context: ClassroomStatsContext(
+    academicYearId: tAcademicYearId,
+    academicYearName: '2025-2026',
+    generatedAt: DateTime.utc(2026, 5, 24, 10),
+  ),
+  kpis: const ClassroomKpis(
+    totalActive: 120,
+    activeGirls: 62,
+    activeBoys: 58,
+    inactive: 8,
+  ),
+  distributionByCycle: const [
+    CycleDistributionItem(
+      cycleId: 'cycle-1',
+      cycleCode: 'PRIMARY',
+      total: 120,
+      levels: [
+        LevelDistributionItem(
+          levelId: tSchoolLevelId,
+          levelCode: 'P1',
+          total: 120,
+        ),
+      ],
+    ),
+  ],
+  detail: const ClassroomDetail(
+    school: SchoolDetail(
+      totalStudents: 120,
+      girls: 62,
+      boys: 58,
+      cycles: [
+        CycleDetail(
+          cycleId: 'cycle-1',
+          cycleCode: 'PRIMARY',
+          totalStudents: 120,
+          girls: 62,
+          boys: 58,
+          levels: [
+            LevelDetail(
+              levelId: tSchoolLevelId,
+              levelCode: 'P1',
+              totalStudents: 120,
+              girls: 62,
+              boys: 58,
+              classrooms: [
+                ClassroomItem(
+                  classroomId: tClassroomId,
+                  name: 'A1',
+                  totalStudents: 35,
+                  girls: 18,
+                  boys: 17,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+);
 
 const tClassroomMemberModel = ClassroomMemberModel(
   id: 'member-1',
@@ -288,25 +414,28 @@ void main() {
   });
 
   group('getClassroomMembers', () {
-    test('returns Right(List<ClassroomMember>) when datasource succeeds', () async {
-      when(
-        () => mockRemoteDataSource.listClassroomMembers(
-          tRequiredAuth,
-          tClassroomId,
-          tAcademicYearId,
-        ),
-      ).thenAnswer((_) async => const [tClassroomMemberModel]);
+    test(
+      'returns Right(List<ClassroomMember>) when datasource succeeds',
+      () async {
+        when(
+          () => mockRemoteDataSource.listClassroomMembers(
+            tRequiredAuth,
+            tClassroomId,
+            tAcademicYearId,
+          ),
+        ).thenAnswer((_) async => const [tClassroomMemberModel]);
 
-      final result = await repository.getClassroomMembers(
-        classroomId: tClassroomId,
-        academicYearId: tAcademicYearId,
-      );
+        final result = await repository.getClassroomMembers(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        );
 
-      result.fold(
-        (_) => fail('Expected Right but got Left'),
-        (members) => expect(members, const [tClassroomMember]),
-      );
-    });
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (members) => expect(members, const [tClassroomMember]),
+        );
+      },
+    );
 
     test('returns Left(Failure) when DioException carries a Failure', () async {
       const failure = NotFoundFailure('Resource not found');
@@ -326,27 +455,30 @@ void main() {
       expect(result, const Left<Failure, List<ClassroomMember>>(failure));
     });
 
-    test('returns Left(NetworkFailure) when DioException has no Failure', () async {
-      when(
-        () => mockRemoteDataSource.listClassroomMembers(
-          tRequiredAuth,
-          tClassroomId,
-          tAcademicYearId,
-        ),
-      ).thenThrow(_dioException(error: Exception('socket error')));
+    test(
+      'returns Left(NetworkFailure) when DioException has no Failure',
+      () async {
+        when(
+          () => mockRemoteDataSource.listClassroomMembers(
+            tRequiredAuth,
+            tClassroomId,
+            tAcademicYearId,
+          ),
+        ).thenThrow(_dioException(error: Exception('socket error')));
 
-      final result = await repository.getClassroomMembers(
-        classroomId: tClassroomId,
-        academicYearId: tAcademicYearId,
-      );
+        final result = await repository.getClassroomMembers(
+          classroomId: tClassroomId,
+          academicYearId: tAcademicYearId,
+        );
 
-      expect(
-        result,
-        const Left<Failure, List<ClassroomMember>>(
-          NetworkFailure('Network error occurred'),
-        ),
-      );
-    });
+        expect(
+          result,
+          const Left<Failure, List<ClassroomMember>>(
+            NetworkFailure('Network error occurred'),
+          ),
+        );
+      },
+    );
 
     test('returns Left(ServerFailure) when payload is invalid', () async {
       when(
@@ -372,55 +504,108 @@ void main() {
   });
 
   group('getLevelDistributionOverview', () {
-    test('returns Right(LevelDistributionOverview) when datasource succeeds', () async {
-      when(
-        () => mockRemoteDataSource.getLevelDistributionOverview(
-          tRequiredAuth,
-          tAcademicYearId,
-          tSchoolLevelId,
-        ),
-      ).thenAnswer((_) async => tLevelDistributionOverviewModel);
+    test(
+      'returns Right(LevelDistributionOverview) when datasource succeeds',
+      () async {
+        when(
+          () => mockRemoteDataSource.getLevelDistributionOverview(
+            tRequiredAuth,
+            tAcademicYearId,
+            tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => tLevelDistributionOverviewModel);
 
-      final result = await repository.getLevelDistributionOverview(
-        academicYearId: tAcademicYearId,
-        schoolLevelId: tSchoolLevelId,
-      );
+        final result = await repository.getLevelDistributionOverview(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        );
+
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (overview) => expect(overview, tLevelDistributionOverview),
+        );
+        verify(
+          () => mockRemoteDataSource.getLevelDistributionOverview(
+            tRequiredAuth,
+            tAcademicYearId,
+            tSchoolLevelId,
+          ),
+        ).called(1);
+        verifyNoMoreInteractions(mockRemoteDataSource);
+      },
+    );
+
+    test(
+      'returns Left(NetworkFailure) when DioException has no Failure',
+      () async {
+        when(
+          () => mockRemoteDataSource.getLevelDistributionOverview(
+            tRequiredAuth,
+            tAcademicYearId,
+            tSchoolLevelId,
+          ),
+        ).thenThrow(_dioException(error: Exception('socket error')));
+
+        final result = await repository.getLevelDistributionOverview(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        );
+
+        expect(
+          result,
+          const Left<Failure, LevelDistributionOverview>(
+            NetworkFailure('Network error occurred'),
+          ),
+        );
+      },
+    );
+  });
+
+  group('getClassroomStats', () {
+    test('returns Right(ClassroomStats) when datasource succeeds', () async {
+      when(
+        () => mockRemoteDataSource.getClassroomStats(tRequiredAuth),
+      ).thenAnswer((_) async => tClassroomStatsResponseModel);
+
+      final result = await repository.getClassroomStats();
 
       result.fold(
         (_) => fail('Expected Right but got Left'),
-        (overview) => expect(overview, tLevelDistributionOverview),
+        (stats) => expect(stats, tClassroomStats),
       );
       verify(
-        () => mockRemoteDataSource.getLevelDistributionOverview(
-          tRequiredAuth,
-          tAcademicYearId,
-          tSchoolLevelId,
-        ),
+        () => mockRemoteDataSource.getClassroomStats(tRequiredAuth),
       ).called(1);
-      verifyNoMoreInteractions(mockRemoteDataSource);
     });
 
-    test('returns Left(NetworkFailure) when DioException has no Failure', () async {
+    test('returns Left(Failure) when DioException carries a Failure', () async {
+      const failure = UnauthorizedFailure('Access forbidden');
       when(
-        () => mockRemoteDataSource.getLevelDistributionOverview(
-          tRequiredAuth,
-          tAcademicYearId,
-          tSchoolLevelId,
-        ),
-      ).thenThrow(_dioException(error: Exception('socket error')));
+        () => mockRemoteDataSource.getClassroomStats(tRequiredAuth),
+      ).thenThrow(_dioException(error: failure));
 
-      final result = await repository.getLevelDistributionOverview(
-        academicYearId: tAcademicYearId,
-        schoolLevelId: tSchoolLevelId,
-      );
+      final result = await repository.getClassroomStats();
 
-      expect(
-        result,
-        const Left<Failure, LevelDistributionOverview>(
-          NetworkFailure('Network error occurred'),
-        ),
-      );
+      expect(result, const Left<Failure, ClassroomStats>(failure));
     });
+
+    test(
+      'returns Left(NetworkFailure) when DioException has no Failure',
+      () async {
+        when(
+          () => mockRemoteDataSource.getClassroomStats(tRequiredAuth),
+        ).thenThrow(_dioException(error: Exception('socket error')));
+
+        final result = await repository.getClassroomStats();
+
+        expect(
+          result,
+          const Left<Failure, ClassroomStats>(
+            NetworkFailure('Network error occurred'),
+          ),
+        );
+      },
+    );
   });
 
   group('distributeStudentsToClassrooms', () {
@@ -524,33 +709,38 @@ void main() {
   });
 
   group('reassignClassroomMember', () {
-    test('returns Right(void) and sends target classroom payload on success', () async {
-      when(
-        () => mockRemoteDataSource.reassignClassroomMember(
-          tRequiredAuth,
-          tTargetClassroomId,
-          tClassroomMemberId,
-          any(),
-        ),
-      ).thenAnswer((_) async {});
+    test(
+      'returns Right(void) and sends target classroom payload on success',
+      () async {
+        when(
+          () => mockRemoteDataSource.reassignClassroomMember(
+            tRequiredAuth,
+            tTargetClassroomId,
+            tClassroomMemberId,
+            any(),
+          ),
+        ).thenAnswer((_) async {});
 
-      final result = await repository.reassignClassroomMember(
-        classroomMemberId: tClassroomMemberId,
-        targetClassroomId: tTargetClassroomId,
-      );
+        final result = await repository.reassignClassroomMember(
+          classroomMemberId: tClassroomMemberId,
+          targetClassroomId: tTargetClassroomId,
+        );
 
-      expect(result.isRight(), true);
-      final captured = verify(
-        () => mockRemoteDataSource.reassignClassroomMember(
-          tRequiredAuth,
-          tTargetClassroomId,
-          tClassroomMemberId,
-          captureAny(),
-        ),
-      ).captured.single as ReassignClassroomMemberRequestModel;
+        expect(result.isRight(), true);
+        final captured =
+            verify(
+                  () => mockRemoteDataSource.reassignClassroomMember(
+                    tRequiredAuth,
+                    tTargetClassroomId,
+                    tClassroomMemberId,
+                    captureAny(),
+                  ),
+                ).captured.single
+                as ReassignClassroomMemberRequestModel;
 
-      expect(captured.targetClassroomId, tTargetClassroomId);
-    });
+        expect(captured.targetClassroomId, tTargetClassroomId);
+      },
+    );
 
     test('returns Left(Failure) when DioException carries a Failure', () async {
       const failure = NotFoundFailure('Resource not found');

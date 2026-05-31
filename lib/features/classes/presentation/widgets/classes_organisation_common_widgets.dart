@@ -66,12 +66,16 @@ class ClassesOrganisationEmptyCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Text(
             subtitle,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -141,9 +145,16 @@ class ClassesOrganisationInfoChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: AppDimensions.detailMiniIconSize, color: AppColors.textSecondary),
+          Icon(
+            icon,
+            size: AppDimensions.detailMiniIconSize,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(width: AppDimensions.spacingXS),
-          Text(text, style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary)),
+          Text(
+            text,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary),
+          ),
         ],
       ),
     );

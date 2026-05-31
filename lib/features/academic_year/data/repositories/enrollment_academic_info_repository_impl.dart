@@ -17,7 +17,8 @@ class EnrollmentAcademicInfoRepositoryImpl
   });
 
   @override
-  Future<Either<Failure, EnrollmentAcademicInfoResponse>> updateEnrollmentAcademicInfo({
+  Future<Either<Failure, EnrollmentAcademicInfoResponse>>
+  updateEnrollmentAcademicInfo({
     required String enrollmentId,
     required String academicYearId,
     required String previousSchoolName,
@@ -28,7 +29,7 @@ class EnrollmentAcademicInfoRepositoryImpl
     int? previousRank,
     required bool validatedPreviousYear,
     String? transferReason,
-    String? cancellationReason
+    String? cancellationReason,
   }) async {
     try {
       final model = await remoteDataSource.updateEnrollmentAcademicInfo(
@@ -44,7 +45,7 @@ class EnrollmentAcademicInfoRepositoryImpl
           previousRank: previousRank,
           validatedPreviousYear: validatedPreviousYear,
           transferReason: transferReason,
-          cancellationReason: cancellationReason
+          cancellationReason: cancellationReason,
         ),
       );
       return Right(model.toEntity());
@@ -56,4 +57,3 @@ class EnrollmentAcademicInfoRepositoryImpl
     }
   }
 }
-

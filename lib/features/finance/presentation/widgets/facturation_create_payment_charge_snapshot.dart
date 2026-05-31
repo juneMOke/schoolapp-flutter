@@ -36,10 +36,8 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
 
   double get _remainingInCents => expectedAmountInCents - amountPaidInCents;
 
-  String _fmt(double cents) => formatMonetaryAmountWithCurrency(
-        amount: cents / 100,
-        currency: currency,
-      );
+  String _fmt(double cents) =>
+      formatMonetaryAmountWithCurrency(amount: cents / 100, currency: currency);
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +62,9 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
             builder: (context, constraints) {
               final compact =
                   constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
-              final tileWidth =
-                  compact ? constraints.maxWidth : AppDimensions.detailInfoItemWidth;
+              final tileWidth = compact
+                  ? constraints.maxWidth
+                  : AppDimensions.detailInfoItemWidth;
 
               return Wrap(
                 spacing: AppDimensions.spacingS,
@@ -75,7 +74,9 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentExpectedLabel,
                     value: _fmt(expectedAmountInCents),
-                    backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.07),
+                    backgroundColor: AppColors.bleuArdoise.withValues(
+                      alpha: 0.07,
+                    ),
                     borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
                     valueColor: AppColors.bleuArdoise,
                   ),
@@ -83,7 +84,9 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentPaidLabel,
                     value: _fmt(amountPaidInCents),
-                    backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.07),
+                    backgroundColor: AppColors.bleuArdoise.withValues(
+                      alpha: 0.07,
+                    ),
                     borderColor: AppColors.bleuArdoise.withValues(alpha: 0.18),
                     valueColor: AppColors.bleuArdoise,
                   ),
@@ -91,22 +94,27 @@ class FacturationCreatePaymentChargeSnapshot extends StatelessWidget {
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentRemainingLabel,
                     value: _fmt(_remainingInCents.clamp(0, double.infinity)),
-                    backgroundColor: (_remainingInCents > 0
-                            ? AppColors.terreCuite
-                            : AppColors.success)
-                        .withValues(alpha: 0.07),
-                    borderColor: (_remainingInCents > 0
-                            ? AppColors.terreCuite
-                            : AppColors.success)
-                        .withValues(alpha: 0.18),
-                    valueColor:
-                        _remainingInCents > 0 ? AppColors.terreCuite : AppColors.success,
+                    backgroundColor:
+                        (_remainingInCents > 0
+                                ? AppColors.terreCuite
+                                : AppColors.success)
+                            .withValues(alpha: 0.07),
+                    borderColor:
+                        (_remainingInCents > 0
+                                ? AppColors.terreCuite
+                                : AppColors.success)
+                            .withValues(alpha: 0.18),
+                    valueColor: _remainingInCents > 0
+                        ? AppColors.terreCuite
+                        : AppColors.success,
                   ),
                   FinanceInfoTile(
                     width: tileWidth,
                     label: l10n.facturationCreatePaymentStatusLabel,
                     value: status.localizedLabel(l10n),
-                    backgroundColor: AppColors.terreCuite.withValues(alpha: 0.07),
+                    backgroundColor: AppColors.terreCuite.withValues(
+                      alpha: 0.07,
+                    ),
                     borderColor: AppColors.terreCuite.withValues(alpha: 0.18),
                     valueColor: AppColors.terreCuite,
                   ),

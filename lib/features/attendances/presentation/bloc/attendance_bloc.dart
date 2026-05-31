@@ -14,9 +14,9 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   AttendanceBloc({
     required GetAttendanceUseCase getAttendanceUseCase,
     required UpdateAttendanceUseCase updateAttendanceUseCase,
-  })  : _getAttendanceUseCase = getAttendanceUseCase,
-        _updateAttendanceUseCase = updateAttendanceUseCase,
-        super(const AttendanceState()) {
+  }) : _getAttendanceUseCase = getAttendanceUseCase,
+       _updateAttendanceUseCase = updateAttendanceUseCase,
+       super(const AttendanceState()) {
     on<AttendanceFetchRequested>(_onFetchRequested);
     on<AttendancePresenceToggled>(_onPresenceToggled);
     on<AttendanceAbsenceReasonChanged>(_onAbsenceReasonChanged);
@@ -30,10 +30,12 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     AttendanceFetchRequested event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(state.copyWith(
-      fetchStatus: AttendanceStatus.loading,
-      fetchErrorType: AttendanceErrorType.none,
-    ));
+    emit(
+      state.copyWith(
+        fetchStatus: AttendanceStatus.loading,
+        fetchErrorType: AttendanceErrorType.none,
+      ),
+    );
 
     final result = await _getAttendanceUseCase(
       classroomId: event.classroomId,
@@ -42,31 +44,35 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        fetchStatus: AttendanceStatus.failure,
-        fetchErrorType: _mapFailureToErrorType(failure),
-        saveStatus: AttendanceStatus.initial,
-        saveErrorType: AttendanceErrorType.none,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          fetchStatus: AttendanceStatus.failure,
+          fetchErrorType: _mapFailureToErrorType(failure),
+          saveStatus: AttendanceStatus.initial,
+          saveErrorType: AttendanceErrorType.none,
+        ),
+      ),
       (records) {
         final draftRows = records
             .map(AttendanceEditableRow.fromRecord)
             .toList(growable: false);
 
-        emit(state.copyWith(
-          fetchStatus: AttendanceStatus.success,
-          records: records,
-          draftRows: draftRows,
-          fetchErrorType: AttendanceErrorType.none,
-          saveStatus: AttendanceStatus.initial,
-          saveErrorType: AttendanceErrorType.none,
-          activeClassroomId: event.classroomId,
-          activeAcademicYearId: event.academicYearId,
-          activeDate: event.date,
-          hasUnsavedChanges: false,
-          hasValidationErrors: _hasValidationErrors(draftRows),
-          modifiedStudentIds: const <String>{},
-        ));
+        emit(
+          state.copyWith(
+            fetchStatus: AttendanceStatus.success,
+            records: records,
+            draftRows: draftRows,
+            fetchErrorType: AttendanceErrorType.none,
+            saveStatus: AttendanceStatus.initial,
+            saveErrorType: AttendanceErrorType.none,
+            activeClassroomId: event.classroomId,
+            activeAcademicYearId: event.academicYearId,
+            activeDate: event.date,
+            hasUnsavedChanges: false,
+            hasValidationErrors: _hasValidationErrors(draftRows),
+            modifiedStudentIds: const <String>{},
+          ),
+        );
       },
     );
   }
@@ -79,7 +85,11 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       emit,
       event.studentId,
       (row) => event.present
-          ? row.copyWith(present: true, absenceReason: null, absenceReasonNote: '')
+          ? row.copyWith(
+              present: true,
+              absenceReason: null,
+              absenceReasonNote: '',
+            )
           : row.copyWith(present: false),
     );
   }
@@ -91,7 +101,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     _updateDraftRows(
       emit,
       event.studentId,
-      (row) => row.present ? row : row.copyWith(absenceReason: event.absenceReason),
+      (row) =>
+          row.present ? row : row.copyWith(absenceReason: event.absenceReason),
     );
   }
 
@@ -110,7 +121,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     AttendanceSaveRequested event,
     Emitter<AttendanceState> emit,
   ) async {
-    if (state.fetchStatus != AttendanceStatus.success || state.draftRows.isEmpty) {
+    if (state.fetchStatus != AttendanceStatus.success ||
+        state.draftRows.isEmpty) {
       return;
     }
 
@@ -118,10 +130,12 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         state.activeClassroomId == null ||
         state.activeAcademicYearId == null ||
         state.activeDate == null) {
-      emit(state.copyWith(
-        saveStatus: AttendanceStatus.failure,
-        saveErrorType: AttendanceErrorType.validation,
-      ));
+      emit(
+        state.copyWith(
+          saveStatus: AttendanceStatus.failure,
+          saveErrorType: AttendanceErrorType.validation,
+        ),
+      );
       return;
     }
 
@@ -129,33 +143,44 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       return;
     }
 
-    emit(state.copyWith(
-      saveStatus: AttendanceStatus.loading,
-      saveErrorType: AttendanceErrorType.none,
-    ));
+    emit(
+      state.copyWith(
+        saveStatus: AttendanceStatus.loading,
+        saveErrorType: AttendanceErrorType.none,
+      ),
+    );
 
     final result = await _updateAttendanceUseCase(
       classroomId: state.activeClassroomId!,
       date: state.activeDate!,
       academicYearId: state.activeAcademicYearId!,
-      updates: state.draftRows.map((row) => row.toUpdate()).toList(growable: false),
+      updates: state.draftRows
+          .map((row) => row.toUpdate())
+          .toList(growable: false),
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        saveStatus: AttendanceStatus.failure,
-        saveErrorType: _mapFailureToErrorType(failure),
-      )),
+      (failure) => emit(
+        state.copyWith(
+          saveStatus: AttendanceStatus.failure,
+          saveErrorType: _mapFailureToErrorType(failure),
+        ),
+      ),
       (_) {
-        final syncedRecords = _syncRecordsWithDraftRows(state.records, state.draftRows);
-        emit(state.copyWith(
-          records: syncedRecords,
-          saveStatus: AttendanceStatus.success,
-          saveErrorType: AttendanceErrorType.none,
-          hasUnsavedChanges: false,
-          hasValidationErrors: false,
-          modifiedStudentIds: const <String>{},
-        ));
+        final syncedRecords = _syncRecordsWithDraftRows(
+          state.records,
+          state.draftRows,
+        );
+        emit(
+          state.copyWith(
+            records: syncedRecords,
+            saveStatus: AttendanceStatus.success,
+            saveErrorType: AttendanceErrorType.none,
+            hasUnsavedChanges: false,
+            hasValidationErrors: false,
+            modifiedStudentIds: const <String>{},
+          ),
+        );
       },
     );
   }
@@ -164,10 +189,12 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     AttendanceSaveStatusResetRequested event,
     Emitter<AttendanceState> emit,
   ) {
-    emit(state.copyWith(
-      saveStatus: AttendanceStatus.initial,
-      saveErrorType: AttendanceErrorType.none,
-    ));
+    emit(
+      state.copyWith(
+        saveStatus: AttendanceStatus.initial,
+        saveErrorType: AttendanceErrorType.none,
+      ),
+    );
   }
 
   void _onResetRequested(
@@ -185,16 +212,21 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     final draftRows = state.draftRows
         .map((row) => row.studentId == studentId ? transform(row) : row)
         .toList(growable: false);
-    final modifiedStudentIds = _computeModifiedStudentIds(state.records, draftRows);
+    final modifiedStudentIds = _computeModifiedStudentIds(
+      state.records,
+      draftRows,
+    );
 
-    emit(state.copyWith(
-      draftRows: draftRows,
-      hasUnsavedChanges: _hasUnsavedChanges(state.records, draftRows),
-      hasValidationErrors: _hasValidationErrors(draftRows),
-      modifiedStudentIds: modifiedStudentIds,
-      saveStatus: AttendanceStatus.initial,
-      saveErrorType: AttendanceErrorType.none,
-    ));
+    emit(
+      state.copyWith(
+        draftRows: draftRows,
+        hasUnsavedChanges: _hasUnsavedChanges(state.records, draftRows),
+        hasValidationErrors: _hasValidationErrors(draftRows),
+        modifiedStudentIds: modifiedStudentIds,
+        saveStatus: AttendanceStatus.initial,
+        saveErrorType: AttendanceErrorType.none,
+      ),
+    );
   }
 
   Set<String> _computeModifiedStudentIds(
@@ -214,9 +246,11 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         continue;
       }
 
-      final isChanged = record.present != draft.present ||
+      final isChanged =
+          record.present != draft.present ||
           record.absenceReason != draft.absenceReason ||
-          (record.absenceReasonNote ?? '').trim() != draft.absenceReasonNote.trim();
+          (record.absenceReasonNote ?? '').trim() !=
+              draft.absenceReasonNote.trim();
 
       if (isChanged) {
         modified.add(draft.studentId);
@@ -241,7 +275,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       if (record.studentId != draft.studentId ||
           record.present != draft.present ||
           record.absenceReason != draft.absenceReason ||
-          (record.absenceReasonNote ?? '').trim() != draft.absenceReasonNote.trim()) {
+          (record.absenceReasonNote ?? '').trim() !=
+              draft.absenceReasonNote.trim()) {
         return true;
       }
     }
@@ -257,35 +292,35 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     List<AttendanceRecord> records,
     List<AttendanceEditableRow> draftRows,
   ) {
-    final draftByStudentId = {
-      for (final row in draftRows) row.studentId: row,
-    };
+    final draftByStudentId = {for (final row in draftRows) row.studentId: row};
 
-    return records.map((record) {
-      final draft = draftByStudentId[record.studentId];
-      if (draft == null) {
-        return record;
-      }
+    return records
+        .map((record) {
+          final draft = draftByStudentId[record.studentId];
+          if (draft == null) {
+            return record;
+          }
 
-      return AttendanceRecord(
-        id: record.id,
-        studentId: record.studentId,
-        studentFirstName: record.studentFirstName,
-        studentLastName: record.studentLastName,
-        studentMiddleName: record.studentMiddleName,
-        studentGender: record.studentGender,
-        classroomId: record.classroomId,
-        academicYearId: record.academicYearId,
-        attendanceDate: record.attendanceDate,
-        present: draft.present,
-        absenceReason: draft.present ? null : draft.absenceReason,
-        absenceReasonNote: draft.present
-            ? null
-            : draft.absenceReasonNote.trim().isEmpty
+          return AttendanceRecord(
+            id: record.id,
+            studentId: record.studentId,
+            studentFirstName: record.studentFirstName,
+            studentLastName: record.studentLastName,
+            studentMiddleName: record.studentMiddleName,
+            studentGender: record.studentGender,
+            classroomId: record.classroomId,
+            academicYearId: record.academicYearId,
+            attendanceDate: record.attendanceDate,
+            present: draft.present,
+            absenceReason: draft.present ? null : draft.absenceReason,
+            absenceReasonNote: draft.present
+                ? null
+                : draft.absenceReasonNote.trim().isEmpty
                 ? null
                 : draft.absenceReasonNote.trim(),
-      );
-    }).toList(growable: false);
+          );
+        })
+        .toList(growable: false);
   }
 
   AttendanceErrorType _mapFailureToErrorType(Failure failure) =>

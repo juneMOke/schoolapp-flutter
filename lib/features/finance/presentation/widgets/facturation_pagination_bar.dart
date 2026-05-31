@@ -41,8 +41,7 @@ class FacturationPaginationBar extends StatelessWidget {
           tooltip: l10n.previous,
         ),
         IconButton(
-          onPressed:
-              !isLoading && currentPage + 1 < totalPages ? onNext : null,
+          onPressed: !isLoading && currentPage + 1 < totalPages ? onNext : null,
           icon: const Icon(Icons.chevron_right_rounded),
           tooltip: l10n.next,
         ),

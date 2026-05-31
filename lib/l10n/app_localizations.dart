@@ -62,7 +62,8 @@ import 'app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('fr')
+    Locale('fr'),
   ];
 
   /// No description provided for @hello.
@@ -537,7 +540,11 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}'**
-  String classesOrganisationSplitSummary(int studentsCount, int classroomsCount, String criterion);
+  String classesOrganisationSplitSummary(
+    int studentsCount,
+    int classroomsCount,
+    String criterion,
+  );
 
   /// No description provided for @classesOrganisationClassroomsSectionTitle.
   ///
@@ -1318,18 +1325,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You certify that the information is accurate. The file will move to validated status and a receipt can be generated.'**
   String get summaryValidationNoticeBody;
-
-  /// No description provided for @next.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get next;
-
-  /// No description provided for @previous.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous'**
-  String get previous;
 
   /// No description provided for @nextPage.
   ///
@@ -2847,7 +2842,11 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partial, {dueCount} to settle'**
-  String facturationDetailChargesSummary(num totalCount, Object partialCount, Object dueCount);
+  String facturationDetailChargesSummary(
+    num totalCount,
+    Object partialCount,
+    Object dueCount,
+  );
 
   /// No description provided for @facturationDetailChargesRetry.
   ///
@@ -3339,7 +3338,9 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Do you really want to remove allocation #{allocationIndex}? This action cannot be undone.'**
-  String facturationCreatePaymentRemoveAllocationConfirmMessage(int allocationIndex);
+  String facturationCreatePaymentRemoveAllocationConfirmMessage(
+    int allocationIndex,
+  );
 
   /// No description provided for @facturationCreatePaymentRemoveAllocationConfirmAction.
   ///
@@ -4385,14 +4386,668 @@ abstract class AppLocalizations {
   /// **'Conflict'**
   String get statusSyncConflict;
 
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
   /// No description provided for @componentGalleryTitle.
   ///
   /// In en, this message translates to:
   /// **'Component gallery'**
   String get componentGalleryTitle;
+
+  /// No description provided for @enrollmentStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Dashboard'**
+  String get enrollmentStatsDashboardTitle;
+
+  /// No description provided for @enrollmentStatsPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get enrollmentStatsPeriodYear;
+
+  /// No description provided for @enrollmentStatsPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get enrollmentStatsPeriodMonth;
+
+  /// No description provided for @enrollmentStatsPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get enrollmentStatsPeriodWeek;
+
+  /// No description provided for @enrollmentStatsKpiTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get enrollmentStatsKpiTotal;
+
+  /// No description provided for @enrollmentStatsKpiFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First enrollments'**
+  String get enrollmentStatsKpiFirst;
+
+  /// No description provided for @enrollmentStatsKpiRe.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrollments'**
+  String get enrollmentStatsKpiRe;
+
+  /// No description provided for @enrollmentStatsKpiPre.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-enrollments'**
+  String get enrollmentStatsKpiPre;
+
+  /// No description provided for @enrollmentStatsKpiInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get enrollmentStatsKpiInProgress;
+
+  /// No description provided for @enrollmentStatsSectionEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution'**
+  String get enrollmentStatsSectionEvolution;
+
+  /// No description provided for @enrollmentStatsSectionCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle'**
+  String get enrollmentStatsSectionCycle;
+
+  /// No description provided for @enrollmentStatsSectionGender.
+  ///
+  /// In en, this message translates to:
+  /// **'By gender'**
+  String get enrollmentStatsSectionGender;
+
+  /// No description provided for @enrollmentStatsSectionEvolutionEnrollments.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment evolution'**
+  String get enrollmentStatsSectionEvolutionEnrollments;
+
+  /// No description provided for @enrollmentStatsSectionLevelEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution by level'**
+  String get enrollmentStatsSectionLevelEvolution;
+
+  /// No description provided for @enrollmentStatsSectionGenderEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution by gender'**
+  String get enrollmentStatsSectionGenderEvolution;
+
+  /// No description provided for @enrollmentStatsGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get enrollmentStatsGenderMale;
+
+  /// No description provided for @enrollmentStatsGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get enrollmentStatsGenderFemale;
+
+  /// No description provided for @enrollmentStatsGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get enrollmentStatsGenderOther;
+
+  /// No description provided for @enrollmentStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get enrollmentStatsNoData;
+
+  /// No description provided for @enrollmentStatsLoadingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load statistics'**
+  String get enrollmentStatsLoadingError;
+
+  /// No description provided for @enrollmentStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentStatsRetry;
+
+  /// No description provided for @enrollmentStatsStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'students'**
+  String get enrollmentStatsStudents;
+
+  /// No description provided for @enrollmentStatsPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} %'**
+  String enrollmentStatsPercent(int percent);
+
+  /// No description provided for @enrollmentStatsPeriodWeekCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get enrollmentStatsPeriodWeekCurrent;
+
+  /// No description provided for @enrollmentStatsPeriodMonthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get enrollmentStatsPeriodMonthCurrent;
+
+  /// No description provided for @enrollmentStatsPeriodYearCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get enrollmentStatsPeriodYearCurrent;
+
+  /// No description provided for @enrollmentStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get enrollmentStatsSchoolYearUnavailable;
+
+  /// No description provided for @enrollmentStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment dashboard, school year {schoolYear}'**
+  String enrollmentStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @enrollmentStatsPeriodFilterA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment statistics time filter, active period: {selectedPeriod}'**
+  String enrollmentStatsPeriodFilterA11yLabel(String selectedPeriod);
+
+  /// No description provided for @enrollmentStatsContextSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year {schoolYear}'**
+  String enrollmentStatsContextSchoolYear(String schoolYear);
+
+  /// No description provided for @classesStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes Overview - School year'**
+  String get classesStatsDashboardTitle;
+
+  /// No description provided for @classesStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get classesStatsSchoolYearUnavailable;
+
+  /// No description provided for @classesStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes dashboard, school year {schoolYear}'**
+  String classesStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @classesStatsKpiTotalStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL STUDENTS'**
+  String get classesStatsKpiTotalStudents;
+
+  /// No description provided for @classesStatsKpiActiveGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL GIRLS'**
+  String get classesStatsKpiActiveGirls;
+
+  /// No description provided for @classesStatsKpiActiveBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'BOYS'**
+  String get classesStatsKpiActiveBoys;
+
+  /// No description provided for @classesStatsKpiInactiveStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL INACTIVE STUDENTS'**
+  String get classesStatsKpiInactiveStudents;
+
+  /// No description provided for @classesStatsSectionCycleDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Active students distribution by cycle'**
+  String get classesStatsSectionCycleDistribution;
+
+  /// No description provided for @classesStatsSectionLevelDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels distribution - {cycleCode}'**
+  String classesStatsSectionLevelDistribution(String cycleCode);
+
+  /// No description provided for @classesStatsSectionClassroomDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Classrooms detail'**
+  String get classesStatsSectionClassroomDetail;
+
+  /// No description provided for @classesStatsDetailColumnClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Classroom'**
+  String get classesStatsDetailColumnClassroom;
+
+  /// No description provided for @classesStatsDetailColumnCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get classesStatsDetailColumnCycle;
+
+  /// No description provided for @classesStatsDetailColumnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get classesStatsDetailColumnLevel;
+
+  /// No description provided for @classesStatsDetailColumnTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get classesStatsDetailColumnTotal;
+
+  /// No description provided for @classesStatsDetailColumnGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get classesStatsDetailColumnGirls;
+
+  /// No description provided for @classesStatsDetailColumnBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get classesStatsDetailColumnBoys;
+
+  /// No description provided for @classesStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get classesStatsNoData;
+
+  /// No description provided for @classesStatsKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes key performance indicators band'**
+  String get classesStatsKpiBandA11yLabel;
+
+  /// No description provided for @classesStatsCycleChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart of active students distribution by cycle'**
+  String get classesStatsCycleChartA11yLabel;
+
+  /// No description provided for @classesStatsLevelChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart of active students distribution by level for cycle {cycleCode}'**
+  String classesStatsLevelChartA11yLabel(String cycleCode);
+
+  /// No description provided for @classesStatsDetailA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed classrooms table with gender breakdown'**
+  String get classesStatsDetailA11yLabel;
+
+  /// No description provided for @classesStatsLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading classes statistics'**
+  String get classesStatsLoadingA11yLabel;
+
+  /// No description provided for @classesStatsErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get classesStatsErrorTitle;
+
+  /// No description provided for @classesStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get classesStatsRetry;
+
+  /// No description provided for @classesStatsRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry loading classes statistics'**
+  String get classesStatsRetryHint;
+
+  /// No description provided for @classesStatsErrorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes statistics loading error: {message}'**
+  String classesStatsErrorA11yLabel(String message);
+
+  /// No description provided for @classesStatsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load classes statistics. Check your internet connection.'**
+  String get classesStatsNetworkError;
+
+  /// No description provided for @classesStatsNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes statistics available.'**
+  String get classesStatsNotFoundError;
+
+  /// No description provided for @classesStatsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested parameters are invalid.'**
+  String get classesStatsValidationError;
+
+  /// No description provided for @classesStatsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to view these statistics.'**
+  String get classesStatsUnauthorizedError;
+
+  /// No description provided for @classesStatsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid session, please sign in again.'**
+  String get classesStatsInvalidCredentialsError;
+
+  /// No description provided for @classesStatsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get classesStatsServerError;
+
+  /// No description provided for @classesStatsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents displaying statistics.'**
+  String get classesStatsStorageError;
+
+  /// No description provided for @classesStatsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading statistics.'**
+  String get classesStatsAuthError;
+
+  /// No description provided for @classesStatsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading statistics.'**
+  String get classesStatsUnknownError;
+
+  /// No description provided for @financeStatsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year'**
+  String get financeStatsDashboardTitle;
+
+  /// No description provided for @financeStatsSchoolYearUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'School year unavailable'**
+  String get financeStatsSchoolYearUnavailable;
+
+  /// No description provided for @financeStatsContextSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview - School year {schoolYear}'**
+  String financeStatsContextSchoolYear(String schoolYear);
+
+  /// No description provided for @financeStatsPeriodWeekCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get financeStatsPeriodWeekCurrent;
+
+  /// No description provided for @financeStatsPeriodMonthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get financeStatsPeriodMonthCurrent;
+
+  /// No description provided for @financeStatsPeriodYearCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get financeStatsPeriodYearCurrent;
+
+  /// No description provided for @financeStatsKpiCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total collected'**
+  String get financeStatsKpiCollected;
+
+  /// No description provided for @financeStatsKpiExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total expected'**
+  String get financeStatsKpiExpected;
+
+  /// No description provided for @financeStatsKpiOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get financeStatsKpiOutstanding;
+
+  /// No description provided for @financeStatsKpiCollectionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection rate'**
+  String get financeStatsKpiCollectionRate;
+
+  /// No description provided for @financeStatsPercentOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of total'**
+  String financeStatsPercentOfTotal(int percent);
+
+  /// No description provided for @financeStatsSectionEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection evolution'**
+  String get financeStatsSectionEvolution;
+
+  /// No description provided for @financeStatsLegendCurrentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Current period'**
+  String get financeStatsLegendCurrentPeriod;
+
+  /// No description provided for @financeStatsLegendOtherPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Other periods'**
+  String get financeStatsLegendOtherPeriods;
+
+  /// No description provided for @financeStatsSectionFeeTypeDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution by fee type'**
+  String get financeStatsSectionFeeTypeDistribution;
+
+  /// No description provided for @financeStatsFeeTypeCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected: {amount}'**
+  String financeStatsFeeTypeCollected(String amount);
+
+  /// No description provided for @financeStatsFeeTypeExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected: {amount}'**
+  String financeStatsFeeTypeExpected(String amount);
+
+  /// No description provided for @financeStatsFeeTypeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: {rate}%'**
+  String financeStatsFeeTypeRate(int rate);
+
+  /// No description provided for @financeStatsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available for this period'**
+  String get financeStatsNoData;
+
+  /// No description provided for @financeStatsNoDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another period to display more insights.'**
+  String get financeStatsNoDataHint;
+
+  /// No description provided for @financeStatsErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get financeStatsErrorTitle;
+
+  /// No description provided for @financeStatsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get financeStatsRetry;
+
+  /// No description provided for @financeStatsRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload finance statistics'**
+  String get financeStatsRetryHint;
+
+  /// No description provided for @financeStatsLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics are loading'**
+  String get financeStatsLoadingA11yLabel;
+
+  /// No description provided for @financeStatsHeaderA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance dashboard, school year {schoolYear}'**
+  String financeStatsHeaderA11yLabel(String schoolYear);
+
+  /// No description provided for @financeStatsPeriodFilterA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics time filter, active period: {selectedPeriod}'**
+  String financeStatsPeriodFilterA11yLabel(String selectedPeriod);
+
+  /// No description provided for @financeStatsKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial key performance indicators band'**
+  String get financeStatsKpiBandA11yLabel;
+
+  /// No description provided for @financeStatsEvolutionChartA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection amount evolution chart'**
+  String get financeStatsEvolutionChartA11yLabel;
+
+  /// No description provided for @financeStatsFeeTypeSectionA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution of amounts by fee type'**
+  String get financeStatsFeeTypeSectionA11yLabel;
+
+  /// No description provided for @financeStatsFeeTypeItemA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type {code}, collected {collected}, expected {expected}, rate {rate}%'**
+  String financeStatsFeeTypeItemA11yLabel(
+    String code,
+    String collected,
+    String expected,
+    int rate,
+  );
+
+  /// No description provided for @financeStatsErrorA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance statistics loading error: {message}'**
+  String financeStatsErrorA11yLabel(String message);
+
+  /// No description provided for @financeStatsEmptyA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No finance data available for this period'**
+  String get financeStatsEmptyA11yLabel;
+
+  /// No description provided for @financeStatsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load finance statistics. Check your internet connection.'**
+  String get financeStatsNetworkError;
+
+  /// No description provided for @financeStatsNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'No finance statistics available.'**
+  String get financeStatsNotFoundError;
+
+  /// No description provided for @financeStatsValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested parameters are invalid.'**
+  String get financeStatsValidationError;
+
+  /// No description provided for @financeStatsUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not authorized to view these statistics.'**
+  String get financeStatsUnauthorizedError;
+
+  /// No description provided for @financeStatsInvalidCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid session, please sign in again.'**
+  String get financeStatsInvalidCredentialsError;
+
+  /// No description provided for @financeStatsServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is currently unavailable.'**
+  String get financeStatsServerError;
+
+  /// No description provided for @financeStatsStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'A local error prevents displaying statistics.'**
+  String get financeStatsStorageError;
+
+  /// No description provided for @financeStatsAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'An authentication error prevents loading statistics.'**
+  String get financeStatsAuthError;
+
+  /// No description provided for @financeStatsUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading statistics.'**
+  String get financeStatsUnknownError;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -4401,25 +5056,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'fr': return AppLocalizationsFr();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

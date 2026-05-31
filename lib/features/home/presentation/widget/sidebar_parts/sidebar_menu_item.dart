@@ -264,23 +264,23 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                               const SizedBox(width: 10),
                             ],
                             Expanded(
-                               child: Text(
-                                 subMenu.title,
-                                 maxLines: 2,
-                                 softWrap: true,
-                                 overflow: TextOverflow.ellipsis,
-                                 style: TextStyle(
-                                   color: subMenu.isActive
-                                       ? activeForeground
-                                       : inactiveForeground,
-                                   fontSize: 13,
-                                   fontWeight: subMenu.isActive
-                                       ? FontWeight.w600
-                                       : FontWeight.w500,
-                                   height: 1.3,
-                                 ),
-                               ),
-                             ),
+                              child: Text(
+                                subMenu.title,
+                                maxLines: 2,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: subMenu.isActive
+                                      ? activeForeground
+                                      : inactiveForeground,
+                                  fontSize: 13,
+                                  fontWeight: subMenu.isActive
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
                           ],
                         );
                       },

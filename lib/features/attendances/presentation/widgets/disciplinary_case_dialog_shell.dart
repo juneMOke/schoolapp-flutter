@@ -72,8 +72,9 @@ class _DisciplinaryCaseDialogShellState
               vertical: AppDimensions.spacingL,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(AppDimensions.sectionCardRadius),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.sectionCardRadius,
+              ),
             ),
             clipBehavior: Clip.antiAlias,
             child: ConstrainedBox(

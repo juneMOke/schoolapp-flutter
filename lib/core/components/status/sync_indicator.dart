@@ -4,13 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// État de synchronisation globale de l'application.
-enum SyncStatus {
-  synced,
-  syncing,
-  offline,
-  pendingUpload,
-  syncConflict,
-}
+enum SyncStatus { synced, syncing, offline, pendingUpload, syncConflict }
 
 /// Pastille de synchronisation pour l'AppBar.
 ///
@@ -21,11 +15,7 @@ class SyncIndicator extends StatelessWidget {
   final SyncStatus status;
   final VoidCallback? onTap;
 
-  const SyncIndicator({
-    super.key,
-    required this.status,
-    this.onTap,
-  });
+  const SyncIndicator({super.key, required this.status, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -74,30 +64,30 @@ class SyncIndicator extends StatelessWidget {
   _SyncAppearance _appearanceFor(SyncStatus status, AppLocalizations l10n) {
     return switch (status) {
       SyncStatus.synced => _SyncAppearance(
-          icon: Icons.cloud_done,
-          label: l10n.statusSynced,
-          color: AppColors.success,
-        ),
+        icon: Icons.cloud_done,
+        label: l10n.statusSynced,
+        color: AppColors.success,
+      ),
       SyncStatus.syncing => _SyncAppearance(
-          icon: Icons.cloud_sync,
-          label: l10n.statusSyncing,
-          color: AppColors.info,
-        ),
+        icon: Icons.cloud_sync,
+        label: l10n.statusSyncing,
+        color: AppColors.info,
+      ),
       SyncStatus.offline => _SyncAppearance(
-          icon: Icons.cloud_off,
-          label: l10n.statusOffline,
-          color: AppColors.textMuted,
-        ),
+        icon: Icons.cloud_off,
+        label: l10n.statusOffline,
+        color: AppColors.textMuted,
+      ),
       SyncStatus.pendingUpload => _SyncAppearance(
-          icon: Icons.cloud_upload,
-          label: l10n.statusPendingUpload,
-          color: AppColors.warning,
-        ),
+        icon: Icons.cloud_upload,
+        label: l10n.statusPendingUpload,
+        color: AppColors.warning,
+      ),
       SyncStatus.syncConflict => _SyncAppearance(
-          icon: Icons.sync_problem,
-          label: l10n.statusSyncConflict,
-          color: AppColors.error,
-        ),
+        icon: Icons.sync_problem,
+        label: l10n.statusSyncConflict,
+        color: AppColors.error,
+      ),
     };
   }
 }

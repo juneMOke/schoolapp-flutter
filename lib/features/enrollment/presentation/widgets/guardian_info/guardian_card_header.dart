@@ -148,15 +148,17 @@ class GuardianCardHeader extends StatelessWidget {
           width: 32,
           height: 32,
           child: IconButton(
-          tooltip: l10n.guardianToggleCard,
-          onPressed: onToggle,
-          icon: Icon(
-            isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-            color: AppColors.textSecondary,
-            size: 20,
-          ),
-          padding: EdgeInsets.zero,
-          splashRadius: 18,
+            tooltip: l10n.guardianToggleCard,
+            onPressed: onToggle,
+            icon: Icon(
+              isExpanded
+                  ? Icons.expand_less_rounded
+                  : Icons.expand_more_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+            padding: EdgeInsets.zero,
+            splashRadius: 18,
           ),
         ),
       ],

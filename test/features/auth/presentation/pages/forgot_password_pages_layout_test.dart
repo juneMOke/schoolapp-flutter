@@ -55,7 +55,11 @@ void main() {
   }) {
     when(() => authBloc.state).thenReturn(authState);
     when(() => forgotPasswordBloc.state).thenReturn(forgotState);
-    whenListen(authBloc, Stream<AuthState>.value(authState), initialState: authState);
+    whenListen(
+      authBloc,
+      Stream<AuthState>.value(authState),
+      initialState: authState,
+    );
     whenListen(
       forgotPasswordBloc,
       Stream<ForgotPasswordState>.value(forgotState),

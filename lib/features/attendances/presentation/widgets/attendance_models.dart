@@ -61,7 +61,12 @@ class AttendanceSearchRequest extends Equatable {
   });
 
   @override
-  List<Object?> get props => [selectedCycle, selectedLevel, selectedClassroom, date];
+  List<Object?> get props => [
+    selectedCycle,
+    selectedLevel,
+    selectedClassroom,
+    date,
+  ];
 }
 
 class AttendanceStats extends Equatable {

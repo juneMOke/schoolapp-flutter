@@ -24,27 +24,24 @@ extension EnrollmentStatusColorX on EnrollmentStatus {
     };
   }
 
-  @Deprecated(
-    'Sera supprimé lors du prochain audit du module Inscription.',
-  )
+  @Deprecated('Sera supprimé lors du prochain audit du module Inscription.')
   Color get tableBackgroundColor => switch (this) {
     EnrollmentStatus.pending => AppColors.textMuted.withValues(alpha: 0.12),
-    EnrollmentStatus.preRegistered =>
-      AppColors.warning.withValues(alpha: 0.12),
+    EnrollmentStatus.preRegistered => AppColors.warning.withValues(alpha: 0.12),
     EnrollmentStatus.inProgress => AppColors.info.withValues(alpha: 0.12),
-    EnrollmentStatus.adminCompleted =>
-      AppColors.bleuArdoise.withValues(alpha: 0.12),
-    EnrollmentStatus.financialCompleted =>
-      AppColors.orDoux.withValues(alpha: 0.12),
+    EnrollmentStatus.adminCompleted => AppColors.bleuArdoise.withValues(
+      alpha: 0.12,
+    ),
+    EnrollmentStatus.financialCompleted => AppColors.orDoux.withValues(
+      alpha: 0.12,
+    ),
     EnrollmentStatus.completed => AppColors.success.withValues(alpha: 0.12),
     EnrollmentStatus.cancelled => AppColors.error.withValues(alpha: 0.12),
     EnrollmentStatus.validated => AppColors.success.withValues(alpha: 0.12),
     EnrollmentStatus.rejected => AppColors.error.withValues(alpha: 0.12),
   };
 
-  @Deprecated(
-    'Sera supprimé lors du prochain audit du module Inscription.',
-  )
+  @Deprecated('Sera supprimé lors du prochain audit du module Inscription.')
   Color get tableForegroundColor => switch (this) {
     EnrollmentStatus.pending => AppColors.textSecondary,
     EnrollmentStatus.preRegistered => AppColors.warning,

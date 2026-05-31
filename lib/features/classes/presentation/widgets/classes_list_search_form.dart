@@ -77,7 +77,8 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       widget.options,
       _selectedCycleId,
     );
-    final levelOptions = selectedCycle?.levels ?? const <ClassesListLevelOption>[];
+    final levelOptions =
+        selectedCycle?.levels ?? const <ClassesListLevelOption>[];
     final selectedLevel = ClassesListSearchFormLogic.findLevel(
       levelOptions,
       _selectedLevelKey,
@@ -103,7 +104,8 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
             selectedLevelKey: _selectedLevelKey,
             classroomOptions: classroomOptions,
             selectedClassroomId: _selectedClassroomId,
-            classroomEnabled: (selectedLevel?.splitIntoClassrooms ?? false) &&
+            classroomEnabled:
+                (selectedLevel?.splitIntoClassrooms ?? false) &&
                 classroomOptions.isNotEmpty,
             firstNameController: _firstNameController,
             lastNameController: _lastNameController,
@@ -127,7 +129,8 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
                 _selectedClassroomId = null;
               });
             },
-            onClassroomChanged: (value) => setState(() => _selectedClassroomId = value),
+            onClassroomChanged: (value) =>
+                setState(() => _selectedClassroomId = value),
             onFirstNameChanged: (_) => setState(() {}),
             onLastNameChanged: (_) => setState(() {}),
             onSurnameChanged: (_) => setState(() {}),
@@ -136,41 +139,41 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
           Align(
             alignment: Alignment.centerRight,
             child: ClassesListSearchActions(
-            onReset: () {
-              setState(() {
-                _firstNameController.clear();
-                _lastNameController.clear();
-                _surnameController.clear();
-                _selectedCycleId = null;
-                _selectedLevelKey = null;
-                _selectedClassroomId = null;
-              });
-            },
-            onSearch: canSearch && !widget.isSearching
-                ? () {
-                    final classroom = selectedLevel == null
-                        ? null
-                        : ClassesListSearchFormLogic.findClassroom(
-                            selectedLevel.classrooms,
-                            _selectedClassroomId,
-                          );
+              onReset: () {
+                setState(() {
+                  _firstNameController.clear();
+                  _lastNameController.clear();
+                  _surnameController.clear();
+                  _selectedCycleId = null;
+                  _selectedLevelKey = null;
+                  _selectedClassroomId = null;
+                });
+              },
+              onSearch: canSearch && !widget.isSearching
+                  ? () {
+                      final classroom = selectedLevel == null
+                          ? null
+                          : ClassesListSearchFormLogic.findClassroom(
+                              selectedLevel.classrooms,
+                              _selectedClassroomId,
+                            );
 
-                    widget.onSearch(
-                      ClassesListSearchRequest(
-                        firstName: _firstNameController.text.trim(),
-                        lastName: _lastNameController.text.trim(),
-                        surname: _surnameController.text.trim(),
-                        selectedCycle: selectedCycle,
-                        selectedLevel: selectedLevel,
-                        selectedClassroom: classroom,
-                      ),
-                    );
-                  }
-                : null,
-            isSearching: widget.isSearching,
-            clearLabel: l10n.clear,
-            searchLabel: l10n.search,
-          ),
+                      widget.onSearch(
+                        ClassesListSearchRequest(
+                          firstName: _firstNameController.text.trim(),
+                          lastName: _lastNameController.text.trim(),
+                          surname: _surnameController.text.trim(),
+                          selectedCycle: selectedCycle,
+                          selectedLevel: selectedLevel,
+                          selectedClassroom: classroom,
+                        ),
+                      );
+                    }
+                  : null,
+              isSearching: widget.isSearching,
+              clearLabel: l10n.clear,
+              searchLabel: l10n.search,
+            ),
           ),
         ],
       ),

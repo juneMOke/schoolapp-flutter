@@ -2,7 +2,14 @@ part of 'parent_bloc.dart';
 
 const _undefinedParent = Object();
 
-enum ParentUpdateStatus { initial, loading, success, failure, unlinkSuccess, unlinkFailure }
+enum ParentUpdateStatus {
+  initial,
+  loading,
+  success,
+  failure,
+  unlinkSuccess,
+  unlinkFailure,
+}
 
 enum ParentOperation { none, update, create, unlink }
 
@@ -20,10 +27,10 @@ class ParentState extends Equatable {
   });
 
   const ParentState.initial()
-      : status = ParentUpdateStatus.initial,
-        operation = ParentOperation.none,
-        updatedParent = null,
-        errorMessage = null;
+    : status = ParentUpdateStatus.initial,
+      operation = ParentOperation.none,
+      updatedParent = null,
+      errorMessage = null;
 
   ParentState copyWith({
     ParentUpdateStatus? status,

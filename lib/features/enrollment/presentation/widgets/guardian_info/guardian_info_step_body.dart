@@ -61,112 +61,114 @@ class GuardianInfoStepBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: AppRadius.brMd,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.guardianInformation,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: AppRadius.brMd,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.guardianInformation,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.guardianPrimaryRequiredHint,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.guardianPrimaryRequiredHint,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                addButton,
-              ],
-            ),
-          ),
-          AnimatedSwitcher(
-            duration: AppMotion.medium,
-            switchInCurve: AppMotion.outCurve,
-            switchOutCurve: AppMotion.inCurve,
-            child: isLoading
-                ? Padding(
-                    key: const ValueKey<String>('guardian-loading-bar'),
-                    padding: const EdgeInsets.only(top: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: const LinearProgressIndicator(minHeight: 4),
+                      ],
                     ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          const SizedBox(height: 16),
-          if (parentDetails.isEmpty)
-            const GuardianEmptyState()
-          else
-            ...parentDetails.asMap().entries.map((entry) {
-              final index = entry.key;
-              final parent = entry.value;
-              return Padding(
-                key: ValueKey<String>('parent-item-${parent.id}'),
-                padding: EdgeInsets.only(
-                  bottom: index < parentDetails.length - 1 ? 16 : 0,
-                ),
-                child: ParentItem(
-                  parent: parent,
-                  isPrimary: primaryParentId == parent.id,
-                  isExpanded: expandedParentId == parent.id,
-                  onToggleExpanded: () => onOpenParent?.call(parent.id),
-                  onPrimaryChanged: (checked) {
-                    if (checked == true) {
-                      onPrimaryParentChanged?.call(parent.id);
-                    }
-                  },
-                  onFormStateChanged: onItemStateChanged,
-                  onValueChanged: onItemValueChanged,
-                  onRemoveRequested: isEditable
-                      ? () => onRemoveParent?.call(parent.id)
-                      : null,
-                  isEditable: isEditable,
-                ),
-              );
-            }),
-          if (showInlineSaveButton)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: FilledButton.icon(
-                onPressed: canSave && !isLoading ? onSave : null,
-                icon: isLoading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.textOnDark,
-                        ),
-                      )
-                    : const Icon(Icons.save_outlined, size: 18),
-                label: Text(l10n.guardianSaveAction),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                  backgroundColor: AppColors.terreCuite,
-                  foregroundColor: AppColors.textOnDark,
-                  shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
-                  elevation: 0,
-                ),
+                  ),
+                  addButton,
+                ],
               ),
             ),
+            AnimatedSwitcher(
+              duration: AppMotion.medium,
+              switchInCurve: AppMotion.outCurve,
+              switchOutCurve: AppMotion.inCurve,
+              child: isLoading
+                  ? Padding(
+                      key: const ValueKey<String>('guardian-loading-bar'),
+                      padding: const EdgeInsets.only(top: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: const LinearProgressIndicator(minHeight: 4),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
+            if (parentDetails.isEmpty)
+              const GuardianEmptyState()
+            else
+              ...parentDetails.asMap().entries.map((entry) {
+                final index = entry.key;
+                final parent = entry.value;
+                return Padding(
+                  key: ValueKey<String>('parent-item-${parent.id}'),
+                  padding: EdgeInsets.only(
+                    bottom: index < parentDetails.length - 1 ? 16 : 0,
+                  ),
+                  child: ParentItem(
+                    parent: parent,
+                    isPrimary: primaryParentId == parent.id,
+                    isExpanded: expandedParentId == parent.id,
+                    onToggleExpanded: () => onOpenParent?.call(parent.id),
+                    onPrimaryChanged: (checked) {
+                      if (checked == true) {
+                        onPrimaryParentChanged?.call(parent.id);
+                      }
+                    },
+                    onFormStateChanged: onItemStateChanged,
+                    onValueChanged: onItemValueChanged,
+                    onRemoveRequested: isEditable
+                        ? () => onRemoveParent?.call(parent.id)
+                        : null,
+                    isEditable: isEditable,
+                  ),
+                );
+              }),
+            if (showInlineSaveButton)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: FilledButton.icon(
+                  onPressed: canSave && !isLoading ? onSave : null,
+                  icon: isLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.textOnDark,
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined, size: 18),
+                  label: Text(l10n.guardianSaveAction),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                    backgroundColor: AppColors.terreCuite,
+                    foregroundColor: AppColors.textOnDark,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppRadius.brMd,
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

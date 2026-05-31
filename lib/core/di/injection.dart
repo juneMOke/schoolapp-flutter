@@ -2,9 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/attendance_repository_impl.dart';
@@ -62,14 +63,19 @@ import 'package:school_app_flutter/features/classes/domain/usecases/distribute_s
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
+import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_stats_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_summary_list_by_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_academic_info_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
@@ -77,6 +83,7 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
@@ -88,12 +95,14 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/create_payment_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_fee_tariffs_usecase.dart';
+import 'package:school_app_flutter/features/finance/domain/usecases/get_finance_stats_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/student/data/datasources/parent_remote_data_source.dart';
@@ -113,9 +122,12 @@ import 'package:school_app_flutter/features/student/presentation/bloc/student_bl
 
 final GetIt getIt = GetIt.instance;
 
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({
+  EnvConfig? envConfig,
+  String bootstrapBoxName = 'bootstrap_box',
+}) async {
   await Hive.initFlutter();
-  final bootstrapBox = await Hive.openBox<String>('bootstrap_box');
+  final bootstrapBox = await Hive.openBox<String>(bootstrapBoxName);
 
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
@@ -126,18 +138,25 @@ Future<void> configureDependencies() async {
     instanceName: 'bootstrapBox',
   );
 
+  final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
+  getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
+
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    );
+    final envConfig = getIt<EnvConfig>();
+    final dio = createDioClient(envConfig);
+
+    if (envConfig.enableVerboseNetworkLogging) {
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestBody: true,
+          requestHeader: true,
+          responseBody: true,
+          responseHeader: true,
+          error: true,
+        ),
+      );
+    }
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -385,6 +404,13 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  getIt.registerLazySingleton<EnrollmentStatsRepository>(
+    () => EnrollmentStatsRepositoryImpl(
+      remoteDataSource: getIt<EnrollmentRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
   getIt.registerFactory<GetEnrollmentSummaryListByStatusUseCase>(
     () =>
         GetEnrollmentSummaryListByStatusUseCase(getIt<EnrollmentRepository>()),
@@ -437,6 +463,10 @@ Future<void> configureDependencies() async {
     () => UpdateEnrollmentStatusUseCase(getIt<EnrollmentRepository>()),
   );
 
+  getIt.registerFactory<GetEnrollmentStatsUseCase>(
+    () => GetEnrollmentStatsUseCase(getIt<EnrollmentStatsRepository>()),
+  );
+
   getIt.registerFactory<EnrollmentBloc>(
     () => EnrollmentBloc(
       getEnrollmentSummariesUseCase:
@@ -460,6 +490,12 @@ Future<void> configureDependencies() async {
       searchByAcademicInfoUseCase:
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
       updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<EnrollmentStatsBloc>(
+    () => EnrollmentStatsBloc(
+      getEnrollmentStatsUseCase: getIt<GetEnrollmentStatsUseCase>(),
     ),
   );
 
@@ -491,6 +527,10 @@ Future<void> configureDependencies() async {
     () => GetLevelDistributionOverviewUseCase(getIt<ClassroomRepository>()),
   );
 
+  getIt.registerFactory<GetClassroomStatsUseCase>(
+    () => GetClassroomStatsUseCase(getIt<ClassroomRepository>()),
+  );
+
   getIt.registerFactory<ReassignClassroomMemberUseCase>(
     () => ReassignClassroomMemberUseCase(getIt<ClassroomRepository>()),
   );
@@ -504,6 +544,12 @@ Future<void> configureDependencies() async {
       getLevelDistributionOverviewUseCase:
           getIt<GetLevelDistributionOverviewUseCase>(),
       reassignClassroomMemberUseCase: getIt<ReassignClassroomMemberUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<ClassroomStatsBloc>(
+    () => ClassroomStatsBloc(
+      getClassroomStatsUseCase: getIt<GetClassroomStatsUseCase>(),
     ),
   );
 
@@ -634,6 +680,10 @@ Future<void> configureDependencies() async {
     () => GetFeeTariffsUseCase(getIt<FinanceRepository>()),
   );
 
+  getIt.registerFactory<GetFinanceStatsUseCase>(
+    () => GetFinanceStatsUseCase(getIt<FinanceRepository>()),
+  );
+
   getIt.registerFactory<GetStudentChargesUseCase>(
     () => GetStudentChargesUseCase(getIt<StudentChargesRepository>()),
   );
@@ -670,6 +720,12 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<FinanceBloc>(
     () => FinanceBloc(getFeeTariffsUseCase: getIt<GetFeeTariffsUseCase>()),
+  );
+
+  getIt.registerFactory<FinanceStatsBloc>(
+    () => FinanceStatsBloc(
+      getFinanceStatsUseCase: getIt<GetFinanceStatsUseCase>(),
+    ),
   );
 
   getIt.registerFactory<StudentChargesBloc>(

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 class FeeTariff extends Equatable {
   final String id;
   final String label;

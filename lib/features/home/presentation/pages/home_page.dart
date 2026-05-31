@@ -8,15 +8,20 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -68,8 +73,7 @@ class _HomePageView extends StatelessWidget {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isMobile =
-              constraints.maxWidth < AppBreakpoints.homeMobileMax;
+          final isMobile = constraints.maxWidth < AppBreakpoints.homeMobileMax;
 
           if (isMobile) {
             return _buildMobileLayout();
@@ -124,6 +128,9 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildMainContent(BuildContext context, NavigationState state) {
     final hidePageBreadcrumb =
+        state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
+        state.selectedSubMenuId == MenuConstants.financesDashboardId ||
+        state.selectedSubMenuId == MenuConstants.classesDashboardId ||
         state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
         state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
@@ -155,7 +162,9 @@ class _HomePageView extends StatelessWidget {
       children: [
         Text(
           l10n.home,
-          style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
+          style: AppTextStyles.body.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
         ),
         if (state.selectedMenuId != null) ...[
           const Text(
@@ -166,7 +175,9 @@ class _HomePageView extends StatelessWidget {
             state.menuItems
                 .firstWhere((menu) => menu.id == state.selectedMenuId)
                 .title,
-            style: AppTextStyles.body.copyWith(color: AppTheme.textSecondaryColor),
+            style: AppTextStyles.body.copyWith(
+              color: AppTheme.textSecondaryColor,
+            ),
           ),
         ],
         if (state.selectedSubMenuId != null) ...[
@@ -193,6 +204,10 @@ class _HomePageView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     switch (state.selectedSubMenuId) {
+      case MenuConstants.inscriptionsDashboardId:
+        return const EnrollmentStatsDashboardScope(
+          child: EnrollmentStatsDashboardPage(),
+        );
       case MenuConstants.preInscriptionsId:
         return const EnrollmentFeatureScope(child: PreRegistrationsPage());
       case MenuConstants.reInscriptionsId:
@@ -201,6 +216,12 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentFeatureScope(child: FirstRegistrationPage());
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(child: FacturationPage());
+      case MenuConstants.financesDashboardId:
+        return const FinanceStatsDashboardScope(
+          child: FinanceStatsDashboardPage(),
+        );
+      case MenuConstants.classesDashboardId:
+        return const ClassesFeatureScope(child: ClassesStatsDashboardPage());
       case MenuConstants.organisationId:
         return const ClassesFeatureScope(child: ClassesOrganisationPage());
       case MenuConstants.classesListId:

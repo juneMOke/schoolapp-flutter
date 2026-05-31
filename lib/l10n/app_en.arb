@@ -361,8 +361,6 @@
   "summaryChargesUnavailable": "Amounts are unavailable for now.",
   "summaryValidationNoticeTitle": "Before validation",
   "summaryValidationNoticeBody": "You certify that the information is accurate. The file will move to validated status and a receipt can be generated.",
-  "next": "Continue",
-  "previous": "Previous",
   "nextPage": "Next page",
   "previousPage": "Previous page",
   "finish": "Finish",
@@ -1013,5 +1011,240 @@
     "previous": "Previous",
     "next": "Next",
 
-    "componentGalleryTitle": "Component gallery"
+    "componentGalleryTitle": "Component gallery",
+
+    "enrollmentStatsDashboardTitle": "Enrollment Dashboard",
+    "enrollmentStatsPeriodYear": "Year",
+    "enrollmentStatsPeriodMonth": "Month",
+    "enrollmentStatsPeriodWeek": "Week",
+    "enrollmentStatsKpiTotal": "Total",
+    "enrollmentStatsKpiFirst": "First enrollments",
+    "enrollmentStatsKpiRe": "Re-enrollments",
+    "enrollmentStatsKpiPre": "Pre-enrollments",
+    "enrollmentStatsKpiInProgress": "In progress",
+    "enrollmentStatsSectionEvolution": "Evolution",
+    "enrollmentStatsSectionCycle": "By cycle",
+    "enrollmentStatsSectionGender": "By gender",
+    "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
+    "enrollmentStatsSectionLevelEvolution": "Evolution by level",
+    "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
+    "enrollmentStatsGenderMale": "Boys",
+    "enrollmentStatsGenderFemale": "Girls",
+    "enrollmentStatsGenderOther": "Other",
+    "enrollmentStatsNoData": "No data available for this period",
+    "enrollmentStatsLoadingError": "Unable to load statistics",
+    "enrollmentStatsRetry": "Retry",
+    "enrollmentStatsStudents": "students",
+    "enrollmentStatsPercent": "{percent} %",
+    "@enrollmentStatsPercent": {
+      "placeholders": {
+        "percent": {
+          "type": "int"
+        }
+      }
+    },
+    "enrollmentStatsPeriodWeekCurrent": "This week",
+    "enrollmentStatsPeriodMonthCurrent": "This month",
+    "enrollmentStatsPeriodYearCurrent": "This year",
+    "enrollmentStatsSchoolYearUnavailable": "School year unavailable",
+    "enrollmentStatsHeaderA11yLabel": "Enrollment dashboard, school year {schoolYear}",
+    "@enrollmentStatsHeaderA11yLabel": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "enrollmentStatsPeriodFilterA11yLabel": "Enrollment statistics time filter, active period: {selectedPeriod}",
+    "@enrollmentStatsPeriodFilterA11yLabel": {
+      "placeholders": {
+        "selectedPeriod": {
+          "type": "String"
+        }
+      }
+    },
+    "enrollmentStatsContextSchoolYear": "Overview - School year {schoolYear}",
+    "@enrollmentStatsContextSchoolYear": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsDashboardTitle": "Classes Overview - School year",
+    "classesStatsSchoolYearUnavailable": "School year unavailable",
+    "classesStatsHeaderA11yLabel": "Classes dashboard, school year {schoolYear}",
+    "@classesStatsHeaderA11yLabel": {
+      "placeholders": {
+        "schoolYear": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsKpiTotalStudents": "TOTAL STUDENTS",
+    "classesStatsKpiActiveGirls": "TOTAL GIRLS",
+    "classesStatsKpiActiveBoys": "BOYS",
+    "classesStatsKpiInactiveStudents": "TOTAL INACTIVE STUDENTS",
+    "classesStatsSectionCycleDistribution": "Active students distribution by cycle",
+    "classesStatsSectionLevelDistribution": "Levels distribution - {cycleCode}",
+    "@classesStatsSectionLevelDistribution": {
+      "placeholders": {
+        "cycleCode": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsSectionClassroomDetail": "Classrooms detail",
+    "classesStatsDetailColumnClassroom": "Classroom",
+    "classesStatsDetailColumnCycle": "Cycle",
+    "classesStatsDetailColumnLevel": "Level",
+    "classesStatsDetailColumnTotal": "Total",
+    "classesStatsDetailColumnGirls": "Girls",
+    "classesStatsDetailColumnBoys": "Boys",
+    "classesStatsNoData": "No data available for this period",
+    "classesStatsKpiBandA11yLabel": "Classes key performance indicators band",
+    "classesStatsCycleChartA11yLabel": "Chart of active students distribution by cycle",
+    "classesStatsLevelChartA11yLabel": "Chart of active students distribution by level for cycle {cycleCode}",
+    "@classesStatsLevelChartA11yLabel": {
+      "placeholders": {
+        "cycleCode": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsDetailA11yLabel": "Detailed classrooms table with gender breakdown",
+    "classesStatsLoadingA11yLabel": "Loading classes statistics",
+    "classesStatsErrorTitle": "Loading error",
+    "classesStatsRetry": "Retry",
+    "classesStatsRetryHint": "Retry loading classes statistics",
+    "classesStatsErrorA11yLabel": "Classes statistics loading error: {message}",
+    "@classesStatsErrorA11yLabel": {
+      "placeholders": {
+        "message": {
+          "type": "String"
+        }
+      }
+    },
+    "classesStatsNetworkError": "Unable to load classes statistics. Check your internet connection.",
+    "classesStatsNotFoundError": "No classes statistics available.",
+    "classesStatsValidationError": "The requested parameters are invalid.",
+    "classesStatsUnauthorizedError": "You are not authorized to view these statistics.",
+    "classesStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+    "classesStatsServerError": "The server is currently unavailable.",
+    "classesStatsStorageError": "A local error prevents displaying statistics.",
+    "classesStatsAuthError": "An authentication error prevents loading statistics.",
+    "classesStatsUnknownError": "An unexpected error occurred while loading statistics.",
+    "financeStatsDashboardTitle": "Overview - School year",
+      "financeStatsSchoolYearUnavailable": "School year unavailable",
+      "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",
+      "@financeStatsContextSchoolYear": {
+        "placeholders": {
+          "schoolYear": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsPeriodWeekCurrent": "This week",
+      "financeStatsPeriodMonthCurrent": "This month",
+      "financeStatsPeriodYearCurrent": "This year",
+      "financeStatsKpiCollected": "Total collected",
+      "financeStatsKpiExpected": "Total expected",
+      "financeStatsKpiOutstanding": "Outstanding",
+      "financeStatsKpiCollectionRate": "Collection rate",
+      "financeStatsPercentOfTotal": "{percent}% of total",
+      "@financeStatsPercentOfTotal": {
+        "placeholders": {
+          "percent": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsSectionEvolution": "Collection evolution",
+      "financeStatsLegendCurrentPeriod": "Current period",
+      "financeStatsLegendOtherPeriods": "Other periods",
+      "financeStatsSectionFeeTypeDistribution": "Distribution by fee type",
+      "financeStatsFeeTypeCollected": "Collected: {amount}",
+      "@financeStatsFeeTypeCollected": {
+        "placeholders": {
+          "amount": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsFeeTypeExpected": "Expected: {amount}",
+      "@financeStatsFeeTypeExpected": {
+        "placeholders": {
+          "amount": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsFeeTypeRate": "Rate: {rate}%",
+      "@financeStatsFeeTypeRate": {
+        "placeholders": {
+          "rate": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsNoData": "No data available for this period",
+      "financeStatsNoDataHint": "Try another period to display more insights.",
+      "financeStatsErrorTitle": "Loading error",
+      "financeStatsRetry": "Retry",
+      "financeStatsRetryHint": "Reload finance statistics",
+      "financeStatsLoadingA11yLabel": "Finance statistics are loading",
+      "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
+      "@financeStatsHeaderA11yLabel": {
+        "placeholders": {
+          "schoolYear": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsPeriodFilterA11yLabel": "Finance statistics time filter, active period: {selectedPeriod}",
+      "@financeStatsPeriodFilterA11yLabel": {
+        "placeholders": {
+          "selectedPeriod": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
+      "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
+      "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
+      "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
+      "@financeStatsFeeTypeItemA11yLabel": {
+        "placeholders": {
+          "code": {
+            "type": "String"
+          },
+          "collected": {
+            "type": "String"
+          },
+          "expected": {
+            "type": "String"
+          },
+          "rate": {
+            "type": "int"
+          }
+        }
+      },
+      "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
+      "@financeStatsErrorA11yLabel": {
+        "placeholders": {
+          "message": {
+            "type": "String"
+          }
+        }
+      },
+      "financeStatsEmptyA11yLabel": "No finance data available for this period",
+      "financeStatsNetworkError": "Unable to load finance statistics. Check your internet connection.",
+      "financeStatsNotFoundError": "No finance statistics available.",
+      "financeStatsValidationError": "The requested parameters are invalid.",
+      "financeStatsUnauthorizedError": "You are not authorized to view these statistics.",
+      "financeStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+      "financeStatsServerError": "The server is currently unavailable.",
+      "financeStatsStorageError": "A local error prevents displaying statistics.",
+      "financeStatsAuthError": "An authentication error prevents loading statistics.",
+      "financeStatsUnknownError": "An unexpected error occurred while loading statistics."
 }

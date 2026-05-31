@@ -55,7 +55,9 @@ class EnrollmentDetailLoadingTemplate extends StatelessWidget {
         const SizedBox(height: 14),
         Text(
           l10n.enrollmentDetailLoadingTitle,
-          style: AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.titleMedium.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
@@ -107,7 +109,9 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             l10n.enrollmentDetailLoadErrorTitle,
-            style: AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
+            style: AppTypography.titleMedium.copyWith(
+              color: AppColors.textPrimary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
@@ -156,7 +160,9 @@ class EnrollmentDetailEmptyTemplate extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           l10n.enrollmentDetailNotFoundTitle,
-          style: AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.titleMedium.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 6),
         Text(

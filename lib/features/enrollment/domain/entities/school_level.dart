@@ -16,5 +16,11 @@ class SchoolLevel extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, name, code, displayOrder, splitIntoClassrooms];
+  List<Object?> get props => [
+    id,
+    name,
+    code,
+    displayOrder,
+    splitIntoClassrooms,
+  ];
 }

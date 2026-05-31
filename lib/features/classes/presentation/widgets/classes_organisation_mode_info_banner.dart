@@ -6,10 +6,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class ClassesOrganisationModeInfoBanner extends StatelessWidget {
   final bool isSplit;
 
-  const ClassesOrganisationModeInfoBanner({
-    super.key,
-    required this.isSplit,
-  });
+  const ClassesOrganisationModeInfoBanner({super.key, required this.isSplit});
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +36,9 @@ class ClassesOrganisationModeInfoBanner extends StatelessWidget {
               isSplit
                   ? l10n.classesOrganisationSplitInfo
                   : l10n.classesOrganisationNonSplitInfo,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

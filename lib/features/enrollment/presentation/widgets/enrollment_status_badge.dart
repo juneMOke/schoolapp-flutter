@@ -21,33 +21,33 @@ class EnrollmentStatusBadge extends StatelessWidget {
 
     return switch (status) {
       EnrollmentStatus.preRegistered => StatusBadge.enrollmentPreRegistered(
-          label: l10n.enrollmentStatusPreRegistered,
-        ),
+        label: l10n.enrollmentStatusPreRegistered,
+      ),
       EnrollmentStatus.inProgress => StatusBadge.enrollmentInProgress(
-          label: l10n.enrollmentStatusInProgress,
-        ),
+        label: l10n.enrollmentStatusInProgress,
+      ),
       EnrollmentStatus.adminCompleted => StatusBadge.enrollmentAdminCompleted(
-          label: l10n.enrollmentStatusAdminCompleted,
-        ),
+        label: l10n.enrollmentStatusAdminCompleted,
+      ),
       EnrollmentStatus.financialCompleted =>
         StatusBadge.enrollmentFinancialCompleted(
           label: l10n.enrollmentStatusFinancialCompleted,
         ),
       EnrollmentStatus.completed => StatusBadge.enrollmentCompleted(
-          label: l10n.enrollmentStatusCompleted,
-        ),
+        label: l10n.enrollmentStatusCompleted,
+      ),
       EnrollmentStatus.cancelled => StatusBadge.enrollmentCancelled(
-          label: l10n.enrollmentStatusCancelled,
-        ),
+        label: l10n.enrollmentStatusCancelled,
+      ),
       EnrollmentStatus.validated => StatusBadge.enrollmentValidated(
-          label: l10n.enrollmentStatusValidated,
-        ),
+        label: l10n.enrollmentStatusValidated,
+      ),
       EnrollmentStatus.rejected => StatusBadge.enrollmentRejected(
-          label: l10n.enrollmentStatusRejected,
-        ),
+        label: l10n.enrollmentStatusRejected,
+      ),
       EnrollmentStatus.pending => StatusBadge.enrollmentPending(
-          label: l10n.statusPending,
-        ),
+        label: l10n.statusPending,
+      ),
     };
   }
 }

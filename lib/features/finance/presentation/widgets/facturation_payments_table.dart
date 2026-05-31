@@ -248,10 +248,14 @@ class _PaymentRow extends StatelessWidget {
                     tooltip: l10n.facturationDetailViewPaymentLabel,
                     style: IconButton.styleFrom(
                       foregroundColor: AppColors.bleuArdoise,
-                      backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                      backgroundColor: AppColors.bleuArdoise.withValues(
+                        alpha: 0.08,
+                      ),
                       hoverColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
                       focusColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
-                      highlightColor: AppColors.bleuArdoise.withValues(alpha: 0.16),
+                      highlightColor: AppColors.bleuArdoise.withValues(
+                        alpha: 0.16,
+                      ),
                       minimumSize: const Size(
                         AppDimensions.minTouchTarget,
                         AppDimensions.minTouchTarget,

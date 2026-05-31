@@ -14,20 +14,20 @@ class StudentChargesBloc
     extends Bloc<StudentChargesEvent, StudentChargesState> {
   final GetStudentChargesUseCase _getStudentChargesUseCase;
   final GetStudentChargesByAcademicYearUseCase
-      _getStudentChargesByAcademicYearUseCase;
+  _getStudentChargesByAcademicYearUseCase;
   final GetPaymentAllocationsFromStudentChargesUseCase
-      _getPaymentAllocationsFromStudentChargesUseCase;
+  _getPaymentAllocationsFromStudentChargesUseCase;
   final UpdateStudentChargeExpectedAmountUseCase
-      _updateStudentChargeExpectedAmountUseCase;
+  _updateStudentChargeExpectedAmountUseCase;
 
   StudentChargesBloc({
     required GetStudentChargesUseCase getStudentChargesUseCase,
     required GetStudentChargesByAcademicYearUseCase
-        getStudentChargesByAcademicYearUseCase,
+    getStudentChargesByAcademicYearUseCase,
     required GetPaymentAllocationsFromStudentChargesUseCase
-        getPaymentAllocationsFromStudentChargesUseCase,
+    getPaymentAllocationsFromStudentChargesUseCase,
     required UpdateStudentChargeExpectedAmountUseCase
-        updateStudentChargeExpectedAmountUseCase,
+    updateStudentChargeExpectedAmountUseCase,
   }) : _getStudentChargesUseCase = getStudentChargesUseCase,
        _getStudentChargesByAcademicYearUseCase =
            getStudentChargesByAcademicYearUseCase,

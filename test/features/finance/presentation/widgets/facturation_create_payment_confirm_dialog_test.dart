@@ -33,7 +33,8 @@ void main() {
                       isDestructive: true,
                       headerIcon: Icons.delete_sweep_outlined,
                       headerIconColor: AppColors.danger,
-                      headerIconBackgroundColor: AppColors.financeDetailDangerSoft,
+                      headerIconBackgroundColor:
+                          AppColors.financeDetailDangerSoft,
                       confirmIcon: Icons.delete_forever_outlined,
                     ),
                     child: const Text('open-delete-dialog'),

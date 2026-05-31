@@ -11,9 +11,8 @@ class GetLevelDistributionOverviewUseCase {
   Future<Either<Failure, LevelDistributionOverview>> call({
     required String academicYearId,
     required String schoolLevelId,
-  }) =>
-      _repository.getLevelDistributionOverview(
-        academicYearId: academicYearId,
-        schoolLevelId: schoolLevelId,
-      );
+  }) => _repository.getLevelDistributionOverview(
+    academicYearId: academicYearId,
+    schoolLevelId: schoolLevelId,
+  );
 }

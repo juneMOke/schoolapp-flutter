@@ -36,26 +36,25 @@ class RelationshipChip extends StatelessWidget {
   }
 
   IconData _getIcon() => switch (relationshipType) {
-    RelationshipType.father     => Icons.man,
-    RelationshipType.mother     => Icons.woman,
-    RelationshipType.guardian   => Icons.supervisor_account,
-    RelationshipType.uncle      => Icons.man_2,
-    RelationshipType.aunt       => Icons.woman_2,
+    RelationshipType.father => Icons.man,
+    RelationshipType.mother => Icons.woman,
+    RelationshipType.guardian => Icons.supervisor_account,
+    RelationshipType.uncle => Icons.man_2,
+    RelationshipType.aunt => Icons.woman_2,
     RelationshipType.grandparent => Icons.elderly,
-    RelationshipType.other      => Icons.person,
+    RelationshipType.other => Icons.person,
   };
 
   String _getLabel(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return switch (relationshipType) {
-      RelationshipType.father     => l10n.relationshipFather,
-      RelationshipType.mother     => l10n.relationshipMother,
-      RelationshipType.guardian   => l10n.relationshipGuardian,
-      RelationshipType.uncle      => l10n.relationshipUncle,
-      RelationshipType.aunt       => l10n.relationshipAunt,
+      RelationshipType.father => l10n.relationshipFather,
+      RelationshipType.mother => l10n.relationshipMother,
+      RelationshipType.guardian => l10n.relationshipGuardian,
+      RelationshipType.uncle => l10n.relationshipUncle,
+      RelationshipType.aunt => l10n.relationshipAunt,
       RelationshipType.grandparent => l10n.relationshipGrandparent,
-      RelationshipType.other      => l10n.relationshipOther,
+      RelationshipType.other => l10n.relationshipOther,
     };
   }
 }
-

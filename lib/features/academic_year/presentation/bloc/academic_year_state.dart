@@ -36,7 +36,9 @@ class AcademicYearState extends Equatable {
       academicYear: identical(academicYear, _undefined)
           ? this.academicYear
           : academicYear as AcademicYear?,
-      source: identical(source, _undefined) ? this.source : source as AcademicYearSource?,
+      source: identical(source, _undefined)
+          ? this.source
+          : source as AcademicYearSource?,
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,

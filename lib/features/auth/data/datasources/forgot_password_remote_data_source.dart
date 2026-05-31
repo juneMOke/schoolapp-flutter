@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/auth/data/models/validate_otp_reques
 import 'package:school_app_flutter/features/auth/data/models/validate_otp_response_model.dart';
 
 part 'forgot_password_remote_data_source.g.dart';
+
 @RestApi()
 abstract class ForgotPasswordRemoteDataSource {
   factory ForgotPasswordRemoteDataSource(Dio dio, {String baseUrl}) =

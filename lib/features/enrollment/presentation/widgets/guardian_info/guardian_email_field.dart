@@ -93,7 +93,7 @@ class GuardianEmailField extends StatelessWidget {
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 16,
-                              color: AppColors.textSecondary,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                     ],

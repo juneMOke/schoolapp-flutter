@@ -33,7 +33,9 @@ class ClassesOrganisationPageContent extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: AppDimensions.detailContentMaxWidth),
+        constraints: const BoxConstraints(
+          maxWidth: AppDimensions.detailContentMaxWidth,
+        ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             AppDimensions.spacingL,

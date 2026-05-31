@@ -17,8 +17,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       _tokenStorageService.saveAuthSession(session);
 
   @override
-  Future<AuthSession?> getSession() =>
-      _tokenStorageService.readAuthSession();
+  Future<AuthSession?> getSession() => _tokenStorageService.readAuthSession();
 
   @override
   Future<void> clearSession() => _tokenStorageService.clearAuthSession();

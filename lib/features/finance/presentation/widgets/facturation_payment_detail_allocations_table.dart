@@ -9,7 +9,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Tableau récapitulatif des allocations de paiement en consultation.
 /// Affiche les charges couvertes (libellés + montants) avec total alloué en pied.
-/// 
+///
 /// Pattern : inspiré de [FacturationPaymentsTable] pour cohérence visuelle.
 class FacturationPaymentDetailAllocationsTable extends StatelessWidget {
   final List<PaymentAllocation> allocations;
@@ -73,18 +73,18 @@ class FacturationPaymentDetailAllocationsTable extends StatelessWidget {
                     separatorBuilder: (_, _) =>
                         const Divider(height: 1, color: AppColors.border),
                     itemBuilder: (context, index) {
-                       if (index < allocations.length) {
-                         return _AllocationRow(
-                           allocation: allocations[index],
-                           formatAmount: _formatAmount,
-                           l10n: l10n,
-                         );
-                       }
-                       return _TotalAllocationRow(
-                         label: l10n.facturationPaymentAllocationsTotalLabel,
-                         amount: _formatAmount(totalInCents),
-                       );
-                     },
+                      if (index < allocations.length) {
+                        return _AllocationRow(
+                          allocation: allocations[index],
+                          formatAmount: _formatAmount,
+                          l10n: l10n,
+                        );
+                      }
+                      return _TotalAllocationRow(
+                        label: l10n.facturationPaymentAllocationsTotalLabel,
+                        amount: _formatAmount(totalInCents),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -193,10 +193,7 @@ class _TotalAllocationRow extends StatelessWidget {
   final String label;
   final String amount;
 
-  const _TotalAllocationRow({
-    required this.label,
-    required this.amount,
-  });
+  const _TotalAllocationRow({required this.label, required this.amount});
 
   @override
   Widget build(BuildContext context) {
@@ -239,4 +236,3 @@ class _TotalAllocationRow extends StatelessWidget {
     );
   }
 }
-

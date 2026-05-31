@@ -18,17 +18,21 @@ class DisciplinaryCaseRepositoryImpl implements DisciplinaryCaseRepository {
   });
 
   @override
-  Future<Either<Failure, List<DisciplinaryCaseSummary>>> getDisciplinaryCaseList({
+  Future<Either<Failure, List<DisciplinaryCaseSummary>>>
+  getDisciplinaryCaseList({
     required String studentId,
     required String academicYearId,
   }) async {
     try {
-      final models = await remoteDataSource.fetchDisciplinaryCasesByStudentAndYear(
-        requiredAuth,
-        studentId,
-        academicYearId,
+      final models = await remoteDataSource
+          .fetchDisciplinaryCasesByStudentAndYear(
+            requiredAuth,
+            studentId,
+            academicYearId,
+          );
+      return Right(
+        models.map((model) => model.toEntity()).toList(growable: false),
       );
-      return Right(models.map((model) => model.toEntity()).toList(growable: false));
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);

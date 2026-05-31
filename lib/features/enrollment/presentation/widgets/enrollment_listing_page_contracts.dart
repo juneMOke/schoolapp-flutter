@@ -3,40 +3,42 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 
-typedef EnrollmentBootstrapBuilder = Widget Function(
-  BuildContext context,
-  Widget Function(BuildContext context, EnrollmentScreenContext ctx) onReady,
-);
+typedef EnrollmentBootstrapBuilder =
+    Widget Function(
+      BuildContext context,
+      Widget Function(BuildContext context, EnrollmentScreenContext ctx)
+      onReady,
+    );
 
-typedef EnrollmentSearchSectionBuilder = Widget Function(
-  BuildContext context,
-  EnrollmentScreenContext ctx,
-  EnrollmentSearchDispatcher dispatch,
-);
+typedef EnrollmentSearchSectionBuilder =
+    Widget Function(
+      BuildContext context,
+      EnrollmentScreenContext ctx,
+      EnrollmentSearchDispatcher dispatch,
+    );
 
 typedef EnrollmentSearchDispatcher =
     void Function(EnrollmentSearchCommand command);
 
-typedef EnrollmentSearchCommandHandler = void Function(
-  BuildContext context,
-  EnrollmentSearchCommand command,
-  EnrollmentScreenContext screenCtx,
-);
+typedef EnrollmentSearchCommandHandler =
+    void Function(
+      BuildContext context,
+      EnrollmentSearchCommand command,
+      EnrollmentScreenContext screenCtx,
+    );
 
-typedef EnrollmentDetailIntentFactory = EnrollmentDetailIntent Function(
-  EnrollmentSummary summary,
-);
+typedef EnrollmentDetailIntentFactory =
+    EnrollmentDetailIntent Function(EnrollmentSummary summary);
 
-typedef EnrollmentEmptyStateBuilder = Widget Function(
-  BuildContext context,
-  EnrollmentState state,
-);
+typedef EnrollmentEmptyStateBuilder =
+    Widget Function(BuildContext context, EnrollmentState state);
 
-typedef EnrollmentResultsSummaryBuilder = Widget Function(
-  BuildContext context,
-  EnrollmentState state,
-  EnrollmentScreenContext screenCtx,
-);
+typedef EnrollmentResultsSummaryBuilder =
+    Widget Function(
+      BuildContext context,
+      EnrollmentState state,
+      EnrollmentScreenContext screenCtx,
+    );
 
 class EnrollmentScreenContext {
   final String schoolId;

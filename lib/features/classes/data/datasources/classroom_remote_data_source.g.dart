@@ -135,6 +135,36 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
   }
 
   @override
+  Future<ClassroomStatsResponseModel> getClassroomStats(
+    Map<String, dynamic> extras,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ClassroomStatsResponseModel>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/classroom-stats',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ClassroomStatsResponseModel _value;
+    try {
+      _value = ClassroomStatsResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<void> distributeStudentsToClassrooms(
     Map<String, dynamic> extras,
     DistributionRequestModel request,

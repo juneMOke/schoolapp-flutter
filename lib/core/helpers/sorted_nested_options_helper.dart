@@ -24,19 +24,23 @@ class SortedNestedOptionsHelper {
     required List<TInner> Function(TOuter outer) inners,
     required int Function(TInner inner) innerOrder,
     required TInnerResult Function(TOuter outer, TInner inner) mapInner,
-    required TOuterResult Function(TOuter outer, List<TInnerResult> items) mapOuter,
+    required TOuterResult Function(TOuter outer, List<TInnerResult> items)
+    mapOuter,
   }) {
-    final sortedOuters = [...outers]..sort((a, b) => outerOrder(a).compareTo(outerOrder(b)));
+    final sortedOuters = [...outers]
+      ..sort((a, b) => outerOrder(a).compareTo(outerOrder(b)));
 
-    return sortedOuters.map((outer) {
-      final sortedInners = [...inners(outer)]
-        ..sort((a, b) => innerOrder(a).compareTo(innerOrder(b)));
+    return sortedOuters
+        .map((outer) {
+          final sortedInners = [...inners(outer)]
+            ..sort((a, b) => innerOrder(a).compareTo(innerOrder(b)));
 
-      final mappedInners = sortedInners
-          .map((inner) => mapInner(outer, inner))
-          .toList(growable: false);
+          final mappedInners = sortedInners
+              .map((inner) => mapInner(outer, inner))
+              .toList(growable: false);
 
-      return mapOuter(outer, mappedInners);
-    }).toList(growable: false);
+          return mapOuter(outer, mappedInners);
+        })
+        .toList(growable: false);
   }
 }

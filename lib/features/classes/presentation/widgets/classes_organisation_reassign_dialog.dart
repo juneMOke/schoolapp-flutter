@@ -65,9 +65,15 @@ Future<void> showClassesOrganisationReassignDialog({
               const SizedBox(height: AppDimensions.spacingXS),
               Text(
                 intent.classroomId == null
-                    ? l10n.classesOrganisationAssignDialogMessage(intent.studentDisplayName)
-                    : l10n.classesOrganisationTransferDialogMessage(intent.studentDisplayName),
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                    ? l10n.classesOrganisationAssignDialogMessage(
+                        intent.studentDisplayName,
+                      )
+                    : l10n.classesOrganisationTransferDialogMessage(
+                        intent.studentDisplayName,
+                      ),
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppDimensions.spacingM),
               ConstrainedBox(
@@ -81,21 +87,32 @@ Future<void> showClassesOrganisationReassignDialog({
                     final option = options[index];
                     return ListTile(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.spacingS,
+                        ),
                         side: const BorderSide(color: AppColors.border),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: AppDimensions.spacingM,
                         vertical: AppDimensions.spacingXS,
                       ),
-                      leading: const Icon(Icons.class_outlined, color: AppColors.bleuArdoise),
+                      leading: const Icon(
+                        Icons.class_outlined,
+                        color: AppColors.bleuArdoise,
+                      ),
                       title: Text(
                         option.name,
-                        style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimary),
+                        style: AppTextStyles.bodyStrong.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       subtitle: Text(
-                        l10n.classesOrganisationClassroomPopulation(option.totalCount),
-                        style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        l10n.classesOrganisationClassroomPopulation(
+                          option.totalCount,
+                        ),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(sheetContext).pop(option.id),
@@ -118,7 +135,9 @@ Future<void> showClassesOrganisationReassignDialog({
   final confirmed = await showAppConfirmationDialog(
     context: context,
     title: l10n.classesOrganisationTransferDialogTitle,
-    message: l10n.classesOrganisationTransferConfirmMessage(intent.studentDisplayName),
+    message: l10n.classesOrganisationTransferConfirmMessage(
+      intent.studentDisplayName,
+    ),
     confirmLabel: l10n.confirm,
     cancelLabel: l10n.cancel,
   );
@@ -128,9 +147,9 @@ Future<void> showClassesOrganisationReassignDialog({
   }
 
   context.read<ClassroomBloc>().add(
-        ClassroomMemberReassignRequested(
-          classroomMemberId: intent.classroomMemberId,
-          targetClassroomId: selectedTargetId,
-        ),
-      );
+    ClassroomMemberReassignRequested(
+      classroomMemberId: intent.classroomMemberId,
+      targetClassroomId: selectedTargetId,
+    ),
+  );
 }

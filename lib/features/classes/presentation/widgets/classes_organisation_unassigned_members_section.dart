@@ -70,7 +70,9 @@ class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingS),
           Text(
             l10n.classesOrganisationUnassignedSummary(count),
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingM),
           ...members.map(

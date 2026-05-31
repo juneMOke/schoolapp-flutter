@@ -9,7 +9,10 @@ part 'daily_attendance_command_model.g.dart';
 @JsonSerializable(explicitToJson: true)
 class DailyAttendanceCommandModel extends Equatable {
   final String classroomId;
-  @JsonKey(fromJson: DateOnlyJsonHelper.fromJson, toJson: DateOnlyJsonHelper.toJson)
+  @JsonKey(
+    fromJson: DateOnlyJsonHelper.fromJson,
+    toJson: DateOnlyJsonHelper.toJson,
+  )
   final DateTime date;
   final String academicYearId;
   final List<AttendanceUpdateModel> updates;

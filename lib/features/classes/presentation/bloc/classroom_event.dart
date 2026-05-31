@@ -102,8 +102,5 @@ class ClassroomMemberReassignRequested extends ClassroomEvent {
   });
 
   @override
-  List<Object?> get props => [
-    classroomMemberId,
-    targetClassroomId,
-  ];
+  List<Object?> get props => [classroomMemberId, targetClassroomId];
 }

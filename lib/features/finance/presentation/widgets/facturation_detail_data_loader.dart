@@ -19,7 +19,8 @@ class FacturationDetailDataLoader extends StatefulWidget {
       _FacturationDetailDataLoaderState();
 }
 
-class _FacturationDetailDataLoaderState extends State<FacturationDetailDataLoader> {
+class _FacturationDetailDataLoaderState
+    extends State<FacturationDetailDataLoader> {
   @override
   void initState() {
     super.initState();

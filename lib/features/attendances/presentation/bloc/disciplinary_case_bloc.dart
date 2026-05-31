@@ -23,7 +23,9 @@ class DisciplinaryCaseBloc
     on<DisciplinaryCaseListRequested>(_onListRequested);
     on<DisciplinaryCaseDetailRequested>(_onDetailRequested);
     on<DisciplinaryCaseCreateRequested>(_onCreateRequested);
-    on<DisciplinaryCaseCreateStatusResetRequested>(_onCreateStatusResetRequested);
+    on<DisciplinaryCaseCreateStatusResetRequested>(
+      _onCreateStatusResetRequested,
+    );
     on<DisciplinaryCaseResetRequested>(_onResetRequested);
   }
 
@@ -71,7 +73,9 @@ class DisciplinaryCaseBloc
       ),
     );
 
-    final result = await _getDisciplinaryCaseDetailUseCase(caseId: event.caseId);
+    final result = await _getDisciplinaryCaseDetailUseCase(
+      caseId: event.caseId,
+    );
 
     result.fold(
       (failure) => emit(

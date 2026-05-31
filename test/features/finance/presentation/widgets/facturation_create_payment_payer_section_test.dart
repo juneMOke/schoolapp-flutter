@@ -33,7 +33,8 @@ void main() {
 
   Finder fieldByController(TextEditingController controller) {
     return find.byWidgetPredicate(
-      (widget) => widget is TextFormField && identical(widget.controller, controller),
+      (widget) =>
+          widget is TextFormField && identical(widget.controller, controller),
     );
   }
 
@@ -55,7 +56,10 @@ void main() {
       middleNameController: middleNameController,
     );
 
-    await tester.enterText(fieldByController(lastNameController), 'd\'angelo-kabeya');
+    await tester.enterText(
+      fieldByController(lastNameController),
+      'd\'angelo-kabeya',
+    );
     await tester.enterText(fieldByController(firstNameController), 'jean paul');
     await tester.enterText(fieldByController(middleNameController), 'm\'bayo');
     await tester.pump();

@@ -26,7 +26,10 @@ class ClassesListClassroomResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final filteredMembers = ClassesListPageHelpers.filterMembers(state.members, request);
+    final filteredMembers = ClassesListPageHelpers.filterMembers(
+      state.members,
+      request,
+    );
     final byId = {for (final member in filteredMembers) member.id: member};
     final rows = filteredMembers
         .map(
@@ -55,7 +58,8 @@ class ClassesListClassroomResults extends StatelessWidget {
       children: [
         ClassesListResultsToolbar(
           summary: summary,
-          canExport: state.membersStatus == ClassroomStatus.success && rows.isNotEmpty,
+          canExport:
+              state.membersStatus == ClassroomStatus.success && rows.isNotEmpty,
           onExportPressed: onExportPressed,
         ),
         const SizedBox(height: AppDimensions.spacingM),

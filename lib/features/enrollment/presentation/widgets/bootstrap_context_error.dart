@@ -28,10 +28,7 @@ class BootstrapContextError extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(
-                  Icons.error_outline_rounded,
-                  color: AppColors.error,
-                ),
+                const Icon(Icons.error_outline_rounded, color: AppColors.error),
                 const SizedBox(width: 8),
                 Text(
                   l10n.bootstrapContextUnavailableTitle,

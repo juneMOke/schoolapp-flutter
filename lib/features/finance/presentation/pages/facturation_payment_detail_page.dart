@@ -23,10 +23,11 @@ class FacturationPaymentDetailPage extends StatelessWidget {
   const FacturationPaymentDetailPage({super.key, required this.intent});
 
   String _studentFullName(AppLocalizations l10n) {
-    final fullName = [intent.lastName, intent.firstName, intent.surname]
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty)
-        .join(' ');
+    final fullName = [
+      intent.lastName,
+      intent.firstName,
+      intent.surname,
+    ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
     return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
   }
 
@@ -40,9 +41,9 @@ class FacturationPaymentDetailPage extends StatelessWidget {
 
   void _onActionRequested(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.pageUnderConstruction)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.pageUnderConstruction)));
   }
 
   Widget _buildEntrance({
@@ -156,4 +157,3 @@ class FacturationPaymentDetailPage extends StatelessWidget {
     );
   }
 }
-

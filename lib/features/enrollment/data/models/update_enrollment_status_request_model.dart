@@ -3,7 +3,5 @@ class UpdateEnrollmentStatusRequestModel {
 
   const UpdateEnrollmentStatusRequestModel({required this.status});
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'status': status,
-  };
+  Map<String, dynamic> toJson() => <String, dynamic>{'status': status};
 }

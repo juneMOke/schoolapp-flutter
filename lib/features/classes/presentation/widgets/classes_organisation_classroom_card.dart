@@ -61,7 +61,9 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
                   '$levelName - ${classroom.name}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
+                  style: AppTextStyles.sectionTitle.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               ClassesOrganisationStatChip(
@@ -75,7 +77,10 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingS),
           Row(
             children: [
-              _InlineGenderCount(icon: Icons.female_outlined, value: femaleCount),
+              _InlineGenderCount(
+                icon: Icons.female_outlined,
+                value: femaleCount,
+              ),
               const SizedBox(width: AppDimensions.spacingS),
               _InlineGenderCount(icon: Icons.male_outlined, value: maleCount),
               const SizedBox(width: AppDimensions.spacingS),
@@ -90,7 +95,9 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),
@@ -102,7 +109,9 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
                 ? Center(
                     child: Text(
                       l10n.classesOrganisationNoMembers,
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   )
                 : ListView.separated(
@@ -115,7 +124,8 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
                         member: member,
                         classroomId: classroom.id,
                         isReassigning: isReassigning,
-                        isCurrentReassigningMember: member.id == reassigningMemberId,
+                        isCurrentReassigningMember:
+                            member.id == reassigningMemberId,
                         transferTooltip: l10n.classesOrganisationTransferAction,
                         transferInProgressTooltip:
                             l10n.classesOrganisationTransferInProgress,
@@ -141,7 +151,11 @@ class _InlineGenderCount extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: AppDimensions.detailMiniIconSize, color: AppColors.textSecondary),
+        Icon(
+          icon,
+          size: AppDimensions.detailMiniIconSize,
+          color: AppColors.textSecondary,
+        ),
         const SizedBox(width: AppDimensions.spacingXS),
         Text(
           '$value',

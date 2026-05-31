@@ -11,10 +11,10 @@ class ReassignClassroomMemberRequestModel extends Equatable {
 
   factory ReassignClassroomMemberRequestModel.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      _$ReassignClassroomMemberRequestModelFromJson(json);
+  ) => _$ReassignClassroomMemberRequestModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$ReassignClassroomMemberRequestModelToJson(this);
+  Map<String, dynamic> toJson() =>
+      _$ReassignClassroomMemberRequestModelToJson(this);
 
   @override
   List<Object?> get props => [targetClassroomId];

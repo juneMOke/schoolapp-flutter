@@ -13,10 +13,7 @@ void main() {
       );
       final policy = EnrollmentDetailPolicyResolver.fromIntent(intent);
 
-      expect(
-        policy.isStepEditable(EnrollmentWizardStep.personalInfo),
-        isFalse,
-      );
+      expect(policy.isStepEditable(EnrollmentWizardStep.personalInfo), isFalse);
       expect(policy.isStepEditable(EnrollmentWizardStep.address), isFalse);
       expect(policy.isStepEditable(EnrollmentWizardStep.summary), isFalse);
     });

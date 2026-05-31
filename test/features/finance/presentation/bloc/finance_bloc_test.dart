@@ -65,9 +65,7 @@ void main() {
     blocTest<FinanceBloc, FinanceState>(
       'emits [loading, failure] avec message réseau sur NetworkFailure',
       setUp: () {
-        when(
-          () => mockGetFeeTariffsUseCase(levelId: tLevelId),
-        ).thenAnswer(
+        when(() => mockGetFeeTariffsUseCase(levelId: tLevelId)).thenAnswer(
           (_) async => const Left(NetworkFailure('Network error occurred')),
         );
       },
@@ -86,9 +84,7 @@ void main() {
     blocTest<FinanceBloc, FinanceState>(
       'emits [loading, failure] avec message serveur sur ServerFailure',
       setUp: () {
-        when(
-          () => mockGetFeeTariffsUseCase(levelId: tLevelId),
-        ).thenAnswer(
+        when(() => mockGetFeeTariffsUseCase(levelId: tLevelId)).thenAnswer(
           (_) async => const Left(ServerFailure('Server error occurred')),
         );
       },
@@ -107,9 +103,7 @@ void main() {
     blocTest<FinanceBloc, FinanceState>(
       'emits [loading, failure] avec message accès sur UnauthorizedFailure',
       setUp: () {
-        when(
-          () => mockGetFeeTariffsUseCase(levelId: tLevelId),
-        ).thenAnswer(
+        when(() => mockGetFeeTariffsUseCase(levelId: tLevelId)).thenAnswer(
           (_) async => const Left(UnauthorizedFailure('Access forbidden')),
         );
       },
@@ -128,9 +122,7 @@ void main() {
     blocTest<FinanceBloc, FinanceState>(
       'emits [loading, failure] avec message identifiants sur InvalidCredentialsFailure',
       setUp: () {
-        when(
-          () => mockGetFeeTariffsUseCase(levelId: tLevelId),
-        ).thenAnswer(
+        when(() => mockGetFeeTariffsUseCase(levelId: tLevelId)).thenAnswer(
           (_) async =>
               const Left(InvalidCredentialsFailure('Invalid credentials')),
         );

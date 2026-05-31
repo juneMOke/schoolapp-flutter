@@ -53,12 +53,7 @@ class ClassesListResultsToolbar extends StatelessWidget {
               children: [
                 info,
                 const SizedBox(height: AppDimensions.spacingS),
-                Row(
-                  children: [
-                    const Spacer(),
-                    exportButton,
-                  ],
-                ),
+                Row(children: [const Spacer(), exportButton]),
               ],
             );
           }

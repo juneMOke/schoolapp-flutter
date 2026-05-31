@@ -40,7 +40,9 @@ class ClassesListStateCard extends StatelessWidget {
             height: AppDimensions.detailHeroAvatarSize,
             decoration: BoxDecoration(
               color: AppColors.financeDetailAccentSoft,
-              borderRadius: BorderRadius.circular(AppDimensions.detailHeroAvatarSize),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.detailHeroAvatarSize,
+              ),
             ),
             child: Icon(icon, color: AppColors.financeDetailAccent),
           ),
@@ -48,7 +50,9 @@ class ClassesListStateCard extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Text(

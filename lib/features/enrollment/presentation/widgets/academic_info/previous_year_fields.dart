@@ -165,7 +165,8 @@ class PreviousYearFields extends StatelessWidget {
                   onChanged: onLevelChanged,
                   errorText: prevLevelError,
                   isChanged: prevLevelChanged,
-                  enabled: isEditable && !isCatalogLoading && selectedCycle != null,
+                  enabled:
+                      isEditable && !isCatalogLoading && selectedCycle != null,
                 ),
               ],
             ),
@@ -185,9 +186,7 @@ class PreviousYearFields extends StatelessWidget {
                       ),
                       textCapitalization: TextCapitalization.none,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'[0-9.,]'),
-                        ),
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                       ],
                       helpMessage: l10n.averageLabelHelp,
                       requiredField: true,

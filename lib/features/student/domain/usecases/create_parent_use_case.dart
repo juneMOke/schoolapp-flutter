@@ -16,14 +16,13 @@ class CreateParentUseCase {
     required String email,
     required String phoneNumber,
     required String relationshipType,
-  }) =>
-      _repository.createParent(
-        studentId: studentId,
-        firstName: firstName,
-        lastName: lastName,
-        surname: surname,
-        email: email,
-        phoneNumber: phoneNumber,
-        relationshipType: relationshipType,
-      );
+  }) => _repository.createParent(
+    studentId: studentId,
+    firstName: firstName,
+    lastName: lastName,
+    surname: surname,
+    email: email,
+    phoneNumber: phoneNumber,
+    relationshipType: relationshipType,
+  );
 }

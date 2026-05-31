@@ -27,14 +27,18 @@ class DisciplinaryStudentHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullName = [lastName, middleName, firstName]
-        .where((part) => part != null && part.trim().isNotEmpty)
-        .join(' ');
+    final fullName = [
+      lastName,
+      middleName,
+      firstName,
+    ].where((part) => part != null && part.trim().isNotEmpty).join(' ');
     final displayName = fullName.isEmpty ? unknownValue : fullName;
-    final displayLevelName =
-        levelName.trim().isEmpty ? unknownValue : levelName.trim();
-    final displayLevelGroupName =
-        levelGroupName.trim().isEmpty ? unknownValue : levelGroupName.trim();
+    final displayLevelName = levelName.trim().isEmpty
+        ? unknownValue
+        : levelName.trim();
+    final displayLevelGroupName = levelGroupName.trim().isEmpty
+        ? unknownValue
+        : levelGroupName.trim();
     final avatarInitial = [lastName, middleName, firstName]
         .where((part) => part != null && part.trim().isNotEmpty)
         .map((part) => part!.trim().characters.first.toUpperCase())

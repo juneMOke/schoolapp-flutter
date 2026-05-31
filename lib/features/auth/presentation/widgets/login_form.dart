@@ -67,7 +67,10 @@ class _LoginFormState extends State<LoginForm> {
                     validator: (value) => validateEmail(context, value),
                     enabled: !isLoading,
                     textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.username, AutofillHints.email],
+                    autofillHints: const [
+                      AutofillHints.username,
+                      AutofillHints.email,
+                    ],
                   ),
                   const SizedBox(height: 16),
                   EteeloPasswordInput(
@@ -94,7 +97,9 @@ class _LoginFormState extends State<LoginForm> {
                               context.read<ForgotPasswordBloc>().add(
                                 const ForgotPasswordFlowResetRequested(),
                               );
-                              context.goNamed(AppRoutesNames.forgotPasswordEmail);
+                              context.goNamed(
+                                AppRoutesNames.forgotPasswordEmail,
+                              );
                             },
                       icon: const Icon(Icons.help_outline_rounded, size: 14),
                       label: Text(l10n.forgotPassword),

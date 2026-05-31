@@ -134,13 +134,15 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       }
 
       if (_editableParentDetails.isNotEmpty) {
-        final expandedStillExists = _expandedParentId != null &&
+        final expandedStillExists =
+            _expandedParentId != null &&
             _editableParentDetails.any((p) => p.id == _expandedParentId);
         _expandedParentId = expandedStillExists
             ? _expandedParentId
             : _editableParentDetails.first.id;
 
-        final primaryStillExists = _primaryParentId != null &&
+        final primaryStillExists =
+            _primaryParentId != null &&
             _editableParentDetails.any((p) => p.id == _primaryParentId);
         _primaryParentId = primaryStillExists
             ? _primaryParentId
@@ -287,7 +289,9 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     }
 
     if (_primaryParentId == null ||
-        !_editableParentDetails.any((parent) => parent.id == _primaryParentId)) {
+        !_editableParentDetails.any(
+          (parent) => parent.id == _primaryParentId,
+        )) {
       errors.add(l10n.guardianPrimaryRequiredHint);
     }
 

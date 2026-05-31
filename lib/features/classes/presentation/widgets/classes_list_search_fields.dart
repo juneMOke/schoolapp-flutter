@@ -70,10 +70,12 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
               label: cycleLabel,
               icon: Icons.account_tree_outlined,
               items: cycleOptions
-                  .map((o) => DropdownMenuItem<String>(
-                        value: o.id,
-                        child: Text(o.label, overflow: TextOverflow.ellipsis),
-                      ))
+                  .map(
+                    (o) => DropdownMenuItem<String>(
+                      value: o.id,
+                      child: Text(o.label, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
                   .toList(growable: false),
               onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
             ),
@@ -85,10 +87,12 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
               label: levelLabel,
               icon: Icons.school_outlined,
               items: levelOptions
-                  .map((o) => DropdownMenuItem<String>(
-                        value: o.key,
-                        child: Text(o.label, overflow: TextOverflow.ellipsis),
-                      ))
+                  .map(
+                    (o) => DropdownMenuItem<String>(
+                      value: o.key,
+                      child: Text(o.label, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
                   .toList(growable: false),
               onChanged: levelOptions.isEmpty ? null : onLevelChanged,
             ),
@@ -100,10 +104,12 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
               label: classroomLabel,
               icon: Icons.meeting_room_outlined,
               items: classroomOptions
-                  .map((c) => DropdownMenuItem<String>(
-                        value: c.id,
-                        child: Text(c.name, overflow: TextOverflow.ellipsis),
-                      ))
+                  .map(
+                    (c) => DropdownMenuItem<String>(
+                      value: c.id,
+                      child: Text(c.name, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
                   .toList(growable: false),
               onChanged: classroomEnabled ? onClassroomChanged : null,
             ),

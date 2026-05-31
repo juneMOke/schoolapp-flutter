@@ -59,30 +59,32 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
         },
         buildWhen: _shouldRebuild,
         builder: (context, state) {
-          final allocations = state.allocationsByPaymentId[paymentId] ?? const [];
+          final allocations =
+              state.allocationsByPaymentId[paymentId] ?? const [];
 
           return AnimatedSwitcher(
             duration: FinanceMotion.standard,
             switchInCurve: FinanceMotion.outCurve,
             switchOutCurve: FinanceMotion.inCurve,
             child: () {
-               if (state.allocationsStatus == PaymentsStatus.loading &&
-                   allocations.isEmpty) {
-                 return StateCard(
-                   key: const ValueKey('payment-allocations-loading'),
-                   message: l10n.loadingStudents,
-                   icon: Icons.hourglass_top_rounded,
-                   accent: AppColors.bleuArdoise,
-                   accentSoft: AppColors.surfaceAlt,
-                   child: const CircularProgressIndicator(),
-                 );
-               }
+              if (state.allocationsStatus == PaymentsStatus.loading &&
+                  allocations.isEmpty) {
+                return StateCard(
+                  key: const ValueKey('payment-allocations-loading'),
+                  message: l10n.loadingStudents,
+                  icon: Icons.hourglass_top_rounded,
+                  accent: AppColors.bleuArdoise,
+                  accentSoft: AppColors.surfaceAlt,
+                  child: const CircularProgressIndicator(),
+                );
+              }
 
               if (state.allocationsStatus == PaymentsStatus.failure &&
                   allocations.isEmpty) {
                 return StateCard(
                   key: const ValueKey('payment-allocations-error'),
-                  message: state.allocationsErrorType.localizedAllocationsMessage(l10n),
+                  message: state.allocationsErrorType
+                      .localizedAllocationsMessage(l10n),
                   icon: Icons.error_outline,
                   accent: AppColors.terreCuite,
                   accentSoft: AppColors.papier,
@@ -103,30 +105,30 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
                 );
               }
 
-               final totalPaid = allocations.fold<int>(
-                 0,
-                 (sum, item) => sum + item.amountInCents,
-               );
+              final totalPaid = allocations.fold<int>(
+                0,
+                (sum, item) => sum + item.amountInCents,
+              );
 
-               return Column(
-                 key: const ValueKey('payment-allocations-content'),
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                   FinanceSectionHeader(
-                     icon: Icons.list_alt_outlined,
-                     title: l10n.facturationPaymentAllocationsSectionTitle,
-                     subtitle: null,
-                     accent: AppColors.bleuArdoise,
-                     accentSoft: AppColors.surfaceAlt,
-                   ),
-                   const SizedBox(height: AppDimensions.spacingM),
-                   FacturationPaymentDetailAllocationsTable(
-                     allocations: allocations,
-                     totalInCents: totalPaid,
-                     currency: currency,
-                   ),
-                 ],
-               );
+              return Column(
+                key: const ValueKey('payment-allocations-content'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FinanceSectionHeader(
+                    icon: Icons.list_alt_outlined,
+                    title: l10n.facturationPaymentAllocationsSectionTitle,
+                    subtitle: null,
+                    accent: AppColors.bleuArdoise,
+                    accentSoft: AppColors.surfaceAlt,
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  FacturationPaymentDetailAllocationsTable(
+                    allocations: allocations,
+                    totalInCents: totalPaid,
+                    currency: currency,
+                  ),
+                ],
+              );
             }(),
           );
         },
@@ -134,5 +136,3 @@ class FacturationPaymentAllocationsSection extends StatelessWidget {
     );
   }
 }
-
-

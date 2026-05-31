@@ -23,7 +23,8 @@ class ClassesOrganisationPage extends StatefulWidget {
   const ClassesOrganisationPage({super.key});
 
   @override
-  State<ClassesOrganisationPage> createState() => _ClassesOrganisationPageState();
+  State<ClassesOrganisationPage> createState() =>
+      _ClassesOrganisationPageState();
 }
 
 class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
@@ -39,7 +40,9 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
         return;
       }
       context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(key: AppConstants.bootstrapPayloadKey),
+        const BootstrapContextLocalRequested(
+          key: AppConstants.bootstrapPayloadKey,
+        ),
       );
     });
   }
@@ -137,7 +140,9 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             final options = ClassesOrganisationPageHelpers.buildAcademicOptions(
               bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
             );
-            final cycles = ClassesOrganisationPageHelpers.buildCycleOptions(options);
+            final cycles = ClassesOrganisationPageHelpers.buildCycleOptions(
+              options,
+            );
 
             return ClassesOrganisationPageContent(
               cycles: cycles,
@@ -180,7 +185,10 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
         .map(
           (item) => ClassroomReassignOption(
             id: item.classroom.id,
-            name: _formatClassroomName(selectedLevel.schoolLevelName, item.classroom.name),
+            name: _formatClassroomName(
+              selectedLevel.schoolLevelName,
+              item.classroom.name,
+            ),
             totalCount: item.members.length,
           ),
         )
@@ -236,11 +244,11 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     }
 
     context.read<ClassroomBloc>().add(
-          ClassroomDistributionOverviewRequested(
-            academicYearId: academicYearId,
-            schoolLevelId: level.schoolLevelId,
-          ),
-        );
+      ClassroomDistributionOverviewRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
   }
 
   Future<void> _handleDistributionRequested() async {
@@ -268,13 +276,13 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     });
 
     context.read<ClassroomBloc>().add(
-          ClassroomDistributionRequested(
-            academicYearId: academicYearId,
-            schoolLevelGroupId: level.schoolLevelGroupId,
-            schoolLevelId: level.schoolLevelId,
-            distributionCriterion: ClassroomDistributionCriterion.gender,
-          ),
-        );
+      ClassroomDistributionRequested(
+        academicYearId: academicYearId,
+        schoolLevelGroupId: level.schoolLevelGroupId,
+        schoolLevelId: level.schoolLevelId,
+        distributionCriterion: ClassroomDistributionCriterion.gender,
+      ),
+    );
   }
 
   String _formatClassroomName(String levelName, String classroomName) {

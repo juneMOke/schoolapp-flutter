@@ -45,7 +45,6 @@ class MenuFactory {
           title: l10n.subMenuPreRegistrations,
           route: AppRoutesNames.preInscriptions,
         ),
-
       ],
     );
   }

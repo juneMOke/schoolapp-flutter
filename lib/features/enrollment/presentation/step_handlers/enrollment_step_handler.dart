@@ -74,10 +74,7 @@ class HandlerContinueContext {
   final HandlerFlowContext flow;
   final HandlerValidationContext validation;
 
-  const HandlerContinueContext({
-    required this.flow,
-    required this.validation,
-  });
+  const HandlerContinueContext({required this.flow, required this.validation});
 }
 
 class HandlerSubmitContext {
@@ -124,11 +121,7 @@ class HandlerInitialStateContext {
   const HandlerInitialStateContext({required this.detail});
 }
 
-enum StepValidationErrorType {
-  invalidForm,
-  unsavedChanges,
-  unsupported,
-}
+enum StepValidationErrorType { invalidForm, unsavedChanges, unsupported }
 
 class StepValidationResult {
   final bool valid;
@@ -142,20 +135,13 @@ class StepValidationResult {
   });
 
   const StepValidationResult.valid()
-      : this._(valid: true, hintKey: null, errorType: null);
+    : this._(valid: true, hintKey: null, errorType: null);
 
-  const StepValidationResult.invalid({
-    this.hintKey,
-    required this.errorType,
-  }) : valid = false;
+  const StepValidationResult.invalid({this.hintKey, required this.errorType})
+    : valid = false;
 }
 
-enum StepSubmitStatus {
-  noop,
-  dispatched,
-  blocked,
-  completed,
-}
+enum StepSubmitStatus { noop, dispatched, blocked, completed }
 
 class StepSubmitResult {
   final StepSubmitStatus status;
@@ -171,20 +157,20 @@ class StepSubmitResult {
   });
 
   const StepSubmitResult.noop()
-      : this._(
-          status: StepSubmitStatus.noop,
-          infoKey: null,
-          errorKey: null,
-          consumeNavigation: false,
-        );
+    : this._(
+        status: StepSubmitStatus.noop,
+        infoKey: null,
+        errorKey: null,
+        consumeNavigation: false,
+      );
 
   const StepSubmitResult.dispatched({bool consumeNavigation = false})
-      : this._(
-          status: StepSubmitStatus.dispatched,
-          infoKey: null,
-          errorKey: null,
-          consumeNavigation: consumeNavigation,
-        );
+    : this._(
+        status: StepSubmitStatus.dispatched,
+        infoKey: null,
+        errorKey: null,
+        consumeNavigation: consumeNavigation,
+      );
 
   const StepSubmitResult.blocked({
     this.infoKey,
@@ -199,11 +185,7 @@ class StepSubmitResult {
        errorKey = null;
 }
 
-enum StepContinueStatus {
-  advance,
-  blocked,
-  completed,
-}
+enum StepContinueStatus { advance, blocked, completed }
 
 class StepContinueResult {
   final StepContinueStatus status;
@@ -217,19 +199,19 @@ class StepContinueResult {
   });
 
   const StepContinueResult.advance(int nextStepIndex)
-      : this._(
-          status: StepContinueStatus.advance,
-          nextStepIndex: nextStepIndex,
-          hintKey: null,
-        );
+    : this._(
+        status: StepContinueStatus.advance,
+        nextStepIndex: nextStepIndex,
+        hintKey: null,
+      );
 
   const StepContinueResult.blocked({this.hintKey})
-      : status = StepContinueStatus.blocked,
-        nextStepIndex = null;
+    : status = StepContinueStatus.blocked,
+      nextStepIndex = null;
 
   const StepContinueResult.completed({this.hintKey})
-      : status = StepContinueStatus.completed,
-        nextStepIndex = null;
+    : status = StepContinueStatus.completed,
+      nextStepIndex = null;
 }
 
 abstract class EnrollmentStepHandler {
@@ -327,7 +309,8 @@ abstract class BaseEnrollmentStepHandler extends EnrollmentStepHandler {
   }
 
   String resolveLevelId(HandlerBuildContext context) {
-    final enrollmentLevelId = context.detail.enrollmentDetail.schoolLevelId.trim();
+    final enrollmentLevelId = context.detail.enrollmentDetail.schoolLevelId
+        .trim();
     if (enrollmentLevelId.isNotEmpty) {
       return enrollmentLevelId;
     }

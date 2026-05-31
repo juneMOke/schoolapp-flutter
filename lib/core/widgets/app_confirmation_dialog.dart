@@ -40,8 +40,8 @@ class AppConfirmationDialog extends StatelessWidget {
     final resolvedHeaderIconBackgroundColor =
         headerIconBackgroundColor ??
         (isDestructive
-        ? AppColors.financeDetailDangerSoft
-        : AppColors.bleuArdoise.withValues(alpha: 0.12));
+            ? AppColors.financeDetailDangerSoft
+            : AppColors.bleuArdoise.withValues(alpha: 0.12));
     final resolvedConfirmButtonColor =
         confirmButtonColor ??
         (isDestructive ? colorScheme.error : AppColors.bleuArdoise);
@@ -160,10 +160,7 @@ class AppConfirmationDialog extends StatelessWidget {
                     foregroundColor: resolvedConfirmForegroundColor,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
-                  icon: Icon(
-                    resolvedConfirmIcon,
-                    size: AppDimensions.spacingM,
-                  ),
+                  icon: Icon(resolvedConfirmIcon, size: AppDimensions.spacingM),
                   label: Text(
                     confirmLabel,
                     style: AppTextStyles.action.copyWith(

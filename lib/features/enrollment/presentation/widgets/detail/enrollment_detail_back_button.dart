@@ -11,7 +11,8 @@ class EnrollmentDetailBackButton extends StatefulWidget {
       _EnrollmentDetailBackButtonState();
 }
 
-class _EnrollmentDetailBackButtonState extends State<EnrollmentDetailBackButton> {
+class _EnrollmentDetailBackButtonState
+    extends State<EnrollmentDetailBackButton> {
   bool _hovered = false;
 
   @override

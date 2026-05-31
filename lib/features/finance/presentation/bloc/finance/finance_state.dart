@@ -20,14 +20,13 @@ class FinanceState extends Equatable {
     FinanceStatus? status,
     List<FeeTariff>? tariffs,
     Object? errorMessage = _undefined,
-  }) =>
-      FinanceState(
-        status: status ?? this.status,
-        tariffs: tariffs ?? this.tariffs,
-        errorMessage: identical(errorMessage, _undefined)
-            ? this.errorMessage
-            : errorMessage as String?,
-      );
+  }) => FinanceState(
+    status: status ?? this.status,
+    tariffs: tariffs ?? this.tariffs,
+    errorMessage: identical(errorMessage, _undefined)
+        ? this.errorMessage
+        : errorMessage as String?,
+  );
 
   @override
   List<Object?> get props => [status, tariffs, errorMessage];

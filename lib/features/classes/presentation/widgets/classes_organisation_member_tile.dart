@@ -63,15 +63,20 @@ class ClassesOrganisationMemberTile extends StatelessWidget {
                     mainName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyStrong.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                  if (subName.isNotEmpty) const SizedBox(height: AppDimensions.spacingXS),
+                  if (subName.isNotEmpty)
+                    const SizedBox(height: AppDimensions.spacingXS),
                   if (subName.isNotEmpty)
                     Text(
                       subName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                 ],
               ),

@@ -56,16 +56,13 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
         listener: (context, state) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                state.allocationsErrorType.localizedMessage(l10n),
-              ),
+              content: Text(state.allocationsErrorType.localizedMessage(l10n)),
             ),
           );
         },
         buildWhen: _shouldRebuild,
         builder: (context, state) {
-          final allocations =
-              state.allocationsByChargeId[chargeId] ?? const [];
+          final allocations = state.allocationsByChargeId[chargeId] ?? const [];
 
           return AnimatedSwitcher(
             duration: FinanceMotion.standard,

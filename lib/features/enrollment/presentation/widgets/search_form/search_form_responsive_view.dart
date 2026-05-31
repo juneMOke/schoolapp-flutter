@@ -55,7 +55,10 @@ class SearchFormResponsiveView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ...fields.expand(
-                      (field) => [Expanded(child: field), SizedBox(width: spacing)],
+                      (field) => [
+                        Expanded(child: field),
+                        SizedBox(width: spacing),
+                      ],
                     ),
                     SizedBox(width: actionsWideSpacing),
                     actions,
@@ -67,10 +70,15 @@ class SearchFormResponsiveView extends StatelessWidget {
                   runSpacing: spacing,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    ...fields.map((field) => SizedBox(width: fieldWidth, child: field)),
+                    ...fields.map(
+                      (field) => SizedBox(width: fieldWidth, child: field),
+                    ),
                     SizedBox(
                       width: constraints.maxWidth,
-                      child: Align(alignment: Alignment.centerRight, child: actions),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: actions,
+                      ),
                     ),
                   ],
                 ),

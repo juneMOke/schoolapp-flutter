@@ -1,0 +1,5 @@
+#include "Debug.xcconfig"
+
+APP_DISPLAY_NAME=School App Dev
+PRODUCT_BUNDLE_IDENTIFIER=com.junethink.schoolAppFlutter.dev
+APP_ENV=dev

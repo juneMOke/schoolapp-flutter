@@ -49,21 +49,28 @@ class ClassesListPageHelpers {
     final lastName = request.lastName.trim().toLowerCase();
     final surname = request.surname.trim().toLowerCase();
 
-    return members.where((member) {
-      final memberFirstName = member.studentFirstName.trim().toLowerCase();
-      final memberLastName = member.studentLastName.trim().toLowerCase();
-      final memberSurname = (member.studentMiddleName ?? '').trim().toLowerCase();
+    return members
+        .where((member) {
+          final memberFirstName = member.studentFirstName.trim().toLowerCase();
+          final memberLastName = member.studentLastName.trim().toLowerCase();
+          final memberSurname = (member.studentMiddleName ?? '')
+              .trim()
+              .toLowerCase();
 
-      return memberFirstName.contains(firstName) &&
-          memberLastName.contains(lastName) &&
-          memberSurname.contains(surname);
-    }).toList(growable: false);
+          return memberFirstName.contains(firstName) &&
+              memberLastName.contains(lastName) &&
+              memberSurname.contains(surname);
+        })
+        .toList(growable: false);
   }
 
   static String mapClassroomErrorToMessage(
     AppLocalizations l10n,
     ClassroomErrorType errorType,
-  ) => ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(l10n, errorType);
+  ) => ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+    l10n,
+    errorType,
+  );
 
   static bool isSearching({
     required EnrollmentState enrollmentState,

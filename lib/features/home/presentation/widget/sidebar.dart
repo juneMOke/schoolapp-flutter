@@ -46,7 +46,9 @@ class Sidebar extends StatelessWidget {
                     children: [
                       FocusTraversalOrder(
                         order: const NumericFocusOrder(1),
-                        child: SidebarHeader(isExpanded: state.isSidebarExpanded),
+                        child: SidebarHeader(
+                          isExpanded: state.isSidebarExpanded,
+                        ),
                       ),
                       const SizedBox(height: AppDimensions.spacingXS + 2),
                       Expanded(
@@ -57,7 +59,9 @@ class Sidebar extends StatelessWidget {
                       ),
                       FocusTraversalOrder(
                         order: const NumericFocusOrder(3),
-                        child: SidebarFooter(isExpanded: state.isSidebarExpanded),
+                        child: SidebarFooter(
+                          isExpanded: state.isSidebarExpanded,
+                        ),
                       ),
                     ],
                   ),

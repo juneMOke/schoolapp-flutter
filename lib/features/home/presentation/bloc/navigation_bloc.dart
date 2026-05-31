@@ -8,7 +8,6 @@ part 'navigation_event.dart';
 part 'navigation_state.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-
   NavigationBloc(AppLocalizations l10n) : super(NavigationState.initial(l10n)) {
     on<MenuItemSelected>(_onMenuItemSelected);
     on<SubMenuItemSelected>(_onSubMenuItemSelected);

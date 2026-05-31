@@ -194,9 +194,7 @@ class _ParentItemState extends State<ParentItem> {
         color: AppColors.surface,
         borderRadius: AppRadius.brMd,
         border: Border.all(
-          color: widget.isExpanded
-              ? AppColors.bleuArdoise
-              : AppColors.border,
+          color: widget.isExpanded ? AppColors.bleuArdoise : AppColors.border,
           width: widget.isExpanded ? 2 : 1,
         ),
         boxShadow: [

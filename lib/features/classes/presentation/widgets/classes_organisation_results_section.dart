@@ -43,15 +43,19 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
       return ClassesOrganisationEmptyStateCard(
         icon: Icons.school_outlined,
         title: l10n.classesOrganisationSelectLevelTitle,
-        subtitle: l10n.classesOrganisationSelectLevelSubtitle(selectedCycle!.label),
+        subtitle: l10n.classesOrganisationSelectLevelSubtitle(
+          selectedCycle!.label,
+        ),
       );
     }
 
     return BlocBuilder<ClassroomBloc, ClassroomState>(
       buildWhen: (previous, current) =>
-          previous.distributionOverviewStatus != current.distributionOverviewStatus ||
+          previous.distributionOverviewStatus !=
+              current.distributionOverviewStatus ||
           previous.distributionOverview != current.distributionOverview ||
-          previous.distributionOverviewErrorType != current.distributionOverviewErrorType ||
+          previous.distributionOverviewErrorType !=
+              current.distributionOverviewErrorType ||
           previous.reassignStatus != current.reassignStatus ||
           previous.reassigningMemberId != current.reassigningMemberId,
       builder: (context, classroomState) {
@@ -60,7 +64,12 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
 
           return ClassesOrganisationPendingDistributionCard(
             isDistributing: isDistributing,
-            studentsToDistribute: classroomState.distributionOverview?.unassignedEnrollments.length ?? 0,
+            studentsToDistribute:
+                classroomState
+                    .distributionOverview
+                    ?.unassignedEnrollments
+                    .length ??
+                0,
             plannedClassroomCount: plannedClassroomCount,
             onDistributionRequested: onDistributionRequested,
           );
@@ -71,9 +80,14 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           overviewStatus: classroomState.distributionOverviewStatus,
           overviewErrorType: classroomState.distributionOverviewErrorType,
           overview: classroomState.distributionOverview,
-          isReassigning: classroomState.reassignStatus == ClassroomStatus.loading,
+          isReassigning:
+              classroomState.reassignStatus == ClassroomStatus.loading,
           reassigningMemberId: classroomState.reassigningMemberId,
-          errorMessage: ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(l10n, classroomState.distributionOverviewErrorType),
+          errorMessage:
+              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                l10n,
+                classroomState.distributionOverviewErrorType,
+              ),
           onTransferTap: onTransferTap,
         );
       },
@@ -116,7 +130,11 @@ class ClassesOrganisationEmptyStateCard extends StatelessWidget {
                 color: AppColors.bleuArdoise.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: AppDimensions.spacingM, color: AppColors.bleuArdoise),
+              child: Icon(
+                icon,
+                size: AppDimensions.spacingM,
+                color: AppColors.bleuArdoise,
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingS),
             Text(
@@ -130,7 +148,9 @@ class ClassesOrganisationEmptyStateCard extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingXS),
             Text(
               subtitle,
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -167,6 +187,7 @@ class ClassesOrganisationDashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant ClassesOrganisationDashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color;
+  bool shouldRepaint(
+    covariant ClassesOrganisationDashedBorderPainter oldDelegate,
+  ) => oldDelegate.color != color;
 }

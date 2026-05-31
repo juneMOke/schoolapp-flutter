@@ -20,7 +20,8 @@ part 'enrollment_event.dart';
 part 'enrollment_state.dart';
 
 class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
-  static const int _defaultSummariesPageSize = AppConstants.enrollmentDefaultPageSize;
+  static const int _defaultSummariesPageSize =
+      AppConstants.enrollmentDefaultPageSize;
 
   final GetEnrollmentSummaryListByStatusUseCase
   _getEnrollmentSummaryListByStatusUseCase;

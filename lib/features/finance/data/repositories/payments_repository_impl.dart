@@ -22,11 +22,12 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
     required String academicYearId,
   }) async {
     try {
-      final models = await remoteDataSource.listPaymentsByStudentAndAcademicYear(
-        requiredAuth,
-        studentId,
-        academicYearId,
-      );
+      final models = await remoteDataSource
+          .listPaymentsByStudentAndAcademicYear(
+            requiredAuth,
+            studentId,
+            academicYearId,
+          );
       return Right(models.map((model) => model.toEntity()).toList());
     } on DioException catch (e) {
       if (e.error is Failure) {

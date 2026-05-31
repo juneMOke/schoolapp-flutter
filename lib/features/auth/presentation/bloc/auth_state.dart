@@ -11,11 +11,7 @@ class AuthState extends Equatable {
   final AuthenticatedUser? user;
   final String? errorMessage;
 
-  const AuthState({
-    required this.status,
-    this.user,
-    this.errorMessage,
-  });
+  const AuthState({required this.status, this.user, this.errorMessage});
 
   factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
 

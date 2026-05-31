@@ -44,46 +44,42 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.paid({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.check_circle,
-        label: label,
-        color: AppColors.success,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.check_circle,
+    label: label,
+    color: AppColors.success,
+    size: size,
+  );
 
   factory StatusBadge.partial({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.pending,
-        label: label,
-        color: AppColors.warning,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.pending,
+    label: label,
+    color: AppColors.warning,
+    size: size,
+  );
 
   factory StatusBadge.overdue({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.error_outline,
-        label: label,
-        color: AppColors.error,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.error_outline,
+    label: label,
+    color: AppColors.error,
+    size: size,
+  );
 
   factory StatusBadge.cancelled({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cancel,
-        label: label,
-        color: AppColors.textMuted,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cancel,
+    label: label,
+    color: AppColors.textMuted,
+    size: size,
+  );
 
   // ---------------------------------------------------------------------------
   // Factories — Présence / Absence
@@ -92,35 +88,32 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.present({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.check,
-        label: label,
-        color: AppColors.success,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.check,
+    label: label,
+    color: AppColors.success,
+    size: size,
+  );
 
   factory StatusBadge.absentJustified({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.event_busy,
-        label: label,
-        color: AppColors.warning,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.event_busy,
+    label: label,
+    color: AppColors.warning,
+    size: size,
+  );
 
   factory StatusBadge.absentUnjustified({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.block,
-        label: label,
-        color: AppColors.error,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.block,
+    label: label,
+    color: AppColors.error,
+    size: size,
+  );
 
   // ---------------------------------------------------------------------------
   // Factories — Synchronisation
@@ -129,57 +122,52 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.synced({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cloud_done,
-        label: label,
-        color: AppColors.success,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cloud_done,
+    label: label,
+    color: AppColors.success,
+    size: size,
+  );
 
   factory StatusBadge.syncing({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cloud_sync,
-        label: label,
-        color: AppColors.info,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cloud_sync,
+    label: label,
+    color: AppColors.info,
+    size: size,
+  );
 
   factory StatusBadge.offline({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cloud_off,
-        label: label,
-        color: AppColors.textMuted,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cloud_off,
+    label: label,
+    color: AppColors.textMuted,
+    size: size,
+  );
 
   factory StatusBadge.pendingUpload({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cloud_upload,
-        label: label,
-        color: AppColors.warning,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cloud_upload,
+    label: label,
+    color: AppColors.warning,
+    size: size,
+  );
 
   factory StatusBadge.syncConflict({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.sync_problem,
-        label: label,
-        color: AppColors.error,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.sync_problem,
+    label: label,
+    color: AppColors.error,
+    size: size,
+  );
 
   // ---------------------------------------------------------------------------
   // Factories — Inscription (EnrollmentStatus — 9 valeurs)
@@ -188,101 +176,92 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.enrollmentPreRegistered({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.schedule,
-        label: label,
-        color: AppColors.warning,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.schedule,
+    label: label,
+    color: AppColors.warning,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentInProgress({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.pending_outlined,
-        label: label,
-        color: AppColors.bleuArdoise,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.pending_outlined,
+    label: label,
+    color: AppColors.bleuArdoise,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentAdminCompleted({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.task_alt,
-        label: label,
-        color: AppColors.info,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.task_alt,
+    label: label,
+    color: AppColors.info,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentFinancialCompleted({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.payments,
-        label: label,
-        color: AppColors.orDoux,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.payments,
+    label: label,
+    color: AppColors.orDoux,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentCompleted({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.check_circle_outline,
-        label: label,
-        color: AppColors.success,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.check_circle_outline,
+    label: label,
+    color: AppColors.success,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentCancelled({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cancel,
-        label: label,
-        color: AppColors.textMuted,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cancel,
+    label: label,
+    color: AppColors.textMuted,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentValidated({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.check_circle,
-        label: label,
-        color: AppColors.success,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.check_circle,
+    label: label,
+    color: AppColors.success,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentRejected({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.cancel,
-        label: label,
-        color: AppColors.error,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.cancel,
+    label: label,
+    color: AppColors.error,
+    size: size,
+  );
 
   factory StatusBadge.enrollmentPending({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,
-  }) =>
-      StatusBadge(
-        icon: Icons.hourglass_empty,
-        label: label,
-        color: AppColors.textMuted,
-        size: size,
-      );
+  }) => StatusBadge(
+    icon: Icons.hourglass_empty,
+    label: label,
+    color: AppColors.textMuted,
+    size: size,
+  );
 
   // ---------------------------------------------------------------------------
   // Build
@@ -292,10 +271,12 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isNeutral = color == AppColors.textMuted;
 
-    final bgColor =
-        isNeutral ? AppColors.surfaceAlt : color.withValues(alpha: 0.10);
-    final borderColor =
-        isNeutral ? AppColors.border : color.withValues(alpha: 0.25);
+    final bgColor = isNeutral
+        ? AppColors.surfaceAlt
+        : color.withValues(alpha: 0.10);
+    final borderColor = isNeutral
+        ? AppColors.border
+        : color.withValues(alpha: 0.25);
 
     final double iconSize;
     final double hPadding;
@@ -324,10 +305,7 @@ class StatusBadge extends StatelessWidget {
         children: [
           Icon(icon, size: iconSize, color: color),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(color: color),
-          ),
+          Text(label, style: AppTypography.labelSmall.copyWith(color: color)),
         ],
       ),
     );

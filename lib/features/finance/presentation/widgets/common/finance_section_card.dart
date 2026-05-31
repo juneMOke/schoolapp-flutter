@@ -44,7 +44,10 @@ class FinanceSectionCard extends StatelessWidget {
                 BoxShadow(
                   color: AppColors.financeDetailShadow,
                   blurRadius: AppDimensions.financeDetailCardShadowBlur,
-                  offset: Offset(0, AppDimensions.financeDetailCardShadowOffsetY),
+                  offset: Offset(
+                    0,
+                    AppDimensions.financeDetailCardShadowOffsetY,
+                  ),
                 ),
               ]
             : null,

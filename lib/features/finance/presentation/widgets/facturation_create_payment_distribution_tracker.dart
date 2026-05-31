@@ -16,9 +16,9 @@ class FacturationCreatePaymentDistributionTracker extends StatelessWidget {
   });
 
   String _format(int amountInCents) => formatMonetaryAmountWithCurrency(
-        amount: amountInCents / 100,
-        currency: currency,
-      );
+    amount: amountInCents / 100,
+    currency: currency,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +30,8 @@ class FacturationCreatePaymentDistributionTracker extends StatelessWidget {
         : Icons.info_outline;
     final message = hasAllocations
         ? l10n.facturationCreatePaymentFooterTotalPayments(
-      _format(allocatedAmountInCents),
-    )
+            _format(allocatedAmountInCents),
+          )
         : l10n.facturationCreatePaymentDistributionTrackerIdle;
 
     return Container(

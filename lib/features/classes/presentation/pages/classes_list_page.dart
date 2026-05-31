@@ -45,7 +45,9 @@ class _ClassesListPageState extends State<ClassesListPage> {
         return;
       }
       context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(key: AppConstants.bootstrapPayloadKey),
+        const BootstrapContextLocalRequested(
+          key: AppConstants.bootstrapPayloadKey,
+        ),
       );
     });
   }
@@ -66,7 +68,8 @@ class _ClassesListPageState extends State<ClassesListPage> {
       child: MultiBlocListener(
         listeners: [
           BlocListener<EnrollmentBloc, EnrollmentState>(
-            listenWhen: ClassesListPageHelpers.listenWhenEnrollmentStatusChanges,
+            listenWhen:
+                ClassesListPageHelpers.listenWhenEnrollmentStatusChanges,
             listener: (context, state) {
               if (state.summariesStatus == EnrollmentLoadStatus.failure) {
                 AppSnackBar.showError(
@@ -77,7 +80,8 @@ class _ClassesListPageState extends State<ClassesListPage> {
             },
           ),
           BlocListener<ClassroomBloc, ClassroomState>(
-            listenWhen: ClassesListPageHelpers.listenWhenClassroomMembersStatusChanges,
+            listenWhen:
+                ClassesListPageHelpers.listenWhenClassroomMembersStatusChanges,
             listener: (context, state) {
               if (state.membersStatus == ClassroomStatus.failure) {
                 AppSnackBar.showError(
@@ -141,24 +145,24 @@ class _ClassesListPageState extends State<ClassesListPage> {
     if (request.targetsClassroom && request.selectedClassroom != null) {
       context.read<EnrollmentBloc>().add(const EnrollmentResetRequested());
       context.read<ClassroomBloc>().add(
-            ClassroomMembersRequested(
-              classroomId: request.selectedClassroom!.id,
-              academicYearId: academicYearId,
-            ),
-          );
+        ClassroomMembersRequested(
+          classroomId: request.selectedClassroom!.id,
+          academicYearId: academicYearId,
+        ),
+      );
       return;
     }
 
     context.read<ClassroomBloc>().add(const ClassroomResetRequested());
     context.read<EnrollmentBloc>().add(
-          EnrollmentSummariesByAcademicInfoRequested(
-            firstName: request.firstName,
-            lastName: request.lastName,
-            surname: request.surname,
-            schoolLevelGroupId: request.selectedLevel?.schoolLevelGroupId ?? '',
-            schoolLevelId: request.selectedLevel?.schoolLevelId ?? '',
-          ),
-        );
+      EnrollmentSummariesByAcademicInfoRequested(
+        firstName: request.firstName,
+        lastName: request.lastName,
+        surname: request.surname,
+        schoolLevelGroupId: request.selectedLevel?.schoolLevelGroupId ?? '',
+        schoolLevelId: request.selectedLevel?.schoolLevelId ?? '',
+      ),
+    );
   }
 
   Future<void> _handleExport() async {
@@ -229,11 +233,7 @@ class _ClassesListPageState extends State<ClassesListPage> {
   }
 
   void _onEnrollmentViewRequested(EnrollmentSummary summary) {
-    _policy.onEnrollmentViewRequested(
-      context,
-      summary,
-      request: _lastRequest,
-    );
+    _policy.onEnrollmentViewRequested(context, summary, request: _lastRequest);
   }
 
   void _onClassroomMemberViewRequested(ClassroomMember member) {

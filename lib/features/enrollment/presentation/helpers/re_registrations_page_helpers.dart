@@ -17,7 +17,8 @@ class ReRegistrationsPageHelpers {
       mapItem: (bundle, levelBundle) => ReRegistrationAcademicOption(
         schoolLevelGroupId: bundle.schoolLevelGroup.id,
         schoolLevelId: levelBundle.schoolLevel.id,
-        label: '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
+        label:
+            '${bundle.schoolLevelGroup.name} - ${levelBundle.schoolLevel.name}',
       ),
     );
 

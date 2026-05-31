@@ -19,14 +19,20 @@ class ClassesListSearchFormLogic {
       );
     }
 
-    final levelOptions = selectedCycle?.levels ?? const <ClassesListLevelOption>[];
+    final levelOptions =
+        selectedCycle?.levels ?? const <ClassesListLevelOption>[];
     final selectedLevel = findLevel(levelOptions, selectedLevelKey);
     if (selectedLevelKey != null && selectedLevel == null) {
-      return const ClassesListSelectionSync(clearLevel: true, clearClassroom: true);
+      return const ClassesListSelectionSync(
+        clearLevel: true,
+        clearClassroom: true,
+      );
     }
 
-    final selectedClassroom =
-        findClassroom(selectedLevel?.classrooms ?? const [], selectedClassroomId);
+    final selectedClassroom = findClassroom(
+      selectedLevel?.classrooms ?? const [],
+      selectedClassroomId,
+    );
     if (selectedClassroomId != null && selectedClassroom == null) {
       return const ClassesListSelectionSync(clearClassroom: true);
     }

@@ -16,18 +16,9 @@ void main() {
         AppBreakpoints.detailCompactMax < AppBreakpoints.homeMobileMax,
         isTrue,
       );
-      expect(
-        AppBreakpoints.homeMobileMax < AppBreakpoints.authWideMin,
-        isTrue,
-      );
-      expect(
-        AppBreakpoints.authWideMin < AppBreakpoints.formMediumMin,
-        isTrue,
-      );
-      expect(
-        AppBreakpoints.formMediumMin < AppBreakpoints.formWideMin,
-        isTrue,
-      );
+      expect(AppBreakpoints.homeMobileMax < AppBreakpoints.authWideMin, isTrue);
+      expect(AppBreakpoints.authWideMin < AppBreakpoints.formMediumMin, isTrue);
+      expect(AppBreakpoints.formMediumMin < AppBreakpoints.formWideMin, isTrue);
     });
   });
 }

@@ -30,12 +30,19 @@ import 'package:school_app_flutter/features/finance/presentation/pages/facturati
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
 import 'package:school_app_flutter/dev/component_gallery_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
+import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -183,7 +190,8 @@ class AppRouter {
               builder: (context, state) => const FirstRegistrationPage(),
             ),
             GoRoute(
-              path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+              path:
+                  '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
               builder: (context, state) {
                 final enrollmentId = state.pathParameters['enrollmentId']!;
                 final intent = EnrollmentDetailIntent.fromRouteContext(
@@ -200,6 +208,12 @@ class AppRouter {
         ShellRoute(
           builder: (context, state, child) => FinanceFeatureScope(child: child),
           routes: [
+            GoRoute(
+              path: AppRoutesNames.financesDashboard,
+              builder: (context, state) => const FinanceStatsDashboardScope(
+                child: FinanceStatsDashboardPage(),
+              ),
+            ),
             GoRoute(
               path: AppRoutesNames.facturations,
               builder: (context, state) => const FacturationPage(),
@@ -247,12 +261,13 @@ class AppRouter {
                         state.pathParameters['academicYearId'] ?? '';
                     final paymentId = state.pathParameters['paymentId'] ?? '';
 
-                    final intent = FacturationPaymentDetailIntent.fromRouteContext(
-                      paymentId: paymentId,
-                      studentId: studentId,
-                      academicYearId: academicYearId,
-                      extra: state.extra,
-                    );
+                    final intent =
+                        FacturationPaymentDetailIntent.fromRouteContext(
+                          paymentId: paymentId,
+                          studentId: studentId,
+                          academicYearId: academicYearId,
+                          extra: state.extra,
+                        );
 
                     return FacturationPaymentDetailPage(intent: intent);
                   },
@@ -275,12 +290,13 @@ class AppRouter {
                         state.pathParameters['academicYearId'] ?? '';
                     final chargeId = state.pathParameters['chargeId'] ?? '';
 
-                    final intent = FacturationChargeDetailIntent.fromRouteContext(
-                      chargeId: chargeId,
-                      studentId: studentId,
-                      academicYearId: academicYearId,
-                      extra: state.extra,
-                    );
+                    final intent =
+                        FacturationChargeDetailIntent.fromRouteContext(
+                          chargeId: chargeId,
+                          studentId: studentId,
+                          academicYearId: academicYearId,
+                          extra: state.extra,
+                        );
 
                     return FacturationChargeDetailPage(intent: intent);
                   },
@@ -303,10 +319,10 @@ class AppRouter {
 
                     final intent =
                         FacturationCreatePaymentIntent.fromRouteContext(
-                      studentId: studentId,
-                      academicYearId: academicYearId,
-                      extra: state.extra,
-                    );
+                          studentId: studentId,
+                          academicYearId: academicYearId,
+                          extra: state.extra,
+                        );
 
                     return FacturationCreatePaymentPage(intent: intent);
                   },
@@ -316,7 +332,33 @@ class AppRouter {
           ],
         ),
         ShellRoute(
-          builder: (context, state, child) => AttendanceFeatureScope(child: child),
+          builder: (context, state, child) => ClassesFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.classesDashboard,
+              builder: (context, state) => const ClassesStatsDashboardPage(),
+            ),
+            GoRoute(
+              path: AppRoutesNames.organisation,
+              builder: (context, state) => const ClassesOrganisationPage(),
+            ),
+            GoRoute(
+              path: AppRoutesNames.classesList,
+              builder: (context, state) => const ClassesListPage(
+                intent: ClassesListIntent.classesList(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutesNames.disciplinesList,
+              builder: (context, state) => const ClassesListPage(
+                intent: ClassesListIntent.disciplinesList(),
+              ),
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) =>
+              AttendanceFeatureScope(child: child),
           routes: [
             GoRoute(
               path: AppRoutesNames.presences,

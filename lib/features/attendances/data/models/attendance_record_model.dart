@@ -17,7 +17,10 @@ class AttendanceRecordModel extends Equatable {
   final String studentGender;
   final String classroomId;
   final String academicYearId;
-  @JsonKey(fromJson: DateOnlyJsonHelper.fromJson, toJson: DateOnlyJsonHelper.toJson)
+  @JsonKey(
+    fromJson: DateOnlyJsonHelper.fromJson,
+    toJson: DateOnlyJsonHelper.toJson,
+  )
   final DateTime attendanceDate;
   final bool present;
   final String? absenceReason;

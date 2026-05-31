@@ -17,7 +17,8 @@ class StepperActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth <= AppBreakpoints.detailCompactMax;
+        final isCompact =
+            constraints.maxWidth <= AppBreakpoints.detailCompactMax;
         final hasLeadingAction = leadingActionBuilder != null;
         final trailingActions = trailingActionBuilders
             .map((builder) => builder(context))

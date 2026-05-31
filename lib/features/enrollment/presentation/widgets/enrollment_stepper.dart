@@ -67,122 +67,123 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     final flowBloc = context.read<EnrollmentStepperFlowBloc>();
 
     return BlocListener<EnrollmentBloc, EnrollmentState>(
-        listenWhen: (prev, curr) =>
+      listenWhen: (prev, curr) =>
+          prev.statusUpdateStatus != curr.statusUpdateStatus,
+      listener: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
+        final enrollmentBloc = context.read<EnrollmentBloc>();
+        if (state.statusUpdateStatus == EnrollmentLoadStatus.success) {
+          AppSnackBar.showSuccess(context, l10n.enrollmentStatusUpdateSuccess);
+          enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
+          EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
+            context,
+          );
+        } else if (state.statusUpdateStatus == EnrollmentLoadStatus.failure) {
+          AppSnackBar.showError(
+            context,
+            l10n.enrollmentStatusUpdateError(state.errorMessage ?? ''),
+          );
+          enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
+        }
+      },
+      child: BlocBuilder<EnrollmentBloc, EnrollmentState>(
+        buildWhen: (prev, curr) =>
             prev.statusUpdateStatus != curr.statusUpdateStatus,
-        listener: (context, state) {
-          final l10n = AppLocalizations.of(context)!;
-          final enrollmentBloc = context.read<EnrollmentBloc>();
-          if (state.statusUpdateStatus == EnrollmentLoadStatus.success) {
-            AppSnackBar.showSuccess(
-              context,
-              l10n.enrollmentStatusUpdateSuccess,
-            );
-            enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
-            EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
-              context,
-            );
-          } else if (state.statusUpdateStatus == EnrollmentLoadStatus.failure) {
-            AppSnackBar.showError(
-              context,
-              l10n.enrollmentStatusUpdateError(state.errorMessage ?? ''),
-            );
-            enrollmentBloc.add(const EnrollmentStatusUpdateResultConsumed());
-          }
-        },
-        child: BlocBuilder<EnrollmentBloc, EnrollmentState>(
-          buildWhen: (prev, curr) =>
-              prev.statusUpdateStatus != curr.statusUpdateStatus,
-          builder: (context, enrollmentState) {
-            final isStatusUpdateLoading =
-                enrollmentState.statusUpdateStatus ==
-                EnrollmentLoadStatus.loading;
+        builder: (context, enrollmentState) {
+          final isStatusUpdateLoading =
+              enrollmentState.statusUpdateStatus ==
+              EnrollmentLoadStatus.loading;
 
-            return BlocBuilder<
-              EnrollmentStepperFlowBloc,
-              EnrollmentStepperFlowState
-            >(
-              builder: (context, flowState) {
-                final currentStep = flowState.currentStep;
-                final progress = (currentStep + 1) / stepTitles.length;
-                final currentStepState = flowState.stateOf(currentStep);
-                final currentHandler = _stepHandlers[currentStep];
-                final currentWizardStep = currentHandler.step;
-                final isSummaryStep = currentHandler.isSummaryStep;
-                final stepIsEditable = widget.detailPolicy.isStepEditable(
-                  currentWizardStep,
-                );
-                final flowContext = HandlerFlowContext(
-                  flowState: flowState,
-                  currentStepIndex: currentStep,
-                  currentStep: currentWizardStep,
-                  currentStepState: currentStepState,
-                  isStatusUpdateLoading: isStatusUpdateLoading,
-                  detail: widget.enrollmentDetail,
-                  intent: widget.detailIntent,
-                  detailPolicy: widget.detailPolicy,
-                );
-                final effectiveSavingNow = currentHandler.isSavingNow(flowContext);
-                final canSaveCurrentStep = currentHandler.canSave(flowContext);
-                final showSaveAction = currentHandler.showSaveAction(flowContext);
+          return BlocBuilder<
+            EnrollmentStepperFlowBloc,
+            EnrollmentStepperFlowState
+          >(
+            builder: (context, flowState) {
+              final currentStep = flowState.currentStep;
+              final progress = (currentStep + 1) / stepTitles.length;
+              final currentStepState = flowState.stateOf(currentStep);
+              final currentHandler = _stepHandlers[currentStep];
+              final currentWizardStep = currentHandler.step;
+              final isSummaryStep = currentHandler.isSummaryStep;
+              final stepIsEditable = widget.detailPolicy.isStepEditable(
+                currentWizardStep,
+              );
+              final flowContext = HandlerFlowContext(
+                flowState: flowState,
+                currentStepIndex: currentStep,
+                currentStep: currentWizardStep,
+                currentStepState: currentStepState,
+                isStatusUpdateLoading: isStatusUpdateLoading,
+                detail: widget.enrollmentDetail,
+                intent: widget.detailIntent,
+                detailPolicy: widget.detailPolicy,
+              );
+              final effectiveSavingNow = currentHandler.isSavingNow(
+                flowContext,
+              );
+              final canSaveCurrentStep = currentHandler.canSave(flowContext);
+              final showSaveAction = currentHandler.showSaveAction(flowContext);
 
-                final controls = EnrollmentStepperControls(
-                  currentStep: currentStep,
-                  isLast: flowState.isLast,
-                  isSummaryStep: isSummaryStep,
-                  canSave: canSaveCurrentStep,
-                  canContinue: currentHandler.canContinue(flowContext),
-                  showSaveAction: showSaveAction,
-                  savingNow: effectiveSavingNow,
-                  saveLabel: currentHandler.saveLabel(
-                    l10n,
-                    SaveLabelContext(
-                      savingNow: effectiveSavingNow,
-                      isEnrollmentAlreadyCompleted:
-                          _isEnrollmentAlreadyCompleted,
-                      enrollmentState: enrollmentState,
-                    ),
+              final controls = EnrollmentStepperControls(
+                currentStep: currentStep,
+                isLast: flowState.isLast,
+                isSummaryStep: isSummaryStep,
+                canSave: canSaveCurrentStep,
+                canContinue: currentHandler.canContinue(flowContext),
+                showSaveAction: showSaveAction,
+                savingNow: effectiveSavingNow,
+                saveLabel: currentHandler.saveLabel(
+                  l10n,
+                  SaveLabelContext(
+                    savingNow: effectiveSavingNow,
+                    isEnrollmentAlreadyCompleted: _isEnrollmentAlreadyCompleted,
+                    enrollmentState: enrollmentState,
                   ),
-                  onPrevious: () {
-                    flowBloc.add(
-                      EnrollmentStepperCurrentStepChanged(currentStep - 1),
-                    );
-                  },
-                  onSave: () {
-                    _onSavePressed(currentStep, flowState);
-                  },
-                  onContinue: () {
-                    _onContinuePressed(
-                      handler: currentHandler,
-                      flowContext: flowContext,
-                      isEditable: stepIsEditable,
-                    );
-                  },
-                );
+                ),
+                onPrevious: () {
+                  flowBloc.add(
+                    EnrollmentStepperCurrentStepChanged(currentStep - 1),
+                  );
+                },
+                onSave: () {
+                  _onSavePressed(currentStep, flowState);
+                },
+                onContinue: () {
+                  _onContinuePressed(
+                    handler: currentHandler,
+                    flowContext: flowContext,
+                    isEditable: stepIsEditable,
+                  );
+                },
+              );
 
-                return _EnrollmentStepperLayout(
-                  stepTitles: stepTitles,
-                  currentStep: currentStep,
-                  progress: progress,
-                  onStepTap: (target) =>
-                      _onBreadcrumbStepTap(flowBloc, target, currentStep),
-                  stepTitle: stepTitles[currentStep],
-                  stepSubtitle: stepCardSubtitles[currentStep],
-                  stepContent: stepContents[currentStep],
-                  controls: controls,
-                  isSummaryStep: isSummaryStep,
-                );
-              },
-            );
-          },
-        ),
-      );
+              return _EnrollmentStepperLayout(
+                stepTitles: stepTitles,
+                currentStep: currentStep,
+                progress: progress,
+                onStepTap: (target) =>
+                    _onBreadcrumbStepTap(flowBloc, target, currentStep),
+                stepTitle: stepTitles[currentStep],
+                stepSubtitle: stepCardSubtitles[currentStep],
+                stepContent: stepContents[currentStep],
+                controls: controls,
+                isSummaryStep: isSummaryStep,
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   void _onSummaryEditRequested(int step) {
     final maxEditableIndex = _stepHandlers.lastIndexWhere(
       (handler) => !handler.isSummaryStep,
     );
-    final boundedStep = step.clamp(0, maxEditableIndex < 0 ? 0 : maxEditableIndex);
+    final boundedStep = step.clamp(
+      0,
+      maxEditableIndex < 0 ? 0 : maxEditableIndex,
+    );
     context.read<EnrollmentStepperFlowBloc>().add(
       EnrollmentStepperCurrentStepChanged(boundedStep),
     );
@@ -317,18 +318,12 @@ class _EnrollmentStepperLayout extends StatelessWidget {
                     subtitle: stepSubtitle,
                     child: stepContent,
                   ),
-                  if (!isSummaryStep) ...[
-                    const SizedBox(height: 12),
-                    controls,
-                  ],
+                  if (!isSummaryStep) ...[const SizedBox(height: 12), controls],
                 ],
               ),
             ),
           ),
-          if (isSummaryStep) ...[
-            const SizedBox(height: 12),
-            controls,
-          ],
+          if (isSummaryStep) ...[const SizedBox(height: 12), controls],
         ],
       ),
     );

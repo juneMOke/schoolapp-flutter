@@ -117,7 +117,9 @@ class _SearchFormState extends State<SearchForm> {
             side: const BorderSide(color: AppColors.border),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            textStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
           ),
         ),
@@ -131,7 +133,9 @@ class _SearchFormState extends State<SearchForm> {
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+            textStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
             disabledBackgroundColor: AppColors.stateDisabled,
             disabledForegroundColor: AppColors.textMuted,

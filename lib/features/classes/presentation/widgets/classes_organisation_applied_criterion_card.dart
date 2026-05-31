@@ -20,7 +20,9 @@ class ClassesOrganisationAppliedCriterionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: Border.all(color: AppColors.bleuArdoise.withValues(alpha: 0.16)),
+        border: Border.all(
+          color: AppColors.bleuArdoise.withValues(alpha: 0.16),
+        ),
       ),
       child: Row(
         children: [

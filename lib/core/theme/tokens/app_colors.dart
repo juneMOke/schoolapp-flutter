@@ -87,6 +87,22 @@ class AppColors {
   static const financeDetailInfoTitle = Color(0xFF1A73E8);
   static const financeDetailPaymentsTitle = Color(0xFF3F51B5);
   static const financeDetailChargesTitle = Color(0xFF2E7D32);
+  // Enrollment stats dashboard palette
+  static const enrollmentStatsAccent = bleuArdoise;
+  static const enrollmentStatsAccentSoft = Color(0xFFEBF2F7);
+  static const enrollmentStatsFirst = vertSavane;
+  static const enrollmentStatsFirstSoft = Color(0xFFEDF5EF);
+  static const enrollmentStatsRe = orDoux;
+  static const enrollmentStatsReSoft = Color(0xFFFBF3E3);
+  static const enrollmentStatsPre = info;
+  static const enrollmentStatsPreSoft = Color(0xFFE8F3F7);
+  static const enrollmentStatsInProgress = textMuted;
+  static const enrollmentStatsInProgressSoft = Color(0xFFF2F0EC);
+  static const enrollmentStatsMale = Color(0xFF3B82F6);
+  static const enrollmentStatsFemale = Color(0xFFEC4899);
+  static const enrollmentStatsCardSurface = surfaceRaised;
+  static const enrollmentStatsChartGrid = border;
+
   static const financeDetailChargeRowPaid = Color(0xFFF1FAF2);
   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
@@ -115,15 +131,15 @@ class AppColors {
   static const classesChipTotalBg = Color(0xFFE8F5E9);
   static const classesChipTotalFg = Color(0xFF1B5E20);
   static const classesFocusRing = Color(0xFF1A73E8);
-   static const classesDisabledBg = Color(0xFFE5E7EB);
-   static const classesDisabledFg = Color(0xFF6B7280);
+  static const classesDisabledBg = Color(0xFFE5E7EB);
+  static const classesDisabledFg = Color(0xFF6B7280);
 
-   // Relationship colours
-   static const relationshipFather = Color(0xFF1976D2);
-   static const relationshipMother = Color(0xFFC2185B);
-   static const relationshipGuardian = Color(0xFF7B1FA2);
-   static const relationshipUncle = Color(0xFFF57C00);
-   static const relationshipAunt = Color(0xFF7E57C2);
-   static const relationshipGrandparent = Color(0xFF00897B);
-   static const relationshipOther = Color(0xFF546E7A);
- }
+  // Relationship colours
+  static const relationshipFather = Color(0xFF1976D2);
+  static const relationshipMother = Color(0xFFC2185B);
+  static const relationshipGuardian = Color(0xFF7B1FA2);
+  static const relationshipUncle = Color(0xFFF57C00);
+  static const relationshipAunt = Color(0xFF7E57C2);
+  static const relationshipGrandparent = Color(0xFF00897B);
+  static const relationshipOther = Color(0xFF546E7A);
+}

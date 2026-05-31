@@ -29,8 +29,8 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
        _getClassroomMembersUseCase = getClassroomMembersUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
-        _getLevelDistributionOverviewUseCase =
-            getLevelDistributionOverviewUseCase,
+       _getLevelDistributionOverviewUseCase =
+           getLevelDistributionOverviewUseCase,
        _reassignClassroomMemberUseCase = reassignClassroomMemberUseCase,
        super(const ClassroomState()) {
     on<ClassroomRequested>(_onClassroomRequested);
@@ -202,15 +202,13 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     );
 
     final results = await Future.wait(
-      event.classroomIds.map(
-        (classroomId) async {
-          final result = await _getClassroomMembersUseCase(
-            classroomId: classroomId,
-            academicYearId: event.academicYearId,
-          );
-          return (classroomId: classroomId, result: result);
-        },
-      ),
+      event.classroomIds.map((classroomId) async {
+        final result = await _getClassroomMembersUseCase(
+          classroomId: classroomId,
+          academicYearId: event.academicYearId,
+        );
+        return (classroomId: classroomId, result: result);
+      }),
     );
 
     final buckets = <ClassroomMembersGroup>[];

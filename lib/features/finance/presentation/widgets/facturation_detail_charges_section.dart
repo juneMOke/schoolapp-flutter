@@ -158,7 +158,9 @@ class _SectionHeader extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                AppLocalizations.of(context)!.facturationDetailChargesSectionTitle,
+                AppLocalizations.of(
+                  context,
+                )!.facturationDetailChargesSectionTitle,
                 style: AppTextStyles.sectionTitle.copyWith(
                   color: AppColors.bleuArdoise,
                 ),

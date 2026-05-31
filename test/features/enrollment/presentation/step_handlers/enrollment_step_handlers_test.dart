@@ -100,71 +100,76 @@ void main() {
   }
 
   group('Non-summary handlers', () {
-    final specs = <({
-      EnrollmentStepHandler Function(EnrollmentStepSubmitController controller)
-      buildHandler,
-      String title,
-      String subtitle,
-      String save,
-      String saving,
-      String invalidHint,
-      String dirtyHint,
-    })>[
-      (
-        buildHandler: (c) => PersonalInfoStepHandler(controller: c),
-        title: 'personal-info',
-        subtitle: 'subtitle-personal-info',
-        save: 'save-personal',
-        saving: 'saving-personal',
-        invalidHint: 'hint-invalid-personal',
-        dirtyHint: 'hint-dirty-personal',
-      ),
-      (
-        buildHandler: (c) => AddressStepHandler(controller: c),
-        title: 'address',
-        subtitle: 'subtitle-address',
-        save: 'save-address',
-        saving: 'saving-address',
-        invalidHint: 'hint-invalid-address',
-        dirtyHint: 'hint-dirty-address',
-      ),
-      (
-        buildHandler: (c) => PreviousAcademicStepHandler(controller: c),
-        title: 'previous-academic',
-        subtitle: 'subtitle-previous-academic',
-        save: 'save-academic',
-        saving: 'saving-academic',
-        invalidHint: 'hint-invalid-academic',
-        dirtyHint: 'hint-dirty-academic',
-      ),
-      (
-        buildHandler: (c) => TargetAcademicStepHandler(controller: c),
-        title: 'target-academic',
-        subtitle: 'subtitle-target-academic',
-        save: 'save-academic',
-        saving: 'saving-academic',
-        invalidHint: 'hint-invalid-academic',
-        dirtyHint: 'hint-dirty-academic',
-      ),
-      (
-        buildHandler: (c) => StudentChargesStepHandler(controller: c),
-        title: 'student-charges',
-        subtitle: 'subtitle-student-charges',
-        save: 'save-charges',
-        saving: 'saving-charges',
-        invalidHint: 'hint-dirty-charges',
-        dirtyHint: 'hint-dirty-charges',
-      ),
-      (
-        buildHandler: (c) => GuardianStepHandler(controller: c),
-        title: 'guardian',
-        subtitle: 'subtitle-guardian',
-        save: 'save-guardian',
-        saving: 'saving-guardian',
-        invalidHint: 'hint-invalid-guardian',
-        dirtyHint: 'hint-dirty-personal',
-      ),
-    ];
+    final specs =
+        <
+          ({
+            EnrollmentStepHandler Function(
+              EnrollmentStepSubmitController controller,
+            )
+            buildHandler,
+            String title,
+            String subtitle,
+            String save,
+            String saving,
+            String invalidHint,
+            String dirtyHint,
+          })
+        >[
+          (
+            buildHandler: (c) => PersonalInfoStepHandler(controller: c),
+            title: 'personal-info',
+            subtitle: 'subtitle-personal-info',
+            save: 'save-personal',
+            saving: 'saving-personal',
+            invalidHint: 'hint-invalid-personal',
+            dirtyHint: 'hint-dirty-personal',
+          ),
+          (
+            buildHandler: (c) => AddressStepHandler(controller: c),
+            title: 'address',
+            subtitle: 'subtitle-address',
+            save: 'save-address',
+            saving: 'saving-address',
+            invalidHint: 'hint-invalid-address',
+            dirtyHint: 'hint-dirty-address',
+          ),
+          (
+            buildHandler: (c) => PreviousAcademicStepHandler(controller: c),
+            title: 'previous-academic',
+            subtitle: 'subtitle-previous-academic',
+            save: 'save-academic',
+            saving: 'saving-academic',
+            invalidHint: 'hint-invalid-academic',
+            dirtyHint: 'hint-dirty-academic',
+          ),
+          (
+            buildHandler: (c) => TargetAcademicStepHandler(controller: c),
+            title: 'target-academic',
+            subtitle: 'subtitle-target-academic',
+            save: 'save-academic',
+            saving: 'saving-academic',
+            invalidHint: 'hint-invalid-academic',
+            dirtyHint: 'hint-dirty-academic',
+          ),
+          (
+            buildHandler: (c) => StudentChargesStepHandler(controller: c),
+            title: 'student-charges',
+            subtitle: 'subtitle-student-charges',
+            save: 'save-charges',
+            saving: 'saving-charges',
+            invalidHint: 'hint-dirty-charges',
+            dirtyHint: 'hint-dirty-charges',
+          ),
+          (
+            buildHandler: (c) => GuardianStepHandler(controller: c),
+            title: 'guardian',
+            subtitle: 'subtitle-guardian',
+            save: 'save-guardian',
+            saving: 'saving-guardian',
+            invalidHint: 'hint-invalid-guardian',
+            dirtyHint: 'hint-dirty-personal',
+          ),
+        ];
 
     for (final spec in specs) {
       test('label/saveLabel/validate/submit for ${spec.title}', () async {
@@ -198,7 +203,11 @@ void main() {
 
         final invalidResult = handler.validate(
           buildValidationContext(
-            stepState: const StepFormState(dirty: false, valid: false, saving: false),
+            stepState: const StepFormState(
+              dirty: false,
+              valid: false,
+              saving: false,
+            ),
           ),
         );
         expect(invalidResult.valid, isFalse);
@@ -206,7 +215,11 @@ void main() {
 
         final dirtyResult = handler.validate(
           buildValidationContext(
-            stepState: const StepFormState(dirty: true, valid: true, saving: false),
+            stepState: const StepFormState(
+              dirty: true,
+              valid: true,
+              saving: false,
+            ),
           ),
         );
         expect(dirtyResult.valid, isFalse);
@@ -244,7 +257,11 @@ void main() {
 
       final validation = handler.validate(
         buildValidationContext(
-          stepState: const StepFormState(dirty: true, valid: false, saving: false),
+          stepState: const StepFormState(
+            dirty: true,
+            valid: false,
+            saving: false,
+          ),
         ),
       );
       expect(validation.valid, isTrue);
@@ -333,33 +350,49 @@ EnrollmentDetail _buildDetail({
 _MockAppLocalizations _mockL10n() {
   final l10n = _MockAppLocalizations();
   when(() => l10n.personalInformation).thenReturn('personal-info');
-  when(() => l10n.stepPersonalInfoSubtitle).thenReturn('subtitle-personal-info');
+  when(
+    () => l10n.stepPersonalInfoSubtitle,
+  ).thenReturn('subtitle-personal-info');
   when(() => l10n.savingPersonalInfo).thenReturn('saving-personal');
   when(() => l10n.savePersonalInfo).thenReturn('save-personal');
   when(() => l10n.validatePersonalInfoHint).thenReturn('hint-invalid-personal');
-  when(() => l10n.personalInfoSaveHintBeforeContinue).thenReturn('hint-dirty-personal');
+  when(
+    () => l10n.personalInfoSaveHintBeforeContinue,
+  ).thenReturn('hint-dirty-personal');
 
   when(() => l10n.address).thenReturn('address');
   when(() => l10n.stepAddressSubtitle).thenReturn('subtitle-address');
   when(() => l10n.savingAddress).thenReturn('saving-address');
   when(() => l10n.saveAddress).thenReturn('save-address');
   when(() => l10n.validateAddressHint).thenReturn('hint-invalid-address');
-  when(() => l10n.addressSaveHintBeforeContinue).thenReturn('hint-dirty-address');
+  when(
+    () => l10n.addressSaveHintBeforeContinue,
+  ).thenReturn('hint-dirty-address');
 
   when(() => l10n.previousYear).thenReturn('previous-academic');
-  when(() => l10n.stepAcademicPreviousSubtitle).thenReturn('subtitle-previous-academic');
+  when(
+    () => l10n.stepAcademicPreviousSubtitle,
+  ).thenReturn('subtitle-previous-academic');
   when(() => l10n.targetYear).thenReturn('target-academic');
-  when(() => l10n.stepAcademicTargetSubtitle).thenReturn('subtitle-target-academic');
+  when(
+    () => l10n.stepAcademicTargetSubtitle,
+  ).thenReturn('subtitle-target-academic');
   when(() => l10n.savingAcademicInfo).thenReturn('saving-academic');
   when(() => l10n.saveAcademicInfo).thenReturn('save-academic');
   when(() => l10n.validateAcademicInfoHint).thenReturn('hint-invalid-academic');
-  when(() => l10n.academicInfoSaveHintBeforeContinue).thenReturn('hint-dirty-academic');
+  when(
+    () => l10n.academicInfoSaveHintBeforeContinue,
+  ).thenReturn('hint-dirty-academic');
 
   when(() => l10n.studentChargesStepTitle).thenReturn('student-charges');
-  when(() => l10n.studentChargesStepSubtitle).thenReturn('subtitle-student-charges');
+  when(
+    () => l10n.studentChargesStepSubtitle,
+  ).thenReturn('subtitle-student-charges');
   when(() => l10n.studentChargesSavingAction).thenReturn('saving-charges');
   when(() => l10n.studentChargesSaveAction).thenReturn('save-charges');
-  when(() => l10n.studentChargesSaveHintBeforeContinue).thenReturn('hint-dirty-charges');
+  when(
+    () => l10n.studentChargesSaveHintBeforeContinue,
+  ).thenReturn('hint-dirty-charges');
 
   when(() => l10n.guardianInformation).thenReturn('guardian');
   when(() => l10n.stepGuardianSubtitle).thenReturn('subtitle-guardian');

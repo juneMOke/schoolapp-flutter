@@ -13,6 +13,9 @@
 ├── 📘 USAGE_GUIDE.md               ← Guide complet (apprentissage)
 ├── 📋 FEATURE_TEMPLATE.md          ← Template détaillé
 ├── ⚡ QUICK_TEMPLATE.md            ← Template rapide
+├── 🚀 GITHUB_RELEASE_STEP_BY_STEP.md ← Guide clic par clic GitHub release
+├── 🧭 GITHUB_RELEASE_RUNBOOK.md      ← Runbook opérationnel écran par écran
+├── ✅ GITHUB_RELEASE_CHECKLIST.md    ← Checklist 1 page imprimable
 ├── 📑 INDEX.md                     ← Ce fichier
 │
 └── [Autres fichiers du projet...]
@@ -292,6 +295,15 @@ Exemples:
 
 **...êtes déjà habitué au pattern**
 → Cliquez sur `QUICK_TEMPLATE.md`
+
+**...préparez une release GitHub**
+→ Cliquez sur `GITHUB_RELEASE_STEP_BY_STEP.md`
+
+**...voulez exécuter sans hésiter (ops)**
+→ Cliquez sur `GITHUB_RELEASE_RUNBOOK.md`
+
+**...voulez une version imprimable**
+→ Cliquez sur `GITHUB_RELEASE_CHECKLIST.md`
 
 **...ne savez pas par où commencer**
 → Vous êtes ici (LISEZ CE FICHIER D'ABORD!)

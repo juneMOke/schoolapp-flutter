@@ -35,15 +35,12 @@ class EteeloFab extends StatelessWidget {
       hoverElevation: 0,
       highlightElevation: 0,
       disabledElevation: 0,
-      backgroundColor:
-          isDisabled ? AppColors.stateDisabled : AppColors.terreCuite,
-      foregroundColor:
-          isDisabled ? AppColors.textMuted : AppColors.blancCasse,
+      backgroundColor: isDisabled
+          ? AppColors.stateDisabled
+          : AppColors.terreCuite,
+      foregroundColor: isDisabled ? AppColors.textMuted : AppColors.blancCasse,
       shape: const StadiumBorder(),
-      extendedPadding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 12,
-      ),
+      extendedPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

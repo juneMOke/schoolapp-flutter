@@ -56,4 +56,22 @@ class AppDimensions {
   static const attendanceClassFieldWidth = 210.0;
   static const attendanceDateFieldWidth = 190.0;
   static const attendanceCounterColumnWidth = 72.0;
+
+  // Enrollment stats dashboard tokens
+  static const enrollmentStatsKpiCardHeight = 104.0;
+  static const enrollmentStatsKpiCardMinWidth = 148.0;
+  static const enrollmentStatsKpiCardMobileWidth = 168.0;
+  static const enrollmentStatsChartSectionHeight = 220.0;
+  static const enrollmentStatsChartRadius = 12.0;
+  static const enrollmentStatsChartBorderRadius = 8.0;
+  static const enrollmentStatsPeriodFilterHeight = 38.0;
+  static const enrollmentStatsDonutCenterRadius = 48.0;
+  static const enrollmentStatsHeaderTitleFontSize = 20.0;
+
+  // Finance stats dashboard tokens
+  static const financeStatsHeaderTitleFontSize = 20.0;
+  static const financeStatsKpiPrimaryValueFontSize = 32.0;
+  static const financeStatsKpiSecondaryValueFontSize = 22.0;
+  static const financeStatsKpiDividerHeight = 64.0;
+  static const financeStatsFeeTypeProgressHeight = 8.0;
 }
