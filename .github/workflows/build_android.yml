@@ -186,12 +186,29 @@ jobs:
           KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
           echo -n "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
 
+          # Rend ces variables disponibles aux étapes suivantes (flutter build / gradle).
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+
           cat > android/key.properties <<EOF
           storeFile=$KEYSTORE_PATH
           storePassword=$ANDROID_KEYSTORE_PASSWORD
           keyAlias=$ANDROID_KEY_ALIAS
           keyPassword=$ANDROID_KEY_PASSWORD
           EOF
+
+          # Compatibilité: certains contextes gradle peuvent lire key.properties à la racine repo.
+          cp android/key.properties key.properties
+
+      - name: Verify Android signing config
+        if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
+        run: |
+          test -f android/key.properties
+          grep -Eq '^[[:space:]]*storeFile=' android/key.properties
+          test -n "$ANDROID_KEYSTORE_PATH"
+          test -f "$ANDROID_KEYSTORE_PATH"
 
       - name: Build APK
         if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
