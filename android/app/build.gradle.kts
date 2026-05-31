@@ -56,16 +56,22 @@ val keyPassword =
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
 
+val hasReleaseSigningCredentials =
+    !keystorePath.isNullOrBlank() &&
+        !keystorePassword.isNullOrBlank() &&
+        !keyAlias.isNullOrBlank() &&
+        !keyPassword.isNullOrBlank()
+
+val isProdReleaseTaskRequested =
+    gradle.startParameter.taskNames.any { taskName ->
+        taskName.contains("prodrelease", ignoreCase = true)
+    }
+
 android {
     signingConfigs {
-        create("release") {
-            if (
-                !keystorePath.isNullOrBlank() &&
-                !keystorePassword.isNullOrBlank() &&
-                !keyAlias.isNullOrBlank() &&
-                !keyPassword.isNullOrBlank()
-            ) {
-                storeFile = file(keystorePath)
+        if (hasReleaseSigningCredentials) {
+            create("release") {
+                storeFile = file(keystorePath!!)
                 storePassword = keystorePassword
                 this.keyAlias = keyAlias
                 this.keyPassword = keyPassword
@@ -122,7 +128,19 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseSigningCredentials) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                if (isProdReleaseTaskRequested) {
+                    throw GradleException(
+                        "Missing Android release signing credentials for prod release. " +
+                            "Provide key.properties or ANDROID_KEYSTORE_PATH / ANDROID_KEYSTORE_PASSWORD / " +
+                            "ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD.",
+                    )
+                }
+                // Fallback local pour release non-prod uniquement.
+                signingConfig = signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
