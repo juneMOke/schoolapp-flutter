@@ -221,7 +221,13 @@ jobs:
         run: |
           test -f android/key.properties
           grep -Eq '^[[:space:]]*storeFile=' android/key.properties
+          grep -Eq '^[[:space:]]*storePassword=' android/key.properties
+          grep -Eq '^[[:space:]]*keyAlias=' android/key.properties
+          grep -Eq '^[[:space:]]*keyPassword=' android/key.properties
           test -n "$ANDROID_KEYSTORE_PATH"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
           test -f "$ANDROID_KEYSTORE_PATH"
 
       - name: Build APK

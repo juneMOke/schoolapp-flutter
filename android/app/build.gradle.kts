@@ -16,16 +16,32 @@ if (keystorePropertiesFile.exists()) {
 
 val keystorePath =
     (keystoreProperties["storeFile"] as String?)
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
         ?: System.getenv("ANDROID_KEYSTORE_PATH")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 val keystorePassword =
     (keystoreProperties["storePassword"] as String?)
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
         ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 val keyAlias =
     (keystoreProperties["keyAlias"] as String?)
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
         ?: System.getenv("ANDROID_KEY_ALIAS")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 val keyPassword =
     (keystoreProperties["keyPassword"] as String?)
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
         ?: System.getenv("ANDROID_KEY_PASSWORD")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 
 android {
     signingConfigs {
