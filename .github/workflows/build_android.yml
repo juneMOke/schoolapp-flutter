@@ -23,6 +23,11 @@ on:
         description: 'Tag SemVer à utiliser pour prod (ex: v1.2.3)'
         required: false
         type: string
+      distribute_firebase:
+        description: 'Distribuer via Firebase App Distribution (démo)'
+        required: false
+        type: boolean
+        default: false
 
   # Déclenchement automatique sur develop → build dev
   push:
@@ -209,3 +214,34 @@ jobs:
           name: android-aab-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
           path: build/app/outputs/bundle/**/*.aab
           retention-days: 30
+  distribute-demo:
+    name: Distribute demo (Firebase)
+    needs: [ resolve-config, build-android ]
+    if: ${{ inputs.distribute_firebase == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk-${{ needs.resolve-config.outputs.flavor }}-${{ github.sha }}
+          path: ./apk
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Write Firebase service account
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > "$RUNNER_TEMP/firebase-sa.json"
+
+      - name: Distribute to Firebase App Distribution
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+        run: |
+          APK=$(ls ./apk/*.apk | head -n1)
+          firebase appdistribution:distribute "$APK" \
+            --app "${{ secrets.FIREBASE_APP_ID }}" \
+            --groups "demo-tablets" \
+            --release-notes "Démo build ${{ github.run_number }}"
+
+      - name: Cleanup secret
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-sa.json"
