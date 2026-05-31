@@ -216,14 +216,18 @@ jobs:
           # Compatibilité: certains contextes gradle peuvent lire key.properties à la racine repo.
           cp android/key.properties key.properties
 
+          # Chemin explicite pour la résolution des propriétés de signing côté Gradle.
+          echo "ANDROID_KEYSTORE_PROPERTIES_PATH=$GITHUB_WORKSPACE/android/key.properties" >> "$GITHUB_ENV"
+
       - name: Verify Android signing config
         if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
         run: |
           test -f android/key.properties
-          grep -Eq '^[[:space:]]*storeFile=' android/key.properties
-          grep -Eq '^[[:space:]]*storePassword=' android/key.properties
-          grep -Eq '^[[:space:]]*keyAlias=' android/key.properties
-          grep -Eq '^[[:space:]]*keyPassword=' android/key.properties
+          test -f "$ANDROID_KEYSTORE_PROPERTIES_PATH"
+          grep -Eq '^[[:space:]]*storeFile=.+$' android/key.properties
+          grep -Eq '^[[:space:]]*storePassword=.+$' android/key.properties
+          grep -Eq '^[[:space:]]*keyAlias=.+$' android/key.properties
+          grep -Eq '^[[:space:]]*keyPassword=.+$' android/key.properties
           test -n "$ANDROID_KEYSTORE_PATH"
           test -n "$ANDROID_KEYSTORE_PASSWORD"
           test -n "$ANDROID_KEY_ALIAS"

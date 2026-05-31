@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -9,8 +10,20 @@ plugins {
 }
 
 val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
+val ciKeystorePropertiesPath =
+    System.getenv("ANDROID_KEYSTORE_PROPERTIES_PATH")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+
+val keystorePropertiesCandidates = listOfNotNull(
+    ciKeystorePropertiesPath?.let(::File),
+    rootProject.file("key.properties"),
+    project.file("../key.properties"),
+    project.file("key.properties"),
+)
+
+val keystorePropertiesFile = keystorePropertiesCandidates.firstOrNull { it.exists() }
+if (keystorePropertiesFile != null) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
