@@ -175,6 +175,15 @@ jobs:
             echo "$key=$value" >> "$GITHUB_OUTPUT"
           done < <(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")
 
+      - name: Prepare Android release signing
+        uses: ./.github/actions/prepare-android-signing
+        with:
+          android_release_keystore_base64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          android_keystore_password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          android_key_alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          android_key_password: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          key_properties_path: android/key.properties
+
       - name: Build App Bundle PROD
         run: |
           flutter build appbundle \

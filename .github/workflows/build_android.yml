@@ -172,67 +172,13 @@ jobs:
 
       - name: Prepare Android release signing
         if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
-        env:
-          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          trim() {
-            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
-          }
-
-          KEYSTORE_B64="$(printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | tr -d '\r\n' | trim)"
-          KEYSTORE_PASSWORD="$(printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | trim)"
-          KEY_ALIAS="$(printf '%s' "$ANDROID_KEY_ALIAS" | trim)"
-          KEY_PASSWORD="$(printf '%s' "$ANDROID_KEY_PASSWORD" | trim)"
-
-          if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
-            echo "Secrets de signing Android manquants (ANDROID_RELEASE_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD)."
-            exit 1
-          fi
-
-          KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
-          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
-
-          if [[ ! -s "$KEYSTORE_PATH" ]]; then
-            echo "Le keystore décodé est vide ou invalide. Vérifiez ANDROID_RELEASE_KEYSTORE_BASE64."
-            exit 1
-          fi
-
-          # Rend ces variables disponibles aux étapes suivantes (flutter build / gradle).
-          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
-          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
-
-          cat > android/key.properties <<EOF
-          storeFile=$KEYSTORE_PATH
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
-          EOF
-
-          # Compatibilité: certains contextes gradle peuvent lire key.properties à la racine repo.
-          cp android/key.properties key.properties
-
-          # Chemin explicite pour la résolution des propriétés de signing côté Gradle.
-          echo "ANDROID_KEYSTORE_PROPERTIES_PATH=$GITHUB_WORKSPACE/android/key.properties" >> "$GITHUB_ENV"
-
-      - name: Verify Android signing config
-        if: ${{ needs.resolve-config.outputs.app_env == 'prod' || inputs.build_type == 'appbundle' }}
-        run: |
-          test -f android/key.properties
-          test -f "$ANDROID_KEYSTORE_PROPERTIES_PATH"
-          grep -Eq '^[[:space:]]*storeFile=.+$' android/key.properties
-          grep -Eq '^[[:space:]]*storePassword=.+$' android/key.properties
-          grep -Eq '^[[:space:]]*keyAlias=.+$' android/key.properties
-          grep -Eq '^[[:space:]]*keyPassword=.+$' android/key.properties
-          test -n "$ANDROID_KEYSTORE_PATH"
-          test -n "$ANDROID_KEYSTORE_PASSWORD"
-          test -n "$ANDROID_KEY_ALIAS"
-          test -n "$ANDROID_KEY_PASSWORD"
-          test -f "$ANDROID_KEYSTORE_PATH"
+        uses: ./.github/actions/prepare-android-signing
+        with:
+          android_release_keystore_base64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          android_keystore_password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          android_key_alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          android_key_password: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          key_properties_path: android/key.properties
 
       - name: Build APK
         if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}

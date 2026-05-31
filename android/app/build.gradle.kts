@@ -27,40 +27,53 @@ if (keystorePropertiesFile != null) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
-val keystorePath =
-    (keystoreProperties["storeFile"] as String?)
+val resolvedKeystorePath =
+    System.getenv("ANDROID_KEYSTORE_PATH")
         ?.trim()
         ?.takeIf { it.isNotEmpty() }
-        ?: System.getenv("ANDROID_KEYSTORE_PATH")
+        ?: (keystoreProperties["storeFile"] as String?)
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
-val keystorePassword =
-    (keystoreProperties["storePassword"] as String?)
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val resolvedKeystorePassword =
+    System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            ?.takeIf { it.isNotEmpty() }
+        ?: (keystoreProperties["storePassword"] as String?)
+            ?.takeIf { it.isNotEmpty() }
+val resolvedKeyAlias =
+    System.getenv("ANDROID_KEY_ALIAS")
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
-val keyAlias =
-    (keystoreProperties["keyAlias"] as String?)
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: System.getenv("ANDROID_KEY_ALIAS")
+        ?: (keystoreProperties["keyAlias"] as String?)
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
-val keyPassword =
-    (keystoreProperties["keyPassword"] as String?)
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: System.getenv("ANDROID_KEY_PASSWORD")
-            ?.trim()
+val resolvedKeyPassword =
+    System.getenv("ANDROID_KEY_PASSWORD")
             ?.takeIf { it.isNotEmpty() }
+        ?: (keystoreProperties["keyPassword"] as String?)
+            ?.takeIf { it.isNotEmpty() }
+        // Si le mot de passe de clé n'est pas fourni séparément, on retombe sur storePassword.
+        ?: resolvedKeystorePassword
 
 val hasReleaseSigningCredentials =
-    !keystorePath.isNullOrBlank() &&
-        !keystorePassword.isNullOrBlank() &&
-        !keyAlias.isNullOrBlank() &&
-        !keyPassword.isNullOrBlank()
+    !resolvedKeystorePath.isNullOrBlank() &&
+        !resolvedKeystorePassword.isNullOrBlank() &&
+        !resolvedKeyAlias.isNullOrBlank() &&
+        !resolvedKeyPassword.isNullOrBlank()
+
+val isSigningDebugEnabled =
+    (findProperty("signingDebug") as String?)
+        ?.toBooleanStrictOrNull()
+        ?: false
+
+if (isSigningDebugEnabled) {
+    println(
+        "SIGNING DEBUG -> " +
+            "storeFile=${!resolvedKeystorePath.isNullOrBlank()} " +
+            "storePassword=${!resolvedKeystorePassword.isNullOrBlank()} " +
+            "keyAlias=${!resolvedKeyAlias.isNullOrBlank()} " +
+            "keyPassword=${!resolvedKeyPassword.isNullOrBlank()}",
+    )
+}
 
 val isProdReleaseTaskRequested =
     gradle.startParameter.taskNames.any { taskName ->
@@ -71,10 +84,10 @@ android {
     signingConfigs {
         if (hasReleaseSigningCredentials) {
             create("release") {
-                storeFile = file(keystorePath!!)
-                storePassword = keystorePassword
-                this.keyAlias = keyAlias
-                this.keyPassword = keyPassword
+                storeFile = file(requireNotNull(resolvedKeystorePath))
+                storePassword = requireNotNull(resolvedKeystorePassword)
+                keyAlias = requireNotNull(resolvedKeyAlias)
+                keyPassword = requireNotNull(resolvedKeyPassword)
             }
         }
     }
@@ -132,8 +145,14 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             } else {
                 if (isProdReleaseTaskRequested) {
+                    val missingCredentialFields = buildList {
+                        if (resolvedKeystorePath.isNullOrBlank()) add("storeFile / ANDROID_KEYSTORE_PATH")
+                        if (resolvedKeystorePassword.isNullOrBlank()) add("storePassword / ANDROID_KEYSTORE_PASSWORD")
+                        if (resolvedKeyAlias.isNullOrBlank()) add("keyAlias / ANDROID_KEY_ALIAS")
+                        if (resolvedKeyPassword.isNullOrBlank()) add("keyPassword / ANDROID_KEY_PASSWORD")
+                    }
                     throw GradleException(
-                        "Missing Android release signing credentials for prod release. " +
+                        "Missing Android release signing credentials for prod release (${missingCredentialFields.joinToString()}). " +
                             "Provide key.properties or ANDROID_KEYSTORE_PATH / ANDROID_KEYSTORE_PASSWORD / " +
                             "ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD.",
                     )

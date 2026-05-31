@@ -1,0 +1,65 @@
+name: Prepare Android Signing
+description: Decode Android keystore and export signing env vars for Gradle/Flutter builds.
+inputs:
+  android_release_keystore_base64:
+    description: Base64-encoded JKS keystore content.
+    required: true
+  android_keystore_password:
+    description: Keystore password.
+    required: true
+  android_key_alias:
+    description: Key alias used for signing.
+    required: true
+  android_key_password:
+    description: Key password used for signing.
+    required: true
+  key_properties_path:
+    description: Relative path (from repository root) where key.properties will be generated.
+    required: false
+    default: android/key.properties
+runs:
+  using: composite
+  steps:
+    - name: Prepare signing files and env
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        KEYSTORE_B64="$(printf '%s' "${{ inputs.android_release_keystore_base64 }}" | tr -d '\r\n')"
+        KEYSTORE_PASSWORD="${{ inputs.android_keystore_password }}"
+        KEY_ALIAS="$(printf '%s' "${{ inputs.android_key_alias }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+        KEY_PASSWORD="${{ inputs.android_key_password }}"
+
+        if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
+          echo "Secrets de signing Android manquants (ANDROID_RELEASE_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD)."
+          exit 1
+        fi
+
+        KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
+        printf '%s' "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
+
+        if [[ ! -s "$KEYSTORE_PATH" ]]; then
+          echo "Le keystore decode est vide ou invalide. Verifiez ANDROID_RELEASE_KEYSTORE_BASE64."
+          exit 1
+        fi
+
+        KEY_PROPERTIES_FILE="$GITHUB_WORKSPACE/${{ inputs.key_properties_path }}"
+        mkdir -p "$(dirname "$KEY_PROPERTIES_FILE")"
+
+        cat > "$KEY_PROPERTIES_FILE" <<EOF
+        storeFile=$KEYSTORE_PATH
+        storePassword=$KEYSTORE_PASSWORD
+        keyAlias=$KEY_ALIAS
+        keyPassword=$KEY_PASSWORD
+        EOF
+
+        grep -Eq '^[[:space:]]*storeFile=.+$' "$KEY_PROPERTIES_FILE"
+        grep -Eq '^[[:space:]]*storePassword=.+$' "$KEY_PROPERTIES_FILE"
+        grep -Eq '^[[:space:]]*keyAlias=.+$' "$KEY_PROPERTIES_FILE"
+        grep -Eq '^[[:space:]]*keyPassword=.+$' "$KEY_PROPERTIES_FILE"
+
+        echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+        echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+        echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+        echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+        echo "ANDROID_KEYSTORE_PROPERTIES_PATH=$KEY_PROPERTIES_FILE" >> "$GITHUB_ENV"
