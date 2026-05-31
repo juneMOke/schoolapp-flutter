@@ -47,7 +47,6 @@ jobs:
     environment: ${{ inputs.environment || 'dev' }}
     outputs:
       app_env: ${{ steps.config.outputs.app_env }}
-      api_base_url: ${{ steps.config.outputs.api_base_url }}
       flavor: ${{ steps.config.outputs.flavor }}
     steps:
       - name: Resolve environment variables
@@ -61,18 +60,14 @@ jobs:
 
           case "$ENV" in
             dev)
-              API_URL="${{ secrets.DEV_API_BASE_URL }}"
               ;;
             staging)
-              API_URL="${{ secrets.STAGING_API_BASE_URL }}"
               ;;
             prod)
-              API_URL="${{ secrets.PROD_API_BASE_URL }}"
               ;;
           esac
 
           echo "app_env=$ENV"       >> "$GITHUB_OUTPUT"
-          echo "api_base_url=$API_URL" >> "$GITHUB_OUTPUT"
           echo "flavor=$ENV"         >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────
@@ -82,16 +77,31 @@ jobs:
     name: Validate env (${{ needs.resolve-config.outputs.app_env }})
     needs: resolve-config
     runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-config.outputs.app_env }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Resolve API base URL
+        run: |
+          case "${{ needs.resolve-config.outputs.app_env }}" in
+            dev)
+              echo "API_BASE_URL=${{ secrets.DEV_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+            staging)
+              echo "API_BASE_URL=${{ secrets.STAGING_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+            prod)
+              echo "API_BASE_URL=${{ secrets.PROD_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+          esac
+
       - name: Validate environment variables
         run: |
           bash scripts/validate_env.sh \
             --env="${{ needs.resolve-config.outputs.app_env }}" \
-            --api-base-url="${{ needs.resolve-config.outputs.api_base_url }}"
+            --api-base-url="$API_BASE_URL"
 
   # ─────────────────────────────────────────────────────────────────
   # Job 3 — Build Android
@@ -129,6 +139,20 @@ jobs:
 
       - name: Generate localizations
         run: flutter gen-l10n
+
+      - name: Resolve API base URL
+        run: |
+          case "${{ needs.resolve-config.outputs.app_env }}" in
+            dev)
+              echo "API_BASE_URL=${{ secrets.DEV_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+            staging)
+              echo "API_BASE_URL=${{ secrets.STAGING_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+            prod)
+              echo "API_BASE_URL=${{ secrets.PROD_API_BASE_URL }}" >> "$GITHUB_ENV"
+              ;;
+          esac
 
       - name: Require version tag for prod
         if: ${{ needs.resolve-config.outputs.app_env == 'prod' && inputs.version_tag == '' }}
@@ -179,7 +203,7 @@ jobs:
               --build-name "${{ steps.version.outputs.build_name }}" \
               --build-number "${{ steps.version.outputs.build_number }}" \
               --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-              --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+              --dart-define=API_BASE_URL="$API_BASE_URL"
           else
             flutter build apk \
               --flavor "${{ needs.resolve-config.outputs.flavor }}" \
@@ -187,7 +211,7 @@ jobs:
               --build-name "${{ steps.version.outputs.build_name }}" \
               --build-number "${{ steps.version.outputs.build_number }}" \
               --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-              --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+              --dart-define=API_BASE_URL="$API_BASE_URL"
           fi
 
       - name: Build App Bundle
@@ -198,7 +222,7 @@ jobs:
             --build-name "${{ steps.version.outputs.build_name }}" \
             --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ needs.resolve-config.outputs.app_env }}" \
-            --dart-define=API_BASE_URL="${{ needs.resolve-config.outputs.api_base_url }}"
+            --dart-define=API_BASE_URL="$API_BASE_URL"
 
       - name: Upload APK artifact
         if: ${{ inputs.build_type == 'apk' || inputs.build_type == '' }}
