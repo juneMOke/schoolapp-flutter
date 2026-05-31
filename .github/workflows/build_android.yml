@@ -252,12 +252,13 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Distribute to Firebase App Distribution
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
         run: |
           APK=$(ls ./apk/*.apk | head -n1)
           echo "APK trouvé : $APK"
           firebase appdistribution:distribute "$APK" \
             --app "${{ secrets.FIREBASE_APP_ID }}" \
-            --service-credentials-file "$RUNNER_TEMP/firebase-sa.json" \
             --groups "demo-tablets" \
             --release-notes "Démo build ${{ github.run_number }}"
 
