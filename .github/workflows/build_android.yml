@@ -44,6 +44,7 @@ jobs:
   resolve-config:
     name: Resolve config
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
     outputs:
       app_env: ${{ steps.config.outputs.app_env }}
       api_base_url: ${{ steps.config.outputs.api_base_url }}
