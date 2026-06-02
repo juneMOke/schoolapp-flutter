@@ -6,15 +6,21 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_menu_item_parts.dart';
 
 class SidebarMenuItem extends StatefulWidget {
   final MenuItem menu;
   final bool isExpanded;
+  final bool isMenuOpened;
+  final bool closeDrawerOnSubMenuSelection;
 
   const SidebarMenuItem({
     super.key,
     required this.menu,
     required this.isExpanded,
+    required this.isMenuOpened,
+    this.closeDrawerOnSubMenuSelection = false,
   });
 
   @override
@@ -22,7 +28,6 @@ class SidebarMenuItem extends StatefulWidget {
 }
 
 class _SidebarMenuItemState extends State<SidebarMenuItem> {
-  bool _isExpanded = false;
   bool _isHovered = false;
 
   @override
@@ -36,7 +41,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
           switchOutCurve: AppMotion.inCurve,
           child:
               widget.isExpanded &&
-                  _isExpanded &&
+                  widget.isMenuOpened &&
                   widget.menu.subMenus.isNotEmpty
               ? KeyedSubtree(
                   key: ValueKey<String>('submenu-open-${widget.menu.id}'),
@@ -51,14 +56,13 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
   Widget _buildMenuItem() {
     final isActive = widget.menu.isActive;
     final transparent = AppColors.surface.withValues(alpha: 0);
-    final activeForeground = AppColors.textOnDark;
-    final inactiveForeground = AppColors.textOnDark.withValues(alpha: 0.72);
-    final tooltipTitle = widget.menu.title.replaceAll('\n', ' ');
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: widget.isExpanded ? 10 : 6,
-        vertical: 3,
+        horizontal: widget.isExpanded
+            ? HomeNavigationUiTokens.sidebarMenuExpandedHorizontalMargin
+            : HomeNavigationUiTokens.sidebarMenuCollapsedHorizontalMargin,
+        vertical: HomeNavigationUiTokens.sidebarMenuVerticalMargin,
       ),
       child: MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
@@ -70,13 +74,15 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
             button: true,
             label: widget.menu.title,
             selected: isActive,
-            toggled: widget.menu.subMenus.isNotEmpty ? _isExpanded : false,
+            toggled: widget.menu.subMenus.isNotEmpty
+                ? widget.isMenuOpened
+                : false,
             child: InkWell(
               borderRadius: AppRadius.brMd,
+              hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
+              splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
+              highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
               onTap: () {
-                if (widget.menu.subMenus.isNotEmpty) {
-                  setState(() => _isExpanded = !_isExpanded);
-                }
                 context.read<NavigationBloc>().add(
                   MenuItemSelected(widget.menu.id),
                 );
@@ -85,22 +91,26 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                 duration: AppMotion.fast,
                 curve: AppMotion.outCurve,
                 padding: EdgeInsets.symmetric(
-                  horizontal: widget.isExpanded ? 12 : 0,
-                  vertical: 11,
+                  horizontal: widget.isExpanded
+                      ? HomeNavigationUiTokens
+                            .sidebarMenuExpandedHorizontalPadding
+                      : HomeNavigationUiTokens
+                            .sidebarMenuCollapsedHorizontalPadding,
+                  vertical: HomeNavigationUiTokens.sidebarMenuVerticalPadding,
                 ),
                 constraints: const BoxConstraints(
                   minHeight: AppDimensions.minTouchTarget,
                 ),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.bleuArdoise.withValues(alpha: 0.2)
+                      ? AppColors.bleuArdoise.withValues(alpha: 0.3)
                       : _isHovered
                       ? AppColors.textOnDark.withValues(alpha: 0.09)
                       : transparent,
                   borderRadius: AppRadius.brMd,
                   border: isActive
                       ? Border.all(
-                          color: AppColors.bleuArdoise.withValues(alpha: 0.45),
+                          color: AppColors.bleuArdoise.withValues(alpha: 0.6),
                         )
                       : null,
                 ),
@@ -109,73 +119,21 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                     final canShowExpandedContent =
                         widget.isExpanded && constraints.maxWidth >= 110;
 
-                    final expandedContent = Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      key: ValueKey<String>('menu-expanded-${widget.menu.id}'),
-                      children: [
-                        Icon(
-                          widget.menu.icon,
-                          color: isActive
-                              ? activeForeground
-                              : inactiveForeground,
-                          size: 22,
-                        ),
-                        if (canShowExpandedContent) ...[
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              widget.menu.title,
-                              maxLines: 2,
-                              softWrap: true,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                color: isActive
-                                    ? activeForeground
-                                    : inactiveForeground,
-                                fontSize: 14,
-                                fontWeight: isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          if (widget.menu.subMenus.isNotEmpty)
-                            Icon(
-                              _isExpanded
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
-                              color: isActive
-                                  ? activeForeground
-                                  : inactiveForeground,
-                              size: 18,
-                            ),
-                        ],
-                      ],
-                    );
-
-                    final collapsedContent = Tooltip(
-                      key: ValueKey<String>('menu-collapsed-${widget.menu.id}'),
-                      message: tooltipTitle,
-                      excludeFromSemantics: true,
-                      child: Center(
-                        child: Icon(
-                          widget.menu.icon,
-                          color: isActive
-                              ? activeForeground
-                              : inactiveForeground,
-                          size: 22,
-                        ),
-                      ),
-                    );
-
                     return AnimatedSwitcher(
                       duration: AppMotion.fast,
                       switchInCurve: AppMotion.outCurve,
                       switchOutCurve: AppMotion.inCurve,
                       child: canShowExpandedContent
-                          ? expandedContent
-                          : collapsedContent,
+                          ? SidebarMenuItemExpandedRow(
+                              menu: widget.menu,
+                              isActive: isActive,
+                              isMenuOpened: widget.isMenuOpened,
+                              canShowText: canShowExpandedContent,
+                            )
+                          : SidebarMenuItemCollapsedIcon(
+                              menu: widget.menu,
+                              isActive: isActive,
+                            ),
                     );
                   },
                 ),
@@ -189,14 +147,19 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
 
   Widget _buildSubMenus() {
     final transparent = AppColors.surface.withValues(alpha: 0);
-    final activeForeground = AppColors.textOnDark;
-    final inactiveForeground = AppColors.textOnDark.withValues(alpha: 0.72);
 
     return AnimatedContainer(
       duration: AppMotion.medium,
       curve: AppMotion.gentleOut,
-      margin: const EdgeInsets.only(left: 16, right: 10, bottom: 6),
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.fromLTRB(
+        HomeNavigationUiTokens.sidebarSubMenuLeftMargin,
+        HomeNavigationUiTokens.sidebarSubMenuTopMargin,
+        HomeNavigationUiTokens.sidebarSubMenuRightMargin,
+        HomeNavigationUiTokens.sidebarSubMenuBottomMargin,
+      ),
+      padding: const EdgeInsets.all(
+        HomeNavigationUiTokens.sidebarSubMenuPadding,
+      ),
       decoration: BoxDecoration(
         color: AppColors.textOnDark.withValues(alpha: 0.05),
         borderRadius: AppRadius.brMd,
@@ -211,6 +174,9 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
               selected: subMenu.isActive,
               child: InkWell(
                 borderRadius: AppRadius.brSm,
+                hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
+                splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
+                highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
                 onTap: () {
                   context.read<NavigationBloc>().add(
                     SubMenuItemSelected(
@@ -219,74 +185,11 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                       title: subMenu.title,
                     ),
                   );
+                  if (widget.closeDrawerOnSubMenuSelection) {
+                    Navigator.of(context).maybePop();
+                  }
                 },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  constraints: const BoxConstraints(
-                    minHeight: AppDimensions.minTouchTarget,
-                  ),
-                  decoration: BoxDecoration(
-                    color: subMenu.isActive
-                        ? AppColors.bleuArdoise.withValues(alpha: 0.16)
-                        : transparent,
-                    borderRadius: AppRadius.brSm,
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        // Pendant l'animation de collapse, la largeur peut devenir
-                        // très petite: on masque le marqueur fixe pour éviter l'overflow.
-                        final canShowLeadingMarker = constraints.maxWidth >= 24;
-
-                        return Row(
-                          children: [
-                            if (canShowLeadingMarker) ...[
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  color: subMenu.isActive
-                                      ? activeForeground
-                                      : AppColors.textOnDark.withValues(
-                                          alpha: 0.54,
-                                        ),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                            ],
-                            Expanded(
-                              child: Text(
-                                subMenu.title,
-                                maxLines: 2,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: subMenu.isActive
-                                      ? activeForeground
-                                      : inactiveForeground,
-                                  fontSize: 13,
-                                  fontWeight: subMenu.isActive
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                  height: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                child: SidebarSubMenuItemContainer(subMenu: subMenu),
               ),
             ),
           );

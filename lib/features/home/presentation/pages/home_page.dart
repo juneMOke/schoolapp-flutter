@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
@@ -73,9 +74,10 @@ class _HomePageView extends StatelessWidget {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < AppBreakpoints.homeMobileMax;
+          final isCompact =
+              constraints.maxWidth < AppBreakpoints.navigationCompactMax;
 
-          if (isMobile) {
+          if (isCompact) {
             return _buildMobileLayout();
           } else {
             return _buildDesktopLayout();
@@ -99,7 +101,7 @@ class _HomePageView extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  const TopBar(),
+                  const TopBar(isCompact: false),
                   Expanded(child: _buildMainContent(context, state)),
                 ],
               ),
@@ -118,8 +120,13 @@ class _HomePageView extends StatelessWidget {
           previous.selectedSubMenuId != current.selectedSubMenuId,
       builder: (context, state) {
         return Scaffold(
-          appBar: const TopBar(),
-          drawer: const Drawer(child: Sidebar()),
+          drawerScrimColor: AppColors.bleuProfond.withValues(alpha: 0.4),
+          appBar: const TopBar(isCompact: true),
+          drawer: const Drawer(
+            width: AppTheme.sidebarWidth,
+            elevation: 12,
+            child: Sidebar(closeDrawerOnSubMenuSelection: true),
+          ),
           body: _buildMainContent(context, state),
         );
       },
@@ -158,41 +165,45 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildBreadcrumb(BuildContext context, NavigationState state) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
-      children: [
-        Text(
-          l10n.home,
-          style: AppTextStyles.body.copyWith(
-            color: AppTheme.textSecondaryColor,
-          ),
-        ),
-        if (state.selectedMenuId != null) ...[
-          const Text(
-            ' / ',
-            style: TextStyle(color: AppTheme.textSecondaryColor),
-          ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Text(
-            state.menuItems
-                .firstWhere((menu) => menu.id == state.selectedMenuId)
-                .title,
+            l10n.home,
             style: AppTextStyles.body.copyWith(
               color: AppTheme.textSecondaryColor,
             ),
           ),
-        ],
-        if (state.selectedSubMenuId != null) ...[
-          const Text(
-            ' / ',
-            style: TextStyle(color: AppTheme.textSecondaryColor),
-          ),
-          Text(
-            state.currentTitle,
-            style: AppTextStyles.bodyStrong.copyWith(
-              color: AppTheme.textPrimaryColor,
+          if (state.selectedMenuId != null) ...[
+            const Text(
+              ' / ',
+              style: TextStyle(color: AppTheme.textSecondaryColor),
             ),
-          ),
+            Text(
+              state.menuItems
+                  .firstWhere((menu) => menu.id == state.selectedMenuId)
+                  .title,
+              style: AppTextStyles.body.copyWith(
+                color: AppTheme.textSecondaryColor,
+              ),
+            ),
+          ],
+          if (state.selectedSubMenuId != null) ...[
+            const Text(
+              ' / ',
+              style: TextStyle(color: AppTheme.textSecondaryColor),
+            ),
+            Text(
+              state.currentTitle,
+              style: AppTextStyles.bodyStrong.copyWith(
+                color: AppTheme.textPrimaryColor,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 

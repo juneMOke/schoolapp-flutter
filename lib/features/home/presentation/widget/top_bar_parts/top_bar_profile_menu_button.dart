@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarProfileMenuButton extends StatelessWidget {
@@ -64,10 +65,23 @@ class TopBarProfileMenuButton extends StatelessWidget {
           ),
         ];
       },
-      child: const CircleAvatar(
-        radius: 18,
-        backgroundColor: tokens.AppColors.bleuArdoise,
-        child: Icon(Icons.person, color: tokens.AppColors.textOnDark, size: 20),
+      child: Container(
+        width: HomeNavigationUiTokens.topBarActionSize - 4,
+        height: HomeNavigationUiTokens.topBarActionSize - 4,
+        decoration: BoxDecoration(
+          color: tokens.AppColors.textOnDark.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(
+            HomeNavigationUiTokens.topBarActionRadius,
+          ),
+          border: Border.all(
+            color: tokens.AppColors.textOnDark.withValues(alpha: 0.18),
+          ),
+        ),
+        child: const Icon(
+          Icons.person,
+          color: tokens.AppColors.textOnDark,
+          size: 20,
+        ),
       ),
     );
   }
