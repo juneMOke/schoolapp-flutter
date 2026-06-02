@@ -23,8 +23,8 @@ class AppTheme {
   static const Color textSecondaryColor = AppColors.textSecondary;
 
   static const double sidebarWidth = 280;
-  static const double sidebarCollapsedWidth = 70;
-  static const double topBarHeight = 64;
+  static const double sidebarCollapsedWidth = 84;
+  static const double topBarHeight = 68;
   static const double defaultPadding = AppSpacing.lg;
   static const double largePadding = AppSpacing.xl;
 
