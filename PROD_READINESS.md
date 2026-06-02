@@ -113,3 +113,5 @@ Le reste est rattrapable post-lancement sans risque utilisateur immédiat.
 - Créer une issue GitHub par item A et B avec le label `prod-readiness`.
 - Re-générer le diagnostic (ou demander à l'agent de le faire) à chaque jalon : avant beta, avant release publique,
   après 1 mois en prod.
+
+1:408251898303:android:322e641049ef82ec3a290a
