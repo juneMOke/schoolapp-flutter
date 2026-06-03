@@ -11,6 +11,7 @@ class AppMotion {
   static const Duration standard = Duration(milliseconds: 220);
   static const Duration entrance = Duration(milliseconds: 260);
   static const Duration layout = Duration(milliseconds: 280);
+  static const Duration skeletonPulse = Duration(milliseconds: 1500);
   static const Duration actionCooldown = Duration(milliseconds: 600);
   static const Duration refreshCooldown = Duration(milliseconds: 700);
   static const Duration tooltipShowDuration = Duration(seconds: 3);
