@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
@@ -19,18 +19,22 @@ void main() {
   testWidgets('fallback status maps to first dropdown value', (tester) async {
     await tester.pumpWidget(
       buildHarness(
-        SearchFormStatusDropdown(
-          selectedStatus: 'UNKNOWN_STATUS',
-          onChanged: (_) {},
+        SearchForm(
+          academicYearId: '2025',
+          status: 'UNKNOWN_STATUS',
+          isLoading: false,
+          dispatch: (_) {},
+          showStatusFilter: true,
+          onStatusChanged: (_) {},
         ),
       ),
     );
 
-    final dropdown = tester.widget<DropdownButtonFormField<String>>(
-      find.byType(DropdownButtonFormField<String>),
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byType(DropdownButton<String>),
     );
 
-    expect(dropdown.initialValue, 'IN_PROGRESS');
+    expect(dropdown.value, 'IN_PROGRESS');
   });
 
   testWidgets('uses medium badge for selected item and small badges in menu', (
@@ -38,9 +42,13 @@ void main() {
   ) async {
     await tester.pumpWidget(
       buildHarness(
-        SearchFormStatusDropdown(
-          selectedStatus: 'VALIDATED',
-          onChanged: (_) {},
+        SearchForm(
+          academicYearId: '2025',
+          status: 'VALIDATED',
+          isLoading: false,
+          dispatch: (_) {},
+          showStatusFilter: true,
+          onStatusChanged: (_) {},
         ),
       ),
     );
@@ -53,7 +61,7 @@ void main() {
       isTrue,
     );
 
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButton<String>));
     await tester.pumpAndSettle();
 
     final badgesAfterOpen = tester.widgetList<StatusBadge>(

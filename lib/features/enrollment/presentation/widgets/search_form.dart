@@ -9,7 +9,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_filter_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SearchForm extends StatefulWidget {
@@ -46,9 +46,9 @@ class _SearchFormState extends State<SearchForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final statusDropdown = widget.showStatusFilter
-        ? SearchFormStatusDropdown(
+        ? SearchFormStatusFilterField(
             selectedStatus: widget.status,
-            onChanged: (value) => widget.onStatusChanged?.call(value),
+            onChanged: widget.onStatusChanged,
           )
         : null;
 
