@@ -121,7 +121,107 @@ Le contenu metier est toujours fourni par la page via `child`.
 
 ---
 
-## 2) EteeloTextInput
+## 2) EteeloButton
+
+- **Fichier**: `lib/core/widgets/eteelo_button.dart`
+- **Type Flutter**: `StatefulWidget`
+- **Statut**: composant de reference (primitive bouton)
+
+### Description
+
+Bouton design-system unifie pour les actions de formulaire et CTA.
+
+Le composant gere:
+- 4 variantes semantiques: `primary`, `secondary`, `ghost`, `danger`
+- 2 tailles: `compact` (actions inline) et `regular` (CTA page/wizard)
+- les etats visuels repos / hover / pressed / focus / disabled / loading
+- un focus ring coherent avec les inputs Eteelo
+- une base semantique accessibilite (`Semantics(button: true, ...)`)
+
+### Zones caracteristiques
+
+- **Variantes**
+  - `primary`: fond `AppColors.terreCuite`, texte `AppColors.blancCasse`
+  - `secondary`: transparent, bordure `1.5px AppColors.bleuArdoise`, texte `AppColors.bleuArdoise`
+  - `ghost`: transparent, sans bordure, texte `AppColors.bleuArdoise`
+  - `danger`: fond `AppColors.error`, texte `AppColors.blancCasse`
+
+- **Tailles**
+  - `compact` (sm): min height 40, min width 112
+  - `regular` (md): min height 48, `fullWidth` configurable
+  - rayon: pilule (`StadiumBorder` / radius 999)
+
+- **Espacement et typographie**
+  - padding horizontal: `md=22`, `sm=16`, `ghost=8`
+  - gap icone/label: `8`
+  - label: `label-large`, `500`, `14/1.2`
+  - taille icone/spinner: `md=18`, `sm=16`
+
+- **Interaction**
+  - hover / pressed via `overlayColor`
+  - focus ring via `BoxShadow(AppColors.stateFocus, spreadRadius: 2)`
+  - `isLoading: true` conserve l'apparence active (no-op callback) avec spinner
+
+### Slots / props (fournis par la page)
+
+- `label` *(required)*
+- `onPressed` *(required nullable, pour disabled)*
+- `icon` *(optional)*
+- `isLoading` *(optional)*
+- `size` *(optional: `EteeloButtonSize.compact|regular`)*
+- `fullWidth` *(optional, surtout utile avec `size: regular`)*
+- `tooltip` *(optional)*
+
+### Contrat de reactvite (conteneur)
+
+- `compact`: largeur naturelle du contenu, avec min-width 112
+- `regular`: pleine largeur par defaut (`fullWidth: true`), ou largeur naturelle si `fullWidth: false`
+- aucune contrainte de largeur globale forcee en dehors du comportement de taille
+
+### Accessibilite (WCAG 2.1 AA)
+
+- role bouton explicite via `Semantics`
+- etat enabled/disabled expose semantiquement
+- focus visible (ring dedie), non base uniquement sur la couleur
+- spinner visible en loading avec etat semantique disabled
+
+### Contrat d'utilisation Flutter
+
+- utiliser cette primitive pour tout nouveau bouton d'action metier
+- choisir `size: compact` pour actions de filtres/listings, `size: regular` pour CTA principaux
+- preferer `ghost` pour actions secondaires legeres (ex: effacer/reinitialiser)
+- reserver `danger` aux actions destructives
+
+### Wrappers de compatibilite (deprecie)
+
+- `lib/core/components/buttons/primary_button.dart`
+  - wrapper vers `EteeloButton.primary` / `EteeloButton.danger`
+  - **deprecie**
+- `lib/core/components/buttons/secondary_button.dart`
+  - wrapper vers `EteeloButton.secondary`
+  - **deprecie**
+- `lib/core/widgets/eteelo_validation_button.dart`
+  - wrapper vers `EteeloButton.primary(size: EteeloButtonSize.regular)`
+  - **deprecie**
+
+### Exemples d'usages actuels
+
+- `lib/features/enrollment/presentation/widgets/search_form.dart`
+- `lib/features/enrollment/presentation/widgets/re_registration_search_form.dart`
+- `lib/features/classes/presentation/widgets/classes_list_search_actions.dart`
+- `lib/features/finance/presentation/widgets/facturation_search_form.dart`
+- `lib/features/auth/presentation/widgets/login_form.dart`
+
+### Tests associes
+
+- `test/core/widgets/eteelo_button_test.dart`
+  - variantes primary / secondary / ghost / danger
+  - etats loading / disabled / focus
+  - tailles regular + comportement `fullWidth`
+
+---
+
+## 3) EteeloTextInput
 
 - **Fichier**: `lib/core/widgets/eteelo_text_input.dart`
 - **Type Flutter**: `StatefulWidget`
@@ -248,7 +348,7 @@ Le composant gere:
 
 ---
 
-## 3) EteeloDateInput
+## 4) EteeloDateInput
 
 - **Fichier**: `lib/core/widgets/eteelo_date_input.dart`
 - **Type Flutter**: `StatefulWidget`

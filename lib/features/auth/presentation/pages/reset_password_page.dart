@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_password_input.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_validation_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -142,10 +142,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     AuthErrorBanner(message: authState.errorMessage!),
                     const SizedBox(height: 16),
                   ],
-                  EteeloValidationButton(
+                  EteeloButton.primary(
                     onPressed: _submit,
                     label: l10n.validateAndLogin,
                     isLoading: isLoading,
+                    size: EteeloButtonSize.regular,
                   ),
                 ],
               ),
