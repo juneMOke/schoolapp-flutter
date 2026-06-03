@@ -542,7 +542,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
-  String get viewDetails => 'View Details';
+  String get viewDetails => 'View details';
 
   @override
   String get editEnrollment => 'Edit';
@@ -556,6 +556,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentNoResultsDescription =>
       'No student matches your search criteria.';
+
+  @override
+  String get enrollmentEmptyTitle => 'No results';
+
+  @override
+  String get enrollmentEmptyDescription =>
+      'No enrollment matches your criteria. Try broadening your search or create a new enrollment.';
+
+  @override
+  String get enrollmentEmptyWithoutFilterDescription => 'No enrollment yet.';
+
+  @override
+  String get enrollmentEmptyCreateAction => 'Enroll a new student';
+
+  @override
+  String get enrollmentErrorRetry => 'Retry';
+
+  @override
+  String get enrollmentErrorReconnect => 'Sign in again';
+
+  @override
+  String get enrollmentErrorContactAdmin => 'Contact administrator';
+
+  @override
+  String get enrollmentErrorNetworkTitle => 'Connection unavailable';
+
+  @override
+  String get enrollmentErrorNetworkMessage =>
+      'Check your internet connection, then retry the search.';
+
+  @override
+  String get enrollmentErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get enrollmentErrorUnauthorizedMessage =>
+      'Your session expired. Sign in again to continue.';
+
+  @override
+  String get enrollmentErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get enrollmentErrorForbiddenMessage =>
+      'You do not have the required permissions to view this list.';
+
+  @override
+  String get enrollmentErrorServerTitle => 'Server error';
+
+  @override
+  String get enrollmentErrorServerMessage =>
+      'The server is temporarily unavailable. Please try again shortly.';
+
+  @override
+  String get enrollmentErrorUnknownTitle => 'Unable to load';
+
+  @override
+  String get enrollmentErrorUnknownMessage =>
+      'An unexpected error occurred while loading results.';
 
   @override
   String get loadingStudents => 'Loading students...';
@@ -782,6 +839,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get firstNameExample => 'Claudine';
+
+  @override
+  String get lastNameExample => 'Furah';
+
+  @override
+  String get surnameExample => 'Sifiwe';
+
+  @override
   String get dateHint => 'dd/mm/yyyy';
 
   @override
@@ -1002,6 +1068,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stepForwardHint => 'Click Continue to advance step by step.';
+
+  @override
+  String get journeyModeNew => 'New';
+
+  @override
+  String get journeyModeEdit => 'Edit';
+
+  @override
+  String get journeyModeView => 'View';
+
+  @override
+  String get journeyCloseAction => 'Close';
+
+  @override
+  String get stepSaveStateIdle => 'No input yet';
+
+  @override
+  String get stepSaveStatePending => 'Unsaved changes';
+
+  @override
+  String get stepSaveStateSaving => 'Saving...';
+
+  @override
+  String get stepSaveStateSaved => 'Step saved';
 
   @override
   String get validatePersonalInfoHint =>
@@ -2846,4 +2936,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'An unexpected error occurred while loading statistics.';
+
+  @override
+  String get enrollmentResults => 'Results';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get switchToTableView => 'Switch to table view';
+
+  @override
+  String get switchToGridView => 'Switch to grid view';
 }

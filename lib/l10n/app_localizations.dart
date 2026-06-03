@@ -1011,7 +1011,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewDetails.
   ///
   /// In en, this message translates to:
-  /// **'View Details'**
+  /// **'View details'**
   String get viewDetails;
 
   /// No description provided for @editEnrollment.
@@ -1037,6 +1037,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student matches your search criteria.'**
   String get enrollmentNoResultsDescription;
+
+  /// No description provided for @enrollmentEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get enrollmentEmptyTitle;
+
+  /// No description provided for @enrollmentEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrollment matches your criteria. Try broadening your search or create a new enrollment.'**
+  String get enrollmentEmptyDescription;
+
+  /// No description provided for @enrollmentEmptyWithoutFilterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrollment yet.'**
+  String get enrollmentEmptyWithoutFilterDescription;
+
+  /// No description provided for @enrollmentEmptyCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll a new student'**
+  String get enrollmentEmptyCreateAction;
+
+  /// No description provided for @enrollmentErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentErrorRetry;
+
+  /// No description provided for @enrollmentErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get enrollmentErrorReconnect;
+
+  /// No description provided for @enrollmentErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact administrator'**
+  String get enrollmentErrorContactAdmin;
+
+  /// No description provided for @enrollmentErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection unavailable'**
+  String get enrollmentErrorNetworkTitle;
+
+  /// No description provided for @enrollmentErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection, then retry the search.'**
+  String get enrollmentErrorNetworkMessage;
+
+  /// No description provided for @enrollmentErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get enrollmentErrorUnauthorizedTitle;
+
+  /// No description provided for @enrollmentErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to continue.'**
+  String get enrollmentErrorUnauthorizedMessage;
+
+  /// No description provided for @enrollmentErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get enrollmentErrorForbiddenTitle;
+
+  /// No description provided for @enrollmentErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this list.'**
+  String get enrollmentErrorForbiddenMessage;
+
+  /// No description provided for @enrollmentErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get enrollmentErrorServerTitle;
+
+  /// No description provided for @enrollmentErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is temporarily unavailable. Please try again shortly.'**
+  String get enrollmentErrorServerMessage;
+
+  /// No description provided for @enrollmentErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get enrollmentErrorUnknownTitle;
+
+  /// No description provided for @enrollmentErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading results.'**
+  String get enrollmentErrorUnknownMessage;
 
   /// No description provided for @loadingStudents.
   ///
@@ -1427,6 +1529,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter {label}'**
   String enterFieldHint(String label);
+
+  /// No description provided for @firstNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Claudine'**
+  String get firstNameExample;
+
+  /// No description provided for @lastNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Furah'**
+  String get lastNameExample;
+
+  /// No description provided for @surnameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Sifiwe'**
+  String get surnameExample;
 
   /// No description provided for @dateHint.
   ///
@@ -1859,6 +1979,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Click Continue to advance step by step.'**
   String get stepForwardHint;
+
+  /// No description provided for @journeyModeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get journeyModeNew;
+
+  /// No description provided for @journeyModeEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get journeyModeEdit;
+
+  /// No description provided for @journeyModeView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get journeyModeView;
+
+  /// No description provided for @journeyCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get journeyCloseAction;
+
+  /// No description provided for @stepSaveStateIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'No input yet'**
+  String get stepSaveStateIdle;
+
+  /// No description provided for @stepSaveStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get stepSaveStatePending;
+
+  /// No description provided for @stepSaveStateSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get stepSaveStateSaving;
+
+  /// No description provided for @stepSaveStateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Step saved'**
+  String get stepSaveStateSaved;
 
   /// No description provided for @validatePersonalInfoHint.
   ///
@@ -5044,6 +5212,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred while loading statistics.'**
   String get financeStatsUnknownError;
+
+  /// No description provided for @enrollmentResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get enrollmentResults;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @switchToTableView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to table view'**
+  String get switchToTableView;
+
+  /// No description provided for @switchToGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to grid view'**
+  String get switchToGridView;
 }
 
 class _AppLocalizationsDelegate

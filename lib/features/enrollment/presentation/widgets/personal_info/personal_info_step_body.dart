@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/date_picker_field.dart';
 import 'package:school_app_flutter/core/components/fields/editable_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
@@ -24,9 +24,8 @@ class PersonalInfoStepBody extends StatelessWidget {
   final DateTime? selectedDate;
   final ValueChanged<String?> onNationalityChanged;
   final ValueChanged<Gender?> onGenderChanged;
-  final VoidCallback onPickDate;
+  final ValueChanged<DateTime?> onDateChanged;
   final void Function(BuildContext) onSave;
-  final String Function(DateTime?) formatDate;
   final String enrollmentId;
   final bool showInlineSaveButton;
   final bool canSave;
@@ -54,9 +53,8 @@ class PersonalInfoStepBody extends StatelessWidget {
     required this.selectedDate,
     required this.onNationalityChanged,
     required this.onGenderChanged,
-    required this.onPickDate,
+    required this.onDateChanged,
     required this.onSave,
-    required this.formatDate,
     required this.enrollmentId,
     required this.showInlineSaveButton,
     required this.canSave,
@@ -164,16 +162,23 @@ class PersonalInfoStepBody extends StatelessWidget {
                         errorText: surnameError,
                         readOnly: !isEditable,
                       ),
-                      DatePickerField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.dateOfBirth,
-                        selectedDate: selectedDate,
-                        displayValue: formatDate(selectedDate),
-                        requiredField: true,
-                        helpMessage: l10n.dateOfBirthHelp,
-                        errorText: dateOfBirthError,
-                        onTap: onPickDate,
-                        enabled: isEditable,
+                        child: EteeloDateInput(
+                          label: l10n.dateOfBirth,
+                          placeholder: l10n.dateHint,
+                          value: selectedDate,
+                          required: true,
+                          errorText: dateOfBirthError,
+                          enabled: isEditable,
+                          lastDate: DateTime.now(),
+                          initialPickerDate: DateTime(DateTime.now().year - 10),
+                          locale: const Locale('fr'),
+                          helpText: l10n.selectDateOfBirthHelpText,
+                          cancelText: l10n.cancel,
+                          confirmText: l10n.confirm,
+                          onChanged: onDateChanged,
+                        ),
                       ),
                       EditableField(
                         width: fieldWidth,

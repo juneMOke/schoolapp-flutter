@@ -546,7 +546,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clear => 'Effacer';
 
   @override
-  String get viewDetails => 'Voir Détails';
+  String get viewDetails => 'Voir les détails';
 
   @override
   String get editEnrollment => 'Modifier';
@@ -560,6 +560,64 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentNoResultsDescription =>
       'Aucun élève ne correspond à vos critères de recherche.';
+
+  @override
+  String get enrollmentEmptyTitle => 'Aucun résultat';
+
+  @override
+  String get enrollmentEmptyDescription =>
+      'Aucune inscription ne correspond à vos critères. Essayez d\'élargir la recherche ou créez une nouvelle inscription.';
+
+  @override
+  String get enrollmentEmptyWithoutFilterDescription =>
+      'Aucune inscription pour le moment.';
+
+  @override
+  String get enrollmentEmptyCreateAction => 'Inscrire un nouvel élève';
+
+  @override
+  String get enrollmentErrorRetry => 'Réessayer';
+
+  @override
+  String get enrollmentErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get enrollmentErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get enrollmentErrorNetworkTitle => 'Connexion indisponible';
+
+  @override
+  String get enrollmentErrorNetworkMessage =>
+      'Vérifiez votre connexion internet puis relancez la recherche.';
+
+  @override
+  String get enrollmentErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get enrollmentErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour continuer.';
+
+  @override
+  String get enrollmentErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get enrollmentErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour voir cette liste.';
+
+  @override
+  String get enrollmentErrorServerTitle => 'Erreur serveur';
+
+  @override
+  String get enrollmentErrorServerMessage =>
+      'Le serveur est temporairement indisponible. Réessayez dans quelques instants.';
+
+  @override
+  String get enrollmentErrorUnknownTitle => 'Chargement impossible';
+
+  @override
+  String get enrollmentErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement des résultats.';
 
   @override
   String get loadingStudents => 'Chargement des étudiants...';
@@ -789,6 +847,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get firstNameExample => 'Claudine';
+
+  @override
+  String get lastNameExample => 'Furah';
+
+  @override
+  String get surnameExample => 'Sifiwe';
+
+  @override
   String get dateHint => 'jj/mm/aaaa';
 
   @override
@@ -1012,6 +1079,30 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get stepForwardHint =>
       'Cliquez sur Continuer pour avancer étape par étape.';
+
+  @override
+  String get journeyModeNew => 'Nouvelle';
+
+  @override
+  String get journeyModeEdit => 'Modification';
+
+  @override
+  String get journeyModeView => 'Consultation';
+
+  @override
+  String get journeyCloseAction => 'Fermer';
+
+  @override
+  String get stepSaveStateIdle => 'Aucune saisie';
+
+  @override
+  String get stepSaveStatePending => 'Modifications non enregistrées';
+
+  @override
+  String get stepSaveStateSaving => 'Enregistrement en cours...';
+
+  @override
+  String get stepSaveStateSaved => 'Étape enregistrée';
 
   @override
   String get validatePersonalInfoHint =>
@@ -2897,4 +2988,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'Une erreur inattendue est survenue lors du chargement des statistiques.';
+
+  @override
+  String get enrollmentResults => 'Résultats';
+
+  @override
+  String get sort => 'Trier';
+
+  @override
+  String get switchToTableView => 'Passer à la vue tableau';
+
+  @override
+  String get switchToGridView => 'Passer à la vue grille';
 }

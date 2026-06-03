@@ -4,11 +4,12 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_dropdown.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SearchForm extends StatefulWidget {
@@ -37,8 +38,8 @@ class _SearchFormState extends State<SearchForm> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _surnameController = TextEditingController();
-  final _dateOfBirthController = TextEditingController();
 
+  DateTime? _selectedDateOfBirth;
   DateTime? _lastActionAt;
 
   @override
@@ -52,7 +53,8 @@ class _SearchFormState extends State<SearchForm> {
         : null;
 
     return SearchFormResponsiveView(
-      title: SearchFormTitle(label: l10n.searchStudents),
+      title: l10n.searchStudents,
+      icon: Icons.search_rounded,
       fields: _buildFields(l10n, statusDropdown),
       actions: _buildActionButtons(l10n),
     );
@@ -60,31 +62,33 @@ class _SearchFormState extends State<SearchForm> {
 
   List<Widget> _buildFields(AppLocalizations l10n, Widget? statusDropdown) {
     final fields = <Widget>[
-      SearchFormInput(
+      EteeloTextInput(
         controller: _firstNameController,
         label: l10n.firstName,
-        prefixIcon: const Icon(Icons.person_outline, size: 16),
+        placeholder: l10n.firstNameExample,
+        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
-      SearchFormInput(
+      EteeloTextInput(
         controller: _lastNameController,
         label: l10n.lastName,
-        prefixIcon: const Icon(Icons.badge_outlined, size: 16),
+        placeholder: l10n.lastNameExample,
+        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
-      SearchFormInput(
+      EteeloTextInput(
         controller: _surnameController,
         label: l10n.surname,
-        prefixIcon: const Icon(Icons.account_circle_outlined, size: 16),
+        placeholder: l10n.surnameExample,
+        inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
         onChanged: (_) => _onFieldChanged(),
       ),
-      SearchFormInput(
-        controller: _dateOfBirthController,
+      EteeloDateInput(
         label: l10n.dateOfBirth,
-        prefixIcon: const Icon(Icons.cake_outlined, size: 16),
-        suffixIcon: const Icon(Icons.calendar_today_rounded, size: 16),
-        readOnly: true,
-        onTap: () => _selectDate(context),
+        placeholder: l10n.dateHint,
+        value: _selectedDateOfBirth,
+        lastDate: DateTime.now(),
+        onChanged: (date) => setState(() => _selectedDateOfBirth = date),
       ),
     ];
 
@@ -96,7 +100,7 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   Widget _buildActionButtons(AppLocalizations l10n) {
-    final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
+    final hasDate = _selectedDateOfBirth != null;
     final hasAllNames = _hasAllNameField();
     final isActionLocked = _isActionLocked();
     final isSearchEnabled =
@@ -153,10 +157,17 @@ class _SearchFormState extends State<SearchForm> {
     if (_isActionLocked()) return;
     if (widget.isLoading) return;
 
-    final hasDate = _dateOfBirthController.text.trim().isNotEmpty;
+    final hasDate = _selectedDateOfBirth != null;
     final hasAllNames = _hasAllNameField();
 
     if (!hasAllNames && !hasDate) return;
+
+    // Format ISO 8601 pour l'API (yyyy-MM-dd).
+    final dateOfBirthParam = _selectedDateOfBirth != null
+        ? '${_selectedDateOfBirth!.year}-'
+              '${_selectedDateOfBirth!.month.toString().padLeft(2, '0')}-'
+              '${_selectedDateOfBirth!.day.toString().padLeft(2, '0')}'
+        : '';
 
     _markActionTriggered();
     widget.dispatch(
@@ -164,7 +175,7 @@ class _SearchFormState extends State<SearchForm> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         surname: _surnameController.text.trim(),
-        dateOfBirth: _dateOfBirthController.text.trim(),
+        dateOfBirth: dateOfBirthParam,
         status: widget.status,
       ),
     );
@@ -180,7 +191,7 @@ class _SearchFormState extends State<SearchForm> {
     return _firstNameController.text.trim().isNotEmpty ||
         _lastNameController.text.trim().isNotEmpty ||
         _surnameController.text.trim().isNotEmpty ||
-        _dateOfBirthController.text.trim().isNotEmpty;
+        _selectedDateOfBirth != null;
   }
 
   void _clearSearch() {
@@ -190,8 +201,7 @@ class _SearchFormState extends State<SearchForm> {
     _firstNameController.clear();
     _lastNameController.clear();
     _surnameController.clear();
-    _dateOfBirthController.clear();
-    setState(() {});
+    setState(() => _selectedDateOfBirth = null);
 
     _markActionTriggered();
     widget.dispatch(StandardSearchCommand(status: widget.status));
@@ -209,29 +219,11 @@ class _SearchFormState extends State<SearchForm> {
     _lastActionAt = DateTime.now();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-
-    if (date != null) {
-      _dateOfBirthController.text =
-          '${date.year}-'
-          '${date.month.toString().padLeft(2, '0')}-'
-          '${date.day.toString().padLeft(2, '0')}';
-      _onFieldChanged();
-    }
-  }
-
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
-    _dateOfBirthController.dispose();
     super.dispose();
   }
 }
