@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -44,81 +45,37 @@ class SearchFormStatusDropdown extends StatelessWidget {
       _StatusOption('REJECTED', l10n.enrollmentStatusRejected),
       _StatusOption('CANCELLED', l10n.enrollmentStatusCancelled),
     ];
+
     final selectedValue = options.any((o) => o.value == selectedStatus)
         ? selectedStatus
         : options.first.value;
 
-    final borderRadius = BorderRadius.circular(AppDimensions.spacingS + 2);
-    const borderSide = BorderSide(color: AppColors.border);
+    final selectItems = options
+        .map(
+          (option) => EteeloSelectItem<String>(
+            value: option.value,
+            label: option.label,
+          ),
+        )
+        .toList(growable: false);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: borderRadius),
-      child: DropdownButtonFormField<String>(
-        initialValue: selectedValue,
-        borderRadius: borderRadius,
-        dropdownColor: AppColors.surface,
-        menuMaxHeight: 320,
-        decoration: InputDecoration(
-          labelText: l10n.enrollmentStatusFilterLabel,
-          labelStyle: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-          prefixIcon: const Icon(
-            Icons.tune_rounded,
-            size: 16,
-            color: AppColors.textSecondary,
-          ),
-          prefixIconConstraints: const BoxConstraints(minWidth: 34),
-          isDense: false,
-          filled: true,
-          fillColor: AppColors.surface,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: borderRadius,
-            borderSide: borderSide,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: borderRadius,
-            borderSide: const BorderSide(
-              color: AppColors.bleuArdoise,
-              width: 1.4,
-            ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingS + 2,
-            vertical: AppDimensions.spacingS + 2,
-          ),
-        ),
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
-        ),
-        icon: const Icon(
-          Icons.keyboard_arrow_down_rounded,
-          size: 18,
-          color: AppColors.textSecondary,
-        ),
-        isExpanded: true,
-        itemHeight: null,
-        selectedItemBuilder: (context) =>
-            options.map((o) => _buildSelectedStatusItem(o, l10n)).toList(),
-        items: options
-            .map(
-              (o) => DropdownMenuItem<String>(
-                value: o.value,
-                child: _buildStatusItem(
-                  o,
-                  l10n: l10n,
-                  isSelected: o.value == selectedValue,
-                ),
-              ),
-            )
-            .toList(),
-        onChanged: (value) {
-          if (value != null) onChanged(value);
-        },
-      ),
+    return EteeloSelectInput<String>(
+      label: l10n.enrollmentStatusFilterLabel,
+      placeholder: l10n.selectPlaceholderChoose,
+      value: selectedValue,
+      items: selectItems,
+      menuMaxHeight: 320,
+      onChanged: (value) {
+        if (value != null) onChanged(value);
+      },
+      itemBuilder: (context, item, isSelected) {
+        final option = _StatusOption(item.value, item.label);
+        return _buildStatusItem(option, l10n: l10n, isSelected: isSelected);
+      },
+      selectedItemBuilder: (context, item) {
+        final option = _StatusOption(item.value, item.label);
+        return _buildSelectedStatusItem(option, l10n);
+      },
     );
   }
 

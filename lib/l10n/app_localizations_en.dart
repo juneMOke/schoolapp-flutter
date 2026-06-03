@@ -848,6 +848,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surnameExample => 'Sifiwe';
 
   @override
+  String get selectPlaceholderChoose => 'Choose';
+
+  @override
   String get dateHint => 'dd/mm/yyyy';
 
   @override

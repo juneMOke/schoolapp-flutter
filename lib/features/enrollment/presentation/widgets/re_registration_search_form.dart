@@ -3,10 +3,10 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_responsive_view.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ReRegistrationAcademicOption {
@@ -64,14 +64,9 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
         !widget.isLoading && (_hasRequiredNames() || selectedKey != null);
 
     return SearchFormResponsiveView(
-      title: SearchFormTitle(label: l10n.subMenuReRegistrations),
-      subtitle: Text(
-        l10n.reRegistrationSearchHint,
-        style: AppTextStyles.caption.copyWith(
-          color: AppColors.textSecondary,
-          height: 1.35,
-        ),
-      ),
+      title: l10n.subMenuReRegistrations,
+      subtitle: l10n.reRegistrationSearchHint,
+      icon: Icons.manage_search_rounded,
       fields: [
         ..._buildNameFields(l10n),
         _buildAcademicDropdown(
@@ -112,52 +107,21 @@ class _ReRegistrationSearchFormState extends State<ReRegistrationSearchForm> {
     required List<ReRegistrationAcademicOption> uniqueOptions,
     required String? selectedKey,
   }) {
-    return DropdownButtonFormField<String>(
+    final selectItems = uniqueOptions
+        .map((o) => EteeloSelectItem<String>(value: o.key, label: o.label))
+        .toList(growable: false);
+
+    return EteeloSelectInput<String>(
       key: ValueKey<String>(
         'academic-option-${selectedKey ?? 'none'}-${uniqueOptions.length}',
       ),
-      initialValue: selectedKey,
-      isExpanded: true,
-      isDense: true,
-      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
-      icon: const Icon(
-        Icons.keyboard_arrow_down_rounded,
-        size: 18,
-        color: AppColors.textSecondary,
-      ),
-      decoration: InputDecoration(
-        labelText: '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
-        labelStyle: const TextStyle(fontSize: 12),
-        prefixIcon: const Icon(Icons.school_outlined, size: 16),
-        prefixIconConstraints: const BoxConstraints(minWidth: 34),
-        isDense: true,
-        filled: true,
-        fillColor: AppColors.surfaceAlt,
-        border: const OutlineInputBorder(
-          borderRadius: AppRadius.brSm,
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: AppRadius.brSm,
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: AppRadius.brSm,
-          borderSide: BorderSide(color: AppColors.bleuArdoise, width: 1.4),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      ),
-      items: uniqueOptions
-          .map(
-            (o) => DropdownMenuItem<String>(
-              value: o.key,
-              child: Text(o.label, overflow: TextOverflow.ellipsis),
-            ),
-          )
-          .toList(growable: false),
-      onChanged: widget.isLoading || uniqueOptions.isEmpty
-          ? null
-          : (value) => setState(() => _selectedAcademicOptionKey = value),
+      label: '${l10n.targetCycleLabel} / ${l10n.targetLevelLabel}',
+      placeholder: l10n.selectPlaceholderChoose,
+      value: selectedKey,
+      items: selectItems,
+      enabled: !widget.isLoading && uniqueOptions.isNotEmpty,
+      panelMode: EteeloSelectPanelMode.popover,
+      onChanged: (value) => setState(() => _selectedAcademicOptionKey = value),
     );
   }
 

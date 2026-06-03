@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/input_decoration.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AddressDropdownField extends StatelessWidget {
   final double width;
@@ -34,6 +33,8 @@ class AddressDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     final selectedValue = value != null && options.contains(value)
         ? value
         : null;
@@ -43,46 +44,21 @@ class AddressDropdownField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FormFieldLabel(
+          EteeloSelectInput<String>(
+            value: selectedValue,
             label: label,
-            requiredField: requiredField,
-            helpMessage: helpMessage,
-          ),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            initialValue: selectedValue,
-            isExpanded: true,
+            required: requiredField,
+            errorText: errorText,
+            enabled: enabled && options.isNotEmpty,
+            placeholder: l10n.selectPlaceholderChoose,
             menuMaxHeight: 320,
-            borderRadius: BorderRadius.circular(12),
-            icon: const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: AppTheme.primaryColor,
-            ),
             items: options
                 .map(
-                  (option) => DropdownMenuItem<String>(
-                    value: option,
-                    child: Text(
-                      option,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.formValueMedium,
-                    ),
-                  ),
+                  (option) =>
+                      EteeloSelectItem<String>(value: option, label: option),
                 )
                 .toList(growable: false),
-            onChanged: (!enabled || options.isEmpty) ? null : onChanged,
-            style: AppTypography.formValueMedium.copyWith(
-              color: AppTheme.textPrimaryColor,
-            ),
-            decoration: buildInputDecoration(
-              hintText: label,
-              errorText: errorText,
-              prefixIcon: Icon(
-                icon,
-                size: 16,
-                color: AppTheme.textSecondaryColor,
-              ),
-            ),
+            onChanged: onChanged,
           ),
           if (enabled && options.isEmpty && emptyOptionsHint != null) ...[
             const SizedBox(height: 6),

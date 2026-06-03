@@ -406,6 +406,7 @@
   "firstNameExample": "Claudine",
   "lastNameExample": "Furah",
   "surnameExample": "Sifiwe",
+  "selectPlaceholderChoose": "Choose",
   "dateHint": "dd/mm/yyyy",
   "genderMale": "Male",
   "genderFemale": "Female",

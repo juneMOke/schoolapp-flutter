@@ -1548,6 +1548,12 @@ abstract class AppLocalizations {
   /// **'Sifiwe'**
   String get surnameExample;
 
+  /// No description provided for @selectPlaceholderChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get selectPlaceholderChoose;
+
   /// No description provided for @dateHint.
   ///
   /// In en, this message translates to:
