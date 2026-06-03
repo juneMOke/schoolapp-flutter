@@ -930,6 +930,18 @@ abstract class AppLocalizations {
   /// **'Search Students'**
   String get searchStudents;
 
+  /// No description provided for @searchFormSubtitleFirstRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter the enrollments list'**
+  String get searchFormSubtitleFirstRegistration;
+
+  /// No description provided for @searchFormSubtitlePreRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Online requests received, pending validation'**
+  String get searchFormSubtitlePreRegistration;
+
   /// No description provided for @reRegistrationSearchHint.
   ///
   /// In en, this message translates to:
@@ -1553,6 +1565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose'**
   String get selectPlaceholderChoose;
+
+  /// No description provided for @requiredSemanticSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get requiredSemanticSuffix;
 
   /// No description provided for @dateHint.
   ///

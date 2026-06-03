@@ -496,6 +496,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchStudents => 'Search Students';
 
   @override
+  String get searchFormSubtitleFirstRegistration =>
+      'Filter the enrollments list';
+
+  @override
+  String get searchFormSubtitlePreRegistration =>
+      'Online requests received, pending validation';
+
+  @override
   String get reRegistrationSearchHint =>
       'Enter either First name, Last name and Surname, or the target cycle/level to start the search.';
 
@@ -849,6 +857,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectPlaceholderChoose => 'Choose';
+
+  @override
+  String get requiredSemanticSuffix => 'required';
 
   @override
   String get dateHint => 'dd/mm/yyyy';

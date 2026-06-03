@@ -500,6 +500,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchStudents => 'Rechercher des élèves';
 
   @override
+  String get searchFormSubtitleFirstRegistration =>
+      'Filtrez la liste des inscriptions';
+
+  @override
+  String get searchFormSubtitlePreRegistration =>
+      'Demandes reçues en ligne, en attente de validation';
+
+  @override
   String get reRegistrationSearchHint =>
       'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
 
@@ -857,6 +865,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectPlaceholderChoose => 'Choisir';
+
+  @override
+  String get requiredSemanticSuffix => 'obligatoire';
 
   @override
   String get dateHint => 'jj/mm/aaaa';

@@ -19,6 +19,7 @@ class SearchForm extends StatefulWidget {
   final EnrollmentSearchDispatcher dispatch;
   final bool showStatusFilter;
   final ValueChanged<String>? onStatusChanged;
+  final String? subtitle;
 
   const SearchForm({
     super.key,
@@ -28,6 +29,7 @@ class SearchForm extends StatefulWidget {
     required this.dispatch,
     this.showStatusFilter = false,
     this.onStatusChanged,
+    this.subtitle,
   });
 
   @override
@@ -54,6 +56,7 @@ class _SearchFormState extends State<SearchForm> {
 
     return SearchFormResponsiveView(
       title: l10n.searchStudents,
+      subtitle: widget.subtitle,
       icon: Icons.search_rounded,
       fields: _buildFields(l10n, statusDropdown),
       actions: _buildActionButtons(l10n),
@@ -93,7 +96,7 @@ class _SearchFormState extends State<SearchForm> {
     ];
 
     if (statusDropdown != null) {
-      return [statusDropdown, ...fields];
+      return [...fields, statusDropdown];
     }
 
     return fields;
