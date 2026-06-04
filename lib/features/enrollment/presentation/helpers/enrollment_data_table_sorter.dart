@@ -1,7 +1,7 @@
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 
 /// Énumération des colonnes triables dans la table Enrollment.
-enum EnrollmentSortColumn { lastName, surname, firstName, dateOfBirth }
+enum EnrollmentSortColumn { student, dateOfBirth }
 
 /// Service stateless pour gérer le tri des résumés d'inscription.
 ///
@@ -32,9 +32,8 @@ class EnrollmentDataTableSorter {
     EnrollmentSortColumn column,
   ) {
     return switch (column) {
-      EnrollmentSortColumn.lastName => enrollment.student.lastName,
-      EnrollmentSortColumn.surname => enrollment.student.surname,
-      EnrollmentSortColumn.firstName => enrollment.student.firstName,
+      EnrollmentSortColumn.student =>
+        '${enrollment.student.lastName}|${enrollment.student.firstName}|${enrollment.student.surname}',
       EnrollmentSortColumn.dateOfBirth => enrollment.student.dateOfBirth,
     };
   }

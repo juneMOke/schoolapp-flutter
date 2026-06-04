@@ -1255,6 +1255,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get enrollmentStudentColumnLabel => 'Student';
+
+  @override
   String get enrollmentStatusFilterLabel => 'Status';
 
   @override
@@ -2962,4 +2965,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get switchToGridView => 'Switch to grid view';
+
+  @override
+  String get enrollmentViewTable => 'Table';
+
+  @override
+  String get enrollmentViewGrid => 'Grid';
+
+  @override
+  String get enrollmentResultsA11yLabel => 'Enrollment results';
+
+  @override
+  String get dataTableSortAscending => 'Ascending sort';
+
+  @override
+  String get dataTableSortDescending => 'Descending sort';
+
+  @override
+  String get dataTableSortNone => 'No sort';
+
+  @override
+  String openDetailsForStudent(String studentName) {
+    return 'Open student file for $studentName';
+  }
+
+  @override
+  String removeFilterNamed(String filter) {
+    return 'Remove filter $filter';
+  }
 }

@@ -2292,6 +2292,12 @@ abstract class AppLocalizations {
   /// **'Address update failed: {message}'**
   String addressSaveError(String message);
 
+  /// No description provided for @enrollmentStudentColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get enrollmentStudentColumnLabel;
+
   /// No description provided for @enrollmentStatusFilterLabel.
   ///
   /// In en, this message translates to:
@@ -5260,6 +5266,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to grid view'**
   String get switchToGridView;
+
+  /// No description provided for @enrollmentViewTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get enrollmentViewTable;
+
+  /// No description provided for @enrollmentViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get enrollmentViewGrid;
+
+  /// No description provided for @enrollmentResultsA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment results'**
+  String get enrollmentResultsA11yLabel;
+
+  /// No description provided for @dataTableSortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending sort'**
+  String get dataTableSortAscending;
+
+  /// No description provided for @dataTableSortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending sort'**
+  String get dataTableSortDescending;
+
+  /// No description provided for @dataTableSortNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No sort'**
+  String get dataTableSortNone;
+
+  /// No description provided for @openDetailsForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Open student file for {studentName}'**
+  String openDetailsForStudent(String studentName);
+
+  /// No description provided for @removeFilterNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove filter {filter}'**
+  String removeFilterNamed(String filter);
 }
 
 class _AppLocalizationsDelegate

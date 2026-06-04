@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 
 /// Type de texte pour une cellule de table.
 enum DataTableCellTextVariant { regular, strong, mono }
@@ -63,12 +64,14 @@ class DataTableTrailingSpec {
   final DataTableTrailingType type;
   final VoidCallback? onTap;
   final String? tooltip;
+  final String? semanticLabel;
   final bool enabled;
 
   const DataTableTrailingSpec({
     this.type = DataTableTrailingType.none,
     this.onTap,
     this.tooltip,
+    this.semanticLabel,
     this.enabled = true,
   });
 }
@@ -139,6 +142,8 @@ class DataTableViewConfig {
   final bool sortAscending;
   final OnDataTableSort? onSortChanged;
   final DataTableFooterConfig? footer;
+  final DataTableDensity density;
+  final String? semanticsLabel;
 
   const DataTableViewConfig({
     required this.columns,
@@ -151,6 +156,8 @@ class DataTableViewConfig {
     this.sortAscending = true,
     this.onSortChanged,
     this.footer,
+    this.density = DataTableDensity.comfortable,
+    this.semanticsLabel,
   });
 }
 

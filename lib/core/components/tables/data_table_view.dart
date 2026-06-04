@@ -41,38 +41,45 @@ class DataTableView extends StatelessWidget {
       showTrailingSlot,
     );
 
-    return ColoredBox(
-      color: EteeloDataTableTheme.tableBackground,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DataTableHeader(
-            columns: config.columns,
-            activeSortColumn: config.sortColumnIndex,
-            sortAscending: config.sortAscending,
-            onSortChanged: config.onSortChanged,
-            showLeadingSlot: showLeadingSlot,
-            showTrailingSlot: showTrailingSlot,
-          ),
-          const Divider(
-            height: EteeloDataTableTheme.separatorThickness,
-            thickness: EteeloDataTableTheme.separatorThickness,
-            color: EteeloDataTableTheme.separatorColor,
-          ),
-          AnimatedSwitcher(
-            duration: AppMotion.standard,
-            switchInCurve: AppMotion.outCurve,
-            switchOutCurve: AppMotion.inCurve,
-            child: content,
-          ),
-          if (config.footer != null)
+    return Semantics(
+      container: true,
+      liveRegion: config.isLoading || config.isError,
+      label: config.semanticsLabel,
+      child: ColoredBox(
+        color: EteeloDataTableTheme.tableBackground,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DataTableHeader(
+              columns: config.columns,
+              activeSortColumn: config.sortColumnIndex,
+              sortAscending: config.sortAscending,
+              onSortChanged: config.onSortChanged,
+              showLeadingSlot: showLeadingSlot,
+              showTrailingSlot: showTrailingSlot,
+              density: config.density,
+            ),
             const Divider(
               height: EteeloDataTableTheme.separatorThickness,
               thickness: EteeloDataTableTheme.separatorThickness,
               color: EteeloDataTableTheme.separatorColor,
             ),
-          if (config.footer != null) DataTableFooterBar(config: config.footer!),
-        ],
+            AnimatedSwitcher(
+              duration: AppMotion.standard,
+              switchInCurve: AppMotion.outCurve,
+              switchOutCurve: AppMotion.inCurve,
+              child: content,
+            ),
+            if (config.footer != null)
+              const Divider(
+                height: EteeloDataTableTheme.separatorThickness,
+                thickness: EteeloDataTableTheme.separatorThickness,
+                color: EteeloDataTableTheme.separatorColor,
+              ),
+            if (config.footer != null)
+              DataTableFooterBar(config: config.footer!),
+          ],
+        ),
       ),
     );
   }
@@ -122,6 +129,7 @@ class DataTableView extends StatelessWidget {
         columns: config.columns,
         isEven: index.isEven,
         trailingBuilders: trailingBuilders,
+        density: config.density,
       ),
     );
   }

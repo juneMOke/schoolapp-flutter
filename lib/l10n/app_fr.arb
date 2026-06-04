@@ -594,6 +594,7 @@
       }
     }
   },
+  "enrollmentStudentColumnLabel": "Eleve",
   "enrollmentStatusFilterLabel": "Statut",
   "enrollmentStatusInProgress": "En cours",
   "enrollmentStatusAdminCompleted": "Complété (Administratif)",
@@ -1281,5 +1282,27 @@
   "refresh": "Actualiser",
   "sort": "Trier",
   "switchToTableView": "Passer à la vue tableau",
-  "switchToGridView": "Passer à la vue grille"
+  "switchToGridView": "Passer à la vue grille",
+  "enrollmentViewTable": "Tableau",
+  "enrollmentViewGrid": "Grille",
+  "enrollmentResultsA11yLabel": "Résultats d'inscriptions",
+  "dataTableSortAscending": "Tri croissant",
+  "dataTableSortDescending": "Tri décroissant",
+  "dataTableSortNone": "Tri non appliqué",
+  "openDetailsForStudent": "Ouvrir la fiche de {studentName}",
+  "@openDetailsForStudent": {
+    "placeholders": {
+      "studentName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFilterNamed": "Retirer le filtre {filter}",
+  "@removeFilterNamed": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1270,6 +1270,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get enrollmentStudentColumnLabel => 'Eleve';
+
+  @override
   String get enrollmentStatusFilterLabel => 'Statut';
 
   @override
@@ -3014,4 +3017,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get switchToGridView => 'Passer à la vue grille';
+
+  @override
+  String get enrollmentViewTable => 'Tableau';
+
+  @override
+  String get enrollmentViewGrid => 'Grille';
+
+  @override
+  String get enrollmentResultsA11yLabel => 'Résultats d\'inscriptions';
+
+  @override
+  String get dataTableSortAscending => 'Tri croissant';
+
+  @override
+  String get dataTableSortDescending => 'Tri décroissant';
+
+  @override
+  String get dataTableSortNone => 'Tri non appliqué';
+
+  @override
+  String openDetailsForStudent(String studentName) {
+    return 'Ouvrir la fiche de $studentName';
+  }
+
+  @override
+  String removeFilterNamed(String filter) {
+    return 'Retirer le filtre $filter';
+  }
 }

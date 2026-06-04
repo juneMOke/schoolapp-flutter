@@ -59,42 +59,66 @@ class _DefaultTrailingIconButton extends StatefulWidget {
 class _DefaultTrailingIconButtonState
     extends State<_DefaultTrailingIconButton> {
   bool _isHovered = false;
+  bool _isFocused = false;
 
   @override
   Widget build(BuildContext context) {
     final isEnabled = widget.spec.enabled && widget.spec.onTap != null;
     final tooltip = widget.spec.tooltip;
+    final semanticLabel = widget.spec.semanticLabel ?? tooltip;
 
-    final button = MouseRegion(
-      onEnter: (_) => isEnabled ? setState(() => _isHovered = true) : null,
-      onExit: (_) => isEnabled ? setState(() => _isHovered = false) : null,
-      child: AnimatedContainer(
-        duration: AppMotion.fast,
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: isEnabled
-              ? (_isHovered
-                    ? EteeloDataTableTheme.headerSortActiveColor
-                    : EteeloDataTableTheme.headerSortActiveColor.withValues(
-                        alpha: 0.08,
-                      ))
-              : AppColors.stateDisabled.withValues(alpha: 0.12),
-          borderRadius: AppRadius.brSm,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: AppRadius.brSm,
-            onTap: isEnabled ? widget.spec.onTap : null,
-            child: Icon(
-              widget.icon,
-              size: 16,
+    final button = Semantics(
+      button: true,
+      enabled: isEnabled,
+      label: semanticLabel,
+      child: FocusableActionDetector(
+        onShowFocusHighlight: (value) {
+          if (_isFocused == value) return;
+          setState(() => _isFocused = value);
+        },
+        child: MouseRegion(
+          onEnter: (_) => isEnabled ? setState(() => _isHovered = true) : null,
+          onExit: (_) => isEnabled ? setState(() => _isHovered = false) : null,
+          child: AnimatedContainer(
+            duration: AppMotion.fast,
+            padding: EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
+            width:
+                EteeloDataTableTheme.trailingSlotWidth -
+                (EteeloDataTableTheme.focusRingOffset * 2),
+            height:
+                EteeloDataTableTheme.trailingSlotWidth -
+                (EteeloDataTableTheme.focusRingOffset * 2),
+            decoration: BoxDecoration(
               color: isEnabled
                   ? (_isHovered
-                        ? AppColors.textOnDark
-                        : EteeloDataTableTheme.headerSortActiveColor)
-                  : AppColors.stateDisabled,
+                        ? EteeloDataTableTheme.headerSortActiveColor
+                        : EteeloDataTableTheme.headerSortActiveColor.withValues(
+                            alpha: 0.08,
+                          ))
+                  : AppColors.stateDisabled.withValues(alpha: 0.12),
+              borderRadius: AppRadius.brSm,
+              border: _isFocused
+                  ? Border.all(
+                      color: EteeloDataTableTheme.focusRingColor,
+                      width: EteeloDataTableTheme.focusRingWidth,
+                    )
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: AppRadius.brSm,
+                onTap: isEnabled ? widget.spec.onTap : null,
+                child: Icon(
+                  widget.icon,
+                  size: 16,
+                  color: isEnabled
+                      ? (_isHovered
+                            ? AppColors.textOnDark
+                            : EteeloDataTableTheme.headerSortActiveColor)
+                      : AppColors.stateDisabled,
+                ),
+              ),
             ),
           ),
         ),

@@ -583,6 +583,7 @@
       "message": { "type": "String" }
     }
   },
+  "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
   "enrollmentStatusInProgress": "In Progress",
   "enrollmentStatusAdminCompleted": "Admin Completed",
@@ -1284,5 +1285,27 @@
        "refresh": "Refresh",
        "sort": "Sort",
        "switchToTableView": "Switch to table view",
-       "switchToGridView": "Switch to grid view"
+       "switchToGridView": "Switch to grid view",
+       "enrollmentViewTable": "Table",
+       "enrollmentViewGrid": "Grid",
+       "enrollmentResultsA11yLabel": "Enrollment results",
+       "dataTableSortAscending": "Ascending sort",
+       "dataTableSortDescending": "Descending sort",
+       "dataTableSortNone": "No sort",
+       "openDetailsForStudent": "Open student file for {studentName}",
+       "@openDetailsForStudent": {
+         "placeholders": {
+           "studentName": {
+             "type": "String"
+           }
+         }
+       },
+       "removeFilterNamed": "Remove filter {filter}",
+       "@removeFilterNamed": {
+         "placeholders": {
+           "filter": {
+             "type": "String"
+           }
+         }
+       }
 }

@@ -37,27 +37,34 @@ class DataTablePaginationBar extends StatelessWidget {
         horizontal: AppDimensions.spacingM,
         vertical: AppDimensions.spacingS,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
         spacing: spacing,
+        runSpacing: AppDimensions.spacingS,
         children: [
           _PaginationButton(
             onPressed: canGoToPrevious ? onPrevious : null,
             icon: Icons.chevron_left_rounded,
             tooltip: l10n.previous,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bleuArdoise.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              defaultLabel,
-              style: AppTextStyles.pageTitle.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.bleuArdoise,
+          Semantics(
+            container: true,
+            liveRegion: true,
+            label: defaultLabel,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.bleuArdoise.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                defaultLabel,
+                style: AppTextStyles.pageTitle.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.bleuArdoise,
+                ),
               ),
             ),
           ),

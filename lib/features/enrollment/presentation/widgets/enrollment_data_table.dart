@@ -19,6 +19,7 @@ class EnrollmentDataTable extends StatefulWidget {
   final String? emptyLabel;
   final int currentPage;
   final int totalPages;
+  final DataTableDensity density;
   final bool showPagination;
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
@@ -36,6 +37,7 @@ class EnrollmentDataTable extends StatefulWidget {
     this.emptyLabel,
     this.currentPage = 1,
     this.totalPages = 1,
+    this.density = DataTableDensity.comfortable,
     this.showPagination = true,
     this.onPreviousPage,
     this.onNextPage,
@@ -47,7 +49,7 @@ class EnrollmentDataTable extends StatefulWidget {
 }
 
 class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
-  EnrollmentSortColumn _sortColumn = EnrollmentSortColumn.lastName;
+  EnrollmentSortColumn _sortColumn = EnrollmentSortColumn.student;
   bool _sortAscending = true;
 
   @override
@@ -75,6 +77,8 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           label: _buildFooterLabel(l10n, sorted.length),
           pagination: _buildPaginationConfig(),
         ),
+        density: widget.density,
+        semanticsLabel: l10n.enrollmentResultsA11yLabel,
       ),
     );
   }
@@ -100,22 +104,10 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
   List<DataTableColumnDef> _buildColumns(AppLocalizations l10n) {
     return [
       DataTableColumnDef(
-        label: l10n.lastName,
-        flex: 3,
+        label: l10n.enrollmentStudentColumnLabel,
+        flex: 7,
         sortable: true,
-        sortIndex: EnrollmentSortColumn.lastName.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.surname,
-        flex: 3,
-        sortable: true,
-        sortIndex: EnrollmentSortColumn.surname.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.firstName,
-        flex: 3,
-        sortable: true,
-        sortIndex: EnrollmentSortColumn.firstName.index,
+        sortIndex: EnrollmentSortColumn.student.index,
       ),
       DataTableColumnDef(
         label: l10n.dateOfBirth,
@@ -135,8 +127,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         .map(
           (enrollment) => DataTableRowSpec(
             id: enrollment.enrollmentId,
-            displayName:
-                '${enrollment.student.lastName} ${enrollment.student.firstName}',
+            displayName: _studentFullName(enrollment),
             leading: core_avatar.StudentAvatar(
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
@@ -147,11 +138,9 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             ),
             cells: [
               DataTableCellSpec(
-                text: enrollment.student.lastName,
+                text: _studentFullName(enrollment),
                 variant: DataTableCellTextVariant.strong,
               ),
-              DataTableCellSpec(text: enrollment.student.surname),
-              DataTableCellSpec(text: enrollment.student.firstName),
               DataTableCellSpec(
                 text: _formatDate(enrollment.student.dateOfBirth),
                 variant: DataTableCellTextVariant.mono,
@@ -168,6 +157,9 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
               tooltip: l10n.viewDetails,
+              semanticLabel: l10n.openDetailsForStudent(
+                _studentFullName(enrollment),
+              ),
               onTap: () => widget.onViewRequested(enrollment),
             ),
           ),
@@ -190,6 +182,16 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       return l10n.enrollmentPageFooter(pageCount, total);
     }
     return l10n.enrollmentResultsCount(pageCount);
+  }
+
+  String _studentFullName(EnrollmentSummary enrollment) {
+    final parts = <String>[
+      enrollment.student.lastName,
+      enrollment.student.surname,
+      enrollment.student.firstName,
+    ].where((value) => value.trim().isNotEmpty);
+
+    return parts.join(' ');
   }
 
   core_avatar.AvatarVariant _avatarVariantForStatus(EnrollmentStatus status) {
