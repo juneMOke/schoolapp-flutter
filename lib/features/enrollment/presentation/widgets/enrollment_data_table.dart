@@ -131,7 +131,8 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             leading: core_avatar.StudentAvatar(
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
-              size: 28,
+              studentId: enrollment.student.id,
+              size: core_avatar.AvatarSize.sm,
               variant: _avatarVariantForStatus(
                 EnrollmentStatus.fromString(enrollment.status),
               ),

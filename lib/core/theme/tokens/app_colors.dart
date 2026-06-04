@@ -134,6 +134,23 @@ class AppColors {
   static const classesDisabledBg = Color(0xFFE5E7EB);
   static const classesDisabledFg = Color(0xFF6B7280);
 
+  // Avatar identity palette
+  // Teintes sombres et sobres pour la couleur d'identité par élève (palette
+  // tournante déterministe — voir AvatarPalette). Chaque teinte est auditée
+  // WCAG 2.1 AA (≥ 4.5:1) dans les DEUX variantes de StudentAvatar :
+  //   - solid    : blancCasse sur la teinte
+  //   - outlined : la teinte sur papier (surfaceAlt)
+  // Ratios minimaux mesurés (le plus contraignant = outlined sur papier) :
+  //   bleuArdoise 7.7 · terreCuiteFonce 5.9 · vertSavane 5.3 · indigoArdoise 8.2
+  //   prune 9.6 · petrole 6.7 · olive 7.8 · bordeaux 9.1
+  // bleuArdoise et vertSavane sont réutilisés depuis la palette de marque.
+  static const avatarTerreCuiteFonce = Color(0xFF8F4521);
+  static const avatarIndigoArdoise = Color(0xFF33417A);
+  static const avatarPrune = Color(0xFF5B2A4A);
+  static const avatarPetrole = Color(0xFF165A66);
+  static const avatarOlive = Color(0xFF4A4A22);
+  static const avatarBordeaux = Color(0xFF6E2433);
+
   // Relationship colours
   static const relationshipFather = Color(0xFF1976D2);
   static const relationshipMother = Color(0xFFC2185B);

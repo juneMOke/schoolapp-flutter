@@ -95,6 +95,10 @@ class ClassesListSearchRequest extends Equatable {
 
 class ClassesListStudentRow extends Equatable {
   final String id;
+
+  /// Identifiant stable de l'élève (≠ [id] qui peut être un id d'adhésion).
+  /// Sert de clé à la teinte d'identité de l'avatar.
+  final String studentId;
   final String lastName;
   final String surname;
   final String firstName;
@@ -102,6 +106,7 @@ class ClassesListStudentRow extends Equatable {
 
   const ClassesListStudentRow({
     required this.id,
+    required this.studentId,
     required this.lastName,
     required this.surname,
     required this.firstName,
@@ -109,5 +114,12 @@ class ClassesListStudentRow extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, lastName, surname, firstName, classroomLabel];
+  List<Object?> get props => [
+    id,
+    studentId,
+    lastName,
+    surname,
+    firstName,
+    classroomLabel,
+  ];
 }

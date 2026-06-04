@@ -106,7 +106,8 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
             leading: core_avatar.StudentAvatar(
               firstName: row.firstName,
               lastName: row.lastName,
-              size: 28,
+              studentId: row.studentId,
+              size: core_avatar.AvatarSize.sm,
             ),
             cells: [
               DataTableCellSpec(

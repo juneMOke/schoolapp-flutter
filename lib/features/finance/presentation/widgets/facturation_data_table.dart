@@ -136,7 +136,8 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
             leading: core_avatar.StudentAvatar(
               firstName: summary.student.firstName,
               lastName: summary.student.lastName,
-              size: 28,
+              studentId: summary.student.id,
+              size: core_avatar.AvatarSize.sm,
             ),
             cells: [
               DataTableCellSpec(

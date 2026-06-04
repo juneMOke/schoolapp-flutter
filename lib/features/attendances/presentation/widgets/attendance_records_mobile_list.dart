@@ -67,6 +67,7 @@ class _AttendanceRecordRow extends StatelessWidget {
                 StudentAvatar(
                   firstName: row.studentFirstName,
                   lastName: row.studentLastName,
+                  studentId: row.studentId,
                   size: AppDimensions.attendanceStudentAvatarSize,
                 ),
                 const SizedBox(width: AppDimensions.spacingS),

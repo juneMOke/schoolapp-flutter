@@ -136,6 +136,7 @@ class _DisciplinaryStudentDetailPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DisciplinaryStudentCompactHeader(
+                studentId: intent.studentId,
                 firstName: intent.studentFirstName,
                 lastName: intent.studentLastName,
                 middleName: intent.studentMiddleName,

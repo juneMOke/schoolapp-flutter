@@ -35,6 +35,7 @@ class ClassesListClassroomResults extends StatelessWidget {
         .map(
           (member) => ClassesListStudentRow(
             id: member.id,
+            studentId: member.studentId,
             lastName: member.studentLastName,
             surname: member.studentMiddleName ?? '',
             firstName: member.studentFirstName,

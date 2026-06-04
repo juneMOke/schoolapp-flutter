@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/core/components/fields/editable_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -114,6 +114,8 @@ class PersonalInfoStepBody extends StatelessWidget {
                       StudentAvatar(
                         firstName: studentDetail.firstName,
                         lastName: studentDetail.lastName,
+                        studentId: studentDetail.id,
+                        size: AvatarSize.lg,
                       ),
                       const SizedBox(width: 12),
                       Expanded(

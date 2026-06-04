@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class DisciplinaryStudentCompactHeader extends StatelessWidget {
+  final String studentId;
   final String firstName;
   final String lastName;
   final String? middleName;
@@ -15,6 +16,7 @@ class DisciplinaryStudentCompactHeader extends StatelessWidget {
 
   const DisciplinaryStudentCompactHeader({
     super.key,
+    required this.studentId,
     required this.firstName,
     required this.lastName,
     this.middleName,
@@ -50,6 +52,7 @@ class DisciplinaryStudentCompactHeader extends StatelessWidget {
           StudentAvatar(
             firstName: firstName,
             lastName: lastName,
+            studentId: studentId,
             size: AppDimensions.detailMiniIconSize + AppDimensions.spacingL,
           ),
           const SizedBox(width: AppDimensions.spacingM),

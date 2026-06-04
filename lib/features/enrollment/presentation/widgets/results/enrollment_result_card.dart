@@ -49,7 +49,8 @@ class EnrollmentResultCard extends StatelessWidget {
                 core_avatar.StudentAvatar(
                   firstName: enrollment.student.firstName,
                   lastName: enrollment.student.lastName,
-                  size: 48,
+                  studentId: enrollment.student.id,
+                  size: core_avatar.AvatarSize.lg,
                   variant: _avatarVariantForStatus(status),
                 ),
                 const SizedBox(width: AppSpacing.md),

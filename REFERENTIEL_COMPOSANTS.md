@@ -422,6 +422,85 @@ Le composant gere:
 
 ---
 
+## 5) StudentAvatar
+
+- **Fichier**: `lib/core/components/avatars/student_avatar.dart`
+- **Type Flutter**: `StatelessWidget`
+- **Statut**: stable
+
+### Description
+
+Avatar circulaire affichant jusqu'a deux initiales (ordre NOM-Prenom, convention
+RDC, via `InitialsHelper`). Deux axes orthogonaux :
+
+- **Teinte de fond = identite** : couleur stable par eleve, attribuee par
+  `AvatarPalette.colorFor(studentId)` (palette tournante deterministe, hash FNV-1a
+  sur l'id eleve — jamais sur le nom, pour ne pas changer si le nom est corrige).
+- **Variante = statut + style de remplissage** :
+  - `solid` (eleve inscrit, 95 % des cas) : fond = teinte, initiales blanc casse.
+  - `outlined` (eleve en attente / pre-inscrit) : fond surface-alt, bordure +
+    initiales = teinte.
+
+La teinte et les initiales ne portent **aucune** information fonctionnelle
+(WCAG 1.1.1 / 1.4.1) : le statut reste lisible via la variante.
+
+### Zones caracteristiques
+
+- Forme : cercle (`BoxShape.circle`).
+- Police : `AppTextStyles.avatarInitials` (Inter 600, height 1), taille =
+  **0.36 x diametre** (et non 40 %), appliquee via `copyWith`.
+- Tailles standard : `AvatarSize.sm` 28 / `md` 32 (defaut) / `lg` 48 / `xl` 64.
+  Les cas deja tokenises hors-ladder (attendance 30, header disciplinaire 40)
+  passent leur valeur via `AppDimensions`.
+
+### Slots / props (fournis par la page)
+
+- `firstName`, `lastName` : requis (ordre NOM-Prenom).
+- `studentId` : requis — cle stable de la teinte d'identite.
+- `size` : double (defaut `AvatarSize.md`).
+- `variant` : `AvatarVariant.solid|outlined` (defaut solid).
+- `semanticLabel` : optionnel — voir Accessibilite.
+
+### Contrat de reactvite (conteneur)
+
+Taille fixe par usage, ne reflue pas sous le seuil de lisibilite.
+
+### Accessibilite (WCAG 2.1 AA)
+
+- `semanticLabel` fourni (avatar isole) → `Semantics(label, excludeSemantics)`
+  annonce le nom complet.
+- `semanticLabel` absent (nom deja affiche a cote) → `ExcludeSemantics` : les
+  initiales ne sont pas relues (evite la redite).
+- Contraste (1.4.3) : chaque teinte de la palette est auditee >= 4.5:1 dans les
+  **deux** variantes (le cas le plus contraignant = teinte sur papier en outlined,
+  aux tailles 28/32 ou les initiales sont du texte normal). Ratios minimaux mesures
+  (outlined sur papier) :
+
+  | Teinte | solid (blanc) | outlined (papier) |
+  |---|---|---|
+  | bleuArdoise | 8.7 | 7.7 |
+  | terreCuiteFonce | 6.6 | 5.9 |
+  | vertSavane | 5.9 | 5.3 |
+  | indigoArdoise | 9.2 | 8.2 |
+  | prune | 10.7 | 9.6 |
+  | petrole | 7.5 | 6.7 |
+  | olive | 8.8 | 7.8 |
+  | bordeaux | 10.2 | 9.1 |
+
+### Exemples d'usages actuels
+
+Tables et tuiles : enrollment, classes, finance, attendance. Header isole :
+`disciplinary_student_compact_header.dart` (avec `studentId`).
+
+### Tests associes
+
+- `test/core/helpers/avatar_palette_test.dart` (determinisme, distribution).
+- `test/core/components/avatars/student_avatar_test.dart` (variantes, teinte,
+  semantics).
+- `test/core/helpers/initials_helper_test.dart` (calcul des initiales).
+
+---
+
 ## Template pour prochains composants
 
 Copier/coller cette section pour toute nouvelle entree:
