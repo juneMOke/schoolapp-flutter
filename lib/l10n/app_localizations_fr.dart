@@ -593,11 +593,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentErrorContactAdmin => 'Contacter l\'administrateur';
 
   @override
-  String get enrollmentErrorNetworkTitle => 'Connexion indisponible';
+  String get enrollmentErrorNetworkTitle => 'Pas de connexion';
 
   @override
   String get enrollmentErrorNetworkMessage =>
-      'Vérifiez votre connexion internet puis relancez la recherche.';
+      'Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.';
 
   @override
   String get enrollmentErrorUnauthorizedTitle => 'Session expirée';
@@ -614,11 +614,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous n\'avez pas les droits requis pour voir cette liste.';
 
   @override
-  String get enrollmentErrorServerTitle => 'Erreur serveur';
+  String get enrollmentErrorServerTitle => 'Erreur du serveur';
 
   @override
   String get enrollmentErrorServerMessage =>
-      'Le serveur est temporairement indisponible. Réessayez dans quelques instants.';
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String enrollmentErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
 
   @override
   String get enrollmentErrorUnknownTitle => 'Chargement impossible';

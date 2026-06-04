@@ -292,14 +292,22 @@
   "enrollmentErrorRetry": "Réessayer",
   "enrollmentErrorReconnect": "Se reconnecter",
   "enrollmentErrorContactAdmin": "Contacter l\u0027administrateur",
-  "enrollmentErrorNetworkTitle": "Connexion indisponible",
-  "enrollmentErrorNetworkMessage": "Vérifiez votre connexion internet puis relancez la recherche.",
+  "enrollmentErrorNetworkTitle": "Pas de connexion",
+  "enrollmentErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.",
   "enrollmentErrorUnauthorizedTitle": "Session expirée",
   "enrollmentErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
   "enrollmentErrorForbiddenTitle": "Accès refusé",
   "enrollmentErrorForbiddenMessage": "Vous n\u0027avez pas les droits requis pour voir cette liste.",
-  "enrollmentErrorServerTitle": "Erreur serveur",
-  "enrollmentErrorServerMessage": "Le serveur est temporairement indisponible. Réessayez dans quelques instants.",
+  "enrollmentErrorServerTitle": "Erreur du serveur",
+  "enrollmentErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "enrollmentErrorIncidentCode": "Code incident : {code}",
+  "@enrollmentErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "enrollmentErrorUnknownTitle": "Chargement impossible",
   "enrollmentErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement des résultats.",
   "loadingStudents": "Chargement des étudiants...",

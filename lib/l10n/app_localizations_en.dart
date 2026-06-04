@@ -588,11 +588,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentErrorContactAdmin => 'Contact administrator';
 
   @override
-  String get enrollmentErrorNetworkTitle => 'Connection unavailable';
+  String get enrollmentErrorNetworkTitle => 'No connection';
 
   @override
   String get enrollmentErrorNetworkMessage =>
-      'Check your internet connection, then retry the search.';
+      'You appear to be offline. Check your internet connection, then retry.';
 
   @override
   String get enrollmentErrorUnauthorizedTitle => 'Session expired';
@@ -613,7 +613,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentErrorServerMessage =>
-      'The server is temporarily unavailable. Please try again shortly.';
+      'An error occurred on our side. Please try again in a moment.';
+
+  @override
+  String enrollmentErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
 
   @override
   String get enrollmentErrorUnknownTitle => 'Unable to load';

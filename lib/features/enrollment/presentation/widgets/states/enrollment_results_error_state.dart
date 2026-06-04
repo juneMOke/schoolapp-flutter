@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentResultsErrorState extends StatelessWidget {
   final EnrollmentErrorType type;
   final String? message;
+  final String? incidentCode;
   final VoidCallback? onRetry;
   final VoidCallback? onReconnect;
   final VoidCallback? onContactAdmin;
@@ -15,6 +15,7 @@ class EnrollmentResultsErrorState extends StatelessWidget {
     super.key,
     required this.type,
     this.message,
+    this.incidentCode,
     this.onRetry,
     this.onReconnect,
     this.onContactAdmin,
@@ -23,17 +24,19 @@ class EnrollmentResultsErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = _tone;
     final action = _primaryAction(l10n);
+    final resolvedMessage = _resolveMessage(l10n);
+    final incidentCodeLabel =
+        type == EnrollmentErrorType.server &&
+            incidentCode != null &&
+            incidentCode!.trim().isNotEmpty
+        ? l10n.enrollmentErrorIncidentCode(incidentCode!)
+        : null;
 
-    return EteeloEmptyResult(
-      label: _title(l10n),
-      description: message?.trim().isNotEmpty == true
-          ? message!
-          : _description(l10n),
-      medallionIcon: _icon,
-      cornerBadgeIcon: Icons.error_outline_rounded,
-      accentColor: tone,
+    return EteeloErrorResult(
+      type: _viewType,
+      title: _title(l10n),
+      message: resolvedMessage,
       primaryAction: action == null
           ? null
           : FilledButton.icon(
@@ -41,9 +44,16 @@ class EnrollmentResultsErrorState extends StatelessWidget {
               icon: Icon(action.icon, size: 16),
               label: Text(action.label),
             ),
+      incidentCodeLabel: incidentCodeLabel,
       autofocusPrimaryAction: action != null,
       fullWidthCard: true,
     );
+  }
+
+  String _resolveMessage(AppLocalizations l10n) {
+    // On force un message i18n lisible pour toutes les erreurs de listing.
+    // Les messages backend peuvent etre techniques et non localises.
+    return _description(l10n);
   }
 
   _ErrorAction? _primaryAction(AppLocalizations l10n) {
@@ -98,23 +108,13 @@ class EnrollmentResultsErrorState extends StatelessWidget {
     };
   }
 
-  Color get _tone {
+  EteeloErrorType get _viewType {
     return switch (type) {
-      EnrollmentErrorType.network => AppColors.info,
-      EnrollmentErrorType.unauthorized ||
-      EnrollmentErrorType.forbidden => AppColors.warning,
-      EnrollmentErrorType.server => AppColors.error,
-      EnrollmentErrorType.unknown => AppColors.bleuArdoise,
-    };
-  }
-
-  IconData get _icon {
-    return switch (type) {
-      EnrollmentErrorType.network => Icons.wifi_off_rounded,
-      EnrollmentErrorType.unauthorized => Icons.lock_outline_rounded,
-      EnrollmentErrorType.forbidden => Icons.gpp_bad_rounded,
-      EnrollmentErrorType.server => Icons.error_outline_rounded,
-      EnrollmentErrorType.unknown => Icons.warning_amber_rounded,
+      EnrollmentErrorType.network => EteeloErrorType.network,
+      EnrollmentErrorType.unauthorized => EteeloErrorType.unauthorized,
+      EnrollmentErrorType.forbidden => EteeloErrorType.forbidden,
+      EnrollmentErrorType.server => EteeloErrorType.server,
+      EnrollmentErrorType.unknown => EteeloErrorType.unknown,
     };
   }
 }

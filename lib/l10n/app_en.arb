@@ -298,14 +298,22 @@
   "enrollmentErrorRetry": "Retry",
   "enrollmentErrorReconnect": "Sign in again",
   "enrollmentErrorContactAdmin": "Contact administrator",
-  "enrollmentErrorNetworkTitle": "Connection unavailable",
-  "enrollmentErrorNetworkMessage": "Check your internet connection, then retry the search.",
+  "enrollmentErrorNetworkTitle": "No connection",
+  "enrollmentErrorNetworkMessage": "You appear to be offline. Check your internet connection, then retry.",
   "enrollmentErrorUnauthorizedTitle": "Session expired",
   "enrollmentErrorUnauthorizedMessage": "Your session expired. Sign in again to continue.",
   "enrollmentErrorForbiddenTitle": "Access denied",
   "enrollmentErrorForbiddenMessage": "You do not have the required permissions to view this list.",
   "enrollmentErrorServerTitle": "Server error",
-  "enrollmentErrorServerMessage": "The server is temporarily unavailable. Please try again shortly.",
+  "enrollmentErrorServerMessage": "An error occurred on our side. Please try again in a moment.",
+  "enrollmentErrorIncidentCode": "Incident code: {code}",
+  "@enrollmentErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "enrollmentErrorUnknownTitle": "Unable to load",
   "enrollmentErrorUnknownMessage": "An unexpected error occurred while loading results.",
   "loadingStudents": "Loading students...",

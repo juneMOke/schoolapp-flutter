@@ -1095,13 +1095,13 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentErrorNetworkTitle.
   ///
   /// In en, this message translates to:
-  /// **'Connection unavailable'**
+  /// **'No connection'**
   String get enrollmentErrorNetworkTitle;
 
   /// No description provided for @enrollmentErrorNetworkMessage.
   ///
   /// In en, this message translates to:
-  /// **'Check your internet connection, then retry the search.'**
+  /// **'You appear to be offline. Check your internet connection, then retry.'**
   String get enrollmentErrorNetworkMessage;
 
   /// No description provided for @enrollmentErrorUnauthorizedTitle.
@@ -1137,8 +1137,14 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentErrorServerMessage.
   ///
   /// In en, this message translates to:
-  /// **'The server is temporarily unavailable. Please try again shortly.'**
+  /// **'An error occurred on our side. Please try again in a moment.'**
   String get enrollmentErrorServerMessage;
+
+  /// No description provided for @enrollmentErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String enrollmentErrorIncidentCode(String code);
 
   /// No description provided for @enrollmentErrorUnknownTitle.
   ///
