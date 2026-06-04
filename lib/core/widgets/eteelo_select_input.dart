@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_constants.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_popover_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_semantics.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_sheet.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_types.dart';
 
-enum EteeloSelectPanelMode { popover, sheet }
-
-class EteeloSelectItem<T> {
-  final T value;
-  final String label;
-  final bool enabled;
-
-  const EteeloSelectItem({
-    required this.value,
-    required this.label,
-    this.enabled = true,
-  });
-}
+export 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_types.dart';
 
 class EteeloSelectInput<T> extends StatefulWidget {
   final String label;
@@ -65,17 +56,9 @@ class EteeloSelectInput<T> extends StatefulWidget {
 }
 
 class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
-  static const double _fieldHeight = AppDimensions.minTouchTarget - 2;
-  static const double _restBorderWidth = 1;
-  static const double _focusBorderWidth = 2;
-  static const double _restHorizontalPadding = AppSpacing.md;
-  static const double _focusHorizontalPadding = AppSpacing.md - 1;
-  static const double _labelGap = AppSpacing.sm - 2;
-
   final _formFieldKey = GlobalKey<FormFieldState<T>>();
 
-  late FocusNode _focusNode;
-  late bool _ownsFocusNode;
+  late final FocusNode _focusNode;
   bool _isPanelOpen = false;
 
   bool get _hasEditingFocus => _focusNode.hasFocus || _isPanelOpen;
@@ -83,7 +66,7 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
   @override
   void initState() {
     super.initState();
-    _setupFocusNode();
+    _focusNode = FocusNode()..addListener(_handleFocusChanged);
   }
 
   @override
@@ -96,34 +79,15 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
 
   @override
   void dispose() {
-    _teardownFocusNode();
+    _focusNode
+      ..removeListener(_handleFocusChanged)
+      ..dispose();
     super.dispose();
-  }
-
-  void _setupFocusNode() {
-    _focusNode = FocusNode();
-    _ownsFocusNode = true;
-    _focusNode.addListener(_handleFocusChanged);
-  }
-
-  void _teardownFocusNode() {
-    _focusNode.removeListener(_handleFocusChanged);
-    if (_ownsFocusNode) {
-      _focusNode.dispose();
-    }
   }
 
   void _handleFocusChanged() {
     if (!mounted) return;
     setState(() {});
-  }
-
-  String _resolvedPlaceholder(BuildContext context) {
-    final fromWidget = widget.placeholder?.trim() ?? '';
-    if (fromWidget.isNotEmpty) {
-      return fromWidget;
-    }
-    return AppLocalizations.of(context)?.selectPlaceholderChoose ?? 'Choisir';
   }
 
   String? _selectedLabel(T? value) {
@@ -144,11 +108,13 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
     return AppColors.border;
   }
 
-  double _borderWidth() =>
-      _hasEditingFocus ? _focusBorderWidth : _restBorderWidth;
+  double _borderWidth() => _hasEditingFocus
+      ? EteeloSelectConstants.focusBorderWidth
+      : EteeloSelectConstants.restBorderWidth;
 
-  double _horizontalPadding() =>
-      _hasEditingFocus ? _focusHorizontalPadding : _restHorizontalPadding;
+  double _horizontalPadding() => _hasEditingFocus
+      ? EteeloSelectConstants.focusHorizontalPadding
+      : EteeloSelectConstants.restHorizontalPadding;
 
   BoxShadow? _focusRing() {
     if (!_hasEditingFocus) return null;
@@ -164,58 +130,11 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
 
     setState(() => _isPanelOpen = true);
 
-    final result = await showModalBottomSheet<T>(
+    final result = await showEteeloSelectSheet<T>(
       context: context,
-      showDragHandle: true,
-      backgroundColor: AppColors.surface,
-      constraints: const BoxConstraints(maxWidth: 640),
-      builder: (context) => SafeArea(
-        child: ListView.separated(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.lg,
-          ),
-          itemCount: widget.items.length,
-          separatorBuilder: (_, _) =>
-              const Divider(height: AppSpacing.sm, color: AppColors.border),
-          itemBuilder: (context, index) {
-            final item = widget.items[index];
-            final isSelected = item.value == state.value;
-            final content = widget.itemBuilder?.call(context, item, isSelected);
-            return ListTile(
-              enabled: item.enabled,
-              contentPadding: EdgeInsets.zero,
-              minLeadingWidth: 0,
-              title:
-                  content ??
-                  Text(
-                    item.label,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: item.enabled
-                          ? AppColors.textPrimary
-                          : AppColors.stateDisabled,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                    ),
-                  ),
-              trailing: content == null && isSelected
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: AppColors.bleuArdoise,
-                      size: 18,
-                    )
-                  : null,
-              onTap: item.enabled
-                  ? () => Navigator.of(context).pop<T>(item.value)
-                  : null,
-            );
-          },
-        ),
-      ),
+      items: widget.items,
+      selectedValue: state.value,
+      itemBuilder: widget.itemBuilder,
     );
 
     if (!mounted) return;
@@ -246,25 +165,35 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
 
           final resolvedErrorText = widget.errorText ?? state.errorText;
           final selectedLabel = _selectedLabel(state.value);
-          final placeholder = _resolvedPlaceholder(context);
+          final placeholder = resolveSelectPlaceholder(
+            context,
+            widget.placeholder,
+          );
+          final semanticLabel = resolveSelectSemanticLabel(
+            context,
+            widget.label,
+            widget.required,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ExcludeSemantics(child: _buildLabel()),
-              const SizedBox(height: _labelGap),
+              const SizedBox(height: EteeloSelectConstants.labelGap),
               switch (widget.panelMode) {
                 EteeloSelectPanelMode.popover => _buildPopoverField(
                   state: state,
                   selectedLabel: selectedLabel,
                   placeholder: placeholder,
                   resolvedErrorText: resolvedErrorText,
+                  semanticLabel: semanticLabel,
                 ),
                 EteeloSelectPanelMode.sheet => _buildSheetField(
                   state: state,
                   selectedLabel: selectedLabel,
                   placeholder: placeholder,
                   resolvedErrorText: resolvedErrorText,
+                  semanticLabel: semanticLabel,
                 ),
               },
               if (resolvedErrorText != null &&
@@ -311,9 +240,10 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
     required String? selectedLabel,
     required String placeholder,
     required String? resolvedErrorText,
+    required String semanticLabel,
   }) {
     return Semantics(
-      label: widget.required ? '${widget.label}, obligatoire' : widget.label,
+      label: semanticLabel,
       value: selectedLabel ?? placeholder,
       textField: false,
       enabled: widget.enabled,
@@ -323,7 +253,9 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOut,
-          constraints: const BoxConstraints(minHeight: _fieldHeight),
+          constraints: const BoxConstraints(
+            minHeight: EteeloSelectConstants.fieldHeight,
+          ),
           padding: EdgeInsets.symmetric(horizontal: _horizontalPadding()),
           decoration: BoxDecoration(
             color: _backgroundColor(),
@@ -334,68 +266,25 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
             ),
             boxShadow: [if (_focusRing() != null) _focusRing()!],
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: state.value,
-              isExpanded: true,
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 18,
-                color: AppColors.textMuted,
-              ),
-              hint: Text(
-                placeholder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-              menuMaxHeight: widget.menuMaxHeight,
-              borderRadius: AppRadius.brSm,
-              style: AppTypography.bodyMedium.copyWith(
-                color: widget.enabled
-                    ? AppColors.textPrimary
-                    : AppColors.stateDisabled,
-              ),
-              selectedItemBuilder: widget.selectedItemBuilder == null
-                  ? null
-                  : (context) => widget.items
-                        .map(
-                          (item) => widget.selectedItemBuilder!(context, item),
-                        )
-                        .toList(growable: false),
-              items: widget.items
-                  .map(
-                    (item) => DropdownMenuItem<T>(
-                      value: item.value,
-                      enabled: item.enabled,
-                      child:
-                          widget.itemBuilder?.call(
-                            context,
-                            item,
-                            item.value == state.value,
-                          ) ??
-                          Text(
-                            item.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    ),
-                  )
-                  .toList(growable: false),
-              onTap: () {
-                if (!widget.enabled) return;
-                setState(() => _isPanelOpen = true);
-              },
-              onChanged: !widget.enabled
-                  ? null
-                  : (value) {
-                      setState(() => _isPanelOpen = false);
-                      state.didChange(value);
-                      widget.onChanged(value);
-                    },
-            ),
+          child: EteeloSelectPopoverField<T>(
+            value: state.value,
+            enabled: widget.enabled,
+            placeholder: placeholder,
+            menuMaxHeight: widget.menuMaxHeight,
+            items: widget.items,
+            itemBuilder: widget.itemBuilder,
+            selectedItemBuilder: widget.selectedItemBuilder,
+            onTap: () {
+              if (!widget.enabled) return;
+              setState(() => _isPanelOpen = true);
+            },
+            onChanged: !widget.enabled
+                ? null
+                : (value) {
+                    setState(() => _isPanelOpen = false);
+                    state.didChange(value);
+                    widget.onChanged(value);
+                  },
           ),
         ),
       ),
@@ -407,9 +296,10 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
     required String? selectedLabel,
     required String placeholder,
     required String? resolvedErrorText,
+    required String semanticLabel,
   }) {
     return Semantics(
-      label: widget.required ? '${widget.label}, obligatoire' : widget.label,
+      label: semanticLabel,
       value: selectedLabel ?? placeholder,
       button: true,
       enabled: widget.enabled,
@@ -419,7 +309,7 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOut,
-          height: _fieldHeight,
+          height: EteeloSelectConstants.fieldHeight,
           padding: EdgeInsets.symmetric(horizontal: _horizontalPadding()),
           decoration: BoxDecoration(
             color: _backgroundColor(),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_search_form_logic.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_actions.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_fields.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListSearchForm extends StatefulWidget {
@@ -93,7 +93,8 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
       surname: _surnameController.text,
     );
 
-    return SearchFormCard(
+    return BiToneSectionCard(
+      bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

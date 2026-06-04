@@ -68,6 +68,16 @@ class AppDimensions {
   static const enrollmentStatsDonutCenterRadius = 48.0;
   static const enrollmentStatsHeaderTitleFontSize = 20.0;
 
+  // Enrollment results bar tokens
+  static const enrollmentResultsBarGap = 10.0;
+  static const enrollmentResultsFilterChipHPadding = 10.0;
+  static const enrollmentResultsFilterChipVPadding = 4.0;
+  static const enrollmentResultsFilterChipIconSize = 13.0;
+  static const enrollmentResultsFilterChipCloseIconSize = 12.0;
+  static const enrollmentResultsSortSelectWidth = 168.0;
+  static const enrollmentResultsViewToggleHeight = 38.0;
+  static const enrollmentResultsViewToggleItemHeight = 30.0;
+
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
   static const financeStatsKpiPrimaryValueFontSize = 32.0;
