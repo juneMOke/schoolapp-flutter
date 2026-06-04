@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -22,6 +25,7 @@ class EnrollmentStepper extends StatefulWidget {
   final EnrollmentDetailIntent detailIntent;
   final EnrollmentDetailPolicy detailPolicy;
   final List<EnrollmentStepHandler> stepHandlers;
+  final ValueChanged<int>? onStepChanged;
 
   const EnrollmentStepper({
     super.key,
@@ -29,6 +33,7 @@ class EnrollmentStepper extends StatefulWidget {
     required this.detailIntent,
     required this.detailPolicy,
     required this.stepHandlers,
+    this.onStepChanged,
   });
 
   @override
@@ -48,6 +53,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     final stepTitles = _stepHandlers
         .map((handler) => handler.title(l10n))
         .toList(growable: false);
+    final breadcrumbTitles = <String>[
+      l10n.wizardStepShortPersonal,
+      l10n.wizardStepShortAddress,
+      l10n.wizardStepShortPrevious,
+      l10n.wizardStepShortTarget,
+      l10n.wizardStepShortCharges,
+      l10n.wizardStepShortGuardian,
+      l10n.wizardStepShortSummary,
+    ];
     final stepCardSubtitles = _stepHandlers
         .map((handler) => handler.subtitle(l10n))
         .toList(growable: false);
@@ -100,6 +114,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
           >(
             builder: (context, flowState) {
               final currentStep = flowState.currentStep;
+              widget.onStepChanged?.call(currentStep);
               final progress = (currentStep + 1) / stepTitles.length;
               final currentStepState = flowState.stateOf(currentStep);
               final currentHandler = _stepHandlers[currentStep];
@@ -128,6 +143,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 currentStep: currentStep,
                 isLast: flowState.isLast,
                 isSummaryStep: isSummaryStep,
+                dirty: currentStepState.dirty,
+                valid: currentStepState.valid,
                 canSave: canSaveCurrentStep,
                 canContinue: currentHandler.canContinue(flowContext),
                 showSaveAction: showSaveAction,
@@ -158,7 +175,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               );
 
               return _EnrollmentStepperLayout(
-                stepTitles: stepTitles,
+                stepTitles: breadcrumbTitles,
                 currentStep: currentStep,
                 progress: progress,
                 onStepTap: (target) =>
@@ -166,6 +183,10 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 stepTitle: stepTitles[currentStep],
                 stepSubtitle: stepCardSubtitles[currentStep],
                 stepContent: stepContents[currentStep],
+                stepEyebrow:
+                    '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
+                stepAccentColor: _stepAccentColor(currentStep),
+                stepIcon: _stepIcon(currentStep),
                 controls: controls,
                 isSummaryStep: isSummaryStep,
               );
@@ -268,6 +289,30 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
   }
+
+  Color _stepAccentColor(int step) {
+    return switch (step) {
+      0 => AppColors.bleuArdoise,
+      1 => AppColors.info,
+      2 => AppColors.orDoux,
+      3 => AppColors.terreCuite,
+      4 => AppColors.vertSavane,
+      5 => AppColors.warning,
+      _ => AppColors.success,
+    };
+  }
+
+  IconData _stepIcon(int step) {
+    return switch (step) {
+      0 => Icons.badge_outlined,
+      1 => Icons.home_work_outlined,
+      2 => Icons.history_edu_outlined,
+      3 => Icons.trending_up_rounded,
+      4 => Icons.payments_outlined,
+      5 => Icons.family_restroom_outlined,
+      _ => Icons.fact_check_outlined,
+    };
+  }
 }
 
 class _EnrollmentStepperLayout extends StatelessWidget {
@@ -277,6 +322,9 @@ class _EnrollmentStepperLayout extends StatelessWidget {
   final ValueChanged<int> onStepTap;
   final String stepTitle;
   final String stepSubtitle;
+  final String stepEyebrow;
+  final Color stepAccentColor;
+  final IconData stepIcon;
   final Widget stepContent;
   final Widget controls;
   final bool isSummaryStep;
@@ -288,6 +336,9 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     required this.onStepTap,
     required this.stepTitle,
     required this.stepSubtitle,
+    required this.stepEyebrow,
+    required this.stepAccentColor,
+    required this.stepIcon,
     required this.stepContent,
     required this.controls,
     required this.isSummaryStep,
@@ -306,24 +357,38 @@ class _EnrollmentStepperLayout extends StatelessWidget {
             progress: progress,
             onStepTap: onStepTap,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StepPageCard(
-                    key: ValueKey(currentStep),
-                    title: stepTitle,
-                    subtitle: stepSubtitle,
-                    child: stepContent,
+                  AnimatedSwitcher(
+                    duration: AppMotion.standard,
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    child: StepPageCard(
+                      key: ValueKey(currentStep),
+                      eyebrow: stepEyebrow,
+                      title: stepTitle,
+                      subtitle: stepSubtitle,
+                      accentColor: stepAccentColor,
+                      icon: stepIcon,
+                      child: stepContent,
+                    ),
                   ),
-                  if (!isSummaryStep) ...[const SizedBox(height: 12), controls],
+                  if (!isSummaryStep) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    controls,
+                  ],
                 ],
               ),
             ),
           ),
-          if (isSummaryStep) ...[const SizedBox(height: 12), controls],
+          if (isSummaryStep) ...[
+            const SizedBox(height: AppSpacing.md),
+            controls,
+          ],
         ],
       ),
     );

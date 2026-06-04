@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -24,7 +25,10 @@ class WizardBreadcrumb extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brMd,
@@ -33,143 +37,146 @@ class WizardBreadcrumb extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                l10n.stepIndicator(currentStep + 1, titles.length),
-                style: AppTypography.labelSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 3,
-                    backgroundColor: AppColors.border,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.bleuArdoise,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            l10n.stepIndicator(currentStep + 1, titles.length),
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: List.generate(titles.length, (index) {
-              final isDone = index < currentStep;
-              final isCurrent = index == currentStep;
-              final isFuture = index > currentStep;
-              final canTap = !isFuture;
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: AppRadius.brMd,
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 4,
+              backgroundColor: AppColors.surfaceAlt,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.terreCuite,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const stepCircleDiameter = 36.0; // Pastille 36×36
+              const stepLabelWidth = 72.0; // Espace pour label sous pastille
+              final connectorWidth = titles.length > 1
+                  ? (constraints.maxWidth -
+                            (titles.length * stepCircleDiameter)) /
+                        (titles.length - 1)
+                  : 0.0;
 
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MouseRegion(
-                    cursor: canTap
-                        ? SystemMouseCursors.click
-                        : SystemMouseCursors.forbidden,
-                    child: AnimatedOpacity(
-                      duration: AppMotion.fast,
-                      curve: AppMotion.outCurve,
-                      opacity: isFuture ? 0.55 : 1,
-                      child: InkWell(
-                        onTap: canTap ? () => onStepTap(index) : null,
-                        borderRadius: BorderRadius.circular(18),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isCurrent
-                                ? AppColors.bleuArdoise
-                                : isDone
-                                ? AppColors.bleuArdoise.withValues(alpha: 0.10)
-                                : AppColors.surfaceAlt,
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(18),
-                            ),
-                            border: isCurrent
-                                ? null
-                                : Border.all(
-                                    color: isDone
-                                        ? AppColors.bleuArdoise.withValues(
-                                            alpha: 0.14,
-                                          )
-                                        : AppColors.border,
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(titles.length, (index) {
+                    final isDone = index < currentStep;
+                    final isCurrent = index == currentStep;
+                    final isFuture = index > currentStep;
+                    final canTap = !isFuture;
+
+                    final circleColor = isCurrent
+                        ? AppColors.terreCuite
+                        : isDone
+                        ? AppColors.vertSavane
+                        : AppColors.surfaceAlt;
+                    final borderColor = isCurrent
+                        ? AppColors.terreCuite
+                        : isDone
+                        ? AppColors.vertSavane
+                        : AppColors.border;
+
+                    return Row(
+                      children: [
+                        Column(
+                          children: [
+                            MouseRegion(
+                              cursor: canTap
+                                  ? SystemMouseCursors.click
+                                  : SystemMouseCursors.forbidden,
+                              child: InkWell(
+                                onTap: canTap ? () => onStepTap(index) : null,
+                                borderRadius: BorderRadius.circular(18),
+                                child: AnimatedContainer(
+                                  duration: AppMotion.fast,
+                                  width: stepCircleDiameter,
+                                  height: stepCircleDiameter,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: circleColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: borderColor,
+                                      width: 2,
+                                    ),
+                                    boxShadow: isCurrent
+                                        ? [
+                                            BoxShadow(
+                                              color: AppColors.terreCuite
+                                                  .withValues(alpha: 0.40),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : null,
                                   ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isCurrent
-                                      ? AppColors.textOnDark.withValues(
-                                          alpha: 0.22,
+                                  child: isDone
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                          color: AppColors.textOnDark,
                                         )
-                                      : isDone
-                                      ? AppColors.bleuArdoise.withValues(
-                                          alpha: 0.16,
-                                        )
-                                      : AppColors.border,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  isDone ? '✓' : '${index + 1}',
-                                  style: AppTypography.labelSmall.copyWith(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w700,
-                                    color: isCurrent
-                                        ? AppColors.textOnDark
-                                        : isDone
-                                        ? AppColors.bleuArdoise
-                                        : AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                titles[index],
-                                style: AppTypography.labelSmall.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: isCurrent
-                                      ? AppColors.textOnDark
-                                      : isDone
-                                      ? AppColors.bleuArdoise
-                                      : AppColors.textSecondary.withValues(
-                                          alpha: 0.75,
+                                      : Text(
+                                          '${index + 1}',
+                                          style: AppTypography.labelMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: isCurrent
+                                                    ? AppColors.textOnDark
+                                                    : AppColors.textSecondary,
+                                              ),
                                         ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            SizedBox(
+                              width: stepLabelWidth,
+                              child: Text(
+                                titles[index],
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: isCurrent
+                                      ? AppColors.terreCuite
+                                      : isDone
+                                      ? AppColors.vertSavane
+                                      : AppColors.textMuted,
+                                  fontWeight: isCurrent
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  ),
-                  if (index < titles.length - 1)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 1),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 12,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                ],
+                        if (index < titles.length - 1)
+                          Container(
+                            width: connectorWidth.clamp(12, 40),
+                            height: 2,
+                            margin: const EdgeInsets.only(bottom: 22),
+                            color: isDone
+                                ? AppColors.vertSavane
+                                : AppColors.border,
+                          ),
+                      ],
+                    );
+                  }),
+                ),
               );
-            }),
+            },
           ),
         ],
       ),

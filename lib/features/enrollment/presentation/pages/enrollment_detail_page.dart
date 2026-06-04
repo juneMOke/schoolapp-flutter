@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_app_bar_title.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_back_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_content_shell.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_info_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_app_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_read_only_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
@@ -32,6 +31,7 @@ class EnrollmentDetailPage extends StatefulWidget {
 class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   late EnrollmentDetailPolicy _policy;
   late EnrollmentDetailIntent _effectiveIntent;
+  int _currentStep = 0;
 
   @override
   void initState() {
@@ -49,6 +49,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
       final shouldRefreshFromRouter = widget.intent != _effectiveIntent;
       _policy = EnrollmentDetailPolicyResolver.fromIntent(widget.intent);
       _effectiveIntent = widget.intent;
+      _currentStep = 0;
       if (shouldRefreshFromRouter) {
         _requestBootstrapContexts();
         _requestDetail();
@@ -126,34 +127,26 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleSpacing: 18,
-        leading: const EnrollmentDetailBackButton(),
-        title: BlocSelector<EnrollmentBloc, EnrollmentState, String>(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(68),
+        child: BlocSelector<EnrollmentBloc, EnrollmentState, String>(
           selector: (state) {
             final detail = _policy.detail(state);
             if (detail == null) {
-              return '';
+              return l10n.enrollmentUnknownStudent;
             }
 
-            return [
-              detail.studentDetail.firstName,
-              detail.studentDetail.lastName,
-              detail.studentDetail.surname,
-            ].where((part) => part.trim().isNotEmpty).join(' ');
+            return _buildStudentDisplayName(detail);
           },
           builder: (context, studentDisplayName) {
-            return EnrollmentDetailAppBarTitle(
-              titleLabel: l10n.enrollmentDetailTitle,
-              titleValue: studentDisplayName.isNotEmpty
-                  ? studentDisplayName
-                  : l10n.enrollmentUnknownStudent,
+            return EnrollmentJourneyAppBar(
+              modeLabel: _buildJourneyModeLabel(l10n),
+              studentDisplayName: studentDisplayName,
+              currentStep: _currentStep,
+              totalSteps: EnrollmentWizardStep.values.length,
             );
           },
         ),
-        backgroundColor: AppTheme.surfaceColor,
       ),
       body: BlocListener<EnrollmentBloc, EnrollmentState>(
         listenWhen: _isEnrollmentCreated,
@@ -188,11 +181,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
             }
 
             final enrollment = detail.enrollmentDetail;
-            final studentDisplayName = [
-              detail.studentDetail.firstName,
-              detail.studentDetail.lastName,
-              detail.studentDetail.surname,
-            ].where((part) => part.trim().isNotEmpty).join(' ');
+            final studentDisplayName = _buildStudentDisplayName(detail);
             final accessMode = _resolveAccessMode(enrollment.status);
             final showAccessBanner = _shouldShowAccessBanner(
               origin: _effectiveIntent.origin,
@@ -218,6 +207,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
                       enrollmentDetail: detail,
                       detailIntent: _effectiveIntent,
                       detailPolicy: _policy,
+                      onStepChanged: _onStepChanged,
                     ),
                   ),
                 ],
@@ -242,5 +232,33 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     return _policy.loadStatus(previous) != _policy.loadStatus(current) ||
         _policy.detail(previous) != _policy.detail(current) ||
         previous.errorMessage != current.errorMessage;
+  }
+
+  String _buildStudentDisplayName(EnrollmentDetail detail) {
+    final fullName = [
+      detail.studentDetail.firstName,
+      detail.studentDetail.lastName,
+      detail.studentDetail.surname,
+    ].where((part) => part.trim().isNotEmpty).join(' ');
+
+    return fullName.isNotEmpty
+        ? fullName
+        : detail.enrollmentDetail.enrollmentCode;
+  }
+
+  String _buildJourneyModeLabel(AppLocalizations l10n) {
+    return switch (_effectiveIntent.origin) {
+      EnrollmentDetailOrigin.newFirstRegistration => l10n.journeyModeNew,
+      EnrollmentDetailOrigin.firstRegistration => l10n.journeyModeEdit,
+      EnrollmentDetailOrigin.preRegistration ||
+      EnrollmentDetailOrigin.reRegistration => l10n.journeyModeView,
+    };
+  }
+
+  void _onStepChanged(int step) {
+    if (_currentStep == step || !mounted) {
+      return;
+    }
+    setState(() => _currentStep = step);
   }
 }

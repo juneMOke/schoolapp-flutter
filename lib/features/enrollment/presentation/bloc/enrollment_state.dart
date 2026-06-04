@@ -72,6 +72,7 @@ class EnrollmentState extends Equatable {
   final EnrollmentDetail? preview;
   final EnrollmentSummary? createdEnrollmentSummary;
   final EnrollmentSummary? updatedEnrollmentSummary;
+  final EnrollmentErrorType? summariesErrorType;
   final String? errorMessage;
 
   const EnrollmentState({
@@ -91,6 +92,7 @@ class EnrollmentState extends Equatable {
     required this.preview,
     required this.createdEnrollmentSummary,
     required this.updatedEnrollmentSummary,
+    required this.summariesErrorType,
     required this.errorMessage,
   });
 
@@ -111,6 +113,7 @@ class EnrollmentState extends Equatable {
       preview = null,
       createdEnrollmentSummary = null,
       updatedEnrollmentSummary = null,
+      summariesErrorType = null,
       errorMessage = null;
 
   EnrollmentState copyWith({
@@ -130,6 +133,7 @@ class EnrollmentState extends Equatable {
     Object? preview = _undefined,
     Object? createdEnrollmentSummary = _undefined,
     Object? updatedEnrollmentSummary = _undefined,
+    Object? summariesErrorType = _undefined,
     Object? errorMessage = _undefined,
   }) {
     return EnrollmentState(
@@ -162,6 +166,9 @@ class EnrollmentState extends Equatable {
       updatedEnrollmentSummary: identical(updatedEnrollmentSummary, _undefined)
           ? this.updatedEnrollmentSummary
           : updatedEnrollmentSummary as EnrollmentSummary?,
+      summariesErrorType: identical(summariesErrorType, _undefined)
+          ? this.summariesErrorType
+          : summariesErrorType as EnrollmentErrorType?,
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,
@@ -186,6 +193,7 @@ class EnrollmentState extends Equatable {
     preview,
     createdEnrollmentSummary,
     updatedEnrollmentSummary,
+    summariesErrorType,
     errorMessage,
   ];
 }
