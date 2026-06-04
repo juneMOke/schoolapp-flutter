@@ -78,6 +78,7 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
           showStatusFilter: true,
           onStatusChanged: (newStatus) {
             setState(() => _effectiveStatus = newStatus);
+            dispatch(StandardSearchCommand(status: newStatus));
           },
         ),
         onSearchCommand:
@@ -89,7 +90,6 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
               statusLabel: _effectiveStatus,
               showStatusBadge: true,
               onRefresh: screenCtx.onRefreshRequested,
-              onSortToggled: _onSortToggled,
               onViewModeChanged: _onViewModeChanged,
               currentViewMode: _preferredViewMode,
             ),
