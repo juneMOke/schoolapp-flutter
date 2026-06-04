@@ -7,6 +7,7 @@ class AppBreakpoints {
   static const double navigationCompactMax = 1024.0;
   static const double enrollmentShellCompactMax = navigationCompactMax;
   static const double dataTableCardsMax = 600.0;
+  static const double fabExtendedMinWidth = dataTableCardsMax;
   static const double dataTablePhoneMax = 390.0;
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;

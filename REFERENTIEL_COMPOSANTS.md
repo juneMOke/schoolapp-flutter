@@ -501,6 +501,73 @@ Tables et tuiles : enrollment, classes, finance, attendance. Header isole :
 
 ---
 
+## 6) EteeloFab
+
+- **Fichier**: `lib/core/components/buttons/eteelo_fab.dart`
+- **Type Flutter**: `StatelessWidget`
+- **Statut**: stable
+
+### Description
+
+Floating Action Button de reference pour les actions primaires de page (ex: creation d'inscription), volontairement plat (aucune ombre) pour rester aligne a l'identite sobre du projet.
+
+Le composant conserve une API simple (`label`, `icon`, `onPressed`, `tooltip`) et adapte automatiquement son rendu selon la largeur d'ecran.
+
+### Zones caracteristiques
+
+- **Style visuel (flat)**
+  - elevation/focus/hover/highlight/disabled a `0`
+  - variante etendue en `StadiumBorder`
+  - variante compacte en `CircleBorder`
+
+- **Couleurs et contraste**
+  - etat actif: fond `AppColors.fabBackground` (`#A64F25`), texte/icones `AppColors.blancCasse`
+  - contraste texte normal mesure: **5.33:1** (WCAG 2.1 AA)
+  - etat desactive: fond `AppColors.stateDisabled`, foreground `AppColors.textMuted`
+
+- **Dimensions**
+  - hauteur cible: `AppDimensions.fabHeight` (56)
+  - padding etendu asymetrique: start `18`, end `22`
+  - taille icone: `22`
+  - gap icone/libelle: `9`
+
+- **Responsive**
+  - `width >= 600`: FAB etendu (icone + libelle)
+  - `width < 600`: FAB icone-seule (circulaire)
+  - breakpoint: `AppBreakpoints.fabExtendedMinWidth`
+
+### Slots / props (fournis par la page)
+
+- `label` *(required)*
+- `icon` *(required)*
+- `onPressed` *(required nullable, pour disabled)*
+- `tooltip` *(optional, fallback sur `label`)*
+
+### Contrat de reactvite (conteneur)
+
+- Positionnement delibere au `Scaffold` appelant (`floatingActionButton` + `endFloat`).
+- Le composant se base sur la largeur ecran (`MediaQuery`) car ancre au shell plein ecran.
+
+### Accessibilite (WCAG 2.1 AA)
+
+- En mode icone-seule, `tooltip ?? label` sert de nom accessible de l'action.
+- Cible interactive: 56dp (>= 44dp recommande).
+- Contraste texte/icone sur fond actif respecte AA (5.33:1).
+
+### Exemples d'usages actuels
+
+- `lib/features/enrollment/presentation/pages/first_registration_page.dart`
+- `lib/dev/component_gallery_page.dart`
+
+### Tests associes
+
+- `test/core/components/buttons/eteelo_fab_test.dart`
+  - mode etendu/compact selon largeur
+  - presence du tooltip en mode icone-seule
+  - couleurs actif/desactive
+
+---
+
 ## Template pour prochains composants
 
 Copier/coller cette section pour toute nouvelle entree:

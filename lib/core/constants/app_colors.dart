@@ -23,6 +23,7 @@ class AppColors {
   static const statePressed = tokens.AppColors.statePressed;
   static const stateFocus = tokens.AppColors.stateFocus;
   static const stateDisabled = tokens.AppColors.stateDisabled;
+  static const fabBackground = tokens.AppColors.fabBackground;
 
   // Base palette
   static const indigo = tokens.AppColors.bleuArdoise;

@@ -25,6 +25,13 @@ class AppDimensions {
   static const detailTableLabelColumnWidth = 72.0;
   static const fabListBottomPadding = 80.0;
 
+  // Eteelo FAB tokens
+  static const fabHeight = 56.0;
+  static const fabPaddingStart = 18.0;
+  static const fabPaddingEnd = 22.0;
+  static const fabIconSize = 22.0;
+  static const fabLabelGap = 9.0;
+
   // Page background decorative tokens (orbes — partagé entre tous les modules)
   static const pageBackgroundOrbLargeSize = 180.0;
   static const pageBackgroundOrbMediumSize = 130.0;

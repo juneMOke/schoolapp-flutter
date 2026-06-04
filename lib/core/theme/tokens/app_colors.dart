@@ -35,6 +35,9 @@ class AppColors {
   static const stateFocus = Color(0x331B4D6B);
   static const stateDisabled = border;
 
+  // Buttons / FAB
+  static const fabBackground = Color(0xFFA64F25);
+
   // Legacy palettes centralisees dans la source unique de tokens.
   static const pageBackgroundGradientStart = surface;
   static const pageBackgroundGradientMiddle = surfaceAlt;
