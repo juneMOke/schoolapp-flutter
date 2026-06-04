@@ -107,6 +107,7 @@ class DataTablePaginationConfig {
 
   /// Nombre total de pages, **1-based**.
   final int totalPages;
+  final int pageSize;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final bool isLoading;
@@ -115,6 +116,7 @@ class DataTablePaginationConfig {
   const DataTablePaginationConfig({
     required this.currentPage,
     required this.totalPages,
+    required this.pageSize,
     required this.onPrevious,
     required this.onNext,
     this.isLoading = false,
@@ -126,8 +128,15 @@ class DataTablePaginationConfig {
 class DataTableFooterConfig {
   final String label;
   final DataTablePaginationConfig? pagination;
+  final int? total;
+  final String? unit;
 
-  const DataTableFooterConfig({required this.label, this.pagination});
+  const DataTableFooterConfig({
+    required this.label,
+    this.pagination,
+    this.total,
+    this.unit,
+  });
 }
 
 /// Configuration principale de [DataTableView].

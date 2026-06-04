@@ -325,20 +325,30 @@
       }
     }
   },
-  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}",
-  "@enrollmentPageFooter": {
-    "placeholders": {
-      "pageCount": { "type": "int" },
-      "totalCount": { "type": "int" }
-    }
-  },
-  "enrollmentPageIndicator": "Page {current} / {total}",
-  "@enrollmentPageIndicator": {
+  "paginationPageIndicator": "Page {current} / {total}",
+  "@paginationPageIndicator": {
     "placeholders": {
       "current": { "type": "int" },
       "total": { "type": "int" }
     }
   },
+  "paginationResultsCount": "{count, plural, =0{0 result} =1{1 result} other{{count} results}}",
+  "@paginationResultsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "paginationRange": "{start}–{end} of {total} {unit}",
+  "@paginationRange": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" },
+      "total": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+  "paginationNavigationLabel": "Pagination",
+  "unitStudents": "students",
   "refresh": "Refresh",
   "statusPending": "Pending",
   "statusValidated": "Validated",

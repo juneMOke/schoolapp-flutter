@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Composant pagination générique réutilisable - UTILISE TOKENS DESIGN SYSTEM
@@ -22,7 +22,7 @@ class DataTablePaginationBar extends StatelessWidget {
     required this.onNext,
     this.isLoading = false,
     this.pageLabel,
-    this.spacing = AppDimensions.spacingM,
+    this.spacing = AppDimensions.paginationGap,
   });
   @override
   Widget build(BuildContext context) {
@@ -31,49 +31,58 @@ class DataTablePaginationBar extends StatelessWidget {
     final canGoToNext = currentPage < totalPages && !isLoading;
     final defaultLabel =
         pageLabel?.call(currentPage, totalPages) ??
-        'Page $currentPage / $totalPages';
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingS,
-      ),
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: spacing,
-        runSpacing: AppDimensions.spacingS,
-        children: [
-          _PaginationButton(
-            onPressed: canGoToPrevious ? onPrevious : null,
-            icon: Icons.chevron_left_rounded,
-            tooltip: l10n.previous,
-          ),
-          Semantics(
-            container: true,
-            liveRegion: true,
-            label: defaultLabel,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.bleuArdoise.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                defaultLabel,
-                style: AppTextStyles.pageTitle.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+        l10n.paginationPageIndicator(currentPage, totalPages);
+    return Semantics(
+      container: true,
+      label: l10n.paginationNavigationLabel,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: spacing,
+          runSpacing: AppDimensions.paginationGap,
+          children: [
+            _PaginationButton(
+              onPressed: canGoToPrevious ? onPrevious : null,
+              icon: Icons.chevron_left_rounded,
+              tooltip: l10n.previousPage,
+            ),
+            Semantics(
+              container: true,
+              liveRegion: true,
+              label: defaultLabel,
+              child: Container(
+                height: AppDimensions.paginationButtonSize,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paginationIndicatorHPadding,
+                ),
+                decoration: BoxDecoration(
                   color: AppColors.bleuArdoise,
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.paginationButtonRadius,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  defaultLabel,
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.blancCasse,
+                  ),
                 ),
               ),
             ),
-          ),
-          _PaginationButton(
-            onPressed: canGoToNext ? onNext : null,
-            icon: Icons.chevron_right_rounded,
-            tooltip: l10n.next,
-          ),
-        ],
+            _PaginationButton(
+              onPressed: canGoToNext ? onNext : null,
+              icon: Icons.chevron_right_rounded,
+              tooltip: l10n.nextPage,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -97,38 +106,55 @@ class _PaginationButtonState extends State<_PaginationButton> {
   @override
   Widget build(BuildContext context) {
     final isEnabled = widget.onPressed != null;
-    return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        onEnter: (_) => isEnabled ? setState(() => _hovered = true) : null,
-        onExit: (_) => isEnabled ? setState(() => _hovered = false) : null,
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: _hovered && isEnabled
-                ? AppColors.bleuArdoise.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isEnabled
-                  ? (_hovered ? AppColors.bleuArdoise : AppColors.border)
-                  : AppColors.stateDisabled,
-            ),
-          ),
+    return Semantics(
+      button: true,
+      enabled: isEnabled,
+      label: widget.tooltip,
+      child: Tooltip(
+        message: widget.tooltip,
+        child: MouseRegion(
+          onEnter: (_) => isEnabled ? setState(() => _hovered = true) : null,
+          onExit: (_) => isEnabled ? setState(() => _hovered = false) : null,
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: widget.onPressed,
-              child: Icon(
-                widget.icon,
-                size: 20,
-                color: isEnabled
-                    ? (_hovered
-                          ? AppColors.bleuArdoise
-                          : AppColors.textSecondary)
-                    : AppColors.stateDisabled,
+              borderRadius: BorderRadius.circular(
+                AppDimensions.paginationButtonRadius,
+              ),
+              child: SizedBox.square(
+                dimension: AppDimensions.paginationTapTarget,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: AppMotion.fast,
+                    width: AppDimensions.paginationButtonSize,
+                    height: AppDimensions.paginationButtonSize,
+                    decoration: BoxDecoration(
+                      color: _hovered && isEnabled
+                          ? AppColors.bleuArdoise.withValues(alpha: 0.12)
+                          : AppColors.surface,
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.paginationButtonRadius,
+                      ),
+                      border: Border.all(
+                        color: isEnabled
+                            ? (_hovered
+                                  ? AppColors.bleuArdoise
+                                  : AppColors.border)
+                            : AppColors.border,
+                      ),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      size: AppDimensions.paginationIconSize,
+                      color: isEnabled
+                          ? (_hovered
+                                ? AppColors.bleuArdoise
+                                : AppColors.textSecondary)
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

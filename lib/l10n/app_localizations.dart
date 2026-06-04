@@ -1170,17 +1170,35 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
   String enrollmentResultsCount(int count);
 
-  /// No description provided for @enrollmentPageFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}'**
-  String enrollmentPageFooter(int pageCount, int totalCount);
-
-  /// No description provided for @enrollmentPageIndicator.
+  /// No description provided for @paginationPageIndicator.
   ///
   /// In en, this message translates to:
   /// **'Page {current} / {total}'**
-  String enrollmentPageIndicator(int current, int total);
+  String paginationPageIndicator(int current, int total);
+
+  /// No description provided for @paginationResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
+  String paginationResultsCount(int count);
+
+  /// No description provided for @paginationRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start}–{end} of {total} {unit}'**
+  String paginationRange(int start, int end, int total, String unit);
+
+  /// No description provided for @paginationNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pagination'**
+  String get paginationNavigationLabel;
+
+  /// No description provided for @unitStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'students'**
+  String get unitStudents;
 
   /// No description provided for @refresh.
   ///

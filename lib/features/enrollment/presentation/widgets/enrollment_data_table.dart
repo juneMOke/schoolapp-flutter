@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
@@ -24,6 +25,7 @@ class EnrollmentDataTable extends StatefulWidget {
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
   final String Function(int current, int total)? pageLabelBuilder;
+  final int pageSize;
 
   const EnrollmentDataTable({
     super.key,
@@ -42,6 +44,7 @@ class EnrollmentDataTable extends StatefulWidget {
     this.onPreviousPage,
     this.onNextPage,
     this.pageLabelBuilder,
+    this.pageSize = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -74,7 +77,9 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.enrollmentNoResultsDescription,
         footer: DataTableFooterConfig(
-          label: _buildFooterLabel(l10n, sorted.length),
+          label: l10n.paginationResultsCount(sorted.length),
+          total: widget.totalCount,
+          unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
         density: widget.density,
@@ -94,6 +99,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     return DataTablePaginationConfig(
       currentPage: widget.currentPage,
       totalPages: widget.totalPages,
+      pageSize: widget.pageSize,
       onPrevious: widget.onPreviousPage!,
       onNext: widget.onNextPage!,
       isLoading: widget.isLoading,
@@ -175,14 +181,6 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       _sortColumn = EnrollmentSortColumn.values[column];
       _sortAscending = ascending;
     });
-  }
-
-  String _buildFooterLabel(AppLocalizations l10n, int pageCount) {
-    final total = widget.totalCount;
-    if (total != null && total > pageCount) {
-      return l10n.enrollmentPageFooter(pageCount, total);
-    }
-    return l10n.enrollmentResultsCount(pageCount);
   }
 
   String _studentFullName(EnrollmentSummary enrollment) {

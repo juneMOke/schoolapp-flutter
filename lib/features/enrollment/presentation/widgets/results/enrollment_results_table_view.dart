@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
 
@@ -16,6 +17,7 @@ class EnrollmentResultsTableView extends StatelessWidget {
   final int totalPages;
   final DataTableDensity density;
   final bool showPagination;
+  final int pageSize;
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
   final String Function(int current, int total)? pageLabelBuilder;
@@ -34,6 +36,7 @@ class EnrollmentResultsTableView extends StatelessWidget {
     this.totalPages = 1,
     this.density = DataTableDensity.comfortable,
     this.showPagination = true,
+    this.pageSize = AppConstants.enrollmentDefaultPageSize,
     this.onPreviousPage,
     this.onNextPage,
     this.pageLabelBuilder,
@@ -54,6 +57,7 @@ class EnrollmentResultsTableView extends StatelessWidget {
       totalPages: totalPages,
       density: density,
       showPagination: showPagination,
+      pageSize: pageSize,
       onPreviousPage: onPreviousPage,
       onNextPage: onNextPage,
       pageLabelBuilder: pageLabelBuilder,

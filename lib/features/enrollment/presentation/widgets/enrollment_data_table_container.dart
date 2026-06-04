@@ -147,6 +147,7 @@ class _EnrollmentDataTableContainerState
       showPagination: true,
       currentPage: state.summariesPage + 1,
       totalPages: state.summariesTotalPages,
+      pageSize: state.summariesSize,
       density: widget.tableDensity,
       onPreviousPage: () => context.read<EnrollmentBloc>().add(
         EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
@@ -155,7 +156,7 @@ class _EnrollmentDataTableContainerState
         EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
       ),
       pageLabelBuilder: (current, total) =>
-          l10n.enrollmentPageIndicator(current, total),
+          l10n.paginationPageIndicator(current, total),
       onViewRequested: widget.onViewRequested,
     );
   }

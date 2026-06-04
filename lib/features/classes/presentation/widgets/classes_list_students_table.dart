@@ -65,7 +65,9 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.classesListNoMatchMessage,
         footer: DataTableFooterConfig(
-          label: l10n.enrollmentResultsCount(rows.length),
+          label: l10n.paginationResultsCount(rows.length),
+          total: rows.length,
+          unit: l10n.unitStudents,
         ),
       ),
     );

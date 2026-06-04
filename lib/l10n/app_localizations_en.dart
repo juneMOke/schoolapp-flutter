@@ -643,20 +643,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String enrollmentPageFooter(int pageCount, int totalCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      pageCount,
-      locale: localeName,
-      other: 'results',
-      one: 'result',
-    );
-    return '$pageCount $_temp0 of $totalCount';
+  String paginationPageIndicator(int current, int total) {
+    return 'Page $current / $total';
   }
 
   @override
-  String enrollmentPageIndicator(int current, int total) {
-    return 'Page $current / $total';
+  String paginationResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: '0 result',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String paginationRange(int start, int end, int total, String unit) {
+    return '$start–$end of $total $unit';
+  }
+
+  @override
+  String get paginationNavigationLabel => 'Pagination';
+
+  @override
+  String get unitStudents => 'students';
 
   @override
   String get refresh => 'Refresh';

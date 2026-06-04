@@ -32,6 +32,14 @@ class AppDimensions {
   static const fabIconSize = 22.0;
   static const fabLabelGap = 9.0;
 
+  // Pagination tokens
+  static const paginationButtonSize = 32.0;
+  static const paginationIconSize = 16.0;
+  static const paginationGap = 6.0;
+  static const paginationButtonRadius = 8.0;
+  static const paginationTapTarget = 44.0;
+  static const paginationIndicatorHPadding = 10.0;
+
   // Page background decorative tokens (orbes — partagé entre tous les modules)
   static const pageBackgroundOrbLargeSize = 180.0;
   static const pageBackgroundOrbMediumSize = 130.0;

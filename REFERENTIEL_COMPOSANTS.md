@@ -568,6 +568,72 @@ Le composant conserve une API simple (`label`, `icon`, `onPressed`, `tooltip`) e
 
 ---
 
+## 7) DataTablePaginationBar (+ DataTableFooterBar)
+
+- **Fichiers**:
+  - `lib/core/components/tables/data_table_pagination_bar.dart`
+  - `lib/core/components/tables/data_table_footer_bar.dart`
+- **Type Flutter**: `StatelessWidget` + sous-composant bouton stateful
+- **Statut**: stable
+
+### Description
+
+Bloc de pagination standard pour les tables du projet, en mode **Option C** :
+navigation uniquement `precedent/suivant`, sans liste de numeros de pages.
+
+Le composant de footer porte le decompte localise `x–y sur/of N unite` quand
+`total` et `unit` sont fournis, sinon il conserve le label fallback existant.
+
+### Zones caracteristiques
+
+- **Layout global**
+  - gauche: decompte (`DataTableFooterBar`) ou label fallback
+  - droite: controles prev/page/suiv (`DataTablePaginationBar`)
+  - en etroit: decompte au-dessus des controles (repli via `LayoutBuilder`)
+
+- **Style pagination**
+  - boutons carres visuels 32 (`AppDimensions.paginationButtonSize`)
+  - icones 16 (`AppDimensions.paginationIconSize`)
+  - gap horizontal 6 (`AppDimensions.paginationGap`)
+  - radius 8 (`AppDimensions.paginationButtonRadius`)
+  - etat actif central: fond plein `AppColors.bleuArdoise`, texte `AppColors.blancCasse`
+
+- **Cible tactile**
+  - chaque bouton visuel 32 est encapsule dans une zone de tap 44
+    (`AppDimensions.paginationTapTarget`)
+
+- **Range footer**
+  - pagine: `start = (page - 1) * pageSize + 1`, `end = min(page * pageSize, total)`
+  - sans pagination: `1..total`
+  - total nul: `0..0`
+
+### Slots / props (fournis par la page)
+
+- `DataTableFooterConfig.label` *(fallback requis)*
+- `DataTableFooterConfig.total` *(optional)*
+- `DataTableFooterConfig.unit` *(optional, ex: `l10n.unitStudents`)*
+- `DataTablePaginationConfig.currentPage|totalPages|pageSize|onPrevious|onNext`
+
+### Accessibilite (WCAG 2.1 AA)
+
+- conteneur pagination expose comme landmark semantique (`Pagination`)
+- indicateur courant expose en `liveRegion`
+- boutons nommes via tooltips localises (`previousPage`, `nextPage`)
+- etat desactive expose semantiquement (`enabled: false`)
+
+### Contrat d'utilisation Flutter
+
+- ne pas ajouter de numeros de pages dans l'UI
+- conserver la navigation prev/suiv pour limiter le bruit visuel
+- fournir `total` + `unit` pour activer le decompte range
+
+### Tests associes
+
+- `test/core/components/tables/data_table_pagination_bar_test.dart`
+- `test/core/components/tables/data_table_footer_bar_test.dart`
+
+---
+
 ## Template pour prochains composants
 
 Copier/coller cette section pour toute nouvelle entree:
