@@ -81,7 +81,7 @@ class _DefaultTrailingIconButtonState
           onExit: (_) => isEnabled ? setState(() => _isHovered = false) : null,
           child: AnimatedContainer(
             duration: AppMotion.fast,
-            padding: EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
+            padding: const EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
             width:
                 EteeloDataTableTheme.trailingSlotWidth -
                 (EteeloDataTableTheme.focusRingOffset * 2),

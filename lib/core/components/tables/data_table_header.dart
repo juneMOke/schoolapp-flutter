@@ -165,7 +165,7 @@ class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
                   )
                 : null,
           ),
-          padding: EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
+          padding: const EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
           child: Material(
             color: Colors.transparent,
             child: InkWell(

@@ -37,7 +37,7 @@ class EnrollmentResultCard extends StatelessWidget {
           border: Border.all(color: AppColors.border),
           boxShadow: AppElevation.shadowCard,
         ),
-        padding: EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -52,7 +52,7 @@ class EnrollmentResultCard extends StatelessWidget {
                   size: 48,
                   variant: _avatarVariantForStatus(status),
                 ),
-                SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +66,7 @@ class EnrollmentResultCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         enrollment.student.firstName,
                         style: AppTypography.bodySmall.copyWith(
@@ -78,7 +78,7 @@ class EnrollmentResultCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.md),
                 if (onViewDetails != null)
                   IconButton(
                     onPressed: onViewDetails,
@@ -88,7 +88,7 @@ class EnrollmentResultCard extends StatelessWidget {
                   ),
               ],
             ),
-            SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
             // Info row: date of birth
             Row(
               children: [
@@ -109,7 +109,7 @@ class EnrollmentResultCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
             // Status badge
             Row(
               children: [
@@ -119,7 +119,7 @@ class EnrollmentResultCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                   ),
                 ),
-                SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(child: EnrollmentStatusBadge(status: status)),
               ],
             ),

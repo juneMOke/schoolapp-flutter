@@ -29,7 +29,7 @@ class EnrollmentResultsGridView extends StatelessWidget {
             crossAxisSpacing: AppSpacing.lg,
           ),
           itemCount: enrollments.length,
-          padding: EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           itemBuilder: (context, index) {
             final enrollment = enrollments[index];
             return EnrollmentResultCard(
