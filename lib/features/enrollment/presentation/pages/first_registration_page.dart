@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -36,6 +37,8 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
+      style: AppPageBackgroundStyle.flat,
+      flatBackgroundColor: AppColors.surface,
       scrollable: true,
       floatingActionButton: EteeloFab(
         label: l10n.firstRegistrationNewEnrollmentAction,

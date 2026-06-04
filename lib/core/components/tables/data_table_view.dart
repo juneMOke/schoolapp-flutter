@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_header.dart
 import 'package:school_app_flutter/core/components/tables/data_table_loading_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_row_item.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
@@ -13,6 +14,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Composant générique pour afficher une table de données - UTILISE TOKENS DESIGN SYSTEM
 class DataTableView extends StatelessWidget {
+  static const BoxDecoration _tableDecoration = BoxDecoration(
+    color: EteeloDataTableTheme.tableBackground,
+    boxShadow: AppElevation.shadowCard,
+  );
+
   final List<DataTableRowSpec> rows;
   final DataTableViewConfig config;
   final Map<DataTableTrailingType, DataTableTrailingBuilder> trailingBuilders;
@@ -45,8 +51,8 @@ class DataTableView extends StatelessWidget {
       container: true,
       liveRegion: config.isLoading || config.isError,
       label: config.semanticsLabel,
-      child: ColoredBox(
-        color: EteeloDataTableTheme.tableBackground,
+      child: Container(
+        decoration: _tableDecoration,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

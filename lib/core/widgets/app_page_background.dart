@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
+enum AppPageBackgroundStyle { decorated, flat }
+
 /// Fond visuel standard partagé par toutes les pages de l'application
 /// (gradient doux + orbes décoratifs + zone centrée scrollable).
 class AppPageBackground extends StatelessWidget {
@@ -11,6 +13,8 @@ class AppPageBackground extends StatelessWidget {
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final Widget? bottomNavigationBar;
+  final AppPageBackgroundStyle style;
+  final Color flatBackgroundColor;
 
   const AppPageBackground({
     super.key,
@@ -20,6 +24,8 @@ class AppPageBackground extends StatelessWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.bottomNavigationBar,
+    this.style = AppPageBackgroundStyle.decorated,
+    this.flatBackgroundColor = AppColors.surface,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -42,46 +48,58 @@ class AppPageBackground extends StatelessWidget {
       ),
     );
 
+    final body = style == AppPageBackgroundStyle.flat
+        ? DecoratedBox(
+            decoration: BoxDecoration(color: flatBackgroundColor),
+            child: _buildScrollableContent(context, content),
+          )
+        : DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.pageBackgroundGradientStart,
+                  AppColors.pageBackgroundGradientMiddle,
+                  AppColors.pageBackgroundGradientEnd,
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                const _AppDecorativeOrbs(),
+                _buildScrollableContent(context, content),
+              ],
+            ),
+          );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.pageBackgroundGradientStart,
-              AppColors.pageBackgroundGradientMiddle,
-              AppColors.pageBackgroundGradientEnd,
-            ],
-          ),
+      body: body,
+    );
+  }
+
+  Widget _buildScrollableContent(BuildContext context, Widget content) {
+    if (scrollable) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: _horizontalPadding(context),
+          vertical: AppDimensions.spacingL,
         ),
-        child: Stack(
-          children: [
-            const _AppDecorativeOrbs(),
-            if (scrollable)
-              SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _horizontalPadding(context),
-                  vertical: AppDimensions.spacingL,
-                ),
-                child: content,
-              )
-            else
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _horizontalPadding(context),
-                  vertical: AppDimensions.spacingL,
-                ),
-                child: content,
-              ),
-          ],
-        ),
+        child: content,
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _horizontalPadding(context),
+        vertical: AppDimensions.spacingL,
       ),
+      child: content,
     );
   }
 }

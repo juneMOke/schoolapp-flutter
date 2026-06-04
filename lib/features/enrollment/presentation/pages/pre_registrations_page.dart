@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -30,6 +31,8 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      style: AppPageBackgroundStyle.flat,
+      flatBackgroundColor: AppColors.surface,
       scrollable: true,
       child: EnrollmentListingPageScaffold(
         readyKey: 'pre-reg-content',
@@ -70,7 +73,6 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
               isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
               showStatusBadge: false,
               onRefresh: screenCtx.onRefreshRequested,
-              onSortToggled: _onSortToggled,
               onViewModeChanged: _onViewModeChanged,
               currentViewMode: _preferredViewMode,
             ),

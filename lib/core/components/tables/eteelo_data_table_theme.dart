@@ -23,7 +23,7 @@ class EteeloDataTableTheme {
   static const double leadingSlotWidth = 36;
   static const double trailingSlotWidth = 44;
   static const double slotGap = AppDimensions.spacingS;
-  static const Color headerBackground = AppColors.surfaceAlt;
+  static const Color headerBackground = AppColors.surfaceRaised;
   static final TextStyle headerLabelStyle = AppTextStyles.tableHeader.copyWith(
     fontSize: 11,
     fontWeight: FontWeight.w600,
@@ -41,7 +41,7 @@ class EteeloDataTableTheme {
   static const double rowHeightCompact = 48;
   static const double rowHorizontalPadding = AppDimensions.spacingM;
   static const Color rowEvenBackground = AppColors.surfaceRaised;
-  static const Color rowOddBackground = AppColors.surfaceAlt;
+  static const Color rowOddBackground = AppColors.surfaceRaised;
   static const Color rowHoverBackground = AppColors.stateHover;
   static const Color rowHoverLeadingBorder = AppColors.bleuArdoise;
   static const double rowLeadingBorderWidth = 3;
