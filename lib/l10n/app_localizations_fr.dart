@@ -574,7 +574,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentEmptyDescription =>
-      'Aucune inscription ne correspond à vos critères. Essayez d\'élargir la recherche ou créez une nouvelle inscription.';
+      'Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\'élève n\'est pas encore enregistré.';
 
   @override
   String get enrollmentEmptyWithoutFilterDescription =>

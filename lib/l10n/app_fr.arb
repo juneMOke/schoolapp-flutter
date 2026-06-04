@@ -286,7 +286,7 @@
   "noResultsFound": "Aucun résultat trouvé",
   "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
   "enrollmentEmptyTitle": "Aucun résultat",
-  "enrollmentEmptyDescription": "Aucune inscription ne correspond à vos critères. Essayez d\u0027élargir la recherche ou créez une nouvelle inscription.",
+  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\u0027élève n\u0027est pas encore enregistré.",
   "enrollmentEmptyWithoutFilterDescription": "Aucune inscription pour le moment.",
   "enrollmentEmptyCreateAction": "Inscrire un nouvel élève",
   "enrollmentErrorRetry": "Réessayer",

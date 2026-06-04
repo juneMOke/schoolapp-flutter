@@ -292,7 +292,7 @@
   "noResultsFound": "No results found",
   "enrollmentNoResultsDescription": "No student matches your search criteria.",
   "enrollmentEmptyTitle": "No results",
-  "enrollmentEmptyDescription": "No enrollment matches your criteria. Try broadening your search or create a new enrollment.",
+  "enrollmentEmptyDescription": "No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.",
   "enrollmentEmptyWithoutFilterDescription": "No enrollment yet.",
   "enrollmentEmptyCreateAction": "Enroll a new student",
   "enrollmentErrorRetry": "Retry",

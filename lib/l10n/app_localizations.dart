@@ -1059,7 +1059,7 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'No enrollment matches your criteria. Try broadening your search or create a new enrollment.'**
+  /// **'No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.'**
   String get enrollmentEmptyDescription;
 
   /// No description provided for @enrollmentEmptyWithoutFilterDescription.

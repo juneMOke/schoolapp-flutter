@@ -570,7 +570,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentEmptyDescription =>
-      'No enrollment matches your criteria. Try broadening your search or create a new enrollment.';
+      'No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.';
 
   @override
   String get enrollmentEmptyWithoutFilterDescription => 'No enrollment yet.';
