@@ -108,13 +108,20 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               enrollmentState.statusUpdateStatus ==
               EnrollmentLoadStatus.loading;
 
-          return BlocBuilder<
+          return BlocConsumer<
             EnrollmentStepperFlowBloc,
             EnrollmentStepperFlowState
           >(
+            // L'étape courante est notifiée à la page via un listener (après la
+            // phase de build) : appeler onStepChanged depuis le builder
+            // déclencherait un setState pendant le build (illégal, crash lors
+            // d'une relayout déclenchée par un LayoutBuilder).
+            listenWhen: (prev, curr) => prev.currentStep != curr.currentStep,
+            listener: (context, flowState) {
+              widget.onStepChanged?.call(flowState.currentStep);
+            },
             builder: (context, flowState) {
               final currentStep = flowState.currentStep;
-              widget.onStepChanged?.call(currentStep);
               final progress = (currentStep + 1) / stepTitles.length;
               final currentStepState = flowState.stateOf(currentStep);
               final currentHandler = _stepHandlers[currentStep];

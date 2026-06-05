@@ -41,33 +41,39 @@ class StepPageCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: AppRadius.brCard,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        // Le rail pleine hauteur est superposé en Stack (et non via un Row
+        // `stretch`) : ainsi la carte se dimensionne sur son contenu et
+        // supporte une hauteur non bornée (ex. SingleChildScrollView).
+        child: Stack(
           children: [
-            // Rail d'accent pleine hauteur, opacité pleine.
-            Container(width: _railWidth, color: accentColor),
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceRaised,
-                  // Liseré clair interne (simule l'inset blanc 70 %).
-                  border: Border(
-                    top: BorderSide(
-                      color: AppColors.surfaceRaised.withValues(alpha: 0.70),
-                    ),
+            // Contenu — enfant non positionné qui fixe la hauteur de la carte.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceRaised,
+                // Liseré clair interne (simule l'inset blanc 70 %).
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.surfaceRaised.withValues(alpha: 0.70),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.stepCardBody),
-                      child: child,
-                    ),
-                  ],
-                ),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.stepCardBody),
+                    child: child,
+                  ),
+                ],
+              ),
+            ),
+            // Rail d'accent 4px pleine hauteur, superposé à gauche.
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: 0,
+              child: Container(width: _railWidth, color: accentColor),
             ),
           ],
         ),
