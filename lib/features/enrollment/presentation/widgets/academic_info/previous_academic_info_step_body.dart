@@ -34,12 +34,6 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
   final String? prevLevelError;
   final String? prevRateError;
   final String? prevRankError;
-  final bool prevYearChanged;
-  final bool prevSchoolChanged;
-  final bool prevCycleChanged;
-  final bool prevLevelChanged;
-  final bool prevRateChanged;
-  final bool prevRankChanged;
   final bool validatedPreviousYearChanged;
 
   const PreviousAcademicInfoStepBody({
@@ -71,12 +65,6 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
     this.prevLevelError,
     this.prevRateError,
     this.prevRankError,
-    this.prevYearChanged = false,
-    this.prevSchoolChanged = false,
-    this.prevCycleChanged = false,
-    this.prevLevelChanged = false,
-    this.prevRateChanged = false,
-    this.prevRankChanged = false,
     this.validatedPreviousYearChanged = false,
   });
 
@@ -113,12 +101,6 @@ class PreviousAcademicInfoStepBody extends StatelessWidget {
             prevLevelError: prevLevelError,
             prevRateError: prevRateError,
             prevRankError: prevRankError,
-            prevYearChanged: prevYearChanged,
-            prevSchoolChanged: prevSchoolChanged,
-            prevCycleChanged: prevCycleChanged,
-            prevLevelChanged: prevLevelChanged,
-            prevRateChanged: prevRateChanged,
-            prevRankChanged: prevRankChanged,
             validatedPreviousYearChanged: validatedPreviousYearChanged,
             isEditable: isEditable,
           ),

@@ -338,9 +338,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
                 levelError: showValidation && _selectedSchoolLevelId.isEmpty
                     ? l10n.requiredFieldError(l10n.targetLevelLabel)
                     : null,
-                groupChanged:
-                    _selectedSchoolLevelGroupId != _initialSchoolLevelGroupId,
-                levelChanged: _selectedSchoolLevelId != _initialSchoolLevelId,
               );
             },
           );

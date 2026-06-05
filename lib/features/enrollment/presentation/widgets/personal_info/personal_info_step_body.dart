@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/core/components/fields/editable_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
@@ -137,32 +138,44 @@ class PersonalInfoStepBody extends StatelessWidget {
                     spacing: spacing,
                     runSpacing: 14,
                     children: [
-                      EditableField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.firstName,
-                        controller: firstNameController,
-                        requiredField: true,
-                        helpMessage: l10n.firstNameHelp,
-                        errorText: firstNameError,
-                        readOnly: !isEditable,
+                        child: EteeloTextInput(
+                          label: l10n.firstName,
+                          controller: firstNameController,
+                          required: true,
+                          errorText: firstNameError,
+                          readOnly: !isEditable,
+                          inputFormatters: const [
+                            FirstLetterUppercaseTextInputFormatter(),
+                          ],
+                        ),
                       ),
-                      EditableField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.lastName,
-                        controller: lastNameController,
-                        requiredField: true,
-                        helpMessage: l10n.lastNameHelp,
-                        errorText: lastNameError,
-                        readOnly: !isEditable,
+                        child: EteeloTextInput(
+                          label: l10n.lastName,
+                          controller: lastNameController,
+                          required: true,
+                          errorText: lastNameError,
+                          readOnly: !isEditable,
+                          inputFormatters: const [
+                            FirstLetterUppercaseTextInputFormatter(),
+                          ],
+                        ),
                       ),
-                      EditableField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.surname,
-                        controller: surnameController,
-                        requiredField: true,
-                        helpMessage: l10n.surnameHelp,
-                        errorText: surnameError,
-                        readOnly: !isEditable,
+                        child: EteeloTextInput(
+                          label: l10n.surname,
+                          controller: surnameController,
+                          required: true,
+                          errorText: surnameError,
+                          readOnly: !isEditable,
+                          inputFormatters: const [
+                            FirstLetterUppercaseTextInputFormatter(),
+                          ],
+                        ),
                       ),
                       SizedBox(
                         width: fieldWidth,
@@ -182,25 +195,30 @@ class PersonalInfoStepBody extends StatelessWidget {
                           onChanged: onDateChanged,
                         ),
                       ),
-                      EditableField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.birthPlace,
-                        controller: birthPlaceController,
-                        requiredField: true,
-                        helpMessage: l10n.birthPlaceHelp,
-                        errorText: birthPlaceError,
-                        readOnly: !isEditable,
+                        child: EteeloTextInput(
+                          label: l10n.birthPlace,
+                          controller: birthPlaceController,
+                          required: true,
+                          errorText: birthPlaceError,
+                          readOnly: !isEditable,
+                          inputFormatters: const [
+                            FirstLetterUppercaseTextInputFormatter(),
+                          ],
+                        ),
                       ),
-                      NationalityDropdownField(
+                      SizedBox(
                         width: fieldWidth,
-                        label: l10n.nationality,
-                        value: selectedNationality,
-                        options: nationalityOptions,
-                        onChanged: onNationalityChanged,
-                        requiredField: true,
-                        helpMessage: l10n.nationalityHelp,
-                        errorText: nationalityError,
-                        enabled: isEditable,
+                        child: NationalityDropdownField(
+                          label: l10n.nationality,
+                          value: selectedNationality,
+                          options: nationalityOptions,
+                          onChanged: onNationalityChanged,
+                          requiredField: true,
+                          errorText: nationalityError,
+                          enabled: isEditable,
+                        ),
                       ),
                       GenderSegmentedField(
                         width: fieldWidth,

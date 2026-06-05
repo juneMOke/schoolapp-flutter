@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_dropdown_field.dart';
-import 'package:school_app_flutter/core/components/fields/editable_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AddressFormContent extends StatelessWidget {
@@ -94,47 +95,40 @@ class AddressFormContent extends StatelessWidget {
                 AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.city,
-                  helpMessage: l10n.cityHelp,
                   options: cityOptions,
                   value: cityValue,
                   errorText: cityErrorText,
                   requiredField: true,
                   enabled: isEditable && !isCatalogLoading,
-                  icon: Icons.location_city_outlined,
                   emptyOptionsHint: cityHint,
                   onChanged: onCityChanged,
                 ),
                 AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.district,
-                  helpMessage: l10n.districtHelp,
                   options: districtOptions,
                   value: districtValue,
                   errorText: districtErrorText,
                   requiredField: true,
                   enabled: isEditable && !isCatalogLoading && cityValue != null,
-                  icon: Icons.map_outlined,
                   emptyOptionsHint: districtHint,
                   onChanged: onDistrictChanged,
                 ),
                 AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.municipality,
-                  helpMessage: l10n.municipalityHelp,
                   options: municipalityOptions,
                   value: municipalityValue,
                   errorText: municipalityErrorText,
                   requiredField: true,
                   enabled:
                       isEditable && !isCatalogLoading && districtValue != null,
-                  icon: Icons.apartment_outlined,
                   emptyOptionsHint: municipalityHint,
                   onChanged: onMunicipalityChanged,
                 ),
                 AddressDropdownField(
                   width: fieldWidth,
                   label: l10n.neighborhood,
-                  helpMessage: l10n.neighborhoodHelp,
                   options: neighborhoodOptions,
                   value: neighborhoodValue,
                   errorText: addressErrorText,
@@ -143,7 +137,6 @@ class AddressFormContent extends StatelessWidget {
                       isEditable &&
                       !isCatalogLoading &&
                       municipalityValue != null,
-                  icon: Icons.home_work_outlined,
                   emptyOptionsHint: neighborhoodHint,
                   onChanged: onNeighborhoodChanged,
                 ),
@@ -154,14 +147,18 @@ class AddressFormContent extends StatelessWidget {
               const LinearProgressIndicator(minHeight: 2),
             ],
             const SizedBox(height: 14),
-            EditableField(
+            SizedBox(
               width: constraints.maxWidth,
-              label: l10n.addressComplementary,
-              controller: additionalAddressController,
-              requiredField: false,
-              helpMessage: l10n.addressComplementaryHelp,
-              hintText: l10n.addressComplementaryPlaceholder,
-              readOnly: !isEditable,
+              child: EteeloTextInput(
+                label: l10n.addressComplementary,
+                controller: additionalAddressController,
+                required: false,
+                placeholder: l10n.addressComplementaryPlaceholder,
+                readOnly: !isEditable,
+                inputFormatters: const [
+                  FirstLetterUppercaseTextInputFormatter(),
+                ],
+              ),
             ),
             if (showInlineSaveButton) ...[
               const SizedBox(height: 22),

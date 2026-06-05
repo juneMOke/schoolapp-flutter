@@ -32,12 +32,6 @@ class PreviousYearFields extends StatelessWidget {
   final String? prevLevelError;
   final String? prevRateError;
   final String? prevRankError;
-  final bool prevYearChanged;
-  final bool prevSchoolChanged;
-  final bool prevCycleChanged;
-  final bool prevLevelChanged;
-  final bool prevRateChanged;
-  final bool prevRankChanged;
   final bool validatedPreviousYearChanged;
   final bool isEditable;
 
@@ -66,12 +60,6 @@ class PreviousYearFields extends StatelessWidget {
     this.prevLevelError,
     this.prevRateError,
     this.prevRankError,
-    this.prevYearChanged = false,
-    this.prevSchoolChanged = false,
-    this.prevCycleChanged = false,
-    this.prevLevelChanged = false,
-    this.prevRateChanged = false,
-    this.prevRankChanged = false,
     this.validatedPreviousYearChanged = false,
     this.isEditable = true,
   });

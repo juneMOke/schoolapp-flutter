@@ -21,8 +21,6 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
   final ValueChanged<String> onLevelChanged;
   final String? groupError;
   final String? levelError;
-  final bool groupChanged;
-  final bool levelChanged;
 
   const TargetAcademicInfoStepBody({
     super.key,
@@ -41,8 +39,6 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
     required this.onLevelChanged,
     this.groupError,
     this.levelError,
-    this.groupChanged = false,
-    this.levelChanged = false,
   });
 
   @override
@@ -63,8 +59,6 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
             selectedSchoolLevelId: selectedSchoolLevelId,
             groupError: groupError,
             levelError: levelError,
-            groupChanged: groupChanged,
-            levelChanged: levelChanged,
             onGroupChanged: onGroupChanged,
             onLevelChanged: onLevelChanged,
             isEditable: isEditable,
