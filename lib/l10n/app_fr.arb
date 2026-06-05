@@ -516,6 +516,7 @@
   "relationshipOther": "Autre",
   "stepPersonalInfoSubtitle": "Informations générales de l'élève",
   "stepAddressSubtitle": "Localisation et adresse complète",
+  "stepAddressTitle": "Adresse de l'élève",
   "stepAcademicSubtitle": "Historique académique et objectifs",
   "stepAcademicPreviousSubtitle": "Historique académique de l'année précédente",
   "stepAcademicTargetSubtitle": "Objectifs académiques pour l'année cible",

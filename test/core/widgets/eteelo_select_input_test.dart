@@ -63,5 +63,53 @@ void main() {
 
       expect(find.text('Maternelle 2'), findsOneWidget);
     });
+
+    testWidgets(
+      'ne plante pas si la valeur est absente des options (cascade geo en cours)',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: EteeloSelectInput<String>(
+                label: 'Quartier',
+                value: 'Bitshaku-Tshaku', // pas (encore) dans les options
+                items: const [
+                  EteeloSelectItem(value: 'A', label: 'A'),
+                  EteeloSelectItem(value: 'B', label: 'B'),
+                ],
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('ne plante pas avec des options en doublon par valeur', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EteeloSelectInput<String>(
+              label: 'Quartier',
+              value: 'X',
+              items: const [
+                EteeloSelectItem(value: 'X', label: 'X'),
+                EteeloSelectItem(value: 'X', label: 'X (doublon)'),
+                EteeloSelectItem(value: 'Y', label: 'Y'),
+              ],
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }

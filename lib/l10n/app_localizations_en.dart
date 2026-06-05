@@ -1065,6 +1065,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepAddressSubtitle => 'Location and full address';
 
   @override
+  String get stepAddressTitle => 'Student\'s address';
+
+  @override
   String get stepAcademicSubtitle => 'Academic history and goals';
 
   @override

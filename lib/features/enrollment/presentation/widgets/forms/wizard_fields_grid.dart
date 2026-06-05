@@ -22,11 +22,16 @@ class WizardFieldsGrid extends StatelessWidget {
   final double spacing;
   final double runSpacing;
 
+  /// Plafond de colonnes (ex. 2 pour grouper les champs deux à deux même quand
+  /// la largeur permettrait 3 colonnes).
+  final int maxColumns;
+
   const WizardFieldsGrid({
     super.key,
     required this.fields,
     this.spacing = 16,
     this.runSpacing = 16,
+    this.maxColumns = 3,
   });
 
   /// Seuils de colonnes (sur la largeur disponible à l'intérieur de la carte).
@@ -41,7 +46,7 @@ class WizardFieldsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = columnsForWidth(width);
+        final columns = columnsForWidth(width).clamp(1, maxColumns);
         final itemWidth = (width - (columns - 1) * spacing) / columns;
 
         return Wrap(

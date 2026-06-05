@@ -1956,6 +1956,12 @@ abstract class AppLocalizations {
   /// **'Location and full address'**
   String get stepAddressSubtitle;
 
+  /// No description provided for @stepAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s address'**
+  String get stepAddressTitle;
+
   /// No description provided for @stepAcademicSubtitle.
   ///
   /// In en, this message translates to:

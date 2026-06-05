@@ -507,6 +507,7 @@
 
   "stepPersonalInfoSubtitle": "General student information",
   "stepAddressSubtitle": "Location and full address",
+  "stepAddressTitle": "Student's address",
   "stepAcademicSubtitle": "Academic history and goals",
   "stepAcademicPreviousSubtitle": "Previous year academic history",
   "stepAcademicTargetSubtitle": "Target year academic objectives",

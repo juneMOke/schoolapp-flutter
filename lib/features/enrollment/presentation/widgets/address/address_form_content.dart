@@ -84,6 +84,9 @@ class AddressFormContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         WizardFieldsGrid(
+          // Groupement deux à deux (Ville–District, Commune–Quartier) même sur
+          // grand écran.
+          maxColumns: 2,
           fields: [
             WizardGridField(
               _AddressSelectField(

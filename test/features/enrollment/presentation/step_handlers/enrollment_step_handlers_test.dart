@@ -127,8 +127,9 @@ void main() {
           ),
           (
             buildHandler: (c) => AddressStepHandler(controller: c),
-            title: 'address',
-            subtitle: 'subtitle-address',
+            title: 'address-title',
+            // Sous-titre retiré (doublon) → désormais vide.
+            subtitle: '',
             save: 'save-address',
             saving: 'saving-address',
             invalidHint: 'hint-invalid-address',
@@ -363,6 +364,7 @@ _MockAppLocalizations _mockL10n() {
 
   when(() => l10n.address).thenReturn('address');
   when(() => l10n.stepAddressSubtitle).thenReturn('subtitle-address');
+  when(() => l10n.stepAddressTitle).thenReturn('address-title');
   when(() => l10n.savingAddress).thenReturn('saving-address');
   when(() => l10n.saveAddress).thenReturn('save-address');
   when(() => l10n.validateAddressHint).thenReturn('hint-invalid-address');

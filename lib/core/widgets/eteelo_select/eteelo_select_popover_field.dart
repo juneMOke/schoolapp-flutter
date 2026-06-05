@@ -36,9 +36,25 @@ class EteeloSelectPopoverField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // DropdownButton (Material) impose : la valeur doit correspondre à
+    // EXACTEMENT un item, et deux items ne peuvent pas partager la même valeur.
+    // Pendant le chargement/cascade de la geo-adresse, la valeur sélectionnée
+    // peut ne pas (encore) figurer dans les options, et certaines listes
+    // peuvent contenir des doublons → on dédoublonne par valeur et on
+    // n'attribue la valeur que si elle correspond à un item (sinon on retombe
+    // sur le hint au lieu de planter).
+    final seen = <T>{};
+    final uniqueItems = <EteeloSelectItem<T>>[
+      for (final item in items)
+        if (seen.add(item.value)) item,
+    ];
+    final hasValue =
+        value != null && uniqueItems.any((item) => item.value == value);
+    final effectiveValue = hasValue ? value : null;
+
     return DropdownButtonHideUnderline(
       child: DropdownButton<T>(
-        value: value,
+        value: effectiveValue,
         isExpanded: true,
         icon: const Icon(
           Icons.keyboard_arrow_down_rounded,
@@ -58,10 +74,10 @@ class EteeloSelectPopoverField<T> extends StatelessWidget {
         ),
         selectedItemBuilder: selectedItemBuilder == null
             ? null
-            : (context) => items
+            : (context) => uniqueItems
                   .map((item) => selectedItemBuilder!(context, item))
                   .toList(growable: false),
-        items: items
+        items: uniqueItems
             .map(
               (item) => DropdownMenuItem<T>(
                 value: item.value,

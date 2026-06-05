@@ -18,10 +18,11 @@ class AddressStepHandler extends BaseEnrollmentStepHandler {
   int get order => step.index;
 
   @override
-  String title(AppLocalizations l10n) => l10n.address;
+  String title(AppLocalizations l10n) => l10n.stepAddressTitle;
 
+  // Sous-titre retiré (StepPageCard masque un sous-titre vide).
   @override
-  String subtitle(AppLocalizations l10n) => l10n.stepAddressSubtitle;
+  String subtitle(AppLocalizations l10n) => '';
 
   @override
   String saveLabel(AppLocalizations l10n, SaveLabelContext context) {
