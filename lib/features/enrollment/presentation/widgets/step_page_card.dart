@@ -5,6 +5,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
+/// Carte d'étape du parcours d'inscription (PARCOURS 19).
+///
+/// Carte surélevée à en-tête bi-ton, rail d'accent pleine hauteur à gauche et
+/// médaillon dégradé à la teinte de l'étape. Terre cuite reste réservé à
+/// l'action ; la teinte d'accent vient de l'identité de l'étape.
 class StepPageCard extends StatelessWidget {
   final String eyebrow;
   final String title;
@@ -23,113 +28,128 @@ class StepPageCard extends StatelessWidget {
     required this.child,
   });
 
+  static const double _railWidth = 4;
+  static const double _medallionSize = 46;
+  static const double _medallionRadius = 14;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
+    return DecoratedBox(
+      decoration: const BoxDecoration(
         borderRadius: AppRadius.brCard,
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppElevation.shadowRaised,
+        boxShadow: AppElevation.shadowStepCard,
       ),
-      child: Column(
+      child: ClipRRect(
+        borderRadius: AppRadius.brCard,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Rail d'accent pleine hauteur, opacité pleine.
+            Container(width: _railWidth, color: accentColor),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceRaised,
+                  // Liseré clair interne (simule l'inset blanc 70 %).
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.surfaceRaised.withValues(alpha: 0.70),
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.stepCardBody),
+                      child: child,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.stepCardHeaderH,
+        vertical: AppSpacing.stepCardHeaderV,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.surfaceAlt, accentColor.withValues(alpha: 0.08)],
+        ),
+        border: const Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xl,
-              vertical: AppSpacing.lg,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.surfaceAlt,
-                  accentColor.withValues(alpha: 0.08),
-                ],
-              ),
-              borderRadius: const BorderRadius.vertical(top: AppRadius.card),
-              border: const Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
+          _buildMedallion(),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        accentColor,
-                        accentColor.withValues(alpha: 0.78),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accentColor.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
+                Text(
+                  eyebrow.toUpperCase(),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: accentColor,
+                    letterSpacing: 0.7,
                   ),
-                  child: Icon(icon, color: AppColors.textOnDark),
                 ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        eyebrow.toUpperCase(),
-                        style: AppTypography.labelSmall.copyWith(
-                          color: accentColor,
-                          letterSpacing: 0.7,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        title,
-                        style: AppTypography.titleLarge.copyWith(
-                          fontFamily: 'Lora',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        subtitle,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  title,
+                  style: AppTypography.titleLarge.copyWith(
+                    fontFamily: 'Lora',
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  subtitle,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(bottom: AppRadius.card),
-              border: Border(
-                left: BorderSide(
-                  color: accentColor.withValues(alpha: 0.45),
-                  width: 4,
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: child,
-            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedallion() {
+    return Container(
+      width: _medallionSize,
+      height: _medallionSize,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [accentColor, accentColor.withValues(alpha: 0.80)],
+        ),
+        borderRadius: BorderRadius.circular(_medallionRadius),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.55),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
+      child: Icon(icon, color: AppColors.textOnDark),
     );
   }
 }

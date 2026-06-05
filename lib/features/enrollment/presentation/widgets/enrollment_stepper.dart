@@ -185,8 +185,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 stepContent: stepContents[currentStep],
                 stepEyebrow:
                     '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
-                stepAccentColor: _stepAccentColor(currentStep),
-                stepIcon: _stepIcon(currentStep),
+                stepAccentColor: _stepAccentColor(currentWizardStep),
+                stepIcon: _stepIcon(currentWizardStep),
                 controls: controls,
                 isSummaryStep: isSummaryStep,
               );
@@ -290,27 +290,30 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
   }
 
-  Color _stepAccentColor(int step) {
+  // Teinte d'accent par étape — indexée sur l'identité de l'étape (et non sa
+  // position), donc robuste à la réorganisation Tuteurs/Frais. Sept teintes
+  // distinctes : le résumé ne réutilise plus le vert-savane des frais.
+  Color _stepAccentColor(EnrollmentWizardStep step) {
     return switch (step) {
-      0 => AppColors.bleuArdoise,
-      1 => AppColors.info,
-      2 => AppColors.orDoux,
-      3 => AppColors.terreCuite,
-      4 => AppColors.vertSavane,
-      5 => AppColors.warning,
-      _ => AppColors.success,
+      EnrollmentWizardStep.personalInfo => AppColors.bleuArdoise,
+      EnrollmentWizardStep.address => AppColors.info,
+      EnrollmentWizardStep.previousAcademic => AppColors.orDoux,
+      EnrollmentWizardStep.targetAcademic => AppColors.terreCuite,
+      EnrollmentWizardStep.studentCharges => AppColors.vertSavane,
+      EnrollmentWizardStep.guardian => AppColors.warning,
+      EnrollmentWizardStep.summary => AppColors.bleuProfond,
     };
   }
 
-  IconData _stepIcon(int step) {
+  IconData _stepIcon(EnrollmentWizardStep step) {
     return switch (step) {
-      0 => Icons.badge_outlined,
-      1 => Icons.home_work_outlined,
-      2 => Icons.history_edu_outlined,
-      3 => Icons.trending_up_rounded,
-      4 => Icons.payments_outlined,
-      5 => Icons.family_restroom_outlined,
-      _ => Icons.fact_check_outlined,
+      EnrollmentWizardStep.personalInfo => Icons.badge_outlined,
+      EnrollmentWizardStep.address => Icons.home_work_outlined,
+      EnrollmentWizardStep.previousAcademic => Icons.history_edu_outlined,
+      EnrollmentWizardStep.targetAcademic => Icons.trending_up_rounded,
+      EnrollmentWizardStep.studentCharges => Icons.payments_outlined,
+      EnrollmentWizardStep.guardian => Icons.family_restroom_outlined,
+      EnrollmentWizardStep.summary => Icons.fact_check_outlined,
     };
   }
 }
@@ -346,6 +349,8 @@ class _EnrollmentStepperLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Padding(
       padding: const EdgeInsets.all(AppTheme.defaultPadding),
       child: Column(
@@ -364,9 +369,24 @@ class _EnrollmentStepperLayout extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AnimatedSwitcher(
-                    duration: AppMotion.standard,
+                    duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      if (reduceMotion) return child;
+                      // etStepIn : fondu + glissement translateY 10 → 0.
+                      return FadeTransition(
+                        opacity: animation,
+                        child: AnimatedBuilder(
+                          animation: animation,
+                          builder: (context, inner) => Transform.translate(
+                            offset: Offset(0, (1 - animation.value) * 10),
+                            child: inner,
+                          ),
+                          child: child,
+                        ),
+                      );
+                    },
                     child: StepPageCard(
                       key: ValueKey(currentStep),
                       eyebrow: stepEyebrow,

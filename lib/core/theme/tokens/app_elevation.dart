@@ -21,6 +21,19 @@ class AppElevation {
     BoxShadow(color: Color(0x260E2D42), blurRadius: 32, offset: Offset(0, 12)),
   ];
 
+  // Carte d'étape du stepper (PARCOURS 19) : ombre composite directionnelle
+  // (couche profonde bleu-profond resserrée par un spread négatif) + couche
+  // ambiante courte. Le liseré clair interne est simulé côté widget.
+  static const List<BoxShadow> shadowStepCard = [
+    BoxShadow(
+      color: Color(0x730E2D42),
+      blurRadius: 48,
+      spreadRadius: -28,
+      offset: Offset(0, 24),
+    ),
+    BoxShadow(color: Color(0x0D2C2A26), blurRadius: 8, offset: Offset(0, 2)),
+  ];
+
   static BoxDecoration get surface1 => const BoxDecoration(
     color: AppColors.surfaceAlt,
     borderRadius: AppRadius.brMd,
