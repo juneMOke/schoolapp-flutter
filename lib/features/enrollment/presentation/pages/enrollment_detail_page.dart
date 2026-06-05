@@ -6,16 +6,13 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_content_shell.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_app_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_read_only_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -103,24 +100,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     enrollmentBloc.add(const EnrollmentCreateResultConsumed());
   }
 
-  /// Resolve detail access mode from enrollment status for first-registration flow.
-  EnrollmentDetailAccessMode? _resolveAccessMode(EnrollmentStatus status) {
-    return switch (status) {
-      EnrollmentStatus.completed => EnrollmentDetailAccessMode.readOnly,
-      EnrollmentStatus.inProgress => EnrollmentDetailAccessMode.editable,
-      _ => null,
-    };
-  }
-
-  /// Show access banner only in first-registration view when an access mode exists.
-  bool _shouldShowAccessBanner({
-    required EnrollmentDetailOrigin origin,
-    required EnrollmentDetailAccessMode? accessMode,
-  }) {
-    return origin == EnrollmentDetailOrigin.firstRegistration &&
-        accessMode != null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -180,37 +159,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
               );
             }
 
-            final enrollment = detail.enrollmentDetail;
-            final studentDisplayName = _buildStudentDisplayName(detail);
-            final accessMode = _resolveAccessMode(enrollment.status);
-            final showAccessBanner = _shouldShowAccessBanner(
-              origin: _effectiveIntent.origin,
-              accessMode: accessMode,
-            );
-
             return EnrollmentDetailContentShell(
-              infoBar: EnrollmentDetailInfoBar(
-                studentDisplayName: studentDisplayName.isNotEmpty
-                    ? studentDisplayName
-                    : enrollment.enrollmentCode,
-                status: enrollment.status,
-                isPreviousYearValidated: enrollment.validatedPreviousYear,
-              ),
-              child: Column(
-                children: [
-                  if (showAccessBanner) ...[
-                    EnrollmentReadOnlyBanner(mode: accessMode!),
-                    const SizedBox(height: 12),
-                  ],
-                  Expanded(
-                    child: EnrollmentStepperScope(
-                      enrollmentDetail: detail,
-                      detailIntent: _effectiveIntent,
-                      detailPolicy: _policy,
-                      onStepChanged: _onStepChanged,
-                    ),
-                  ),
-                ],
+              child: EnrollmentStepperScope(
+                enrollmentDetail: detail,
+                detailIntent: _effectiveIntent,
+                detailPolicy: _policy,
+                onStepChanged: _onStepChanged,
               ),
             );
           },

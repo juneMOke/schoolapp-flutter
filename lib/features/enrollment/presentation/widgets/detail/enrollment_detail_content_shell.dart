@@ -4,14 +4,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 class EnrollmentDetailContentShell extends StatelessWidget {
-  final Widget infoBar;
   final Widget child;
 
-  const EnrollmentDetailContentShell({
-    super.key,
-    required this.infoBar,
-    required this.child,
-  });
+  const EnrollmentDetailContentShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -54,16 +49,7 @@ class EnrollmentDetailContentShell extends StatelessWidget {
                     )
                   : const EdgeInsets.all(AppSpacing.xl);
 
-              return Padding(
-                padding: shellPadding,
-                child: Column(
-                  children: [
-                    infoBar,
-                    const SizedBox(height: AppSpacing.md),
-                    Expanded(child: child),
-                  ],
-                ),
-              );
+              return Padding(padding: shellPadding, child: child);
             },
           ),
         ],
