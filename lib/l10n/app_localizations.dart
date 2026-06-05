@@ -930,6 +930,18 @@ abstract class AppLocalizations {
   /// **'Search Students'**
   String get searchStudents;
 
+  /// No description provided for @searchFormSubtitleFirstRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter the enrollments list'**
+  String get searchFormSubtitleFirstRegistration;
+
+  /// No description provided for @searchFormSubtitlePreRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Online requests received, pending validation'**
+  String get searchFormSubtitlePreRegistration;
+
   /// No description provided for @reRegistrationSearchHint.
   ///
   /// In en, this message translates to:
@@ -1011,7 +1023,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewDetails.
   ///
   /// In en, this message translates to:
-  /// **'View Details'**
+  /// **'View details'**
   String get viewDetails;
 
   /// No description provided for @editEnrollment.
@@ -1038,6 +1050,114 @@ abstract class AppLocalizations {
   /// **'No student matches your search criteria.'**
   String get enrollmentNoResultsDescription;
 
+  /// No description provided for @enrollmentEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get enrollmentEmptyTitle;
+
+  /// No description provided for @enrollmentEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.'**
+  String get enrollmentEmptyDescription;
+
+  /// No description provided for @enrollmentEmptyWithoutFilterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrollment yet.'**
+  String get enrollmentEmptyWithoutFilterDescription;
+
+  /// No description provided for @enrollmentEmptyCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll a new student'**
+  String get enrollmentEmptyCreateAction;
+
+  /// No description provided for @enrollmentErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentErrorRetry;
+
+  /// No description provided for @enrollmentErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get enrollmentErrorReconnect;
+
+  /// No description provided for @enrollmentErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact administrator'**
+  String get enrollmentErrorContactAdmin;
+
+  /// No description provided for @enrollmentErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get enrollmentErrorNetworkTitle;
+
+  /// No description provided for @enrollmentErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your internet connection, then retry.'**
+  String get enrollmentErrorNetworkMessage;
+
+  /// No description provided for @enrollmentErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get enrollmentErrorUnauthorizedTitle;
+
+  /// No description provided for @enrollmentErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to continue.'**
+  String get enrollmentErrorUnauthorizedMessage;
+
+  /// No description provided for @enrollmentErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get enrollmentErrorForbiddenTitle;
+
+  /// No description provided for @enrollmentErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this list.'**
+  String get enrollmentErrorForbiddenMessage;
+
+  /// No description provided for @enrollmentErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get enrollmentErrorServerTitle;
+
+  /// No description provided for @enrollmentErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred on our side. Please try again in a moment.'**
+  String get enrollmentErrorServerMessage;
+
+  /// No description provided for @enrollmentErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String enrollmentErrorIncidentCode(String code);
+
+  /// No description provided for @enrollmentErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get enrollmentErrorUnknownTitle;
+
+  /// No description provided for @enrollmentErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading results.'**
+  String get enrollmentErrorUnknownMessage;
+
   /// No description provided for @loadingStudents.
   ///
   /// In en, this message translates to:
@@ -1050,17 +1170,41 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
   String enrollmentResultsCount(int count);
 
-  /// No description provided for @enrollmentPageFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}'**
-  String enrollmentPageFooter(int pageCount, int totalCount);
-
-  /// No description provided for @enrollmentPageIndicator.
+  /// No description provided for @paginationPageIndicator.
   ///
   /// In en, this message translates to:
   /// **'Page {current} / {total}'**
-  String enrollmentPageIndicator(int current, int total);
+  String paginationPageIndicator(int current, int total);
+
+  /// No description provided for @paginationResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 result} =1{1 result} other{{count} results}}'**
+  String paginationResultsCount(int count);
+
+  /// No description provided for @paginationRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start}–{end} of {total} {unit}'**
+  String paginationRange(int start, int end, int total, String unit);
+
+  /// No description provided for @paginationNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pagination'**
+  String get paginationNavigationLabel;
+
+  /// No description provided for @unitStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'students'**
+  String get unitStudents;
+
+  /// No description provided for @enrollmentResultCardOpenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name}\'s record, status {status}'**
+  String enrollmentResultCardOpenLabel(String name, String status);
 
   /// No description provided for @refresh.
   ///
@@ -1235,6 +1379,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open or close guardian card'**
   String get guardianToggleCard;
+
+  /// No description provided for @guardianIncompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete profile'**
+  String get guardianIncompleteHint;
 
   /// No description provided for @guardianEmailOptionalInline.
   ///
@@ -1427,6 +1577,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter {label}'**
   String enterFieldHint(String label);
+
+  /// No description provided for @firstNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Claudine'**
+  String get firstNameExample;
+
+  /// No description provided for @lastNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Furah'**
+  String get lastNameExample;
+
+  /// No description provided for @surnameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Sifiwe'**
+  String get surnameExample;
+
+  /// No description provided for @selectPlaceholderChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get selectPlaceholderChoose;
+
+  /// No description provided for @requiredSemanticSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get requiredSemanticSuffix;
 
   /// No description provided for @dateHint.
   ///
@@ -1776,6 +1956,12 @@ abstract class AppLocalizations {
   /// **'Location and full address'**
   String get stepAddressSubtitle;
 
+  /// No description provided for @stepAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s address'**
+  String get stepAddressTitle;
+
   /// No description provided for @stepAcademicSubtitle.
   ///
   /// In en, this message translates to:
@@ -1809,7 +1995,7 @@ abstract class AppLocalizations {
   /// No description provided for @wizardStepShortPersonal.
   ///
   /// In en, this message translates to:
-  /// **'Personal'**
+  /// **'Identity'**
   String get wizardStepShortPersonal;
 
   /// No description provided for @wizardStepShortAddress.
@@ -1821,13 +2007,13 @@ abstract class AppLocalizations {
   /// No description provided for @wizardStepShortPrevious.
   ///
   /// In en, this message translates to:
-  /// **'Previous'**
+  /// **'Prev. year'**
   String get wizardStepShortPrevious;
 
   /// No description provided for @wizardStepShortTarget.
   ///
   /// In en, this message translates to:
-  /// **'Target'**
+  /// **'Target year'**
   String get wizardStepShortTarget;
 
   /// No description provided for @wizardStepShortCharges.
@@ -1854,11 +2040,71 @@ abstract class AppLocalizations {
   /// **'Step {current} / {total}'**
   String stepIndicator(int current, int total);
 
+  /// No description provided for @wizardStepNumberShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number}'**
+  String wizardStepNumberShort(int number);
+
   /// No description provided for @stepForwardHint.
   ///
   /// In en, this message translates to:
   /// **'Click Continue to advance step by step.'**
   String get stepForwardHint;
+
+  /// No description provided for @journeyModeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get journeyModeNew;
+
+  /// No description provided for @journeyModeEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get journeyModeEdit;
+
+  /// No description provided for @journeyModeView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get journeyModeView;
+
+  /// No description provided for @journeyCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get journeyCloseAction;
+
+  /// No description provided for @stepSaveStateIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'No input yet'**
+  String get stepSaveStateIdle;
+
+  /// No description provided for @stepSaveStateIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete fields'**
+  String get stepSaveStateIncomplete;
+
+  /// No description provided for @stepSaveStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get stepSaveStatePending;
+
+  /// No description provided for @stepSaveStateSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get stepSaveStateSaving;
+
+  /// No description provided for @stepSaveStateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Step saved'**
+  String get stepSaveStateSaved;
 
   /// No description provided for @validatePersonalInfoHint.
   ///
@@ -2099,6 +2345,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Address update failed: {message}'**
   String addressSaveError(String message);
+
+  /// No description provided for @enrollmentStudentColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get enrollmentStudentColumnLabel;
 
   /// No description provided for @enrollmentStatusFilterLabel.
   ///
@@ -5044,6 +5296,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred while loading statistics.'**
   String get financeStatsUnknownError;
+
+  /// No description provided for @enrollmentResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get enrollmentResults;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @switchToTableView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to table view'**
+  String get switchToTableView;
+
+  /// No description provided for @switchToGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to grid view'**
+  String get switchToGridView;
+
+  /// No description provided for @enrollmentViewTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get enrollmentViewTable;
+
+  /// No description provided for @enrollmentViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get enrollmentViewGrid;
+
+  /// No description provided for @enrollmentResultsA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment results'**
+  String get enrollmentResultsA11yLabel;
+
+  /// No description provided for @dataTableSortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending sort'**
+  String get dataTableSortAscending;
+
+  /// No description provided for @dataTableSortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending sort'**
+  String get dataTableSortDescending;
+
+  /// No description provided for @dataTableSortNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No sort'**
+  String get dataTableSortNone;
+
+  /// No description provided for @openDetailsForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Open student file for {studentName}'**
+  String openDetailsForStudent(String studentName);
+
+  /// No description provided for @removeFilterNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove filter {filter}'**
+  String removeFilterNamed(String filter);
 }
 
 class _AppLocalizationsDelegate

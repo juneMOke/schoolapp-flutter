@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form_compact_layout.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form_wide_layout.dart';
@@ -256,38 +257,16 @@ class _FacturationSearchFormState extends State<FacturationSearchForm> {
       crossAxisAlignment: WrapCrossAlignment.center,
       alignment: WrapAlignment.end,
       children: [
-        ElevatedButton.icon(
+        EteeloButton.primary(
           onPressed: _canSearch ? _submit : null,
-          icon: const Icon(Icons.search_rounded, size: 14),
-          label: Text(l10n.search),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.bleuArdoise,
-            foregroundColor: AppColors.textOnDark,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-            disabledBackgroundColor: AppColors.stateDisabled,
-            disabledForegroundColor: AppColors.textMuted,
-          ),
+          icon: Icons.search_rounded,
+          label: l10n.search,
+          isLoading: widget.isLoading,
         ),
-        OutlinedButton.icon(
+        EteeloButton.ghost(
           onPressed: widget.isLoading ? null : _reset,
-          icon: const Icon(Icons.refresh_rounded, size: 14),
-          label: Text(l10n.clear),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            side: const BorderSide(color: AppColors.border),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            minimumSize: const Size(112, AppDimensions.minTouchTarget),
-            textStyle: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-          ),
+          icon: Icons.refresh_rounded,
+          label: l10n.clear,
         ),
       ],
     );

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table_container.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
@@ -39,23 +40,50 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     BuildContext context,
     EnrollmentScreenContext screenCtx,
   ) {
-    return AnimatedSwitcher(
-      duration: AppMotion.standard,
-      switchInCurve: AppMotion.outCurve,
-      switchOutCurve: AppMotion.inCurve,
-      child: Column(
-        key: ValueKey<String>(readyKey),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSearchSection(screenCtx),
-          if (resultsSummaryBuilder != null) ...[
-            const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
-            _buildResultsSummarySection(screenCtx),
-          ],
-          const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
-          _buildResultsSection(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final effectiveCtx = EnrollmentScreenContext(
+          schoolId: screenCtx.schoolId,
+          academicYearId: screenCtx.academicYearId,
+          isLoading: screenCtx.isLoading,
+          onRefreshRequested: screenCtx.onRefreshRequested,
+          layout: EnrollmentListingLayout.fromWidth(constraints.maxWidth),
+          preferredViewMode: screenCtx.preferredViewMode,
+          onSortToggled: screenCtx.onSortToggled,
+          onViewModeChanged: screenCtx.onViewModeChanged,
+          onResetSearchRequested: screenCtx.onResetSearchRequested,
+          onCreateEnrollmentRequested: screenCtx.onCreateEnrollmentRequested,
+          onReconnectRequested: screenCtx.onReconnectRequested,
+          onContactAdminRequested: screenCtx.onContactAdminRequested,
+        );
+
+        return AnimatedSwitcher(
+          duration: AppMotion.standard,
+          switchInCurve: AppMotion.outCurve,
+          switchOutCurve: AppMotion.inCurve,
+          child: Column(
+            key: ValueKey<String>(readyKey),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSearchSection(effectiveCtx),
+              if (resultsSummaryBuilder != null) ...[
+                const SizedBox(
+                  height: EnrollmentPageLayout.searchToSummarySpacing,
+                ),
+                _buildResultsSummarySection(effectiveCtx),
+                const SizedBox(
+                  height: EnrollmentPageLayout.summaryToResultsSpacing,
+                ),
+              ] else ...[
+                const SizedBox(
+                  height: EnrollmentPageLayout.searchToSummarySpacing,
+                ),
+              ],
+              _buildResultsSection(effectiveCtx),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -68,6 +96,15 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
           schoolId: screenCtx.schoolId,
           academicYearId: screenCtx.academicYearId,
           isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
+          onRefreshRequested: screenCtx.onRefreshRequested,
+          layout: screenCtx.layout,
+          preferredViewMode: screenCtx.preferredViewMode,
+          onSortToggled: screenCtx.onSortToggled,
+          onViewModeChanged: screenCtx.onViewModeChanged,
+          onResetSearchRequested: screenCtx.onResetSearchRequested,
+          onCreateEnrollmentRequested: screenCtx.onCreateEnrollmentRequested,
+          onReconnectRequested: screenCtx.onReconnectRequested,
+          onContactAdminRequested: screenCtx.onContactAdminRequested,
         );
 
         return searchSectionBuilder(context, ctx, (command) {
@@ -77,7 +114,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsSection() {
+  Widget _buildResultsSection(EnrollmentScreenContext screenCtx) {
     return BlocBuilder<EnrollmentBloc, EnrollmentState>(
       builder: (context, state) {
         final shouldShowEmpty = showEmptyBeforeSearchWhen?.call(state) ?? false;
@@ -86,6 +123,8 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
         }
 
         return EnrollmentDataTableContainer(
+          layout: screenCtx.layout,
+          preferredViewMode: screenCtx.preferredViewMode,
           onViewRequested: (summary) {
             final intent = detailIntentFactory(summary);
             context.push(
@@ -97,6 +136,13 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
               extra: intent,
             );
           },
+          onRefresh: screenCtx.onRefreshRequested,
+          onSortToggled: screenCtx.onSortToggled,
+          onViewModeChanged: screenCtx.onViewModeChanged,
+          onResetSearchRequested: screenCtx.onResetSearchRequested,
+          onCreateEnrollmentRequested: screenCtx.onCreateEnrollmentRequested,
+          onReconnectRequested: screenCtx.onReconnectRequested,
+          onContactAdminRequested: screenCtx.onContactAdminRequested,
         );
       },
     );

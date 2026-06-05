@@ -244,28 +244,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     super.dispose();
   }
 
-  Future<void> _pickDate(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime(now.year - 10),
-      firstDate: DateTime(1990),
-      lastDate: now,
-      locale: const Locale('fr'),
-      helpText: l10n.selectDateOfBirthHelpText,
-      cancelText: l10n.cancel,
-      confirmText: l10n.confirm,
-    );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-      _recomputeFormState();
-      if (_showValidationHints && _isValid) {
-        setState(() => _showValidationHints = false);
-      }
-    }
-  }
-
   List<String> _buildValidationErrors(AppLocalizations l10n) {
     final errors = <String>[];
     final firstName = _firstNameController.text.trim();
@@ -325,14 +303,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     if (_showValidationHints && _isValid) {
       setState(() => _showValidationHints = false);
     }
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$d/$m/$y';
   }
 
   String _toIsoDate(DateTime? date) {
@@ -405,6 +375,8 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
             AppSnackBar.showError(
               context,
               l10n.personalInfoSaveError(state.errorMessage ?? ''),
+              onRetry: submitForm,
+              retryLabel: l10n.enrollmentErrorRetry,
             );
           }
         },
@@ -427,9 +399,14 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
               _recomputeFormState();
             }
           },
-          onPickDate: () => _pickDate(context),
+          onDateChanged: (date) {
+            setState(() => _selectedDate = date);
+            _recomputeFormState();
+            if (_showValidationHints && _isValid) {
+              setState(() => _showValidationHints = false);
+            }
+          },
           onSave: _onSave,
-          formatDate: _formatDate,
           enrollmentId: widget.enrollmentId,
           showInlineSaveButton: widget.showInlineSaveButton,
           canSave: canSubmit,

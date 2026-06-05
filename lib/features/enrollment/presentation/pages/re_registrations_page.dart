@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
@@ -14,9 +16,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_r
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_scaffold.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_results_info_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_invitation_card.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration/re_registration_empty_before_search.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
 
 class ReRegistrationsPage extends StatefulWidget {
   const ReRegistrationsPage({super.key});
@@ -26,6 +28,9 @@ class ReRegistrationsPage extends StatefulWidget {
 }
 
 class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
+  EnrollmentListingViewMode _preferredViewMode = EnrollmentListingViewMode.auto;
+  static const String _adminEmail = 'support@school.local';
+
   @override
   void initState() {
     super.initState();
@@ -55,15 +60,13 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             return const SizedBox.shrink();
           }
 
-          return EnrollmentResultsInfoBar(
+          return EnrollmentResultsBar(
             count: state.summariesTotalElements,
             isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
-            onRefresh: () async {
-              context.read<EnrollmentBloc>().add(
-                const EnrollmentSummariesRefreshRequested(),
-              );
-            },
+            onRefresh: screenCtx.onRefreshRequested,
             showStatusBadge: false,
+            onViewModeChanged: _onViewModeChanged,
+            currentViewMode: _preferredViewMode,
           );
         },
         detailIntentFactory: (summary) => EnrollmentDetailIntent.reRegistration(
@@ -74,7 +77,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             state.summariesQueryType !=
             EnrollmentSummaryQueryType.byAcademicInfo,
         emptyBeforeSearchBuilder: (_, _) =>
-            const ReRegistrationSearchInvitationCard(),
+            const ReRegistrationEmptyBeforeSearch(),
       ),
     );
   }
@@ -118,6 +121,13 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             schoolId: schoolId,
             academicYearId: '',
             isLoading: isLoading,
+            onRefreshRequested: _onResetSearch,
+            preferredViewMode: _preferredViewMode,
+            onSortToggled: _onSortToggled,
+            onViewModeChanged: _onViewModeChanged,
+            onResetSearchRequested: _onResetSearch,
+            onReconnectRequested: _onReconnect,
+            onContactAdminRequested: _contactAdmin,
           ),
         );
       },
@@ -139,5 +149,31 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
       isLoading: ctx.isLoading,
       dispatch: dispatch,
     );
+  }
+
+  void _onViewModeChanged(EnrollmentListingViewMode mode) {
+    if (_preferredViewMode == mode) {
+      return;
+    }
+    setState(() => _preferredViewMode = mode);
+  }
+
+  void _onSortToggled() {
+    setState(() {});
+  }
+
+  Future<void> _onResetSearch() async {
+    context.read<EnrollmentBloc>().add(
+      const EnrollmentSummariesRefreshRequested(),
+    );
+  }
+
+  void _onReconnect() {
+    context.read<AuthBloc>().add(const AuthLogoutRequested());
+  }
+
+  Future<void> _contactAdmin() async {
+    final uri = Uri(scheme: 'mailto', path: _adminEmail);
+    await launchUrl(uri);
   }
 }

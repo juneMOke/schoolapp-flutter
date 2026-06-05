@@ -57,6 +57,7 @@ class $AssetsAssetsGen {
   const $AssetsAssetsGen();
 
   final $AssetsBrandingGen branding = const $AssetsBrandingGen();
+  final $AssetsPatternsGen patterns = const $AssetsPatternsGen();
 }
 
 class $AssetsBrandingGen {
@@ -112,6 +113,14 @@ class $AssetsSplashGen {
   );
   final AssetGenImage splashLogo2048 = const AssetGenImage(
     'assets/branding/splash/splash_logo_2048.png',
+  );
+}
+
+class $AssetsPatternsGen {
+  const $AssetsPatternsGen();
+
+  final SvgGenImage kubaTile = const SvgGenImage(
+    'assets/patterns/kuba_tile.svg',
   );
 }
 

@@ -31,7 +31,7 @@ void main() {
     );
 
     final searchFinder = find.widgetWithText(ElevatedButton, 'Rechercher');
-    final clearFinder = find.widgetWithText(OutlinedButton, 'Effacer');
+    final clearFinder = find.widgetWithText(TextButton, 'Effacer');
 
     expect(
       tester.getSize(searchFinder).height,
@@ -43,7 +43,7 @@ void main() {
     );
 
     final searchButton = tester.widget<ElevatedButton>(searchFinder);
-    final clearButton = tester.widget<OutlinedButton>(clearFinder);
+    final clearButton = tester.widget<TextButton>(clearFinder);
 
     expect(
       searchButton.style?.tapTargetSize,

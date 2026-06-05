@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 
 part 'enrollment_event.dart';
 part 'enrollment_state.dart';
@@ -244,6 +246,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
         summariesStatus: EnrollmentLoadStatus.loading,
         summariesQueryType: query.type,
         lastSummariesQuery: query,
+        summariesErrorType: null,
         errorMessage: null,
       ),
     );
@@ -298,6 +301,7 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
       (failure) => emit(
         state.copyWith(
           summariesStatus: EnrollmentLoadStatus.failure,
+          summariesErrorType: _mapFailureToErrorType(failure),
           errorMessage: failure.message,
         ),
       ),
@@ -313,10 +317,21 @@ class EnrollmentBloc extends Bloc<EnrollmentEvent, EnrollmentState> {
               : _defaultSummariesPageSize,
           summariesTotalElements: summaryPage.totalElements,
           summariesTotalPages: summaryPage.totalPages,
+          summariesErrorType: null,
           errorMessage: null,
         ),
       ),
     );
+  }
+
+  EnrollmentErrorType _mapFailureToErrorType(Failure failure) {
+    return switch (failure) {
+      NetworkFailure() => EnrollmentErrorType.network,
+      InvalidCredentialsFailure() => EnrollmentErrorType.unauthorized,
+      UnauthorizedFailure() => EnrollmentErrorType.forbidden,
+      ServerFailure() => EnrollmentErrorType.server,
+      _ => EnrollmentErrorType.unknown,
+    };
   }
 
   Future<void> _onDetailRequested(

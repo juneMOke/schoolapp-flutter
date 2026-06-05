@@ -195,7 +195,8 @@ class _PaymentRow extends StatelessWidget {
                       StudentAvatar(
                         firstName: payment.payerFirstName,
                         lastName: payment.payerLastName,
-                        size: 32,
+                        studentId: payment.studentId,
+                        size: AvatarSize.md,
                         variant: AvatarVariant.solid,
                       ),
                       const SizedBox(width: AppDimensions.spacingS),

@@ -8,14 +8,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SummarySectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
   final Widget child;
 
   const SummarySectionCard({
     super.key,
     required this.title,
     required this.icon,
-    required this.onEdit,
+    this.onEdit,
     required this.child,
   });
 
@@ -54,12 +54,13 @@ class SummarySectionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SecondaryButton(
-                  label: l10n.editEnrollment,
-                  icon: Icons.edit_outlined,
-                  onPressed: onEdit,
-                  fullWidth: false,
-                ),
+                if (onEdit != null)
+                  SecondaryButton(
+                    label: l10n.editEnrollment,
+                    icon: Icons.edit_outlined,
+                    onPressed: onEdit,
+                    fullWidth: false,
+                  ),
               ],
             ),
           ),

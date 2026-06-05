@@ -97,15 +97,15 @@ class _SummaryStepState extends State<SummaryStep> {
             onEditRequested: widget.onEditRequested,
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          SummaryChargesSection(
-            canLoadCharges: _canLoadCharges,
-            onRetry: _requestCharges,
-            onEditRequested: widget.onEditRequested,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
           SummaryGuardiansSection(
             parents: widget.enrollmentDetail.parentDetails,
             onEditRequested: widget.onEditRequested,
+          ),
+          const SizedBox(height: AppDimensions.spacingM),
+          // Frais : section en lecture seule, sans bouton « Modifier ».
+          SummaryChargesSection(
+            canLoadCharges: _canLoadCharges,
+            onRetry: _requestCharges,
           ),
           const SizedBox(height: AppDimensions.spacingM),
           const SummaryValidationNotice(),

@@ -26,5 +26,4 @@ class EnrollmentConstants {
   static const double cardRadius = 12.0;
   static const double searchFormHeight = 120.0;
   static const double tableRowHeight = 64.0;
-  static const double avatarRadius = 20.0;
 }

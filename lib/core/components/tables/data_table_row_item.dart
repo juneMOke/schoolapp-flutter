@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_widget.dart';
@@ -10,6 +11,7 @@ class DataTableRowItem extends StatefulWidget {
   final List<DataTableColumnDef> columns;
   final bool isEven;
   final Map<DataTableTrailingType, DataTableTrailingBuilder> trailingBuilders;
+  final DataTableDensity density;
 
   const DataTableRowItem({
     super.key,
@@ -17,6 +19,7 @@ class DataTableRowItem extends StatefulWidget {
     required this.columns,
     required this.isEven,
     this.trailingBuilders = const {},
+    this.density = DataTableDensity.comfortable,
   });
 
   @override
@@ -29,10 +32,15 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
 
   @override
   Widget build(BuildContext context) {
-    final hasTap = widget.row.onTap != null;
+    final hasTap =
+        widget.row.onTap != null ||
+        (widget.row.trailing.enabled && widget.row.trailing.onTap != null);
     final hasLeading = widget.row.leading != null;
     final hasTrailing = widget.row.trailing.type != DataTableTrailingType.none;
     final isActive = _isHovered || _isPressed;
+    final baseRowBackground = widget.isEven
+        ? EteeloDataTableTheme.rowEvenBackground
+        : EteeloDataTableTheme.rowOddBackground;
 
     return MouseRegion(
       cursor: hasTap ? SystemMouseCursors.click : MouseCursor.defer,
@@ -48,14 +56,14 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedContainer(
           duration: EteeloDataTableTheme.rowHoverDuration,
-          height: EteeloDataTableTheme.rowHeight,
+          height: widget.density.rowHeight,
           padding: const EdgeInsets.symmetric(
             horizontal: EteeloDataTableTheme.rowHorizontalPadding,
           ),
           decoration: BoxDecoration(
             color: isActive
                 ? EteeloDataTableTheme.rowHoverBackground
-                : EteeloDataTableTheme.rowEvenBackground,
+                : baseRowBackground,
             border: Border(
               left: BorderSide(
                 color: isActive

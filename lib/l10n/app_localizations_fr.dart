@@ -500,6 +500,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchStudents => 'Rechercher des élèves';
 
   @override
+  String get searchFormSubtitleFirstRegistration =>
+      'Filtrez la liste des inscriptions';
+
+  @override
+  String get searchFormSubtitlePreRegistration =>
+      'Demandes reçues en ligne, en attente de validation';
+
+  @override
   String get reRegistrationSearchHint =>
       'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
 
@@ -546,7 +554,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clear => 'Effacer';
 
   @override
-  String get viewDetails => 'Voir Détails';
+  String get viewDetails => 'Voir les détails';
 
   @override
   String get editEnrollment => 'Modifier';
@@ -560,6 +568,69 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentNoResultsDescription =>
       'Aucun élève ne correspond à vos critères de recherche.';
+
+  @override
+  String get enrollmentEmptyTitle => 'Aucun résultat';
+
+  @override
+  String get enrollmentEmptyDescription =>
+      'Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\'élève n\'est pas encore enregistré.';
+
+  @override
+  String get enrollmentEmptyWithoutFilterDescription =>
+      'Aucune inscription pour le moment.';
+
+  @override
+  String get enrollmentEmptyCreateAction => 'Inscrire un nouvel élève';
+
+  @override
+  String get enrollmentErrorRetry => 'Réessayer';
+
+  @override
+  String get enrollmentErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get enrollmentErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get enrollmentErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get enrollmentErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.';
+
+  @override
+  String get enrollmentErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get enrollmentErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour continuer.';
+
+  @override
+  String get enrollmentErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get enrollmentErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour voir cette liste.';
+
+  @override
+  String get enrollmentErrorServerTitle => 'Erreur du serveur';
+
+  @override
+  String get enrollmentErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String enrollmentErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get enrollmentErrorUnknownTitle => 'Chargement impossible';
+
+  @override
+  String get enrollmentErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement des résultats.';
 
   @override
   String get loadingStudents => 'Chargement des étudiants...';
@@ -577,19 +648,36 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String enrollmentPageFooter(int pageCount, int totalCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      pageCount,
-      locale: localeName,
-      other: 'résultats',
-      one: 'résultat',
-    );
-    return '$pageCount $_temp0 sur $totalCount';
+  String paginationPageIndicator(int current, int total) {
+    return 'Page $current / $total';
   }
 
   @override
-  String enrollmentPageIndicator(int current, int total) {
-    return 'Page $current / $total';
+  String paginationResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count résultats',
+      one: '1 résultat',
+      zero: '0 résultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paginationRange(int start, int end, int total, String unit) {
+    return '$start–$end sur $total $unit';
+  }
+
+  @override
+  String get paginationNavigationLabel => 'Pagination';
+
+  @override
+  String get unitStudents => 'élèves';
+
+  @override
+  String enrollmentResultCardOpenLabel(String name, String status) {
+    return 'Ouvrir la fiche de $name, statut $status';
   }
 
   @override
@@ -683,6 +771,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianToggleCard => 'Ouvrir ou fermer la carte tuteur';
+
+  @override
+  String get guardianIncompleteHint => 'Fiche incomplète';
 
   @override
   String get guardianEmailOptionalInline => '(facultatif)';
@@ -787,6 +878,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String enterFieldHint(String label) {
     return 'Saisir $label';
   }
+
+  @override
+  String get firstNameExample => 'Claudine';
+
+  @override
+  String get lastNameExample => 'Furah';
+
+  @override
+  String get surnameExample => 'Sifiwe';
+
+  @override
+  String get selectPlaceholderChoose => 'Choisir';
+
+  @override
+  String get requiredSemanticSuffix => 'obligatoire';
 
   @override
   String get dateHint => 'jj/mm/aaaa';
@@ -967,6 +1073,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepAddressSubtitle => 'Localisation et adresse complète';
 
   @override
+  String get stepAddressTitle => 'Adresse de l\'élève';
+
+  @override
   String get stepAcademicSubtitle => 'Historique académique et objectifs';
 
   @override
@@ -984,19 +1093,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepSummarySubtitle => 'Récapitulatif final du dossier';
 
   @override
-  String get wizardStepShortPersonal => 'Perso';
+  String get wizardStepShortPersonal => 'Identité';
 
   @override
   String get wizardStepShortAddress => 'Adresse';
 
   @override
-  String get wizardStepShortPrevious => 'Précédent';
+  String get wizardStepShortPrevious => 'Année préc';
 
   @override
-  String get wizardStepShortTarget => 'Cible';
+  String get wizardStepShortTarget => 'Année cible';
 
   @override
-  String get wizardStepShortCharges => 'Charges';
+  String get wizardStepShortCharges => 'Frais';
 
   @override
   String get wizardStepShortGuardian => 'Tuteurs';
@@ -1010,8 +1119,40 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String wizardStepNumberShort(int number) {
+    return 'Étape $number';
+  }
+
+  @override
   String get stepForwardHint =>
       'Cliquez sur Continuer pour avancer étape par étape.';
+
+  @override
+  String get journeyModeNew => 'Nouvelle';
+
+  @override
+  String get journeyModeEdit => 'Modification';
+
+  @override
+  String get journeyModeView => 'Consultation';
+
+  @override
+  String get journeyCloseAction => 'Fermer';
+
+  @override
+  String get stepSaveStateIdle => 'Aucune saisie';
+
+  @override
+  String get stepSaveStateIncomplete => 'Champs incomplets';
+
+  @override
+  String get stepSaveStatePending => 'Modifications non enregistrées';
+
+  @override
+  String get stepSaveStateSaving => 'Enregistrement en cours...';
+
+  @override
+  String get stepSaveStateSaved => 'Étape enregistrée';
 
   @override
   String get validatePersonalInfoHint =>
@@ -1163,6 +1304,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Erreur lors de la mise à jour de l\'adresse : $message';
   }
+
+  @override
+  String get enrollmentStudentColumnLabel => 'Eleve';
 
   @override
   String get enrollmentStatusFilterLabel => 'Statut';
@@ -2897,4 +3041,44 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'Une erreur inattendue est survenue lors du chargement des statistiques.';
+
+  @override
+  String get enrollmentResults => 'Résultats';
+
+  @override
+  String get sort => 'Trier';
+
+  @override
+  String get switchToTableView => 'Passer à la vue tableau';
+
+  @override
+  String get switchToGridView => 'Passer à la vue grille';
+
+  @override
+  String get enrollmentViewTable => 'Tableau';
+
+  @override
+  String get enrollmentViewGrid => 'Grille';
+
+  @override
+  String get enrollmentResultsA11yLabel => 'Résultats d\'inscriptions';
+
+  @override
+  String get dataTableSortAscending => 'Tri croissant';
+
+  @override
+  String get dataTableSortDescending => 'Tri décroissant';
+
+  @override
+  String get dataTableSortNone => 'Tri non appliqué';
+
+  @override
+  String openDetailsForStudent(String studentName) {
+    return 'Ouvrir la fiche de $studentName';
+  }
+
+  @override
+  String removeFilterNamed(String filter) {
+    return 'Retirer le filtre $filter';
+  }
 }

@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarFooter extends StatelessWidget {
@@ -18,19 +19,25 @@ class SidebarFooter extends StatelessWidget {
       duration: AppMotion.standard,
       curve: AppMotion.outCurve,
       margin: EdgeInsets.fromLTRB(
-        isExpanded ? 12 : 8,
-        8,
-        isExpanded ? 12 : 8,
-        12,
+        isExpanded
+            ? HomeNavigationUiTokens.sidebarFooterExpandedHorizontalMargin
+            : HomeNavigationUiTokens.sidebarFooterCollapsedHorizontalMargin,
+        HomeNavigationUiTokens.sidebarFooterTopMargin,
+        isExpanded
+            ? HomeNavigationUiTokens.sidebarFooterExpandedHorizontalMargin
+            : HomeNavigationUiTokens.sidebarFooterCollapsedHorizontalMargin,
+        HomeNavigationUiTokens.sidebarFooterBottomMargin,
       ),
       padding: EdgeInsets.symmetric(
         horizontal: isExpanded ? 12 : 6,
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: AppColors.textOnDark.withValues(alpha: 0.06),
+        color: AppColors.textOnDark.withValues(alpha: 0.05),
         borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.textOnDark.withValues(alpha: 0.06)),
+        border: Border(
+          top: BorderSide(color: AppColors.textOnDark.withValues(alpha: 0.08)),
+        ),
       ),
       child: Semantics(
         container: true,

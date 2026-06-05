@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
@@ -30,6 +31,7 @@ class FacturationDataTable extends StatefulWidget {
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
   final String Function(int current, int total)? pageLabelBuilder;
+  final int pageSize;
 
   const FacturationDataTable({
     super.key,
@@ -47,6 +49,7 @@ class FacturationDataTable extends StatefulWidget {
     this.onPreviousPage,
     this.onNextPage,
     this.pageLabelBuilder,
+    this.pageSize = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -75,7 +78,9 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.facturationNoResultsDescription,
         footer: DataTableFooterConfig(
-          label: _buildFooterLabel(l10n, sorted.length),
+          label: l10n.paginationResultsCount(sorted.length),
+          total: widget.totalCount,
+          unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
       ),
@@ -93,6 +98,7 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
     return DataTablePaginationConfig(
       currentPage: widget.currentPage,
       totalPages: widget.totalPages,
+      pageSize: widget.pageSize,
       onPrevious: widget.onPreviousPage!,
       onNext: widget.onNextPage!,
       isLoading: widget.isLoading,
@@ -136,7 +142,8 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
             leading: core_avatar.StudentAvatar(
               firstName: summary.student.firstName,
               lastName: summary.student.lastName,
-              size: 28,
+              studentId: summary.student.id,
+              size: core_avatar.AvatarSize.sm,
             ),
             cells: [
               DataTableCellSpec(
@@ -163,14 +170,6 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
       _sortColumn = _FacturationSortColumn.values[column];
       _sortAscending = ascending;
     });
-  }
-
-  String _buildFooterLabel(AppLocalizations l10n, int pageCount) {
-    final total = widget.totalCount;
-    if (total != null && total > pageCount) {
-      return l10n.enrollmentPageFooter(pageCount, total);
-    }
-    return l10n.enrollmentResultsCount(pageCount);
   }
 
   List<EnrollmentSummary> _sortSummaries(List<EnrollmentSummary> summaries) {

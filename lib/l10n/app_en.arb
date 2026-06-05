@@ -271,6 +271,8 @@
   "pageUnderConstruction": "This page is under development",
   "preRegistrations": "Pre-Registrations",
   "searchStudents": "Search Students",
+  "searchFormSubtitleFirstRegistration": "Filter the enrollments list",
+  "searchFormSubtitlePreRegistration": "Online requests received, pending validation",
   "reRegistrationSearchHint": "Enter either First name, Last name and Surname, or the target cycle/level to start the search.",
   "reRegistrationAcademicInfoHelp": "Select the target cycle and level to filter results.",
   "reRegistrationSearchNoOptions": "No cycle/level is available for this search.",
@@ -289,6 +291,31 @@
   "exportData": "Export",
   "noResultsFound": "No results found",
   "enrollmentNoResultsDescription": "No student matches your search criteria.",
+  "enrollmentEmptyTitle": "No results",
+  "enrollmentEmptyDescription": "No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.",
+  "enrollmentEmptyWithoutFilterDescription": "No enrollment yet.",
+  "enrollmentEmptyCreateAction": "Enroll a new student",
+  "enrollmentErrorRetry": "Retry",
+  "enrollmentErrorReconnect": "Sign in again",
+  "enrollmentErrorContactAdmin": "Contact administrator",
+  "enrollmentErrorNetworkTitle": "No connection",
+  "enrollmentErrorNetworkMessage": "You appear to be offline. Check your internet connection, then retry.",
+  "enrollmentErrorUnauthorizedTitle": "Session expired",
+  "enrollmentErrorUnauthorizedMessage": "Your session expired. Sign in again to continue.",
+  "enrollmentErrorForbiddenTitle": "Access denied",
+  "enrollmentErrorForbiddenMessage": "You do not have the required permissions to view this list.",
+  "enrollmentErrorServerTitle": "Server error",
+  "enrollmentErrorServerMessage": "An error occurred on our side. Please try again in a moment.",
+  "enrollmentErrorIncidentCode": "Incident code: {code}",
+  "@enrollmentErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentErrorUnknownTitle": "Unable to load",
+  "enrollmentErrorUnknownMessage": "An unexpected error occurred while loading results.",
   "loadingStudents": "Loading students...",
   "enrollmentResultsCount": "{count, plural, =0{0 result} =1{1 result} other{{count} results}}",
   "@enrollmentResultsCount": {
@@ -298,18 +325,39 @@
       }
     }
   },
-  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{result} other{results}} of {totalCount}",
-  "@enrollmentPageFooter": {
-    "placeholders": {
-      "pageCount": { "type": "int" },
-      "totalCount": { "type": "int" }
-    }
-  },
-  "enrollmentPageIndicator": "Page {current} / {total}",
-  "@enrollmentPageIndicator": {
+  "paginationPageIndicator": "Page {current} / {total}",
+  "@paginationPageIndicator": {
     "placeholders": {
       "current": { "type": "int" },
       "total": { "type": "int" }
+    }
+  },
+  "paginationResultsCount": "{count, plural, =0{0 result} =1{1 result} other{{count} results}}",
+  "@paginationResultsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "paginationRange": "{start}–{end} of {total} {unit}",
+  "@paginationRange": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" },
+      "total": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+  "paginationNavigationLabel": "Pagination",
+  "unitStudents": "students",
+  "enrollmentResultCardOpenLabel": "Open {name}'s record, status {status}",
+  "@enrollmentResultCardOpenLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "refresh": "Refresh",
@@ -341,6 +389,7 @@
   "guardianPrimaryRequiredHint": "At least one primary guardian is required",
   "guardianPrincipalBadge": "Primary",
   "guardianToggleCard": "Open or close guardian card",
+  "guardianIncompleteHint": "Incomplete profile",
   "guardianEmailOptionalInline": "(optional)",
   "guardianDeleteAction": "Remove this guardian",
   "guardianDeleteConfirmTitle": "Confirm removal",
@@ -386,6 +435,11 @@
       }
     }
   },
+  "firstNameExample": "Claudine",
+  "lastNameExample": "Furah",
+  "surnameExample": "Sifiwe",
+  "selectPlaceholderChoose": "Choose",
+  "requiredSemanticSuffix": "required",
   "dateHint": "dd/mm/yyyy",
   "genderMale": "Male",
   "genderFemale": "Female",
@@ -453,15 +507,16 @@
 
   "stepPersonalInfoSubtitle": "General student information",
   "stepAddressSubtitle": "Location and full address",
+  "stepAddressTitle": "Student's address",
   "stepAcademicSubtitle": "Academic history and goals",
   "stepAcademicPreviousSubtitle": "Previous year academic history",
   "stepAcademicTargetSubtitle": "Target year academic objectives",
   "stepGuardianSubtitle": "Legal guardians and contacts",
   "stepSummarySubtitle": "Final enrollment summary",
-  "wizardStepShortPersonal": "Personal",
+  "wizardStepShortPersonal": "Identity",
   "wizardStepShortAddress": "Address",
-  "wizardStepShortPrevious": "Previous",
-  "wizardStepShortTarget": "Target",
+  "wizardStepShortPrevious": "Prev. year",
+  "wizardStepShortTarget": "Target year",
   "wizardStepShortCharges": "Fees",
   "wizardStepShortGuardian": "Guardians",
   "wizardStepShortSummary": "Summary",
@@ -472,7 +527,22 @@
       "total": { "type": "int" }
     }
   },
+  "wizardStepNumberShort": "Step {number}",
+  "@wizardStepNumberShort": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
   "stepForwardHint": "Click Continue to advance step by step.",
+  "journeyModeNew": "New",
+  "journeyModeEdit": "Edit",
+  "journeyModeView": "View",
+  "journeyCloseAction": "Close",
+  "stepSaveStateIdle": "No input yet",
+  "stepSaveStateIncomplete": "Incomplete fields",
+  "stepSaveStatePending": "Unsaved changes",
+  "stepSaveStateSaving": "Saving...",
+  "stepSaveStateSaved": "Step saved",
   "validatePersonalInfoHint": "Please complete the personal information.",
   "validateAddressHint": "Please complete the student's address.",
   "validateAcademicInfoHint": "Please complete the academic information.",
@@ -551,6 +621,7 @@
       "message": { "type": "String" }
     }
   },
+  "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
   "enrollmentStatusInProgress": "In Progress",
   "enrollmentStatusAdminCompleted": "Admin Completed",
@@ -1245,6 +1316,34 @@
       "financeStatsInvalidCredentialsError": "Invalid session, please sign in again.",
       "financeStatsServerError": "The server is currently unavailable.",
       "financeStatsStorageError": "A local error prevents displaying statistics.",
-      "financeStatsAuthError": "An authentication error prevents loading statistics.",
-      "financeStatsUnknownError": "An unexpected error occurred while loading statistics."
+       "financeStatsAuthError": "An authentication error prevents loading statistics.",
+       "financeStatsUnknownError": "An unexpected error occurred while loading statistics.",
+       "enrollmentResults": "Results",
+       "viewDetails": "View details",
+       "refresh": "Refresh",
+       "sort": "Sort",
+       "switchToTableView": "Switch to table view",
+       "switchToGridView": "Switch to grid view",
+       "enrollmentViewTable": "Table",
+       "enrollmentViewGrid": "Grid",
+       "enrollmentResultsA11yLabel": "Enrollment results",
+       "dataTableSortAscending": "Ascending sort",
+       "dataTableSortDescending": "Descending sort",
+       "dataTableSortNone": "No sort",
+       "openDetailsForStudent": "Open student file for {studentName}",
+       "@openDetailsForStudent": {
+         "placeholders": {
+           "studentName": {
+             "type": "String"
+           }
+         }
+       },
+       "removeFilterNamed": "Remove filter {filter}",
+       "@removeFilterNamed": {
+         "placeholders": {
+           "filter": {
+             "type": "String"
+           }
+         }
+       }
 }

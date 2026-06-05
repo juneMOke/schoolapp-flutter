@@ -114,4 +114,12 @@ class AppTypography {
     fontSize: 12,
     fontWeight: FontWeight.w500,
   );
+
+  // Numéro de pastille du stepper — chiffres tabulaires (largeur stable).
+  static const stepNumber = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
 }

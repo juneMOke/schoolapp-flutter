@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
+import 'package:school_app_flutter/core/widgets/page_background_halos.dart';
+
+enum AppPageBackgroundStyle { decorated, flat }
 
 /// Fond visuel standard partagé par toutes les pages de l'application
 /// (gradient doux + orbes décoratifs + zone centrée scrollable).
@@ -11,6 +15,8 @@ class AppPageBackground extends StatelessWidget {
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final Widget? bottomNavigationBar;
+  final AppPageBackgroundStyle style;
+  final Color flatBackgroundColor;
 
   const AppPageBackground({
     super.key,
@@ -20,6 +26,8 @@ class AppPageBackground extends StatelessWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.bottomNavigationBar,
+    this.style = AppPageBackgroundStyle.decorated,
+    this.flatBackgroundColor = AppColors.surface,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -42,82 +50,58 @@ class AppPageBackground extends StatelessWidget {
       ),
     );
 
+    final body = style == AppPageBackgroundStyle.flat
+        ? DecoratedBox(
+            decoration: BoxDecoration(color: flatBackgroundColor),
+            child: _buildScrollableContent(context, content),
+          )
+        : DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.pageBackgroundGradientStart,
+                  AppColors.pageBackgroundGradientEnd,
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                const PageBackgroundHalos(),
+                const KubaPatternLayer(),
+                _buildScrollableContent(context, content),
+              ],
+            ),
+          );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.pageBackgroundGradientStart,
-              AppColors.pageBackgroundGradientMiddle,
-              AppColors.pageBackgroundGradientEnd,
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            const _AppDecorativeOrbs(),
-            if (scrollable)
-              SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _horizontalPadding(context),
-                  vertical: AppDimensions.spacingL,
-                ),
-                child: content,
-              )
-            else
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _horizontalPadding(context),
-                  vertical: AppDimensions.spacingL,
-                ),
-                child: content,
-              ),
-          ],
-        ),
-      ),
+      body: body,
     );
   }
-}
 
-class _AppDecorativeOrbs extends StatelessWidget {
-  const _AppDecorativeOrbs();
+  Widget _buildScrollableContent(BuildContext context, Widget content) {
+    if (scrollable) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: _horizontalPadding(context),
+          vertical: AppDimensions.spacingL,
+        ),
+        child: content,
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: AppDimensions.pageBackgroundOrbLargeTop,
-          right: AppDimensions.pageBackgroundOrbLargeRight,
-          child: Container(
-            width: AppDimensions.pageBackgroundOrbLargeSize,
-            height: AppDimensions.pageBackgroundOrbLargeSize,
-            decoration: BoxDecoration(
-              color: AppColors.pageBackgroundAccent.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          top: AppDimensions.pageBackgroundOrbMediumTop,
-          left: AppDimensions.pageBackgroundOrbMediumLeft,
-          child: Container(
-            width: AppDimensions.pageBackgroundOrbMediumSize,
-            height: AppDimensions.pageBackgroundOrbMediumSize,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _horizontalPadding(context),
+        vertical: AppDimensions.spacingL,
+      ),
+      child: content,
     );
   }
 }

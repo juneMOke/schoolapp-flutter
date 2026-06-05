@@ -52,6 +52,7 @@ class FacturationStudentTable extends StatelessWidget {
             showPagination: true,
             currentPage: state.summariesPage + 1,
             totalPages: state.summariesTotalPages,
+            pageSize: state.summariesSize,
             onPreviousPage: () => context.read<EnrollmentBloc>().add(
               EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
             ),
@@ -59,7 +60,7 @@ class FacturationStudentTable extends StatelessWidget {
               EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
             ),
             pageLabelBuilder: (current, total) =>
-                l10n.enrollmentPageIndicator(current, total),
+                l10n.paginationPageIndicator(current, total),
             onViewRequested: (s) => onViewRequested(s, levelId),
           ),
         );

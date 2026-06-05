@@ -12,8 +12,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// [StatusBadge.enrollmentXxx] directement.
 class EnrollmentStatusBadge extends StatelessWidget {
   final EnrollmentStatus status;
+  final StatusBadgeStyle style;
 
-  const EnrollmentStatusBadge({super.key, required this.status});
+  const EnrollmentStatusBadge({
+    super.key,
+    required this.status,
+    this.style = StatusBadgeStyle.soft,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,31 +27,40 @@ class EnrollmentStatusBadge extends StatelessWidget {
     return switch (status) {
       EnrollmentStatus.preRegistered => StatusBadge.enrollmentPreRegistered(
         label: l10n.enrollmentStatusPreRegistered,
+        style: style,
       ),
       EnrollmentStatus.inProgress => StatusBadge.enrollmentInProgress(
         label: l10n.enrollmentStatusInProgress,
+        style: style,
       ),
       EnrollmentStatus.adminCompleted => StatusBadge.enrollmentAdminCompleted(
         label: l10n.enrollmentStatusAdminCompleted,
+        style: style,
       ),
       EnrollmentStatus.financialCompleted =>
         StatusBadge.enrollmentFinancialCompleted(
           label: l10n.enrollmentStatusFinancialCompleted,
+          style: style,
         ),
       EnrollmentStatus.completed => StatusBadge.enrollmentCompleted(
         label: l10n.enrollmentStatusCompleted,
+        style: style,
       ),
       EnrollmentStatus.cancelled => StatusBadge.enrollmentCancelled(
         label: l10n.enrollmentStatusCancelled,
+        style: style,
       ),
       EnrollmentStatus.validated => StatusBadge.enrollmentValidated(
         label: l10n.enrollmentStatusValidated,
+        style: style,
       ),
       EnrollmentStatus.rejected => StatusBadge.enrollmentRejected(
         label: l10n.enrollmentStatusRejected,
+        style: style,
       ),
       EnrollmentStatus.pending => StatusBadge.enrollmentPending(
         label: l10n.statusPending,
+        style: style,
       ),
     };
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 
 /// Type de texte pour une cellule de table.
 enum DataTableCellTextVariant { regular, strong, mono }
@@ -63,12 +64,14 @@ class DataTableTrailingSpec {
   final DataTableTrailingType type;
   final VoidCallback? onTap;
   final String? tooltip;
+  final String? semanticLabel;
   final bool enabled;
 
   const DataTableTrailingSpec({
     this.type = DataTableTrailingType.none,
     this.onTap,
     this.tooltip,
+    this.semanticLabel,
     this.enabled = true,
   });
 }
@@ -104,6 +107,7 @@ class DataTablePaginationConfig {
 
   /// Nombre total de pages, **1-based**.
   final int totalPages;
+  final int pageSize;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final bool isLoading;
@@ -112,6 +116,7 @@ class DataTablePaginationConfig {
   const DataTablePaginationConfig({
     required this.currentPage,
     required this.totalPages,
+    required this.pageSize,
     required this.onPrevious,
     required this.onNext,
     this.isLoading = false,
@@ -123,8 +128,15 @@ class DataTablePaginationConfig {
 class DataTableFooterConfig {
   final String label;
   final DataTablePaginationConfig? pagination;
+  final int? total;
+  final String? unit;
 
-  const DataTableFooterConfig({required this.label, this.pagination});
+  const DataTableFooterConfig({
+    required this.label,
+    this.pagination,
+    this.total,
+    this.unit,
+  });
 }
 
 /// Configuration principale de [DataTableView].
@@ -139,6 +151,8 @@ class DataTableViewConfig {
   final bool sortAscending;
   final OnDataTableSort? onSortChanged;
   final DataTableFooterConfig? footer;
+  final DataTableDensity density;
+  final String? semanticsLabel;
 
   const DataTableViewConfig({
     required this.columns,
@@ -151,6 +165,8 @@ class DataTableViewConfig {
     this.sortAscending = true,
     this.onSortChanged,
     this.footer,
+    this.density = DataTableDensity.comfortable,
+    this.semanticsLabel,
   });
 }
 

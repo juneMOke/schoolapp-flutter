@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
@@ -19,10 +20,12 @@ class EnrollmentDataTable extends StatefulWidget {
   final String? emptyLabel;
   final int currentPage;
   final int totalPages;
+  final DataTableDensity density;
   final bool showPagination;
   final VoidCallback? onPreviousPage;
   final VoidCallback? onNextPage;
   final String Function(int current, int total)? pageLabelBuilder;
+  final int pageSize;
 
   const EnrollmentDataTable({
     super.key,
@@ -36,10 +39,12 @@ class EnrollmentDataTable extends StatefulWidget {
     this.emptyLabel,
     this.currentPage = 1,
     this.totalPages = 1,
+    this.density = DataTableDensity.comfortable,
     this.showPagination = true,
     this.onPreviousPage,
     this.onNextPage,
     this.pageLabelBuilder,
+    this.pageSize = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
@@ -47,7 +52,7 @@ class EnrollmentDataTable extends StatefulWidget {
 }
 
 class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
-  EnrollmentSortColumn _sortColumn = EnrollmentSortColumn.lastName;
+  EnrollmentSortColumn _sortColumn = EnrollmentSortColumn.student;
   bool _sortAscending = true;
 
   @override
@@ -72,9 +77,13 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.enrollmentNoResultsDescription,
         footer: DataTableFooterConfig(
-          label: _buildFooterLabel(l10n, sorted.length),
+          label: l10n.paginationResultsCount(sorted.length),
+          total: widget.totalCount,
+          unit: l10n.unitStudents,
           pagination: _buildPaginationConfig(),
         ),
+        density: widget.density,
+        semanticsLabel: l10n.enrollmentResultsA11yLabel,
       ),
     );
   }
@@ -90,6 +99,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     return DataTablePaginationConfig(
       currentPage: widget.currentPage,
       totalPages: widget.totalPages,
+      pageSize: widget.pageSize,
       onPrevious: widget.onPreviousPage!,
       onNext: widget.onNextPage!,
       isLoading: widget.isLoading,
@@ -100,22 +110,10 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
   List<DataTableColumnDef> _buildColumns(AppLocalizations l10n) {
     return [
       DataTableColumnDef(
-        label: l10n.lastName,
-        flex: 3,
+        label: l10n.enrollmentStudentColumnLabel,
+        flex: 7,
         sortable: true,
-        sortIndex: EnrollmentSortColumn.lastName.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.surname,
-        flex: 3,
-        sortable: true,
-        sortIndex: EnrollmentSortColumn.surname.index,
-      ),
-      DataTableColumnDef(
-        label: l10n.firstName,
-        flex: 3,
-        sortable: true,
-        sortIndex: EnrollmentSortColumn.firstName.index,
+        sortIndex: EnrollmentSortColumn.student.index,
       ),
       DataTableColumnDef(
         label: l10n.dateOfBirth,
@@ -135,23 +133,21 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         .map(
           (enrollment) => DataTableRowSpec(
             id: enrollment.enrollmentId,
-            displayName:
-                '${enrollment.student.lastName} ${enrollment.student.firstName}',
+            displayName: _studentFullName(enrollment),
             leading: core_avatar.StudentAvatar(
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
-              size: 28,
+              studentId: enrollment.student.id,
+              size: core_avatar.AvatarSize.sm,
               variant: _avatarVariantForStatus(
                 EnrollmentStatus.fromString(enrollment.status),
               ),
             ),
             cells: [
               DataTableCellSpec(
-                text: enrollment.student.lastName,
+                text: _studentFullName(enrollment),
                 variant: DataTableCellTextVariant.strong,
               ),
-              DataTableCellSpec(text: enrollment.student.surname),
-              DataTableCellSpec(text: enrollment.student.firstName),
               DataTableCellSpec(
                 text: _formatDate(enrollment.student.dateOfBirth),
                 variant: DataTableCellTextVariant.mono,
@@ -168,6 +164,9 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
               tooltip: l10n.viewDetails,
+              semanticLabel: l10n.openDetailsForStudent(
+                _studentFullName(enrollment),
+              ),
               onTap: () => widget.onViewRequested(enrollment),
             ),
           ),
@@ -184,12 +183,14 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     });
   }
 
-  String _buildFooterLabel(AppLocalizations l10n, int pageCount) {
-    final total = widget.totalCount;
-    if (total != null && total > pageCount) {
-      return l10n.enrollmentPageFooter(pageCount, total);
-    }
-    return l10n.enrollmentResultsCount(pageCount);
+  String _studentFullName(EnrollmentSummary enrollment) {
+    final parts = <String>[
+      enrollment.student.lastName,
+      enrollment.student.surname,
+      enrollment.student.firstName,
+    ].where((value) => value.trim().isNotEmpty);
+
+    return parts.join(' ');
   }
 
   core_avatar.AvatarVariant _avatarVariantForStatus(EnrollmentStatus status) {

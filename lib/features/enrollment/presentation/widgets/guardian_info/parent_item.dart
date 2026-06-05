@@ -187,7 +187,6 @@ class _ParentItemState extends State<ParentItem> {
   @override
   Widget build(BuildContext context) {
     final state = _currentState();
-    final changed = state.changedFields;
 
     return Container(
       decoration: BoxDecoration(
@@ -222,6 +221,7 @@ class _ParentItemState extends State<ParentItem> {
                     parent: widget.parent,
                     isPrimary: widget.isPrimary,
                     isExpanded: widget.isExpanded,
+                    isComplete: state.valid,
                     onToggle: widget.onToggleExpanded,
                   ),
                 ),
@@ -257,14 +257,8 @@ class _ParentItemState extends State<ParentItem> {
                 surnameController: _surnameController,
                 phoneController: _phoneController,
                 emailController: _emailController,
-                firstNameChanged: changed['firstName'] ?? false,
-                lastNameChanged: changed['lastName'] ?? false,
-                surnameChanged: changed['surname'] ?? false,
-                phoneChanged: changed['phoneNumber'] ?? false,
-                emailChanged: changed['email'] ?? false,
                 selectedRelationshipType: _selectedRelationshipType,
                 onRelationshipTypeChanged: _onRelationshipChanged,
-                relationshipChanged: changed['relationshipType'] ?? false,
                 isEditable: widget.isEditable,
                 isPrimary: widget.isPrimary,
                 onPrimaryChanged: widget.onPrimaryChanged,

@@ -10,8 +10,22 @@ abstract final class AppSnackBar {
   }
 
   /// Affiche un [SnackBar] d'erreur.
-  static void showError(BuildContext context, String message) {
-    _show(context, message: message, variant: _AppSnackBarVariant.error);
+  ///
+  /// [onRetry] + [retryLabel] (les deux requis ensemble) ajoutent une action
+  /// « Réessayer » au toast (PARCOURS 21).
+  static void showError(
+    BuildContext context,
+    String message, {
+    VoidCallback? onRetry,
+    String? retryLabel,
+  }) {
+    _show(
+      context,
+      message: message,
+      variant: _AppSnackBarVariant.error,
+      onAction: onRetry,
+      actionLabel: retryLabel,
+    );
   }
 
   /// Affiche un [SnackBar] d'avertissement.
@@ -52,6 +66,8 @@ abstract final class AppSnackBar {
     required String message,
     required _AppSnackBarVariant variant,
     Duration duration = const Duration(seconds: 4),
+    VoidCallback? onAction,
+    String? actionLabel,
   }) {
     final messenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
@@ -94,6 +110,13 @@ abstract final class AppSnackBar {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.spacingM),
           ),
+          action: (onAction != null && actionLabel != null)
+              ? SnackBarAction(
+                  label: actionLabel,
+                  textColor: style.foreground,
+                  onPressed: onAction,
+                )
+              : null,
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

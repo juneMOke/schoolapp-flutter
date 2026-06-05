@@ -20,8 +20,10 @@ class PersonalInfoStepHandler extends BaseEnrollmentStepHandler {
   @override
   String title(AppLocalizations l10n) => l10n.personalInformation;
 
+  // Sous-titre retiré : il faisait doublon avec le titre « Informations
+  // personnelles ». StepPageCard masque un sous-titre vide.
   @override
-  String subtitle(AppLocalizations l10n) => l10n.stepPersonalInfoSubtitle;
+  String subtitle(AppLocalizations l10n) => '';
 
   @override
   String saveLabel(AppLocalizations l10n, SaveLabelContext context) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 
 /// Bouton d'action primaire — Terre Cuite, forme stadium, pleine largeur par défaut.
 ///
 /// Utilise [FilledButton] Material (style configuré dans [AppTheme]).
+@Deprecated('Use EteeloButton.primary or EteeloButton.danger directly.')
 class PrimaryButton extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -25,44 +25,24 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pendant le chargement, on passe un no-op pour conserver l'apparence active.
-    final effectiveCallback = isLoading ? () {} : onPressed;
-
-    final localStyle = FilledButton.styleFrom(
-      // Couleur danger — override du thème global Terre Cuite
-      backgroundColor: isDanger ? AppColors.error : null,
-      foregroundColor: isDanger ? AppColors.blancCasse : null,
-      // Couleurs disabled explicites (thème global ne les spécifie pas)
-      disabledBackgroundColor: AppColors.stateDisabled,
-      disabledForegroundColor: AppColors.textMuted,
-      // fullWidth: false → on réduit le minimum pour wrapper le contenu
-      minimumSize: fullWidth ? null : const Size(0, 56),
-    );
-
-    final child = isLoading
-        ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.blancCasse),
-            ),
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 20),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Text(label),
-            ],
-          );
-
-    return FilledButton(
-      onPressed: effectiveCallback,
-      style: localStyle,
-      child: child,
+    final size = EteeloButtonSize.regular;
+    if (isDanger) {
+      return EteeloButton.danger(
+        onPressed: onPressed,
+        label: label,
+        icon: icon,
+        isLoading: isLoading,
+        size: size,
+        fullWidth: fullWidth,
+      );
+    }
+    return EteeloButton.primary(
+      onPressed: onPressed,
+      label: label,
+      icon: icon,
+      isLoading: isLoading,
+      size: size,
+      fullWidth: fullWidth,
     );
   }
 }

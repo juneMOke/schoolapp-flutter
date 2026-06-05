@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBarTitle extends StatelessWidget {
+  final String? moduleTitle;
   final String title;
   final bool isPreRegistrations;
   final String? selectedSubMenuId;
 
   const TopBarTitle({
     super.key,
+    required this.moduleTitle,
     required this.title,
     required this.isPreRegistrations,
     required this.selectedSubMenuId,
@@ -37,26 +39,44 @@ class TopBarTitle extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 34,
-          height: 34,
-          decoration: const BoxDecoration(
-            color: AppColors.bleuArdoise,
+          width: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
+          height: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
+          decoration: BoxDecoration(
+            color: AppColors.textOnDark.withValues(alpha: 0.09),
             borderRadius: AppRadius.brSm,
           ),
-          child: Icon(leadingIcon, size: 18, color: AppColors.textOnDark),
+          child: Icon(
+            leadingIcon,
+            size: HomeNavigationUiTokens.topBarTitleLeadingIconSize,
+            color: AppColors.textOnDark,
+          ),
         ),
-        const SizedBox(width: AppDimensions.spacingS),
+        const SizedBox(width: HomeNavigationUiTokens.topBarTitleGap),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (moduleTitle != null)
+                Text(
+                  moduleTitle!.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.orDoux,
+                    letterSpacing:
+                        HomeNavigationUiTokens.topBarTitleLetterSpacing,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               Text(
                 resolvedTitle.replaceAll('\n', ' '),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.sidebarTitle.copyWith(
-                  color: AppColors.bleuArdoise,
+                  color: AppColors.textOnDark,
+                  fontSize: HomeNavigationUiTokens.topBarTitleFontSize,
+                  height: HomeNavigationUiTokens.topBarTitleLineHeight,
                 ),
               ),
               if (isPreRegistrations)
@@ -65,7 +85,7 @@ class TopBarTitle extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textOnDark.withValues(alpha: 0.76),
                   ),
                 ),
             ],

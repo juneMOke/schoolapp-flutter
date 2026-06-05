@@ -11,7 +11,9 @@ import 'package:school_app_flutter/features/home/presentation/widget/sidebar_par
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key});
+  final bool closeDrawerOnSubMenuSelection;
+
+  const Sidebar({super.key, this.closeDrawerOnSubMenuSelection = false});
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +88,8 @@ class Sidebar extends StatelessWidget {
           child: SidebarMenuItem(
             menu: menu,
             isExpanded: state.isSidebarExpanded,
+            isMenuOpened: state.openedMenuId == menu.id,
+            closeDrawerOnSubMenuSelection: closeDrawerOnSubMenuSelection,
           ),
         );
       },

@@ -496,6 +496,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchStudents => 'Search Students';
 
   @override
+  String get searchFormSubtitleFirstRegistration =>
+      'Filter the enrollments list';
+
+  @override
+  String get searchFormSubtitlePreRegistration =>
+      'Online requests received, pending validation';
+
+  @override
   String get reRegistrationSearchHint =>
       'Enter either First name, Last name and Surname, or the target cycle/level to start the search.';
 
@@ -542,7 +550,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
-  String get viewDetails => 'View Details';
+  String get viewDetails => 'View details';
 
   @override
   String get editEnrollment => 'Edit';
@@ -556,6 +564,68 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentNoResultsDescription =>
       'No student matches your search criteria.';
+
+  @override
+  String get enrollmentEmptyTitle => 'No results';
+
+  @override
+  String get enrollmentEmptyDescription =>
+      'No enrollment matches these criteria. Adjust your search, or create the record if the student is not yet registered.';
+
+  @override
+  String get enrollmentEmptyWithoutFilterDescription => 'No enrollment yet.';
+
+  @override
+  String get enrollmentEmptyCreateAction => 'Enroll a new student';
+
+  @override
+  String get enrollmentErrorRetry => 'Retry';
+
+  @override
+  String get enrollmentErrorReconnect => 'Sign in again';
+
+  @override
+  String get enrollmentErrorContactAdmin => 'Contact administrator';
+
+  @override
+  String get enrollmentErrorNetworkTitle => 'No connection';
+
+  @override
+  String get enrollmentErrorNetworkMessage =>
+      'You appear to be offline. Check your internet connection, then retry.';
+
+  @override
+  String get enrollmentErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get enrollmentErrorUnauthorizedMessage =>
+      'Your session expired. Sign in again to continue.';
+
+  @override
+  String get enrollmentErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get enrollmentErrorForbiddenMessage =>
+      'You do not have the required permissions to view this list.';
+
+  @override
+  String get enrollmentErrorServerTitle => 'Server error';
+
+  @override
+  String get enrollmentErrorServerMessage =>
+      'An error occurred on our side. Please try again in a moment.';
+
+  @override
+  String enrollmentErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get enrollmentErrorUnknownTitle => 'Unable to load';
+
+  @override
+  String get enrollmentErrorUnknownMessage =>
+      'An unexpected error occurred while loading results.';
 
   @override
   String get loadingStudents => 'Loading students...';
@@ -573,19 +643,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String enrollmentPageFooter(int pageCount, int totalCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      pageCount,
-      locale: localeName,
-      other: 'results',
-      one: 'result',
-    );
-    return '$pageCount $_temp0 of $totalCount';
+  String paginationPageIndicator(int current, int total) {
+    return 'Page $current / $total';
   }
 
   @override
-  String enrollmentPageIndicator(int current, int total) {
-    return 'Page $current / $total';
+  String paginationResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: '0 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paginationRange(int start, int end, int total, String unit) {
+    return '$start–$end of $total $unit';
+  }
+
+  @override
+  String get paginationNavigationLabel => 'Pagination';
+
+  @override
+  String get unitStudents => 'students';
+
+  @override
+  String enrollmentResultCardOpenLabel(String name, String status) {
+    return 'Open $name\'s record, status $status';
   }
 
   @override
@@ -678,6 +765,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianToggleCard => 'Open or close guardian card';
+
+  @override
+  String get guardianIncompleteHint => 'Incomplete profile';
 
   @override
   String get guardianEmailOptionalInline => '(optional)';
@@ -780,6 +870,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String enterFieldHint(String label) {
     return 'Enter $label';
   }
+
+  @override
+  String get firstNameExample => 'Claudine';
+
+  @override
+  String get lastNameExample => 'Furah';
+
+  @override
+  String get surnameExample => 'Sifiwe';
+
+  @override
+  String get selectPlaceholderChoose => 'Choose';
+
+  @override
+  String get requiredSemanticSuffix => 'required';
 
   @override
   String get dateHint => 'dd/mm/yyyy';
@@ -960,6 +1065,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepAddressSubtitle => 'Location and full address';
 
   @override
+  String get stepAddressTitle => 'Student\'s address';
+
+  @override
   String get stepAcademicSubtitle => 'Academic history and goals';
 
   @override
@@ -975,16 +1083,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepSummarySubtitle => 'Final enrollment summary';
 
   @override
-  String get wizardStepShortPersonal => 'Personal';
+  String get wizardStepShortPersonal => 'Identity';
 
   @override
   String get wizardStepShortAddress => 'Address';
 
   @override
-  String get wizardStepShortPrevious => 'Previous';
+  String get wizardStepShortPrevious => 'Prev. year';
 
   @override
-  String get wizardStepShortTarget => 'Target';
+  String get wizardStepShortTarget => 'Target year';
 
   @override
   String get wizardStepShortCharges => 'Fees';
@@ -1001,7 +1109,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String wizardStepNumberShort(int number) {
+    return 'Step $number';
+  }
+
+  @override
   String get stepForwardHint => 'Click Continue to advance step by step.';
+
+  @override
+  String get journeyModeNew => 'New';
+
+  @override
+  String get journeyModeEdit => 'Edit';
+
+  @override
+  String get journeyModeView => 'View';
+
+  @override
+  String get journeyCloseAction => 'Close';
+
+  @override
+  String get stepSaveStateIdle => 'No input yet';
+
+  @override
+  String get stepSaveStateIncomplete => 'Incomplete fields';
+
+  @override
+  String get stepSaveStatePending => 'Unsaved changes';
+
+  @override
+  String get stepSaveStateSaving => 'Saving...';
+
+  @override
+  String get stepSaveStateSaved => 'Step saved';
 
   @override
   String get validatePersonalInfoHint =>
@@ -1149,6 +1289,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String addressSaveError(String message) {
     return 'Address update failed: $message';
   }
+
+  @override
+  String get enrollmentStudentColumnLabel => 'Student';
 
   @override
   String get enrollmentStatusFilterLabel => 'Status';
@@ -2846,4 +2989,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get financeStatsUnknownError =>
       'An unexpected error occurred while loading statistics.';
+
+  @override
+  String get enrollmentResults => 'Results';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get switchToTableView => 'Switch to table view';
+
+  @override
+  String get switchToGridView => 'Switch to grid view';
+
+  @override
+  String get enrollmentViewTable => 'Table';
+
+  @override
+  String get enrollmentViewGrid => 'Grid';
+
+  @override
+  String get enrollmentResultsA11yLabel => 'Enrollment results';
+
+  @override
+  String get dataTableSortAscending => 'Ascending sort';
+
+  @override
+  String get dataTableSortDescending => 'Descending sort';
+
+  @override
+  String get dataTableSortNone => 'No sort';
+
+  @override
+  String openDetailsForStudent(String studentName) {
+    return 'Open student file for $studentName';
+  }
+
+  @override
+  String removeFilterNamed(String filter) {
+    return 'Remove filter $filter';
+  }
 }

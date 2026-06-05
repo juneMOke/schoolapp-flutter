@@ -65,7 +65,9 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
         onSortChanged: _onSortChanged,
         emptyLabel: widget.emptyLabel ?? l10n.classesListNoMatchMessage,
         footer: DataTableFooterConfig(
-          label: l10n.enrollmentResultsCount(rows.length),
+          label: l10n.paginationResultsCount(rows.length),
+          total: rows.length,
+          unit: l10n.unitStudents,
         ),
       ),
     );
@@ -106,7 +108,8 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
             leading: core_avatar.StudentAvatar(
               firstName: row.firstName,
               lastName: row.lastName,
-              size: 28,
+              studentId: row.studentId,
+              size: core_avatar.AvatarSize.sm,
             ),
             cells: [
               DataTableCellSpec(

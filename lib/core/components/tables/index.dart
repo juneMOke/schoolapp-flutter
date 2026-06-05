@@ -2,6 +2,7 @@
 // Export central pour tous les composants table de core.
 
 export 'data_table_models.dart';
+export 'data_table_density.dart';
 export 'eteelo_data_table_theme.dart';
 export 'data_table_header.dart';
 export 'data_table_row_item.dart';

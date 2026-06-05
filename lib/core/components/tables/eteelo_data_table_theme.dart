@@ -17,30 +17,31 @@ class EteeloDataTableTheme {
   static const Color tableBackground = AppColors.surfaceRaised;
 
   // Header
-  static const double headerHeight = 46;
-  static const double headerHorizontalPadding = AppDimensions.spacingM;
+  static const double headerHorizontalPadding = 18;
+  static const double headerVerticalPaddingComfortable = 12;
+  static const double headerVerticalPaddingCompact = 8;
   static const double leadingSlotWidth = 36;
-  static const double trailingSlotWidth = 32;
+  static const double trailingSlotWidth = 44;
   static const double slotGap = AppDimensions.spacingS;
-  static const Gradient headerGradient = LinearGradient(
-    colors: [AppColors.surfaceRaised, AppColors.surface],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
+  static const Color headerBackground = AppColors.surfaceRaised;
   static final TextStyle headerLabelStyle = AppTextStyles.tableHeader.copyWith(
     fontSize: 11,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textMuted,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textSecondary,
     letterSpacing: 0.9,
   );
   static const Color headerSortActiveColor = AppColors.bleuArdoise;
-  static const Color headerSortInactiveColor = AppColors.textMuted;
+  static const Color headerSortInactiveColor = AppColors.textSecondary;
+  static const Color focusRingColor = AppColors.bleuArdoise;
+  static const double focusRingWidth = 2;
+  static const double focusRingOffset = 2;
 
   // Rows
-  static const double rowHeight = 58;
+  static const double rowHeightComfortable = 58;
+  static const double rowHeightCompact = 48;
   static const double rowHorizontalPadding = AppDimensions.spacingM;
   static const Color rowEvenBackground = AppColors.surfaceRaised;
-  static const Color rowOddBackground = AppColors.surfaceAlt;
+  static const Color rowOddBackground = AppColors.surfaceRaised;
   static const Color rowHoverBackground = AppColors.stateHover;
   static const Color rowHoverLeadingBorder = AppColors.bleuArdoise;
   static const double rowLeadingBorderWidth = 3;

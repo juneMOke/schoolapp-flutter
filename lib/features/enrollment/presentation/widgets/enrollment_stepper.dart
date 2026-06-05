@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -22,6 +25,7 @@ class EnrollmentStepper extends StatefulWidget {
   final EnrollmentDetailIntent detailIntent;
   final EnrollmentDetailPolicy detailPolicy;
   final List<EnrollmentStepHandler> stepHandlers;
+  final ValueChanged<int>? onStepChanged;
 
   const EnrollmentStepper({
     super.key,
@@ -29,6 +33,7 @@ class EnrollmentStepper extends StatefulWidget {
     required this.detailIntent,
     required this.detailPolicy,
     required this.stepHandlers,
+    this.onStepChanged,
   });
 
   @override
@@ -48,6 +53,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     final stepTitles = _stepHandlers
         .map((handler) => handler.title(l10n))
         .toList(growable: false);
+    final breadcrumbTitles = <String>[
+      l10n.wizardStepShortPersonal,
+      l10n.wizardStepShortAddress,
+      l10n.wizardStepShortPrevious,
+      l10n.wizardStepShortTarget,
+      l10n.wizardStepShortGuardian,
+      l10n.wizardStepShortCharges,
+      l10n.wizardStepShortSummary,
+    ];
     final stepCardSubtitles = _stepHandlers
         .map((handler) => handler.subtitle(l10n))
         .toList(growable: false);
@@ -94,10 +108,18 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               enrollmentState.statusUpdateStatus ==
               EnrollmentLoadStatus.loading;
 
-          return BlocBuilder<
+          return BlocConsumer<
             EnrollmentStepperFlowBloc,
             EnrollmentStepperFlowState
           >(
+            // L'étape courante est notifiée à la page via un listener (après la
+            // phase de build) : appeler onStepChanged depuis le builder
+            // déclencherait un setState pendant le build (illégal, crash lors
+            // d'une relayout déclenchée par un LayoutBuilder).
+            listenWhen: (prev, curr) => prev.currentStep != curr.currentStep,
+            listener: (context, flowState) {
+              widget.onStepChanged?.call(flowState.currentStep);
+            },
             builder: (context, flowState) {
               final currentStep = flowState.currentStep;
               final progress = (currentStep + 1) / stepTitles.length;
@@ -128,6 +150,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 currentStep: currentStep,
                 isLast: flowState.isLast,
                 isSummaryStep: isSummaryStep,
+                dirty: currentStepState.dirty,
+                valid: currentStepState.valid,
                 canSave: canSaveCurrentStep,
                 canContinue: currentHandler.canContinue(flowContext),
                 showSaveAction: showSaveAction,
@@ -158,7 +182,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               );
 
               return _EnrollmentStepperLayout(
-                stepTitles: stepTitles,
+                stepTitles: breadcrumbTitles,
                 currentStep: currentStep,
                 progress: progress,
                 onStepTap: (target) =>
@@ -166,8 +190,11 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 stepTitle: stepTitles[currentStep],
                 stepSubtitle: stepCardSubtitles[currentStep],
                 stepContent: stepContents[currentStep],
+                stepEyebrow:
+                    '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
+                stepAccentColor: _stepAccentColor(currentWizardStep),
+                stepIcon: _stepIcon(currentWizardStep),
                 controls: controls,
-                isSummaryStep: isSummaryStep,
               );
             },
           );
@@ -268,6 +295,33 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
     );
     enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
   }
+
+  // Teinte d'accent par étape — indexée sur l'identité de l'étape (et non sa
+  // position), donc robuste à la réorganisation Tuteurs/Frais. Sept teintes
+  // distinctes : le résumé ne réutilise plus le vert-savane des frais.
+  Color _stepAccentColor(EnrollmentWizardStep step) {
+    return switch (step) {
+      EnrollmentWizardStep.personalInfo => AppColors.bleuArdoise,
+      EnrollmentWizardStep.address => AppColors.info,
+      EnrollmentWizardStep.previousAcademic => AppColors.orDoux,
+      EnrollmentWizardStep.targetAcademic => AppColors.terreCuite,
+      EnrollmentWizardStep.studentCharges => AppColors.vertSavane,
+      EnrollmentWizardStep.guardian => AppColors.warning,
+      EnrollmentWizardStep.summary => AppColors.bleuProfond,
+    };
+  }
+
+  IconData _stepIcon(EnrollmentWizardStep step) {
+    return switch (step) {
+      EnrollmentWizardStep.personalInfo => Icons.badge_outlined,
+      EnrollmentWizardStep.address => Icons.home_work_outlined,
+      EnrollmentWizardStep.previousAcademic => Icons.history_edu_outlined,
+      EnrollmentWizardStep.targetAcademic => Icons.trending_up_rounded,
+      EnrollmentWizardStep.studentCharges => Icons.payments_outlined,
+      EnrollmentWizardStep.guardian => Icons.family_restroom_outlined,
+      EnrollmentWizardStep.summary => Icons.fact_check_outlined,
+    };
+  }
 }
 
 class _EnrollmentStepperLayout extends StatelessWidget {
@@ -277,9 +331,11 @@ class _EnrollmentStepperLayout extends StatelessWidget {
   final ValueChanged<int> onStepTap;
   final String stepTitle;
   final String stepSubtitle;
+  final String stepEyebrow;
+  final Color stepAccentColor;
+  final IconData stepIcon;
   final Widget stepContent;
   final Widget controls;
-  final bool isSummaryStep;
 
   const _EnrollmentStepperLayout({
     required this.stepTitles,
@@ -288,17 +344,28 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     required this.onStepTap,
     required this.stepTitle,
     required this.stepSubtitle,
+    required this.stepEyebrow,
+    required this.stepAccentColor,
+    required this.stepIcon,
     required this.stepContent,
     required this.controls,
-    required this.isSummaryStep,
   });
+
+  // Largeur max de la carte d'étape : large, bornée sur très grand écran (au-delà
+  // elle reste centrée). Les champs s'organisent en 1/2/3 colonnes selon la
+  // largeur disponible (voir WizardFieldsGrid) → carte large, hauteur modérée.
+  static const double _stepCardMaxWidth = 1100;
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Padding(
-      padding: const EdgeInsets.all(AppTheme.defaultPadding),
+      // Barre de steps + pied à pleine largeur (collés aux bords) ; seule une
+      // marge basse subsiste. La barre est collée sous l'AppBar (top = 0).
+      padding: const EdgeInsets.only(bottom: AppTheme.defaultPadding),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           WizardBreadcrumb(
             titles: stepTitles,
@@ -306,24 +373,54 @@ class _EnrollmentStepperLayout extends StatelessWidget {
             progress: progress,
             onStepTap: onStepTap,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
+            // Carte d'étape large, centrée horizontalement, avec de l'espace
+            // tout autour. Défile si son contenu dépasse la hauteur disponible.
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  StepPageCard(
-                    key: ValueKey(currentStep),
-                    title: stepTitle,
-                    subtitle: stepSubtitle,
-                    child: stepContent,
+              padding: const EdgeInsets.all(AppTheme.defaultPadding),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _stepCardMaxWidth,
                   ),
-                  if (!isSummaryStep) ...[const SizedBox(height: 12), controls],
-                ],
+                  child: AnimatedSwitcher(
+                    duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      if (reduceMotion) return child;
+                      // etStepIn : fondu + glissement translateY 10 → 0.
+                      return FadeTransition(
+                        opacity: animation,
+                        child: AnimatedBuilder(
+                          animation: animation,
+                          builder: (context, inner) => Transform.translate(
+                            offset: Offset(0, (1 - animation.value) * 10),
+                            child: inner,
+                          ),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: StepPageCard(
+                      key: ValueKey(currentStep),
+                      eyebrow: stepEyebrow,
+                      title: stepTitle,
+                      subtitle: stepSubtitle,
+                      accentColor: stepAccentColor,
+                      icon: stepIcon,
+                      child: stepContent,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-          if (isSummaryStep) ...[const SizedBox(height: 12), controls],
+          // Pied fixe : barre d'actions ancrée hors du défilement, identique
+          // pour toutes les étapes (PARCOURS 21).
+          controls,
         ],
       ),
     );

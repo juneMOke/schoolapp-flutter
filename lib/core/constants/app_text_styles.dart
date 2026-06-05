@@ -78,6 +78,15 @@ class AppTextStyles {
     decoration: TextDecoration.none,
   );
 
+  /// Initiales d'avatar. La taille de police est dynamique (0.36 × diamètre)
+  /// et la couleur dépend de la variante : le widget les applique via copyWith.
+  static final avatarInitials = const TextStyle(
+    fontFamily: 'Inter',
+    fontWeight: FontWeight.w600,
+    height: 1,
+    decoration: TextDecoration.none,
+  );
+
   static final moneyTabular = const TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,

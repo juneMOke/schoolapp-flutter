@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceDateButton extends StatelessWidget {
@@ -83,30 +84,14 @@ class AttendanceSearchButton extends StatelessWidget {
       duration: AppMotion.fast,
       switchInCurve: AppMotion.outCurve,
       switchOutCurve: AppMotion.inCurve,
-      child: ElevatedButton.icon(
-        key: ValueKey('attendance-search-$isSearching-$canSearch-$isCompact'),
-        onPressed: canSearch ? onSearch : null,
-        icon: isSearching
-            ? const SizedBox(
-                width: AppDimensions.detailMiniIconSize,
-                height: AppDimensions.detailMiniIconSize,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.surface,
-                ),
-              )
-            : const Icon(Icons.search),
-        label: Text(l10n.attendanceShowClassAction),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.terreCuite,
-          foregroundColor: AppColors.surface,
-          disabledBackgroundColor: AppColors.classesDisabledBg,
-          disabledForegroundColor: AppColors.classesDisabledFg,
-          minimumSize: Size(isCompact ? 0 : 140, AppDimensions.minTouchTarget),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingM,
-            vertical: AppDimensions.spacingS,
-          ),
+      child: SizedBox(
+        width: isCompact ? null : 140,
+        child: EteeloButton.primary(
+          key: ValueKey('attendance-search-$isSearching-$canSearch-$isCompact'),
+          onPressed: canSearch ? onSearch : null,
+          icon: Icons.search,
+          label: l10n.attendanceShowClassAction,
+          isLoading: isSearching,
         ),
       ),
     );

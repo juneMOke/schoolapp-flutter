@@ -505,6 +505,8 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                 AppSnackBar.showError(
                   context,
                   l10n.academicInfoSaveError(state.errorMessage ?? ''),
+                  onRetry: submitForm,
+                  retryLabel: l10n.enrollmentErrorRetry,
                 );
               }
             },
@@ -567,19 +569,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                           ? l10n.requiredFieldError(l10n.rankingLabel)
                           : l10n.invalidNumberFieldError(l10n.rankingLabel))
                     : null,
-                prevYearChanged: (_selectedYear ?? '') != _initialPrevYear,
-                prevSchoolChanged:
-                    _prevSchoolController.text.trim() != _initialPrevSchool,
-                prevCycleChanged:
-                    (_selectedCycle?.trim() ?? '') != _initialPrevCycle,
-                prevLevelChanged:
-                    (_selectedLevel?.trim() ?? '') != _initialPrevLevel,
-                prevRateChanged:
-                    _normalizeRate(_prevRateController.text) !=
-                    _initialPrevRate,
-                prevRankChanged:
-                    _normalizeRank(_prevRankController.text) !=
-                    _initialPrevRank,
                 validatedPreviousYearChanged:
                     _validatedPreviousYear != _initialValidatedPreviousYear,
               );

@@ -52,7 +52,8 @@ class ClassesOrganisationMemberTile extends StatelessWidget {
             StudentAvatar(
               firstName: member.studentFirstName,
               lastName: member.studentLastName,
-              size: 32,
+              studentId: member.studentId,
+              size: AvatarSize.md,
             ),
             const SizedBox(width: AppDimensions.spacingS),
             Expanded(

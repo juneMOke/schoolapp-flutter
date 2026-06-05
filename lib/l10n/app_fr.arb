@@ -265,6 +265,8 @@
   "pageUnderConstruction": "Cette page est en cours de développement",
   "preRegistrations": "Pré-Inscriptions",
   "searchStudents": "Rechercher des élèves",
+  "searchFormSubtitleFirstRegistration": "Filtrez la liste des inscriptions",
+  "searchFormSubtitlePreRegistration": "Demandes reçues en ligne, en attente de validation",
   "reRegistrationSearchHint": "Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.",
   "reRegistrationAcademicInfoHelp": "Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.",
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
@@ -283,6 +285,31 @@
   "exportData": "Exporter",
   "noResultsFound": "Aucun résultat trouvé",
   "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
+  "enrollmentEmptyTitle": "Aucun résultat",
+  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\u0027élève n\u0027est pas encore enregistré.",
+  "enrollmentEmptyWithoutFilterDescription": "Aucune inscription pour le moment.",
+  "enrollmentEmptyCreateAction": "Inscrire un nouvel élève",
+  "enrollmentErrorRetry": "Réessayer",
+  "enrollmentErrorReconnect": "Se reconnecter",
+  "enrollmentErrorContactAdmin": "Contacter l\u0027administrateur",
+  "enrollmentErrorNetworkTitle": "Pas de connexion",
+  "enrollmentErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.",
+  "enrollmentErrorUnauthorizedTitle": "Session expirée",
+  "enrollmentErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
+  "enrollmentErrorForbiddenTitle": "Accès refusé",
+  "enrollmentErrorForbiddenMessage": "Vous n\u0027avez pas les droits requis pour voir cette liste.",
+  "enrollmentErrorServerTitle": "Erreur du serveur",
+  "enrollmentErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "enrollmentErrorIncidentCode": "Code incident : {code}",
+  "@enrollmentErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollmentErrorUnknownTitle": "Chargement impossible",
+  "enrollmentErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement des résultats.",
   "loadingStudents": "Chargement des étudiants...",
   "enrollmentResultsCount": "{count, plural, =0{0 résultat} =1{1 résultat} other{{count} résultats}}",
   "@enrollmentResultsCount": {
@@ -292,25 +319,52 @@
       }
     }
   },
-  "enrollmentPageFooter": "{pageCount} {pageCount, plural, =1{résultat} other{résultats}} sur {totalCount}",
-  "@enrollmentPageFooter": {
-    "placeholders": {
-      "pageCount": {
-        "type": "int"
-      },
-      "totalCount": {
-        "type": "int"
-      }
-    }
-  },
-  "enrollmentPageIndicator": "Page {current} / {total}",
-  "@enrollmentPageIndicator": {
+  "paginationPageIndicator": "Page {current} / {total}",
+  "@paginationPageIndicator": {
     "placeholders": {
       "current": {
         "type": "int"
       },
       "total": {
         "type": "int"
+      }
+    }
+  },
+  "paginationResultsCount": "{count, plural, =0{0 résultat} =1{1 résultat} other{{count} résultats}}",
+  "@paginationResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paginationRange": "{start}–{end} sur {total} {unit}",
+  "@paginationRange": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "paginationNavigationLabel": "Pagination",
+  "unitStudents": "élèves",
+  "enrollmentResultCardOpenLabel": "Ouvrir la fiche de {name}, statut {status}",
+  "@enrollmentResultCardOpenLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
       }
     }
   },
@@ -343,6 +397,7 @@
   "guardianPrimaryRequiredHint": "Au moins un tuteur principal est requis",
   "guardianPrincipalBadge": "Principal",
   "guardianToggleCard": "Ouvrir ou fermer la carte tuteur",
+  "guardianIncompleteHint": "Fiche incomplète",
   "guardianEmailOptionalInline": "(facultatif)",
   "guardianDeleteAction": "Supprimer ce tuteur",
   "guardianDeleteConfirmTitle": "Confirmer la suppression",
@@ -391,6 +446,11 @@
       }
     }
   },
+  "firstNameExample": "Claudine",
+  "lastNameExample": "Furah",
+  "surnameExample": "Sifiwe",
+  "selectPlaceholderChoose": "Choisir",
+  "requiredSemanticSuffix": "obligatoire",
   "dateHint": "jj/mm/aaaa",
   "genderMale": "Masculin",
   "genderFemale": "Féminin",
@@ -456,16 +516,17 @@
   "relationshipOther": "Autre",
   "stepPersonalInfoSubtitle": "Informations générales de l'élève",
   "stepAddressSubtitle": "Localisation et adresse complète",
+  "stepAddressTitle": "Adresse de l'élève",
   "stepAcademicSubtitle": "Historique académique et objectifs",
   "stepAcademicPreviousSubtitle": "Historique académique de l'année précédente",
   "stepAcademicTargetSubtitle": "Objectifs académiques pour l'année cible",
   "stepGuardianSubtitle": "Responsables légaux et contacts",
   "stepSummarySubtitle": "Récapitulatif final du dossier",
-  "wizardStepShortPersonal": "Perso",
+  "wizardStepShortPersonal": "Identité",
   "wizardStepShortAddress": "Adresse",
-  "wizardStepShortPrevious": "Précédent",
-  "wizardStepShortTarget": "Cible",
-  "wizardStepShortCharges": "Charges",
+  "wizardStepShortPrevious": "Année préc",
+  "wizardStepShortTarget": "Année cible",
+  "wizardStepShortCharges": "Frais",
   "wizardStepShortGuardian": "Tuteurs",
   "wizardStepShortSummary": "Résumé",
   "stepIndicator": "Étape {current} / {total}",
@@ -479,7 +540,24 @@
       }
     }
   },
+  "wizardStepNumberShort": "Étape {number}",
+  "@wizardStepNumberShort": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "stepForwardHint": "Cliquez sur Continuer pour avancer étape par étape.",
+  "journeyModeNew": "Nouvelle",
+  "journeyModeEdit": "Modification",
+  "journeyModeView": "Consultation",
+  "journeyCloseAction": "Fermer",
+  "stepSaveStateIdle": "Aucune saisie",
+  "stepSaveStateIncomplete": "Champs incomplets",
+  "stepSaveStatePending": "Modifications non enregistrées",
+  "stepSaveStateSaving": "Enregistrement en cours...",
+  "stepSaveStateSaved": "Étape enregistrée",
   "validatePersonalInfoHint": "Veuillez compléter les informations personnelles.",
   "validateAddressHint": "Veuillez compléter l'adresse de l'élève.",
   "validateAcademicInfoHint": "Veuillez compléter les informations académiques.",
@@ -562,6 +640,7 @@
       }
     }
   },
+  "enrollmentStudentColumnLabel": "Eleve",
   "enrollmentStatusFilterLabel": "Statut",
   "enrollmentStatusInProgress": "En cours",
   "enrollmentStatusAdminCompleted": "Complété (Administratif)",
@@ -1243,5 +1322,33 @@
   "financeStatsServerError": "Le serveur est indisponible pour le moment.",
   "financeStatsStorageError": "Une erreur locale empêche l'affichage des statistiques.",
   "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
-  "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques."
+  "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques.",
+  "enrollmentResults": "Résultats",
+  "viewDetails": "Voir les détails",
+  "refresh": "Actualiser",
+  "sort": "Trier",
+  "switchToTableView": "Passer à la vue tableau",
+  "switchToGridView": "Passer à la vue grille",
+  "enrollmentViewTable": "Tableau",
+  "enrollmentViewGrid": "Grille",
+  "enrollmentResultsA11yLabel": "Résultats d'inscriptions",
+  "dataTableSortAscending": "Tri croissant",
+  "dataTableSortDescending": "Tri décroissant",
+  "dataTableSortNone": "Tri non appliqué",
+  "openDetailsForStudent": "Ouvrir la fiche de {studentName}",
+  "@openDetailsForStudent": {
+    "placeholders": {
+      "studentName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFilterNamed": "Retirer le filtre {filter}",
+  "@removeFilterNamed": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -25,13 +25,39 @@ class AppDimensions {
   static const detailTableLabelColumnWidth = 72.0;
   static const fabListBottomPadding = 80.0;
 
-  // Page background decorative tokens (orbes — partagé entre tous les modules)
-  static const pageBackgroundOrbLargeSize = 180.0;
-  static const pageBackgroundOrbMediumSize = 130.0;
-  static const pageBackgroundOrbLargeTop = -60.0;
-  static const pageBackgroundOrbLargeRight = -50.0;
-  static const pageBackgroundOrbMediumTop = 120.0;
-  static const pageBackgroundOrbMediumLeft = -40.0;
+  // Eteelo FAB tokens
+  static const fabHeight = 56.0;
+  static const fabPaddingStart = 18.0;
+  static const fabPaddingEnd = 22.0;
+  static const fabIconSize = 22.0;
+  static const fabLabelGap = 9.0;
+  // Décalage du FAB par rapport au bord (endFloat = 16 par défaut).
+  static const fabEdgeOffset = 28.0;
+
+  // Pagination tokens
+  static const paginationButtonSize = 32.0;
+  static const paginationIconSize = 16.0;
+  static const paginationGap = 6.0;
+  static const paginationButtonRadius = 8.0;
+  static const paginationTapTarget = 44.0;
+  static const paginationIndicatorHPadding = 10.0;
+
+  // Page background decorative tokens (halos + filigrane — partagé entre tous les modules)
+  static const pageHaloBlueAlign = 0.72; // Alignment.x pour halo bleu
+  static const pageHaloBlueAlignY = -1.16; // Alignment.y pour halo bleu
+  static const pageHaloBlueRatio = 1100 / 460; // scaleX de l'ellipse
+  static const pageHaloBlueOpacity = 0.08;
+
+  static const pageHaloTerraAlign = -1.12; // Alignment.x pour halo terre-cuite
+  static const pageHaloTerraAlignY = 1.24; // Alignment.y pour halo terre-cuite
+  static const pageHaloTerraRatio = 900 / 520;
+  static const pageHaloTerraOpacity = 0.07;
+
+  static const pageHaloRadius = 0.9; // fraction du rayon du gradient radial
+
+  // Filigrane Kuba
+  static const kubaTileSize = 60.0;
+  static const kubaOpacity = 0.07;
 
   // Finance detail elevation/responsive tokens
   static const financeDetailCardShadowBlur = 20.0;
@@ -67,6 +93,30 @@ class AppDimensions {
   static const enrollmentStatsPeriodFilterHeight = 38.0;
   static const enrollmentStatsDonutCenterRadius = 48.0;
   static const enrollmentStatsHeaderTitleFontSize = 20.0;
+
+  // Enrollment results bar tokens
+  static const enrollmentResultsBarGap = 10.0;
+  static const enrollmentResultsFilterChipHPadding = 10.0;
+  static const enrollmentResultsFilterChipVPadding = 4.0;
+  static const enrollmentResultsFilterChipIconSize = 13.0;
+  static const enrollmentResultsFilterChipCloseIconSize = 12.0;
+  static const enrollmentResultsSortSelectWidth = 168.0;
+  static const enrollmentResultsViewToggleHeight = 38.0;
+  static const enrollmentResultsViewToggleItemHeight = 30.0;
+
+  // Grid + result card tokens
+  // Largeur mini d'une carte (équivaut au `min` de `minmax(300, 1fr)`) : les
+  // colonnes sont calculées pour ne jamais descendre sous cette largeur.
+  static const gridMinItemWidth = 300.0;
+  // Largeur mini d'un champ de filtre (équivaut au `min` de `minmax(190, 1fr)`).
+  static const filterGridMinItemWidth = 190.0;
+  static const resultCardAccentWidth = 5.0;
+  static const resultCardBodyPaddingH = 18.0;
+  static const resultCardBodyPaddingV = 16.0;
+  static const resultCardHoverTranslateY = -2.0;
+  static const chipPaddingH = 10.0;
+  static const chipPaddingV = 4.0;
+  static const chipIconSize = 12.0;
 
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;

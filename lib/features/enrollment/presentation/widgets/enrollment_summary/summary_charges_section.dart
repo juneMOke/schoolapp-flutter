@@ -8,20 +8,17 @@ import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_charge_line.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_neutral_line.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_section_card.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_step_constants.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SummaryChargesSection extends StatelessWidget {
   final bool canLoadCharges;
   final VoidCallback onRetry;
-  final ValueChanged<int> onEditRequested;
 
   const SummaryChargesSection({
     super.key,
     required this.canLoadCharges,
     required this.onRetry,
-    required this.onEditRequested,
   });
 
   @override
@@ -31,7 +28,7 @@ class SummaryChargesSection extends StatelessWidget {
     return SummarySectionCard(
       title: l10n.studentChargesStepTitle,
       icon: Icons.paid_outlined,
-      onEdit: () => onEditRequested(EnrollmentSummarySteps.charges),
+      // Frais : section en lecture seule, pas de bouton « Modifier ».
       child: BlocBuilder<StudentChargesBloc, StudentChargesState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status ||
