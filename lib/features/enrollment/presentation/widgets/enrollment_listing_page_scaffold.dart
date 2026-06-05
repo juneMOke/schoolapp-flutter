@@ -67,10 +67,18 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
             children: [
               _buildSearchSection(effectiveCtx),
               if (resultsSummaryBuilder != null) ...[
-                const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
+                const SizedBox(
+                  height: EnrollmentPageLayout.searchToSummarySpacing,
+                ),
                 _buildResultsSummarySection(effectiveCtx),
+                const SizedBox(
+                  height: EnrollmentPageLayout.summaryToResultsSpacing,
+                ),
+              ] else ...[
+                const SizedBox(
+                  height: EnrollmentPageLayout.searchToSummarySpacing,
+                ),
               ],
-              const SizedBox(height: EnrollmentPageLayout.sectionSpacing),
               _buildResultsSection(effectiveCtx),
             ],
           ),

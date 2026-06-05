@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -45,7 +46,7 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
         icon: Icons.add,
         onPressed: () => _openNewEnrollment(context),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: const EndFloatEdgeOffsetFabLocation(),
       child: EnrollmentListingPageScaffold(
         readyKey: 'first-reg-content',
         bootstrapBuilder: (context, onReady) =>

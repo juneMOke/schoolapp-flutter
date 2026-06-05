@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
@@ -59,11 +60,11 @@ void main() {
     await tester.pumpWidget(
       buildHost(const EnrollmentResultsLoadingSkeleton(isGrid: false)),
     );
-    expect(find.byType(GridView), findsNothing);
+    expect(find.byType(EteeloGridView), findsNothing);
 
     await tester.pumpWidget(
       buildHost(const EnrollmentResultsLoadingSkeleton(isGrid: true)),
     );
-    expect(find.byType(GridView), findsOneWidget);
+    expect(find.byType(EteeloGridView), findsOneWidget);
   });
 }

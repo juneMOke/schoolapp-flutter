@@ -31,6 +31,8 @@ class AppDimensions {
   static const fabPaddingEnd = 22.0;
   static const fabIconSize = 22.0;
   static const fabLabelGap = 9.0;
+  // Décalage du FAB par rapport au bord (endFloat = 16 par défaut).
+  static const fabEdgeOffset = 28.0;
 
   // Pagination tokens
   static const paginationButtonSize = 32.0;
@@ -97,6 +99,8 @@ class AppDimensions {
   // Largeur mini d'une carte (équivaut au `min` de `minmax(300, 1fr)`) : les
   // colonnes sont calculées pour ne jamais descendre sous cette largeur.
   static const gridMinItemWidth = 300.0;
+  // Largeur mini d'un champ de filtre (équivaut au `min` de `minmax(190, 1fr)`).
+  static const filterGridMinItemWidth = 190.0;
   static const resultCardAccentWidth = 5.0;
   static const resultCardBodyPaddingH = 18.0;
   static const resultCardBodyPaddingV = 16.0;

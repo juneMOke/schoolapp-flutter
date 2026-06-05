@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -108,22 +110,41 @@ class _SearchFormState extends State<SearchForm> {
     final isClearEnabled =
         _hasAnyCriteria() && !widget.isLoading && !isActionLocked;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 10,
-      children: [
-        EteeloButton.ghost(
-          onPressed: isClearEnabled ? _clearSearch : null,
-          icon: Icons.refresh_rounded,
-          label: l10n.clear,
-        ),
-        EteeloButton.primary(
-          onPressed: isSearchEnabled ? _performSearch : null,
-          icon: Icons.search_rounded,
-          label: l10n.search,
-          isLoading: widget.isLoading,
-        ),
-      ],
+    final clearButton = EteeloButton.ghost(
+      onPressed: isClearEnabled ? _clearSearch : null,
+      icon: Icons.refresh_rounded,
+      label: l10n.clear,
+    );
+    final searchButton = EteeloButton.primary(
+      onPressed: isSearchEnabled ? _performSearch : null,
+      icon: Icons.search_rounded,
+      label: l10n.search,
+      isLoading: widget.isLoading,
+    );
+
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final stacked = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+
+        if (stacked) {
+          return Row(
+            children: [
+              Expanded(child: clearButton),
+              const SizedBox(width: AppSpacing.gridGap),
+              Expanded(child: searchButton),
+            ],
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            clearButton,
+            const SizedBox(width: AppSpacing.gridGap),
+            searchButton,
+          ],
+        );
+      },
     );
   }
 

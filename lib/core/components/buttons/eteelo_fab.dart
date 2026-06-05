@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// FAB étendu Terre Cuite — aucune ombre, forme stadium.
 ///
 /// Positionnement : délégué au [Scaffold.floatingActionButton] de l'appelant.
-/// Convention app : [FloatingActionButtonLocation.endFloat].
+/// Convention app : `EndFloatEdgeOffsetFabLocation`.
 class EteeloFab extends StatelessWidget {
   final String label;
   final IconData icon;

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -20,18 +22,12 @@ class EnrollmentResultsLoadingSkeleton extends StatelessWidget {
     final highlight = AppColors.surfaceRaised;
 
     if (isGrid) {
-      return GridView.builder(
+      return EteeloGridView(
         itemCount: itemCount,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        minItemWidth: AppDimensions.gridMinItemWidth,
+        spacing: AppSpacing.gridGap,
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 360,
-          mainAxisSpacing: AppSpacing.gridGap,
-          crossAxisSpacing: AppSpacing.gridGap,
-          childAspectRatio: 1.2,
-        ),
-        itemBuilder: (_, index) =>
+        itemBuilder: (_, _) =>
             _SkeletonCard(baseColor: baseColor, highlightColor: highlight),
       );
     }
@@ -77,6 +73,7 @@ class _SkeletonCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SkeletonBlock(
@@ -99,7 +96,7 @@ class _SkeletonCard extends StatelessWidget {
             baseColor: baseColor,
             highlightColor: highlightColor,
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.lg),
           _SkeletonBlock(
             width: 78,
             height: 22,
