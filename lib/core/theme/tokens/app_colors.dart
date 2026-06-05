@@ -26,6 +26,7 @@ class AppColors {
   static const textOnDark = blancCasse;
   static const surface = blancCasse;
   static const surfaceAlt = papier;
+  static const surfaceCool = Color(0xFFF1F5F3);
   static const surfaceRaised = Color(0xFFFFFFFF);
   static const surfaceDark = bleuProfond;
   static const border = Color(0xFFE3DFD2);
@@ -37,12 +38,6 @@ class AppColors {
 
   // Buttons / FAB
   static const fabBackground = Color(0xFFA64F25);
-
-  // Legacy palettes centralisees dans la source unique de tokens.
-  static const pageBackgroundGradientStart = surface;
-  static const pageBackgroundGradientMiddle = surfaceAlt;
-  static const pageBackgroundGradientEnd = surface;
-  static const pageBackgroundAccent = bleuArdoise;
 
   // Finance detail palette
   static const financeDetailCard = surfaceRaised;

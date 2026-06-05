@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
+import 'package:school_app_flutter/core/widgets/page_background_halos.dart';
 
 enum AppPageBackgroundStyle { decorated, flat }
 
@@ -60,14 +62,14 @@ class AppPageBackground extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   AppColors.pageBackgroundGradientStart,
-                  AppColors.pageBackgroundGradientMiddle,
                   AppColors.pageBackgroundGradientEnd,
                 ],
               ),
             ),
             child: Stack(
               children: [
-                const _AppDecorativeOrbs(),
+                const PageBackgroundHalos(),
+                const KubaPatternLayer(),
                 _buildScrollableContent(context, content),
               ],
             ),
@@ -100,42 +102,6 @@ class AppPageBackground extends StatelessWidget {
         vertical: AppDimensions.spacingL,
       ),
       child: content,
-    );
-  }
-}
-
-class _AppDecorativeOrbs extends StatelessWidget {
-  const _AppDecorativeOrbs();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: AppDimensions.pageBackgroundOrbLargeTop,
-          right: AppDimensions.pageBackgroundOrbLargeRight,
-          child: Container(
-            width: AppDimensions.pageBackgroundOrbLargeSize,
-            height: AppDimensions.pageBackgroundOrbLargeSize,
-            decoration: BoxDecoration(
-              color: AppColors.pageBackgroundAccent.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          top: AppDimensions.pageBackgroundOrbMediumTop,
-          left: AppDimensions.pageBackgroundOrbMediumLeft,
-          child: Container(
-            width: AppDimensions.pageBackgroundOrbMediumSize,
-            height: AppDimensions.pageBackgroundOrbMediumSize,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

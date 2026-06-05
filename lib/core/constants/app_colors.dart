@@ -15,6 +15,7 @@ class AppColors {
   static const error = tokens.AppColors.error;
   static const textMuted = tokens.AppColors.textMuted;
   static const textOnDark = tokens.AppColors.textOnDark;
+  static const surface = tokens.AppColors.surface;
   static const surfaceAlt = tokens.AppColors.surfaceAlt;
   static const surfaceRaised = tokens.AppColors.surfaceRaised;
   static const surfaceDark = tokens.AppColors.surfaceDark;
@@ -31,16 +32,15 @@ class AppColors {
   static const green = tokens.AppColors.vertSavane;
   static const red = tokens.AppColors.error;
   static const background = tokens.AppColors.surface;
-  static const surface = tokens.AppColors.surface;
   static const textPrimary = tokens.AppColors.textPrimary;
   static const textSecondary = tokens.AppColors.textSecondary;
   static const border = tokens.AppColors.border;
 
-  // Page background palette (gradient + orbes — partagé entre tous les modules)
+  // Page background palette (gradient + halos — partagé entre tous les modules)
   static const pageBackgroundGradientStart = tokens.AppColors.surface;
-  static const pageBackgroundGradientMiddle = tokens.AppColors.surfaceAlt;
-  static const pageBackgroundGradientEnd = tokens.AppColors.surface;
-  static const pageBackgroundAccent = tokens.AppColors.bleuArdoise;
+  static const pageBackgroundGradientEnd = tokens.AppColors.surfaceCool;
+  static const pageBackgroundHaloBlue = tokens.AppColors.bleuArdoise;
+  static const pageBackgroundHaloTerracotta = tokens.AppColors.terreCuite;
 
   // Finance detail palette
   static const financeDetailCard = tokens.AppColors.financeDetailCard;

@@ -42,13 +42,22 @@ class AppDimensions {
   static const paginationTapTarget = 44.0;
   static const paginationIndicatorHPadding = 10.0;
 
-  // Page background decorative tokens (orbes — partagé entre tous les modules)
-  static const pageBackgroundOrbLargeSize = 180.0;
-  static const pageBackgroundOrbMediumSize = 130.0;
-  static const pageBackgroundOrbLargeTop = -60.0;
-  static const pageBackgroundOrbLargeRight = -50.0;
-  static const pageBackgroundOrbMediumTop = 120.0;
-  static const pageBackgroundOrbMediumLeft = -40.0;
+  // Page background decorative tokens (halos + filigrane — partagé entre tous les modules)
+  static const pageHaloBlueAlign = 0.72; // Alignment.x pour halo bleu
+  static const pageHaloBlueAlignY = -1.16; // Alignment.y pour halo bleu
+  static const pageHaloBlueRatio = 1100 / 460; // scaleX de l'ellipse
+  static const pageHaloBlueOpacity = 0.08;
+
+  static const pageHaloTerraAlign = -1.12; // Alignment.x pour halo terre-cuite
+  static const pageHaloTerraAlignY = 1.24; // Alignment.y pour halo terre-cuite
+  static const pageHaloTerraRatio = 900 / 520;
+  static const pageHaloTerraOpacity = 0.07;
+
+  static const pageHaloRadius = 0.9; // fraction du rayon du gradient radial
+
+  // Filigrane Kuba
+  static const kubaTileSize = 60.0;
+  static const kubaOpacity = 0.07;
 
   // Finance detail elevation/responsive tokens
   static const financeDetailCardShadowBlur = 20.0;

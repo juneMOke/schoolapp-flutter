@@ -122,6 +122,7 @@ flutter:
     - assets/branding/fonce/
     - assets/branding/profond/
     - assets/branding/splash/
+    - assets/patterns/
 
   fonts:
     - family: Inter
