@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/validated_year_selector.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PreviousYearFields extends StatelessWidget {
@@ -66,122 +67,94 @@ class PreviousYearFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 16.0;
-        final w2 = (constraints.maxWidth - spacing) / 2;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ligne 1 & 2 : année / école / cycle / niveau
-            Wrap(
-              spacing: spacing,
-              runSpacing: 14,
-              children: [
-                SizedBox(
-                  width: w2,
-                  child: EteeloSelectInput<String>(
-                    label: l10n.academicYearLabel,
-                    required: true,
-                    value: selectedYear,
-                    items: _itemsFrom(yearOptions),
-                    onChanged: onYearChanged,
-                    errorText: prevYearError,
-                    enabled: isEditable,
-                  ),
-                ),
-                SizedBox(
-                  width: w2,
-                  child: EteeloTextInput(
-                    controller: prevSchoolController,
-                    label: l10n.schoolLabel,
-                    required: true,
-                    errorText: prevSchoolError,
-                    readOnly: !isEditable,
-                    inputFormatters: const [
-                      FirstLetterUppercaseTextInputFormatter(),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: w2,
-                  child: EteeloSelectInput<String>(
-                    label: l10n.schoolCycle,
-                    required: true,
-                    value: selectedCycle,
-                    items: _itemsFrom(cycleOptions),
-                    onChanged: onCycleChanged,
-                    errorText: prevCycleError,
-                    // Cascade : le cycle est désactivé tant que l'année est vide.
-                    enabled:
-                        isEditable && !isCatalogLoading && selectedYear != null,
-                  ),
-                ),
-                SizedBox(
-                  width: w2,
-                  child: EteeloSelectInput<String>(
-                    label: l10n.schoolLevelLabel,
-                    required: true,
-                    value: selectedLevel,
-                    items: _itemsFrom(levelOptions),
-                    onChanged: onLevelChanged,
-                    errorText: prevLevelError,
-                    enabled:
-                        isEditable &&
-                        !isCatalogLoading &&
-                        selectedCycle != null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            // Ligne 3 : moyenne | classement | année validée
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: EteeloTextInput(
-                    controller: prevRateController,
-                    label: l10n.averageLabel,
-                    required: true,
-                    keyboardType: EteeloTextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                    ],
-                    errorText: prevRateError,
-                    readOnly: !isEditable,
-                  ),
-                ),
-                const SizedBox(width: spacing),
-                Expanded(
-                  child: EteeloTextInput(
-                    controller: prevRankController,
-                    label: l10n.rankingLabel,
-                    required: true,
-                    keyboardType: EteeloTextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    errorText: prevRankError,
-                    readOnly: !isEditable,
-                  ),
-                ),
-                const SizedBox(width: spacing),
-                Expanded(
-                  child: ValidatedYearSelector(
-                    l10n: l10n,
-                    width: double.infinity,
-                    validatedPreviousYear: validatedPreviousYear,
-                    onChanged: onValidatedChanged,
-                    isChanged: validatedPreviousYearChanged,
-                    enabled: isEditable,
-                    helpMessage: l10n.yearValidatedHelp,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+    return WizardFieldsGrid(
+      fields: [
+        // Année scolaire
+        WizardGridField(
+          EteeloSelectInput<String>(
+            label: l10n.academicYearLabel,
+            required: true,
+            value: selectedYear,
+            items: _itemsFrom(yearOptions),
+            onChanged: onYearChanged,
+            errorText: prevYearError,
+            enabled: isEditable,
+          ),
+        ),
+        // École
+        WizardGridField(
+          EteeloTextInput(
+            controller: prevSchoolController,
+            label: l10n.schoolLabel,
+            required: true,
+            errorText: prevSchoolError,
+            readOnly: !isEditable,
+            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
+          ),
+        ),
+        // Cycle — cascade : désactivé tant que l'année est vide.
+        WizardGridField(
+          EteeloSelectInput<String>(
+            label: l10n.schoolCycle,
+            required: true,
+            value: selectedCycle,
+            items: _itemsFrom(cycleOptions),
+            onChanged: onCycleChanged,
+            errorText: prevCycleError,
+            enabled: isEditable && !isCatalogLoading && selectedYear != null,
+          ),
+        ),
+        // Niveau — cascade : désactivé tant que le cycle est vide.
+        WizardGridField(
+          EteeloSelectInput<String>(
+            label: l10n.schoolLevelLabel,
+            required: true,
+            value: selectedLevel,
+            items: _itemsFrom(levelOptions),
+            onChanged: onLevelChanged,
+            errorText: prevLevelError,
+            enabled: isEditable && !isCatalogLoading && selectedCycle != null,
+          ),
+        ),
+        // Moyenne
+        WizardGridField(
+          EteeloTextInput(
+            controller: prevRateController,
+            label: l10n.averageLabel,
+            required: true,
+            keyboardType: EteeloTextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+            ],
+            errorText: prevRateError,
+            readOnly: !isEditable,
+          ),
+        ),
+        // Classement
+        WizardGridField(
+          EteeloTextInput(
+            controller: prevRankController,
+            label: l10n.rankingLabel,
+            required: true,
+            keyboardType: EteeloTextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            errorText: prevRankError,
+            readOnly: !isEditable,
+          ),
+        ),
+        // Année validée (contrôle segmenté Oui/Non)
+        WizardGridField(
+          ValidatedYearSelector(
+            l10n: l10n,
+            width: double.infinity,
+            validatedPreviousYear: validatedPreviousYear,
+            onChanged: onValidatedChanged,
+            isChanged: validatedPreviousYearChanged,
+            enabled: isEditable,
+            helpMessage: l10n.yearValidatedHelp,
+          ),
+        ),
+      ],
     );
   }
 

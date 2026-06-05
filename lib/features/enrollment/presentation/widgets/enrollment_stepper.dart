@@ -351,6 +351,11 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     required this.controls,
   });
 
+  // Largeur max de la carte d'étape : large, bornée sur très grand écran (au-delà
+  // elle reste centrée). Les champs s'organisent en 1/2/3 colonnes selon la
+  // largeur disponible (voir WizardFieldsGrid) → carte large, hauteur modérée.
+  static const double _stepCardMaxWidth = 1100;
+
   @override
   Widget build(BuildContext context) {
     final reduceMotion =
@@ -370,44 +375,45 @@ class _EnrollmentStepperLayout extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.defaultPadding,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedSwitcher(
-                      duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, animation) {
-                        if (reduceMotion) return child;
-                        // etStepIn : fondu + glissement translateY 10 → 0.
-                        return FadeTransition(
-                          opacity: animation,
-                          child: AnimatedBuilder(
-                            animation: animation,
-                            builder: (context, inner) => Transform.translate(
-                              offset: Offset(0, (1 - animation.value) * 10),
-                              child: inner,
-                            ),
-                            child: child,
+            // Carte d'étape large, centrée horizontalement, avec de l'espace
+            // tout autour. Défile si son contenu dépasse la hauteur disponible.
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppTheme.defaultPadding),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _stepCardMaxWidth,
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      if (reduceMotion) return child;
+                      // etStepIn : fondu + glissement translateY 10 → 0.
+                      return FadeTransition(
+                        opacity: animation,
+                        child: AnimatedBuilder(
+                          animation: animation,
+                          builder: (context, inner) => Transform.translate(
+                            offset: Offset(0, (1 - animation.value) * 10),
+                            child: inner,
                           ),
-                        );
-                      },
-                      child: StepPageCard(
-                        key: ValueKey(currentStep),
-                        eyebrow: stepEyebrow,
-                        title: stepTitle,
-                        subtitle: stepSubtitle,
-                        accentColor: stepAccentColor,
-                        icon: stepIcon,
-                        child: stepContent,
-                      ),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: StepPageCard(
+                      key: ValueKey(currentStep),
+                      eyebrow: stepEyebrow,
+                      title: stepTitle,
+                      subtitle: stepSubtitle,
+                      accentColor: stepAccentColor,
+                      icon: stepIcon,
+                      child: stepContent,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
