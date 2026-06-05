@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/stepper_actions_bar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Pied fixe du stepper d'inscription (PARCOURS 21) : navigation à gauche,
-/// indicateur d'état au centre, actions à droite. Le pied est ancré hors du
-/// défilement pour toutes les étapes. L'indicateur est masqué pour le résumé
-/// et pour l'étape Frais (lecture seule, sans enregistrement).
+/// Pied fixe du stepper d'inscription (PARCOURS 21) : fine bande sur une seule
+/// ligne — navigation à gauche, indicateur d'état au centre, actions à droite.
+/// L'indicateur est masqué pour le résumé et pour l'étape Frais (lecture seule).
 class EnrollmentStepperControls extends StatelessWidget {
   final int currentStep;
   final bool isLast;
@@ -49,10 +47,11 @@ class EnrollmentStepperControls extends StatelessWidget {
 
     final actionsBar = StepperActionsBar(
       leadingActionBuilder: currentStep > 0
-          ? (_) => SecondaryButton(
+          ? (_) => EteeloButton.secondary(
               label: l10n.previous,
               icon: Icons.arrow_back_rounded,
               onPressed: onPrevious,
+              size: EteeloButtonSize.compact,
               fullWidth: false,
             )
           : null,
@@ -61,29 +60,34 @@ class EnrollmentStepperControls extends StatelessWidget {
           : null,
       trailingActionBuilders: <WidgetBuilder>[
         if (showSaveAction)
-          (_) => SecondaryButton(
+          (_) => EteeloButton.secondary(
             label: saveLabel,
             icon: Icons.save_outlined,
             onPressed: canSave ? onSave : null,
             isLoading: savingNow,
+            size: EteeloButtonSize.compact,
             fullWidth: false,
           ),
         // Au dernier step, le bouton « Valider l'inscription » (Save) remplace
         // le bouton « Terminer » — on ne l'affiche donc pas en doublon.
         if (!(isLast && showSaveAction))
-          (_) => PrimaryButton(
+          (_) => EteeloButton.primary(
             label: isLast ? l10n.finish : l10n.next,
             icon: isLast
                 ? Icons.check_circle_outline
                 : Icons.arrow_forward_rounded,
             onPressed: canContinue ? onContinue : null,
+            size: EteeloButtonSize.compact,
             fullWidth: false,
           ),
       ],
     );
 
     return Container(
-      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.surfaceRaised,
         border: Border(top: BorderSide(color: AppColors.border)),

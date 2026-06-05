@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
-/// Barre d'actions responsive pour steppers : navigation à gauche, indicateur
-/// d'état au centre, actions de fin à droite (PARCOURS 21).
+/// Barre d'actions du stepper sur UNE seule ligne : navigation à gauche,
+/// indicateur d'état (flexible) au centre, actions de fin à droite. Tous les
+/// boutons restent en ligne (pas d'empilement vertical).
 class StepperActionsBar extends StatelessWidget {
   final WidgetBuilder? leadingActionBuilder;
   final WidgetBuilder? centerBuilder;
@@ -18,64 +18,31 @@ class StepperActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact =
-            constraints.maxWidth <= AppBreakpoints.detailCompactMax;
-        final hasLeadingAction = leadingActionBuilder != null;
-        final center = centerBuilder?.call(context);
-        final trailingActions = trailingActionBuilders
-            .map((builder) => builder(context))
-            .toList(growable: false);
-        final trailingWrap = trailingActions.isEmpty
-            ? null
-            : Wrap(
-                alignment: WrapAlignment.end,
-                spacing: AppDimensions.spacingS,
-                runSpacing: AppDimensions.spacingS,
-                children: trailingActions,
-              );
+    final leading = leadingActionBuilder?.call(context);
+    final center = centerBuilder?.call(context);
+    final trailing = trailingActionBuilders
+        .map((builder) => builder(context))
+        .toList(growable: false);
 
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (center != null) ...[
-                Center(child: center),
-                const SizedBox(height: AppDimensions.spacingS),
-              ],
-              if (hasLeadingAction)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: leadingActionBuilder!(context),
+    return Row(
+      children: [
+        ?leading,
+        // Indicateur d'état : occupe l'espace central restant et se compresse.
+        Expanded(
+          child: center == null
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.spacingM,
+                  ),
+                  child: Align(alignment: Alignment.centerLeft, child: center),
                 ),
-              if (hasLeadingAction && trailingWrap != null)
-                const SizedBox(height: AppDimensions.spacingS),
-              ?trailingWrap,
-            ],
-          );
-        }
-
-        return Row(
-          children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: hasLeadingAction
-                    ? leadingActionBuilder!(context)
-                    : const SizedBox.shrink(),
-              ),
-            ),
-            if (center != null) Flexible(child: center),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: trailingWrap ?? const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        );
-      },
+        ),
+        for (var i = 0; i < trailing.length; i++) ...[
+          if (i > 0) const SizedBox(width: AppDimensions.spacingS),
+          trailing[i],
+        ],
+      ],
     );
   }
 }
