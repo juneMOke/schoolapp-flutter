@@ -177,6 +177,8 @@ class PersonalInfoStepBody extends StatelessWidget {
                       enabled: isEditable,
                     ),
                   ),
+                  // Genre (contrôle segmenté M/F) — pleine largeur, comme
+                  // « Année validée » à l'étape 3.
                   WizardGridField(
                     GenderSegmentedField(
                       width: double.infinity,
@@ -187,6 +189,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                       onChanged: onGenderChanged,
                       enabled: isEditable,
                     ),
+                    fullWidth: true,
                   ),
                 ],
               ),

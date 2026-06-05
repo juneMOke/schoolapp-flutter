@@ -142,7 +142,8 @@ class PreviousYearFields extends StatelessWidget {
             readOnly: !isEditable,
           ),
         ),
-        // Année validée (contrôle segmenté Oui/Non)
+        // Année validée (contrôle segmenté Oui/Non) — pleine largeur, pour une
+        // meilleure présence visuelle sur sa propre ligne.
         WizardGridField(
           ValidatedYearSelector(
             l10n: l10n,
@@ -153,6 +154,7 @@ class PreviousYearFields extends StatelessWidget {
             enabled: isEditable,
             helpMessage: l10n.yearValidatedHelp,
           ),
+          fullWidth: true,
         ),
       ],
     );
