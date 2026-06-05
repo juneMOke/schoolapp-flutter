@@ -58,8 +58,8 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       l10n.wizardStepShortAddress,
       l10n.wizardStepShortPrevious,
       l10n.wizardStepShortTarget,
-      l10n.wizardStepShortCharges,
       l10n.wizardStepShortGuardian,
+      l10n.wizardStepShortCharges,
       l10n.wizardStepShortSummary,
     ];
     final stepCardSubtitles = _stepHandlers

@@ -26,13 +26,17 @@ class EnrollmentPersonalInfoPayload {
   });
 }
 
+// Ordre du parcours (PARCOURS 20) : Tuteurs AVANT Frais. L'ordre de
+// déclaration pilote step.index (natif), qui pilote à son tour order des
+// handlers, la clé de la map d'états et la position dans le stepper — tout
+// reste donc aligné.
 enum EnrollmentWizardStep {
   personalInfo,
   address,
   previousAcademic,
   targetAcademic,
-  studentCharges,
   guardian,
+  studentCharges,
   summary,
 }
 
@@ -42,8 +46,8 @@ extension EnrollmentWizardStepX on EnrollmentWizardStep {
     EnrollmentWizardStep.address => 1,
     EnrollmentWizardStep.previousAcademic => 2,
     EnrollmentWizardStep.targetAcademic => 3,
-    EnrollmentWizardStep.studentCharges => 4,
-    EnrollmentWizardStep.guardian => 5,
+    EnrollmentWizardStep.guardian => 4,
+    EnrollmentWizardStep.studentCharges => 5,
     EnrollmentWizardStep.summary => 6,
   };
 
@@ -53,8 +57,8 @@ extension EnrollmentWizardStepX on EnrollmentWizardStep {
       1 => EnrollmentWizardStep.address,
       2 => EnrollmentWizardStep.previousAcademic,
       3 => EnrollmentWizardStep.targetAcademic,
-      4 => EnrollmentWizardStep.studentCharges,
-      5 => EnrollmentWizardStep.guardian,
+      4 => EnrollmentWizardStep.guardian,
+      5 => EnrollmentWizardStep.studentCharges,
       _ => EnrollmentWizardStep.summary,
     };
   }
