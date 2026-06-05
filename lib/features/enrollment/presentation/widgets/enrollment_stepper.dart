@@ -188,7 +188,6 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                 stepAccentColor: _stepAccentColor(currentWizardStep),
                 stepIcon: _stepIcon(currentWizardStep),
                 controls: controls,
-                isSummaryStep: isSummaryStep,
               );
             },
           );
@@ -330,7 +329,6 @@ class _EnrollmentStepperLayout extends StatelessWidget {
   final IconData stepIcon;
   final Widget stepContent;
   final Widget controls;
-  final bool isSummaryStep;
 
   const _EnrollmentStepperLayout({
     required this.stepTitles,
@@ -344,7 +342,6 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     required this.stepIcon,
     required this.stepContent,
     required this.controls,
-    required this.isSummaryStep,
   });
 
   @override
@@ -397,18 +394,13 @@ class _EnrollmentStepperLayout extends StatelessWidget {
                       child: stepContent,
                     ),
                   ),
-                  if (!isSummaryStep) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    controls,
-                  ],
                 ],
               ),
             ),
           ),
-          if (isSummaryStep) ...[
-            const SizedBox(height: AppSpacing.md),
-            controls,
-          ],
+          // Pied fixe : barre d'actions ancrée hors du défilement, identique
+          // pour toutes les étapes (PARCOURS 21).
+          controls,
         ],
       ),
     );

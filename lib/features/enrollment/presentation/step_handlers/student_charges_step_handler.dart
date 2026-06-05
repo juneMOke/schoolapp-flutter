@@ -30,6 +30,11 @@ class StudentChargesStepHandler extends BaseEnrollmentStepHandler {
         : l10n.studentChargesSaveAction;
   }
 
+  // Frais : étape en lecture seule (PARCOURS 21) — pas d'enregistrement ni
+  // d'indicateur, uniquement « Continuer » (actif hors chargement).
+  @override
+  bool showSaveAction(HandlerFlowContext context) => false;
+
   @override
   StepFormState initialState(HandlerInitialStateContext context) {
     return const StepFormState(dirty: false, saving: false, valid: false);
@@ -71,7 +76,7 @@ class StudentChargesStepHandler extends BaseEnrollmentStepHandler {
       enrollmentStatus: context.detail.enrollmentDetail.status,
       showInlineSaveButton: false,
       flowStepIndex: step.index,
-      isEditable: context.detailPolicy.isStepEditable(step),
+      isEditable: false,
       stepController: controller,
     );
   }

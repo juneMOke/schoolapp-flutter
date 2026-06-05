@@ -50,10 +50,30 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      buildHarness(currentStep: 0, dirty: false, valid: false),
+      buildHarness(
+        currentStep: 0,
+        dirty: false,
+        valid: false,
+        showSaveAction: true,
+      ),
     );
 
     expect(find.text('Aucune saisie'), findsOneWidget);
+  });
+
+  testWidgets('Enrollment stepper controls shows incomplete save state', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildHarness(
+        currentStep: 0,
+        dirty: true,
+        valid: false,
+        showSaveAction: true,
+      ),
+    );
+
+    expect(find.text('Champs incomplets'), findsOneWidget);
   });
 
   testWidgets('Enrollment stepper controls shows pending save state', (
@@ -91,11 +111,36 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      buildHarness(currentStep: 0, dirty: false, valid: true),
+      buildHarness(
+        currentStep: 0,
+        dirty: false,
+        valid: true,
+        showSaveAction: true,
+      ),
     );
 
     expect(find.text('Étape enregistrée'), findsOneWidget);
   });
+
+  testWidgets(
+    'Enrollment stepper controls hides status indicator when no save action '
+    '(read-only fees step)',
+    (tester) async {
+      await tester.pumpWidget(
+        buildHarness(
+          currentStep: 4,
+          dirty: false,
+          valid: true,
+          showSaveAction: false,
+          canContinue: true,
+        ),
+      );
+
+      // Étape Frais : pas d'indicateur d'état, uniquement « Continuer ».
+      expect(find.text('Étape enregistrée'), findsNothing);
+      expect(find.text('Continuer'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'Enrollment stepper controls disables save button when not allowed',

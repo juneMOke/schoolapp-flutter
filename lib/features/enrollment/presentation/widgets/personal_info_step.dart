@@ -375,6 +375,8 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
             AppSnackBar.showError(
               context,
               l10n.personalInfoSaveError(state.errorMessage ?? ''),
+              onRetry: submitForm,
+              retryLabel: l10n.enrollmentErrorRetry,
             );
           }
         },

@@ -1126,6 +1126,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepSaveStateIdle => 'No input yet';
 
   @override
+  String get stepSaveStateIncomplete => 'Incomplete fields';
+
+  @override
   String get stepSaveStatePending => 'Unsaved changes';
 
   @override

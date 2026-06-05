@@ -617,6 +617,8 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
             AppSnackBar.showError(
               context,
               l10n.academicInfoSaveError(state.errorMessage ?? ''),
+              onRetry: submitForm,
+              retryLabel: l10n.enrollmentErrorRetry,
             );
           } else if (state.status == ParentUpdateStatus.unlinkSuccess) {
             final pendingId = _pendingUnlinkParentId;

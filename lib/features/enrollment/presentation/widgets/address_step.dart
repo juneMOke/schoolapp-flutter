@@ -649,6 +649,8 @@ class AddressStepState extends State<AddressStep> {
             AppSnackBar.showError(
               context,
               l10n.addressSaveError(state.errorMessage ?? ''),
+              onRetry: submitForm,
+              retryLabel: l10n.enrollmentErrorRetry,
             );
           }
         },

@@ -1137,6 +1137,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepSaveStateIdle => 'Aucune saisie';
 
   @override
+  String get stepSaveStateIncomplete => 'Champs incomplets';
+
+  @override
   String get stepSaveStatePending => 'Modifications non enregistrées';
 
   @override

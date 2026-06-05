@@ -505,6 +505,8 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
                 AppSnackBar.showError(
                   context,
                   l10n.academicInfoSaveError(state.errorMessage ?? ''),
+                  onRetry: submitForm,
+                  retryLabel: l10n.enrollmentErrorRetry,
                 );
               }
             },

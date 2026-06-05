@@ -537,6 +537,7 @@
   "journeyModeView": "View",
   "journeyCloseAction": "Close",
   "stepSaveStateIdle": "No input yet",
+  "stepSaveStateIncomplete": "Incomplete fields",
   "stepSaveStatePending": "Unsaved changes",
   "stepSaveStateSaving": "Saving...",
   "stepSaveStateSaved": "Step saved",

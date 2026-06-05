@@ -552,6 +552,7 @@
   "journeyModeView": "Consultation",
   "journeyCloseAction": "Fermer",
   "stepSaveStateIdle": "Aucune saisie",
+  "stepSaveStateIncomplete": "Champs incomplets",
   "stepSaveStatePending": "Modifications non enregistrées",
   "stepSaveStateSaving": "Enregistrement en cours...",
   "stepSaveStateSaved": "Étape enregistrée",

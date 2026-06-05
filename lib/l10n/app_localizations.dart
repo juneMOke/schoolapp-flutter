@@ -2070,6 +2070,12 @@ abstract class AppLocalizations {
   /// **'No input yet'**
   String get stepSaveStateIdle;
 
+  /// No description provided for @stepSaveStateIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete fields'**
+  String get stepSaveStateIncomplete;
+
   /// No description provided for @stepSaveStatePending.
   ///
   /// In en, this message translates to:
