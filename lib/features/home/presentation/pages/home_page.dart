@@ -102,7 +102,9 @@ class _HomePageView extends StatelessWidget {
               child: Column(
                 children: [
                   const TopBar(isCompact: false),
-                  Expanded(child: _buildMainContent(context, state)),
+                  Expanded(
+                    child: _buildMainContent(context, state, isCompact: false),
+                  ),
                 ],
               ),
             ),
@@ -125,15 +127,23 @@ class _HomePageView extends StatelessWidget {
           drawer: const Drawer(
             width: AppTheme.sidebarWidth,
             elevation: 12,
-            child: Sidebar(closeDrawerOnSubMenuSelection: true),
+            // Tiroir : sidebar toujours déployée (ignore le repli 84 du bureau).
+            child: Sidebar(
+              closeDrawerOnSubMenuSelection: true,
+              forceExpanded: true,
+            ),
           ),
-          body: _buildMainContent(context, state),
+          body: _buildMainContent(context, state, isCompact: true),
         );
       },
     );
   }
 
-  Widget _buildMainContent(BuildContext context, NavigationState state) {
+  Widget _buildMainContent(
+    BuildContext context,
+    NavigationState state, {
+    required bool isCompact,
+  }) {
     final hidePageBreadcrumb =
         state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
         state.selectedSubMenuId == MenuConstants.financesDashboardId ||
@@ -147,19 +157,34 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.presencesId ||
         state.selectedSubMenuId == MenuConstants.disciplinesListId;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!hidePageBreadcrumb) ...[
-            _buildBreadcrumb(context, state),
-            const SizedBox(height: AppDimensions.spacingL),
-          ],
-          Expanded(child: _buildContentArea(context, state)),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!hidePageBreadcrumb) ...[
+          _buildBreadcrumb(context, state),
+          const SizedBox(height: AppDimensions.spacingL),
         ],
+        Expanded(child: _buildContentArea(context, state)),
+      ],
+    );
+
+    return Padding(
+      // Padding contenu : 16 dp en compact, 24 dp en bureau.
+      padding: EdgeInsets.all(
+        isCompact ? AppDimensions.spacingM : AppDimensions.spacingL,
       ),
+      // Bureau : contenu plafonné à 1180 dp et centré ; compact : pleine largeur.
+      child: isCompact
+          ? content
+          : Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppDimensions.detailContentMaxWidth,
+                ),
+                child: content,
+              ),
+            ),
     );
   }
 

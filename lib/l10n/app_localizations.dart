@@ -900,6 +900,12 @@ abstract class AppLocalizations {
   /// **'Expand menu'**
   String get homeSidebarExpandTooltip;
 
+  /// No description provided for @homeOpenNavigationDrawerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open menu'**
+  String get homeOpenNavigationDrawerTooltip;
+
   /// No description provided for @homeSidebarFooterLabel.
   ///
   /// In en, this message translates to:

@@ -484,6 +484,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeSidebarExpandTooltip => 'Étendre le menu';
 
   @override
+  String get homeOpenNavigationDrawerTooltip => 'Ouvrir le menu';
+
+  @override
   String get homeSidebarFooterLabel => 'Tableau de bord scolaire';
 
   @override

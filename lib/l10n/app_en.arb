@@ -266,6 +266,7 @@
   "homeUserMenuTooltip": "User menu",
   "homeSidebarCollapseTooltip": "Collapse menu",
   "homeSidebarExpandTooltip": "Expand menu",
+  "homeOpenNavigationDrawerTooltip": "Open menu",
   "homeSidebarFooterLabel": "School dashboard",
   "homeSidebarNavigationLabel": "Main navigation",
   "pageUnderConstruction": "This page is under development",

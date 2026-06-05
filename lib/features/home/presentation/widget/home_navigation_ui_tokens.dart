@@ -4,8 +4,7 @@ class HomeNavigationUiTokens {
   // Top bar
   static const double topBarDesktopHorizontalPadding = 24;
   static const double topBarCompactHorizontalPadding = 16;
-  static const double topBarDesktopTitleSpacing = 16;
-  static const double topBarCompactTitleSpacing = 10;
+  static const double topBarLeadingMarginRight = 2;
   static const double topBarActionSize = 40;
   static const double topBarActionRadius = 8;
   static const double topBarActionIconSize = 20;

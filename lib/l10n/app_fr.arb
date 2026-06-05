@@ -260,6 +260,7 @@
   "homeUserMenuTooltip": "Menu utilisateur",
   "homeSidebarCollapseTooltip": "Replier le menu",
   "homeSidebarExpandTooltip": "Étendre le menu",
+  "homeOpenNavigationDrawerTooltip": "Ouvrir le menu",
   "homeSidebarFooterLabel": "Tableau de bord scolaire",
   "homeSidebarNavigationLabel": "Navigation principale",
   "pageUnderConstruction": "Cette page est en cours de développement",

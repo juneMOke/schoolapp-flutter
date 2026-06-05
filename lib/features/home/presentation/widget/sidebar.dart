@@ -13,7 +13,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class Sidebar extends StatelessWidget {
   final bool closeDrawerOnSubMenuSelection;
 
-  const Sidebar({super.key, this.closeDrawerOnSubMenuSelection = false});
+  /// Force l'affichage déployé (280), même si l'état bureau est replié.
+  /// Utilisé en mode tiroir : la sidebar overlay est toujours déployée.
+  final bool forceExpanded;
+
+  const Sidebar({
+    super.key,
+    this.closeDrawerOnSubMenuSelection = false,
+    this.forceExpanded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +32,9 @@ class Sidebar extends StatelessWidget {
           previous.isSidebarExpanded != current.isSidebarExpanded ||
           previous.menuItems != current.menuItems,
       builder: (context, state) {
+        // En mode tiroir (forceExpanded), la sidebar reste toujours déployée,
+        // même si l'état bureau était replié.
+        final isExpanded = forceExpanded || state.isSidebarExpanded;
         return Semantics(
           container: true,
           label: l10n.homeSidebarNavigationLabel,
@@ -31,7 +42,7 @@ class Sidebar extends StatelessWidget {
           child: AnimatedContainer(
             duration: AppMotion.layout,
             curve: AppMotion.outCurve,
-            width: state.isSidebarExpanded
+            width: isExpanded
                 ? AppTheme.sidebarWidth
                 : AppTheme.sidebarCollapsedWidth,
             child: Container(
@@ -48,22 +59,18 @@ class Sidebar extends StatelessWidget {
                     children: [
                       FocusTraversalOrder(
                         order: const NumericFocusOrder(1),
-                        child: SidebarHeader(
-                          isExpanded: state.isSidebarExpanded,
-                        ),
+                        child: SidebarHeader(isExpanded: isExpanded),
                       ),
                       const SizedBox(height: AppDimensions.spacingXS + 2),
                       Expanded(
                         child: FocusTraversalOrder(
                           order: const NumericFocusOrder(2),
-                          child: _buildMenuList(context, state),
+                          child: _buildMenuList(context, state, isExpanded),
                         ),
                       ),
                       FocusTraversalOrder(
                         order: const NumericFocusOrder(3),
-                        child: SidebarFooter(
-                          isExpanded: state.isSidebarExpanded,
-                        ),
+                        child: SidebarFooter(isExpanded: isExpanded),
                       ),
                     ],
                   ),
@@ -76,7 +83,11 @@ class Sidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuList(BuildContext context, NavigationState state) {
+  Widget _buildMenuList(
+    BuildContext context,
+    NavigationState state,
+    bool isExpanded,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: state.menuItems.length,
@@ -87,7 +98,7 @@ class Sidebar extends StatelessWidget {
           index: index,
           child: SidebarMenuItem(
             menu: menu,
-            isExpanded: state.isSidebarExpanded,
+            isExpanded: isExpanded,
             isMenuOpened: state.openedMenuId == menu.id,
             closeDrawerOnSubMenuSelection: closeDrawerOnSubMenuSelection,
           ),

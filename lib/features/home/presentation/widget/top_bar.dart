@@ -45,9 +45,18 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 )
               : null,
+          // Padding horizontal de la barre : 24 (bureau) / 16 (compact).
+          // En compact, le hamburger (leading) porte la marge gauche 16 ; le
+          // titre démarre juste après (titleSpacing 0 + marge droite 2 du
+          // hamburger). À droite, TopBarActions porte le end-padding 24/16.
+          leadingWidth: isCompact
+              ? HomeNavigationUiTokens.topBarCompactHorizontalPadding +
+                    HomeNavigationUiTokens.topBarActionSize +
+                    HomeNavigationUiTokens.topBarLeadingMarginRight
+              : null,
           titleSpacing: isCompact
-              ? HomeNavigationUiTokens.topBarCompactTitleSpacing
-              : HomeNavigationUiTokens.topBarDesktopTitleSpacing,
+              ? 0
+              : HomeNavigationUiTokens.topBarDesktopHorizontalPadding,
           toolbarHeight: AppTheme.topBarHeight,
           flexibleSpace: const DecoratedBox(
             decoration: BoxDecoration(

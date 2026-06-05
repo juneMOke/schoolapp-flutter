@@ -481,6 +481,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSidebarExpandTooltip => 'Expand menu';
 
   @override
+  String get homeOpenNavigationDrawerTooltip => 'Open menu';
+
+  @override
   String get homeSidebarFooterLabel => 'School dashboard';
 
   @override
