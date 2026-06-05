@@ -1113,6 +1113,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String wizardStepNumberShort(int number) {
+    return 'Étape $number';
+  }
+
+  @override
   String get stepForwardHint =>
       'Cliquez sur Continuer pour avancer étape par étape.';
 

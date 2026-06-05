@@ -2028,6 +2028,12 @@ abstract class AppLocalizations {
   /// **'Step {current} / {total}'**
   String stepIndicator(int current, int total);
 
+  /// No description provided for @wizardStepNumberShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number}'**
+  String wizardStepNumberShort(int number);
+
   /// No description provided for @stepForwardHint.
   ///
   /// In en, this message translates to:

@@ -538,6 +538,14 @@
       }
     }
   },
+  "wizardStepNumberShort": "Étape {number}",
+  "@wizardStepNumberShort": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "stepForwardHint": "Cliquez sur Continuer pour avancer étape par étape.",
   "journeyModeNew": "Nouvelle",
   "journeyModeEdit": "Modification",

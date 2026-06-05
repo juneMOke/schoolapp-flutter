@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -112,13 +113,13 @@ void main() {
   testWidgets('Wizard breadcrumb displays progress bar', (tester) async {
     await tester.pumpWidget(buildHarness(currentStep: 2, totalSteps: 7));
 
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byType(WizardProgressBar), findsOneWidget);
 
-    final progressIndicator = tester.widget<LinearProgressIndicator>(
-      find.byType(LinearProgressIndicator),
+    final progressBar = tester.widget<WizardProgressBar>(
+      find.byType(WizardProgressBar),
     );
 
-    expect(progressIndicator.value, closeTo(3 / 7, 0.01));
+    expect(progressBar.progress, closeTo(3 / 7, 0.01));
   });
 
   testWidgets('Wizard breadcrumb shows step titles with 7 steps layout', (
