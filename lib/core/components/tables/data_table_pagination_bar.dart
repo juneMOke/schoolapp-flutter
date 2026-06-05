@@ -40,11 +40,10 @@ class DataTablePaginationBar extends StatelessWidget {
           horizontal: AppDimensions.spacingM,
           vertical: AppDimensions.spacingS,
         ),
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           spacing: spacing,
-          runSpacing: AppDimensions.paginationGap,
           children: [
             _PaginationButton(
               onPressed: canGoToPrevious ? onPrevious : null,

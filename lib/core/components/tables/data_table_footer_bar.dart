@@ -50,17 +50,17 @@ class DataTableFooterBar extends StatelessWidget {
                     summaryWidget,
                     if (pagination != null) ...[
                       const SizedBox(height: AppDimensions.spacingXS),
-                      pagination,
+                      Align(child: pagination),
                     ],
                   ],
                 )
               : Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    summaryWidget,
+                    Expanded(child: summaryWidget),
                     if (pagination != null) ...[
-                      const Spacer(),
-                      Flexible(child: pagination),
+                      const SizedBox(width: AppDimensions.spacingM),
+                      pagination,
                     ],
                   ],
                 ),
