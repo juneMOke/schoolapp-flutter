@@ -773,6 +773,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianToggleCard => 'Ouvrir ou fermer la carte tuteur';
 
   @override
+  String get guardianIncompleteHint => 'Fiche incomplète';
+
+  @override
   String get guardianEmailOptionalInline => '(facultatif)';
 
   @override

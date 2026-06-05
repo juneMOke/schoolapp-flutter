@@ -767,6 +767,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianToggleCard => 'Open or close guardian card';
 
   @override
+  String get guardianIncompleteHint => 'Incomplete profile';
+
+  @override
   String get guardianEmailOptionalInline => '(optional)';
 
   @override

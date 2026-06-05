@@ -134,7 +134,8 @@ class GuardianInfoStepBody extends StatelessWidget {
                     },
                     onFormStateChanged: onItemStateChanged,
                     onValueChanged: onItemValueChanged,
-                    onRemoveRequested: isEditable
+                    // Corbeille masquée s'il ne reste qu'un seul tuteur.
+                    onRemoveRequested: isEditable && parentDetails.length > 1
                         ? () => onRemoveParent?.call(parent.id)
                         : null,
                     isEditable: isEditable,

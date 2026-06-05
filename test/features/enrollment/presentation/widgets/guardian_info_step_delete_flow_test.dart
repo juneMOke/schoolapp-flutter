@@ -30,6 +30,17 @@ void main() {
     relationshipType: RelationshipType.guardian,
   );
 
+  const testParent2 = ParentSummary(
+    id: 'parent-2',
+    firstName: 'Marie',
+    lastName: 'Martin',
+    surname: 'L',
+    identificationNumber: 'ID-456',
+    phoneNumber: '+243111111111',
+    email: 'marie.martin@example.com',
+    relationshipType: RelationshipType.mother,
+  );
+
   Future<void> pumpGuardianStep(WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -38,7 +49,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: GuardianInfoStep(
-            parentDetails: [testParent],
+            parentDetails: [testParent, testParent2],
             studentId: 'student-1',
             enrollmentId: 'enrollment-1',
             showInlineSaveButton: false,
@@ -132,7 +143,7 @@ void main() {
 
     expect(find.byKey(parentItemKey), findsNothing);
     expect(
-      find.text('Aucune information de tuteur disponible'),
+      find.byKey(const ValueKey<String>('parent-item-parent-2')),
       findsOneWidget,
     );
 
@@ -159,5 +170,26 @@ void main() {
     expect(find.text('Confirmer la suppression'), findsNothing);
     expect(find.byKey(parentItemKey), findsOneWidget);
     expect(find.text('Aucune information de tuteur disponible'), findsNothing);
+  });
+
+  testWidgets('un seul tuteur : la corbeille est masquée', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: GuardianInfoStep(
+            parentDetails: [testParent],
+            studentId: 'student-1',
+            enrollmentId: 'enrollment-1',
+            showInlineSaveButton: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
   });
 }

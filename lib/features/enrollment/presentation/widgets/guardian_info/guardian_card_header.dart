@@ -10,6 +10,7 @@ class GuardianCardHeader extends StatelessWidget {
   final ParentSummary parent;
   final bool isPrimary;
   final bool isExpanded;
+  final bool isComplete;
   final VoidCallback? onToggle;
 
   const GuardianCardHeader({
@@ -17,6 +18,7 @@ class GuardianCardHeader extends StatelessWidget {
     required this.parent,
     required this.isPrimary,
     required this.isExpanded,
+    this.isComplete = true,
     this.onToggle,
   });
 
@@ -144,6 +146,20 @@ class GuardianCardHeader extends StatelessWidget {
             ],
           ),
         ),
+        if (!isComplete) ...[
+          Tooltip(
+            message: l10n.guardianIncompleteHint,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.warning,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+        ],
         SizedBox(
           width: 32,
           height: 32,

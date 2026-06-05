@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/labels/form_field_label.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ValidatedYearSelector extends StatelessWidget {
@@ -33,7 +33,8 @@ class ValidatedYearSelector extends StatelessWidget {
         children: [
           FormFieldLabel(
             label: l10n.yearValidated,
-            labelColor: isChanged ? AppColors.success : null,
+            // Oui/Non = teinte neutre unique (bleu ardoise), pas de connotation.
+            labelColor: isChanged ? AppColors.bleuArdoise : null,
             helpMessage: helpMessage,
           ),
           const SizedBox(height: 6),
@@ -62,15 +63,15 @@ class ValidatedYearSelector extends StatelessWidget {
                     }
                   : null,
               style: SegmentedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppTheme.textSecondaryColor,
-                selectedForegroundColor: Colors.white,
-                selectedBackgroundColor: AppTheme.primaryColor,
+                backgroundColor: AppColors.surface,
+                foregroundColor: AppColors.textSecondary,
+                selectedForegroundColor: AppColors.textOnDark,
+                selectedBackgroundColor: AppColors.bleuArdoise,
                 side: BorderSide(
-                  color: AppTheme.primaryColor.withValues(alpha: 0.25),
+                  color: AppColors.bleuArdoise.withValues(alpha: 0.25),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadius.brSm,
                 ),
                 textStyle: const TextStyle(fontSize: 13),
               ),

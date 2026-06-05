@@ -389,6 +389,7 @@
   "guardianPrimaryRequiredHint": "At least one primary guardian is required",
   "guardianPrincipalBadge": "Primary",
   "guardianToggleCard": "Open or close guardian card",
+  "guardianIncompleteHint": "Incomplete profile",
   "guardianEmailOptionalInline": "(optional)",
   "guardianDeleteAction": "Remove this guardian",
   "guardianDeleteConfirmTitle": "Confirm removal",

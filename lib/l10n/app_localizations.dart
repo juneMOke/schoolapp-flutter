@@ -1380,6 +1380,12 @@ abstract class AppLocalizations {
   /// **'Open or close guardian card'**
   String get guardianToggleCard;
 
+  /// No description provided for @guardianIncompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete profile'**
+  String get guardianIncompleteHint;
+
   /// No description provided for @guardianEmailOptionalInline.
   ///
   /// In en, this message translates to:

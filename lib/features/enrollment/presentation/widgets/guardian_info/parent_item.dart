@@ -222,6 +222,7 @@ class _ParentItemState extends State<ParentItem> {
                     parent: widget.parent,
                     isPrimary: widget.isPrimary,
                     isExpanded: widget.isExpanded,
+                    isComplete: state.valid,
                     onToggle: widget.onToggleExpanded,
                   ),
                 ),

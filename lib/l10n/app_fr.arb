@@ -397,6 +397,7 @@
   "guardianPrimaryRequiredHint": "Au moins un tuteur principal est requis",
   "guardianPrincipalBadge": "Principal",
   "guardianToggleCard": "Ouvrir ou fermer la carte tuteur",
+  "guardianIncompleteHint": "Fiche incomplète",
   "guardianEmailOptionalInline": "(facultatif)",
   "guardianDeleteAction": "Supprimer ce tuteur",
   "guardianDeleteConfirmTitle": "Confirmer la suppression",

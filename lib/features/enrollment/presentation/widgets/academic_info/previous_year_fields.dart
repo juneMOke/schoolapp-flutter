@@ -143,7 +143,9 @@ class PreviousYearFields extends StatelessWidget {
                   onChanged: onCycleChanged,
                   errorText: prevCycleError,
                   isChanged: prevCycleChanged,
-                  enabled: isEditable && !isCatalogLoading,
+                  // Cascade : le cycle est désactivé tant que l'année est vide.
+                  enabled:
+                      isEditable && !isCatalogLoading && selectedYear != null,
                 ),
                 DropdownField(
                   width: w2,
