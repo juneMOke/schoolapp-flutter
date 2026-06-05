@@ -1989,7 +1989,7 @@ abstract class AppLocalizations {
   /// No description provided for @wizardStepShortPersonal.
   ///
   /// In en, this message translates to:
-  /// **'Personal'**
+  /// **'Identity'**
   String get wizardStepShortPersonal;
 
   /// No description provided for @wizardStepShortAddress.

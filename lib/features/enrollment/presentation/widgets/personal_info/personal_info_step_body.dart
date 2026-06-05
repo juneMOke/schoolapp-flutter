@@ -9,7 +9,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/firs
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -100,30 +99,6 @@ class PersonalInfoStepBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  StudentAvatar(
-                    firstName: studentDetail.firstName,
-                    lastName: studentDetail.lastName,
-                    studentId: studentDetail.id,
-                    size: AvatarSize.lg,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${studentDetail.firstName} ${studentDetail.lastName}',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
               WizardFieldsGrid(
                 fields: [
                   WizardGridField(

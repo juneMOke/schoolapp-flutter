@@ -1090,7 +1090,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepSummarySubtitle => 'Récapitulatif final du dossier';
 
   @override
-  String get wizardStepShortPersonal => 'Perso';
+  String get wizardStepShortPersonal => 'Identité';
 
   @override
   String get wizardStepShortAddress => 'Adresse';

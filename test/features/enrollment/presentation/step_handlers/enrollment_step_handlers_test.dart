@@ -118,7 +118,8 @@ void main() {
           (
             buildHandler: (c) => PersonalInfoStepHandler(controller: c),
             title: 'personal-info',
-            subtitle: 'subtitle-personal-info',
+            // Sous-titre retiré (doublon avec le titre) → désormais vide.
+            subtitle: '',
             save: 'save-personal',
             saving: 'saving-personal',
             invalidHint: 'hint-invalid-personal',

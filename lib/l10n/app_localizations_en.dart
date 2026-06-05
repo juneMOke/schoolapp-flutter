@@ -1080,7 +1080,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepSummarySubtitle => 'Final enrollment summary';
 
   @override
-  String get wizardStepShortPersonal => 'Personal';
+  String get wizardStepShortPersonal => 'Identity';
 
   @override
   String get wizardStepShortAddress => 'Address';
