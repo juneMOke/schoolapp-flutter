@@ -349,6 +349,17 @@
   },
   "paginationNavigationLabel": "Pagination",
   "unitStudents": "students",
+  "enrollmentResultCardOpenLabel": "Open {name}'s record, status {status}",
+  "@enrollmentResultCardOpenLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "refresh": "Refresh",
   "statusPending": "Pending",
   "statusValidated": "Validated",

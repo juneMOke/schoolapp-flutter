@@ -93,6 +93,18 @@ class AppDimensions {
   static const enrollmentResultsViewToggleHeight = 38.0;
   static const enrollmentResultsViewToggleItemHeight = 30.0;
 
+  // Grid + result card tokens
+  // Largeur mini d'une carte (équivaut au `min` de `minmax(300, 1fr)`) : les
+  // colonnes sont calculées pour ne jamais descendre sous cette largeur.
+  static const gridMinItemWidth = 300.0;
+  static const resultCardAccentWidth = 5.0;
+  static const resultCardBodyPaddingH = 18.0;
+  static const resultCardBodyPaddingV = 16.0;
+  static const resultCardHoverTranslateY = -2.0;
+  static const chipPaddingH = 10.0;
+  static const chipPaddingV = 4.0;
+  static const chipIconSize = 12.0;
+
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
   static const financeStatsKpiPrimaryValueFontSize = 32.0;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
@@ -54,18 +55,19 @@ void main() {
     );
 
     // Should render grid items (GridView only renders visible items)
+    expect(find.byType(EteeloGridView), findsOneWidget);
     expect(find.byType(EnrollmentResultCard), findsWidgets);
   });
 
-  testWidgets('Grid view respects single column on narrow width', (
+  testWidgets('Grid view ajuste la hauteur de carte à son contenu (fit)', (
     tester,
   ) async {
-    final items = [createMockEnrollment(1), createMockEnrollment(2)];
+    final items = [createMockEnrollment(1)];
 
     await tester.pumpWidget(
       buildHarness(
         SizedBox(
-          width: 390,
+          width: 500,
           height: 600,
           child: EnrollmentResultsGridView(
             enrollments: items,
@@ -75,7 +77,11 @@ void main() {
       ),
     );
 
-    expect(find.byType(EnrollmentResultCard), findsWidgets);
+    // Plus de tuile à hauteur uniforme : rendu Wrap, pas de GridView.
+    expect(find.byType(GridView), findsNothing);
+    // La carte épouse son contenu (pas de grand vide en bas).
+    final cardHeight = tester.getSize(find.byType(EnrollmentResultCard)).height;
+    expect(cardHeight, lessThan(200));
   });
 
   testWidgets('Grid view supports item selection', (tester) async {
@@ -120,13 +126,15 @@ void main() {
     expect(find.byType(EnrollmentResultCard), findsNothing);
   });
 
-  testWidgets('Grid view handles large number of items', (tester) async {
-    final items = List.generate(20, (i) => createMockEnrollment(i));
+  testWidgets('Grid view passe en une seule colonne sous 360px', (
+    tester,
+  ) async {
+    final items = List.generate(2, (i) => createMockEnrollment(i));
 
     await tester.pumpWidget(
       buildHarness(
         SizedBox(
-          width: 400,
+          width: 350,
           height: 600,
           child: EnrollmentResultsGridView(
             enrollments: items,
@@ -136,27 +144,14 @@ void main() {
       ),
     );
 
-    // Grid should render visible items
-    expect(find.byType(EnrollmentResultCard), findsWidgets);
-  });
-
-  testWidgets('Grid view responsive columns: varies by width', (tester) async {
-    final items = List.generate(3, (i) => createMockEnrollment(i));
-
-    await tester.pumpWidget(
-      buildHarness(
-        SizedBox(
-          width: 390,
-          height: 600,
-          child: EnrollmentResultsGridView(
-            enrollments: items,
-            onViewRequested: (_) {},
-          ),
-        ),
-      ),
+    final firstTopLeft = tester.getTopLeft(
+      find.byType(EnrollmentResultCard).at(0),
+    );
+    final secondTopLeft = tester.getTopLeft(
+      find.byType(EnrollmentResultCard).at(1),
     );
 
-    // At 390px width (mobile), should use 1 column
-    expect(find.byType(EnrollmentResultCard), findsWidgets);
+    expect(secondTopLeft.dx, firstTopLeft.dx);
+    expect(secondTopLeft.dy, greaterThan(firstTopLeft.dy));
   });
 }

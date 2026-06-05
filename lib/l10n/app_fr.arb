@@ -357,6 +357,17 @@
   },
   "paginationNavigationLabel": "Pagination",
   "unitStudents": "élèves",
+  "enrollmentResultCardOpenLabel": "Ouvrir la fiche de {name}, statut {status}",
+  "@enrollmentResultCardOpenLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "refresh": "Actualiser",
   "statusPending": "En Attente",
   "statusValidated": "Validé",

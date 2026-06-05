@@ -1200,6 +1200,12 @@ abstract class AppLocalizations {
   /// **'students'**
   String get unitStudents;
 
+  /// No description provided for @enrollmentResultCardOpenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name}\'s record, status {status}'**
+  String enrollmentResultCardOpenLabel(String name, String status);
+
   /// No description provided for @refresh.
   ///
   /// In en, this message translates to:

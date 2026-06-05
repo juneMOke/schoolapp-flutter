@@ -634,6 +634,201 @@ Le composant de footer porte le decompte localise `x–y sur/of N unite` quand
 
 ---
 
+## 8) StatusBadge
+
+- **Fichier**: `lib/core/components/status/status_badge.dart`
+- **Type Flutter**: `StatelessWidget`
+- **Statut**: stable
+
+### Description
+
+Badge semantique transversal pour representer un statut metier via une icone,
+un libelle et une couleur metier.
+
+Deux variantes coexistent:
+- `soft` *(defaut)*: fond teinte leger + bordure discrete
+- `filled`: fond plein adaptatif avec texte/icone choisis pour respecter AA quand c'est possible
+
+### Zones caracteristiques
+
+- **Variante soft**
+  - comportement retro-compatible
+  - fond = couleur a 10% d'opacite
+  - bordure = couleur a 25% d'opacite
+  - cas neutre (`AppColors.textMuted`) -> fallback `surfaceAlt + border + textMuted`
+
+- **Variante filled**
+  - rayon pilule: `AppRadius.brPill`
+  - padding: `AppDimensions.chipPaddingH / chipPaddingV`
+  - icone: `AppDimensions.chipIconSize`
+  - label: `AppTypography.labelSmall`
+  - foreground adaptatif via contraste WCAG:
+    - calcule `contrast(a,b) = (max(L_a,L_b)+0.05)/(min+0.05)`
+    - compare `AppColors.blancCasse` et `AppColors.noirChaud`
+    - si le meilleur ratio >= 4.5 -> fond plein couleur metier + foreground choisi
+    - sinon -> fallback neutre `surfaceAlt + textPrimary + border`
+
+### Slots / props (fournis par la page)
+
+- `icon` *(required sur le constructeur principal)*
+- `label` *(required)*
+- `color` *(required sur le constructeur principal)*
+- `size` *(optional: `small|medium`)*
+- `style` *(optional: `soft|filled`, defaut `soft`)*
+
+### Contrat d'utilisation Flutter
+
+- privilegier les factories nommees (`StatusBadge.enrollmentCompleted`, etc.)
+- utiliser `style: filled` pour les cartes resultat ou surfaces a forte densite visuelle
+- conserver `style: soft` pour les tableaux, filtres et listes denses
+
+### Tests associes
+
+- `test/core/components/status/status_badge_test.dart`
+  - foreground blanc sur fond sombre
+  - foreground noir sur fond clair
+  - fallback neutre si contraste insuffisant
+
+---
+
+## 9) EteeloChip
+
+- **Fichier**: `lib/core/components/cards/eteelo_chip.dart`
+- **Type Flutter**: `StatelessWidget`
+- **Statut**: stable
+
+### Description
+
+Mini-puce de metadonnees pour les cartes resultats et listings riches.
+
+### Zones caracteristiques
+
+- fond: `AppColors.surfaceAlt`
+- rayon: `AppRadius.brSm`
+- padding: `AppDimensions.chipPaddingH / chipPaddingV`
+- icone optionnelle: `AppDimensions.chipIconSize`
+- gap icone/libelle: `AppSpacing.sm`
+
+### Slots / props (fournis par la page)
+
+- `label` *(required)*
+- `icon` *(optional)*
+
+### Contrat d'utilisation Flutter
+
+- utiliser pour les metadonnees courtes (date, cycle, niveau, reference)
+- ne pas y ajouter d'action imbriquee
+
+### Tests associes
+
+- couvert indirectement par `test/core/components/cards/eteelo_result_card_test.dart`
+- couvert indirectement par `test/features/enrollment/presentation/widgets/enrollment_result_card_test.dart`
+
+---
+
+## 10) EteeloGridView
+
+- **Fichier**: `lib/core/components/grid/eteelo_grid_view.dart`
+- **Type Flutter**: `StatelessWidget`
+- **Statut**: stable
+
+### Description
+
+Primitive de grille responsive partagee pour les cartes resultat.
+
+Le composant s'appuie sur `SliverGridDelegateWithMaxCrossAxisExtent` afin de raisonner
+en largeur maximale de tuile plutot qu'en nombre fixe de colonnes.
+
+### Zones caracteristiques
+
+- max extent: `AppDimensions.gridMaxCrossAxisExtent` (360)
+- gaps horizontal/vertical: `AppSpacing.gridGap` (14)
+- padding defaut: `EdgeInsets.all(AppSpacing.gridGap)`
+- expose `childAspectRatio` et `mainAxisExtent`
+
+### Contrat de reactvite (conteneur)
+
+- une seule colonne apparait naturellement si la largeur disponible est < 360
+- la hauteur des tuiles reste uniforme (contrainte native `GridView`)
+- l'appelant choisit donc `childAspectRatio` ou `mainAxisExtent`
+
+### Slots / props (fournis par la page)
+
+- `itemCount` *(required)*
+- `itemBuilder` *(required)*
+- `padding` *(optional)*
+- `shrinkWrap` *(optional)*
+- `physics` *(optional)*
+- `childAspectRatio` *(optional)*
+- `mainAxisExtent` *(optional)*
+
+### Tests associes
+
+- `test/core/components/grid/eteelo_grid_view_test.dart`
+  - delegate max-extent = 360
+  - une colonne sous 360px
+
+---
+
+## 11) EteeloResultCard
+
+- **Fichier**: `lib/core/components/cards/eteelo_result_card.dart`
+- **Type Flutter**: `StatefulWidget`
+- **Statut**: stable
+
+### Description
+
+Carte resultat slot-based partagee pour les modules qui affichent un avatar,
+une identite, un statut et un jeu de metadonnees compactes.
+
+### Zones caracteristiques
+
+- fond repos: `AppColors.surfaceRaised`
+- fond hover: teinte `accentColor` a ~6%
+- radius: `AppRadius.brLg`
+- ombre repos: `AppElevation.shadowKpi`
+- ombre hover: `AppElevation.shadowRaised`
+- translation hover: `AppDimensions.resultCardHoverTranslateY` (-2)
+- rail accent vertical: `AppDimensions.resultCardAccentWidth`
+- padding corps: `AppDimensions.resultCardBodyPaddingH / resultCardBodyPaddingV`
+
+### Slots / props (fournis par la page)
+
+- `onTap` *(required)*
+- `accentColor` *(required)*
+- `avatar` *(required)*
+- `title` *(required)*
+- `subtitle` *(required)*
+- `statusPill` *(required)*
+- `chips` *(required, liste de widgets)*
+- `semanticLabel` *(required)*
+
+### Accessibilite (WCAG 2.1 AA)
+
+- expose un unique role bouton via `Semantics(button: true)`
+- exclut les slots internes de l'arbre semantique pour eviter la redite
+- supprime les actions imbriquees dans la carte
+- focus visible via ring `AppColors.stateFocus`
+
+### Contrat d'utilisation Flutter
+
+- utiliser des slots purs (pas d'`IconButton` ou de controle imbrique)
+- fournir un `semanticLabel` complet et localise cote feature
+- fournir des `chips` concis pour eviter l'overflow vertical
+
+### Exemples d'usages actuels
+
+- `lib/features/enrollment/presentation/widgets/results/enrollment_result_card.dart`
+
+### Tests associes
+
+- `test/core/components/cards/eteelo_result_card_test.dart`
+  - rendu des slots
+  - semantics bouton unique
+  - hover / focus / tap
+
+---
+
 ## Template pour prochains composants
 
 Copier/coller cette section pour toute nouvelle entree:

@@ -676,6 +676,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unitStudents => 'élèves';
 
   @override
+  String enrollmentResultCardOpenLabel(String name, String status) {
+    return 'Ouvrir la fiche de $name, statut $status';
+  }
+
+  @override
   String get refresh => 'Actualiser';
 
   @override
