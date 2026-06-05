@@ -42,12 +42,12 @@ class EnrollmentDetailContentShell extends StatelessWidget {
             builder: (context, constraints) {
               final isCompact =
                   constraints.maxWidth <= AppBreakpoints.detailCompactMax;
+              // Barre/pied à pleine largeur : seule une marge basse subsiste
+              // (top = 0 : la barre est collée sous l'AppBar ; pas de marge
+              // horizontale au niveau du shell).
               final shellPadding = isCompact
-                  ? const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
-                    )
-                  : const EdgeInsets.all(AppSpacing.xl);
+                  ? const EdgeInsets.only(bottom: AppSpacing.md)
+                  : const EdgeInsets.only(bottom: AppSpacing.xl);
 
               return Padding(padding: shellPadding, child: child);
             },

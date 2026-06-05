@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Pastille numérotée du stepper d'inscription (PARCOURS 18).
+/// Step du stepper d'inscription (PARCOURS 18) : chip numéroté centré, encadré
+/// par des connecteurs (vert-savane si franchi, neutre sinon), avec « ÉTAPE N »
+/// (teinte neutre) au-dessus de la description (terre-cuite si courante,
+/// vert-savane si faite, neutre sinon), centrées sous le chip.
 ///
-/// États : courante (terre-cuite + halo), faite (vert-savane + coche + ombre),
-/// à venir (surface-alt, non cliquable). Animation « pop » rejouée au passage
-/// d'état, accessibilité (rôle bouton + état sélectionné) et reduced-motion.
+/// Chip animé (pop rejoué au changement d'état), accessibilité et reduced-motion.
 class WizardStepDot extends StatelessWidget {
   final int index;
   final String title;
@@ -18,6 +20,10 @@ class WizardStepDot extends StatelessWidget {
   final bool canTap;
   final bool reduceMotion;
   final VoidCallback onTap;
+  final bool isFirst;
+  final bool isLast;
+  final bool leftConnectorActive;
+  final bool rightConnectorActive;
 
   const WizardStepDot({
     super.key,
@@ -28,10 +34,13 @@ class WizardStepDot extends StatelessWidget {
     required this.canTap,
     required this.reduceMotion,
     required this.onTap,
+    required this.isFirst,
+    required this.isLast,
+    required this.leftConnectorActive,
+    required this.rightConnectorActive,
   });
 
   static const double diameter = 34;
-  static const double _labelWidth = 72;
 
   @override
   Widget build(BuildContext context) {
@@ -46,23 +55,92 @@ class WizardStepDot extends StatelessWidget {
       label: '$stepLabel · $title',
       onTap: canTap ? onTap : null,
       child: ExcludeSemantics(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MouseRegion(
-              cursor: canTap
-                  ? SystemMouseCursors.click
-                  : SystemMouseCursors.forbidden,
-              child: InkWell(
-                onTap: canTap ? onTap : null,
-                customBorder: const CircleBorder(),
-                child: _buildDot(stepNumber),
-              ),
+        child: MouseRegion(
+          cursor: canTap
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.forbidden,
+          child: InkWell(
+            onTap: canTap ? onTap : null,
+            borderRadius: AppRadius.brSm,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Chip centré, encadré par les connecteurs (pleine largeur).
+                SizedBox(
+                  height: diameter,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _connector(
+                          active: leftConnectorActive,
+                          visible: !isFirst,
+                        ),
+                      ),
+                      _buildDot(stepNumber),
+                      Expanded(
+                        child: _connector(
+                          active: rightConnectorActive,
+                          visible: !isLast,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _buildLabel(stepLabel),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(width: _labelWidth, child: _buildLabel(stepLabel)),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _connector({required bool active, required bool visible}) {
+    if (!visible) {
+      return const SizedBox.shrink();
+    }
+    return Center(
+      child: Container(
+        height: 2,
+        color: active ? AppColors.vertSavane : AppColors.border,
+      ),
+    );
+  }
+
+  Widget _buildLabel(String stepLabel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // « ÉTAPE N » — toujours en teinte neutre (non sélectionné).
+          Text(
+            stepLabel.toUpperCase(),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textMuted,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Description — couleur selon l'état.
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelMedium.copyWith(
+              color: _descriptionColor,
+              fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+              height: 1.1,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -106,37 +184,11 @@ class WizardStepDot extends StatelessWidget {
     );
   }
 
-  Widget _buildLabel(String stepLabel) {
-    return Column(
-      children: [
-        Text(
-          stepLabel,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.labelSmall.copyWith(
-            color: isCurrent ? AppColors.terreCuite : AppColors.textMuted,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.4,
-          ),
-        ),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.labelSmall.copyWith(
-            color: isCurrent
-                ? AppColors.terreCuite
-                : isDone
-                ? AppColors.vertSavane
-                : AppColors.textMuted,
-            fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
+  Color get _descriptionColor => isCurrent
+      ? AppColors.terreCuite
+      : isDone
+      ? AppColors.vertSavane
+      : AppColors.textMuted;
 
   Color get _circleColor => isCurrent
       ? AppColors.terreCuite

@@ -1096,13 +1096,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get wizardStepShortAddress => 'Adresse';
 
   @override
-  String get wizardStepShortPrevious => 'Précédent';
+  String get wizardStepShortPrevious => 'Année préc';
 
   @override
-  String get wizardStepShortTarget => 'Cible';
+  String get wizardStepShortTarget => 'Année cible';
 
   @override
-  String get wizardStepShortCharges => 'Charges';
+  String get wizardStepShortCharges => 'Frais';
 
   @override
   String get wizardStepShortGuardian => 'Tuteurs';

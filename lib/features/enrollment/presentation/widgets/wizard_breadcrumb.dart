@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_step_dot.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Fil d'Ariane du stepper d'inscription (PARCOURS 18) : indicateur « Étape N
-/// sur M », barre de progression dégradée animée, puis la rangée de pastilles
-/// numérotées reliées par des connecteurs.
+/// Barre du stepper d'inscription (PARCOURS 18) : bande pleine largeur collée
+/// sous l'AppBar — barre de progression dégradée puis la rangée de steps
+/// (chip + connecteurs + « ÉTAPE N » / description) répartis de bout en bout.
 class WizardBreadcrumb extends StatelessWidget {
   final List<String> titles;
   final int currentStep;
@@ -26,31 +23,22 @@ class WizardBreadcrumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surfaceRaised,
-        borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.border),
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.stepIndicator(currentStep + 1, titles.length),
-            style: AppTypography.labelSmall.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
           WizardProgressBar(progress: progress, reduceMotion: reduceMotion),
           const SizedBox(height: AppSpacing.md),
           _StepRow(
@@ -80,51 +68,33 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final count = titles.length;
-        final connectorWidth = count > 1
-            ? ((constraints.maxWidth - count * WizardStepDot.diameter) /
-                      (count - 1))
-                  .clamp(12.0, 40.0)
-            : 0.0;
+    final count = titles.length;
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List<Widget>.generate(count, (index) {
-              final isDone = index < currentStep;
-              final isCurrent = index == currentStep;
-              final canTap = index <= currentStep;
+    // Steps répartis à parts égales (Expanded) pour occuper toute la largeur ;
+    // les connecteurs relient les chips de bout en bout.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List<Widget>.generate(count, (index) {
+        final isDone = index < currentStep;
+        final isCurrent = index == currentStep;
+        final canTap = index <= currentStep;
 
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  WizardStepDot(
-                    index: index,
-                    title: titles[index],
-                    isCurrent: isCurrent,
-                    isDone: isDone,
-                    canTap: canTap,
-                    reduceMotion: reduceMotion,
-                    onTap: () => onStepTap(index),
-                  ),
-                  if (index < count - 1)
-                    Container(
-                      width: connectorWidth,
-                      height: 2,
-                      margin: const EdgeInsets.only(
-                        top: WizardStepDot.diameter / 2 - 1,
-                      ),
-                      color: isDone ? AppColors.vertSavane : AppColors.border,
-                    ),
-                ],
-              );
-            }),
+        return Expanded(
+          child: WizardStepDot(
+            index: index,
+            title: titles[index],
+            isCurrent: isCurrent,
+            isDone: isDone,
+            canTap: canTap,
+            reduceMotion: reduceMotion,
+            onTap: () => onStepTap(index),
+            isFirst: index == 0,
+            isLast: index == count - 1,
+            leftConnectorActive: index <= currentStep,
+            rightConnectorActive: index < currentStep,
           ),
         );
-      },
+      }),
     );
   }
 }

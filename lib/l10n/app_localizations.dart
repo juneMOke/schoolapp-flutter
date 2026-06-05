@@ -2001,13 +2001,13 @@ abstract class AppLocalizations {
   /// No description provided for @wizardStepShortPrevious.
   ///
   /// In en, this message translates to:
-  /// **'Previous'**
+  /// **'Prev. year'**
   String get wizardStepShortPrevious;
 
   /// No description provided for @wizardStepShortTarget.
   ///
   /// In en, this message translates to:
-  /// **'Target'**
+  /// **'Target year'**
   String get wizardStepShortTarget;
 
   /// No description provided for @wizardStepShortCharges.

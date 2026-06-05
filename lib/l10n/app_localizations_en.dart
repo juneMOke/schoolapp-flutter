@@ -1086,10 +1086,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wizardStepShortAddress => 'Address';
 
   @override
-  String get wizardStepShortPrevious => 'Previous';
+  String get wizardStepShortPrevious => 'Prev. year';
 
   @override
-  String get wizardStepShortTarget => 'Target';
+  String get wizardStepShortTarget => 'Target year';
 
   @override
   String get wizardStepShortCharges => 'Fees';

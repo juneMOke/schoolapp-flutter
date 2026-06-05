@@ -17,24 +17,31 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: Center(
-          child: WizardBreadcrumb(
-            titles: titles,
-            currentStep: currentStep,
-            progress: (currentStep + 1) / totalSteps,
-            onStepTap: onStepTap ?? (int _) {},
+        // La barre utilise des steps Expanded → largeur bornée requise.
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: 700,
+            child: WizardBreadcrumb(
+              titles: titles,
+              currentStep: currentStep,
+              progress: (currentStep + 1) / totalSteps,
+              onStepTap: onStepTap ?? (int _) {},
+            ),
           ),
         ),
       ),
     );
   }
 
-  testWidgets('Wizard breadcrumb displays current step indicator', (
+  testWidgets('Wizard breadcrumb no longer shows the global step count', (
     tester,
   ) async {
     await tester.pumpWidget(buildHarness(currentStep: 2, totalSteps: 7));
 
-    expect(find.text('Étape 3 / 7'), findsOneWidget);
+    // L'indicateur global « Étape N / M » a été retiré (déjà affiché dans
+    // l'AppBar) — la barre ne montre plus que les steps + la progression.
+    expect(find.text('Étape 3 / 7'), findsNothing);
   });
 
   testWidgets('Wizard breadcrumb shows done steps with checkmark', (

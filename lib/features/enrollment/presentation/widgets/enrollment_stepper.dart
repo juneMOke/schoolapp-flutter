@@ -356,9 +356,11 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Padding(
-      padding: const EdgeInsets.all(AppTheme.defaultPadding),
+      // Barre de steps + pied à pleine largeur (collés aux bords) ; seule une
+      // marge basse subsiste. La barre est collée sous l'AppBar (top = 0).
+      padding: const EdgeInsets.only(bottom: AppTheme.defaultPadding),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           WizardBreadcrumb(
             titles: stepTitles,
@@ -368,40 +370,45 @@ class _EnrollmentStepperLayout extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, animation) {
-                      if (reduceMotion) return child;
-                      // etStepIn : fondu + glissement translateY 10 → 0.
-                      return FadeTransition(
-                        opacity: animation,
-                        child: AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, inner) => Transform.translate(
-                            offset: Offset(0, (1 - animation.value) * 10),
-                            child: inner,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.defaultPadding,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, animation) {
+                        if (reduceMotion) return child;
+                        // etStepIn : fondu + glissement translateY 10 → 0.
+                        return FadeTransition(
+                          opacity: animation,
+                          child: AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, inner) => Transform.translate(
+                              offset: Offset(0, (1 - animation.value) * 10),
+                              child: inner,
+                            ),
+                            child: child,
                           ),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: StepPageCard(
-                      key: ValueKey(currentStep),
-                      eyebrow: stepEyebrow,
-                      title: stepTitle,
-                      subtitle: stepSubtitle,
-                      accentColor: stepAccentColor,
-                      icon: stepIcon,
-                      child: stepContent,
+                        );
+                      },
+                      child: StepPageCard(
+                        key: ValueKey(currentStep),
+                        eyebrow: stepEyebrow,
+                        title: stepTitle,
+                        subtitle: stepSubtitle,
+                        accentColor: stepAccentColor,
+                        icon: stepIcon,
+                        child: stepContent,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
