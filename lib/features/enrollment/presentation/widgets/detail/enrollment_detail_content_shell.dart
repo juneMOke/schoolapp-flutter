@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
+import 'package:school_app_flutter/core/widgets/page_background_halos.dart';
 
+/// Fond du parcours d'inscription (stepper) : même décor que les autres pages
+/// — dégradé doux + halos elliptiques + filigrane Kuba — derrière le contenu.
 class EnrollmentDetailContentShell extends StatelessWidget {
   final Widget child;
 
@@ -11,40 +15,22 @@ class EnrollmentDetailContentShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.surface),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.surface, AppColors.surfaceCool],
+        ),
+      ),
       child: Stack(
         children: [
-          Positioned(
-            top: -50,
-            right: -40,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppColors.bleuArdoise.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 120,
-            left: -45,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+          const PageBackgroundHalos(),
+          const KubaPatternLayer(),
           LayoutBuilder(
             builder: (context, constraints) {
               final isCompact =
                   constraints.maxWidth <= AppBreakpoints.detailCompactMax;
-              // Barre/pied à pleine largeur : seule une marge basse subsiste
-              // (top = 0 : la barre est collée sous l'AppBar ; pas de marge
-              // horizontale au niveau du shell).
+              // Barre/pied à pleine largeur : seule une marge basse subsiste.
               final shellPadding = isCompact
                   ? const EdgeInsets.only(bottom: AppSpacing.md)
                   : const EdgeInsets.only(bottom: AppSpacing.xl);
