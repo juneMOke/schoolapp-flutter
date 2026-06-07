@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/payments_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payments_table.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class FacturationDetailPaymentsSection extends StatelessWidget {
@@ -59,9 +61,20 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                 prev.payments != curr.payments ||
                 prev.errorType != curr.errorType,
             builder: (context, state) {
+              final totalPaidInCents = state.payments.fold<int>(
+                0,
+                (sum, payment) => sum + payment.amountInCents,
+              );
+              final currency = state.payments.isNotEmpty
+                  ? state.payments.first.currency
+                  : '';
               final subtitle = state.status == PaymentsStatus.success
-                  ? l10n.facturationDetailPaymentsRecordedCount(
+                  ? l10n.facturationDetailPaymentsRecordedWithTotal(
                       state.payments.length,
+                      formatMonetaryAmountWithCurrency(
+                        amount: totalPaidInCents / 100,
+                        currency: currency,
+                      ),
                     )
                   : l10n.facturationDetailPaymentsSectionSubtitle;
 
@@ -111,10 +124,22 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                         );
                       }
 
-                      return FacturationPaymentsTable(
-                        key: const ValueKey('payments-table'),
-                        payments: state.payments,
-                        onViewRequested: onViewPaymentRequested,
+                      final sorted = [...state.payments]
+                        ..sort((a, b) => b.paidAt.compareTo(a.paidAt));
+
+                      return Column(
+                        key: const ValueKey('payments-list'),
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var i = 0; i < sorted.length; i++) ...[
+                            FacturationPaymentLine(
+                              payment: sorted[i],
+                              onTap: () => onViewPaymentRequested(sorted[i]),
+                            ),
+                            if (i < sorted.length - 1)
+                              const SizedBox(height: AppDimensions.spacingS),
+                          ],
+                        ],
                       );
                     }(),
                   ),
@@ -145,11 +170,13 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact =
-            constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
-        final button = PrimaryButton(
+        // Le bouton « Encaisser un paiement » reste aligné avec le titre tant
+        // qu'il y a la place (desktop, 2 colonnes, tablette) ; il ne passe sous
+        // le titre que sur petit téléphone.
+        final compact = constraints.maxWidth < AppBreakpoints.dataTablePhoneMax;
+        final button = EteeloButton.primary(
           label: actionLabel,
-          icon: Icons.point_of_sale_outlined,
+          icon: Icons.add,
           onPressed: onActionPressed,
           fullWidth: false,
         );
@@ -168,8 +195,9 @@ class _SectionHeader extends StatelessWidget {
             ),
             const SizedBox(width: AppDimensions.spacingM),
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
@@ -177,16 +205,14 @@ class _SectionHeader extends StatelessWidget {
                       color: AppColors.bleuProfond,
                     ),
                   ),
-                  const SizedBox(width: AppDimensions.spacingS),
-                  Expanded(
-                    child: Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
-                        letterSpacing: 0.2,
-                      ),
+                  const SizedBox(height: AppDimensions.spacingXS),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textMuted,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
@@ -210,6 +236,7 @@ class _SectionHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: titleBlock),
+            const SizedBox(width: AppDimensions.spacingM),
             button,
           ],
         );

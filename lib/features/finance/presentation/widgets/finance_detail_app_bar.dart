@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 
+/// AppBar claire des sous-détails facturation (détail d'un frais / d'un
+/// paiement). La page de facturation, elle, utilise [FacturationDetailAppBar].
 class FinanceDetailAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String title;
