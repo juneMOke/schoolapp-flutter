@@ -951,8 +951,62 @@ abstract class AppLocalizations {
   /// No description provided for @reRegistrationSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter either First name, Last name and Surname, or the target cycle/level to start the search.'**
+  /// **'Find a student or a class from the previous year to re-enroll'**
   String get reRegistrationSearchHint;
+
+  /// No description provided for @reRegistrationSearchHelpPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.'**
+  String get reRegistrationSearchHelpPill;
+
+  /// No description provided for @reRegistrationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student'**
+  String get reRegistrationSearchTitle;
+
+  /// No description provided for @reRegistrationSearchByNameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get reRegistrationSearchByNameGroup;
+
+  /// No description provided for @reRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle / level'**
+  String get reRegistrationSearchByLevelGroup;
+
+  /// No description provided for @reRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get reRegistrationSearchOrSeparator;
+
+  /// No description provided for @reRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get reRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @reRegistrationSearchModeNameBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get reRegistrationSearchModeNameBadge;
+
+  /// No description provided for @reRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle / level'**
+  String get reRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @reRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get reRegistrationSearchLevelPlaceholder;
 
   /// No description provided for @reRegistrationAcademicInfoHelp.
   ///
@@ -2784,6 +2838,120 @@ abstract class AppLocalizations {
   /// **'No student matches these criteria. Update the form and try again.'**
   String get facturationNoResultsDescription;
 
+  /// No description provided for @facturationEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get facturationEmptyTitle;
+
+  /// No description provided for @facturationSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.'**
+  String get facturationSearchHelpBanner;
+
+  /// No description provided for @facturationSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get facturationSearchByStudentGroup;
+
+  /// No description provided for @facturationSearchByClassGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get facturationSearchByClassGroup;
+
+  /// No description provided for @facturationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get facturationSearchOrSeparator;
+
+  /// No description provided for @facturationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get facturationSearchActiveModeLabel;
+
+  /// No description provided for @facturationSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get facturationSearchModeStudentBadge;
+
+  /// No description provided for @facturationSearchModeClassBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get facturationSearchModeClassBadge;
+
+  /// No description provided for @facturationSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get facturationSearchCycleLabel;
+
+  /// No description provided for @facturationSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get facturationSearchLevelLabel;
+
+  /// No description provided for @facturationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get facturationSearchLevelPlaceholder;
+
+  /// Billing AppBar pill when the balance is outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} due'**
+  String facturationBalanceDuePill(String amount);
+
+  /// No description provided for @facturationBalanceUpToDatePill.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get facturationBalanceUpToDatePill;
+
+  /// Fee line footer: amount remaining to pay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} remaining'**
+  String facturationChargeLineRemainingSuffix(String amount);
+
+  /// Confirmation toast after a successful payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment of {amount} recorded'**
+  String facturationPaymentRecordedToast(String amount);
+
+  /// No description provided for @facturationChargeStatementCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement copied to clipboard'**
+  String get facturationChargeStatementCopied;
+
+  /// No description provided for @facturationChargeStatementEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment to export for this fee.'**
+  String get facturationChargeStatementEmpty;
+
+  /// No description provided for @facturationCsvHeaderFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get facturationCsvHeaderFee;
+
+  /// No description provided for @facturationCsvHeaderImputedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Imputed amount (USD)'**
+  String get facturationCsvHeaderImputedAmount;
+
   /// No description provided for @facturationDetailBackLabel.
   ///
   /// In en, this message translates to:
@@ -2850,6 +3018,12 @@ abstract class AppLocalizations {
   /// **'Financial record'**
   String get facturationDetailInfoTitle;
 
+  /// No description provided for @facturationDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get facturationDetailEyebrow;
+
   /// No description provided for @facturationDetailInfoSubtitle.
   ///
   /// In en, this message translates to:
@@ -2903,6 +3077,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}'**
   String facturationDetailPaymentsRecordedCount(num count);
+
+  /// Payments section subtitle: payment count + total paid.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payment recorded} =1{1 payment · {total}} other{{count} payments · {total}}}'**
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total);
+
+  /// No description provided for @facturationPaymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get facturationPaymentMethodCash;
 
   /// No description provided for @facturationDetailCollectPaymentAction.
   ///
@@ -2994,10 +3180,52 @@ abstract class AppLocalizations {
   /// **'Paid at'**
   String get facturationPaymentPaidAtLabel;
 
+  /// No description provided for @facturationPaymentAmountPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount paid'**
+  String get facturationPaymentAmountPaidLabel;
+
+  /// No description provided for @facturationPaymentMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get facturationPaymentMethodLabel;
+
+  /// No description provided for @facturationPaymentCollectedByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected by'**
+  String get facturationPaymentCollectedByLabel;
+
+  /// No description provided for @facturationPaymentReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no.'**
+  String get facturationPaymentReceiptLabel;
+
+  /// No description provided for @facturationPaymentStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get facturationPaymentStudentLabel;
+
+  /// No description provided for @facturationPaymentDownloadReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download receipt'**
+  String get facturationPaymentDownloadReceiptLabel;
+
+  /// No description provided for @facturationPaymentCloseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get facturationPaymentCloseLabel;
+
   /// No description provided for @facturationPaymentAllocationsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment allocations'**
+  /// **'Breakdown by fee'**
   String get facturationPaymentAllocationsSectionTitle;
 
   /// No description provided for @facturationPaymentAllocationsSectionSubtitle.
@@ -3247,7 +3475,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationChargeDetailHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Charge detail'**
+  /// **'Fee details'**
   String get facturationChargeDetailHeroTitle;
 
   /// No description provided for @facturationChargeDetailHeroSubtitle.
@@ -3289,7 +3517,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationChargeDetailAllocationsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Allocations for this charge'**
+  /// **'Applied payments'**
   String get facturationChargeDetailAllocationsSectionTitle;
 
   /// No description provided for @facturationChargeDetailAllocationsSectionSubtitle.
@@ -3761,6 +3989,172 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No unpaid charges available for this student.'**
   String get facturationCreatePaymentNoChargesAvailable;
+
+  /// No description provided for @facturationCreatePaymentChargesToSettleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees to settle'**
+  String get facturationCreatePaymentChargesToSettleTitle;
+
+  /// No description provided for @facturationCreatePaymentChargesToSettleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the fees to settle and adjust the amounts.'**
+  String get facturationCreatePaymentChargesToSettleSubtitle;
+
+  /// No description provided for @facturationCreatePaymentAllFeesSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All fees are already settled.'**
+  String get facturationCreatePaymentAllFeesSettled;
+
+  /// No description provided for @facturationCreatePaymentChargeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {amount}'**
+  String facturationCreatePaymentChargeDue(String amount);
+
+  /// No description provided for @facturationCreatePaymentChargePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid {amount}'**
+  String facturationCreatePaymentChargePaid(String amount);
+
+  /// No description provided for @facturationCreatePaymentChargeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining {amount}'**
+  String facturationCreatePaymentChargeRemaining(String amount);
+
+  /// No description provided for @facturationCreatePaymentAmountToSettleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to settle'**
+  String get facturationCreatePaymentAmountToSettleLabel;
+
+  /// No description provided for @facturationCreatePaymentSettleAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle all'**
+  String get facturationCreatePaymentSettleAllAction;
+
+  /// No description provided for @facturationCreatePaymentAmountClampedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount capped to the remaining balance ({amount}).'**
+  String facturationCreatePaymentAmountClampedWarning(String amount);
+
+  /// No description provided for @facturationCreatePaymentRemainingAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining after: {amount}'**
+  String facturationCreatePaymentRemainingAfter(String amount);
+
+  /// No description provided for @facturationCreatePaymentSettledChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get facturationCreatePaymentSettledChip;
+
+  /// No description provided for @facturationCreatePaymentTotalToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to collect'**
+  String get facturationCreatePaymentTotalToCollect;
+
+  /// No description provided for @facturationCreatePaymentCollectAmountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount}'**
+  String facturationCreatePaymentCollectAmountAction(String amount);
+
+  /// No description provided for @facturationCreatePaymentConfirmCollectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount}?'**
+  String facturationCreatePaymentConfirmCollectTitle(String amount);
+
+  /// No description provided for @facturationCreatePaymentConfirmSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to collect {amount} for {student}, paid by {payer}.'**
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  );
+
+  /// No description provided for @facturationCreatePaymentConfirmDistributionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get facturationCreatePaymentConfirmDistributionTitle;
+
+  /// No description provided for @facturationCollectStepConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation'**
+  String get facturationCollectStepConfirm;
+
+  /// No description provided for @facturationCollectStepResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get facturationCollectStepResult;
+
+  /// No description provided for @facturationCollectSimulateFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulate a failure'**
+  String get facturationCollectSimulateFailure;
+
+  /// No description provided for @facturationCollectProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording the payment…'**
+  String get facturationCollectProcessing;
+
+  /// No description provided for @facturationCollectSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get facturationCollectSuccessTitle;
+
+  /// No description provided for @facturationCollectReceiptChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no. {code}'**
+  String facturationCollectReceiptChip(String code);
+
+  /// No description provided for @facturationCollectErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection failed'**
+  String get facturationCollectErrorTitle;
+
+  /// No description provided for @facturationCollectErrorNoDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount was debited.'**
+  String get facturationCollectErrorNoDebit;
+
+  /// No description provided for @facturationCollectIncidentChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String facturationCollectIncidentChip(String code);
+
+  /// No description provided for @facturationCollectEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get facturationCollectEditAction;
+
+  /// No description provided for @facturationCollectRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationCollectRetryAction;
 
   /// No description provided for @attendanceHeroTitle.
   ///

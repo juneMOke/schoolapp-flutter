@@ -14,6 +14,8 @@ class AppMotion {
   static const Duration stepIn = Duration(milliseconds: 340);
   static const Duration pop = Duration(milliseconds: 420);
   static const Duration skeletonPulse = Duration(milliseconds: 1500);
+  // Tour complet d'un indicateur en rotation (spinner « processing »).
+  static const Duration spinnerCycle = Duration(milliseconds: 900);
   static const Duration actionCooldown = Duration(milliseconds: 600);
   static const Duration refreshCooldown = Duration(milliseconds: 700);
   static const Duration tooltipShowDuration = Duration(seconds: 3);

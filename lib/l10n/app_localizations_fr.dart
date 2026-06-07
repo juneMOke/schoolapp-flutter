@@ -512,7 +512,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reRegistrationSearchHint =>
-      'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
+      'Retrouvez un élève ou une classe de l\'année précédente à réinscrire';
+
+  @override
+  String get reRegistrationSearchHelpPill =>
+      'Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l\'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.';
+
+  @override
+  String get reRegistrationSearchTitle => 'Rechercher un élève';
+
+  @override
+  String get reRegistrationSearchByNameGroup => 'Par nom';
+
+  @override
+  String get reRegistrationSearchByLevelGroup => 'Par cycle / niveau';
+
+  @override
+  String get reRegistrationSearchOrSeparator => 'OU';
+
+  @override
+  String get reRegistrationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get reRegistrationSearchModeNameBadge => 'Nom';
+
+  @override
+  String get reRegistrationSearchModeLevelBadge => 'Cycle / niveau';
+
+  @override
+  String get reRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
 
   @override
   String get reRegistrationAcademicInfoHelp =>
@@ -1544,6 +1572,72 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
 
   @override
+  String get facturationEmptyTitle => 'Aucun élève trouvé';
+
+  @override
+  String get facturationSearchHelpBanner =>
+      'Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.';
+
+  @override
+  String get facturationSearchByStudentGroup => 'Par élève';
+
+  @override
+  String get facturationSearchByClassGroup => 'Par classe';
+
+  @override
+  String get facturationSearchOrSeparator => 'OU';
+
+  @override
+  String get facturationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get facturationSearchModeStudentBadge => 'Élève';
+
+  @override
+  String get facturationSearchModeClassBadge => 'Classe';
+
+  @override
+  String get facturationSearchCycleLabel => 'Cycle';
+
+  @override
+  String get facturationSearchLevelLabel => 'Niveau';
+
+  @override
+  String get facturationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String facturationBalanceDuePill(String amount) {
+    return '$amount dû';
+  }
+
+  @override
+  String get facturationBalanceUpToDatePill => 'À jour';
+
+  @override
+  String facturationChargeLineRemainingSuffix(String amount) {
+    return '$amount restant';
+  }
+
+  @override
+  String facturationPaymentRecordedToast(String amount) {
+    return 'Paiement de $amount enregistré';
+  }
+
+  @override
+  String get facturationChargeStatementCopied =>
+      'Relevé copié dans le presse-papiers';
+
+  @override
+  String get facturationChargeStatementEmpty =>
+      'Aucun paiement à exporter pour ce frais.';
+
+  @override
+  String get facturationCsvHeaderFee => 'Frais';
+
+  @override
+  String get facturationCsvHeaderImputedAmount => 'Montant imputé (USD)';
+
+  @override
   String get facturationDetailBackLabel => 'Retour aux facturations';
 
   @override
@@ -1577,6 +1671,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationDetailInfoTitle => 'Fiche financière';
+
+  @override
+  String get facturationDetailEyebrow => 'Facturation';
 
   @override
   String get facturationDetailInfoSubtitle =>
@@ -1615,6 +1712,21 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements · $total',
+      one: '1 versement · $total',
+      zero: 'Aucun versement enregistré',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationPaymentMethodCash => 'Espèces';
 
   @override
   String get facturationDetailCollectPaymentAction => 'Encaisser un paiement';
@@ -1664,8 +1776,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPaidAtLabel => 'Date de paiement';
 
   @override
+  String get facturationPaymentAmountPaidLabel => 'Montant versé';
+
+  @override
+  String get facturationPaymentMethodLabel => 'Moyen de paiement';
+
+  @override
+  String get facturationPaymentCollectedByLabel => 'Encaissé par';
+
+  @override
+  String get facturationPaymentReceiptLabel => 'Reçu n°';
+
+  @override
+  String get facturationPaymentStudentLabel => 'Élève';
+
+  @override
+  String get facturationPaymentDownloadReceiptLabel => 'Télécharger le reçu';
+
+  @override
+  String get facturationPaymentCloseLabel => 'Fermer';
+
+  @override
   String get facturationPaymentAllocationsSectionTitle =>
-      'Allocations de paiement';
+      'Répartition par frais';
 
   @override
   String get facturationPaymentAllocationsSectionSubtitle =>
@@ -1828,7 +1961,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Retour au détail de facturation';
 
   @override
-  String get facturationChargeDetailHeroTitle => 'Détail d\'une charge';
+  String get facturationChargeDetailHeroTitle => 'Détail du frais';
 
   @override
   String get facturationChargeDetailHeroSubtitle =>
@@ -1852,7 +1985,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationChargeDetailAllocationsSectionTitle =>
-      'Allocations liées à cette charge';
+      'Paiements affectés';
 
   @override
   String get facturationChargeDetailAllocationsSectionSubtitle =>
@@ -2145,6 +2278,113 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get facturationCreatePaymentNoChargesAvailable =>
       'Aucune charge non réglée disponible pour cet élève.';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleTitle => 'Frais à régler';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleSubtitle =>
+      'Cochez les frais à régler et ajustez les montants.';
+
+  @override
+  String get facturationCreatePaymentAllFeesSettled =>
+      'Tous les frais sont déjà soldés.';
+
+  @override
+  String facturationCreatePaymentChargeDue(String amount) {
+    return 'Dû $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargePaid(String amount) {
+    return 'Déjà payé $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargeRemaining(String amount) {
+    return 'Restant $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentAmountToSettleLabel => 'Montant à régler';
+
+  @override
+  String get facturationCreatePaymentSettleAllAction => 'Tout solder';
+
+  @override
+  String facturationCreatePaymentAmountClampedWarning(String amount) {
+    return 'Montant ramené au restant dû ($amount).';
+  }
+
+  @override
+  String facturationCreatePaymentRemainingAfter(String amount) {
+    return 'Restant après : $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentSettledChip => 'Soldé';
+
+  @override
+  String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
+
+  @override
+  String facturationCreatePaymentCollectAmountAction(String amount) {
+    return 'Encaisser $amount';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmCollectTitle(String amount) {
+    return 'Encaisser $amount ?';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  ) {
+    return 'Vous allez encaisser $amount pour $student, réglé par $payer.';
+  }
+
+  @override
+  String get facturationCreatePaymentConfirmDistributionTitle => 'Répartition';
+
+  @override
+  String get facturationCollectStepConfirm => 'Confirmation';
+
+  @override
+  String get facturationCollectStepResult => 'Résultat';
+
+  @override
+  String get facturationCollectSimulateFailure => 'Simuler un échec';
+
+  @override
+  String get facturationCollectProcessing => 'Enregistrement du paiement…';
+
+  @override
+  String get facturationCollectSuccessTitle => 'Paiement enregistré';
+
+  @override
+  String facturationCollectReceiptChip(String code) {
+    return 'Reçu n° $code';
+  }
+
+  @override
+  String get facturationCollectErrorTitle => 'Échec de l\'encaissement';
+
+  @override
+  String get facturationCollectErrorNoDebit => 'Aucun montant n\'a été débité.';
+
+  @override
+  String facturationCollectIncidentChip(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get facturationCollectEditAction => 'Modifier';
+
+  @override
+  String get facturationCollectRetryAction => 'Réessayer';
 
   @override
   String get attendanceHeroTitle => 'Présences';

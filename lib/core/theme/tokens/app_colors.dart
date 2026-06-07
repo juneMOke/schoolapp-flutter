@@ -105,6 +105,23 @@ class AppColors {
   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
 
+  // Statut de frais — spec Facturation §20 (source unique badge / barre / icône).
+  // Soldé = vert-savane · Partiel = #A66A00 · Impayé = #C0392B (= error).
+  static const feeStatusPaid = vertSavane;
+  static const feeStatusPaidSoft = Color(0xFFEDF5EF);
+  static const feeStatusPaidBorder = Color(0xFFCFE3D4);
+  static const feeStatusPartial = Color(0xFFA66A00);
+  static const feeStatusPartialSoft = Color(0xFFFBF1DF);
+  static const feeStatusPartialBorder = Color(0xFFEAD9B0);
+  static const feeStatusDue = error;
+  static const feeStatusDueSoft = Color(0xFFFBEAE7);
+  static const feeStatusDueBorder = Color(0xFFF0CDC7);
+
+  // Facturation — bandeau d'aide bi-mode & teintes utilitaires (spec §01).
+  static const billingHelpSurface = Color(0xFFEBF2F7);
+  static const billingHelpBorder = Color(0xFFCFE0EA);
+  static const billingPaymentMedallionSoft = Color(0xFFEDF5EF);
+
   // Disciplinary detail palette
   static const disciplinaryDetailCard = surfaceRaised;
   static const disciplinaryDetailAccent = Color(0xFFDC2626);

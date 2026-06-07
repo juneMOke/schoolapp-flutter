@@ -21,6 +21,22 @@ class AppDimensions {
   static const detailHeroAvatarSize = 64.0;
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
+  // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
+  // contenu plafonné à 880 dp), centrée et responsive.
+  static const facturationContentMaxWidth = 880.0;
+  // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
+  static const facturationModalMaxWidth = 520.0;
+  // Modale d'encaissement (spec MODALE-12 : centrée, largeur 560).
+  static const facturationCreatePaymentModalMaxWidth = 560.0;
+  // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
+  static const facturationCollectModalMaxWidth = 440.0;
+  // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
+  static const searchFieldMinWidth = 170.0;
+  static const searchFieldGap = 10.0;
+  // Largeur min d'une cellule du bandeau KPI stats (garde-fou anti-écrasement).
+  static const financeStatsKpiCellMinWidth = 220.0;
+  // Largeur max de la carte d'invitation « avant recherche » (centrée).
+  static const searchInvitationMaxWidth = 620.0;
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;
   static const detailTableLabelColumnWidth = 72.0;

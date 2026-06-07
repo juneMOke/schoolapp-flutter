@@ -268,7 +268,16 @@
   "searchStudents": "Rechercher des élèves",
   "searchFormSubtitleFirstRegistration": "Filtrez la liste des inscriptions",
   "searchFormSubtitlePreRegistration": "Demandes reçues en ligne, en attente de validation",
-  "reRegistrationSearchHint": "Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.",
+  "reRegistrationSearchHint": "Retrouvez un élève ou une classe de l'année précédente à réinscrire",
+  "reRegistrationSearchHelpPill": "Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.",
+  "reRegistrationSearchTitle": "Rechercher un élève",
+  "reRegistrationSearchByNameGroup": "Par nom",
+  "reRegistrationSearchByLevelGroup": "Par cycle / niveau",
+  "reRegistrationSearchOrSeparator": "OU",
+  "reRegistrationSearchActiveModeLabel": "Recherche active par :",
+  "reRegistrationSearchModeNameBadge": "Nom",
+  "reRegistrationSearchModeLevelBadge": "Cycle / niveau",
+  "reRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "reRegistrationAcademicInfoHelp": "Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.",
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
   "reRegistrationSearchNeedCriteria": "Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.",
@@ -713,6 +722,37 @@
   "facturationViewChargesLabel": "Voir les charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
+  "facturationEmptyTitle": "Aucun élève trouvé",
+  "facturationSearchHelpBanner": "Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.",
+  "facturationSearchByStudentGroup": "Par élève",
+  "facturationSearchByClassGroup": "Par classe",
+  "facturationSearchOrSeparator": "OU",
+  "facturationSearchActiveModeLabel": "Recherche active par :",
+  "facturationSearchModeStudentBadge": "Élève",
+  "facturationSearchModeClassBadge": "Classe",
+  "facturationSearchCycleLabel": "Cycle",
+  "facturationSearchLevelLabel": "Niveau",
+  "facturationSearchLevelPlaceholder": "Choisissez un cycle",
+  "facturationBalanceDuePill": "{amount} dû",
+  "@facturationBalanceDuePill": {
+    "description": "Pastille AppBar facturation lorsque le solde est dû.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationBalanceUpToDatePill": "À jour",
+  "facturationChargeLineRemainingSuffix": "{amount} restant",
+  "@facturationChargeLineRemainingSuffix": {
+    "description": "Pied de la ligne de frais : montant restant à payer.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationPaymentRecordedToast": "Paiement de {amount} enregistré",
+  "@facturationPaymentRecordedToast": {
+    "description": "Toast de confirmation après un encaissement réussi.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationChargeStatementCopied": "Relevé copié dans le presse-papiers",
+  "facturationChargeStatementEmpty": "Aucun paiement à exporter pour ce frais.",
+  "facturationCsvHeaderFee": "Frais",
+  "facturationCsvHeaderImputedAmount": "Montant imputé (USD)",
   "facturationDetailBackLabel": "Retour aux facturations",
   "facturationDetailContextErrorTitle": "Contexte de détail indisponible",
   "facturationDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
@@ -724,6 +764,7 @@
   "facturationDetailStudentLevelGroup": "Cycle",
   "facturationDetailStudentLevel": "Niveau",
   "facturationDetailInfoTitle": "Fiche financière",
+  "facturationDetailEyebrow": "Facturation",
   "facturationDetailInfoSubtitle": "Consultez les paiements récents et l'état des charges de l'élève.",
   "facturationDetailHeaderKpiTotalDue": "Total dû",
   "facturationDetailHeaderKpiAlreadyPaid": "Déjà payé",
@@ -733,6 +774,15 @@
   "facturationDetailPaymentsSectionTitle": "Derniers paiements",
   "facturationDetailPaymentsSectionSubtitle": "Historique des encaissements enregistrés pour cet élève.",
   "facturationDetailPaymentsRecordedCount": "{count, plural, =0{Aucun paiement enregistré} =1{1 paiement enregistré} other{{count} paiements enregistrés}}",
+  "facturationDetailPaymentsRecordedWithTotal": "{count, plural, =0{Aucun versement enregistré} =1{1 versement · {total}} other{{count} versements · {total}}}",
+  "@facturationDetailPaymentsRecordedWithTotal": {
+    "description": "Sous-titre de la section paiements : nombre de versements + total payé.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "String" }
+    }
+  },
+  "facturationPaymentMethodCash": "Espèces",
   "@facturationDetailPaymentsRecordedCount": {
     "placeholders": {
       "count": {}
@@ -753,7 +803,14 @@
   "facturationPaymentPayerLabel": "Payeur",
   "facturationPaymentAmountLabel": "Montant global payé",
   "facturationPaymentPaidAtLabel": "Date de paiement",
-  "facturationPaymentAllocationsSectionTitle": "Allocations de paiement",
+  "facturationPaymentAmountPaidLabel": "Montant versé",
+  "facturationPaymentMethodLabel": "Moyen de paiement",
+  "facturationPaymentCollectedByLabel": "Encaissé par",
+  "facturationPaymentReceiptLabel": "Reçu n°",
+  "facturationPaymentStudentLabel": "Élève",
+  "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",
+  "facturationPaymentCloseLabel": "Fermer",
+  "facturationPaymentAllocationsSectionTitle": "Répartition par frais",
   "facturationPaymentAllocationsSectionSubtitle": "Liste des charges couvertes par ce paiement.",
   "facturationPaymentAllocationsTotalLabel": "Total alloué",
   "facturationPaymentAllocationsEmpty": "Aucune allocation n'a été trouvée pour ce paiement.",
@@ -801,14 +858,14 @@
   "facturationPrintStatementsLabel": "Imprimer les relevés",
   "facturationPrintStatementsSubtitle": "Générez et téléchargez les relevés de facturation de cet étudiant",
   "facturationChargeDetailBackLabel": "Retour au détail de facturation",
-  "facturationChargeDetailHeroTitle": "Détail d'une charge",
+  "facturationChargeDetailHeroTitle": "Détail du frais",
   "facturationChargeDetailHeroSubtitle": "Consultez l'état de cette charge et les paiements qui y ont été alloués.",
   "facturationChargeDetailInfoSectionTitle": "Informations de la charge",
   "facturationChargeDetailExpectedAmountLabel": "Montant attendu",
   "facturationChargeDetailPaidAmountLabel": "Montant payé",
   "facturationChargeDetailRemainingAmountLabel": "Reste à payer",
   "facturationChargeDetailStatusLabel": "Statut",
-  "facturationChargeDetailAllocationsSectionTitle": "Allocations liées à cette charge",
+  "facturationChargeDetailAllocationsSectionTitle": "Paiements affectés",
   "facturationChargeDetailAllocationsSectionSubtitle": "Détail des paiements alloués à cette charge.",
   "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Total alloué",
@@ -908,6 +965,109 @@
   "facturationCreatePaymentAuthError": "Une erreur d'authentification est survenue.",
   "facturationCreatePaymentUnknownError": "Une erreur inattendue est survenue.",
   "facturationCreatePaymentNoChargesAvailable": "Aucune charge non réglée disponible pour cet élève.",
+  "facturationCreatePaymentChargesToSettleTitle": "Frais à régler",
+  "facturationCreatePaymentChargesToSettleSubtitle": "Cochez les frais à régler et ajustez les montants.",
+  "facturationCreatePaymentAllFeesSettled": "Tous les frais sont déjà soldés.",
+  "facturationCreatePaymentChargeDue": "Dû {amount}",
+  "@facturationCreatePaymentChargeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargePaid": "Déjà payé {amount}",
+  "@facturationCreatePaymentChargePaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargeRemaining": "Restant {amount}",
+  "@facturationCreatePaymentChargeRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentAmountToSettleLabel": "Montant à régler",
+  "facturationCreatePaymentSettleAllAction": "Tout solder",
+  "facturationCreatePaymentAmountClampedWarning": "Montant ramené au restant dû ({amount}).",
+  "@facturationCreatePaymentAmountClampedWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentRemainingAfter": "Restant après : {amount}",
+  "@facturationCreatePaymentRemainingAfter": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentSettledChip": "Soldé",
+  "facturationCreatePaymentTotalToCollect": "Total à encaisser",
+  "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
+  "@facturationCreatePaymentCollectAmountAction": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmCollectTitle": "Encaisser {amount} ?",
+  "@facturationCreatePaymentConfirmCollectTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentence": "Vous allez encaisser {amount} pour {student}, réglé par {payer}.",
+  "@facturationCreatePaymentConfirmSentence": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
+        "type": "String"
+      },
+      "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmDistributionTitle": "Répartition",
+  "facturationCollectStepConfirm": "Confirmation",
+  "facturationCollectStepResult": "Résultat",
+  "facturationCollectSimulateFailure": "Simuler un échec",
+  "facturationCollectProcessing": "Enregistrement du paiement…",
+  "facturationCollectSuccessTitle": "Paiement enregistré",
+  "facturationCollectReceiptChip": "Reçu n° {code}",
+  "@facturationCollectReceiptChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectErrorTitle": "Échec de l'encaissement",
+  "facturationCollectErrorNoDebit": "Aucun montant n'a été débité.",
+  "facturationCollectIncidentChip": "Code incident : {code}",
+  "@facturationCollectIncidentChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectEditAction": "Modifier",
+  "facturationCollectRetryAction": "Réessayer",
   "attendanceHeroTitle": "Présences",
   "attendanceHeroSubtitle": "Consultez les présences par classe et date pour un suivi quotidien fiable.",
   "attendanceHeroChipClass": "Recherche par classe",

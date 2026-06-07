@@ -508,7 +508,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reRegistrationSearchHint =>
-      'Enter either First name, Last name and Surname, or the target cycle/level to start the search.';
+      'Find a student or a class from the previous year to re-enroll';
+
+  @override
+  String get reRegistrationSearchHelpPill =>
+      'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.';
+
+  @override
+  String get reRegistrationSearchTitle => 'Search a student';
+
+  @override
+  String get reRegistrationSearchByNameGroup => 'By name';
+
+  @override
+  String get reRegistrationSearchByLevelGroup => 'By cycle / level';
+
+  @override
+  String get reRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get reRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get reRegistrationSearchModeNameBadge => 'Name';
+
+  @override
+  String get reRegistrationSearchModeLevelBadge => 'Cycle / level';
+
+  @override
+  String get reRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
 
   @override
   String get reRegistrationAcademicInfoHelp =>
@@ -1530,6 +1558,72 @@ class AppLocalizationsEn extends AppLocalizations {
       'No student matches these criteria. Update the form and try again.';
 
   @override
+  String get facturationEmptyTitle => 'No student found';
+
+  @override
+  String get facturationSearchHelpBanner =>
+      'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.';
+
+  @override
+  String get facturationSearchByStudentGroup => 'By student';
+
+  @override
+  String get facturationSearchByClassGroup => 'By class';
+
+  @override
+  String get facturationSearchOrSeparator => 'OR';
+
+  @override
+  String get facturationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get facturationSearchModeStudentBadge => 'Student';
+
+  @override
+  String get facturationSearchModeClassBadge => 'Class';
+
+  @override
+  String get facturationSearchCycleLabel => 'Cycle';
+
+  @override
+  String get facturationSearchLevelLabel => 'Level';
+
+  @override
+  String get facturationSearchLevelPlaceholder => 'Pick a cycle first';
+
+  @override
+  String facturationBalanceDuePill(String amount) {
+    return '$amount due';
+  }
+
+  @override
+  String get facturationBalanceUpToDatePill => 'Up to date';
+
+  @override
+  String facturationChargeLineRemainingSuffix(String amount) {
+    return '$amount remaining';
+  }
+
+  @override
+  String facturationPaymentRecordedToast(String amount) {
+    return 'Payment of $amount recorded';
+  }
+
+  @override
+  String get facturationChargeStatementCopied =>
+      'Statement copied to clipboard';
+
+  @override
+  String get facturationChargeStatementEmpty =>
+      'No payment to export for this fee.';
+
+  @override
+  String get facturationCsvHeaderFee => 'Fee';
+
+  @override
+  String get facturationCsvHeaderImputedAmount => 'Imputed amount (USD)';
+
+  @override
   String get facturationDetailBackLabel => 'Back to billing';
 
   @override
@@ -1562,6 +1656,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationDetailInfoTitle => 'Financial record';
+
+  @override
+  String get facturationDetailEyebrow => 'Billing';
 
   @override
   String get facturationDetailInfoSubtitle =>
@@ -1600,6 +1697,21 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments · $total',
+      one: '1 payment · $total',
+      zero: 'No payment recorded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationPaymentMethodCash => 'Cash';
 
   @override
   String get facturationDetailCollectPaymentAction => 'Collect payment';
@@ -1649,7 +1761,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPaidAtLabel => 'Paid at';
 
   @override
-  String get facturationPaymentAllocationsSectionTitle => 'Payment allocations';
+  String get facturationPaymentAmountPaidLabel => 'Amount paid';
+
+  @override
+  String get facturationPaymentMethodLabel => 'Payment method';
+
+  @override
+  String get facturationPaymentCollectedByLabel => 'Collected by';
+
+  @override
+  String get facturationPaymentReceiptLabel => 'Receipt no.';
+
+  @override
+  String get facturationPaymentStudentLabel => 'Student';
+
+  @override
+  String get facturationPaymentDownloadReceiptLabel => 'Download receipt';
+
+  @override
+  String get facturationPaymentCloseLabel => 'Close';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Breakdown by fee';
 
   @override
   String get facturationPaymentAllocationsSectionSubtitle =>
@@ -1811,7 +1944,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationChargeDetailBackLabel => 'Back to billing detail';
 
   @override
-  String get facturationChargeDetailHeroTitle => 'Charge detail';
+  String get facturationChargeDetailHeroTitle => 'Fee details';
 
   @override
   String get facturationChargeDetailHeroSubtitle =>
@@ -1834,7 +1967,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationChargeDetailAllocationsSectionTitle =>
-      'Allocations for this charge';
+      'Applied payments';
 
   @override
   String get facturationChargeDetailAllocationsSectionSubtitle =>
@@ -2118,6 +2251,113 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get facturationCreatePaymentNoChargesAvailable =>
       'No unpaid charges available for this student.';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleTitle => 'Fees to settle';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleSubtitle =>
+      'Check the fees to settle and adjust the amounts.';
+
+  @override
+  String get facturationCreatePaymentAllFeesSettled =>
+      'All fees are already settled.';
+
+  @override
+  String facturationCreatePaymentChargeDue(String amount) {
+    return 'Due $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargePaid(String amount) {
+    return 'Already paid $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargeRemaining(String amount) {
+    return 'Remaining $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentAmountToSettleLabel => 'Amount to settle';
+
+  @override
+  String get facturationCreatePaymentSettleAllAction => 'Settle all';
+
+  @override
+  String facturationCreatePaymentAmountClampedWarning(String amount) {
+    return 'Amount capped to the remaining balance ($amount).';
+  }
+
+  @override
+  String facturationCreatePaymentRemainingAfter(String amount) {
+    return 'Remaining after: $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentSettledChip => 'Settled';
+
+  @override
+  String get facturationCreatePaymentTotalToCollect => 'Total to collect';
+
+  @override
+  String facturationCreatePaymentCollectAmountAction(String amount) {
+    return 'Collect $amount';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmCollectTitle(String amount) {
+    return 'Collect $amount?';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  ) {
+    return 'You are about to collect $amount for $student, paid by $payer.';
+  }
+
+  @override
+  String get facturationCreatePaymentConfirmDistributionTitle => 'Breakdown';
+
+  @override
+  String get facturationCollectStepConfirm => 'Confirmation';
+
+  @override
+  String get facturationCollectStepResult => 'Result';
+
+  @override
+  String get facturationCollectSimulateFailure => 'Simulate a failure';
+
+  @override
+  String get facturationCollectProcessing => 'Recording the payment…';
+
+  @override
+  String get facturationCollectSuccessTitle => 'Payment recorded';
+
+  @override
+  String facturationCollectReceiptChip(String code) {
+    return 'Receipt no. $code';
+  }
+
+  @override
+  String get facturationCollectErrorTitle => 'Collection failed';
+
+  @override
+  String get facturationCollectErrorNoDebit => 'No amount was debited.';
+
+  @override
+  String facturationCollectIncidentChip(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get facturationCollectEditAction => 'Edit';
+
+  @override
+  String get facturationCollectRetryAction => 'Retry';
 
   @override
   String get attendanceHeroTitle => 'Attendance';
