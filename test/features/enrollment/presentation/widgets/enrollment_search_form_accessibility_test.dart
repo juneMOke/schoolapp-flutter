@@ -11,7 +11,9 @@ void main() {
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: child),
+      // Comme en vrai (AppPageBackground scrollable) : on défile pour éviter un
+      // débordement vertical dans le petit viewport de test.
+      home: Scaffold(body: SingleChildScrollView(child: child)),
     );
   }
 
