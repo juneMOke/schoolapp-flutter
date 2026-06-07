@@ -168,11 +168,25 @@ class SegmentedTabFilter<T> extends StatelessWidget {
         children: [
           Icon(opt.icon, size: 16, color: color),
           const SizedBox(width: AppSpacing.xs),
-          Text(opt.label, style: textStyle),
+          Flexible(
+            child: Text(
+              opt.label,
+              style: textStyle,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       );
     }
 
-    return Text(opt.label, style: textStyle);
+    return Text(
+      opt.label,
+      style: textStyle,
+      maxLines: 1,
+      softWrap: false,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }

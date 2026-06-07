@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -65,12 +66,16 @@ class FinanceStatsKpiBand extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth < 780) {
-              final useSingleColumn = constraints.maxWidth < 480;
+            if (constraints.maxWidth <
+                AppBreakpoints.financeStatsKpiFourColMin) {
+              final useSingleColumn =
+                  constraints.maxWidth <
+                  AppBreakpoints.financeStatsKpiTwoColMin;
               final availableWidth = useSingleColumn
                   ? constraints.maxWidth
                   : (constraints.maxWidth - AppDimensions.spacingM) / 2;
-              final safeWidth = availableWidth < 220
+              final safeWidth =
+                  availableWidth < AppDimensions.financeStatsKpiCellMinWidth
                   ? constraints.maxWidth
                   : availableWidth;
 

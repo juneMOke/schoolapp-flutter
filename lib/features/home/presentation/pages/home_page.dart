@@ -157,13 +157,20 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.presencesId ||
         state.selectedSubMenuId == MenuConstants.disciplinesListId;
 
+    // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
+    // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
+    // donne TOUT le volet pour que le fond couvre l'intégralité de la page
+    // (gouttières et marges comprises), au lieu de le confiner dans une boîte
+    // paddée/centrée par la coquille (ce qui évite aussi un double padding).
+    if (hidePageBreadcrumb) {
+      return _buildContentArea(context, state);
+    }
+
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!hidePageBreadcrumb) ...[
-          _buildBreadcrumb(context, state),
-          const SizedBox(height: AppDimensions.spacingL),
-        ],
+        _buildBreadcrumb(context, state),
+        const SizedBox(height: AppDimensions.spacingL),
         Expanded(child: _buildContentArea(context, state)),
       ],
     );
