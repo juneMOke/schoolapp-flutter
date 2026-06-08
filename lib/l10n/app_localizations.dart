@@ -782,30 +782,6 @@ abstract class AppLocalizations {
   /// **'An error occurred.'**
   String get classesOrganisationErrorUnknown;
 
-  /// No description provided for @classesListHeroTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Class lists'**
-  String get classesListHeroTitle;
-
-  /// No description provided for @classesListHeroSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Quickly search students by cycle, level or classroom, then export the displayed results.'**
-  String get classesListHeroSubtitle;
-
-  /// No description provided for @classesListHeroFilterChip.
-  ///
-  /// In en, this message translates to:
-  /// **'Multi-criteria search by identity and level.'**
-  String get classesListHeroFilterChip;
-
-  /// No description provided for @classesListHeroClassroomChip.
-  ///
-  /// In en, this message translates to:
-  /// **'Optional classroom filtering for the current school year.'**
-  String get classesListHeroClassroomChip;
-
   /// No description provided for @classesListSearchTitle.
   ///
   /// In en, this message translates to:
@@ -817,12 +793,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **''**
   String get classesListSearchHint;
-
-  /// No description provided for @classesListValidationAtLeastOneCriterion.
-  ///
-  /// In en, this message translates to:
-  /// **'Provide at least one criterion to run a search.'**
-  String get classesListValidationAtLeastOneCriterion;
 
   /// No description provided for @classesListClassroomOptionalLabel.
   ///

@@ -147,7 +147,6 @@ class AppColors {
   static const classesChipTotalFg = Color(0xFF1B5E20);
   static const classesFocusRing = Color(0xFF1A73E8);
   static const classesDisabledBg = Color(0xFFE5E7EB);
-  static const classesDisabledFg = Color(0xFF6B7280);
 
   // Avatar identity palette
   // Teintes sombres et sobres pour la couleur d'identité par élève (palette

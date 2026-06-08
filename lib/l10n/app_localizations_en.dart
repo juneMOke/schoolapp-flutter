@@ -403,29 +403,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'An error occurred.';
 
   @override
-  String get classesListHeroTitle => 'Class lists';
-
-  @override
-  String get classesListHeroSubtitle =>
-      'Quickly search students by cycle, level or classroom, then export the displayed results.';
-
-  @override
-  String get classesListHeroFilterChip =>
-      'Multi-criteria search by identity and level.';
-
-  @override
-  String get classesListHeroClassroomChip =>
-      'Optional classroom filtering for the current school year.';
-
-  @override
   String get classesListSearchTitle => 'Search form';
 
   @override
   String get classesListSearchHint => '';
-
-  @override
-  String get classesListValidationAtLeastOneCriterion =>
-      'Provide at least one criterion to run a search.';
 
   @override
   String get classesListClassroomOptionalLabel => 'Classroom (optional)';

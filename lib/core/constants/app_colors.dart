@@ -174,7 +174,6 @@ class AppColors {
   static const classesChipTotalFg = tokens.AppColors.classesChipTotalFg;
   static const classesFocusRing = tokens.AppColors.classesFocusRing;
   static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
-  static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
 
   // Relationship colours
   static const relationshipFather = tokens.AppColors.relationshipFather;

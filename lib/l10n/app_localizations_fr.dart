@@ -405,29 +405,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'Une erreur est survenue.';
 
   @override
-  String get classesListHeroTitle => 'Listes de classe';
-
-  @override
-  String get classesListHeroSubtitle =>
-      'Recherchez rapidement les élèves par cycle, niveau ou classe, puis exportez les résultats affichés.';
-
-  @override
-  String get classesListHeroFilterChip =>
-      'Recherche multi-critères par identité et niveau.';
-
-  @override
-  String get classesListHeroClassroomChip =>
-      'Filtrage optionnel par classe de l\'année courante.';
-
-  @override
   String get classesListSearchTitle => 'Formulaire de recherche';
 
   @override
   String get classesListSearchHint => '';
-
-  @override
-  String get classesListValidationAtLeastOneCriterion =>
-      'Renseignez au moins un critère pour lancer la recherche.';
 
   @override
   String get classesListClassroomOptionalLabel => 'Classe (optionnel)';
