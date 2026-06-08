@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
@@ -350,20 +351,16 @@ class _ResultBody extends StatelessWidget {
 
     final (kind, title, message) = switch (phase) {
       _Phase.success => (
-        CollectResultKind.success,
+        EteeloResultKind.success,
         l10n.facturationCollectSuccessTitle,
         totalLabel,
       ),
       _Phase.error => (
-        CollectResultKind.error,
+        EteeloResultKind.error,
         l10n.facturationCollectErrorTitle,
         l10n.facturationCollectErrorNoDebit,
       ),
-      _ => (
-        CollectResultKind.processing,
-        l10n.facturationCollectProcessing,
-        '',
-      ),
+      _ => (EteeloResultKind.processing, l10n.facturationCollectProcessing, ''),
     };
 
     return Padding(
@@ -371,7 +368,7 @@ class _ResultBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CollectResultMedallion(kind: kind),
+          EteeloResultMedallion(kind: kind),
           const SizedBox(height: AppDimensions.spacingM),
           Text(
             title,

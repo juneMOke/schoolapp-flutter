@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
-
-/// Issue de l'étape 2 (résultat) de l'encaissement.
-enum CollectResultKind { processing, success, error }
 
 /// En-tête sombre coiffé de l'indicateur 2 étapes (Confirmation → Résultat).
 ///
@@ -174,121 +170,5 @@ class _StepPill extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-/// Médaillon animé de l'étape résultat : processing (spin), succès (pop + halo),
-/// échec (statique rouge).
-class CollectResultMedallion extends StatefulWidget {
-  final CollectResultKind kind;
-
-  const CollectResultMedallion({super.key, required this.kind});
-
-  @override
-  State<CollectResultMedallion> createState() => _CollectResultMedallionState();
-}
-
-class _CollectResultMedallionState extends State<CollectResultMedallion>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _spin;
-
-  @override
-  void initState() {
-    super.initState();
-    _spin = AnimationController(vsync: this, duration: AppMotion.spinnerCycle);
-    _syncSpin();
-  }
-
-  @override
-  void didUpdateWidget(covariant CollectResultMedallion oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.kind != widget.kind) {
-      _syncSpin();
-    }
-  }
-
-  void _syncSpin() {
-    if (widget.kind == CollectResultKind.processing) {
-      _spin.repeat();
-    } else {
-      _spin.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _spin.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-
-    final (color, icon) = switch (widget.kind) {
-      CollectResultKind.processing => (
-        AppColors.bleuArdoise,
-        Icons.refresh_rounded,
-      ),
-      CollectResultKind.success => (
-        AppColors.feeStatusPaid,
-        Icons.check_rounded,
-      ),
-      CollectResultKind.error => (AppColors.danger, Icons.dns_outlined),
-    };
-
-    Widget medallion = Container(
-      width: 72,
-      height: 72,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: widget.kind == CollectResultKind.processing
-          ? (reduceMotion
-                ? Icon(icon, size: 34, color: color)
-                : RotationTransition(
-                    turns: _spin,
-                    child: Icon(icon, size: 34, color: color),
-                  ))
-          : Icon(icon, size: 36, color: color),
-    );
-
-    // Succès : halo en expansion + pop (sauf reduced-motion).
-    if (widget.kind == CollectResultKind.success && !reduceMotion) {
-      medallion = Stack(
-        alignment: Alignment.center,
-        children: [
-          TweenAnimationBuilder<double>(
-            key: const ValueKey('collect-halo'),
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: AppMotion.pop,
-            curve: Curves.easeOut,
-            builder: (context, t, _) => Container(
-              width: 72 + 36 * t,
-              height: 72 + 36 * t,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withValues(alpha: 0.18 * (1 - t)),
-              ),
-            ),
-          ),
-          TweenAnimationBuilder<double>(
-            key: const ValueKey('collect-pop'),
-            tween: Tween<double>(begin: 0.85, end: 1),
-            duration: AppMotion.pop,
-            curve: Curves.easeOutBack,
-            builder: (context, scale, child) =>
-                Transform.scale(scale: scale, child: child),
-            child: medallion,
-          ),
-        ],
-      );
-    }
-
-    return medallion;
   }
 }
