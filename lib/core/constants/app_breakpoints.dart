@@ -31,4 +31,11 @@ class AppBreakpoints {
   static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
+  // Composition des classes — vue répartie.
+  // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
+  // en deçà, le basculeur passe dessous.
+  static const double classesSummaryBandRowMin = 860.0;
+  // Grille de cartes de classe : 2 colonnes / 3 colonnes.
+  static const double classesGridTwoColMin = 700.0;
+  static const double classesGridThreeColMin = 1080.0;
 }

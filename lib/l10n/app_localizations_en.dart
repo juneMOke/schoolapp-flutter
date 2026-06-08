@@ -150,6 +150,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Level selection for class distribution';
 
   @override
+  String classesOrganisationHeaderEyebrow(String schoolYear) {
+    return 'Class composition · Year $schoolYear';
+  }
+
+  @override
+  String get classesOrganisationLevelPlaceholder => 'Choose a cycle first';
+
+  @override
   String get classesOrganisationSearchHint =>
       'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.';
 
@@ -167,15 +175,73 @@ class AppLocalizationsEn extends AppLocalizations {
       'Distribute by average';
 
   @override
-  String get classesOrganisationDistributionAction => 'Distribute';
+  String get classesOrganisationDistributeByGenderAction =>
+      'Start gender-based distribution';
 
   @override
-  String get classesOrganisationDistributionConfirmTitle =>
-      'Confirm distribution';
+  String get classesDistributionResultEyebrow => 'Gender distribution';
 
   @override
-  String get classesOrganisationDistributionConfirmMessage =>
-      'Do you want to distribute students for this level?';
+  String get classesDistributionProcessingTitle => 'Distribution in progress…';
+
+  @override
+  String get classesDistributionSuccessTitle => 'Distribution complete';
+
+  @override
+  String get classesDistributionSuccessSubtitle =>
+      'Students were evenly distributed by gender.';
+
+  @override
+  String get classesDistributionRecapTitle => 'Headcount per class';
+
+  @override
+  String classesDistributionClassHeadcount(int count) {
+    return '$count students';
+  }
+
+  @override
+  String get classesDistributionErrorTitle => 'Distribution failed';
+
+  @override
+  String get classesDistributionErrorMessage =>
+      'The classes were left intact. You can try again.';
+
+  @override
+  String get classesDistributionRetry => 'Retry';
+
+  @override
+  String get classesDistributionClose => 'Close';
+
+  @override
+  String get classesDistributionKpiHeadcount => 'Headcount';
+
+  @override
+  String get classesDistributionKpiClasses => 'Classes';
+
+  @override
+  String get classesDistributionKpiBoys => 'Boys';
+
+  @override
+  String get classesDistributionKpiGirls => 'Girls';
+
+  @override
+  String get classesDistributionViewGrid => 'Grid';
+
+  @override
+  String get classesDistributionViewList => 'List';
+
+  @override
+  String classesDistributionClassLabel(String code) {
+    return 'Class $code';
+  }
+
+  @override
+  String classesDistributionClassCapacity(int count, int capacity) {
+    return '$count students · capacity $capacity';
+  }
+
+  @override
+  String get classesDistributionCapacityFull => 'full';
 
   @override
   String get classesOrganisationDistributionSuccess =>
@@ -190,24 +256,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Non-split mode enabled: student list for the selected level.';
 
   @override
-  String get classesOrganisationNoClassrooms =>
-      'No classroom is available for this level.';
+  String get classesOrganisationLoadingTitle => 'Loading classes…';
 
   @override
-  String classesOrganisationClassroomStats(int total, int girls, int boys) {
-    return '$total students - Girls: $girls - Boys: $boys';
-  }
+  String get classesOrganisationEmptyTitle => 'No student to distribute';
+
+  @override
+  String get classesOrganisationEmptyInvite =>
+      'Enroll students in this level to start the distribution.';
+
+  @override
+  String get classesOrganisationOverviewErrorTitle => 'Unable to load';
 
   @override
   String get classesOrganisationTransferDialogTitle => 'Transfer student';
 
   @override
-  String classesOrganisationTransferDialogMessage(String studentName) {
-    return 'Choose the destination classroom for $studentName.';
-  }
+  String get classesReassignCurrentClassState => 'Current class';
 
   @override
-  String get classesOrganisationTransferTargetLabel => 'Destination classroom';
+  String get classesReassignUnassignedState => 'Unassigned';
+
+  @override
+  String get classesReassignCurrentBadge => 'Current';
+
+  @override
+  String get classesReassignFullBadge => 'Full';
+
+  @override
+  String classesReassignOptionStats(int eff, int cap, int boys, int girls) {
+    return '$eff/$cap · B $boys · G $girls';
+  }
 
   @override
   String get classesOrganisationTransferAction => 'Transfer';
@@ -243,8 +322,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationPendingTitle => 'Level not distributed yet';
 
   @override
-  String get classesOrganisationPendingSubtitle =>
-      'Run the initial distribution to create classes for this level.';
+  String classesOrganisationPendingMessage(int count, String levelName) {
+    return '$count students in $levelName aren\'\'t assigned to any class. Automatic distribution balances the classes by gender.';
+  }
 
   @override
   String classesOrganisationPendingStudentsToDistribute(int count) {
@@ -252,64 +332,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String classesOrganisationPendingPlannedClassrooms(int count) {
-    return '$count planned classes';
+  String classesOrganisationGenderBoysPill(int count) {
+    return 'B · $count';
   }
 
   @override
-  String get classesOrganisationAppliedCriterionInfo =>
-      'Applied criterion: balanced distribution by gender (mixed school).';
-
-  @override
-  String classesOrganisationSplitSummary(
-    int studentsCount,
-    int classroomsCount,
-    String criterion,
-  ) {
-    return '$studentsCount students distributed across $classroomsCount classes · Applied criterion: $criterion';
+  String classesOrganisationGenderGirlsPill(int count) {
+    return 'G · $count';
   }
 
   @override
-  String get classesOrganisationClassroomsSectionTitle => 'Constituted classes';
+  String get classesOrganisationUnassignedTitle => 'Unassigned students';
 
   @override
-  String get classesOrganisationUnassignedTitle => 'Students to assign';
-
-  @override
-  String get classesOrganisationUnassignedTitleSuffix =>
-      ' — added after distribution';
+  String get classesOrganisationUnassignedSubtitle =>
+      'New arrivals, cancelled transfers…';
 
   @override
   String get classesOrganisationUnassignedBadge => 'To assign';
 
   @override
-  String classesOrganisationUnassignedSummary(int count) {
-    return '$count students waiting for assignment';
-  }
-
-  @override
   String get classesOrganisationNoMembers => 'No student in this classroom.';
 
   @override
-  String get classesOrganisationAssignAction => 'Assign to a classroom';
+  String get classesOrganisationAssignAction => 'Assign';
 
   @override
-  String get classesOrganisationAssignDialogTitle => 'Assign to a classroom';
-
-  @override
-  String classesOrganisationAssignDialogMessage(String studentName) {
-    return 'Choose the destination classroom for $studentName.';
-  }
-
-  @override
-  String classesOrganisationClassroomPopulation(int count) {
-    return 'Current size: $count';
-  }
-
-  @override
-  String classesOrganisationTransferConfirmMessage(String studentName) {
-    return 'Do you confirm transferring $studentName to this classroom?';
-  }
+  String get classesOrganisationAssignDialogTitle => 'Assign the student';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {

@@ -87,6 +87,9 @@ class AppDimensions {
   static const classesOrganisationGridRatio = 1.15;
   static const classesOrganisationShadowBlur = 14.0;
   static const classesOrganisationShadowOffsetY = 8.0;
+  static const classesDistributionResultModalMaxWidth = 460.0;
+  static const classesReassignModalMaxWidth = 480.0;
+  static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
 
   // Attendance page tokens

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/search/search_invitation_card.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
@@ -180,6 +181,7 @@ void main() {
     (tester) async {
       await pumpSection(tester, selectedCycle: null, selectedLevel: null);
 
+      expect(find.byType(SearchInvitationCard), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (widget) =>
@@ -197,6 +199,7 @@ void main() {
     (tester) async {
       await pumpSection(tester, selectedCycle: cycle, selectedLevel: null);
 
+      expect(find.byType(SearchInvitationCard), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (widget) =>
@@ -215,11 +218,15 @@ void main() {
       tester,
       selectedCycle: cycle,
       selectedLevel: nonSplitLevel,
-      blocState: const ClassroomState(),
+      blocState: const ClassroomState(
+        distributionOverviewStatus: ClassroomStatus.success,
+        distributionOverview: overview,
+      ),
     );
 
     expect(find.byType(FilledButton), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsWidgets);
+    expect(find.text('Niveau pas encore réparti'), findsOneWidget);
   });
 
   testWidgets(

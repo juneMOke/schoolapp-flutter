@@ -362,6 +362,18 @@ abstract class AppLocalizations {
   /// **'Level selection for class distribution'**
   String get classesOrganisationSearchTitle;
 
+  /// No description provided for @classesOrganisationHeaderEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition · Year {schoolYear}'**
+  String classesOrganisationHeaderEyebrow(String schoolYear);
+
+  /// No description provided for @classesOrganisationLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get classesOrganisationLevelPlaceholder;
+
   /// No description provided for @classesOrganisationSearchHint.
   ///
   /// In en, this message translates to:
@@ -392,23 +404,125 @@ abstract class AppLocalizations {
   /// **'Distribute by average'**
   String get classesOrganisationDistributionByPercentage;
 
-  /// No description provided for @classesOrganisationDistributionAction.
+  /// No description provided for @classesOrganisationDistributeByGenderAction.
   ///
   /// In en, this message translates to:
-  /// **'Distribute'**
-  String get classesOrganisationDistributionAction;
+  /// **'Start gender-based distribution'**
+  String get classesOrganisationDistributeByGenderAction;
 
-  /// No description provided for @classesOrganisationDistributionConfirmTitle.
+  /// No description provided for @classesDistributionResultEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Confirm distribution'**
-  String get classesOrganisationDistributionConfirmTitle;
+  /// **'Gender distribution'**
+  String get classesDistributionResultEyebrow;
 
-  /// No description provided for @classesOrganisationDistributionConfirmMessage.
+  /// No description provided for @classesDistributionProcessingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to distribute students for this level?'**
-  String get classesOrganisationDistributionConfirmMessage;
+  /// **'Distribution in progress…'**
+  String get classesDistributionProcessingTitle;
+
+  /// No description provided for @classesDistributionSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution complete'**
+  String get classesDistributionSuccessTitle;
+
+  /// No description provided for @classesDistributionSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students were evenly distributed by gender.'**
+  String get classesDistributionSuccessSubtitle;
+
+  /// No description provided for @classesDistributionRecapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount per class'**
+  String get classesDistributionRecapTitle;
+
+  /// No description provided for @classesDistributionClassHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students'**
+  String classesDistributionClassHeadcount(int count);
+
+  /// No description provided for @classesDistributionErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution failed'**
+  String get classesDistributionErrorTitle;
+
+  /// No description provided for @classesDistributionErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The classes were left intact. You can try again.'**
+  String get classesDistributionErrorMessage;
+
+  /// No description provided for @classesDistributionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get classesDistributionRetry;
+
+  /// No description provided for @classesDistributionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get classesDistributionClose;
+
+  /// No description provided for @classesDistributionKpiHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get classesDistributionKpiHeadcount;
+
+  /// No description provided for @classesDistributionKpiClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classesDistributionKpiClasses;
+
+  /// No description provided for @classesDistributionKpiBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get classesDistributionKpiBoys;
+
+  /// No description provided for @classesDistributionKpiGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get classesDistributionKpiGirls;
+
+  /// No description provided for @classesDistributionViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get classesDistributionViewGrid;
+
+  /// No description provided for @classesDistributionViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get classesDistributionViewList;
+
+  /// No description provided for @classesDistributionClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {code}'**
+  String classesDistributionClassLabel(String code);
+
+  /// No description provided for @classesDistributionClassCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students · capacity {capacity}'**
+  String classesDistributionClassCapacity(int count, int capacity);
+
+  /// No description provided for @classesDistributionCapacityFull.
+  ///
+  /// In en, this message translates to:
+  /// **'full'**
+  String get classesDistributionCapacityFull;
 
   /// No description provided for @classesOrganisationDistributionSuccess.
   ///
@@ -428,17 +542,29 @@ abstract class AppLocalizations {
   /// **'Non-split mode enabled: student list for the selected level.'**
   String get classesOrganisationNonSplitInfo;
 
-  /// No description provided for @classesOrganisationNoClassrooms.
+  /// No description provided for @classesOrganisationLoadingTitle.
   ///
   /// In en, this message translates to:
-  /// **'No classroom is available for this level.'**
-  String get classesOrganisationNoClassrooms;
+  /// **'Loading classes…'**
+  String get classesOrganisationLoadingTitle;
 
-  /// No description provided for @classesOrganisationClassroomStats.
+  /// No description provided for @classesOrganisationEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'{total} students - Girls: {girls} - Boys: {boys}'**
-  String classesOrganisationClassroomStats(int total, int girls, int boys);
+  /// **'No student to distribute'**
+  String get classesOrganisationEmptyTitle;
+
+  /// No description provided for @classesOrganisationEmptyInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll students in this level to start the distribution.'**
+  String get classesOrganisationEmptyInvite;
+
+  /// No description provided for @classesOrganisationOverviewErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get classesOrganisationOverviewErrorTitle;
 
   /// No description provided for @classesOrganisationTransferDialogTitle.
   ///
@@ -446,17 +572,35 @@ abstract class AppLocalizations {
   /// **'Transfer student'**
   String get classesOrganisationTransferDialogTitle;
 
-  /// No description provided for @classesOrganisationTransferDialogMessage.
+  /// No description provided for @classesReassignCurrentClassState.
   ///
   /// In en, this message translates to:
-  /// **'Choose the destination classroom for {studentName}.'**
-  String classesOrganisationTransferDialogMessage(String studentName);
+  /// **'Current class'**
+  String get classesReassignCurrentClassState;
 
-  /// No description provided for @classesOrganisationTransferTargetLabel.
+  /// No description provided for @classesReassignUnassignedState.
   ///
   /// In en, this message translates to:
-  /// **'Destination classroom'**
-  String get classesOrganisationTransferTargetLabel;
+  /// **'Unassigned'**
+  String get classesReassignUnassignedState;
+
+  /// No description provided for @classesReassignCurrentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get classesReassignCurrentBadge;
+
+  /// No description provided for @classesReassignFullBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get classesReassignFullBadge;
+
+  /// No description provided for @classesReassignOptionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{eff}/{cap} · B {boys} · G {girls}'**
+  String classesReassignOptionStats(int eff, int cap, int boys, int girls);
 
   /// No description provided for @classesOrganisationTransferAction.
   ///
@@ -512,11 +656,11 @@ abstract class AppLocalizations {
   /// **'Level not distributed yet'**
   String get classesOrganisationPendingTitle;
 
-  /// No description provided for @classesOrganisationPendingSubtitle.
+  /// No description provided for @classesOrganisationPendingMessage.
   ///
   /// In en, this message translates to:
-  /// **'Run the initial distribution to create classes for this level.'**
-  String get classesOrganisationPendingSubtitle;
+  /// **'{count} students in {levelName} aren\'\'t assigned to any class. Automatic distribution balances the classes by gender.'**
+  String classesOrganisationPendingMessage(int count, String levelName);
 
   /// No description provided for @classesOrganisationPendingStudentsToDistribute.
   ///
@@ -524,57 +668,35 @@ abstract class AppLocalizations {
   /// **'{count} students to distribute'**
   String classesOrganisationPendingStudentsToDistribute(int count);
 
-  /// No description provided for @classesOrganisationPendingPlannedClassrooms.
+  /// No description provided for @classesOrganisationGenderBoysPill.
   ///
   /// In en, this message translates to:
-  /// **'{count} planned classes'**
-  String classesOrganisationPendingPlannedClassrooms(int count);
+  /// **'B · {count}'**
+  String classesOrganisationGenderBoysPill(int count);
 
-  /// No description provided for @classesOrganisationAppliedCriterionInfo.
+  /// No description provided for @classesOrganisationGenderGirlsPill.
   ///
   /// In en, this message translates to:
-  /// **'Applied criterion: balanced distribution by gender (mixed school).'**
-  String get classesOrganisationAppliedCriterionInfo;
-
-  /// No description provided for @classesOrganisationSplitSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}'**
-  String classesOrganisationSplitSummary(
-    int studentsCount,
-    int classroomsCount,
-    String criterion,
-  );
-
-  /// No description provided for @classesOrganisationClassroomsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Constituted classes'**
-  String get classesOrganisationClassroomsSectionTitle;
+  /// **'G · {count}'**
+  String classesOrganisationGenderGirlsPill(int count);
 
   /// No description provided for @classesOrganisationUnassignedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Students to assign'**
+  /// **'Unassigned students'**
   String get classesOrganisationUnassignedTitle;
 
-  /// No description provided for @classesOrganisationUnassignedTitleSuffix.
+  /// No description provided for @classesOrganisationUnassignedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **' — added after distribution'**
-  String get classesOrganisationUnassignedTitleSuffix;
+  /// **'New arrivals, cancelled transfers…'**
+  String get classesOrganisationUnassignedSubtitle;
 
   /// No description provided for @classesOrganisationUnassignedBadge.
   ///
   /// In en, this message translates to:
   /// **'To assign'**
   String get classesOrganisationUnassignedBadge;
-
-  /// No description provided for @classesOrganisationUnassignedSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} students waiting for assignment'**
-  String classesOrganisationUnassignedSummary(int count);
 
   /// No description provided for @classesOrganisationNoMembers.
   ///
@@ -585,32 +707,14 @@ abstract class AppLocalizations {
   /// No description provided for @classesOrganisationAssignAction.
   ///
   /// In en, this message translates to:
-  /// **'Assign to a classroom'**
+  /// **'Assign'**
   String get classesOrganisationAssignAction;
 
   /// No description provided for @classesOrganisationAssignDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assign to a classroom'**
+  /// **'Assign the student'**
   String get classesOrganisationAssignDialogTitle;
-
-  /// No description provided for @classesOrganisationAssignDialogMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the destination classroom for {studentName}.'**
-  String classesOrganisationAssignDialogMessage(String studentName);
-
-  /// No description provided for @classesOrganisationClassroomPopulation.
-  ///
-  /// In en, this message translates to:
-  /// **'Current size: {count}'**
-  String classesOrganisationClassroomPopulation(int count);
-
-  /// No description provided for @classesOrganisationTransferConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Do you confirm transferring {studentName} to this classroom?'**
-  String classesOrganisationTransferConfirmMessage(String studentName);
 
   /// No description provided for @classesOrganisationLoadingClassroomsCount.
   ///

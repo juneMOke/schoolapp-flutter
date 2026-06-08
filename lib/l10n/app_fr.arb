@@ -65,42 +65,93 @@
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
   "classesOrganisationSearchTitle": "Sélection du niveau à organiser",
+  "classesOrganisationHeaderEyebrow": "Composition des classes · Année {schoolYear}",
+  "@classesOrganisationHeaderEyebrow": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "classesOrganisationLevelPlaceholder": "Choisissez d'abord un cycle",
   "classesOrganisationSearchHint": "Sélectionnez le cycle et le niveau à organiser, puis lancez la recherche pour afficher la répartition actuelle ou préparer la distribution en sous-classes.",
   "classesOrganisationClassroomFieldLabel": "Sous-classe",
   "classesOrganisationDistributionLabel": "Critère de répartition",
   "classesOrganisationDistributionByGender": "Répartition par genre",
   "classesOrganisationDistributionByPercentage": "Répartition par moyenne",
-  "classesOrganisationDistributionAction": "Répartir",
-  "classesOrganisationDistributionConfirmTitle": "Confirmer la répartition",
-  "classesOrganisationDistributionConfirmMessage": "Voulez-vous lancer la répartition des élèves pour ce niveau ?",
-  "classesOrganisationDistributionSuccess": "Répartition terminée avec succès.",
-  "classesOrganisationSplitInfo": "Mode sous-classes actif : affichage par sous-classe avec effectifs et statistiques.",
-  "classesOrganisationNonSplitInfo": "Mode classe unique actif : liste des élèves du niveau sélectionné.",
-  "classesOrganisationNoClassrooms": "Aucune sous-classe disponible pour ce niveau.",
-  "classesOrganisationClassroomStats": "{total} élèves - Filles: {girls} - Garçons: {boys}",
-  "@classesOrganisationClassroomStats": {
+  "classesOrganisationDistributeByGenderAction": "Lancer la répartition par genre",
+  "classesDistributionResultEyebrow": "Répartition par genre",
+  "classesDistributionProcessingTitle": "Répartition en cours…",
+  "classesDistributionSuccessTitle": "Répartition réussie",
+  "classesDistributionSuccessSubtitle": "Les élèves ont été répartis de façon équilibrée par genre.",
+  "classesDistributionRecapTitle": "Effectif par classe",
+  "classesDistributionClassHeadcount": "{count} élèves",
+  "@classesDistributionClassHeadcount": {
     "placeholders": {
-      "total": {
-        "type": "int"
-      },
-      "girls": {
-        "type": "int"
-      },
-      "boys": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "classesOrganisationTransferDialogTitle": "Transférer l'élève",
-  "classesOrganisationTransferDialogMessage": "Choisissez la sous-classe de destination pour {studentName}.",
-  "@classesOrganisationTransferDialogMessage": {
+  "classesDistributionErrorTitle": "Échec de la répartition",
+  "classesDistributionErrorMessage": "Les classes sont restées intactes. Vous pouvez réessayer.",
+  "classesDistributionRetry": "Réessayer",
+  "classesDistributionClose": "Fermer",
+  "classesDistributionKpiHeadcount": "Effectif",
+  "classesDistributionKpiClasses": "Classes",
+  "classesDistributionKpiBoys": "Garçons",
+  "classesDistributionKpiGirls": "Filles",
+  "classesDistributionViewGrid": "Grille",
+  "classesDistributionViewList": "Liste",
+  "classesDistributionClassLabel": "Classe {code}",
+  "@classesDistributionClassLabel": {
     "placeholders": {
-      "studentName": {
+      "code": {
         "type": "String"
       }
     }
   },
-  "classesOrganisationTransferTargetLabel": "Sous-classe de destination",
+  "classesDistributionClassCapacity": "{count} élèves · capacité {capacity}",
+  "@classesDistributionClassCapacity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "classesDistributionCapacityFull": "complet",
+  "classesOrganisationDistributionSuccess": "Répartition terminée avec succès.",
+  "classesOrganisationSplitInfo": "Mode sous-classes actif : affichage par sous-classe avec effectifs et statistiques.",
+  "classesOrganisationNonSplitInfo": "Mode classe unique actif : liste des élèves du niveau sélectionné.",
+  "classesOrganisationLoadingTitle": "Chargement des classes…",
+  "classesOrganisationEmptyTitle": "Aucun élève à répartir",
+  "classesOrganisationEmptyInvite": "Inscrivez des élèves dans ce niveau pour lancer la répartition.",
+  "classesOrganisationOverviewErrorTitle": "Chargement impossible",
+  "classesOrganisationTransferDialogTitle": "Transférer l'élève",
+  "classesReassignCurrentClassState": "Classe actuelle",
+  "classesReassignUnassignedState": "Non réparti",
+  "classesReassignCurrentBadge": "Actuelle",
+  "classesReassignFullBadge": "Complet",
+  "classesReassignOptionStats": "{eff}/{cap} · G {boys} · F {girls}",
+  "@classesReassignOptionStats": {
+    "placeholders": {
+      "eff": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      },
+      "boys": {
+        "type": "int"
+      },
+      "girls": {
+        "type": "int"
+      }
+    }
+  },
   "classesOrganisationTransferAction": "Transférer",
   "classesOrganisationTransferInProgress": "Transfert en cours...",
   "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
@@ -116,8 +167,18 @@
       }
     }
   },
-  "classesOrganisationPendingTitle": "Niveau non encore réparti",
-  "classesOrganisationPendingSubtitle": "Lancez la répartition initiale pour constituer les classes de ce niveau.",
+  "classesOrganisationPendingTitle": "Niveau pas encore réparti",
+  "classesOrganisationPendingMessage": "Les {count} élèves de {levelName} ne sont rattachés à aucune classe. La répartition automatique équilibre les classes par genre.",
+  "@classesOrganisationPendingMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "levelName": {
+        "type": "String"
+      }
+    }
+  },
   "classesOrganisationPendingStudentsToDistribute": "{count} élèves à répartir",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
@@ -126,68 +187,28 @@
       }
     }
   },
-  "classesOrganisationPendingPlannedClassrooms": "{count} classes prévues",
-  "@classesOrganisationPendingPlannedClassrooms": {
+  "classesOrganisationGenderBoysPill": "G · {count}",
+  "@classesOrganisationGenderBoysPill": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "classesOrganisationAppliedCriterionInfo": "Critère appliqué : répartition équilibrée par genre (école mixte).",
-  "classesOrganisationSplitSummary": "{studentsCount} élèves répartis en {classroomsCount} classes · Critère appliqué : {criterion}",
-  "@classesOrganisationSplitSummary": {
+  "classesOrganisationGenderGirlsPill": "F · {count}",
+  "@classesOrganisationGenderGirlsPill": {
     "placeholders": {
-      "studentsCount": {
+      "count": {
         "type": "int"
-      },
-      "classroomsCount": {
-        "type": "int"
-      },
-      "criterion": {
-        "type": "String"
       }
     }
   },
-  "classesOrganisationClassroomsSectionTitle": "Classes constituées",
-  "classesOrganisationUnassignedTitle": "Élèves à affecter",
-  "classesOrganisationUnassignedTitleSuffix": " — arrivés après la répartition",
+  "classesOrganisationUnassignedTitle": "Élèves non répartis",
+  "classesOrganisationUnassignedSubtitle": "Nouveaux arrivants, transferts annulés…",
   "classesOrganisationUnassignedBadge": "À affecter",
-  "classesOrganisationUnassignedSummary": "{count} élèves en attente d'affectation",
-  "@classesOrganisationUnassignedSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
-  "classesOrganisationAssignAction": "Affecter à une classe",
-  "classesOrganisationAssignDialogTitle": "Affecter à une classe",
-  "classesOrganisationAssignDialogMessage": "Choisissez la classe de destination pour {studentName}.",
-  "@classesOrganisationAssignDialogMessage": {
-    "placeholders": {
-      "studentName": {
-        "type": "String"
-      }
-    }
-  },
-  "classesOrganisationClassroomPopulation": "Effectif actuel : {count}",
-  "@classesOrganisationClassroomPopulation": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "classesOrganisationTransferConfirmMessage": "Confirmez-vous le transfert de {studentName} vers cette classe ?",
-  "@classesOrganisationTransferConfirmMessage": {
-    "placeholders": {
-      "studentName": {
-        "type": "String"
-      }
-    }
-  },
+  "classesOrganisationAssignAction": "Affecter",
+  "classesOrganisationAssignDialogTitle": "Affecter l'élève",
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {

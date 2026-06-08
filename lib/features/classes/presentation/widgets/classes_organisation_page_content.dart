@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/classes/presentation/widgets/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_search_form.dart';
 
 class ClassesOrganisationPageContent extends StatelessWidget {
+  final String schoolYear;
   final List<ClassesOrganisationCycleOption> cycles;
   final String? selectedCycleId;
   final ClassesOrganisationLevelOption? selectedLevel;
@@ -16,6 +17,7 @@ class ClassesOrganisationPageContent extends StatelessWidget {
 
   const ClassesOrganisationPageContent({
     super.key,
+    required this.schoolYear,
     required this.cycles,
     required this.selectedCycleId,
     required this.selectedLevel,
@@ -47,6 +49,7 @@ class ClassesOrganisationPageContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClassesOrganisationSearchForm(
+                schoolYear: schoolYear,
                 cycles: cycles,
                 selectedCycleId: selectedCycleId,
                 selectedLevelId: selectedLevel?.key,

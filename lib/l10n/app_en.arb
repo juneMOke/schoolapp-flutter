@@ -98,34 +98,79 @@
   "classesOrganisationHeroTitle": "Class composition",
   "classesOrganisationHeroSubtitle": "Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.",
   "classesOrganisationSearchTitle": "Level selection for class distribution",
+  "classesOrganisationHeaderEyebrow": "Class composition · Year {schoolYear}",
+  "@classesOrganisationHeaderEyebrow": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "classesOrganisationLevelPlaceholder": "Choose a cycle first",
   "classesOrganisationSearchHint": "Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.",
   "classesOrganisationClassroomFieldLabel": "Classroom",
   "classesOrganisationDistributionLabel": "Distribution criterion",
   "classesOrganisationDistributionByGender": "Distribute by gender",
   "classesOrganisationDistributionByPercentage": "Distribute by average",
-  "classesOrganisationDistributionAction": "Distribute",
-  "classesOrganisationDistributionConfirmTitle": "Confirm distribution",
-  "classesOrganisationDistributionConfirmMessage": "Do you want to distribute students for this level?",
+  "classesOrganisationDistributeByGenderAction": "Start gender-based distribution",
+  "classesDistributionResultEyebrow": "Gender distribution",
+  "classesDistributionProcessingTitle": "Distribution in progress…",
+  "classesDistributionSuccessTitle": "Distribution complete",
+  "classesDistributionSuccessSubtitle": "Students were evenly distributed by gender.",
+  "classesDistributionRecapTitle": "Headcount per class",
+  "classesDistributionClassHeadcount": "{count} students",
+  "@classesDistributionClassHeadcount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "classesDistributionErrorTitle": "Distribution failed",
+  "classesDistributionErrorMessage": "The classes were left intact. You can try again.",
+  "classesDistributionRetry": "Retry",
+  "classesDistributionClose": "Close",
+  "classesDistributionKpiHeadcount": "Headcount",
+  "classesDistributionKpiClasses": "Classes",
+  "classesDistributionKpiBoys": "Boys",
+  "classesDistributionKpiGirls": "Girls",
+  "classesDistributionViewGrid": "Grid",
+  "classesDistributionViewList": "List",
+  "classesDistributionClassLabel": "Class {code}",
+  "@classesDistributionClassLabel": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "classesDistributionClassCapacity": "{count} students · capacity {capacity}",
+  "@classesDistributionClassCapacity": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "capacity": { "type": "int" }
+    }
+  },
+  "classesDistributionCapacityFull": "full",
   "classesOrganisationDistributionSuccess": "Distribution completed successfully.",
   "classesOrganisationSplitInfo": "Split mode enabled: classroom grid with members and stats.",
   "classesOrganisationNonSplitInfo": "Non-split mode enabled: student list for the selected level.",
-  "classesOrganisationNoClassrooms": "No classroom is available for this level.",
-  "classesOrganisationClassroomStats": "{total} students - Girls: {girls} - Boys: {boys}",
-  "@classesOrganisationClassroomStats": {
-    "placeholders": {
-      "total": { "type": "int" },
-      "girls": { "type": "int" },
-      "boys": { "type": "int" }
-    }
-  },
+  "classesOrganisationLoadingTitle": "Loading classes…",
+  "classesOrganisationEmptyTitle": "No student to distribute",
+  "classesOrganisationEmptyInvite": "Enroll students in this level to start the distribution.",
+  "classesOrganisationOverviewErrorTitle": "Unable to load",
   "classesOrganisationTransferDialogTitle": "Transfer student",
-  "classesOrganisationTransferDialogMessage": "Choose the destination classroom for {studentName}.",
-  "@classesOrganisationTransferDialogMessage": {
+  "classesReassignCurrentClassState": "Current class",
+  "classesReassignUnassignedState": "Unassigned",
+  "classesReassignCurrentBadge": "Current",
+  "classesReassignFullBadge": "Full",
+  "classesReassignOptionStats": "{eff}/{cap} · B {boys} · G {girls}",
+  "@classesReassignOptionStats": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "eff": { "type": "int" },
+      "cap": { "type": "int" },
+      "boys": { "type": "int" },
+      "girls": { "type": "int" }
     }
   },
-  "classesOrganisationTransferTargetLabel": "Destination classroom",
   "classesOrganisationTransferAction": "Transfer",
   "classesOrganisationTransferInProgress": "Transfer in progress...",
   "classesOrganisationTransferSuccess": "Transfer completed successfully.",
@@ -140,59 +185,37 @@
     }
   },
   "classesOrganisationPendingTitle": "Level not distributed yet",
-  "classesOrganisationPendingSubtitle": "Run the initial distribution to create classes for this level.",
+  "classesOrganisationPendingMessage": "{count} students in {levelName} aren''t assigned to any class. Automatic distribution balances the classes by gender.",
+  "@classesOrganisationPendingMessage": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "levelName": { "type": "String" }
+    }
+  },
   "classesOrganisationPendingStudentsToDistribute": "{count} students to distribute",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "classesOrganisationPendingPlannedClassrooms": "{count} planned classes",
-  "@classesOrganisationPendingPlannedClassrooms": {
+  "classesOrganisationGenderBoysPill": "B · {count}",
+  "@classesOrganisationGenderBoysPill": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "classesOrganisationAppliedCriterionInfo": "Applied criterion: balanced distribution by gender (mixed school).",
-  "classesOrganisationSplitSummary": "{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}",
-  "@classesOrganisationSplitSummary": {
+  "classesOrganisationGenderGirlsPill": "G · {count}",
+  "@classesOrganisationGenderGirlsPill": {
     "placeholders": {
-      "studentsCount": { "type": "int" },
-      "classroomsCount": { "type": "int" },
-      "criterion": { "type": "String" }
+      "count": { "type": "int" }
     }
   },
-  "classesOrganisationClassroomsSectionTitle": "Constituted classes",
-  "classesOrganisationUnassignedTitle": "Students to assign",
-  "classesOrganisationUnassignedTitleSuffix": " — added after distribution",
+  "classesOrganisationUnassignedTitle": "Unassigned students",
+  "classesOrganisationUnassignedSubtitle": "New arrivals, cancelled transfers…",
   "classesOrganisationUnassignedBadge": "To assign",
-  "classesOrganisationUnassignedSummary": "{count} students waiting for assignment",
-  "@classesOrganisationUnassignedSummary": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
   "classesOrganisationNoMembers": "No student in this classroom.",
-  "classesOrganisationAssignAction": "Assign to a classroom",
-  "classesOrganisationAssignDialogTitle": "Assign to a classroom",
-  "classesOrganisationAssignDialogMessage": "Choose the destination classroom for {studentName}.",
-  "@classesOrganisationAssignDialogMessage": {
-    "placeholders": {
-      "studentName": { "type": "String" }
-    }
-  },
-  "classesOrganisationClassroomPopulation": "Current size: {count}",
-  "@classesOrganisationClassroomPopulation": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "classesOrganisationTransferConfirmMessage": "Do you confirm transferring {studentName} to this classroom?",
-  "@classesOrganisationTransferConfirmMessage": {
-    "placeholders": {
-      "studentName": { "type": "String" }
-    }
-  },
+  "classesOrganisationAssignAction": "Assign",
+  "classesOrganisationAssignDialogTitle": "Assign the student",
   "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
