@@ -93,24 +93,45 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
             femaleCount: femaleCount,
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          FilledButton.icon(
-            onPressed: (isDistributing || isLoadingOverview)
-                ? null
-                : onDistributionRequested,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.terreCuite,
-              foregroundColor: AppColors.blancCasse,
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              shape: const StadiumBorder(),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: (isDistributing || isLoadingOverview)
+                  ? null
+                  : onDistributionRequested,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.terreCuite,
+                foregroundColor: AppColors.blancCasse,
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacingM,
+                ),
+                shape: const StadiumBorder(),
+              ),
+              // Bouton pleine largeur + libellé flexible : sur très petit écran
+              // le texte passe sur 2 lignes plutôt que de déborder.
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isDistributing)
+                    const SizedBox(
+                      width: AppDimensions.detailMiniIconSize,
+                      height: AppDimensions.detailMiniIconSize,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    const Icon(Icons.auto_awesome_outlined),
+                  const SizedBox(width: AppDimensions.spacingS),
+                  Flexible(
+                    child: Text(
+                      l10n.classesOrganisationDistributeByGenderAction,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            icon: isDistributing
-                ? const SizedBox(
-                    width: AppDimensions.detailMiniIconSize,
-                    height: AppDimensions.detailMiniIconSize,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.auto_awesome_outlined),
-            label: Text(l10n.classesOrganisationDistributeByGenderAction),
           ),
         ],
       ),

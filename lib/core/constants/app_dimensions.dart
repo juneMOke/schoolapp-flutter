@@ -83,8 +83,6 @@ class AppDimensions {
 
   // Classes organisation responsive tokens
   static const classesOrganisationCompactFieldWidth = 260.0;
-  static const classesOrganisationCompactSelectWidth = 320.0;
-  static const classesOrganisationGridRatio = 1.15;
   static const classesOrganisationShadowBlur = 14.0;
   static const classesOrganisationShadowOffsetY = 8.0;
   static const classesDistributionResultModalMaxWidth = 460.0;

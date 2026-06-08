@@ -170,4 +170,17 @@ void main() {
       ).called(1);
     },
   );
+
+  testWidgets('popin sans débordement sur écran étroit (320px)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await openDialog(tester, transferIntent);
+
+    expect(tester.takeException(), isNull);
+  });
 }

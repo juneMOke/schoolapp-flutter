@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -63,13 +64,19 @@ class _ReassignDialogState extends State<_ReassignDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final size = MediaQuery.sizeOf(context);
+    final maxHeight = size.height * 0.88;
+    // Sur petit écran, on réduit les marges de la popin pour récupérer de la
+    // largeur utile (sinon le contenu est trop comprimé).
+    final inset = size.width <= AppBreakpoints.dataTablePhoneMax
+        ? AppDimensions.spacingM
+        : AppDimensions.spacingL;
 
     return Dialog(
       backgroundColor: AppColors.surfaceRaised,
       surfaceTintColor: Colors.transparent,
       clipBehavior: Clip.antiAlias,
-      insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
+      insetPadding: EdgeInsets.all(inset),
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -172,7 +179,10 @@ class _ReassignDialogState extends State<_ReassignDialog> {
                       ),
                     ),
                     const SizedBox(height: AppDimensions.spacingXS),
-                    _StateBadge(label: stateLabel, color: stateColor),
+                    ClassesOrganisationGenderPill(
+                      label: stateLabel,
+                      color: stateColor,
+                    ),
                   ],
                 ),
               ),
@@ -192,32 +202,49 @@ class _ReassignDialogState extends State<_ReassignDialog> {
         ? l10n.classesOrganisationTransferAction
         : l10n.classesOrganisationAssignAction;
 
+    final cancel = TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: Text(l10n.cancel),
+    );
+    final action = FilledButton.icon(
+      onPressed: _selectedId == null
+          ? null
+          : () => Navigator.of(context).pop(_selectedId),
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.bleuArdoise,
+        foregroundColor: AppColors.blancCasse,
+        minimumSize: const Size(0, AppDimensions.minTouchTarget),
+        shape: const StadiumBorder(),
+      ),
+      icon: Icon(_isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
+      label: Text(actionLabel),
+    );
+
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          FilledButton.icon(
-            onPressed: _selectedId == null
-                ? null
-                : () => Navigator.of(context).pop(_selectedId),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.bleuArdoise,
-              foregroundColor: AppColors.blancCasse,
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              shape: const StadiumBorder(),
-            ),
-            icon: Icon(
-              _isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded,
-            ),
-            label: Text(actionLabel),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Petit écran : les deux boutons s'empilent (action en tête, pleine
+          // largeur) plutôt que de déborder sur une seule ligne.
+          if (constraints.maxWidth < AppBreakpoints.financeModalFooterRowMin) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                action,
+                const SizedBox(height: AppDimensions.spacingS),
+                cancel,
+              ],
+            );
+          }
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              cancel,
+              const SizedBox(width: AppDimensions.spacingS),
+              action,
+            ],
+          );
+        },
       ),
     );
   }
@@ -322,7 +349,10 @@ class _ClassChoiceTile extends StatelessWidget {
                 ),
                 if (badgeLabel != null && badgeColor != null) ...[
                   const SizedBox(width: AppDimensions.spacingS),
-                  _StateBadge(label: badgeLabel, color: badgeColor),
+                  ClassesOrganisationGenderPill(
+                    label: badgeLabel,
+                    color: badgeColor,
+                  ),
                 ],
               ],
             ),
@@ -406,29 +436,6 @@ class _LetterBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
-    );
-  }
-}
-
-class _StateBadge extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _StateBadge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: Border.all(color: color.withValues(alpha: 0.32)),
-      ),
-      child: Text(label, style: AppTextStyles.badge.copyWith(color: color)),
     );
   }
 }

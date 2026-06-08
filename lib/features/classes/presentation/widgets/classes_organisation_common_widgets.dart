@@ -65,7 +65,16 @@ class ClassesOrganisationStatChip extends StatelessWidget {
         children: [
           Icon(icon, size: AppDimensions.detailMiniIconSize, color: foreground),
           const SizedBox(width: AppDimensions.spacingXS),
-          Text(label, style: AppTextStyles.badge.copyWith(color: foreground)),
+          // Flexible + ellipsis : la pastille s'adapte à un conteneur étroit
+          // au lieu de déborder horizontalement.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.badge.copyWith(color: foreground),
+            ),
+          ),
         ],
       ),
     );

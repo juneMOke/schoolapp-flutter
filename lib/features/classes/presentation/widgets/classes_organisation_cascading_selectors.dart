@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
@@ -50,49 +51,61 @@ class ClassesOrganisationCascadingSelectors extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final levelEnabled = _selectedCycle != null;
 
-    return Wrap(
-      spacing: AppDimensions.spacingS,
-      runSpacing: AppDimensions.spacingS,
-      children: [
-        SizedBox(
-          width: AppDimensions.classesOrganisationCompactFieldWidth,
-          child: EteeloSelectInput<String>(
-            label: l10n.schoolCycle,
-            value: selectedCycleId,
-            enabled: cycles.isNotEmpty,
-            onChanged: onCycleChanged,
-            items: cycles
-                .map(
-                  (option) => EteeloSelectItem<String>(
-                    value: option.id,
-                    label: option.label,
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        ),
-        SizedBox(
-          width: AppDimensions.classesOrganisationCompactSelectWidth,
-          child: EteeloSelectInput<String>(
-            label: l10n.schoolLevelLabel,
-            value: selectedLevelId,
-            enabled: levelEnabled,
-            // Tant qu'aucun cycle n'est choisi, on invite à en prendre un.
-            placeholder: levelEnabled
-                ? null
-                : l10n.classesOrganisationLevelPlaceholder,
-            onChanged: (value) => onLevelChanged(_levelForKey(value)),
-            items: _availableLevels
-                .map(
-                  (option) => EteeloSelectItem<String>(
-                    value: option.key,
-                    label: option.schoolLevelName,
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        ),
-      ],
+    final cycleField = EteeloSelectInput<String>(
+      label: l10n.schoolCycle,
+      value: selectedCycleId,
+      enabled: cycles.isNotEmpty,
+      onChanged: onCycleChanged,
+      items: cycles
+          .map(
+            (option) =>
+                EteeloSelectItem<String>(value: option.id, label: option.label),
+          )
+          .toList(growable: false),
+    );
+
+    final levelField = EteeloSelectInput<String>(
+      label: l10n.schoolLevelLabel,
+      value: selectedLevelId,
+      enabled: levelEnabled,
+      // Tant qu'aucun cycle n'est choisi, on invite à en prendre un.
+      placeholder: levelEnabled
+          ? null
+          : l10n.classesOrganisationLevelPlaceholder,
+      onChanged: (value) => onLevelChanged(_levelForKey(value)),
+      items: _availableLevels
+          .map(
+            (option) => EteeloSelectItem<String>(
+              value: option.key,
+              label: option.schoolLevelName,
+            ),
+          )
+          .toList(growable: false),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Large : les deux selects côte à côte ; étroit : empilés pleine largeur
+        // (plus de largeurs fixes qui débordent / se clampent maladroitement).
+        if (constraints.maxWidth < AppBreakpoints.classesCascadeRowMin) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              cycleField,
+              const SizedBox(height: AppDimensions.spacingS),
+              levelField,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: cycleField),
+            const SizedBox(width: AppDimensions.spacingS),
+            Expanded(child: levelField),
+          ],
+        );
+      },
     );
   }
 }
