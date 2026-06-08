@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_search_inputs.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
+/// Grille de recherche des classes en composants design-system Eteelo.
+///
+/// Deux groupes de trois champs (cascade Cycle → Niveau → Classe, puis
+/// Nom / Post-nom / Prénom). Chaque groupe se replie en 3 → 2 → 1 colonnes
+/// selon la largeur disponible (auto-fit, largeur min par champ).
 class ClassesListSearchFieldsGrid extends StatelessWidget {
+  /// Largeur minimale d'un champ avant repli sur la colonne suivante.
+  static const double _minFieldWidth = 200;
+  static const double _gap = AppDimensions.spacingS;
+
   final List<ClassesListCycleOption> cycleOptions;
   final String? selectedCycleId;
   final List<ClassesListLevelOption> levelOptions;
@@ -57,129 +67,112 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dropdownFields = <Widget>[
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(1),
+        child: EteeloSelectInput<String>(
+          label: cycleLabel,
+          value: selectedCycleId,
+          enabled: cycleOptions.isNotEmpty,
+          minWidth: 0,
+          onChanged: (value) => onCycleChanged?.call(value),
+          items: cycleOptions
+              .map((o) => EteeloSelectItem<String>(value: o.id, label: o.label))
+              .toList(growable: false),
+        ),
+      ),
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(2),
+        child: EteeloSelectInput<String>(
+          label: levelLabel,
+          value: selectedLevelKey,
+          enabled: levelOptions.isNotEmpty,
+          minWidth: 0,
+          onChanged: (value) => onLevelChanged?.call(value),
+          items: levelOptions
+              .map(
+                (o) => EteeloSelectItem<String>(value: o.key, label: o.label),
+              )
+              .toList(growable: false),
+        ),
+      ),
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(3),
+        child: EteeloSelectInput<String>(
+          label: classroomLabel,
+          value: selectedClassroomId,
+          enabled: classroomEnabled,
+          minWidth: 0,
+          onChanged: (value) => onClassroomChanged?.call(value),
+          items: classroomOptions
+              .map((c) => EteeloSelectItem<String>(value: c.id, label: c.name))
+              .toList(growable: false),
+        ),
+      ),
+    ];
+
+    final textFields = <Widget>[
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(4),
+        child: EteeloTextInput(
+          controller: lastNameController,
+          label: lastNameLabel,
+          onChanged: onLastNameChanged,
+          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
+          textInputAction: TextInputAction.next,
+        ),
+      ),
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(5),
+        child: EteeloTextInput(
+          controller: surnameController,
+          label: surnameLabel,
+          onChanged: onSurnameChanged,
+          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
+          textInputAction: TextInputAction.next,
+        ),
+      ),
+      FocusTraversalOrder(
+        order: const NumericFocusOrder(6),
+        child: EteeloTextInput(
+          controller: firstNameController,
+          label: firstNameLabel,
+          onChanged: onFirstNameChanged,
+          inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
+          textInputAction: TextInputAction.done,
+        ),
+      ),
+    ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= AppBreakpoints.formMediumMin;
-        const spacing = AppDimensions.spacingS;
-
-        final dropdownFields = [
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(1),
-            child: ClassesListSearchDropdownField<String>(
-              value: selectedCycleId,
-              label: cycleLabel,
-              icon: Icons.account_tree_outlined,
-              items: cycleOptions
-                  .map(
-                    (o) => DropdownMenuItem<String>(
-                      value: o.id,
-                      child: Text(o.label, overflow: TextOverflow.ellipsis),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: cycleOptions.isEmpty ? null : onCycleChanged,
-            ),
-          ),
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(2),
-            child: ClassesListSearchDropdownField<String>(
-              value: selectedLevelKey,
-              label: levelLabel,
-              icon: Icons.school_outlined,
-              items: levelOptions
-                  .map(
-                    (o) => DropdownMenuItem<String>(
-                      value: o.key,
-                      child: Text(o.label, overflow: TextOverflow.ellipsis),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: levelOptions.isEmpty ? null : onLevelChanged,
-            ),
-          ),
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(3),
-            child: ClassesListSearchDropdownField<String>(
-              value: selectedClassroomId,
-              label: classroomLabel,
-              icon: Icons.meeting_room_outlined,
-              items: classroomOptions
-                  .map(
-                    (c) => DropdownMenuItem<String>(
-                      value: c.id,
-                      child: Text(c.name, overflow: TextOverflow.ellipsis),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: classroomEnabled ? onClassroomChanged : null,
-            ),
-          ),
-        ];
-
-        final textFields = [
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(4),
-            child: ClassesListSearchTextField(
-              controller: firstNameController,
-              label: firstNameLabel,
-              icon: Icons.person_outline_rounded,
-              onChanged: onFirstNameChanged,
-            ),
-          ),
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(5),
-            child: ClassesListSearchTextField(
-              controller: lastNameController,
-              label: lastNameLabel,
-              icon: Icons.badge_outlined,
-              onChanged: onLastNameChanged,
-            ),
-          ),
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(6),
-            child: ClassesListSearchTextField(
-              controller: surnameController,
-              label: surnameLabel,
-              icon: Icons.account_circle_outlined,
-              onChanged: onSurnameChanged,
-            ),
-          ),
-        ];
-
-        if (isWide) {
-          return Column(
-            children: [
-              _buildRow(dropdownFields, spacing),
-              const SizedBox(height: spacing),
-              _buildRow(textFields, spacing),
-            ],
-          );
-        }
-
-        // Compact : wrap automatique, largeur min par champ
-        final fieldWidth = ((constraints.maxWidth - spacing) / 2)
-            .clamp(170.0, 360.0)
-            .toDouble();
-
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
+        final maxWidth = constraints.maxWidth;
+        return Column(
           children: [
-            ...dropdownFields.map((f) => SizedBox(width: fieldWidth, child: f)),
-            ...textFields.map((f) => SizedBox(width: fieldWidth, child: f)),
+            _autoFitRow(dropdownFields, maxWidth),
+            const SizedBox(height: _gap),
+            _autoFitRow(textFields, maxWidth),
           ],
         );
       },
     );
   }
 
-  Widget _buildRow(List<Widget> children, double spacing) {
-    return Row(
+  /// Dispose [fields] en colonnes auto-fit : autant de colonnes que la largeur
+  /// le permet (max = nombre de champs), repli ligne à ligne au-delà.
+  Widget _autoFitRow(List<Widget> fields, double maxWidth) {
+    var columns = fields.length;
+    while (columns > 1 &&
+        maxWidth < (columns * _minFieldWidth) + ((columns - 1) * _gap)) {
+      columns--;
+    }
+    final fieldWidth = (maxWidth - ((columns - 1) * _gap)) / columns;
+
+    return Wrap(
+      spacing: _gap,
+      runSpacing: _gap,
       children: [
-        for (var i = 0; i < children.length; i++) ...[
-          Expanded(child: children[i]),
-          if (i < children.length - 1) SizedBox(width: spacing),
-        ],
+        for (final field in fields) SizedBox(width: fieldWidth, child: field),
       ],
     );
   }
