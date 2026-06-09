@@ -50,14 +50,6 @@ class AttendancePageHelpers {
         previous.records != current.records;
   }
 
-  static bool buildWhenSearchFormChanges(
-    AttendanceState previous,
-    AttendanceState current,
-  ) {
-    return previous.fetchStatus != current.fetchStatus ||
-        previous.saveStatus != current.saveStatus;
-  }
-
   static bool buildWhenResultsChanges(
     AttendanceState previous,
     AttendanceState current,
@@ -123,6 +115,7 @@ class AttendancePageHelpers {
       AbsenceReason.marriageLeave => l10n.absenceReasonMarriageLeave,
       AbsenceReason.parentalLeave => l10n.absenceReasonParentalLeave,
       AbsenceReason.workLeave => l10n.absenceReasonWorkLeave,
+      AbsenceReason.unjustified => l10n.absenceReasonUnjustified,
       AbsenceReason.other => l10n.absenceReasonOther,
     };
   }

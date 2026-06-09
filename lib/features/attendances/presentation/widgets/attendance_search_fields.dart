@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -17,13 +16,10 @@ class AttendanceSearchFields extends StatelessWidget {
   final List<BootstrapClassroom> classroomOptions;
   final String? selectedClassroomId;
   final DateTime selectedDate;
-  final bool isSearching;
-  final bool canSearch;
   final ValueChanged<String?> onCycleChanged;
   final ValueChanged<String?> onLevelChanged;
   final ValueChanged<String?> onClassroomChanged;
   final Future<void> Function() onPickDate;
-  final VoidCallback onSearch;
 
   const AttendanceSearchFields({
     super.key,
@@ -34,13 +30,10 @@ class AttendanceSearchFields extends StatelessWidget {
     required this.classroomOptions,
     required this.selectedClassroomId,
     required this.selectedDate,
-    required this.isSearching,
-    required this.canSearch,
     required this.onCycleChanged,
     required this.onLevelChanged,
     required this.onClassroomChanged,
     required this.onPickDate,
-    required this.onSearch,
   });
 
   @override
@@ -50,7 +43,7 @@ class AttendanceSearchFields extends StatelessWidget {
       _AttendanceDropdownField(
         width: AppDimensions.attendanceCycleFieldWidth,
         label: l10n.attendanceCycleLabel,
-        selectedValue: selectedCycleId,
+        value: selectedCycleId,
         items: cycleOptions
             .map(
               (option) => DropdownMenuItem<String>(
@@ -64,7 +57,7 @@ class AttendanceSearchFields extends StatelessWidget {
       _AttendanceDropdownField(
         width: AppDimensions.attendanceLevelFieldWidth,
         label: l10n.attendanceLevelLabel,
-        selectedValue: selectedLevelKey,
+        value: selectedLevelKey,
         items: levelOptions
             .map(
               (option) => DropdownMenuItem<String>(
@@ -78,7 +71,7 @@ class AttendanceSearchFields extends StatelessWidget {
       _AttendanceDropdownField(
         width: AppDimensions.attendanceClassFieldWidth,
         label: l10n.attendanceClassLabel,
-        selectedValue: selectedClassroomId,
+        value: selectedClassroomId,
         items: classroomOptions
             .map(
               (classroom) => DropdownMenuItem<String>(
@@ -98,8 +91,7 @@ class AttendanceSearchFields extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < AppBreakpoints.formMediumMin;
-        final canRenderSingleLineSelectors =
+        final canRenderSingleLine =
             constraints.maxWidth >=
             (AppDimensions.attendanceCycleFieldWidth +
                 AppDimensions.attendanceLevelFieldWidth +
@@ -110,11 +102,8 @@ class AttendanceSearchFields extends StatelessWidget {
         return AnimatedContainer(
           duration: AppMotion.medium,
           curve: AppMotion.outCurve,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (canRenderSingleLineSelectors)
-                Row(
+          child: canRenderSingleLine
+              ? Row(
                   children: [
                     fields[0],
                     const SizedBox(width: AppDimensions.spacingS),
@@ -125,28 +114,12 @@ class AttendanceSearchFields extends StatelessWidget {
                     fields[3],
                   ],
                 )
-              else
-                Wrap(
+              : Wrap(
                   spacing: AppDimensions.spacingS,
                   runSpacing: AppDimensions.spacingS,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: fields,
                 ),
-              const SizedBox(height: AppDimensions.spacingS),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: isCompact ? double.infinity : null,
-                  child: AttendanceSearchButton(
-                    isSearching: isSearching,
-                    canSearch: canSearch,
-                    onSearch: onSearch,
-                    isCompact: isCompact,
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -156,14 +129,14 @@ class AttendanceSearchFields extends StatelessWidget {
 class _AttendanceDropdownField extends StatelessWidget {
   final double width;
   final String label;
-  final String? selectedValue;
+  final String? value;
   final List<DropdownMenuItem<String>> items;
   final ValueChanged<String?>? onChanged;
 
   const _AttendanceDropdownField({
     required this.width,
     required this.label,
-    required this.selectedValue,
+    required this.value,
     required this.items,
     required this.onChanged,
   });
@@ -173,7 +146,7 @@ class _AttendanceDropdownField extends StatelessWidget {
     return SizedBox(
       width: width,
       child: DropdownButtonFormField<String>(
-        initialValue: selectedValue,
+        initialValue: value,
         style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
         decoration: _fieldDecoration(label),
         items: items,

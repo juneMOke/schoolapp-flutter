@@ -2456,8 +2456,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Lancez une recherche pour afficher les présences de la classe sélectionnée.';
 
   @override
+  String get attendanceSelectClassTitle => 'Sélectionnez une classe';
+
+  @override
   String get attendanceEmptySelectionMessage =>
-      'Sélectionnez une classe et une date pour faire l\'appel.';
+      'Choisissez un cycle, un niveau puis une classe pour charger la liste d\'appel.';
 
   @override
   String get attendanceLoadingMessage => 'Chargement des présences en cours...';
@@ -2523,6 +2526,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get attendancePresentCount => 'Présents';
+
+  @override
+  String get attendanceJustifiedCount => 'Justifiés';
+
+  @override
+  String get attendanceUnjustifiedCount => 'Non justifiés';
+
+  @override
+  String get attendancePendingCount => 'À motiver';
 
   @override
   String get attendanceAbsentCount => 'Absents';
@@ -2603,6 +2615,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceReasonRequiredHint => 'Motif requis pour une absence.';
 
   @override
+  String get attendanceMotifRequisLabel => 'Motif requis';
+
+  @override
   String get attendanceReasonDisabledHint =>
       'Le motif est requis seulement pour une absence.';
 
@@ -2658,6 +2673,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceErrorUnknown => 'Une erreur inattendue est survenue.';
 
   @override
+  String get attendanceSaveCallAction => 'Enregistrer l\'appel';
+
+  @override
+  String get attendanceMarkAllPresentAction => 'Tout présent';
+
+  @override
+  String get attendanceSaveOverlayEyebrow => 'Appel';
+
+  @override
+  String get attendanceSaveProcessingTitle => 'Enregistrement en cours…';
+
+  @override
+  String get attendanceSaveSuccessTitle => 'Appel enregistré !';
+
+  @override
+  String get attendanceSaveSuccessSubtitle =>
+      'Les présences de la classe ont été sauvegardées.';
+
+  @override
+  String get attendanceSaveErrorTitle => 'Échec de l\'enregistrement';
+
+  @override
+  String get attendanceSaveErrorMessage =>
+      'Les saisies sont conservées. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get attendanceSaveRetryAction => 'Réessayer';
+
+  @override
+  String get attendanceSaveCloseAction => 'Terminer';
+
+  @override
   String get absenceReasonSickness => 'Maladie';
 
   @override
@@ -2683,6 +2730,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get absenceReasonWorkLeave => 'Congé professionnel';
+
+  @override
+  String get absenceReasonUnjustified => 'Absence non justifiée';
 
   @override
   String get absenceReasonOther => 'Autre';

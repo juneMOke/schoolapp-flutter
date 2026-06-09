@@ -53,10 +53,7 @@ class _PresencesPageState extends State<PresencesPage> {
           BlocListener<AttendanceBloc, AttendanceState>(
             listenWhen: AttendancePageHelpers.listenWhenFetchFailure,
             listener: (context, state) {
-              if (state.fetchStatus != AttendanceStatus.failure) {
-                return;
-              }
-
+              if (state.fetchStatus != AttendanceStatus.failure) return;
               AppSnackBar.showError(
                 context,
                 AttendancePageHelpers.mapAttendanceErrorToMessage(
@@ -64,30 +61,6 @@ class _PresencesPageState extends State<PresencesPage> {
                   state.fetchErrorType,
                 ),
               );
-            },
-          ),
-          BlocListener<AttendanceBloc, AttendanceState>(
-            listenWhen: AttendancePageHelpers.listenWhenSaveStatusChanges,
-            listener: (context, state) {
-              if (state.saveStatus == AttendanceStatus.success) {
-                AppSnackBar.showSuccess(context, l10n.attendanceSaveSuccess);
-                context.read<AttendanceBloc>().add(
-                  const AttendanceSaveStatusResetRequested(),
-                );
-              }
-
-              if (state.saveStatus == AttendanceStatus.failure) {
-                AppSnackBar.showError(
-                  context,
-                  AttendancePageHelpers.mapAttendanceErrorToMessage(
-                    l10n,
-                    state.saveErrorType,
-                  ),
-                );
-                context.read<AttendanceBloc>().add(
-                  const AttendanceSaveStatusResetRequested(),
-                );
-              }
             },
           ),
         ],
@@ -116,7 +89,6 @@ class _PresencesPageState extends State<PresencesPage> {
               options: options,
               lastRequest: _lastRequest,
               onSearch: _handleSearch,
-              onExportPressed: _handleExportPressed,
               onRetry: _retryLastSearch,
             );
           },
@@ -155,11 +127,6 @@ class _PresencesPageState extends State<PresencesPage> {
         academicYearId: academicYearId,
       ),
     );
-  }
-
-  void _handleExportPressed() {
-    final l10n = AppLocalizations.of(context)!;
-    AppSnackBar.showInfo(context, l10n.attendanceExportSoon);
   }
 
   void _retryLastSearch() {

@@ -4302,10 +4302,16 @@ abstract class AppLocalizations {
   /// **'Run a search to display attendance for the selected class.'**
   String get attendanceInvitationMessage;
 
+  /// No description provided for @attendanceSelectClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class'**
+  String get attendanceSelectClassTitle;
+
   /// No description provided for @attendanceEmptySelectionMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select a class and a date to take attendance.'**
+  /// **'Select a cycle, a level, and then a class to load the attendance list.'**
   String get attendanceEmptySelectionMessage;
 
   /// No description provided for @attendanceLoadingMessage.
@@ -4427,6 +4433,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Present'**
   String get attendancePresentCount;
+
+  /// No description provided for @attendanceJustifiedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get attendanceJustifiedCount;
+
+  /// No description provided for @attendanceUnjustifiedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified'**
+  String get attendanceUnjustifiedCount;
+
+  /// No description provided for @attendancePendingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending reason'**
+  String get attendancePendingCount;
 
   /// No description provided for @attendanceAbsentCount.
   ///
@@ -4566,6 +4590,12 @@ abstract class AppLocalizations {
   /// **'Reason required for an absence.'**
   String get attendanceReasonRequiredHint;
 
+  /// No description provided for @attendanceMotifRequisLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason required'**
+  String get attendanceMotifRequisLabel;
+
   /// No description provided for @attendanceReasonDisabledHint.
   ///
   /// In en, this message translates to:
@@ -4656,6 +4686,66 @@ abstract class AppLocalizations {
   /// **'An unexpected error occurred.'**
   String get attendanceErrorUnknown;
 
+  /// No description provided for @attendanceSaveCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save attendance'**
+  String get attendanceSaveCallAction;
+
+  /// No description provided for @attendanceMarkAllPresentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'All present'**
+  String get attendanceMarkAllPresentAction;
+
+  /// No description provided for @attendanceSaveOverlayEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceSaveOverlayEyebrow;
+
+  /// No description provided for @attendanceSaveProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving attendance…'**
+  String get attendanceSaveProcessingTitle;
+
+  /// No description provided for @attendanceSaveSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved!'**
+  String get attendanceSaveSuccessTitle;
+
+  /// No description provided for @attendanceSaveSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class attendance records have been saved.'**
+  String get attendanceSaveSuccessSubtitle;
+
+  /// No description provided for @attendanceSaveErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get attendanceSaveErrorTitle;
+
+  /// No description provided for @attendanceSaveErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entries are preserved. Check your connection and try again.'**
+  String get attendanceSaveErrorMessage;
+
+  /// No description provided for @attendanceSaveRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get attendanceSaveRetryAction;
+
+  /// No description provided for @attendanceSaveCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get attendanceSaveCloseAction;
+
   /// No description provided for @absenceReasonSickness.
   ///
   /// In en, this message translates to:
@@ -4709,6 +4799,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Work leave'**
   String get absenceReasonWorkLeave;
+
+  /// No description provided for @absenceReasonUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absence'**
+  String get absenceReasonUnjustified;
 
   /// No description provided for @absenceReasonOther.
   ///

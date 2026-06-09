@@ -44,11 +44,13 @@ class AttendancePresenceSwitch extends StatelessWidget {
           onChanged(target);
         },
         style: SegmentedButton.styleFrom(
-          backgroundColor: AppColors.background,
-          selectedBackgroundColor: selectedBackground.withValues(alpha: 0.18),
-          selectedForegroundColor: selectedBackground,
+          backgroundColor: Colors.transparent,
+          selectedBackgroundColor: selectedBackground,
+          selectedForegroundColor: Colors.white,
           foregroundColor: AppColors.textSecondary,
           side: const BorderSide(color: AppColors.border),
+          minimumSize: const Size(0, 36),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           textStyle: AppTextStyles.caption.copyWith(
             fontWeight: FontWeight.w700,
           ),

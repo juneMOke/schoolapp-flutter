@@ -7,13 +7,11 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/att
 
 class AttendanceSearchForm extends StatefulWidget {
   final List<AttendanceCycleOption> options;
-  final bool isSearching;
   final ValueChanged<AttendanceSearchRequest> onSearch;
 
   const AttendanceSearchForm({
     super.key,
     required this.options,
-    required this.isSearching,
     required this.onSearch,
   });
 
@@ -117,8 +115,6 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
     return null;
   }
 
-  bool get _canSearch => !widget.isSearching && _request != null;
-
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -128,11 +124,19 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
       lastDate: DateTime(now.year + 2),
     );
 
-    if (!mounted || picked == null) {
+    if (!mounted || picked == null || picked == _selectedDate) {
       return;
     }
 
     setState(() => _selectedDate = picked);
+    _triggerSearchIfReady();
+  }
+
+  void _triggerSearchIfReady() {
+    final request = _request;
+    if (request != null) {
+      widget.onSearch(request);
+    }
   }
 
   @override
@@ -160,8 +164,6 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
         classroomOptions: _selectedLevel?.classrooms ?? const [],
         selectedClassroomId: _selectedClassroomId,
         selectedDate: _selectedDate,
-        isSearching: widget.isSearching,
-        canSearch: _canSearch,
         onCycleChanged: (value) {
           setState(() {
             _selectedCycleId = value;
@@ -177,15 +179,9 @@ class _AttendanceSearchFormState extends State<AttendanceSearchForm> {
         },
         onClassroomChanged: (value) {
           setState(() => _selectedClassroomId = value);
+          _triggerSearchIfReady();
         },
         onPickDate: _pickDate,
-        onSearch: () {
-          final request = _request;
-          if (request == null) {
-            return;
-          }
-          widget.onSearch(request);
-        },
       ),
     );
   }

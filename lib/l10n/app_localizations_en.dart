@@ -2429,8 +2429,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Run a search to display attendance for the selected class.';
 
   @override
+  String get attendanceSelectClassTitle => 'Select a class';
+
+  @override
   String get attendanceEmptySelectionMessage =>
-      'Select a class and a date to take attendance.';
+      'Select a cycle, a level, and then a class to load the attendance list.';
 
   @override
   String get attendanceLoadingMessage => 'Loading attendance records...';
@@ -2494,6 +2497,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendancePresentCount => 'Present';
+
+  @override
+  String get attendanceJustifiedCount => 'Justified';
+
+  @override
+  String get attendanceUnjustifiedCount => 'Unjustified';
+
+  @override
+  String get attendancePendingCount => 'Pending reason';
 
   @override
   String get attendanceAbsentCount => 'Absent';
@@ -2574,6 +2586,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceReasonRequiredHint => 'Reason required for an absence.';
 
   @override
+  String get attendanceMotifRequisLabel => 'Reason required';
+
+  @override
   String get attendanceReasonDisabledHint =>
       'Reason is required only when the student is absent.';
 
@@ -2625,6 +2640,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceErrorUnknown => 'An unexpected error occurred.';
 
   @override
+  String get attendanceSaveCallAction => 'Save attendance';
+
+  @override
+  String get attendanceMarkAllPresentAction => 'All present';
+
+  @override
+  String get attendanceSaveOverlayEyebrow => 'Attendance';
+
+  @override
+  String get attendanceSaveProcessingTitle => 'Saving attendance…';
+
+  @override
+  String get attendanceSaveSuccessTitle => 'Attendance saved!';
+
+  @override
+  String get attendanceSaveSuccessSubtitle =>
+      'Class attendance records have been saved.';
+
+  @override
+  String get attendanceSaveErrorTitle => 'Save failed';
+
+  @override
+  String get attendanceSaveErrorMessage =>
+      'Your entries are preserved. Check your connection and try again.';
+
+  @override
+  String get attendanceSaveRetryAction => 'Retry';
+
+  @override
+  String get attendanceSaveCloseAction => 'Done';
+
+  @override
   String get absenceReasonSickness => 'Sickness';
 
   @override
@@ -2650,6 +2697,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get absenceReasonWorkLeave => 'Work leave';
+
+  @override
+  String get absenceReasonUnjustified => 'Unjustified absence';
 
   @override
   String get absenceReasonOther => 'Other';

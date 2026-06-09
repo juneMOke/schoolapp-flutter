@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
-import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_section.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_search_form.dart';
@@ -13,7 +9,6 @@ class AttendancePageContent extends StatelessWidget {
   final List<AttendanceCycleOption> options;
   final AttendanceSearchRequest? lastRequest;
   final ValueChanged<AttendanceSearchRequest> onSearch;
-  final VoidCallback onExportPressed;
   final VoidCallback onRetry;
 
   const AttendancePageContent({
@@ -21,7 +16,6 @@ class AttendancePageContent extends StatelessWidget {
     required this.options,
     required this.lastRequest,
     required this.onSearch,
-    required this.onExportPressed,
     required this.onRetry,
   });
 
@@ -44,25 +38,13 @@ class AttendancePageContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<AttendanceBloc, AttendanceState>(
-              buildWhen: AttendancePageHelpers.buildWhenSearchFormChanges,
-              builder: (context, state) {
-                return AttendanceSearchForm(
-                  options: options,
-                  isSearching:
-                      state.fetchStatus == AttendanceStatus.loading ||
-                      state.saveStatus == AttendanceStatus.loading,
-                  onSearch: onSearch,
-                );
-              },
-            ),
+            AttendanceSearchForm(options: options, onSearch: onSearch),
             const SizedBox(height: AppDimensions.spacingM),
             AttendanceResultsSection(
               key: ValueKey<String>(
                 'attendance-results-${lastRequest != null}',
               ),
               lastRequest: lastRequest,
-              onExportPressed: onExportPressed,
               onRetry: onRetry,
             ),
           ],
