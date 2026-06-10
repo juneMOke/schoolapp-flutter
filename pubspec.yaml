@@ -71,6 +71,7 @@ dev_dependencies:
   injectable_generator: ^2.12.1
   retrofit_generator: ^10.2.3
   flutter_gen_runner: ^5.13.0+1
+  flutter_launcher_icons: ^0.14.1
 
 
 # For information on the generic Dart part of this file, see the
@@ -167,3 +168,30 @@ flutter_native_splash:
     image_dark: assets/app-icon/ic_launcher_foreground.png
     color_dark: "#0E2D42"
   web: false
+
+# Icône de lancement ETEELO CONNECT (toutes plateformes sauf Linux, non pris en
+# charge par l'outil). Régénérer après modif :
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/app-icon/appstore_1024.png"
+  android: true
+  min_sdk_android: 21
+  # Icône adaptative Android : symbole crème sur fond Bleu Profond uni.
+  adaptive_icon_background: "#0E2D42"
+  adaptive_icon_foreground: "assets/app-icon/ic_launcher_foreground.png"
+  ios: true
+  # iOS refuse la transparence : aplatir l'alpha sur le Bleu Profond.
+  remove_alpha_ios: true
+  background_color_ios: "#0E2D42"
+  web:
+    generate: true
+    image_path: "assets/app-icon/appstore_1024.png"
+    background_color: "#0E2D42"
+    theme_color: "#0E2D42"
+  macos:
+    generate: true
+    image_path: "assets/app-icon/appstore_1024.png"
+  windows:
+    generate: true
+    image_path: "assets/app-icon/appstore_1024.png"
+    icon_size: 48

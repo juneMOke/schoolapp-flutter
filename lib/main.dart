@@ -120,7 +120,7 @@ class _MyAppState extends State<MyApp> {
           ],
           locale: const Locale('fr'),
           supportedLocales: AppLocalizations.supportedLocales,
-          title: 'SchoolApp',
+          title: 'ETEELO CONNECT',
           theme: AppTheme.light,
           routerConfig: _router,
           // Bandeau hors-ligne global au-dessus de toutes les routes.

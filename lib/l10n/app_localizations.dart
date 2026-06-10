@@ -155,7 +155,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolApp.
   ///
   /// In en, this message translates to:
-  /// **'ETEELO TECH'**
+  /// **'ETEELO CONNECT'**
   String get schoolApp;
 
   /// No description provided for @splashBrandPrimary.

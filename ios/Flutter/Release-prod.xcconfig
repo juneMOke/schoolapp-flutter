@@ -1,5 +1,5 @@
 #include "Release.xcconfig"
 
-APP_DISPLAY_NAME=School App
+APP_DISPLAY_NAME=ETEELO CONNECT
 PRODUCT_BUNDLE_IDENTIFIER=com.junethink.schoolAppFlutter
 APP_ENV=prod
