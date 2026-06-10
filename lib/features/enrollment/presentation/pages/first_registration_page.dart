@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
@@ -36,13 +38,21 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Tablette paysage (1280×800+) : le FAB flottant masquait la pagination en
+    // bas de tableau. On le remplace par un bouton inline rendu sous le tableau.
+    final useInlineCreate =
+        MediaQuery.sizeOf(context).width >=
+        AppBreakpoints.enrollmentInlineCreateMin;
+
     return AppPageBackground(
       scrollable: true,
-      floatingActionButton: EteeloFab(
-        label: l10n.firstRegistrationNewEnrollmentAction,
-        icon: Icons.add,
-        onPressed: () => _openNewEnrollment(context),
-      ),
+      floatingActionButton: useInlineCreate
+          ? null
+          : EteeloFab(
+              label: l10n.firstRegistrationNewEnrollmentAction,
+              icon: Icons.add,
+              onPressed: () => _openNewEnrollment(context),
+            ),
       floatingActionButtonLocation: const EndFloatEdgeOffsetFabLocation(),
       child: EnrollmentListingPageScaffold(
         readyKey: 'first-reg-content',
@@ -99,6 +109,22 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
           enrollmentId: summary.enrollmentId,
           status: summary.status,
         ),
+        resultsFooterBuilder: useInlineCreate
+            ? (context, _) => _buildInlineCreateAction(context, l10n)
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildInlineCreateAction(BuildContext context, AppLocalizations l10n) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: EteeloButton.primary(
+        label: l10n.firstRegistrationNewEnrollmentAction,
+        icon: Icons.add,
+        size: EteeloButtonSize.regular,
+        fullWidth: false,
+        onPressed: () => _openNewEnrollment(context),
       ),
     );
   }

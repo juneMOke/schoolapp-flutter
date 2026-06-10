@@ -19,6 +19,11 @@ class AppBreakpoints {
   static const double formMediumMin = 860.0;
   static const double formWideMin = 1280.0;
 
+  // Première inscription — au-delà (tablette paysage 1280×800+), l'action de
+  // création quitte le FAB flottant (qui masquait la pagination) pour devenir
+  // un bouton inline sous le tableau. Seuil dédié (découplé de formWideMin).
+  static const double enrollmentInlineCreateMin = formWideMin;
+
   // Facturation — seuils responsive dédiés (spec §00 : occupation de l'espace).
   // Bascule des tuiles KPI détail en colonne sous cette largeur (très petits
   // écrans), pour que le montant tienne en pleine largeur sans réduction.

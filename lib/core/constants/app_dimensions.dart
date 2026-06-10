@@ -40,7 +40,6 @@ class AppDimensions {
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;
   static const detailTableLabelColumnWidth = 72.0;
-  static const fabListBottomPadding = 80.0;
 
   // Eteelo FAB tokens
   static const fabHeight = 56.0;

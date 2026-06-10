@@ -17,6 +17,16 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   final EnrollmentEmptyStateBuilder? emptyBeforeSearchBuilder;
   final EnrollmentResultsSummaryBuilder? resultsSummaryBuilder;
   final bool Function(EnrollmentState state)? showEmptyBeforeSearchWhen;
+
+  /// Slot optionnel rendu sous le tableau, dans le flux scrollable de la page.
+  /// Utilisé p. ex. par la première inscription pour poser l'action de création
+  /// en bouton inline (vue tablette) plutôt qu'en FAB flottant masquant la
+  /// pagination. N'apparaît qu'une fois le bootstrap prêt (pas en loading/erreur).
+  final Widget Function(
+    BuildContext context,
+    EnrollmentScreenContext screenCtx,
+  )?
+  resultsFooterBuilder;
   final String readyKey;
 
   const EnrollmentListingPageScaffold({
@@ -28,6 +38,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     this.emptyBeforeSearchBuilder,
     this.resultsSummaryBuilder,
     this.showEmptyBeforeSearchWhen,
+    this.resultsFooterBuilder,
     this.readyKey = 'enrollment-list-ready',
   });
 
@@ -80,6 +91,12 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
                 ),
               ],
               _buildResultsSection(effectiveCtx),
+              if (resultsFooterBuilder != null) ...[
+                const SizedBox(
+                  height: EnrollmentPageLayout.resultsToFooterSpacing,
+                ),
+                resultsFooterBuilder!(context, effectiveCtx),
+              ],
             ],
           ),
         );

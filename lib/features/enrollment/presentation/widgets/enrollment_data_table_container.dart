@@ -82,7 +82,7 @@ class _EnrollmentDataTableContainerState
               switchInCurve: AppMotion.outCurve,
               switchOutCurve: AppMotion.inCurve,
               child: effectiveViewMode.isGrid
-                  ? _buildGridView(state)
+                  ? _buildGridView(state, l10n)
                   : _buildTableView(state, l10n),
             );
           },
@@ -161,11 +161,22 @@ class _EnrollmentDataTableContainerState
     );
   }
 
-  Widget _buildGridView(EnrollmentState state) {
+  Widget _buildGridView(EnrollmentState state, AppLocalizations l10n) {
     return EnrollmentResultsGridView(
       key: ValueKey('grid-${state.summariesStatus}'),
       enrollments: state.summaries,
       onViewRequested: widget.onViewRequested,
+      isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
+      currentPage: state.summariesPage + 1,
+      totalPages: state.summariesTotalPages,
+      onPreviousPage: () => context.read<EnrollmentBloc>().add(
+        EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+      ),
+      onNextPage: () => context.read<EnrollmentBloc>().add(
+        EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+      ),
+      pageLabelBuilder: (current, total) =>
+          l10n.paginationPageIndicator(current, total),
     );
   }
 
