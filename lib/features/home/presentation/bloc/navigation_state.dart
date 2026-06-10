@@ -20,18 +20,20 @@ class NavigationState extends Equatable {
   });
 
   factory NavigationState.initial(AppLocalizations l10n) {
+    // Atterrissage post-connexion sur la page d'accueil (spec Accueil §00/§09) :
+    // l'entrée feuille « Accueil » est l'item actif, le contenu affiché est la
+    // page d'accueil. Aucun menu module n'est déployé.
     final initialMenuItems = MenuFactory.createMenuItems(l10n).map((menu) {
-      return menu.copyWith(
-        isActive: menu.id == MenuConstants.inscriptionsMenuId,
-      );
+      return menu.copyWith(isActive: menu.id == MenuConstants.accueilId);
     }).toList();
 
     return NavigationState(
       menuItems: initialMenuItems,
-      selectedMenuId: MenuConstants.inscriptionsMenuId,
-      openedMenuId: MenuConstants.inscriptionsMenuId,
+      selectedMenuId: MenuConstants.accueilId,
+      selectedSubMenuId: MenuConstants.accueilId,
+      openedMenuId: MenuConstants.accueilId,
       isSidebarExpanded: true,
-      currentTitle: l10n.subMenuDashboard,
+      currentTitle: l10n.home,
     );
   }
 

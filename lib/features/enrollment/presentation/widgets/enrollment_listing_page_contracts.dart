@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 
@@ -47,7 +46,6 @@ class EnrollmentScreenContext {
   final String academicYearId;
   final bool isLoading;
   final Future<void> Function()? onRefreshRequested;
-  final EnrollmentListingLayout? layout;
   final EnrollmentListingViewMode preferredViewMode;
   final VoidCallback? onSortToggled;
   final ValueChanged<EnrollmentListingViewMode>? onViewModeChanged;
@@ -61,7 +59,6 @@ class EnrollmentScreenContext {
     required this.academicYearId,
     required this.isLoading,
     this.onRefreshRequested,
-    this.layout,
     this.preferredViewMode = EnrollmentListingViewMode.auto,
     this.onSortToggled,
     this.onViewModeChanged,

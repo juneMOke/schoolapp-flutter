@@ -94,6 +94,11 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
     );
 
     return BiToneSectionCard(
+      title: l10n.classesListSearchTitle,
+      subtitle: l10n.classesListSearchHint.isEmpty
+          ? null
+          : l10n.classesListSearchHint,
+      icon: Icons.search_rounded,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

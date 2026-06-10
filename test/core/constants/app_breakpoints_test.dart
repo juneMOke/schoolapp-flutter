@@ -5,7 +5,6 @@ void main() {
   group('AppBreakpoints', () {
     test('uses expected global responsive values', () {
       expect(AppBreakpoints.detailCompactMax, 760.0);
-      expect(AppBreakpoints.homeMobileMax, 768.0);
       expect(AppBreakpoints.authWideMin, 800.0);
       expect(AppBreakpoints.formMediumMin, 860.0);
       expect(AppBreakpoints.formWideMin, 1280.0);
@@ -13,10 +12,9 @@ void main() {
 
     test('keeps monotonic order for responsive tiers', () {
       expect(
-        AppBreakpoints.detailCompactMax < AppBreakpoints.homeMobileMax,
+        AppBreakpoints.detailCompactMax < AppBreakpoints.authWideMin,
         isTrue,
       );
-      expect(AppBreakpoints.homeMobileMax < AppBreakpoints.authWideMin, isTrue);
       expect(AppBreakpoints.authWideMin < AppBreakpoints.formMediumMin, isTrue);
       expect(AppBreakpoints.formMediumMin < AppBreakpoints.formWideMin, isTrue);
     });

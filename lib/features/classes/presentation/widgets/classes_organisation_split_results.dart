@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/kpi_strip.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_classroom_card.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
+import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_states.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_unassigned_members_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class ClassesOrganisationSplitResults extends StatelessWidget {
-  final ClassesOrganisationLevelOption selectedLevel;
+/// Disposition des cartes de classe pilotée par le basculeur (PARCOURS 5).
+enum _ClassroomLayout { grid, list }
+
+class ClassesOrganisationSplitResults extends StatefulWidget {
   final ClassroomStatus overviewStatus;
   final ClassroomErrorType overviewErrorType;
   final LevelDistributionOverview? overview;
@@ -20,10 +25,10 @@ class ClassesOrganisationSplitResults extends StatelessWidget {
   final String reassigningMemberId;
   final String? errorMessage;
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
+  final VoidCallback onRetry;
 
   const ClassesOrganisationSplitResults({
     super.key,
-    required this.selectedLevel,
     required this.overviewStatus,
     required this.overviewErrorType,
     required this.overview,
@@ -31,69 +36,67 @@ class ClassesOrganisationSplitResults extends StatelessWidget {
     required this.reassigningMemberId,
     required this.errorMessage,
     required this.onTransferTap,
+    required this.onRetry,
   });
+
+  @override
+  State<ClassesOrganisationSplitResults> createState() =>
+      _ClassesOrganisationSplitResultsState();
+}
+
+class _ClassesOrganisationSplitResultsState
+    extends State<ClassesOrganisationSplitResults> {
+  _ClassroomLayout _layout = _ClassroomLayout.grid;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (overviewStatus == ClassroomStatus.loading ||
-        overviewStatus == ClassroomStatus.initial) {
-      return const Center(child: CircularProgressIndicator());
+    if (widget.overviewStatus == ClassroomStatus.loading ||
+        widget.overviewStatus == ClassroomStatus.initial) {
+      return const ClassesOrganisationClassroomsSkeleton();
     }
 
-    if (overviewStatus == ClassroomStatus.failure) {
-      return ClassesOrganisationEmptyCard(
-        title: l10n.classesOrganisationErrorUnknown,
-        subtitle: errorMessage ?? l10n.classesOrganisationErrorUnknown,
+    if (widget.overviewStatus == ClassroomStatus.failure) {
+      return ClassesOrganisationSplitErrorState(
+        errorType: widget.overviewErrorType,
+        message: widget.errorMessage ?? l10n.classesOrganisationErrorUnknown,
+        onRetry: widget.onRetry,
       );
     }
 
-    final data = overview;
-    if (data == null) {
-      return ClassesOrganisationEmptyCard(
-        title: l10n.classesOrganisationNoClassrooms,
-        subtitle: l10n.classesOrganisationErrorUnknown,
-      );
+    final data = widget.overview;
+    if (data == null || data.classrooms.isEmpty) {
+      return const ClassesOrganisationSplitEmptyState();
     }
 
     final classrooms = data.classrooms;
-    if (classrooms.isEmpty) {
-      return ClassesOrganisationEmptyCard(
-        title: l10n.noResultsFound,
-        subtitle: l10n.classesOrganisationNoClassrooms,
-      );
-    }
 
     final distributedCount = classrooms.fold<int>(
       0,
       (acc, item) => acc + item.members.length,
     );
+    final maleTotal = classrooms.fold<int>(
+      0,
+      (acc, item) => acc + _countGender(item, ClassroomMemberGender.male),
+    );
+    final femaleTotal = classrooms.fold<int>(
+      0,
+      (acc, item) => acc + _countGender(item, ClassroomMemberGender.female),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppDimensions.spacingM),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceRaised,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Text(
-            l10n.classesOrganisationSplitSummary(
-              distributedCount,
-              classrooms.length,
-              l10n.classesOrganisationDistributionByGender,
-            ),
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        _SummaryBand(
+          headcount: distributedCount,
+          classroomCount: classrooms.length,
+          maleCount: maleTotal,
+          femaleCount: femaleTotal,
+          layout: _layout,
+          onLayoutChanged: (value) => setState(() => _layout = value),
         ),
-        const SizedBox(height: AppDimensions.spacingM),
+        const SizedBox(height: AppDimensions.spacingL),
         if (data.unassignedEnrollments.isNotEmpty) ...[
           ClassesOrganisationUnassignedMembersSection(
             count: data.unassignedEnrollments.length,
@@ -113,76 +116,185 @@ class ClassesOrganisationSplitResults extends StatelessWidget {
                   ),
                 )
                 .toList(growable: false),
-            isReassigning: isReassigning,
-            reassigningMemberId: reassigningMemberId,
-            onTransferTap: onTransferTap,
+            isReassigning: widget.isReassigning,
+            reassigningMemberId: widget.reassigningMemberId,
+            onTransferTap: widget.onTransferTap,
           ),
           const SizedBox(height: AppDimensions.spacingM),
         ],
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingM,
-            vertical: AppDimensions.spacingS,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceRaised,
-            borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.grid_view_rounded,
-                size: AppDimensions.detailMiniIconSize,
-                color: AppColors.bleuArdoise,
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Text(
-                l10n.classesOrganisationClassroomsSectionTitle,
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: AppColors.bleuArdoise,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final columns = width >= 1080
-                ? 3
-                : width >= 700
-                ? 2
-                : 1;
-
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: classrooms.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                crossAxisSpacing: AppDimensions.spacingM,
-                mainAxisSpacing: AppDimensions.spacingM,
-                childAspectRatio: AppDimensions.classesOrganisationGridRatio,
-              ),
-              itemBuilder: (context, index) {
-                final bucket = classrooms[index];
-                return ClassesOrganisationClassroomCard(
-                  levelName: selectedLevel.schoolLevelName,
-                  classroom: bucket.classroom,
-                  members: bucket.members,
-                  isReassigning: isReassigning,
-                  reassigningMemberId: reassigningMemberId,
-                  onTransferTap: onTransferTap,
-                );
-              },
-            );
-          },
+        _ClassroomsView(
+          classrooms: classrooms,
+          layout: _layout,
+          isReassigning: widget.isReassigning,
+          reassigningMemberId: widget.reassigningMemberId,
+          onTransferTap: widget.onTransferTap,
         ),
       ],
+    );
+  }
+
+  int _countGender(ClassroomWithMembers bucket, ClassroomMemberGender gender) {
+    return bucket.members
+        .where((member) => member.studentGender == gender)
+        .length;
+  }
+}
+
+/// Bandeau de synthèse : 4 KpiCard + basculeur Grille/Liste (PARCOURS 5).
+class _SummaryBand extends StatelessWidget {
+  final int headcount;
+  final int classroomCount;
+  final int maleCount;
+  final int femaleCount;
+  final _ClassroomLayout layout;
+  final ValueChanged<_ClassroomLayout> onLayoutChanged;
+
+  const _SummaryBand({
+    required this.headcount,
+    required this.classroomCount,
+    required this.maleCount,
+    required this.femaleCount,
+    required this.layout,
+    required this.onLayoutChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final kpis = EteeloKpiStrip(
+      items: [
+        EteeloKpiItem(
+          label: l10n.classesDistributionKpiHeadcount,
+          value: '$headcount',
+          valueColor: AppColors.bleuProfond,
+          topAccentColor: AppColors.bleuProfond,
+        ),
+        EteeloKpiItem(
+          label: l10n.classesDistributionKpiClasses,
+          value: '$classroomCount',
+          valueColor: AppColors.indigo,
+          topAccentColor: AppColors.indigo,
+        ),
+        EteeloKpiItem(
+          label: l10n.classesDistributionKpiBoys,
+          value: '$maleCount',
+          valueColor: AppColors.bleuArdoise,
+          topAccentColor: AppColors.bleuArdoise,
+        ),
+        EteeloKpiItem(
+          label: l10n.classesDistributionKpiGirls,
+          value: '$femaleCount',
+          valueColor: AppColors.terreCuite,
+          topAccentColor: AppColors.terreCuite,
+        ),
+      ],
+    );
+
+    final toggle = SegmentedTabFilter<_ClassroomLayout>(
+      selected: layout,
+      onSelected: onLayoutChanged,
+      style: SegmentedTabFilterStyle.kpi,
+      semanticsLabel: l10n.classesDistributionViewGrid,
+      options: [
+        SegmentedTabOption<_ClassroomLayout>(
+          value: _ClassroomLayout.grid,
+          label: l10n.classesDistributionViewGrid,
+          icon: Icons.grid_view_rounded,
+        ),
+        SegmentedTabOption<_ClassroomLayout>(
+          value: _ClassroomLayout.list,
+          label: l10n.classesDistributionViewList,
+          icon: Icons.view_list_rounded,
+        ),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= AppBreakpoints.classesSummaryBandRowMin) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: kpis),
+              const SizedBox(width: AppDimensions.spacingM),
+              toggle,
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            kpis,
+            const SizedBox(height: AppDimensions.spacingM),
+            toggle,
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Disposition des cartes : grille (Wrap) ou liste (1 classe/ligne).
+class _ClassroomsView extends StatelessWidget {
+  final List<ClassroomWithMembers> classrooms;
+  final _ClassroomLayout layout;
+  final bool isReassigning;
+  final String reassigningMemberId;
+  final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
+
+  const _ClassroomsView({
+    required this.classrooms,
+    required this.layout,
+    required this.isReassigning,
+    required this.reassigningMemberId,
+    required this.onTransferTap,
+  });
+
+  Widget _card(ClassroomWithMembers bucket) {
+    return ClassesOrganisationClassroomCard(
+      classroom: bucket.classroom,
+      members: bucket.members,
+      isReassigning: isReassigning,
+      reassigningMemberId: reassigningMemberId,
+      onTransferTap: onTransferTap,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (layout == _ClassroomLayout.list) {
+      return Column(
+        children: [
+          for (var index = 0; index < classrooms.length; index++) ...[
+            if (index > 0) const SizedBox(height: AppDimensions.spacingM),
+            _card(classrooms[index]),
+          ],
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= AppBreakpoints.classesGridThreeColMin
+            ? 3
+            : width >= AppBreakpoints.classesGridTwoColMin
+            ? 2
+            : 1;
+        const gap = AppDimensions.spacingM;
+        final cardWidth = columns <= 1
+            ? width
+            : (width - (columns - 1) * gap) / columns;
+
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: classrooms
+              .map((bucket) => SizedBox(width: cardWidth, child: _card(bucket)))
+              .toList(growable: false),
+        );
+      },
     );
   }
 }

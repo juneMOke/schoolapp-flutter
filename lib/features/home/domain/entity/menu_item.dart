@@ -15,6 +15,10 @@ class MenuItem {
     this.isActive = false,
   });
 
+  /// Item feuille : aucune sous-entrée. Le clic sélectionne directement l'écran
+  /// (pas d'accordéon, pas de chevron) — cf. entrée « Accueil » (spec §09).
+  bool get isLeaf => subMenus.isEmpty;
+
   MenuItem copyWith({
     String? id,
     String? title,

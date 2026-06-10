@@ -20,15 +20,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_charge_detail_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_payment_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -63,6 +57,7 @@ class RouterNotifier extends ChangeNotifier {
     return _RouterRefreshSnapshot(
       authStatus: _authBloc.state.status,
       bootstrapBlocksNavigation: _bootstrapBloc.state.blocksNavigation,
+      bootstrapHasBlockingFailure: _bootstrapBloc.state.hasBlockingFailure,
     );
   }
 
@@ -87,10 +82,12 @@ class RouterNotifier extends ChangeNotifier {
 class _RouterRefreshSnapshot {
   final AuthStatus authStatus;
   final bool bootstrapBlocksNavigation;
+  final bool bootstrapHasBlockingFailure;
 
   const _RouterRefreshSnapshot({
     required this.authStatus,
     required this.bootstrapBlocksNavigation,
+    required this.bootstrapHasBlockingFailure,
   });
 
   @override
@@ -98,11 +95,16 @@ class _RouterRefreshSnapshot {
     if (identical(this, other)) return true;
     return other is _RouterRefreshSnapshot &&
         other.authStatus == authStatus &&
-        other.bootstrapBlocksNavigation == bootstrapBlocksNavigation;
+        other.bootstrapBlocksNavigation == bootstrapBlocksNavigation &&
+        other.bootstrapHasBlockingFailure == bootstrapHasBlockingFailure;
   }
 
   @override
-  int get hashCode => Object.hash(authStatus, bootstrapBlocksNavigation);
+  int get hashCode => Object.hash(
+    authStatus,
+    bootstrapBlocksNavigation,
+    bootstrapHasBlockingFailure,
+  );
 }
 
 class AppRouter {
@@ -122,6 +124,7 @@ class AppRouter {
             authState.status == AuthStatus.loading ||
             authState.status == AuthStatus.initial;
         final isBootstrapBlocking = bootstrapState.blocksNavigation;
+        final hasBootstrapFailure = bootstrapState.hasBlockingFailure;
         final isOnSplash = state.matchedLocation == '/splash';
         final isOnAuthFlow =
             state.matchedLocation == '/login' ||
@@ -136,6 +139,12 @@ class AppRouter {
         }
 
         if (isBootstrapBlocking) {
+          return isOnSplash ? null : '/splash';
+        }
+
+        // Échec du bootstrap distant : retenir sur le splash (ErrorView + retry)
+        // au lieu d'éjecter vers /home sans données.
+        if (hasBootstrapFailure) {
           return isOnSplash ? null : '/splash';
         }
 
@@ -241,90 +250,6 @@ class AppRouter {
                     );
 
                     return FacturationDetailPage(intent: intent);
-                  },
-                ),
-                GoRoute(
-                  path: 'payment/:studentId/:academicYearId/:paymentId',
-                  redirect: (context, state) {
-                    if (!_hasRequiredPathParameters(state, const [
-                      'studentId',
-                      'academicYearId',
-                      'paymentId',
-                    ])) {
-                      return AppRoutesNames.facturations;
-                    }
-                    return null;
-                  },
-                  builder: (context, state) {
-                    final studentId = state.pathParameters['studentId'] ?? '';
-                    final academicYearId =
-                        state.pathParameters['academicYearId'] ?? '';
-                    final paymentId = state.pathParameters['paymentId'] ?? '';
-
-                    final intent =
-                        FacturationPaymentDetailIntent.fromRouteContext(
-                          paymentId: paymentId,
-                          studentId: studentId,
-                          academicYearId: academicYearId,
-                          extra: state.extra,
-                        );
-
-                    return FacturationPaymentDetailPage(intent: intent);
-                  },
-                ),
-                GoRoute(
-                  path: 'charge/:studentId/:academicYearId/:chargeId',
-                  redirect: (context, state) {
-                    if (!_hasRequiredPathParameters(state, const [
-                      'studentId',
-                      'academicYearId',
-                      'chargeId',
-                    ])) {
-                      return AppRoutesNames.facturations;
-                    }
-                    return null;
-                  },
-                  builder: (context, state) {
-                    final studentId = state.pathParameters['studentId'] ?? '';
-                    final academicYearId =
-                        state.pathParameters['academicYearId'] ?? '';
-                    final chargeId = state.pathParameters['chargeId'] ?? '';
-
-                    final intent =
-                        FacturationChargeDetailIntent.fromRouteContext(
-                          chargeId: chargeId,
-                          studentId: studentId,
-                          academicYearId: academicYearId,
-                          extra: state.extra,
-                        );
-
-                    return FacturationChargeDetailPage(intent: intent);
-                  },
-                ),
-                GoRoute(
-                  path: 'create-payment/:studentId/:academicYearId',
-                  redirect: (context, state) {
-                    if (!_hasRequiredPathParameters(state, const [
-                      'studentId',
-                      'academicYearId',
-                    ])) {
-                      return AppRoutesNames.facturations;
-                    }
-                    return null;
-                  },
-                  builder: (context, state) {
-                    final studentId = state.pathParameters['studentId'] ?? '';
-                    final academicYearId =
-                        state.pathParameters['academicYearId'] ?? '';
-
-                    final intent =
-                        FacturationCreatePaymentIntent.fromRouteContext(
-                          studentId: studentId,
-                          academicYearId: academicYearId,
-                          extra: state.extra,
-                        );
-
-                    return FacturationCreatePaymentPage(intent: intent);
                   },
                 ),
               ],

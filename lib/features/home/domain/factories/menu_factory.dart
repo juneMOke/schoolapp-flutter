@@ -11,11 +11,22 @@ class MenuFactory {
   /// Crée la liste complète des menus avec leurs sous-menus
   static List<MenuItem> createMenuItems(AppLocalizations l10n) {
     return [
+      _createAccueilMenu(l10n),
       _createInscriptionsMenu(l10n),
       _createFinancesMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
     ];
+  }
+
+  /// Entrée « Accueil » : item feuille (sans sous-menu), premier de la liste.
+  /// Le clic sélectionne directement la page d'atterrissage (spec Accueil §09).
+  static MenuItem _createAccueilMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.accueilId,
+      title: l10n.home,
+      icon: Icons.home_outlined,
+    );
   }
 
   /// Menu Inscriptions avec ses sous-menus

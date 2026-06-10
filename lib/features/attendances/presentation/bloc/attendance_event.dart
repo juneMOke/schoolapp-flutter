@@ -79,3 +79,10 @@ class AttendanceResetRequested extends AttendanceEvent {
   @override
   List<Object?> get props => [];
 }
+
+class AttendanceMarkAllPresentRequested extends AttendanceEvent {
+  const AttendanceMarkAllPresentRequested();
+
+  @override
+  List<Object?> get props => [];
+}

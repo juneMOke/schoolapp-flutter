@@ -8,7 +8,49 @@
   "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères",
   "pleaseEnterEmail": "Veuillez entrer votre email",
   "pleaseEnterValidEmail": "Veuillez entrer un email valide",
+  "loginEyebrow": "Espace direction",
+  "loginSubtitle": "Accédez au tableau de bord de votre école.",
+  "loginEmailLabel": "Adresse e-mail",
+  "loginSubmitting": "Connexion…",
+  "loginSignature": "eteyelo · l'école en lingala",
+  "loginBrandTitle": "L'école congolaise reliée au numérique.",
+  "loginBrandTitleCondensed": "L'école reliée au numérique.",
+  "loginBrandTitleHighlight": "numérique",
+  "loginBrandSubtitle": "Inscriptions, finances, classes et présences — une seule application, sur tout écran.",
+  "loginEmailRequired": "L'adresse e-mail est requise.",
+  "loginEmailInvalid": "Format d'e-mail invalide.",
+  "loginPasswordRequired": "Le mot de passe est requis.",
+  "loginErrorInvalidCredentials": "E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
+  "loginErrorNetwork": "Pas de connexion. Vérifiez votre réseau.",
+  "loginErrorAccountDisabled": "Compte désactivé. Contactez l'administrateur de votre école.",
+  "loginErrorServer": "Erreur serveur. Réessayez dans un instant.",
+  "loginErrorRateLimited": "Trop de tentatives. Réessayez dans {seconds} s",
+  "@loginErrorRateLimited": {
+    "description": "Bandeau d'erreur 429 — verrouillage temporaire avec compte à rebours",
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "loginContactAdmin": "Contacter l'administrateur",
+  "showPassword": "Afficher",
+  "hidePassword": "Masquer",
   "schoolApp": "ETEELO CONNECT",
+  "splashBrandPrimary": "ETEELO",
+  "splashBrandSecondary": "CONNECT",
+  "splashTagline": "Simplifier la gestion de votre école",
+  "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
+  "bootstrapOfflineBanner": "Mode hors-ligne — données en cache",
+  "splashErrorTitle": "Connexion impossible",
+  "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
+  "splashErrorRetry": "Réessayer",
+  "splashVersion": "v{version} (build {build})",
+  "@splashVersion": {
+    "description": "Version technique affichée au pied du splash",
+    "placeholders": {
+      "version": { "type": "String" },
+      "build": { "type": "String" }
+    }
+  },
   "logout": "Déconnexion",
   "welcome": "Bienvenue{name} !",
   "@welcome": {
@@ -52,6 +94,29 @@
   "validateAndLogin": "Valider et se connecter",
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
   "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe",
+  "resetEyebrow": "Réinitialisation",
+  "resetBrandTitle": "Récupération d'accès en toute sécurité.",
+  "resetBrandTitleCondensed": "Récupération d'accès.",
+  "resetBrandTitleHighlight": "d'accès",
+  "resetBrandSubtitle": "Réinitialisez votre mot de passe en toute sécurité.",
+  "resetStepIndicator": "Étape {step} sur {total} · {label}",
+  "@resetStepIndicator": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStepLabelEmail": "E-mail",
+  "resetStepLabelCode": "Code",
+  "resetStepLabelPassword": "Nouveau mot de passe",
+  "resetBackToLogin": "Retour",
   "menuInscriptions": "Inscriptions",
   "menuFinances": "Finances",
   "menuClasses": "Classes",
@@ -65,42 +130,93 @@
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
   "classesOrganisationSearchTitle": "Sélection du niveau à organiser",
+  "classesOrganisationHeaderEyebrow": "Composition des classes · Année {schoolYear}",
+  "@classesOrganisationHeaderEyebrow": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "classesOrganisationLevelPlaceholder": "Choisissez d'abord un cycle",
   "classesOrganisationSearchHint": "Sélectionnez le cycle et le niveau à organiser, puis lancez la recherche pour afficher la répartition actuelle ou préparer la distribution en sous-classes.",
   "classesOrganisationClassroomFieldLabel": "Sous-classe",
   "classesOrganisationDistributionLabel": "Critère de répartition",
   "classesOrganisationDistributionByGender": "Répartition par genre",
   "classesOrganisationDistributionByPercentage": "Répartition par moyenne",
-  "classesOrganisationDistributionAction": "Répartir",
-  "classesOrganisationDistributionConfirmTitle": "Confirmer la répartition",
-  "classesOrganisationDistributionConfirmMessage": "Voulez-vous lancer la répartition des élèves pour ce niveau ?",
-  "classesOrganisationDistributionSuccess": "Répartition terminée avec succès.",
-  "classesOrganisationSplitInfo": "Mode sous-classes actif : affichage par sous-classe avec effectifs et statistiques.",
-  "classesOrganisationNonSplitInfo": "Mode classe unique actif : liste des élèves du niveau sélectionné.",
-  "classesOrganisationNoClassrooms": "Aucune sous-classe disponible pour ce niveau.",
-  "classesOrganisationClassroomStats": "{total} élèves - Filles: {girls} - Garçons: {boys}",
-  "@classesOrganisationClassroomStats": {
+  "classesOrganisationDistributeByGenderAction": "Lancer la répartition par genre",
+  "classesDistributionResultEyebrow": "Répartition par genre",
+  "classesDistributionProcessingTitle": "Répartition en cours…",
+  "classesDistributionSuccessTitle": "Répartition réussie",
+  "classesDistributionSuccessSubtitle": "Les élèves ont été répartis de façon équilibrée par genre.",
+  "classesDistributionRecapTitle": "Effectif par classe",
+  "classesDistributionClassHeadcount": "{count} élèves",
+  "@classesDistributionClassHeadcount": {
     "placeholders": {
-      "total": {
-        "type": "int"
-      },
-      "girls": {
-        "type": "int"
-      },
-      "boys": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "classesOrganisationTransferDialogTitle": "Transférer l'élève",
-  "classesOrganisationTransferDialogMessage": "Choisissez la sous-classe de destination pour {studentName}.",
-  "@classesOrganisationTransferDialogMessage": {
+  "classesDistributionErrorTitle": "Échec de la répartition",
+  "classesDistributionErrorMessage": "Les classes sont restées intactes. Vous pouvez réessayer.",
+  "classesDistributionRetry": "Réessayer",
+  "classesDistributionClose": "Fermer",
+  "classesDistributionKpiHeadcount": "Effectif",
+  "classesDistributionKpiClasses": "Classes",
+  "classesDistributionKpiBoys": "Garçons",
+  "classesDistributionKpiGirls": "Filles",
+  "classesDistributionViewGrid": "Grille",
+  "classesDistributionViewList": "Liste",
+  "classesDistributionClassLabel": "Classe {code}",
+  "@classesDistributionClassLabel": {
     "placeholders": {
-      "studentName": {
+      "code": {
         "type": "String"
       }
     }
   },
-  "classesOrganisationTransferTargetLabel": "Sous-classe de destination",
+  "classesDistributionClassCapacity": "{count} élèves · capacité {capacity}",
+  "@classesDistributionClassCapacity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "classesDistributionCapacityFull": "complet",
+  "classesOrganisationDistributionSuccess": "Répartition terminée avec succès.",
+  "classesOrganisationSplitInfo": "Mode sous-classes actif : affichage par sous-classe avec effectifs et statistiques.",
+  "classesOrganisationNonSplitInfo": "Mode classe unique actif : liste des élèves du niveau sélectionné.",
+  "classesOrganisationLoadingTitle": "Chargement des classes…",
+  "classesOrganisationEmptyTitle": "Aucun élève à répartir",
+  "classesOrganisationEmptyInvite": "Inscrivez des élèves dans ce niveau pour lancer la répartition.",
+  "classesOrganisationOverviewErrorTitle": "Chargement impossible",
+  "classesOrganisationTransferDialogTitle": "Transférer l'élève",
+  "classesReassignCurrentClassState": "Classe actuelle",
+  "classesReassignUnassignedState": "Non réparti",
+  "classesReassignCurrentBadge": "Actuelle",
+  "classesReassignFullBadge": "Complet",
+  "classesReassignOptionStats": "{eff}/{cap} · G {boys} · F {girls}",
+  "@classesReassignOptionStats": {
+    "placeholders": {
+      "eff": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      },
+      "boys": {
+        "type": "int"
+      },
+      "girls": {
+        "type": "int"
+      }
+    }
+  },
   "classesOrganisationTransferAction": "Transférer",
   "classesOrganisationTransferInProgress": "Transfert en cours...",
   "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
@@ -116,8 +232,18 @@
       }
     }
   },
-  "classesOrganisationPendingTitle": "Niveau non encore réparti",
-  "classesOrganisationPendingSubtitle": "Lancez la répartition initiale pour constituer les classes de ce niveau.",
+  "classesOrganisationPendingTitle": "Niveau pas encore réparti",
+  "classesOrganisationPendingMessage": "Les {count} élèves de {levelName} ne sont rattachés à aucune classe. La répartition automatique équilibre les classes par genre.",
+  "@classesOrganisationPendingMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "levelName": {
+        "type": "String"
+      }
+    }
+  },
   "classesOrganisationPendingStudentsToDistribute": "{count} élèves à répartir",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
@@ -126,68 +252,28 @@
       }
     }
   },
-  "classesOrganisationPendingPlannedClassrooms": "{count} classes prévues",
-  "@classesOrganisationPendingPlannedClassrooms": {
+  "classesOrganisationGenderBoysPill": "G · {count}",
+  "@classesOrganisationGenderBoysPill": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "classesOrganisationAppliedCriterionInfo": "Critère appliqué : répartition équilibrée par genre (école mixte).",
-  "classesOrganisationSplitSummary": "{studentsCount} élèves répartis en {classroomsCount} classes · Critère appliqué : {criterion}",
-  "@classesOrganisationSplitSummary": {
+  "classesOrganisationGenderGirlsPill": "F · {count}",
+  "@classesOrganisationGenderGirlsPill": {
     "placeholders": {
-      "studentsCount": {
+      "count": {
         "type": "int"
-      },
-      "classroomsCount": {
-        "type": "int"
-      },
-      "criterion": {
-        "type": "String"
       }
     }
   },
-  "classesOrganisationClassroomsSectionTitle": "Classes constituées",
-  "classesOrganisationUnassignedTitle": "Élèves à affecter",
-  "classesOrganisationUnassignedTitleSuffix": " — arrivés après la répartition",
+  "classesOrganisationUnassignedTitle": "Élèves non répartis",
+  "classesOrganisationUnassignedSubtitle": "Nouveaux arrivants, transferts annulés…",
   "classesOrganisationUnassignedBadge": "À affecter",
-  "classesOrganisationUnassignedSummary": "{count} élèves en attente d'affectation",
-  "@classesOrganisationUnassignedSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
-  "classesOrganisationAssignAction": "Affecter à une classe",
-  "classesOrganisationAssignDialogTitle": "Affecter à une classe",
-  "classesOrganisationAssignDialogMessage": "Choisissez la classe de destination pour {studentName}.",
-  "@classesOrganisationAssignDialogMessage": {
-    "placeholders": {
-      "studentName": {
-        "type": "String"
-      }
-    }
-  },
-  "classesOrganisationClassroomPopulation": "Effectif actuel : {count}",
-  "@classesOrganisationClassroomPopulation": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "classesOrganisationTransferConfirmMessage": "Confirmez-vous le transfert de {studentName} vers cette classe ?",
-  "@classesOrganisationTransferConfirmMessage": {
-    "placeholders": {
-      "studentName": {
-        "type": "String"
-      }
-    }
-  },
+  "classesOrganisationAssignAction": "Affecter",
+  "classesOrganisationAssignDialogTitle": "Affecter l'élève",
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
@@ -206,13 +292,8 @@
   "classesOrganisationErrorStorage": "Erreur de stockage local.",
   "classesOrganisationErrorAuth": "Session non valide, reconnectez-vous.",
   "classesOrganisationErrorUnknown": "Une erreur est survenue.",
-  "classesListHeroTitle": "Listes de classe",
-  "classesListHeroSubtitle": "Recherchez rapidement les élèves par cycle, niveau ou classe, puis exportez les résultats affichés.",
-  "classesListHeroFilterChip": "Recherche multi-critères par identité et niveau.",
-  "classesListHeroClassroomChip": "Filtrage optionnel par classe de l'année courante.",
   "classesListSearchTitle": "Formulaire de recherche",
   "classesListSearchHint": "",
-  "classesListValidationAtLeastOneCriterion": "Renseignez au moins un critère pour lancer la recherche.",
   "classesListClassroomOptionalLabel": "Classe (optionnel)",
   "classesListFirstNameOptionalLabel": "Prénom (optionnel)",
   "classesListLastNameOptionalLabel": "Nom (optionnel)",
@@ -255,11 +336,40 @@
   "profile": "Profil",
   "settings": "Paramètres",
   "home": "Accueil",
+  "accueilBannerGreeting": "Bonjour, {firstName}",
+  "@accueilBannerGreeting": {
+    "description": "Salutation du bandeau d'accueil avec le prénom de l'utilisateur connecté.",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerGreetingGeneric": "Bonjour",
+  "accueilBannerContextTail": "Voici l'essentiel de votre école aujourd'hui.",
+  "accueilModulesEyebrow": "Vos modules",
+  "accueilModulesTitle": "Où souhaitez-vous aller ?",
+  "accueilModulesIntro": "Quatre modules couvrent la vie administrative de l'école. Tout reste accessible depuis le menu latéral.",
+  "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
+  "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
+  "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
+  "accueilModuleDisciplinesDescription": "Présences du jour, dossiers de discipline et suivi des élèves.",
+  "accueilModuleCardSemantics": "{module} — ouvrir le tableau de bord",
+  "@accueilModuleCardSemantics": {
+    "description": "Libellé d'accessibilité de la carte module (rôle bouton, destination explicite).",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSignature": "eteyelo · l'école en lingala",
   "homeTopBarPendingSubtitle": "Suivi des dossiers en attente",
   "homeTopBarNotificationsTooltip": "Notifications",
   "homeUserMenuTooltip": "Menu utilisateur",
   "homeSidebarCollapseTooltip": "Replier le menu",
   "homeSidebarExpandTooltip": "Étendre le menu",
+  "homeOpenNavigationDrawerTooltip": "Ouvrir le menu",
   "homeSidebarFooterLabel": "Tableau de bord scolaire",
   "homeSidebarNavigationLabel": "Navigation principale",
   "pageUnderConstruction": "Cette page est en cours de développement",
@@ -267,7 +377,16 @@
   "searchStudents": "Rechercher des élèves",
   "searchFormSubtitleFirstRegistration": "Filtrez la liste des inscriptions",
   "searchFormSubtitlePreRegistration": "Demandes reçues en ligne, en attente de validation",
-  "reRegistrationSearchHint": "Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.",
+  "reRegistrationSearchHint": "Retrouvez un élève ou une classe de l'année précédente à réinscrire",
+  "reRegistrationSearchHelpPill": "Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.",
+  "reRegistrationSearchTitle": "Rechercher un élève",
+  "reRegistrationSearchByNameGroup": "Par nom",
+  "reRegistrationSearchByLevelGroup": "Par cycle / niveau",
+  "reRegistrationSearchOrSeparator": "OU",
+  "reRegistrationSearchActiveModeLabel": "Recherche active par :",
+  "reRegistrationSearchModeNameBadge": "Nom",
+  "reRegistrationSearchModeLevelBadge": "Cycle / niveau",
+  "reRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "reRegistrationAcademicInfoHelp": "Sélectionnez le cycle et le niveau ciblés pour filtrer les résultats.",
   "reRegistrationSearchNoOptions": "Aucun niveau/cycle disponible pour la recherche.",
   "reRegistrationSearchNeedCriteria": "Renseignez soit Prénom, Nom et Post-nom, soit Cycle/Niveau.",
@@ -650,7 +769,7 @@
   "enrollmentStatusRejected": "Rejeté",
   "enrollmentStatusCancelled": "Annulé",
   "enrollmentReadOnlyTitle": "Mode consultation",
-  "enrollmentReadOnlyMessage": "Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.",
+  "enrollmentReadOnlyMessage": "Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.",
   "enrollmentEditableTitle": "Mode édition",
   "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
   "studentChargesStepTitle": "Charges de l'élève",
@@ -712,6 +831,37 @@
   "facturationViewChargesLabel": "Voir les charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
+  "facturationEmptyTitle": "Aucun élève trouvé",
+  "facturationSearchHelpBanner": "Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.",
+  "facturationSearchByStudentGroup": "Par élève",
+  "facturationSearchByClassGroup": "Par classe",
+  "facturationSearchOrSeparator": "OU",
+  "facturationSearchActiveModeLabel": "Recherche active par :",
+  "facturationSearchModeStudentBadge": "Élève",
+  "facturationSearchModeClassBadge": "Classe",
+  "facturationSearchCycleLabel": "Cycle",
+  "facturationSearchLevelLabel": "Niveau",
+  "facturationSearchLevelPlaceholder": "Choisissez un cycle",
+  "facturationBalanceDuePill": "{amount} dû",
+  "@facturationBalanceDuePill": {
+    "description": "Pastille AppBar facturation lorsque le solde est dû.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationBalanceUpToDatePill": "À jour",
+  "facturationChargeLineRemainingSuffix": "{amount} restant",
+  "@facturationChargeLineRemainingSuffix": {
+    "description": "Pied de la ligne de frais : montant restant à payer.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationPaymentRecordedToast": "Paiement de {amount} enregistré",
+  "@facturationPaymentRecordedToast": {
+    "description": "Toast de confirmation après un encaissement réussi.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationChargeStatementCopied": "Relevé copié dans le presse-papiers",
+  "facturationChargeStatementEmpty": "Aucun paiement à exporter pour ce frais.",
+  "facturationCsvHeaderFee": "Frais",
+  "facturationCsvHeaderImputedAmount": "Montant imputé (USD)",
   "facturationDetailBackLabel": "Retour aux facturations",
   "facturationDetailContextErrorTitle": "Contexte de détail indisponible",
   "facturationDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
@@ -723,6 +873,7 @@
   "facturationDetailStudentLevelGroup": "Cycle",
   "facturationDetailStudentLevel": "Niveau",
   "facturationDetailInfoTitle": "Fiche financière",
+  "facturationDetailEyebrow": "Facturation",
   "facturationDetailInfoSubtitle": "Consultez les paiements récents et l'état des charges de l'élève.",
   "facturationDetailHeaderKpiTotalDue": "Total dû",
   "facturationDetailHeaderKpiAlreadyPaid": "Déjà payé",
@@ -732,6 +883,15 @@
   "facturationDetailPaymentsSectionTitle": "Derniers paiements",
   "facturationDetailPaymentsSectionSubtitle": "Historique des encaissements enregistrés pour cet élève.",
   "facturationDetailPaymentsRecordedCount": "{count, plural, =0{Aucun paiement enregistré} =1{1 paiement enregistré} other{{count} paiements enregistrés}}",
+  "facturationDetailPaymentsRecordedWithTotal": "{count, plural, =0{Aucun versement enregistré} =1{1 versement · {total}} other{{count} versements · {total}}}",
+  "@facturationDetailPaymentsRecordedWithTotal": {
+    "description": "Sous-titre de la section paiements : nombre de versements + total payé.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "String" }
+    }
+  },
+  "facturationPaymentMethodCash": "Espèces",
   "@facturationDetailPaymentsRecordedCount": {
     "placeholders": {
       "count": {}
@@ -752,7 +912,14 @@
   "facturationPaymentPayerLabel": "Payeur",
   "facturationPaymentAmountLabel": "Montant global payé",
   "facturationPaymentPaidAtLabel": "Date de paiement",
-  "facturationPaymentAllocationsSectionTitle": "Allocations de paiement",
+  "facturationPaymentAmountPaidLabel": "Montant versé",
+  "facturationPaymentMethodLabel": "Moyen de paiement",
+  "facturationPaymentCollectedByLabel": "Encaissé par",
+  "facturationPaymentReceiptLabel": "Reçu n°",
+  "facturationPaymentStudentLabel": "Élève",
+  "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",
+  "facturationPaymentCloseLabel": "Fermer",
+  "facturationPaymentAllocationsSectionTitle": "Répartition par frais",
   "facturationPaymentAllocationsSectionSubtitle": "Liste des charges couvertes par ce paiement.",
   "facturationPaymentAllocationsTotalLabel": "Total alloué",
   "facturationPaymentAllocationsEmpty": "Aucune allocation n'a été trouvée pour ce paiement.",
@@ -800,14 +967,14 @@
   "facturationPrintStatementsLabel": "Imprimer les relevés",
   "facturationPrintStatementsSubtitle": "Générez et téléchargez les relevés de facturation de cet étudiant",
   "facturationChargeDetailBackLabel": "Retour au détail de facturation",
-  "facturationChargeDetailHeroTitle": "Détail d'une charge",
+  "facturationChargeDetailHeroTitle": "Détail du frais",
   "facturationChargeDetailHeroSubtitle": "Consultez l'état de cette charge et les paiements qui y ont été alloués.",
   "facturationChargeDetailInfoSectionTitle": "Informations de la charge",
   "facturationChargeDetailExpectedAmountLabel": "Montant attendu",
   "facturationChargeDetailPaidAmountLabel": "Montant payé",
   "facturationChargeDetailRemainingAmountLabel": "Reste à payer",
   "facturationChargeDetailStatusLabel": "Statut",
-  "facturationChargeDetailAllocationsSectionTitle": "Allocations liées à cette charge",
+  "facturationChargeDetailAllocationsSectionTitle": "Paiements affectés",
   "facturationChargeDetailAllocationsSectionSubtitle": "Détail des paiements alloués à cette charge.",
   "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Total alloué",
@@ -907,6 +1074,109 @@
   "facturationCreatePaymentAuthError": "Une erreur d'authentification est survenue.",
   "facturationCreatePaymentUnknownError": "Une erreur inattendue est survenue.",
   "facturationCreatePaymentNoChargesAvailable": "Aucune charge non réglée disponible pour cet élève.",
+  "facturationCreatePaymentChargesToSettleTitle": "Frais à régler",
+  "facturationCreatePaymentChargesToSettleSubtitle": "Cochez les frais à régler et ajustez les montants.",
+  "facturationCreatePaymentAllFeesSettled": "Tous les frais sont déjà soldés.",
+  "facturationCreatePaymentChargeDue": "Dû {amount}",
+  "@facturationCreatePaymentChargeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargePaid": "Déjà payé {amount}",
+  "@facturationCreatePaymentChargePaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargeRemaining": "Restant {amount}",
+  "@facturationCreatePaymentChargeRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentAmountToSettleLabel": "Montant à régler",
+  "facturationCreatePaymentSettleAllAction": "Tout solder",
+  "facturationCreatePaymentAmountClampedWarning": "Montant ramené au restant dû ({amount}).",
+  "@facturationCreatePaymentAmountClampedWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentRemainingAfter": "Restant après : {amount}",
+  "@facturationCreatePaymentRemainingAfter": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentSettledChip": "Soldé",
+  "facturationCreatePaymentTotalToCollect": "Total à encaisser",
+  "facturationCreatePaymentCollectAmountAction": "Encaisser {amount}",
+  "@facturationCreatePaymentCollectAmountAction": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmCollectTitle": "Encaisser {amount} ?",
+  "@facturationCreatePaymentConfirmCollectTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentence": "Vous allez encaisser {amount} pour {student}, réglé par {payer}.",
+  "@facturationCreatePaymentConfirmSentence": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
+        "type": "String"
+      },
+      "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmDistributionTitle": "Répartition",
+  "facturationCollectStepConfirm": "Confirmation",
+  "facturationCollectStepResult": "Résultat",
+  "facturationCollectSimulateFailure": "Simuler un échec",
+  "facturationCollectProcessing": "Enregistrement du paiement…",
+  "facturationCollectSuccessTitle": "Paiement enregistré",
+  "facturationCollectReceiptChip": "Reçu n° {code}",
+  "@facturationCollectReceiptChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectErrorTitle": "Échec de l'encaissement",
+  "facturationCollectErrorNoDebit": "Aucun montant n'a été débité.",
+  "facturationCollectIncidentChip": "Code incident : {code}",
+  "@facturationCollectIncidentChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectEditAction": "Modifier",
+  "facturationCollectRetryAction": "Réessayer",
   "attendanceHeroTitle": "Présences",
   "attendanceHeroSubtitle": "Consultez les présences par classe et date pour un suivi quotidien fiable.",
   "attendanceHeroChipClass": "Recherche par classe",
@@ -919,7 +1189,8 @@
   "attendanceClassLabel": "Classe",
   "attendanceShowClassAction": "Afficher la classe",
   "attendanceInvitationMessage": "Lancez une recherche pour afficher les présences de la classe sélectionnée.",
-  "attendanceEmptySelectionMessage": "Sélectionnez une classe et une date pour faire l'appel.",
+  "attendanceSelectClassTitle": "Sélectionnez une classe",
+  "attendanceEmptySelectionMessage": "Choisissez un cycle, un niveau puis une classe pour charger la liste d'appel.",
   "attendanceLoadingMessage": "Chargement des présences en cours...",
   "attendanceEmptyMessage": "Aucune présence trouvée pour ces critères.",
   "attendanceExportAction": "Exporter",
@@ -940,6 +1211,9 @@
   "attendanceStatusInProgress": "Appel en cours",
   "attendanceStatusReady": "Prêt à valider",
   "attendancePresentCount": "Présents",
+  "attendanceJustifiedCount": "Justifiés",
+  "attendanceUnjustifiedCount": "Non justifiés",
+  "attendancePendingCount": "À motiver",
   "attendanceAbsentCount": "Absents",
   "attendanceTotalCountCompact": "Total",
   "attendanceDefaultPresenceHelper": "Tous les élèves sont présents par défaut. Tapez Absent pour signaler une exception.",
@@ -987,6 +1261,7 @@
   "attendanceReadOnlyHint": "Statut consultatif en lecture seule",
   "attendanceReasonRequiredError": "Veuillez sélectionner un motif pour cette absence.",
   "attendanceReasonRequiredHint": "Motif requis pour une absence.",
+  "attendanceMotifRequisLabel": "Motif requis",
   "attendanceReasonDisabledHint": "Le motif est requis seulement pour une absence.",
   "attendanceNoteDisabledHint": "La note est facultative seulement pour une absence.",
   "attendanceNotePlaceholder": "Ajouter une précision si nécessaire",
@@ -1002,6 +1277,16 @@
   "attendanceErrorStorage": "Une erreur de stockage local est survenue.",
   "attendanceErrorAuth": "Une erreur d'authentification est survenue.",
   "attendanceErrorUnknown": "Une erreur inattendue est survenue.",
+  "attendanceSaveCallAction": "Enregistrer l'appel",
+  "attendanceMarkAllPresentAction": "Tout présent",
+  "attendanceSaveOverlayEyebrow": "Appel",
+  "attendanceSaveProcessingTitle": "Enregistrement en cours…",
+  "attendanceSaveSuccessTitle": "Appel enregistré !",
+  "attendanceSaveSuccessSubtitle": "Les présences de la classe ont été sauvegardées.",
+  "attendanceSaveErrorTitle": "Échec de l'enregistrement",
+  "attendanceSaveErrorMessage": "Les saisies sont conservées. Vérifiez votre connexion et réessayez.",
+  "attendanceSaveRetryAction": "Réessayer",
+  "attendanceSaveCloseAction": "Terminer",
   "absenceReasonSickness": "Maladie",
   "absenceReasonFamilyEmergency": "Urgence familiale",
   "absenceReasonPersonal": "Personnel",
@@ -1011,6 +1296,7 @@
   "absenceReasonMarriageLeave": "Congé de mariage",
   "absenceReasonParentalLeave": "Congé parental",
   "absenceReasonWorkLeave": "Congé professionnel",
+  "absenceReasonUnjustified": "Absence non justifiée",
   "absenceReasonOther": "Autre",
   "bootstrapContextUnavailableTitle": "Contexte d'inscription indisponible",
   "bootstrapContextUnavailableMessage": "Les données bootstrap (année scolaire / école) sont absentes. Veuillez vous déconnecter puis vous reconnecter pour recharger la configuration.",

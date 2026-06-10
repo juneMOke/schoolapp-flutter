@@ -42,9 +42,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       state.copyWith(
         menuItems: updatedMenus,
         selectedMenuId: nextOpenedMenuId,
-        selectedSubMenuId: nextOpenedMenuId == null
-            ? null
-            : state.selectedSubMenuId,
+        // Déployer/replier un accordéon est une action de divulgation, pas de
+        // navigation : on conserve l'écran affiché (selectedSubMenuId inchangé,
+        // donc non passé au copyWith). Sans cela, refermer un module depuis
+        // l'Accueil — ou depuis n'importe quelle page — retombait sur le
+        // placeholder « page en construction » (cul-de-sac, cf. revue spec §00).
         openedMenuId: nextOpenedMenuId,
         isSidebarExpanded: state.isSidebarExpanded ? null : true,
       ),

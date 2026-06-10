@@ -125,6 +125,21 @@ class AppColors {
   static const financeDetailChargeRowDue =
       tokens.AppColors.financeDetailChargeRowDue;
 
+  // Statut de frais — spec Facturation §20
+  static const feeStatusPaid = tokens.AppColors.feeStatusPaid;
+  static const feeStatusPaidSoft = tokens.AppColors.feeStatusPaidSoft;
+  static const feeStatusPaidBorder = tokens.AppColors.feeStatusPaidBorder;
+  static const feeStatusPartial = tokens.AppColors.feeStatusPartial;
+  static const feeStatusPartialSoft = tokens.AppColors.feeStatusPartialSoft;
+  static const feeStatusPartialBorder = tokens.AppColors.feeStatusPartialBorder;
+  static const feeStatusDue = tokens.AppColors.feeStatusDue;
+  static const feeStatusDueSoft = tokens.AppColors.feeStatusDueSoft;
+  static const feeStatusDueBorder = tokens.AppColors.feeStatusDueBorder;
+  static const billingHelpSurface = tokens.AppColors.billingHelpSurface;
+  static const billingHelpBorder = tokens.AppColors.billingHelpBorder;
+  static const billingPaymentMedallionSoft =
+      tokens.AppColors.billingPaymentMedallionSoft;
+
   // Disciplinary detail palette
   static const disciplinaryDetailCard = tokens.AppColors.disciplinaryDetailCard;
   static const disciplinaryDetailAccent =
@@ -159,7 +174,6 @@ class AppColors {
   static const classesChipTotalFg = tokens.AppColors.classesChipTotalFg;
   static const classesFocusRing = tokens.AppColors.classesFocusRing;
   static const classesDisabledBg = tokens.AppColors.classesDisabledBg;
-  static const classesDisabledFg = tokens.AppColors.classesDisabledFg;
 
   // Relationship colours
   static const relationshipFather = tokens.AppColors.relationshipFather;

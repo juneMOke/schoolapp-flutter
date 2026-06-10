@@ -2,19 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// État « Niveau non réparti » (PARCOURS 3).
+///
+/// Le niveau a des élèves mais aucun n'est rattaché à une classe. On l'explicite
+/// (titre + message), on rappelle l'effectif et le ratio G/F, puis on propose la
+/// répartition automatique par genre via un unique bouton primaire.
 class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
   final bool isDistributing;
+  final ClassroomStatus overviewStatus;
+  final String levelName;
   final int studentsToDistribute;
-  final int plannedClassroomCount;
+  final int maleCount;
+  final int femaleCount;
   final VoidCallback onDistributionRequested;
 
   const ClassesOrganisationPendingDistributionCard({
     required this.isDistributing,
+    required this.overviewStatus,
+    required this.levelName,
     required this.studentsToDistribute,
-    required this.plannedClassroomCount,
+    required this.maleCount,
+    required this.femaleCount,
     required this.onDistributionRequested,
     super.key,
   });
@@ -22,6 +34,9 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isLoadingOverview =
+        overviewStatus == ClassroomStatus.loading ||
+        overviewStatus == ClassroomStatus.initial;
 
     return ClassesOrganisationDashedContainer(
       backgroundColor: AppColors.surfaceRaised,
@@ -30,6 +45,7 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 44,
@@ -39,7 +55,7 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
                   color: AppColors.terreCuite.withValues(alpha: 0.12),
                 ),
                 child: const Icon(
-                  Icons.auto_awesome_outlined,
+                  Icons.groups_outlined,
                   color: AppColors.terreCuite,
                 ),
               ),
@@ -56,7 +72,10 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppDimensions.spacingXS),
                     Text(
-                      l10n.classesOrganisationPendingSubtitle,
+                      l10n.classesOrganisationPendingMessage(
+                        studentsToDistribute,
+                        levelName,
+                      ),
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -67,60 +86,116 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          Wrap(
-            spacing: AppDimensions.spacingS,
-            runSpacing: AppDimensions.spacingS,
-            children: [
-              ClassesOrganisationInfoChip(
-                icon: Icons.groups_outlined,
-                text: l10n.classesOrganisationPendingStudentsToDistribute(
-                  studentsToDistribute,
-                ),
-              ),
-              ClassesOrganisationInfoChip(
-                icon: Icons.grid_view_rounded,
-                text: l10n.classesOrganisationPendingPlannedClassrooms(
-                  plannedClassroomCount,
-                ),
-              ),
-            ],
+          _PendingHeadcountRecap(
+            isLoading: isLoadingOverview,
+            studentsToDistribute: studentsToDistribute,
+            maleCount: maleCount,
+            femaleCount: femaleCount,
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          FilledButton.icon(
-            onPressed: isDistributing ? null : onDistributionRequested,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.terreCuite,
-              foregroundColor: AppColors.blancCasse,
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              shape: const StadiumBorder(),
-            ),
-            icon: isDistributing
-                ? const SizedBox(
-                    width: AppDimensions.detailMiniIconSize,
-                    height: AppDimensions.detailMiniIconSize,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.auto_awesome_outlined),
-            label: Text(l10n.classesOrganisationDistributionAction),
-          ),
-          const SizedBox(height: AppDimensions.spacingS),
-          Container(
+          SizedBox(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppDimensions.spacingS),
-            decoration: BoxDecoration(
-              color: AppColors.classesInfoBannerSurface,
-              borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-              border: Border.all(color: AppColors.classesInfoBannerBorder),
-            ),
-            child: Text(
-              l10n.classesOrganisationAppliedCriterionInfo,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textPrimary,
+            child: FilledButton(
+              onPressed: (isDistributing || isLoadingOverview)
+                  ? null
+                  : onDistributionRequested,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.terreCuite,
+                foregroundColor: AppColors.blancCasse,
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacingM,
+                ),
+                shape: const StadiumBorder(),
+              ),
+              // Bouton pleine largeur + libellé flexible : sur très petit écran
+              // le texte passe sur 2 lignes plutôt que de déborder.
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isDistributing)
+                    const SizedBox(
+                      width: AppDimensions.detailMiniIconSize,
+                      height: AppDimensions.detailMiniIconSize,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    const Icon(Icons.auto_awesome_outlined),
+                  const SizedBox(width: AppDimensions.spacingS),
+                  Flexible(
+                    child: Text(
+                      l10n.classesOrganisationDistributeByGenderAction,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Encart « Rappel » : effectif + pastilles Garçons (bleu) / Filles (terre-cuite).
+class _PendingHeadcountRecap extends StatelessWidget {
+  final bool isLoading;
+  final int studentsToDistribute;
+  final int maleCount;
+  final int femaleCount;
+
+  const _PendingHeadcountRecap({
+    required this.isLoading,
+    required this.studentsToDistribute,
+    required this.maleCount,
+    required this.femaleCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: isLoading
+          ? const Center(
+              child: SizedBox(
+                width: AppDimensions.spacingL,
+                height: AppDimensions.spacingL,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          : Wrap(
+              spacing: AppDimensions.spacingS,
+              runSpacing: AppDimensions.spacingS,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ClassesOrganisationStatChip(
+                  icon: Icons.groups_outlined,
+                  label: l10n.classesOrganisationPendingStudentsToDistribute(
+                    studentsToDistribute,
+                  ),
+                  background: AppColors.surface,
+                  foreground: AppColors.textPrimary,
+                ),
+                ClassesOrganisationGenderPill(
+                  label: l10n.classesOrganisationGenderBoysPill(maleCount),
+                  color: AppColors.bleuArdoise,
+                ),
+                ClassesOrganisationGenderPill(
+                  label: l10n.classesOrganisationGenderGirlsPill(femaleCount),
+                  color: AppColors.terreCuite,
+                ),
+              ],
+            ),
     );
   }
 }

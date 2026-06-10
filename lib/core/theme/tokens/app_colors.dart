@@ -105,6 +105,35 @@ class AppColors {
   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);
   static const financeDetailChargeRowDue = Color(0xFFFFF1F3);
 
+  // Statut de frais — spec Facturation §20 (source unique badge / barre / icône).
+  // Soldé = vert-savane · Partiel = #A66A00 · Impayé = #C0392B (= error).
+  static const feeStatusPaid = vertSavane;
+  static const feeStatusPaidSoft = Color(0xFFEDF5EF);
+  static const feeStatusPaidBorder = Color(0xFFCFE3D4);
+  static const feeStatusPartial = Color(0xFFA66A00);
+  static const feeStatusPartialSoft = Color(0xFFFBF1DF);
+  static const feeStatusPartialBorder = Color(0xFFEAD9B0);
+  static const feeStatusDue = error;
+  static const feeStatusDueSoft = Color(0xFFFBEAE7);
+  static const feeStatusDueBorder = Color(0xFFF0CDC7);
+
+  // Facturation — bandeau d'aide bi-mode & teintes utilitaires (spec §01).
+  static const billingHelpSurface = Color(0xFFEBF2F7);
+  static const billingHelpBorder = Color(0xFFCFE0EA);
+  static const billingPaymentMedallionSoft = Color(0xFFEDF5EF);
+
+  // Connexion — bandeaux d'erreur en place (spec §08 : une tonalité par type).
+  // Rouge = 401/500 · Bleu ardoise = réseau · Ambre = 403/429.
+  static const loginBannerErrorSurface = Color(0xFFFBEAE7);
+  static const loginBannerErrorBorder = Color(0xFFE7B8B0);
+  static const loginBannerErrorText = Color(0xFF8A2C20);
+  static const loginBannerNetworkSurface = Color(0xFFEBF2F7);
+  static const loginBannerNetworkBorder = Color(0xFFCFE0EA);
+  static const loginBannerNetworkText = Color(0xFF2B566F);
+  static const loginBannerWarningSurface = Color(0xFFFBF0E0);
+  static const loginBannerWarningBorder = Color(0xFFECD4A6);
+  static const loginBannerWarningText = Color(0xFF7A5A16);
+
   // Disciplinary detail palette
   static const disciplinaryDetailCard = surfaceRaised;
   static const disciplinaryDetailAccent = Color(0xFFDC2626);
@@ -130,24 +159,17 @@ class AppColors {
   static const classesChipTotalFg = Color(0xFF1B5E20);
   static const classesFocusRing = Color(0xFF1A73E8);
   static const classesDisabledBg = Color(0xFFE5E7EB);
-  static const classesDisabledFg = Color(0xFF6B7280);
 
-  // Avatar identity palette
-  // Teintes sombres et sobres pour la couleur d'identité par élève (palette
-  // tournante déterministe — voir AvatarPalette). Chaque teinte est auditée
-  // WCAG 2.1 AA (≥ 4.5:1) dans les DEUX variantes de StudentAvatar :
-  //   - solid    : blancCasse sur la teinte
-  //   - outlined : la teinte sur papier (surfaceAlt)
-  // Ratios minimaux mesurés (le plus contraignant = outlined sur papier) :
-  //   bleuArdoise 7.7 · terreCuiteFonce 5.9 · vertSavane 5.3 · indigoArdoise 8.2
-  //   prune 9.6 · petrole 6.7 · olive 7.8 · bordeaux 9.1
-  // bleuArdoise et vertSavane sont réutilisés depuis la palette de marque.
-  static const avatarTerreCuiteFonce = Color(0xFF8F4521);
-  static const avatarIndigoArdoise = Color(0xFF33417A);
-  static const avatarPrune = Color(0xFF5B2A4A);
-  static const avatarPetrole = Color(0xFF165A66);
-  static const avatarOlive = Color(0xFF4A4A22);
-  static const avatarBordeaux = Color(0xFF6E2433);
+  // Accueil — cartes modules (spec Accueil §03 : un accent + un fond doux par
+  // module). Les fonds doux reprennent les teintes de la synthèse d'inscription.
+  static const accueilInscriptionsAccent = bleuArdoise; // #1B4D6B
+  static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
+  static const accueilFinancesAccent = vertSavane; // #3D6B4A
+  static const accueilFinancesSoft = Color(0xFFEDF5EF);
+  static const accueilClassesAccent = orDoux; // #D9A24E
+  static const accueilClassesSoft = Color(0xFFFBF3E3);
+  static const accueilDisciplinesAccent = info; // #2E6E8E
+  static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
 
   // Relationship colours
   static const relationshipFather = Color(0xFF1976D2);

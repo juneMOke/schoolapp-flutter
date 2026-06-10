@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/contracts/en
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_counter_filters.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 export 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
@@ -153,13 +154,20 @@ class EnrollmentResultsBar extends StatelessWidget {
     filters: filters,
   );
 
-  Widget _buildActions(AppLocalizations l10n) => EnrollmentResultsBarActions(
-    isLoading: isLoading,
-    sortOptions: sortOptions,
-    selectedSort: selectedSort,
-    onSortChanged: onSortChanged,
-    onViewModeChanged: onViewModeChanged,
-    currentViewMode: currentViewMode,
-    onRefresh: onRefresh,
-  );
+  Widget _buildActions(AppLocalizations l10n) {
+    // Le basculeur reflète le mode RÉELLEMENT rendu : en `auto` (défaut) on rend
+    // la table → le basculeur surligne « Liste », y compris sur mobile.
+    final effectiveMode = EnrollmentResultsResponsiveMode.resolve(
+      preferred: currentViewMode,
+    );
+    return EnrollmentResultsBarActions(
+      isLoading: isLoading,
+      sortOptions: sortOptions,
+      selectedSort: selectedSort,
+      onSortChanged: onSortChanged,
+      onViewModeChanged: onViewModeChanged,
+      currentViewMode: effectiveMode,
+      onRefresh: onRefresh,
+    );
+  }
 }

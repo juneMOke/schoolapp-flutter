@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListResultsToolbar extends StatelessWidget {
@@ -85,36 +86,11 @@ class _ExportButton extends StatelessWidget {
       opacity: canExport ? 1 : 0.72,
       child: FocusTraversalOrder(
         order: const NumericFocusOrder(9),
-        child: Semantics(
-          button: true,
-          enabled: canExport,
+        child: EteeloButton.secondary(
+          onPressed: canExport ? onPressed : null,
+          icon: Icons.download_rounded,
           label: l10n.classesListExportPdf,
-          child: Tooltip(
-            message: l10n.classesListExportPdf,
-            child: OutlinedButton.icon(
-              onPressed: canExport ? onPressed : null,
-              icon: const Icon(Icons.download_rounded),
-              label: Text(l10n.classesListExportPdf),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.bleuArdoise,
-                disabledForegroundColor: AppColors.classesDisabledFg,
-                side: BorderSide(
-                  color: canExport
-                      ? AppColors.bleuArdoise.withValues(alpha: 0.5)
-                      : AppColors.border,
-                ),
-                minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.spacingM,
-                  vertical: AppDimensions.spacingS,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-                ),
-                textStyle: AppTextStyles.action,
-              ),
-            ),
-          ),
+          tooltip: l10n.classesListExportPdf,
         ),
       ),
     );

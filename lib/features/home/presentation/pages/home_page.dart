@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_l
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -102,7 +103,9 @@ class _HomePageView extends StatelessWidget {
               child: Column(
                 children: [
                   const TopBar(isCompact: false),
-                  Expanded(child: _buildMainContent(context, state)),
+                  Expanded(
+                    child: _buildMainContent(context, state, isCompact: false),
+                  ),
                 ],
               ),
             ),
@@ -125,16 +128,25 @@ class _HomePageView extends StatelessWidget {
           drawer: const Drawer(
             width: AppTheme.sidebarWidth,
             elevation: 12,
-            child: Sidebar(closeDrawerOnSubMenuSelection: true),
+            // Tiroir : sidebar toujours déployée (ignore le repli 84 du bureau).
+            child: Sidebar(
+              closeDrawerOnSubMenuSelection: true,
+              forceExpanded: true,
+            ),
           ),
-          body: _buildMainContent(context, state),
+          body: _buildMainContent(context, state, isCompact: true),
         );
       },
     );
   }
 
-  Widget _buildMainContent(BuildContext context, NavigationState state) {
+  Widget _buildMainContent(
+    BuildContext context,
+    NavigationState state, {
+    required bool isCompact,
+  }) {
     final hidePageBreadcrumb =
+        state.selectedSubMenuId == MenuConstants.accueilId ||
         state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
         state.selectedSubMenuId == MenuConstants.financesDashboardId ||
         state.selectedSubMenuId == MenuConstants.classesDashboardId ||
@@ -147,24 +159,54 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.presencesId ||
         state.selectedSubMenuId == MenuConstants.disciplinesListId;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!hidePageBreadcrumb) ...[
-            _buildBreadcrumb(context, state),
-            const SizedBox(height: AppDimensions.spacingL),
-          ],
-          Expanded(child: _buildContentArea(context, state)),
-        ],
+    // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
+    // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
+    // donne TOUT le volet pour que le fond couvre l'intégralité de la page
+    // (gouttières et marges comprises), au lieu de le confiner dans une boîte
+    // paddée/centrée par la coquille (ce qui évite aussi un double padding).
+    if (hidePageBreadcrumb) {
+      return _buildContentArea(context, state);
+    }
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildBreadcrumb(context, state),
+        const SizedBox(height: AppDimensions.spacingL),
+        Expanded(child: _buildContentArea(context, state)),
+      ],
+    );
+
+    return Padding(
+      // Padding contenu : 16 dp en compact, 24 dp en bureau.
+      padding: EdgeInsets.all(
+        isCompact ? AppDimensions.spacingM : AppDimensions.spacingL,
       ),
+      // Bureau : contenu plafonné à 1180 dp et centré ; compact : pleine largeur.
+      child: isCompact
+          ? content
+          : Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppDimensions.detailContentMaxWidth,
+                ),
+                child: content,
+              ),
+            ),
     );
   }
 
   Widget _buildBreadcrumb(BuildContext context, NavigationState state) {
     final l10n = AppLocalizations.of(context)!;
+    // Lookup tolérant : un selectedMenuId qui ne correspondrait à aucun menu
+    // (état incohérent) ne doit jamais faire planter le fil d'Ariane.
+    final selectedMenuMatches = state.menuItems.where(
+      (menu) => menu.id == state.selectedMenuId,
+    );
+    final selectedMenuTitle = selectedMenuMatches.isEmpty
+        ? null
+        : selectedMenuMatches.first.title;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -176,15 +218,13 @@ class _HomePageView extends StatelessWidget {
               color: AppTheme.textSecondaryColor,
             ),
           ),
-          if (state.selectedMenuId != null) ...[
+          if (selectedMenuTitle != null) ...[
             const Text(
               ' / ',
               style: TextStyle(color: AppTheme.textSecondaryColor),
             ),
             Text(
-              state.menuItems
-                  .firstWhere((menu) => menu.id == state.selectedMenuId)
-                  .title,
+              selectedMenuTitle,
               style: AppTextStyles.body.copyWith(
                 color: AppTheme.textSecondaryColor,
               ),
@@ -215,6 +255,8 @@ class _HomePageView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     switch (state.selectedSubMenuId) {
+      case MenuConstants.accueilId:
+        return const AccueilPage();
       case MenuConstants.inscriptionsDashboardId:
         return const EnrollmentStatsDashboardScope(
           child: EnrollmentStatsDashboardPage(),

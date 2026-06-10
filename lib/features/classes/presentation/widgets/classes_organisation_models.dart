@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 
 class ClassesOrganisationCycleOption extends Equatable {
   final String id;
@@ -80,13 +81,22 @@ class ClassesOrganisationSearchRequest extends Equatable {
 }
 
 class ClassroomMemberReassignIntent extends Equatable {
+  /// Classe d'origine de l'élève. `null` → élève non réparti (mode affectation).
   final String? classroomId;
   final String classroomMemberId;
+  final String studentId;
+  final String studentFirstName;
+  final String studentLastName;
+  final ClassroomMemberGender studentGender;
   final String studentDisplayName;
 
   const ClassroomMemberReassignIntent({
     required this.classroomId,
     required this.classroomMemberId,
+    required this.studentId,
+    required this.studentFirstName,
+    required this.studentLastName,
+    required this.studentGender,
     required this.studentDisplayName,
   });
 
@@ -94,6 +104,10 @@ class ClassroomMemberReassignIntent extends Equatable {
   List<Object?> get props => [
     classroomId,
     classroomMemberId,
+    studentId,
+    studentFirstName,
+    studentLastName,
+    studentGender,
     studentDisplayName,
   ];
 }
@@ -102,13 +116,28 @@ class ClassroomReassignOption extends Equatable {
   final String id;
   final String name;
   final int totalCount;
+  final int capacity;
+  final int femaleCount;
+  final int maleCount;
 
   const ClassroomReassignOption({
     required this.id,
     required this.name,
     required this.totalCount,
+    required this.capacity,
+    required this.femaleCount,
+    required this.maleCount,
   });
 
+  bool get isFull => capacity > 0 && totalCount >= capacity;
+
   @override
-  List<Object?> get props => [id, name, totalCount];
+  List<Object?> get props => [
+    id,
+    name,
+    totalCount,
+    capacity,
+    femaleCount,
+    maleCount,
+  ];
 }

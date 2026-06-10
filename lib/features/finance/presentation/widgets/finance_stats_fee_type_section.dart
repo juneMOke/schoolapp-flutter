@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -27,9 +28,12 @@ class FinanceStatsFeeTypeSection extends StatelessWidget {
             )
           : LayoutBuilder(
               builder: (context, constraints) {
-                final cardWidth = constraints.maxWidth >= 980
+                final cardWidth =
+                    constraints.maxWidth >=
+                        AppBreakpoints.financeStatsFeeTypeThreeColMin
                     ? (constraints.maxWidth - AppDimensions.spacingM * 2) / 3
-                    : constraints.maxWidth >= 640
+                    : constraints.maxWidth >=
+                          AppBreakpoints.financeStatsFeeTypeTwoColMin
                     ? (constraints.maxWidth - AppDimensions.spacingM) / 2
                     : constraints.maxWidth;
 

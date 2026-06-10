@@ -97,6 +97,7 @@ class TargetYearFields extends StatelessWidget {
             },
             errorText: groupError,
             enabled: isEditable,
+            readOnly: !isEditable,
           ),
         ),
         WizardGridField(
@@ -112,6 +113,7 @@ class TargetYearFields extends StatelessWidget {
             errorText: levelError,
             // Cascade : le niveau est désactivé tant que le cycle est vide.
             enabled: isEditable && selectedSchoolLevelGroupId.isNotEmpty,
+            readOnly: !isEditable,
           ),
         ),
         WizardGridField(

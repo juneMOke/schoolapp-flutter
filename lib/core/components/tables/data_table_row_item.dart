@@ -112,6 +112,9 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
           ? widget.row.cells[index]
           : const DataTableCellSpec(text: '');
 
+      final hasSecondary =
+          cell.secondaryText != null && cell.secondaryText!.isNotEmpty;
+
       widgets.add(
         Expanded(
           flex: column.flex,
@@ -123,6 +126,29 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                     alignment: Alignment.centerLeft,
                     child: cell.child,
                   ),
+                )
+              : hasSecondary
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cell.text.isNotEmpty ? cell.text : '—',
+                      textAlign: cell.textAlign,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _resolveCellStyle(cell.variant),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      cell.secondaryText!,
+                      textAlign: cell.textAlign,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _resolveCellStyle(cell.secondaryVariant),
+                    ),
+                  ],
                 )
               : Text(
                   cell.text.isNotEmpty ? cell.text : '—',

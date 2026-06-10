@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 
 void main() {
@@ -70,15 +71,18 @@ void main() {
       expect(paddingAfter.left, 11);
     });
 
-    testWidgets('utilise un fond readonly specifique', (tester) async {
+    testWidgets('en lecture (readOnly), garde le fond de l etat editable', (
+      tester,
+    ) async {
+      // Décision design : pas de couleur particulière en lecture — un champ
+      // readOnly garde le même fond (surface) qu'un champ éditable au repos.
       await pumpInput(tester, readOnly: true);
 
       final container = tester.widget<AnimatedContainer>(
         find.byType(AnimatedContainer),
       );
       final decoration = container.decoration! as BoxDecoration;
-      expect(decoration.color, isNotNull);
-      expect(decoration.color, equals(const Color(0xFFF1EDE2)));
+      expect(decoration.color, equals(AppColors.surface));
     });
 
     testWidgets('affiche le message d erreur sous le champ', (tester) async {

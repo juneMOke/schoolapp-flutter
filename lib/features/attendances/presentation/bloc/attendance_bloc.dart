@@ -24,6 +24,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<AttendanceSaveRequested>(_onSaveRequested);
     on<AttendanceSaveStatusResetRequested>(_onSaveStatusResetRequested);
     on<AttendanceResetRequested>(_onResetRequested);
+    on<AttendanceMarkAllPresentRequested>(_onMarkAllPresentRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -202,6 +203,40 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) {
     emit(const AttendanceState());
+  }
+
+  void _onMarkAllPresentRequested(
+    AttendanceMarkAllPresentRequested event,
+    Emitter<AttendanceState> emit,
+  ) {
+    if (state.fetchStatus != AttendanceStatus.success ||
+        state.draftRows.isEmpty) {
+      return;
+    }
+
+    final draftRows = state.draftRows
+        .map(
+          (row) => row.copyWith(
+            present: true,
+            absenceReason: null,
+            absenceReasonNote: '',
+          ),
+        )
+        .toList(growable: false);
+
+    emit(
+      state.copyWith(
+        draftRows: draftRows,
+        hasUnsavedChanges: _hasUnsavedChanges(state.records, draftRows),
+        hasValidationErrors: false,
+        modifiedStudentIds: _computeModifiedStudentIds(
+          state.records,
+          draftRows,
+        ),
+        saveStatus: AttendanceStatus.initial,
+        saveErrorType: AttendanceErrorType.none,
+      ),
+    );
   }
 
   void _updateDraftRows(

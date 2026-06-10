@@ -17,6 +17,11 @@ class EteeloSelectInput<T> extends StatefulWidget {
   final T? value;
   final ValueChanged<T?> onChanged;
   final bool enabled;
+
+  /// Lecture seule : le champ est non interactif mais garde l'apparence d'un
+  /// champ au repos (pleine couleur), contrairement à [enabled] = false qui
+  /// grise le champ (repère « non disponible », ex. cascade en édition).
+  final bool readOnly;
   final bool required;
   final String? errorText;
   final String? placeholder;
@@ -40,6 +45,7 @@ class EteeloSelectInput<T> extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.enabled = true,
+    this.readOnly = false,
     this.required = false,
     this.errorText,
     this.placeholder,
@@ -61,7 +67,15 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
   late final FocusNode _focusNode;
   bool _isPanelOpen = false;
 
-  bool get _hasEditingFocus => _focusNode.hasFocus || _isPanelOpen;
+  // Interactif uniquement si activé ET pas en lecture seule.
+  bool get _interactive => widget.enabled && !widget.readOnly;
+
+  // Grisé (repère « non disponible ») uniquement si désactivé ET pas en
+  // lecture seule : la lecture seule garde l'apparence pleine couleur.
+  bool get _dimmed => !widget.enabled && !widget.readOnly;
+
+  bool get _hasEditingFocus =>
+      _interactive && (_focusNode.hasFocus || _isPanelOpen);
 
   @override
   void initState() {
@@ -99,10 +113,10 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
   }
 
   Color _backgroundColor() =>
-      widget.enabled ? AppColors.surface : AppColors.surfaceAlt;
+      _dimmed ? AppColors.surfaceAlt : AppColors.surface;
 
   Color _borderColor(String? resolvedErrorText) {
-    if (!widget.enabled) return AppColors.stateDisabled;
+    if (_dimmed) return AppColors.stateDisabled;
     if (resolvedErrorText?.isNotEmpty ?? false) return AppColors.error;
     if (_hasEditingFocus) return AppColors.bleuArdoise;
     return AppColors.border;
@@ -126,7 +140,7 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
   }
 
   Future<void> _openSheet(FormFieldState<T> state) async {
-    if (!widget.enabled) return;
+    if (!_interactive) return;
 
     setState(() => _isPanelOpen = true);
 
@@ -246,7 +260,8 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
       label: semanticLabel,
       value: selectedLabel ?? placeholder,
       textField: false,
-      enabled: widget.enabled,
+      enabled: _interactive,
+      readOnly: widget.readOnly,
       focused: _focusNode.hasFocus,
       child: Focus(
         focusNode: _focusNode,
@@ -266,28 +281,57 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
             ),
             boxShadow: [if (_focusRing() != null) _focusRing()!],
           ),
-          child: EteeloSelectPopoverField<T>(
-            value: state.value,
-            enabled: widget.enabled,
-            placeholder: placeholder,
-            menuMaxHeight: widget.menuMaxHeight,
-            items: widget.items,
-            itemBuilder: widget.itemBuilder,
-            selectedItemBuilder: widget.selectedItemBuilder,
-            onTap: () {
-              if (!widget.enabled) return;
-              setState(() => _isPanelOpen = true);
-            },
-            onChanged: !widget.enabled
-                ? null
-                : (value) {
-                    setState(() => _isPanelOpen = false);
-                    state.didChange(value);
-                    widget.onChanged(value);
+          // Lecture seule : affichage statique (label + chevron) plutôt que le
+          // DropdownButton, pour garder la pleine couleur sans son grisé Material.
+          child: widget.readOnly
+              ? _buildReadOnlyValue(selectedLabel, placeholder)
+              : EteeloSelectPopoverField<T>(
+                  value: state.value,
+                  enabled: widget.enabled,
+                  placeholder: placeholder,
+                  menuMaxHeight: widget.menuMaxHeight,
+                  items: widget.items,
+                  itemBuilder: widget.itemBuilder,
+                  selectedItemBuilder: widget.selectedItemBuilder,
+                  onTap: () {
+                    if (!widget.enabled) return;
+                    setState(() => _isPanelOpen = true);
                   },
-          ),
+                  onChanged: !widget.enabled
+                      ? null
+                      : (value) {
+                          setState(() => _isPanelOpen = false);
+                          state.didChange(value);
+                          widget.onChanged(value);
+                        },
+                ),
         ),
       ),
+    );
+  }
+
+  Widget _buildReadOnlyValue(String? selectedLabel, String placeholder) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            selectedLabel ?? placeholder,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.bodyMedium.copyWith(
+              color: selectedLabel == null
+                  ? AppColors.textMuted
+                  : AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        const Icon(
+          Icons.keyboard_arrow_down_rounded,
+          size: 18,
+          color: AppColors.textMuted,
+        ),
+      ],
     );
   }
 
@@ -302,7 +346,8 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
       label: semanticLabel,
       value: selectedLabel ?? placeholder,
       button: true,
-      enabled: widget.enabled,
+      enabled: _interactive,
+      readOnly: widget.readOnly,
       focused: _focusNode.hasFocus,
       child: Focus(
         focusNode: _focusNode,
@@ -321,7 +366,7 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
             boxShadow: [if (_focusRing() != null) _focusRing()!],
           ),
           child: InkWell(
-            onTap: widget.enabled ? () => _openSheet(state) : null,
+            onTap: _interactive ? () => _openSheet(state) : null,
             borderRadius: AppRadius.brSm,
             child: Row(
               children: [
@@ -333,9 +378,9 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
                     style: AppTypography.bodyMedium.copyWith(
                       color: selectedLabel == null
                           ? AppColors.textMuted
-                          : widget.enabled
-                          ? AppColors.textPrimary
-                          : AppColors.stateDisabled,
+                          : _dimmed
+                          ? AppColors.stateDisabled
+                          : AppColors.textPrimary,
                     ),
                   ),
                 ),

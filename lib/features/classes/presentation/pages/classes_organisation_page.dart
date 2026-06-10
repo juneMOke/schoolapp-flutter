@@ -7,12 +7,13 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_distribution_confirm_dialog.dart';
+import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_distribution_result_dialog.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_page_content.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -30,7 +31,6 @@ class ClassesOrganisationPage extends StatefulWidget {
 class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
   String? _selectedCycleId;
   ClassesOrganisationLevelOption? _selectedLevel;
-  ClassesOrganisationLevelOption? _lastDistributionLevel;
 
   @override
   void initState() {
@@ -52,74 +52,31 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
-      child: MultiBlocListener(
-        listeners: [
-          BlocListener<ClassroomBloc, ClassroomState>(
-            listenWhen: ClassesOrganisationPageHelpers.listenDistributionStatus,
-            listener: (context, state) {
-              if (state.distributionStatus == ClassroomStatus.success) {
-                AppSnackBar.showSuccess(
-                  context,
-                  l10n.classesOrganisationDistributionSuccess,
-                );
-                final distributedLevel = _lastDistributionLevel;
-                if (distributedLevel != null) {
-                  context.read<BootstrapCurrentYearBloc>().add(
-                    BootstrapContextSchoolLevelSplitPatched(
-                      schoolLevelId: distributedLevel.schoolLevelId,
-                      key: AppConstants.bootstrapPayloadKey,
-                    ),
-                  );
-                  final updatedLevel = distributedLevel.copyWith(
-                    splitIntoClassrooms: true,
-                  );
-                  setState(() {
-                    _selectedLevel = updatedLevel;
-                  });
-                  _loadOverviewIfNeeded(updatedLevel);
-                } else {
-                  final selectedLevel = _selectedLevel;
-                  if (selectedLevel != null) {
-                    _loadOverviewIfNeeded(selectedLevel);
-                  }
-                }
-              }
-              if (state.distributionStatus == ClassroomStatus.failure) {
-                AppSnackBar.showError(
-                  context,
-                  ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                    l10n,
-                    state.distributionErrorType,
-                  ),
-                );
-              }
-            },
-          ),
-          BlocListener<ClassroomBloc, ClassroomState>(
-            listenWhen: ClassesOrganisationPageHelpers.listenReassignStatus,
-            listener: (context, state) {
-              if (state.reassignStatus == ClassroomStatus.success) {
-                AppSnackBar.showSuccess(
-                  context,
-                  l10n.classesOrganisationTransferSuccess,
-                );
-                final selectedLevel = _selectedLevel;
-                if (selectedLevel != null) {
-                  _loadOverviewIfNeeded(selectedLevel);
-                }
-              }
-              if (state.reassignStatus == ClassroomStatus.failure) {
-                AppSnackBar.showError(
-                  context,
-                  ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                    l10n,
-                    state.reassignErrorType,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
+      child: BlocListener<ClassroomBloc, ClassroomState>(
+        // La distribution est désormais gérée par la sur-couche de résultat
+        // (PARCOURS 4) ; ce listener ne traite plus que la réassignation.
+        listenWhen: ClassesOrganisationPageHelpers.listenReassignStatus,
+        listener: (context, state) {
+          if (state.reassignStatus == ClassroomStatus.success) {
+            AppSnackBar.showSuccess(
+              context,
+              l10n.classesOrganisationTransferSuccess,
+            );
+            final selectedLevel = _selectedLevel;
+            if (selectedLevel != null) {
+              _loadOverviewIfNeeded(selectedLevel);
+            }
+          }
+          if (state.reassignStatus == ClassroomStatus.failure) {
+            AppSnackBar.showError(
+              context,
+              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                l10n,
+                state.reassignErrorType,
+              ),
+            );
+          }
+        },
         child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
           buildWhen: ClassesOrganisationPageHelpers.buildWhenBootstrapChanges,
           builder: (context, bootstrapState) {
@@ -143,8 +100,11 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             final cycles = ClassesOrganisationPageHelpers.buildCycleOptions(
               options,
             );
+            final schoolYear =
+                bootstrapState.bootstrap?.academicYear.name ?? '';
 
             return ClassesOrganisationPageContent(
+              schoolYear: schoolYear,
               cycles: cycles,
               selectedCycleId: _selectedCycleId,
               selectedLevel: _selectedLevel,
@@ -180,21 +140,38 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    final availableTargets = overview.classrooms
-        .where((item) => item.classroom.id != intent.classroomId)
+    // Toutes les classes du niveau sont proposées : la popin marque la classe
+    // actuelle « Actuelle » et les classes pleines « Complet » (désactivées).
+    final options = overview.classrooms
         .map(
           (item) => ClassroomReassignOption(
             id: item.classroom.id,
-            name: _formatClassroomName(
-              selectedLevel.schoolLevelName,
-              item.classroom.name,
-            ),
+            name: item.classroom.name,
             totalCount: item.members.length,
+            capacity: item.classroom.capacity,
+            femaleCount: item.members
+                .where(
+                  (member) =>
+                      member.studentGender == ClassroomMemberGender.female,
+                )
+                .length,
+            maleCount: item.members
+                .where(
+                  (member) =>
+                      member.studentGender == ClassroomMemberGender.male,
+                )
+                .length,
           ),
         )
         .toList(growable: false);
 
-    if (availableTargets.isEmpty) {
+    // Au moins une classe doit être sélectionnable : ni la classe actuelle, ni
+    // une classe pleine. Sinon (niveau mono-classe en transfert, ou toutes
+    // pleines), on prévient sans ouvrir une popin sans issue.
+    final hasSelectableTarget = options.any(
+      (option) => !option.isFull && option.id != intent.classroomId,
+    );
+    if (!hasSelectableTarget) {
       AppSnackBar.showWarning(
         context,
         l10n.classesOrganisationTransferNoTarget,
@@ -205,7 +182,7 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     await showClassesOrganisationReassignDialog(
       context: context,
       intent: intent,
-      options: availableTargets,
+      options: options,
     );
   }
 
@@ -213,7 +190,6 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     setState(() {
       _selectedCycleId = cycleId;
       _selectedLevel = null;
-      _lastDistributionLevel = null;
     });
     context.read<ClassroomBloc>().add(const ClassroomResetRequested());
   }
@@ -232,11 +208,10 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
   }
 
   void _loadOverviewIfNeeded(ClassesOrganisationLevelOption level) {
-    if (!level.splitIntoClassrooms) {
-      context.read<ClassroomBloc>().add(const ClassroomResetRequested());
-      return;
-    }
-
+    // On charge l'aperçu de distribution dans les deux cas :
+    // - niveau réparti : pour afficher les sous-classes et leurs membres ;
+    // - niveau non réparti : pour rappeler l'effectif et le ratio G/F des
+    //   élèves restant à répartir (tous non affectés).
     final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
     final academicYearId = bootstrap?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
@@ -263,29 +238,40 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    final confirmed = await showClassesOrganisationDistributionConfirmDialog(
-      context,
-    );
-
-    if (!confirmed || !mounted) {
-      return;
-    }
-
-    setState(() {
-      _lastDistributionLevel = level;
-    });
-
-    context.read<ClassroomBloc>().add(
-      ClassroomDistributionRequested(
+    // La carte « Niveau non réparti » sert de surface de confirmation : le
+    // bouton ouvre directement la sur-couche de résultat (PARCOURS 4), qui
+    // dispatche la répartition et affiche processing → succès | échec.
+    await showClassesOrganisationDistributionResultDialog(
+      context: context,
+      classroomBloc: context.read<ClassroomBloc>(),
+      levelName: level.schoolLevelName,
+      request: ClassroomDistributionRequested(
         academicYearId: academicYearId,
         schoolLevelGroupId: level.schoolLevelGroupId,
         schoolLevelId: level.schoolLevelId,
         distributionCriterion: ClassroomDistributionCriterion.gender,
       ),
+      onDistributed: () => _applyDistributionSuccess(level),
     );
   }
 
-  String _formatClassroomName(String levelName, String classroomName) {
-    return '$levelName - $classroomName';
+  /// Effets de bord appliqués au SUCCÈS de la répartition : marquer le niveau
+  /// comme réparti (patch bootstrap + état local) puis recharger l'aperçu pour
+  /// alimenter la vue répartie et le récapitulatif de la sur-couche.
+  void _applyDistributionSuccess(ClassesOrganisationLevelOption level) {
+    if (!mounted) {
+      return;
+    }
+    context.read<BootstrapCurrentYearBloc>().add(
+      BootstrapContextSchoolLevelSplitPatched(
+        schoolLevelId: level.schoolLevelId,
+        key: AppConstants.bootstrapPayloadKey,
+      ),
+    );
+    final updatedLevel = level.copyWith(splitIntoClassrooms: true);
+    setState(() {
+      _selectedLevel = updatedLevel;
+    });
+    _loadOverviewIfNeeded(updatedLevel);
   }
 }

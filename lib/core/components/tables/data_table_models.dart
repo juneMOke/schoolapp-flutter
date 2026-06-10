@@ -20,17 +20,25 @@ class DataTableColumnDef {
 }
 
 /// Donnees d'une cellule textuelle.
+///
+/// [secondaryText] : ligne secondaire optionnelle affichee sous le texte
+/// principal (ex. date de naissance sous le nom en rendu etroit/telephone).
+/// Ignoree si [child] est fourni.
 class DataTableCellSpec {
   final String text;
   final Widget? child;
   final DataTableCellTextVariant variant;
   final TextAlign textAlign;
+  final String? secondaryText;
+  final DataTableCellTextVariant secondaryVariant;
 
   const DataTableCellSpec({
     this.text = '',
     this.child,
     this.variant = DataTableCellTextVariant.regular,
     this.textAlign = TextAlign.start,
+    this.secondaryText,
+    this.secondaryVariant = DataTableCellTextVariant.regular,
   });
 }
 

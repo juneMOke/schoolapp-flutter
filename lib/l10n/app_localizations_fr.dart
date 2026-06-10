@@ -37,7 +37,102 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Veuillez entrer un email valide';
 
   @override
+  String get loginEyebrow => 'Espace direction';
+
+  @override
+  String get loginSubtitle => 'Accédez au tableau de bord de votre école.';
+
+  @override
+  String get loginEmailLabel => 'Adresse e-mail';
+
+  @override
+  String get loginSubmitting => 'Connexion…';
+
+  @override
+  String get loginSignature => 'eteyelo · l\'école en lingala';
+
+  @override
+  String get loginBrandTitle => 'L\'école congolaise reliée au numérique.';
+
+  @override
+  String get loginBrandTitleCondensed => 'L\'école reliée au numérique.';
+
+  @override
+  String get loginBrandTitleHighlight => 'numérique';
+
+  @override
+  String get loginBrandSubtitle =>
+      'Inscriptions, finances, classes et présences — une seule application, sur tout écran.';
+
+  @override
+  String get loginEmailRequired => 'L\'adresse e-mail est requise.';
+
+  @override
+  String get loginEmailInvalid => 'Format d\'e-mail invalide.';
+
+  @override
+  String get loginPasswordRequired => 'Le mot de passe est requis.';
+
+  @override
+  String get loginErrorInvalidCredentials =>
+      'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
+
+  @override
+  String get loginErrorNetwork => 'Pas de connexion. Vérifiez votre réseau.';
+
+  @override
+  String get loginErrorAccountDisabled =>
+      'Compte désactivé. Contactez l\'administrateur de votre école.';
+
+  @override
+  String get loginErrorServer => 'Erreur serveur. Réessayez dans un instant.';
+
+  @override
+  String loginErrorRateLimited(int seconds) {
+    return 'Trop de tentatives. Réessayez dans $seconds s';
+  }
+
+  @override
+  String get loginContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get showPassword => 'Afficher';
+
+  @override
+  String get hidePassword => 'Masquer';
+
+  @override
   String get schoolApp => 'ETEELO CONNECT';
+
+  @override
+  String get splashBrandPrimary => 'ETEELO';
+
+  @override
+  String get splashBrandSecondary => 'CONNECT';
+
+  @override
+  String get splashTagline => 'Simplifier la gestion de votre école';
+
+  @override
+  String get splashSemanticsLabel => 'ETEELO CONNECT — écran de démarrage';
+
+  @override
+  String get bootstrapOfflineBanner => 'Mode hors-ligne — données en cache';
+
+  @override
+  String get splashErrorTitle => 'Connexion impossible';
+
+  @override
+  String get splashErrorMessage =>
+      'Impossible de charger les données de l\'application. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get splashErrorRetry => 'Réessayer';
+
+  @override
+  String splashVersion(String version, String build) {
+    return 'v$version (build $build)';
+  }
 
   @override
   String get logout => 'Déconnexion';
@@ -110,6 +205,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseConfirmPassword => 'Veuillez confirmer votre mot de passe';
 
   @override
+  String get resetEyebrow => 'Réinitialisation';
+
+  @override
+  String get resetBrandTitle => 'Récupération d\'accès en toute sécurité.';
+
+  @override
+  String get resetBrandTitleCondensed => 'Récupération d\'accès.';
+
+  @override
+  String get resetBrandTitleHighlight => 'd\'accès';
+
+  @override
+  String get resetBrandSubtitle =>
+      'Réinitialisez votre mot de passe en toute sécurité.';
+
+  @override
+  String resetStepIndicator(int step, int total, String label) {
+    return 'Étape $step sur $total · $label';
+  }
+
+  @override
+  String get resetStepLabelEmail => 'E-mail';
+
+  @override
+  String get resetStepLabelCode => 'Code';
+
+  @override
+  String get resetStepLabelPassword => 'Nouveau mot de passe';
+
+  @override
+  String get resetBackToLogin => 'Retour';
+
+  @override
   String get menuInscriptions => 'Inscriptions';
 
   @override
@@ -151,6 +279,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Sélection du niveau à organiser';
 
   @override
+  String classesOrganisationHeaderEyebrow(String schoolYear) {
+    return 'Composition des classes · Année $schoolYear';
+  }
+
+  @override
+  String get classesOrganisationLevelPlaceholder =>
+      'Choisissez d\'abord un cycle';
+
+  @override
   String get classesOrganisationSearchHint =>
       'Sélectionnez le cycle et le niveau à organiser, puis lancez la recherche pour afficher la répartition actuelle ou préparer la distribution en sous-classes.';
 
@@ -168,15 +305,73 @@ class AppLocalizationsFr extends AppLocalizations {
       'Répartition par moyenne';
 
   @override
-  String get classesOrganisationDistributionAction => 'Répartir';
+  String get classesOrganisationDistributeByGenderAction =>
+      'Lancer la répartition par genre';
 
   @override
-  String get classesOrganisationDistributionConfirmTitle =>
-      'Confirmer la répartition';
+  String get classesDistributionResultEyebrow => 'Répartition par genre';
 
   @override
-  String get classesOrganisationDistributionConfirmMessage =>
-      'Voulez-vous lancer la répartition des élèves pour ce niveau ?';
+  String get classesDistributionProcessingTitle => 'Répartition en cours…';
+
+  @override
+  String get classesDistributionSuccessTitle => 'Répartition réussie';
+
+  @override
+  String get classesDistributionSuccessSubtitle =>
+      'Les élèves ont été répartis de façon équilibrée par genre.';
+
+  @override
+  String get classesDistributionRecapTitle => 'Effectif par classe';
+
+  @override
+  String classesDistributionClassHeadcount(int count) {
+    return '$count élèves';
+  }
+
+  @override
+  String get classesDistributionErrorTitle => 'Échec de la répartition';
+
+  @override
+  String get classesDistributionErrorMessage =>
+      'Les classes sont restées intactes. Vous pouvez réessayer.';
+
+  @override
+  String get classesDistributionRetry => 'Réessayer';
+
+  @override
+  String get classesDistributionClose => 'Fermer';
+
+  @override
+  String get classesDistributionKpiHeadcount => 'Effectif';
+
+  @override
+  String get classesDistributionKpiClasses => 'Classes';
+
+  @override
+  String get classesDistributionKpiBoys => 'Garçons';
+
+  @override
+  String get classesDistributionKpiGirls => 'Filles';
+
+  @override
+  String get classesDistributionViewGrid => 'Grille';
+
+  @override
+  String get classesDistributionViewList => 'Liste';
+
+  @override
+  String classesDistributionClassLabel(String code) {
+    return 'Classe $code';
+  }
+
+  @override
+  String classesDistributionClassCapacity(int count, int capacity) {
+    return '$count élèves · capacité $capacity';
+  }
+
+  @override
+  String get classesDistributionCapacityFull => 'complet';
 
   @override
   String get classesOrganisationDistributionSuccess =>
@@ -191,25 +386,37 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mode classe unique actif : liste des élèves du niveau sélectionné.';
 
   @override
-  String get classesOrganisationNoClassrooms =>
-      'Aucune sous-classe disponible pour ce niveau.';
+  String get classesOrganisationLoadingTitle => 'Chargement des classes…';
 
   @override
-  String classesOrganisationClassroomStats(int total, int girls, int boys) {
-    return '$total élèves - Filles: $girls - Garçons: $boys';
-  }
+  String get classesOrganisationEmptyTitle => 'Aucun élève à répartir';
+
+  @override
+  String get classesOrganisationEmptyInvite =>
+      'Inscrivez des élèves dans ce niveau pour lancer la répartition.';
+
+  @override
+  String get classesOrganisationOverviewErrorTitle => 'Chargement impossible';
 
   @override
   String get classesOrganisationTransferDialogTitle => 'Transférer l\'élève';
 
   @override
-  String classesOrganisationTransferDialogMessage(String studentName) {
-    return 'Choisissez la sous-classe de destination pour $studentName.';
-  }
+  String get classesReassignCurrentClassState => 'Classe actuelle';
 
   @override
-  String get classesOrganisationTransferTargetLabel =>
-      'Sous-classe de destination';
+  String get classesReassignUnassignedState => 'Non réparti';
+
+  @override
+  String get classesReassignCurrentBadge => 'Actuelle';
+
+  @override
+  String get classesReassignFullBadge => 'Complet';
+
+  @override
+  String classesReassignOptionStats(int eff, int cap, int boys, int girls) {
+    return '$eff/$cap · G $boys · F $girls';
+  }
 
   @override
   String get classesOrganisationTransferAction => 'Transférer';
@@ -242,11 +449,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get classesOrganisationPendingTitle => 'Niveau non encore réparti';
+  String get classesOrganisationPendingTitle => 'Niveau pas encore réparti';
 
   @override
-  String get classesOrganisationPendingSubtitle =>
-      'Lancez la répartition initiale pour constituer les classes de ce niveau.';
+  String classesOrganisationPendingMessage(int count, String levelName) {
+    return 'Les $count élèves de $levelName ne sont rattachés à aucune classe. La répartition automatique équilibre les classes par genre.';
+  }
 
   @override
   String classesOrganisationPendingStudentsToDistribute(int count) {
@@ -254,64 +462,33 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String classesOrganisationPendingPlannedClassrooms(int count) {
-    return '$count classes prévues';
+  String classesOrganisationGenderBoysPill(int count) {
+    return 'G · $count';
   }
 
   @override
-  String get classesOrganisationAppliedCriterionInfo =>
-      'Critère appliqué : répartition équilibrée par genre (école mixte).';
-
-  @override
-  String classesOrganisationSplitSummary(
-    int studentsCount,
-    int classroomsCount,
-    String criterion,
-  ) {
-    return '$studentsCount élèves répartis en $classroomsCount classes · Critère appliqué : $criterion';
+  String classesOrganisationGenderGirlsPill(int count) {
+    return 'F · $count';
   }
 
   @override
-  String get classesOrganisationClassroomsSectionTitle => 'Classes constituées';
+  String get classesOrganisationUnassignedTitle => 'Élèves non répartis';
 
   @override
-  String get classesOrganisationUnassignedTitle => 'Élèves à affecter';
-
-  @override
-  String get classesOrganisationUnassignedTitleSuffix =>
-      ' — arrivés après la répartition';
+  String get classesOrganisationUnassignedSubtitle =>
+      'Nouveaux arrivants, transferts annulés…';
 
   @override
   String get classesOrganisationUnassignedBadge => 'À affecter';
 
   @override
-  String classesOrganisationUnassignedSummary(int count) {
-    return '$count élèves en attente d\'affectation';
-  }
-
-  @override
   String get classesOrganisationNoMembers => 'Aucun élève dans cette classe.';
 
   @override
-  String get classesOrganisationAssignAction => 'Affecter à une classe';
+  String get classesOrganisationAssignAction => 'Affecter';
 
   @override
-  String get classesOrganisationAssignDialogTitle => 'Affecter à une classe';
-
-  @override
-  String classesOrganisationAssignDialogMessage(String studentName) {
-    return 'Choisissez la classe de destination pour $studentName.';
-  }
-
-  @override
-  String classesOrganisationClassroomPopulation(int count) {
-    return 'Effectif actuel : $count';
-  }
-
-  @override
-  String classesOrganisationTransferConfirmMessage(String studentName) {
-    return 'Confirmez-vous le transfert de $studentName vers cette classe ?';
-  }
+  String get classesOrganisationAssignDialogTitle => 'Affecter l\'élève';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {
@@ -356,29 +533,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'Une erreur est survenue.';
 
   @override
-  String get classesListHeroTitle => 'Listes de classe';
-
-  @override
-  String get classesListHeroSubtitle =>
-      'Recherchez rapidement les élèves par cycle, niveau ou classe, puis exportez les résultats affichés.';
-
-  @override
-  String get classesListHeroFilterChip =>
-      'Recherche multi-critères par identité et niveau.';
-
-  @override
-  String get classesListHeroClassroomChip =>
-      'Filtrage optionnel par classe de l\'année courante.';
-
-  @override
   String get classesListSearchTitle => 'Formulaire de recherche';
 
   @override
   String get classesListSearchHint => '';
-
-  @override
-  String get classesListValidationAtLeastOneCriterion =>
-      'Renseignez au moins un critère pour lancer la recherche.';
 
   @override
   String get classesListClassroomOptionalLabel => 'Classe (optionnel)';
@@ -469,6 +627,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get home => 'Accueil';
 
   @override
+  String accueilBannerGreeting(String firstName) {
+    return 'Bonjour, $firstName';
+  }
+
+  @override
+  String get accueilBannerGreetingGeneric => 'Bonjour';
+
+  @override
+  String get accueilBannerContextTail =>
+      'Voici l\'essentiel de votre école aujourd\'hui.';
+
+  @override
+  String get accueilModulesEyebrow => 'Vos modules';
+
+  @override
+  String get accueilModulesTitle => 'Où souhaitez-vous aller ?';
+
+  @override
+  String get accueilModulesIntro =>
+      'Quatre modules couvrent la vie administrative de l\'école. Tout reste accessible depuis le menu latéral.';
+
+  @override
+  String get accueilModuleInscriptionsDescription =>
+      'Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.';
+
+  @override
+  String get accueilModuleFinancesDescription =>
+      'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+
+  @override
+  String get accueilModuleClassesDescription =>
+      'Composition des classes et liste des élèves par cycle.';
+
+  @override
+  String get accueilModuleDisciplinesDescription =>
+      'Présences du jour, dossiers de discipline et suivi des élèves.';
+
+  @override
+  String accueilModuleCardSemantics(String module) {
+    return '$module — ouvrir le tableau de bord';
+  }
+
+  @override
+  String get accueilSignature => 'eteyelo · l\'école en lingala';
+
+  @override
   String get homeTopBarPendingSubtitle => 'Suivi des dossiers en attente';
 
   @override
@@ -482,6 +686,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeSidebarExpandTooltip => 'Étendre le menu';
+
+  @override
+  String get homeOpenNavigationDrawerTooltip => 'Ouvrir le menu';
 
   @override
   String get homeSidebarFooterLabel => 'Tableau de bord scolaire';
@@ -509,7 +716,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reRegistrationSearchHint =>
-      'Renseignez soit Prénom, Nom et Post-nom, soit le cycle/niveau souhaité pour lancer la recherche.';
+      'Retrouvez un élève ou une classe de l\'année précédente à réinscrire';
+
+  @override
+  String get reRegistrationSearchHelpPill =>
+      'Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l\'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.';
+
+  @override
+  String get reRegistrationSearchTitle => 'Rechercher un élève';
+
+  @override
+  String get reRegistrationSearchByNameGroup => 'Par nom';
+
+  @override
+  String get reRegistrationSearchByLevelGroup => 'Par cycle / niveau';
+
+  @override
+  String get reRegistrationSearchOrSeparator => 'OU';
+
+  @override
+  String get reRegistrationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get reRegistrationSearchModeNameBadge => 'Nom';
+
+  @override
+  String get reRegistrationSearchModeLevelBadge => 'Cycle / niveau';
+
+  @override
+  String get reRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
 
   @override
   String get reRegistrationAcademicInfoHelp =>
@@ -1337,7 +1572,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentReadOnlyMessage =>
-      'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
+      'Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.';
 
   @override
   String get enrollmentEditableTitle => 'Mode édition';
@@ -1541,6 +1776,72 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
 
   @override
+  String get facturationEmptyTitle => 'Aucun élève trouvé';
+
+  @override
+  String get facturationSearchHelpBanner =>
+      'Recherchez un élève précis (nom + post-nom + prénom) ou toute une classe (cycle + niveau). Vous pouvez aussi combiner les deux pour affiner.';
+
+  @override
+  String get facturationSearchByStudentGroup => 'Par élève';
+
+  @override
+  String get facturationSearchByClassGroup => 'Par classe';
+
+  @override
+  String get facturationSearchOrSeparator => 'OU';
+
+  @override
+  String get facturationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get facturationSearchModeStudentBadge => 'Élève';
+
+  @override
+  String get facturationSearchModeClassBadge => 'Classe';
+
+  @override
+  String get facturationSearchCycleLabel => 'Cycle';
+
+  @override
+  String get facturationSearchLevelLabel => 'Niveau';
+
+  @override
+  String get facturationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String facturationBalanceDuePill(String amount) {
+    return '$amount dû';
+  }
+
+  @override
+  String get facturationBalanceUpToDatePill => 'À jour';
+
+  @override
+  String facturationChargeLineRemainingSuffix(String amount) {
+    return '$amount restant';
+  }
+
+  @override
+  String facturationPaymentRecordedToast(String amount) {
+    return 'Paiement de $amount enregistré';
+  }
+
+  @override
+  String get facturationChargeStatementCopied =>
+      'Relevé copié dans le presse-papiers';
+
+  @override
+  String get facturationChargeStatementEmpty =>
+      'Aucun paiement à exporter pour ce frais.';
+
+  @override
+  String get facturationCsvHeaderFee => 'Frais';
+
+  @override
+  String get facturationCsvHeaderImputedAmount => 'Montant imputé (USD)';
+
+  @override
   String get facturationDetailBackLabel => 'Retour aux facturations';
 
   @override
@@ -1574,6 +1875,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationDetailInfoTitle => 'Fiche financière';
+
+  @override
+  String get facturationDetailEyebrow => 'Facturation';
 
   @override
   String get facturationDetailInfoSubtitle =>
@@ -1612,6 +1916,21 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements · $total',
+      one: '1 versement · $total',
+      zero: 'Aucun versement enregistré',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationPaymentMethodCash => 'Espèces';
 
   @override
   String get facturationDetailCollectPaymentAction => 'Encaisser un paiement';
@@ -1661,8 +1980,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPaidAtLabel => 'Date de paiement';
 
   @override
+  String get facturationPaymentAmountPaidLabel => 'Montant versé';
+
+  @override
+  String get facturationPaymentMethodLabel => 'Moyen de paiement';
+
+  @override
+  String get facturationPaymentCollectedByLabel => 'Encaissé par';
+
+  @override
+  String get facturationPaymentReceiptLabel => 'Reçu n°';
+
+  @override
+  String get facturationPaymentStudentLabel => 'Élève';
+
+  @override
+  String get facturationPaymentDownloadReceiptLabel => 'Télécharger le reçu';
+
+  @override
+  String get facturationPaymentCloseLabel => 'Fermer';
+
+  @override
   String get facturationPaymentAllocationsSectionTitle =>
-      'Allocations de paiement';
+      'Répartition par frais';
 
   @override
   String get facturationPaymentAllocationsSectionSubtitle =>
@@ -1825,7 +2165,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Retour au détail de facturation';
 
   @override
-  String get facturationChargeDetailHeroTitle => 'Détail d\'une charge';
+  String get facturationChargeDetailHeroTitle => 'Détail du frais';
 
   @override
   String get facturationChargeDetailHeroSubtitle =>
@@ -1849,7 +2189,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationChargeDetailAllocationsSectionTitle =>
-      'Allocations liées à cette charge';
+      'Paiements affectés';
 
   @override
   String get facturationChargeDetailAllocationsSectionSubtitle =>
@@ -2144,6 +2484,113 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune charge non réglée disponible pour cet élève.';
 
   @override
+  String get facturationCreatePaymentChargesToSettleTitle => 'Frais à régler';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleSubtitle =>
+      'Cochez les frais à régler et ajustez les montants.';
+
+  @override
+  String get facturationCreatePaymentAllFeesSettled =>
+      'Tous les frais sont déjà soldés.';
+
+  @override
+  String facturationCreatePaymentChargeDue(String amount) {
+    return 'Dû $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargePaid(String amount) {
+    return 'Déjà payé $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargeRemaining(String amount) {
+    return 'Restant $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentAmountToSettleLabel => 'Montant à régler';
+
+  @override
+  String get facturationCreatePaymentSettleAllAction => 'Tout solder';
+
+  @override
+  String facturationCreatePaymentAmountClampedWarning(String amount) {
+    return 'Montant ramené au restant dû ($amount).';
+  }
+
+  @override
+  String facturationCreatePaymentRemainingAfter(String amount) {
+    return 'Restant après : $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentSettledChip => 'Soldé';
+
+  @override
+  String get facturationCreatePaymentTotalToCollect => 'Total à encaisser';
+
+  @override
+  String facturationCreatePaymentCollectAmountAction(String amount) {
+    return 'Encaisser $amount';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmCollectTitle(String amount) {
+    return 'Encaisser $amount ?';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  ) {
+    return 'Vous allez encaisser $amount pour $student, réglé par $payer.';
+  }
+
+  @override
+  String get facturationCreatePaymentConfirmDistributionTitle => 'Répartition';
+
+  @override
+  String get facturationCollectStepConfirm => 'Confirmation';
+
+  @override
+  String get facturationCollectStepResult => 'Résultat';
+
+  @override
+  String get facturationCollectSimulateFailure => 'Simuler un échec';
+
+  @override
+  String get facturationCollectProcessing => 'Enregistrement du paiement…';
+
+  @override
+  String get facturationCollectSuccessTitle => 'Paiement enregistré';
+
+  @override
+  String facturationCollectReceiptChip(String code) {
+    return 'Reçu n° $code';
+  }
+
+  @override
+  String get facturationCollectErrorTitle => 'Échec de l\'encaissement';
+
+  @override
+  String get facturationCollectErrorNoDebit => 'Aucun montant n\'a été débité.';
+
+  @override
+  String facturationCollectIncidentChip(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get facturationCollectEditAction => 'Modifier';
+
+  @override
+  String get facturationCollectRetryAction => 'Réessayer';
+
+  @override
   String get attendanceHeroTitle => 'Présences';
 
   @override
@@ -2183,8 +2630,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Lancez une recherche pour afficher les présences de la classe sélectionnée.';
 
   @override
+  String get attendanceSelectClassTitle => 'Sélectionnez une classe';
+
+  @override
   String get attendanceEmptySelectionMessage =>
-      'Sélectionnez une classe et une date pour faire l\'appel.';
+      'Choisissez un cycle, un niveau puis une classe pour charger la liste d\'appel.';
 
   @override
   String get attendanceLoadingMessage => 'Chargement des présences en cours...';
@@ -2250,6 +2700,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get attendancePresentCount => 'Présents';
+
+  @override
+  String get attendanceJustifiedCount => 'Justifiés';
+
+  @override
+  String get attendanceUnjustifiedCount => 'Non justifiés';
+
+  @override
+  String get attendancePendingCount => 'À motiver';
 
   @override
   String get attendanceAbsentCount => 'Absents';
@@ -2330,6 +2789,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceReasonRequiredHint => 'Motif requis pour une absence.';
 
   @override
+  String get attendanceMotifRequisLabel => 'Motif requis';
+
+  @override
   String get attendanceReasonDisabledHint =>
       'Le motif est requis seulement pour une absence.';
 
@@ -2385,6 +2847,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceErrorUnknown => 'Une erreur inattendue est survenue.';
 
   @override
+  String get attendanceSaveCallAction => 'Enregistrer l\'appel';
+
+  @override
+  String get attendanceMarkAllPresentAction => 'Tout présent';
+
+  @override
+  String get attendanceSaveOverlayEyebrow => 'Appel';
+
+  @override
+  String get attendanceSaveProcessingTitle => 'Enregistrement en cours…';
+
+  @override
+  String get attendanceSaveSuccessTitle => 'Appel enregistré !';
+
+  @override
+  String get attendanceSaveSuccessSubtitle =>
+      'Les présences de la classe ont été sauvegardées.';
+
+  @override
+  String get attendanceSaveErrorTitle => 'Échec de l\'enregistrement';
+
+  @override
+  String get attendanceSaveErrorMessage =>
+      'Les saisies sont conservées. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get attendanceSaveRetryAction => 'Réessayer';
+
+  @override
+  String get attendanceSaveCloseAction => 'Terminer';
+
+  @override
   String get absenceReasonSickness => 'Maladie';
 
   @override
@@ -2410,6 +2904,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get absenceReasonWorkLeave => 'Congé professionnel';
+
+  @override
+  String get absenceReasonUnjustified => 'Absence non justifiée';
 
   @override
   String get absenceReasonOther => 'Autre';

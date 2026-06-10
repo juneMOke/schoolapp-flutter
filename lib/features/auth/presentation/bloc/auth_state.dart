@@ -3,6 +3,21 @@ import 'package:school_app_flutter/features/auth/domain/entities/authenticated_u
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
 
+/// Catégorie d'échec de connexion — pilote la tonalité et l'action du bandeau
+/// d'erreur (spec Connexion §08). Découple l'UI du texte brut de la [Failure].
+///
+/// [accountDisabled] (403) et [rateLimited] (429) ne sont pas encore émis : le
+/// backend n'expose pas les signaux correspondants. Le bandeau les gère déjà —
+/// il suffira de les mapper dans [AuthBloc] quand le contrat sera disponible.
+enum AuthErrorKind {
+  invalidCredentials,
+  network,
+  accountDisabled,
+  rateLimited,
+  server,
+  generic,
+}
+
 // Sentinel object used to distinguish "not provided" from explicit null in copyWith.
 const _undefined = Object();
 
@@ -10,8 +25,14 @@ class AuthState extends Equatable {
   final AuthStatus status;
   final AuthenticatedUser? user;
   final String? errorMessage;
+  final AuthErrorKind? errorKind;
 
-  const AuthState({required this.status, this.user, this.errorMessage});
+  const AuthState({
+    required this.status,
+    this.user,
+    this.errorMessage,
+    this.errorKind,
+  });
 
   factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
 
@@ -23,6 +44,7 @@ class AuthState extends Equatable {
     AuthStatus? status,
     Object? user = _undefined,
     Object? errorMessage = _undefined,
+    Object? errorKind = _undefined,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -32,9 +54,12 @@ class AuthState extends Equatable {
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,
+      errorKind: identical(errorKind, _undefined)
+          ? this.errorKind
+          : errorKind as AuthErrorKind?,
     );
   }
 
   @override
-  List<Object?> get props => [status, user, errorMessage];
+  List<Object?> get props => [status, user, errorMessage, errorKind];
 }

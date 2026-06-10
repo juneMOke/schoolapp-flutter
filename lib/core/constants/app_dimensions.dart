@@ -3,7 +3,8 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 class AppDimensions {
   static const sidebarWidth = 280.0;
   static const sidebarCollapsedWidth = 84.0;
-  static const topBarHeight = 72.0;
+  // Aligné sur AppTheme.topBarHeight (source unique de la hauteur de barre).
+  static const topBarHeight = 68.0;
   static const pagePadding = 24.0;
   static const cardRadius = 20.0;
   static const spacingXS = 4.0;
@@ -20,10 +21,25 @@ class AppDimensions {
   static const detailHeroAvatarSize = 64.0;
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
+  // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
+  // contenu plafonné à 880 dp), centrée et responsive.
+  static const facturationContentMaxWidth = 880.0;
+  // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
+  static const facturationModalMaxWidth = 520.0;
+  // Modale d'encaissement (spec MODALE-12 : centrée, largeur 560).
+  static const facturationCreatePaymentModalMaxWidth = 560.0;
+  // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
+  static const facturationCollectModalMaxWidth = 440.0;
+  // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
+  static const searchFieldMinWidth = 170.0;
+  static const searchFieldGap = 10.0;
+  // Largeur min d'une cellule du bandeau KPI stats (garde-fou anti-écrasement).
+  static const financeStatsKpiCellMinWidth = 220.0;
+  // Largeur max de la carte d'invitation « avant recherche » (centrée).
+  static const searchInvitationMaxWidth = 620.0;
   static const detailTableMinWidth = 860.0;
   static const detailInfoItemWidth = 224.0;
   static const detailTableLabelColumnWidth = 72.0;
-  static const fabListBottomPadding = 80.0;
 
   // Eteelo FAB tokens
   static const fabHeight = 56.0;
@@ -66,11 +82,19 @@ class AppDimensions {
 
   // Classes organisation responsive tokens
   static const classesOrganisationCompactFieldWidth = 260.0;
-  static const classesOrganisationCompactSelectWidth = 320.0;
-  static const classesOrganisationGridRatio = 1.15;
   static const classesOrganisationShadowBlur = 14.0;
   static const classesOrganisationShadowOffsetY = 8.0;
+  static const classesDistributionResultModalMaxWidth = 460.0;
+  static const classesReassignModalMaxWidth = 480.0;
+  static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
+
+  // Connexion — panneau formulaire (spec §01).
+  // Split : largeur = clamp(400, 38% conteneur, 460). Empilé : max 400.
+  static const loginFormPanelMin = 400.0;
+  static const loginFormPanelMax = 460.0;
+  static const loginFormPanelRatio = 0.38;
+  static const loginFormStackedMax = 400.0;
 
   // Attendance page tokens
   static const attendanceStudentAvatarSize = 30.0;
@@ -86,7 +110,6 @@ class AppDimensions {
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;
   static const enrollmentStatsKpiCardMinWidth = 148.0;
-  static const enrollmentStatsKpiCardMobileWidth = 168.0;
   static const enrollmentStatsChartSectionHeight = 220.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;

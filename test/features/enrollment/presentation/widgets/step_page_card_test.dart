@@ -44,4 +44,36 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('Identité'), findsOneWidget);
   });
+
+  testWidgets('StepPageCard rend le bandeau fourni au-dessus du contenu', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      harness(
+        viewportHeight: 600,
+        body: const StepPageCard(
+          eyebrow: 'ÉTAPE 1 SUR 7 · IDENTITÉ',
+          title: 'Identité',
+          subtitle: 'Informations personnelles',
+          accentColor: Color(0xFF1B4D6B),
+          icon: Icons.badge_outlined,
+          banner: Text('BANDEAU'),
+          child: SizedBox(height: 200, child: Text('contenu')),
+        ),
+      ),
+    );
+
+    expect(find.text('BANDEAU'), findsOneWidget);
+    // Le bandeau est rendu au-dessus du corps de l'étape.
+    expect(
+      tester.getTopLeft(find.text('BANDEAU')).dy,
+      lessThan(tester.getTopLeft(find.text('contenu')).dy),
+    );
+  });
+
+  testWidgets('StepPageCard sans bandeau : rien rendu', (tester) async {
+    await tester.pumpWidget(harness(viewportHeight: 600, body: buildCard()));
+
+    expect(find.text('BANDEAU'), findsNothing);
+  });
 }

@@ -152,11 +152,185 @@ abstract class AppLocalizations {
   /// **'Please enter a valid email'**
   String get pleaseEnterValidEmail;
 
+  /// No description provided for @loginEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Management area'**
+  String get loginEyebrow;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access your school\'s dashboard.'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get loginEmailLabel;
+
+  /// No description provided for @loginSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in…'**
+  String get loginSubmitting;
+
+  /// No description provided for @loginSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'eteyelo · the school, in Lingala'**
+  String get loginSignature;
+
+  /// No description provided for @loginBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Congolese school, now digital.'**
+  String get loginBrandTitle;
+
+  /// No description provided for @loginBrandTitleCondensed.
+  ///
+  /// In en, this message translates to:
+  /// **'The school, now digital.'**
+  String get loginBrandTitleCondensed;
+
+  /// No description provided for @loginBrandTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'digital'**
+  String get loginBrandTitleHighlight;
+
+  /// No description provided for @loginBrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations, finances, classes and attendance — one app, on every screen.'**
+  String get loginBrandSubtitle;
+
+  /// No description provided for @loginEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address is required.'**
+  String get loginEmailRequired;
+
+  /// No description provided for @loginEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format.'**
+  String get loginEmailInvalid;
+
+  /// No description provided for @loginPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required.'**
+  String get loginPasswordRequired;
+
+  /// No description provided for @loginErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password. Check your credentials and try again.'**
+  String get loginErrorInvalidCredentials;
+
+  /// No description provided for @loginErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your network.'**
+  String get loginErrorNetwork;
+
+  /// No description provided for @loginErrorAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Account disabled. Contact your school administrator.'**
+  String get loginErrorAccountDisabled;
+
+  /// No description provided for @loginErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again shortly.'**
+  String get loginErrorServer;
+
+  /// 429 error banner — temporary lockout with countdown
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {seconds}s'**
+  String loginErrorRateLimited(int seconds);
+
+  /// No description provided for @loginContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get loginContactAdmin;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hidePassword;
+
   /// No description provided for @schoolApp.
   ///
   /// In en, this message translates to:
-  /// **'ETEELO TECH'**
+  /// **'ETEELO CONNECT'**
   String get schoolApp;
+
+  /// No description provided for @splashBrandPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO'**
+  String get splashBrandPrimary;
+
+  /// No description provided for @splashBrandSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'CONNECT'**
+  String get splashBrandSecondary;
+
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplify your school management'**
+  String get splashTagline;
+
+  /// No description provided for @splashSemanticsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO CONNECT — splash screen'**
+  String get splashSemanticsLabel;
+
+  /// No description provided for @bootstrapOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline mode — cached data'**
+  String get bootstrapOfflineBanner;
+
+  /// No description provided for @splashErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed'**
+  String get splashErrorTitle;
+
+  /// No description provided for @splashErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load the application data. Check your connection, then try again.'**
+  String get splashErrorMessage;
+
+  /// No description provided for @splashErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get splashErrorRetry;
+
+  /// Technical version shown in the splash footer
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} (build {build})'**
+  String splashVersion(String version, String build);
 
   /// No description provided for @logout.
   ///
@@ -284,6 +458,66 @@ abstract class AppLocalizations {
   /// **'Please confirm your password'**
   String get pleaseConfirmPassword;
 
+  /// No description provided for @resetEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset'**
+  String get resetEyebrow;
+
+  /// No description provided for @resetBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover your access securely.'**
+  String get resetBrandTitle;
+
+  /// No description provided for @resetBrandTitleCondensed.
+  ///
+  /// In en, this message translates to:
+  /// **'Account access recovery.'**
+  String get resetBrandTitleCondensed;
+
+  /// No description provided for @resetBrandTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'access'**
+  String get resetBrandTitleHighlight;
+
+  /// No description provided for @resetBrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password safely.'**
+  String get resetBrandSubtitle;
+
+  /// No description provided for @resetStepIndicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total} · {label}'**
+  String resetStepIndicator(int step, int total, String label);
+
+  /// No description provided for @resetStepLabelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get resetStepLabelEmail;
+
+  /// No description provided for @resetStepLabelCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get resetStepLabelCode;
+
+  /// No description provided for @resetStepLabelPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get resetStepLabelPassword;
+
+  /// No description provided for @resetBackToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get resetBackToLogin;
+
   /// Inscriptions menu title
   ///
   /// In en, this message translates to:
@@ -362,6 +596,18 @@ abstract class AppLocalizations {
   /// **'Level selection for class distribution'**
   String get classesOrganisationSearchTitle;
 
+  /// No description provided for @classesOrganisationHeaderEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition · Year {schoolYear}'**
+  String classesOrganisationHeaderEyebrow(String schoolYear);
+
+  /// No description provided for @classesOrganisationLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get classesOrganisationLevelPlaceholder;
+
   /// No description provided for @classesOrganisationSearchHint.
   ///
   /// In en, this message translates to:
@@ -392,23 +638,125 @@ abstract class AppLocalizations {
   /// **'Distribute by average'**
   String get classesOrganisationDistributionByPercentage;
 
-  /// No description provided for @classesOrganisationDistributionAction.
+  /// No description provided for @classesOrganisationDistributeByGenderAction.
   ///
   /// In en, this message translates to:
-  /// **'Distribute'**
-  String get classesOrganisationDistributionAction;
+  /// **'Start gender-based distribution'**
+  String get classesOrganisationDistributeByGenderAction;
 
-  /// No description provided for @classesOrganisationDistributionConfirmTitle.
+  /// No description provided for @classesDistributionResultEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Confirm distribution'**
-  String get classesOrganisationDistributionConfirmTitle;
+  /// **'Gender distribution'**
+  String get classesDistributionResultEyebrow;
 
-  /// No description provided for @classesOrganisationDistributionConfirmMessage.
+  /// No description provided for @classesDistributionProcessingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to distribute students for this level?'**
-  String get classesOrganisationDistributionConfirmMessage;
+  /// **'Distribution in progress…'**
+  String get classesDistributionProcessingTitle;
+
+  /// No description provided for @classesDistributionSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution complete'**
+  String get classesDistributionSuccessTitle;
+
+  /// No description provided for @classesDistributionSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students were evenly distributed by gender.'**
+  String get classesDistributionSuccessSubtitle;
+
+  /// No description provided for @classesDistributionRecapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount per class'**
+  String get classesDistributionRecapTitle;
+
+  /// No description provided for @classesDistributionClassHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students'**
+  String classesDistributionClassHeadcount(int count);
+
+  /// No description provided for @classesDistributionErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution failed'**
+  String get classesDistributionErrorTitle;
+
+  /// No description provided for @classesDistributionErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The classes were left intact. You can try again.'**
+  String get classesDistributionErrorMessage;
+
+  /// No description provided for @classesDistributionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get classesDistributionRetry;
+
+  /// No description provided for @classesDistributionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get classesDistributionClose;
+
+  /// No description provided for @classesDistributionKpiHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get classesDistributionKpiHeadcount;
+
+  /// No description provided for @classesDistributionKpiClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classesDistributionKpiClasses;
+
+  /// No description provided for @classesDistributionKpiBoys.
+  ///
+  /// In en, this message translates to:
+  /// **'Boys'**
+  String get classesDistributionKpiBoys;
+
+  /// No description provided for @classesDistributionKpiGirls.
+  ///
+  /// In en, this message translates to:
+  /// **'Girls'**
+  String get classesDistributionKpiGirls;
+
+  /// No description provided for @classesDistributionViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get classesDistributionViewGrid;
+
+  /// No description provided for @classesDistributionViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get classesDistributionViewList;
+
+  /// No description provided for @classesDistributionClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {code}'**
+  String classesDistributionClassLabel(String code);
+
+  /// No description provided for @classesDistributionClassCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students · capacity {capacity}'**
+  String classesDistributionClassCapacity(int count, int capacity);
+
+  /// No description provided for @classesDistributionCapacityFull.
+  ///
+  /// In en, this message translates to:
+  /// **'full'**
+  String get classesDistributionCapacityFull;
 
   /// No description provided for @classesOrganisationDistributionSuccess.
   ///
@@ -428,17 +776,29 @@ abstract class AppLocalizations {
   /// **'Non-split mode enabled: student list for the selected level.'**
   String get classesOrganisationNonSplitInfo;
 
-  /// No description provided for @classesOrganisationNoClassrooms.
+  /// No description provided for @classesOrganisationLoadingTitle.
   ///
   /// In en, this message translates to:
-  /// **'No classroom is available for this level.'**
-  String get classesOrganisationNoClassrooms;
+  /// **'Loading classes…'**
+  String get classesOrganisationLoadingTitle;
 
-  /// No description provided for @classesOrganisationClassroomStats.
+  /// No description provided for @classesOrganisationEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'{total} students - Girls: {girls} - Boys: {boys}'**
-  String classesOrganisationClassroomStats(int total, int girls, int boys);
+  /// **'No student to distribute'**
+  String get classesOrganisationEmptyTitle;
+
+  /// No description provided for @classesOrganisationEmptyInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll students in this level to start the distribution.'**
+  String get classesOrganisationEmptyInvite;
+
+  /// No description provided for @classesOrganisationOverviewErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get classesOrganisationOverviewErrorTitle;
 
   /// No description provided for @classesOrganisationTransferDialogTitle.
   ///
@@ -446,17 +806,35 @@ abstract class AppLocalizations {
   /// **'Transfer student'**
   String get classesOrganisationTransferDialogTitle;
 
-  /// No description provided for @classesOrganisationTransferDialogMessage.
+  /// No description provided for @classesReassignCurrentClassState.
   ///
   /// In en, this message translates to:
-  /// **'Choose the destination classroom for {studentName}.'**
-  String classesOrganisationTransferDialogMessage(String studentName);
+  /// **'Current class'**
+  String get classesReassignCurrentClassState;
 
-  /// No description provided for @classesOrganisationTransferTargetLabel.
+  /// No description provided for @classesReassignUnassignedState.
   ///
   /// In en, this message translates to:
-  /// **'Destination classroom'**
-  String get classesOrganisationTransferTargetLabel;
+  /// **'Unassigned'**
+  String get classesReassignUnassignedState;
+
+  /// No description provided for @classesReassignCurrentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get classesReassignCurrentBadge;
+
+  /// No description provided for @classesReassignFullBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get classesReassignFullBadge;
+
+  /// No description provided for @classesReassignOptionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{eff}/{cap} · B {boys} · G {girls}'**
+  String classesReassignOptionStats(int eff, int cap, int boys, int girls);
 
   /// No description provided for @classesOrganisationTransferAction.
   ///
@@ -512,11 +890,11 @@ abstract class AppLocalizations {
   /// **'Level not distributed yet'**
   String get classesOrganisationPendingTitle;
 
-  /// No description provided for @classesOrganisationPendingSubtitle.
+  /// No description provided for @classesOrganisationPendingMessage.
   ///
   /// In en, this message translates to:
-  /// **'Run the initial distribution to create classes for this level.'**
-  String get classesOrganisationPendingSubtitle;
+  /// **'{count} students in {levelName} aren\'\'t assigned to any class. Automatic distribution balances the classes by gender.'**
+  String classesOrganisationPendingMessage(int count, String levelName);
 
   /// No description provided for @classesOrganisationPendingStudentsToDistribute.
   ///
@@ -524,57 +902,35 @@ abstract class AppLocalizations {
   /// **'{count} students to distribute'**
   String classesOrganisationPendingStudentsToDistribute(int count);
 
-  /// No description provided for @classesOrganisationPendingPlannedClassrooms.
+  /// No description provided for @classesOrganisationGenderBoysPill.
   ///
   /// In en, this message translates to:
-  /// **'{count} planned classes'**
-  String classesOrganisationPendingPlannedClassrooms(int count);
+  /// **'B · {count}'**
+  String classesOrganisationGenderBoysPill(int count);
 
-  /// No description provided for @classesOrganisationAppliedCriterionInfo.
+  /// No description provided for @classesOrganisationGenderGirlsPill.
   ///
   /// In en, this message translates to:
-  /// **'Applied criterion: balanced distribution by gender (mixed school).'**
-  String get classesOrganisationAppliedCriterionInfo;
-
-  /// No description provided for @classesOrganisationSplitSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}'**
-  String classesOrganisationSplitSummary(
-    int studentsCount,
-    int classroomsCount,
-    String criterion,
-  );
-
-  /// No description provided for @classesOrganisationClassroomsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Constituted classes'**
-  String get classesOrganisationClassroomsSectionTitle;
+  /// **'G · {count}'**
+  String classesOrganisationGenderGirlsPill(int count);
 
   /// No description provided for @classesOrganisationUnassignedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Students to assign'**
+  /// **'Unassigned students'**
   String get classesOrganisationUnassignedTitle;
 
-  /// No description provided for @classesOrganisationUnassignedTitleSuffix.
+  /// No description provided for @classesOrganisationUnassignedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **' — added after distribution'**
-  String get classesOrganisationUnassignedTitleSuffix;
+  /// **'New arrivals, cancelled transfers…'**
+  String get classesOrganisationUnassignedSubtitle;
 
   /// No description provided for @classesOrganisationUnassignedBadge.
   ///
   /// In en, this message translates to:
   /// **'To assign'**
   String get classesOrganisationUnassignedBadge;
-
-  /// No description provided for @classesOrganisationUnassignedSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} students waiting for assignment'**
-  String classesOrganisationUnassignedSummary(int count);
 
   /// No description provided for @classesOrganisationNoMembers.
   ///
@@ -585,32 +941,14 @@ abstract class AppLocalizations {
   /// No description provided for @classesOrganisationAssignAction.
   ///
   /// In en, this message translates to:
-  /// **'Assign to a classroom'**
+  /// **'Assign'**
   String get classesOrganisationAssignAction;
 
   /// No description provided for @classesOrganisationAssignDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assign to a classroom'**
+  /// **'Assign the student'**
   String get classesOrganisationAssignDialogTitle;
-
-  /// No description provided for @classesOrganisationAssignDialogMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the destination classroom for {studentName}.'**
-  String classesOrganisationAssignDialogMessage(String studentName);
-
-  /// No description provided for @classesOrganisationClassroomPopulation.
-  ///
-  /// In en, this message translates to:
-  /// **'Current size: {count}'**
-  String classesOrganisationClassroomPopulation(int count);
-
-  /// No description provided for @classesOrganisationTransferConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Do you confirm transferring {studentName} to this classroom?'**
-  String classesOrganisationTransferConfirmMessage(String studentName);
 
   /// No description provided for @classesOrganisationLoadingClassroomsCount.
   ///
@@ -678,30 +1016,6 @@ abstract class AppLocalizations {
   /// **'An error occurred.'**
   String get classesOrganisationErrorUnknown;
 
-  /// No description provided for @classesListHeroTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Class lists'**
-  String get classesListHeroTitle;
-
-  /// No description provided for @classesListHeroSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Quickly search students by cycle, level or classroom, then export the displayed results.'**
-  String get classesListHeroSubtitle;
-
-  /// No description provided for @classesListHeroFilterChip.
-  ///
-  /// In en, this message translates to:
-  /// **'Multi-criteria search by identity and level.'**
-  String get classesListHeroFilterChip;
-
-  /// No description provided for @classesListHeroClassroomChip.
-  ///
-  /// In en, this message translates to:
-  /// **'Optional classroom filtering for the current school year.'**
-  String get classesListHeroClassroomChip;
-
   /// No description provided for @classesListSearchTitle.
   ///
   /// In en, this message translates to:
@@ -713,12 +1027,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **''**
   String get classesListSearchHint;
-
-  /// No description provided for @classesListValidationAtLeastOneCriterion.
-  ///
-  /// In en, this message translates to:
-  /// **'Provide at least one criterion to run a search.'**
-  String get classesListValidationAtLeastOneCriterion;
 
   /// No description provided for @classesListClassroomOptionalLabel.
   ///
@@ -870,6 +1178,78 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get home;
 
+  /// Home banner greeting with the signed-in user's first name.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {firstName}'**
+  String accueilBannerGreeting(String firstName);
+
+  /// No description provided for @accueilBannerGreetingGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get accueilBannerGreetingGeneric;
+
+  /// No description provided for @accueilBannerContextTail.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is the essential view of your school today.'**
+  String get accueilBannerContextTail;
+
+  /// No description provided for @accueilModulesEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your modules'**
+  String get accueilModulesEyebrow;
+
+  /// No description provided for @accueilModulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where would you like to go?'**
+  String get accueilModulesTitle;
+
+  /// No description provided for @accueilModulesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.'**
+  String get accueilModulesIntro;
+
+  /// No description provided for @accueilModuleInscriptionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'New enrolments, re-enrolments and pre-enrolments for your students.'**
+  String get accueilModuleInscriptionsDescription;
+
+  /// No description provided for @accueilModuleFinancesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue, invoicing and tracking of school fee collection.'**
+  String get accueilModuleFinancesDescription;
+
+  /// No description provided for @accueilModuleClassesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition and student lists by cycle.'**
+  String get accueilModuleClassesDescription;
+
+  /// No description provided for @accueilModuleDisciplinesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily attendance, disciplinary records and student follow-up.'**
+  String get accueilModuleDisciplinesDescription;
+
+  /// Accessibility label for the module card (button role, explicit destination).
+  ///
+  /// In en, this message translates to:
+  /// **'{module} — open the dashboard'**
+  String accueilModuleCardSemantics(String module);
+
+  /// No description provided for @accueilSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'eteyelo · l\'école en lingala'**
+  String get accueilSignature;
+
   /// No description provided for @homeTopBarPendingSubtitle.
   ///
   /// In en, this message translates to:
@@ -899,6 +1279,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expand menu'**
   String get homeSidebarExpandTooltip;
+
+  /// No description provided for @homeOpenNavigationDrawerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open menu'**
+  String get homeOpenNavigationDrawerTooltip;
 
   /// No description provided for @homeSidebarFooterLabel.
   ///
@@ -945,8 +1331,62 @@ abstract class AppLocalizations {
   /// No description provided for @reRegistrationSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter either First name, Last name and Surname, or the target cycle/level to start the search.'**
+  /// **'Find a student or a class from the previous year to re-enroll'**
   String get reRegistrationSearchHint;
+
+  /// No description provided for @reRegistrationSearchHelpPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.'**
+  String get reRegistrationSearchHelpPill;
+
+  /// No description provided for @reRegistrationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student'**
+  String get reRegistrationSearchTitle;
+
+  /// No description provided for @reRegistrationSearchByNameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get reRegistrationSearchByNameGroup;
+
+  /// No description provided for @reRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle / level'**
+  String get reRegistrationSearchByLevelGroup;
+
+  /// No description provided for @reRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get reRegistrationSearchOrSeparator;
+
+  /// No description provided for @reRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get reRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @reRegistrationSearchModeNameBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get reRegistrationSearchModeNameBadge;
+
+  /// No description provided for @reRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle / level'**
+  String get reRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @reRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get reRegistrationSearchLevelPlaceholder;
 
   /// No description provided for @reRegistrationAcademicInfoHelp.
   ///
@@ -2409,7 +2849,7 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentReadOnlyMessage.
   ///
   /// In en, this message translates to:
-  /// **'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.'**
+  /// **'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.'**
   String get enrollmentReadOnlyMessage;
 
   /// No description provided for @enrollmentEditableTitle.
@@ -2778,6 +3218,120 @@ abstract class AppLocalizations {
   /// **'No student matches these criteria. Update the form and try again.'**
   String get facturationNoResultsDescription;
 
+  /// No description provided for @facturationEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get facturationEmptyTitle;
+
+  /// No description provided for @facturationSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.'**
+  String get facturationSearchHelpBanner;
+
+  /// No description provided for @facturationSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get facturationSearchByStudentGroup;
+
+  /// No description provided for @facturationSearchByClassGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get facturationSearchByClassGroup;
+
+  /// No description provided for @facturationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get facturationSearchOrSeparator;
+
+  /// No description provided for @facturationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get facturationSearchActiveModeLabel;
+
+  /// No description provided for @facturationSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get facturationSearchModeStudentBadge;
+
+  /// No description provided for @facturationSearchModeClassBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get facturationSearchModeClassBadge;
+
+  /// No description provided for @facturationSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get facturationSearchCycleLabel;
+
+  /// No description provided for @facturationSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get facturationSearchLevelLabel;
+
+  /// No description provided for @facturationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get facturationSearchLevelPlaceholder;
+
+  /// Billing AppBar pill when the balance is outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} due'**
+  String facturationBalanceDuePill(String amount);
+
+  /// No description provided for @facturationBalanceUpToDatePill.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get facturationBalanceUpToDatePill;
+
+  /// Fee line footer: amount remaining to pay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} remaining'**
+  String facturationChargeLineRemainingSuffix(String amount);
+
+  /// Confirmation toast after a successful payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment of {amount} recorded'**
+  String facturationPaymentRecordedToast(String amount);
+
+  /// No description provided for @facturationChargeStatementCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement copied to clipboard'**
+  String get facturationChargeStatementCopied;
+
+  /// No description provided for @facturationChargeStatementEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment to export for this fee.'**
+  String get facturationChargeStatementEmpty;
+
+  /// No description provided for @facturationCsvHeaderFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get facturationCsvHeaderFee;
+
+  /// No description provided for @facturationCsvHeaderImputedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Imputed amount (USD)'**
+  String get facturationCsvHeaderImputedAmount;
+
   /// No description provided for @facturationDetailBackLabel.
   ///
   /// In en, this message translates to:
@@ -2844,6 +3398,12 @@ abstract class AppLocalizations {
   /// **'Financial record'**
   String get facturationDetailInfoTitle;
 
+  /// No description provided for @facturationDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get facturationDetailEyebrow;
+
   /// No description provided for @facturationDetailInfoSubtitle.
   ///
   /// In en, this message translates to:
@@ -2897,6 +3457,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}'**
   String facturationDetailPaymentsRecordedCount(num count);
+
+  /// Payments section subtitle: payment count + total paid.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payment recorded} =1{1 payment · {total}} other{{count} payments · {total}}}'**
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total);
+
+  /// No description provided for @facturationPaymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get facturationPaymentMethodCash;
 
   /// No description provided for @facturationDetailCollectPaymentAction.
   ///
@@ -2988,10 +3560,52 @@ abstract class AppLocalizations {
   /// **'Paid at'**
   String get facturationPaymentPaidAtLabel;
 
+  /// No description provided for @facturationPaymentAmountPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount paid'**
+  String get facturationPaymentAmountPaidLabel;
+
+  /// No description provided for @facturationPaymentMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get facturationPaymentMethodLabel;
+
+  /// No description provided for @facturationPaymentCollectedByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected by'**
+  String get facturationPaymentCollectedByLabel;
+
+  /// No description provided for @facturationPaymentReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no.'**
+  String get facturationPaymentReceiptLabel;
+
+  /// No description provided for @facturationPaymentStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get facturationPaymentStudentLabel;
+
+  /// No description provided for @facturationPaymentDownloadReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download receipt'**
+  String get facturationPaymentDownloadReceiptLabel;
+
+  /// No description provided for @facturationPaymentCloseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get facturationPaymentCloseLabel;
+
   /// No description provided for @facturationPaymentAllocationsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment allocations'**
+  /// **'Breakdown by fee'**
   String get facturationPaymentAllocationsSectionTitle;
 
   /// No description provided for @facturationPaymentAllocationsSectionSubtitle.
@@ -3241,7 +3855,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationChargeDetailHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Charge detail'**
+  /// **'Fee details'**
   String get facturationChargeDetailHeroTitle;
 
   /// No description provided for @facturationChargeDetailHeroSubtitle.
@@ -3283,7 +3897,7 @@ abstract class AppLocalizations {
   /// No description provided for @facturationChargeDetailAllocationsSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Allocations for this charge'**
+  /// **'Applied payments'**
   String get facturationChargeDetailAllocationsSectionTitle;
 
   /// No description provided for @facturationChargeDetailAllocationsSectionSubtitle.
@@ -3756,6 +4370,172 @@ abstract class AppLocalizations {
   /// **'No unpaid charges available for this student.'**
   String get facturationCreatePaymentNoChargesAvailable;
 
+  /// No description provided for @facturationCreatePaymentChargesToSettleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees to settle'**
+  String get facturationCreatePaymentChargesToSettleTitle;
+
+  /// No description provided for @facturationCreatePaymentChargesToSettleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the fees to settle and adjust the amounts.'**
+  String get facturationCreatePaymentChargesToSettleSubtitle;
+
+  /// No description provided for @facturationCreatePaymentAllFeesSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All fees are already settled.'**
+  String get facturationCreatePaymentAllFeesSettled;
+
+  /// No description provided for @facturationCreatePaymentChargeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {amount}'**
+  String facturationCreatePaymentChargeDue(String amount);
+
+  /// No description provided for @facturationCreatePaymentChargePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid {amount}'**
+  String facturationCreatePaymentChargePaid(String amount);
+
+  /// No description provided for @facturationCreatePaymentChargeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining {amount}'**
+  String facturationCreatePaymentChargeRemaining(String amount);
+
+  /// No description provided for @facturationCreatePaymentAmountToSettleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to settle'**
+  String get facturationCreatePaymentAmountToSettleLabel;
+
+  /// No description provided for @facturationCreatePaymentSettleAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle all'**
+  String get facturationCreatePaymentSettleAllAction;
+
+  /// No description provided for @facturationCreatePaymentAmountClampedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount capped to the remaining balance ({amount}).'**
+  String facturationCreatePaymentAmountClampedWarning(String amount);
+
+  /// No description provided for @facturationCreatePaymentRemainingAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining after: {amount}'**
+  String facturationCreatePaymentRemainingAfter(String amount);
+
+  /// No description provided for @facturationCreatePaymentSettledChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get facturationCreatePaymentSettledChip;
+
+  /// No description provided for @facturationCreatePaymentTotalToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to collect'**
+  String get facturationCreatePaymentTotalToCollect;
+
+  /// No description provided for @facturationCreatePaymentCollectAmountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount}'**
+  String facturationCreatePaymentCollectAmountAction(String amount);
+
+  /// No description provided for @facturationCreatePaymentConfirmCollectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount}?'**
+  String facturationCreatePaymentConfirmCollectTitle(String amount);
+
+  /// No description provided for @facturationCreatePaymentConfirmSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to collect {amount} for {student}, paid by {payer}.'**
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  );
+
+  /// No description provided for @facturationCreatePaymentConfirmDistributionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get facturationCreatePaymentConfirmDistributionTitle;
+
+  /// No description provided for @facturationCollectStepConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation'**
+  String get facturationCollectStepConfirm;
+
+  /// No description provided for @facturationCollectStepResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get facturationCollectStepResult;
+
+  /// No description provided for @facturationCollectSimulateFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulate a failure'**
+  String get facturationCollectSimulateFailure;
+
+  /// No description provided for @facturationCollectProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording the payment…'**
+  String get facturationCollectProcessing;
+
+  /// No description provided for @facturationCollectSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get facturationCollectSuccessTitle;
+
+  /// No description provided for @facturationCollectReceiptChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no. {code}'**
+  String facturationCollectReceiptChip(String code);
+
+  /// No description provided for @facturationCollectErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection failed'**
+  String get facturationCollectErrorTitle;
+
+  /// No description provided for @facturationCollectErrorNoDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount was debited.'**
+  String get facturationCollectErrorNoDebit;
+
+  /// No description provided for @facturationCollectIncidentChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String facturationCollectIncidentChip(String code);
+
+  /// No description provided for @facturationCollectEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get facturationCollectEditAction;
+
+  /// No description provided for @facturationCollectRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get facturationCollectRetryAction;
+
   /// No description provided for @attendanceHeroTitle.
   ///
   /// In en, this message translates to:
@@ -3828,10 +4608,16 @@ abstract class AppLocalizations {
   /// **'Run a search to display attendance for the selected class.'**
   String get attendanceInvitationMessage;
 
+  /// No description provided for @attendanceSelectClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class'**
+  String get attendanceSelectClassTitle;
+
   /// No description provided for @attendanceEmptySelectionMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select a class and a date to take attendance.'**
+  /// **'Select a cycle, a level, and then a class to load the attendance list.'**
   String get attendanceEmptySelectionMessage;
 
   /// No description provided for @attendanceLoadingMessage.
@@ -3953,6 +4739,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Present'**
   String get attendancePresentCount;
+
+  /// No description provided for @attendanceJustifiedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get attendanceJustifiedCount;
+
+  /// No description provided for @attendanceUnjustifiedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified'**
+  String get attendanceUnjustifiedCount;
+
+  /// No description provided for @attendancePendingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending reason'**
+  String get attendancePendingCount;
 
   /// No description provided for @attendanceAbsentCount.
   ///
@@ -4092,6 +4896,12 @@ abstract class AppLocalizations {
   /// **'Reason required for an absence.'**
   String get attendanceReasonRequiredHint;
 
+  /// No description provided for @attendanceMotifRequisLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason required'**
+  String get attendanceMotifRequisLabel;
+
   /// No description provided for @attendanceReasonDisabledHint.
   ///
   /// In en, this message translates to:
@@ -4182,6 +4992,66 @@ abstract class AppLocalizations {
   /// **'An unexpected error occurred.'**
   String get attendanceErrorUnknown;
 
+  /// No description provided for @attendanceSaveCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save attendance'**
+  String get attendanceSaveCallAction;
+
+  /// No description provided for @attendanceMarkAllPresentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'All present'**
+  String get attendanceMarkAllPresentAction;
+
+  /// No description provided for @attendanceSaveOverlayEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceSaveOverlayEyebrow;
+
+  /// No description provided for @attendanceSaveProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving attendance…'**
+  String get attendanceSaveProcessingTitle;
+
+  /// No description provided for @attendanceSaveSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved!'**
+  String get attendanceSaveSuccessTitle;
+
+  /// No description provided for @attendanceSaveSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class attendance records have been saved.'**
+  String get attendanceSaveSuccessSubtitle;
+
+  /// No description provided for @attendanceSaveErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get attendanceSaveErrorTitle;
+
+  /// No description provided for @attendanceSaveErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entries are preserved. Check your connection and try again.'**
+  String get attendanceSaveErrorMessage;
+
+  /// No description provided for @attendanceSaveRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get attendanceSaveRetryAction;
+
+  /// No description provided for @attendanceSaveCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get attendanceSaveCloseAction;
+
   /// No description provided for @absenceReasonSickness.
   ///
   /// In en, this message translates to:
@@ -4235,6 +5105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Work leave'**
   String get absenceReasonWorkLeave;
+
+  /// No description provided for @absenceReasonUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absence'**
+  String get absenceReasonUnjustified;
 
   /// No description provided for @absenceReasonOther.
   ///

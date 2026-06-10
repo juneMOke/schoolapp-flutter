@@ -8,7 +8,49 @@
   "passwordTooShort": "Password must be at least 6 characters",
   "pleaseEnterEmail": "Please enter your email",
   "pleaseEnterValidEmail": "Please enter a valid email",
-  "schoolApp": "ETEELO TECH",
+  "loginEyebrow": "Management area",
+  "loginSubtitle": "Access your school's dashboard.",
+  "loginEmailLabel": "Email address",
+  "loginSubmitting": "Signing in…",
+  "loginSignature": "eteyelo · the school, in Lingala",
+  "loginBrandTitle": "The Congolese school, now digital.",
+  "loginBrandTitleCondensed": "The school, now digital.",
+  "loginBrandTitleHighlight": "digital",
+  "loginBrandSubtitle": "Registrations, finances, classes and attendance — one app, on every screen.",
+  "loginEmailRequired": "Email address is required.",
+  "loginEmailInvalid": "Invalid email format.",
+  "loginPasswordRequired": "Password is required.",
+  "loginErrorInvalidCredentials": "Incorrect email or password. Check your credentials and try again.",
+  "loginErrorNetwork": "No connection. Check your network.",
+  "loginErrorAccountDisabled": "Account disabled. Contact your school administrator.",
+  "loginErrorServer": "Server error. Please try again shortly.",
+  "loginErrorRateLimited": "Too many attempts. Try again in {seconds}s",
+  "@loginErrorRateLimited": {
+    "description": "429 error banner — temporary lockout with countdown",
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "loginContactAdmin": "Contact the administrator",
+  "showPassword": "Show",
+  "hidePassword": "Hide",
+  "schoolApp": "ETEELO CONNECT",
+  "splashBrandPrimary": "ETEELO",
+  "splashBrandSecondary": "CONNECT",
+  "splashTagline": "Simplify your school management",
+  "splashSemanticsLabel": "ETEELO CONNECT — splash screen",
+  "bootstrapOfflineBanner": "Offline mode — cached data",
+  "splashErrorTitle": "Connection failed",
+  "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
+  "splashErrorRetry": "Retry",
+  "splashVersion": "v{version} (build {build})",
+  "@splashVersion": {
+    "description": "Technical version shown in the splash footer",
+    "placeholders": {
+      "version": { "type": "String" },
+      "build": { "type": "String" }
+    }
+  },
   "logout": "Logout",
   "welcome": "Welcome{name}!",
   "@welcome": {
@@ -55,6 +97,29 @@
   "@pleaseConfirmPassword": {
     "description": "Confirm password validation message"
   },
+  "resetEyebrow": "Password reset",
+  "resetBrandTitle": "Recover your access securely.",
+  "resetBrandTitleCondensed": "Account access recovery.",
+  "resetBrandTitleHighlight": "access",
+  "resetBrandSubtitle": "Reset your password safely.",
+  "resetStepIndicator": "Step {step} of {total} · {label}",
+  "@resetStepIndicator": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStepLabelEmail": "Email",
+  "resetStepLabelCode": "Code",
+  "resetStepLabelPassword": "New password",
+  "resetBackToLogin": "Back",
   "menuInscriptions": "Registrations",
   "@menuInscriptions": {
     "description": "Inscriptions menu title"
@@ -98,34 +163,79 @@
   "classesOrganisationHeroTitle": "Class composition",
   "classesOrganisationHeroSubtitle": "Distribute students from one level into sub-classes (e.g. Grade 1 A, Grade 1 B, Grade 1 C) and view the student list for each sub-class.",
   "classesOrganisationSearchTitle": "Level selection for class distribution",
+  "classesOrganisationHeaderEyebrow": "Class composition · Year {schoolYear}",
+  "@classesOrganisationHeaderEyebrow": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "classesOrganisationLevelPlaceholder": "Choose a cycle first",
   "classesOrganisationSearchHint": "Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.",
   "classesOrganisationClassroomFieldLabel": "Classroom",
   "classesOrganisationDistributionLabel": "Distribution criterion",
   "classesOrganisationDistributionByGender": "Distribute by gender",
   "classesOrganisationDistributionByPercentage": "Distribute by average",
-  "classesOrganisationDistributionAction": "Distribute",
-  "classesOrganisationDistributionConfirmTitle": "Confirm distribution",
-  "classesOrganisationDistributionConfirmMessage": "Do you want to distribute students for this level?",
+  "classesOrganisationDistributeByGenderAction": "Start gender-based distribution",
+  "classesDistributionResultEyebrow": "Gender distribution",
+  "classesDistributionProcessingTitle": "Distribution in progress…",
+  "classesDistributionSuccessTitle": "Distribution complete",
+  "classesDistributionSuccessSubtitle": "Students were evenly distributed by gender.",
+  "classesDistributionRecapTitle": "Headcount per class",
+  "classesDistributionClassHeadcount": "{count} students",
+  "@classesDistributionClassHeadcount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "classesDistributionErrorTitle": "Distribution failed",
+  "classesDistributionErrorMessage": "The classes were left intact. You can try again.",
+  "classesDistributionRetry": "Retry",
+  "classesDistributionClose": "Close",
+  "classesDistributionKpiHeadcount": "Headcount",
+  "classesDistributionKpiClasses": "Classes",
+  "classesDistributionKpiBoys": "Boys",
+  "classesDistributionKpiGirls": "Girls",
+  "classesDistributionViewGrid": "Grid",
+  "classesDistributionViewList": "List",
+  "classesDistributionClassLabel": "Class {code}",
+  "@classesDistributionClassLabel": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "classesDistributionClassCapacity": "{count} students · capacity {capacity}",
+  "@classesDistributionClassCapacity": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "capacity": { "type": "int" }
+    }
+  },
+  "classesDistributionCapacityFull": "full",
   "classesOrganisationDistributionSuccess": "Distribution completed successfully.",
   "classesOrganisationSplitInfo": "Split mode enabled: classroom grid with members and stats.",
   "classesOrganisationNonSplitInfo": "Non-split mode enabled: student list for the selected level.",
-  "classesOrganisationNoClassrooms": "No classroom is available for this level.",
-  "classesOrganisationClassroomStats": "{total} students - Girls: {girls} - Boys: {boys}",
-  "@classesOrganisationClassroomStats": {
-    "placeholders": {
-      "total": { "type": "int" },
-      "girls": { "type": "int" },
-      "boys": { "type": "int" }
-    }
-  },
+  "classesOrganisationLoadingTitle": "Loading classes…",
+  "classesOrganisationEmptyTitle": "No student to distribute",
+  "classesOrganisationEmptyInvite": "Enroll students in this level to start the distribution.",
+  "classesOrganisationOverviewErrorTitle": "Unable to load",
   "classesOrganisationTransferDialogTitle": "Transfer student",
-  "classesOrganisationTransferDialogMessage": "Choose the destination classroom for {studentName}.",
-  "@classesOrganisationTransferDialogMessage": {
+  "classesReassignCurrentClassState": "Current class",
+  "classesReassignUnassignedState": "Unassigned",
+  "classesReassignCurrentBadge": "Current",
+  "classesReassignFullBadge": "Full",
+  "classesReassignOptionStats": "{eff}/{cap} · B {boys} · G {girls}",
+  "@classesReassignOptionStats": {
     "placeholders": {
-      "studentName": { "type": "String" }
+      "eff": { "type": "int" },
+      "cap": { "type": "int" },
+      "boys": { "type": "int" },
+      "girls": { "type": "int" }
     }
   },
-  "classesOrganisationTransferTargetLabel": "Destination classroom",
   "classesOrganisationTransferAction": "Transfer",
   "classesOrganisationTransferInProgress": "Transfer in progress...",
   "classesOrganisationTransferSuccess": "Transfer completed successfully.",
@@ -140,59 +250,37 @@
     }
   },
   "classesOrganisationPendingTitle": "Level not distributed yet",
-  "classesOrganisationPendingSubtitle": "Run the initial distribution to create classes for this level.",
+  "classesOrganisationPendingMessage": "{count} students in {levelName} aren''t assigned to any class. Automatic distribution balances the classes by gender.",
+  "@classesOrganisationPendingMessage": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "levelName": { "type": "String" }
+    }
+  },
   "classesOrganisationPendingStudentsToDistribute": "{count} students to distribute",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "classesOrganisationPendingPlannedClassrooms": "{count} planned classes",
-  "@classesOrganisationPendingPlannedClassrooms": {
+  "classesOrganisationGenderBoysPill": "B · {count}",
+  "@classesOrganisationGenderBoysPill": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "classesOrganisationAppliedCriterionInfo": "Applied criterion: balanced distribution by gender (mixed school).",
-  "classesOrganisationSplitSummary": "{studentsCount} students distributed across {classroomsCount} classes · Applied criterion: {criterion}",
-  "@classesOrganisationSplitSummary": {
+  "classesOrganisationGenderGirlsPill": "G · {count}",
+  "@classesOrganisationGenderGirlsPill": {
     "placeholders": {
-      "studentsCount": { "type": "int" },
-      "classroomsCount": { "type": "int" },
-      "criterion": { "type": "String" }
+      "count": { "type": "int" }
     }
   },
-  "classesOrganisationClassroomsSectionTitle": "Constituted classes",
-  "classesOrganisationUnassignedTitle": "Students to assign",
-  "classesOrganisationUnassignedTitleSuffix": " — added after distribution",
+  "classesOrganisationUnassignedTitle": "Unassigned students",
+  "classesOrganisationUnassignedSubtitle": "New arrivals, cancelled transfers…",
   "classesOrganisationUnassignedBadge": "To assign",
-  "classesOrganisationUnassignedSummary": "{count} students waiting for assignment",
-  "@classesOrganisationUnassignedSummary": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
   "classesOrganisationNoMembers": "No student in this classroom.",
-  "classesOrganisationAssignAction": "Assign to a classroom",
-  "classesOrganisationAssignDialogTitle": "Assign to a classroom",
-  "classesOrganisationAssignDialogMessage": "Choose the destination classroom for {studentName}.",
-  "@classesOrganisationAssignDialogMessage": {
-    "placeholders": {
-      "studentName": { "type": "String" }
-    }
-  },
-  "classesOrganisationClassroomPopulation": "Current size: {count}",
-  "@classesOrganisationClassroomPopulation": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "classesOrganisationTransferConfirmMessage": "Do you confirm transferring {studentName} to this classroom?",
-  "@classesOrganisationTransferConfirmMessage": {
-    "placeholders": {
-      "studentName": { "type": "String" }
-    }
-  },
+  "classesOrganisationAssignAction": "Assign",
+  "classesOrganisationAssignDialogTitle": "Assign the student",
   "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
@@ -209,13 +297,8 @@
   "classesOrganisationErrorStorage": "Local storage error.",
   "classesOrganisationErrorAuth": "Session is not valid, please sign in again.",
   "classesOrganisationErrorUnknown": "An error occurred.",
-  "classesListHeroTitle": "Class lists",
-  "classesListHeroSubtitle": "Quickly search students by cycle, level or classroom, then export the displayed results.",
-  "classesListHeroFilterChip": "Multi-criteria search by identity and level.",
-  "classesListHeroClassroomChip": "Optional classroom filtering for the current school year.",
   "classesListSearchTitle": "Search form",
   "classesListSearchHint": "",
-  "classesListValidationAtLeastOneCriterion": "Provide at least one criterion to run a search.",
   "classesListClassroomOptionalLabel": "Classroom (optional)",
   "classesListFirstNameOptionalLabel": "First name (optional)",
   "classesListLastNameOptionalLabel": "Last name (optional)",
@@ -261,11 +344,40 @@
   "profile": "Profile",
   "settings": "Settings",
   "home": "Home",
+  "accueilBannerGreeting": "Hello, {firstName}",
+  "@accueilBannerGreeting": {
+    "description": "Home banner greeting with the signed-in user's first name.",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerGreetingGeneric": "Hello",
+  "accueilBannerContextTail": "Here is the essential view of your school today.",
+  "accueilModulesEyebrow": "Your modules",
+  "accueilModulesTitle": "Where would you like to go?",
+  "accueilModulesIntro": "Four modules cover the administrative life of the school. Everything stays accessible from the side menu.",
+  "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
+  "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
+  "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
+  "accueilModuleCardSemantics": "{module} — open the dashboard",
+  "@accueilModuleCardSemantics": {
+    "description": "Accessibility label for the module card (button role, explicit destination).",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSignature": "eteyelo · l'école en lingala",
   "homeTopBarPendingSubtitle": "Pending files follow-up",
   "homeTopBarNotificationsTooltip": "Notifications",
   "homeUserMenuTooltip": "User menu",
   "homeSidebarCollapseTooltip": "Collapse menu",
   "homeSidebarExpandTooltip": "Expand menu",
+  "homeOpenNavigationDrawerTooltip": "Open menu",
   "homeSidebarFooterLabel": "School dashboard",
   "homeSidebarNavigationLabel": "Main navigation",
   "pageUnderConstruction": "This page is under development",
@@ -273,7 +385,16 @@
   "searchStudents": "Search Students",
   "searchFormSubtitleFirstRegistration": "Filter the enrollments list",
   "searchFormSubtitlePreRegistration": "Online requests received, pending validation",
-  "reRegistrationSearchHint": "Enter either First name, Last name and Surname, or the target cycle/level to start the search.",
+  "reRegistrationSearchHint": "Find a student or a class from the previous year to re-enroll",
+  "reRegistrationSearchHelpPill": "Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.",
+  "reRegistrationSearchTitle": "Search a student",
+  "reRegistrationSearchByNameGroup": "By name",
+  "reRegistrationSearchByLevelGroup": "By cycle / level",
+  "reRegistrationSearchOrSeparator": "OR",
+  "reRegistrationSearchActiveModeLabel": "Active search by:",
+  "reRegistrationSearchModeNameBadge": "Name",
+  "reRegistrationSearchModeLevelBadge": "Cycle / level",
+  "reRegistrationSearchLevelPlaceholder": "Choose a cycle first",
   "reRegistrationAcademicInfoHelp": "Select the target cycle and level to filter results.",
   "reRegistrationSearchNoOptions": "No cycle/level is available for this search.",
   "reRegistrationSearchNeedCriteria": "Provide either First name, Last name and Surname, or Cycle/Level.",
@@ -631,7 +752,7 @@
   "enrollmentStatusRejected": "Rejected",
   "enrollmentStatusCancelled": "Cancelled",
   "enrollmentReadOnlyTitle": "View-only mode",
-  "enrollmentReadOnlyMessage": "This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.",
+  "enrollmentReadOnlyMessage": "Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.",
   "enrollmentEditableTitle": "Edit mode",
   "enrollmentEditableMessage": "This enrollment is in progress (IN_PROGRESS). Information can be updated.",
 
@@ -694,6 +815,37 @@
   "facturationViewChargesLabel": "View charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
+  "facturationEmptyTitle": "No student found",
+  "facturationSearchHelpBanner": "Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.",
+  "facturationSearchByStudentGroup": "By student",
+  "facturationSearchByClassGroup": "By class",
+  "facturationSearchOrSeparator": "OR",
+  "facturationSearchActiveModeLabel": "Active search by:",
+  "facturationSearchModeStudentBadge": "Student",
+  "facturationSearchModeClassBadge": "Class",
+  "facturationSearchCycleLabel": "Cycle",
+  "facturationSearchLevelLabel": "Level",
+  "facturationSearchLevelPlaceholder": "Pick a cycle first",
+  "facturationBalanceDuePill": "{amount} due",
+  "@facturationBalanceDuePill": {
+    "description": "Billing AppBar pill when the balance is outstanding.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationBalanceUpToDatePill": "Up to date",
+  "facturationChargeLineRemainingSuffix": "{amount} remaining",
+  "@facturationChargeLineRemainingSuffix": {
+    "description": "Fee line footer: amount remaining to pay.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationPaymentRecordedToast": "Payment of {amount} recorded",
+  "@facturationPaymentRecordedToast": {
+    "description": "Confirmation toast after a successful payment.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "facturationChargeStatementCopied": "Statement copied to clipboard",
+  "facturationChargeStatementEmpty": "No payment to export for this fee.",
+  "facturationCsvHeaderFee": "Fee",
+  "facturationCsvHeaderImputedAmount": "Imputed amount (USD)",
 
   "facturationDetailBackLabel": "Back to billing",
   "facturationDetailContextErrorTitle": "Detail context unavailable",
@@ -706,6 +858,7 @@
   "facturationDetailStudentLevelGroup": "Level group",
   "facturationDetailStudentLevel": "Level",
   "facturationDetailInfoTitle": "Financial record",
+  "facturationDetailEyebrow": "Billing",
   "facturationDetailInfoSubtitle": "Review recent payments and student charge status for this student.",
   "facturationDetailHeaderKpiTotalDue": "Total due",
   "facturationDetailHeaderKpiAlreadyPaid": "Already paid",
@@ -715,6 +868,15 @@
   "facturationDetailPaymentsSectionTitle": "Payments",
   "facturationDetailPaymentsSectionSubtitle": "Recorded payment history for this student.",
   "facturationDetailPaymentsRecordedCount": "{count, plural, =0{No payment recorded} =1{1 payment recorded} other{{count} payments recorded}}",
+  "facturationDetailPaymentsRecordedWithTotal": "{count, plural, =0{No payment recorded} =1{1 payment · {total}} other{{count} payments · {total}}}",
+  "@facturationDetailPaymentsRecordedWithTotal": {
+    "description": "Payments section subtitle: payment count + total paid.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "String" }
+    }
+  },
+  "facturationPaymentMethodCash": "Cash",
   "@facturationDetailPaymentsRecordedCount": {
     "placeholders": {
       "count": {}
@@ -735,7 +897,14 @@
   "facturationPaymentPayerLabel": "Payer",
   "facturationPaymentAmountLabel": "Total paid amount",
   "facturationPaymentPaidAtLabel": "Paid at",
-  "facturationPaymentAllocationsSectionTitle": "Payment allocations",
+  "facturationPaymentAmountPaidLabel": "Amount paid",
+  "facturationPaymentMethodLabel": "Payment method",
+  "facturationPaymentCollectedByLabel": "Collected by",
+  "facturationPaymentReceiptLabel": "Receipt no.",
+  "facturationPaymentStudentLabel": "Student",
+  "facturationPaymentDownloadReceiptLabel": "Download receipt",
+  "facturationPaymentCloseLabel": "Close",
+  "facturationPaymentAllocationsSectionTitle": "Breakdown by fee",
   "facturationPaymentAllocationsSectionSubtitle": "List of charges covered by this payment.",
   "facturationPaymentAllocationsTotalLabel": "Allocated total",
   "facturationPaymentAllocationsEmpty": "No allocation was found for this payment.",
@@ -783,14 +952,14 @@
   "facturationPrintStatementsLabel": "Print statements",
   "facturationPrintStatementsSubtitle": "Generate and download the billing statements for this student",
   "facturationChargeDetailBackLabel": "Back to billing detail",
-  "facturationChargeDetailHeroTitle": "Charge detail",
+  "facturationChargeDetailHeroTitle": "Fee details",
   "facturationChargeDetailHeroSubtitle": "Review this charge status and the payments allocated to it.",
   "facturationChargeDetailInfoSectionTitle": "Charge information",
   "facturationChargeDetailExpectedAmountLabel": "Expected amount",
   "facturationChargeDetailPaidAmountLabel": "Paid amount",
   "facturationChargeDetailRemainingAmountLabel": "Remaining amount",
   "facturationChargeDetailStatusLabel": "Status",
-  "facturationChargeDetailAllocationsSectionTitle": "Allocations for this charge",
+  "facturationChargeDetailAllocationsSectionTitle": "Applied payments",
   "facturationChargeDetailAllocationsSectionSubtitle": "Breakdown of payments allocated to this charge.",
   "facturationChargeDetailAllocationLabelColumn": "Allocation",
   "facturationChargeDetailAllocationsTotalLabel": "Allocated total",
@@ -890,6 +1059,109 @@
   "facturationCreatePaymentAuthError": "An authentication error occurred.",
   "facturationCreatePaymentUnknownError": "An unexpected error occurred.",
   "facturationCreatePaymentNoChargesAvailable": "No unpaid charges available for this student.",
+  "facturationCreatePaymentChargesToSettleTitle": "Fees to settle",
+  "facturationCreatePaymentChargesToSettleSubtitle": "Check the fees to settle and adjust the amounts.",
+  "facturationCreatePaymentAllFeesSettled": "All fees are already settled.",
+  "facturationCreatePaymentChargeDue": "Due {amount}",
+  "@facturationCreatePaymentChargeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargePaid": "Already paid {amount}",
+  "@facturationCreatePaymentChargePaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentChargeRemaining": "Remaining {amount}",
+  "@facturationCreatePaymentChargeRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentAmountToSettleLabel": "Amount to settle",
+  "facturationCreatePaymentSettleAllAction": "Settle all",
+  "facturationCreatePaymentAmountClampedWarning": "Amount capped to the remaining balance ({amount}).",
+  "@facturationCreatePaymentAmountClampedWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentRemainingAfter": "Remaining after: {amount}",
+  "@facturationCreatePaymentRemainingAfter": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentSettledChip": "Settled",
+  "facturationCreatePaymentTotalToCollect": "Total to collect",
+  "facturationCreatePaymentCollectAmountAction": "Collect {amount}",
+  "@facturationCreatePaymentCollectAmountAction": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmCollectTitle": "Collect {amount}?",
+  "@facturationCreatePaymentConfirmCollectTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmSentence": "You are about to collect {amount} for {student}, paid by {payer}.",
+  "@facturationCreatePaymentConfirmSentence": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "student": {
+        "type": "String"
+      },
+      "payer": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCreatePaymentConfirmDistributionTitle": "Breakdown",
+  "facturationCollectStepConfirm": "Confirmation",
+  "facturationCollectStepResult": "Result",
+  "facturationCollectSimulateFailure": "Simulate a failure",
+  "facturationCollectProcessing": "Recording the payment…",
+  "facturationCollectSuccessTitle": "Payment recorded",
+  "facturationCollectReceiptChip": "Receipt no. {code}",
+  "@facturationCollectReceiptChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectErrorTitle": "Collection failed",
+  "facturationCollectErrorNoDebit": "No amount was debited.",
+  "facturationCollectIncidentChip": "Incident code: {code}",
+  "@facturationCollectIncidentChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationCollectEditAction": "Edit",
+  "facturationCollectRetryAction": "Retry",
 
   "attendanceHeroTitle": "Attendance",
   "attendanceHeroSubtitle": "View class attendance by date for reliable daily tracking.",
@@ -903,7 +1175,8 @@
   "attendanceClassLabel": "Class",
   "attendanceShowClassAction": "Show class",
   "attendanceInvitationMessage": "Run a search to display attendance for the selected class.",
-  "attendanceEmptySelectionMessage": "Select a class and a date to take attendance.",
+  "attendanceSelectClassTitle": "Select a class",
+  "attendanceEmptySelectionMessage": "Select a cycle, a level, and then a class to load the attendance list.",
   "attendanceLoadingMessage": "Loading attendance records...",
   "attendanceEmptyMessage": "No attendance found for these filters.",
   "attendanceExportAction": "Export",
@@ -924,6 +1197,9 @@
   "attendanceStatusInProgress": "Attendance in progress",
   "attendanceStatusReady": "Ready to validate",
   "attendancePresentCount": "Present",
+  "attendanceJustifiedCount": "Justified",
+  "attendanceUnjustifiedCount": "Unjustified",
+  "attendancePendingCount": "Pending reason",
   "attendanceAbsentCount": "Absent",
   "attendanceTotalCountCompact": "Total",
   "attendanceDefaultPresenceHelper": "All students are marked present by default. Tap Absent to report an exception.",
@@ -971,6 +1247,7 @@
   "attendanceReadOnlyHint": "Read-only informational status",
   "attendanceReasonRequiredError": "Please select a reason for this absence.",
   "attendanceReasonRequiredHint": "Reason required for an absence.",
+  "attendanceMotifRequisLabel": "Reason required",
   "attendanceReasonDisabledHint": "Reason is required only when the student is absent.",
   "attendanceNoteDisabledHint": "Note is optional only when the student is absent.",
   "attendanceNotePlaceholder": "Add details if needed",
@@ -986,6 +1263,16 @@
   "attendanceErrorStorage": "A local storage error occurred.",
   "attendanceErrorAuth": "An authentication error occurred.",
   "attendanceErrorUnknown": "An unexpected error occurred.",
+  "attendanceSaveCallAction": "Save attendance",
+  "attendanceMarkAllPresentAction": "All present",
+  "attendanceSaveOverlayEyebrow": "Attendance",
+  "attendanceSaveProcessingTitle": "Saving attendance…",
+  "attendanceSaveSuccessTitle": "Attendance saved!",
+  "attendanceSaveSuccessSubtitle": "Class attendance records have been saved.",
+  "attendanceSaveErrorTitle": "Save failed",
+  "attendanceSaveErrorMessage": "Your entries are preserved. Check your connection and try again.",
+  "attendanceSaveRetryAction": "Retry",
+  "attendanceSaveCloseAction": "Done",
   "absenceReasonSickness": "Sickness",
   "absenceReasonFamilyEmergency": "Family emergency",
   "absenceReasonPersonal": "Personal",
@@ -995,6 +1282,7 @@
   "absenceReasonMarriageLeave": "Marriage leave",
   "absenceReasonParentalLeave": "Parental leave",
   "absenceReasonWorkLeave": "Work leave",
+  "absenceReasonUnjustified": "Unjustified absence",
   "absenceReasonOther": "Other",
 
    "bootstrapContextUnavailableTitle": "Enrollment context unavailable",

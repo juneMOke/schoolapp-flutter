@@ -87,6 +87,13 @@ Point d'entrée recommandé pour comprendre le projet:
 - `INDEX.md` (index des guides/templates)
 - `PROD_READINESS.md` (suivi des risques avant prod)
 
+## À faire
+
+### Splash (améliorations différées)
+
+- [ ] **Wordmark en Inter ExtraBold (800)** — seuls les poids 400/500/600/700 d'Inter sont bundlés, donc « ETEELO » se rabat actuellement sur le poids 700. Ajouter `Inter-ExtraBold.ttf` dans `assets/fonts/inter/` + entrée `pubspec.yaml` pour le vrai 800.
+- [ ] **Alternative « lockup horizontal » en paysage large** (spec splash, COMPOSANT 02) — afficher le logo horizontal complet (`assets/branding/fonce/logo_horizontal_fond_fonce.svg`) à la place du symbole + wordmark texte sur les écrans larges en paysage.
+
 ## Dépannage rapide
 
 - Si `build_runner` échoue: `flutter clean` puis relancer la commande de génération.

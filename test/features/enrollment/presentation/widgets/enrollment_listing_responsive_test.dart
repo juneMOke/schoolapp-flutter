@@ -3,9 +3,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
+  group('EnrollmentResultsResponsiveMode.resolve', () {
+    EnrollmentListingViewMode resolveMode(
+      EnrollmentListingViewMode preferred,
+    ) => EnrollmentResultsResponsiveMode.resolve(preferred: preferred);
+
+    test('auto (défaut) → table, y compris sur mobile', () {
+      // La table est le défaut partout ; la grille n'apparaît que sur choix
+      // explicite (la table a un rendu étroit 2 colonnes adapté au téléphone).
+      expect(resolveMode(EnrollmentListingViewMode.auto).isTable, isTrue);
+    });
+
+    test('un choix explicite Liste est honoré', () {
+      expect(resolveMode(EnrollmentListingViewMode.table).isTable, isTrue);
+    });
+
+    test('un choix explicite Grille est honoré', () {
+      expect(resolveMode(EnrollmentListingViewMode.grid).isGrid, isTrue);
+    });
+  });
+
   Widget buildResponsiveHarness({
     required double width,
     required Widget child,
@@ -70,9 +91,8 @@ void main() {
   });
 
   testWidgets('Breakpoint constants are correctly defined', (tester) async {
-    // Verify the constants exist
+    // Verify the constant exists
     expect(AppBreakpoints.enrollmentTableGridSwitchMax, 600.0);
-    expect(AppBreakpoints.enrollmentShellCompactMax, 1024.0);
   });
 
   testWidgets('Results bar shows loading state', (tester) async {

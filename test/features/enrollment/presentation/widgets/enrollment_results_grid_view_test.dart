@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_pagination_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
@@ -153,5 +154,87 @@ void main() {
 
     expect(secondTopLeft.dx, firstTopLeft.dx);
     expect(secondTopLeft.dy, greaterThan(firstTopLeft.dy));
+  });
+
+  testWidgets('Grid view masque la pagination sur une seule page', (
+    tester,
+  ) async {
+    final items = [createMockEnrollment(1), createMockEnrollment(2)];
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 500,
+          height: 600,
+          child: EnrollmentResultsGridView(
+            enrollments: items,
+            onViewRequested: (_) {},
+            totalPages: 1,
+            onPreviousPage: () {},
+            onNextPage: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(DataTablePaginationBar), findsNothing);
+  });
+
+  testWidgets('Grid view affiche la pagination en bas quand plusieurs pages', (
+    tester,
+  ) async {
+    final items = [createMockEnrollment(1), createMockEnrollment(2)];
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 500,
+          height: 600,
+          child: EnrollmentResultsGridView(
+            enrollments: items,
+            onViewRequested: (_) {},
+            currentPage: 1,
+            totalPages: 3,
+            onPreviousPage: () {},
+            onNextPage: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(DataTablePaginationBar), findsOneWidget);
+    // La pagination est rendue sous la grille.
+    final gridBottom = tester.getBottomLeft(find.byType(EteeloGridView)).dy;
+    final paginationTop = tester
+        .getTopLeft(find.byType(DataTablePaginationBar))
+        .dy;
+    expect(paginationTop, greaterThanOrEqualTo(gridBottom));
+  });
+
+  testWidgets('Grid view déclenche onNextPage au clic suivant', (tester) async {
+    var nextTapped = false;
+    final items = [createMockEnrollment(1), createMockEnrollment(2)];
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 500,
+          height: 600,
+          child: EnrollmentResultsGridView(
+            enrollments: items,
+            onViewRequested: (_) {},
+            currentPage: 1,
+            totalPages: 3,
+            onPreviousPage: () {},
+            onNextPage: () => nextTapped = true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.chevron_right_rounded));
+    await tester.pump();
+
+    expect(nextTapped, isTrue);
   });
 }

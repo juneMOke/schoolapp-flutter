@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceDateButton extends StatelessWidget {
@@ -56,42 +54,6 @@ class AttendanceDateButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppDimensions.spacingS),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class AttendanceSearchButton extends StatelessWidget {
-  final bool isSearching;
-  final bool canSearch;
-  final VoidCallback onSearch;
-  final bool isCompact;
-
-  const AttendanceSearchButton({
-    super.key,
-    required this.isSearching,
-    required this.canSearch,
-    required this.onSearch,
-    required this.isCompact,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AnimatedSwitcher(
-      duration: AppMotion.fast,
-      switchInCurve: AppMotion.outCurve,
-      switchOutCurve: AppMotion.inCurve,
-      child: SizedBox(
-        width: isCompact ? null : 140,
-        child: EteeloButton.primary(
-          key: ValueKey('attendance-search-$isSearching-$canSearch-$isCompact'),
-          onPressed: canSearch ? onSearch : null,
-          icon: Icons.search,
-          label: l10n.attendanceShowClassAction,
-          isLoading: isSearching,
         ),
       ),
     );

@@ -55,17 +55,48 @@ Deux repositories séparés :
 Le router (`RouterNotifier` dans `app_router.dart`) consulte
 `bootstrapBloc.state.blocksNavigation` avant d'autoriser les routes app.
 
+**Modèle offline-first (depuis la refonte splash)** : la navigation est pilotée
+par la **disponibilité des données** (`hasData = bootstrap != null`), pas par
+« le réseau a-t-il répondu ». Dès qu'un cache local est chargé, on entre dans
+l'app et le réseau rafraîchit **en tâche de fond**.
+
 ```dart
+bool get hasData => bootstrap != null;
+
+// Bloque UNIQUEMENT tant qu'on n'a aucune donnée ET qu'on n'est pas déjà en
+// échec distant (sinon c'est l'ErrorView qui prend le relais).
 bool get blocksNavigation =>
-    status == BootstrapLoadStatus.initial ||
-    (status == BootstrapLoadStatus.loading && operation.blocksNavigation);
+    !hasData &&
+    !(status == BootstrapLoadStatus.failure && operation.blocksNavigation);
+
+// Seul cas réellement bloquant : aucune donnée + échec distant → ErrorView.
+bool get hasBlockingFailure =>
+    !hasData &&
+    status == BootstrapLoadStatus.failure &&
+    operation.blocksNavigation;
+
+// On affiche du cache car le refresh distant a échoué → bandeau hors-ligne.
+bool get isStale =>
+    source == BootstrapSource.local && status == BootstrapLoadStatus.failure;
 
 // operation.blocksNavigation est true UNIQUEMENT pour :
 //   - BootstrapOperation.remoteCurrentYear
 //   - BootstrapOperation.remotePreviousYear
 ```
 
-→ Un `BootstrapLocalRequested` en cours ne bloque **pas** la navigation (c'est fait exprès : si on a déjà vu le cache, on n'attend pas un rechargement local).
+Décision d'entrée résumée (gérée par le redirect du router + `SplashPage`) :
+
+| JWT (local) | Cache | Comportement |
+|---|---|---|
+| absent/expiré | — | `/login` (zéro réseau) |
+| valide | présent | `/home` direct + refresh en fond (bandeau hors-ligne si refresh KO) |
+| valide | absent | splash (loading) → `/home`, ou ErrorView+Réessayer si échec |
+
+**Session expirée (401/403)** : un échec distant d'auth lève
+`state.sessionExpired = true`. `main.dart` écoute le `BootstrapBloc` et déclenche
+alors `AuthLogoutRequested` (couplage bootstrap→auth en sens unique, via main).
+
+→ Un `BootstrapLocalRequested` en cours ne bloque **pas** la navigation (offline-first).
 
 → Si tu ajoutes une nouvelle `BootstrapOperation`, **décide explicitement** si elle doit bloquer la navigation et mets à jour `BootstrapOperationX.blocksNavigation`.
 

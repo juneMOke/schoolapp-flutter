@@ -125,6 +125,8 @@ void main() {
           password: 'password123',
         ),
       ),
+      // Le handler login applique un plancher d'affichage de 400 ms (spec §07).
+      wait: const Duration(milliseconds: 450),
       expect: () => const [
         AuthState(status: AuthStatus.loading),
         AuthState(status: AuthStatus.authenticated, user: tUser),
@@ -145,11 +147,13 @@ void main() {
       act: (bloc) => bloc.add(
         const AuthLoginRequested(email: 'test@example.com', password: 'wrong'),
       ),
+      wait: const Duration(milliseconds: 450),
       expect: () => const [
         AuthState(status: AuthStatus.loading),
         AuthState(
           status: AuthStatus.failure,
           errorMessage: 'Invalid credentials',
+          errorKind: AuthErrorKind.invalidCredentials,
         ),
       ],
     );

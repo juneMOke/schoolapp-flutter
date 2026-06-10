@@ -8,6 +8,7 @@ enum AbsenceReason {
   marriageLeave,
   parentalLeave,
   workLeave,
+  unjustified,
   other,
 }
 
@@ -24,6 +25,7 @@ extension AbsenceReasonX on AbsenceReason {
       'MARRIAGE_LEAVE' => AbsenceReason.marriageLeave,
       'PARENTAL_LEAVE' => AbsenceReason.parentalLeave,
       'WORK_LEAVE' => AbsenceReason.workLeave,
+      'UNJUSTIFIED' => AbsenceReason.unjustified,
       'OTHER' => AbsenceReason.other,
       _ => AbsenceReason.unknown,
     };
@@ -39,6 +41,7 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.marriageLeave => 'MARRIAGE_LEAVE',
     AbsenceReason.parentalLeave => 'PARENTAL_LEAVE',
     AbsenceReason.workLeave => 'WORK_LEAVE',
+    AbsenceReason.unjustified => 'UNJUSTIFIED',
     AbsenceReason.other => 'OTHER',
   };
 }

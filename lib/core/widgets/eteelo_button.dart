@@ -22,6 +22,7 @@ class EteeloButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.isLoading = false,
+    this.loadingLabel,
     this.size = EteeloButtonSize.compact,
     this.fullWidth = true,
     this.tooltip,
@@ -33,6 +34,7 @@ class EteeloButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.isLoading = false,
+    this.loadingLabel,
     this.size = EteeloButtonSize.compact,
     this.fullWidth = true,
     this.tooltip,
@@ -44,6 +46,7 @@ class EteeloButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.isLoading = false,
+    this.loadingLabel,
     this.size = EteeloButtonSize.compact,
     this.fullWidth = true,
     this.tooltip,
@@ -55,6 +58,7 @@ class EteeloButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.isLoading = false,
+    this.loadingLabel,
     this.size = EteeloButtonSize.compact,
     this.fullWidth = true,
     this.tooltip,
@@ -64,6 +68,10 @@ class EteeloButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool isLoading;
+
+  /// Libellé affiché à côté du spinner pendant le chargement (ex. « Connexion… »).
+  /// Si `null`, seul le spinner est montré (comportement par défaut).
+  final String? loadingLabel;
   final EteeloButtonSize size;
   final bool fullWidth;
 
@@ -214,7 +222,7 @@ class _EteeloButtonState extends State<EteeloButton> {
     final iconSize = _iconSize();
     final spinnerSize = _iconSize();
     if (widget.isLoading) {
-      return SizedBox(
+      final spinner = SizedBox(
         width: spinnerSize,
         height: spinnerSize,
         child: CircularProgressIndicator(
@@ -223,6 +231,21 @@ class _EteeloButtonState extends State<EteeloButton> {
             _isFilledVariant ? AppColors.blancCasse : AppColors.bleuArdoise,
           ),
         ),
+      );
+      if (widget.loadingLabel == null) return spinner;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          spinner,
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              widget.loadingLabel!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       );
     }
     if (widget.icon != null) {

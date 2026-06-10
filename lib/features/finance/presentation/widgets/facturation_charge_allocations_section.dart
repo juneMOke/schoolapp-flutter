@@ -7,7 +7,6 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment_allo
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_allocations_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -48,90 +47,86 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return FinanceSectionCard(
-      backgroundColor: AppColors.surfaceRaised,
-      borderColor: AppColors.border,
-      child: BlocConsumer<StudentChargesBloc, StudentChargesState>(
-        listenWhen: _shouldListen,
-        listener: (context, state) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.allocationsErrorType.localizedMessage(l10n)),
-            ),
-          );
-        },
-        buildWhen: _shouldRebuild,
-        builder: (context, state) {
-          final allocations = state.allocationsByChargeId[chargeId] ?? const [];
+    return BlocConsumer<StudentChargesBloc, StudentChargesState>(
+      listenWhen: _shouldListen,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.allocationsErrorType.localizedMessage(l10n)),
+          ),
+        );
+      },
+      buildWhen: _shouldRebuild,
+      builder: (context, state) {
+        final allocations = state.allocationsByChargeId[chargeId] ?? const [];
 
-          return AnimatedSwitcher(
-            duration: FinanceMotion.standard,
-            switchInCurve: FinanceMotion.outCurve,
-            switchOutCurve: FinanceMotion.inCurve,
-            child: () {
-              if (state.allocationsStatus == StudentChargesStatus.loading &&
-                  allocations.isEmpty) {
-                return StateCard(
-                  key: const ValueKey('charge-allocations-loading'),
-                  message: l10n.loadingStudents,
-                  icon: Icons.hourglass_top_rounded,
+        return AnimatedSwitcher(
+          duration: FinanceMotion.standard,
+          switchInCurve: FinanceMotion.outCurve,
+          switchOutCurve: FinanceMotion.inCurve,
+          child: () {
+            if (state.allocationsStatus == StudentChargesStatus.loading &&
+                allocations.isEmpty) {
+              return StateCard(
+                key: const ValueKey('charge-allocations-loading'),
+                message: l10n.loadingStudents,
+                icon: Icons.hourglass_top_rounded,
+                accent: AppColors.bleuArdoise,
+                accentSoft: AppColors.surfaceAlt,
+                child: const CircularProgressIndicator(),
+              );
+            }
+
+            if (state.allocationsStatus == StudentChargesStatus.failure &&
+                allocations.isEmpty) {
+              return StateCard(
+                key: const ValueKey('charge-allocations-error'),
+                message: state.allocationsErrorType.localizedMessage(l10n),
+                icon: Icons.error_outline,
+                accent: AppColors.terreCuite,
+                accentSoft: AppColors.papier,
+                actionLabel: l10n.facturationChargeDetailAllocationsRetry,
+                onAction: () => _retry(context),
+              );
+            }
+
+            if (allocations.isEmpty) {
+              return StateCard(
+                key: const ValueKey('charge-allocations-empty'),
+                message: l10n.facturationChargeDetailAllocationsEmpty,
+                icon: Icons.receipt_long_outlined,
+                accent: AppColors.textSecondary,
+                accentSoft: AppColors.financeDetailMutedSurface,
+              );
+            }
+
+            final totalPaid = allocations.fold<double>(
+              0,
+              (sum, item) => sum + item.amountInCents,
+            );
+
+            return Column(
+              key: const ValueKey('charge-allocations-content'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FinanceSectionHeader(
+                  icon: Icons.list_alt_outlined,
+                  title: l10n.facturationChargeDetailAllocationsSectionTitle,
+                  subtitle: null,
                   accent: AppColors.bleuArdoise,
                   accentSoft: AppColors.surfaceAlt,
-                  child: const CircularProgressIndicator(),
-                );
-              }
-
-              if (state.allocationsStatus == StudentChargesStatus.failure &&
-                  allocations.isEmpty) {
-                return StateCard(
-                  key: const ValueKey('charge-allocations-error'),
-                  message: state.allocationsErrorType.localizedMessage(l10n),
-                  icon: Icons.error_outline,
-                  accent: AppColors.terreCuite,
-                  accentSoft: AppColors.papier,
-                  actionLabel: l10n.facturationChargeDetailAllocationsRetry,
-                  onAction: () => _retry(context),
-                );
-              }
-
-              if (allocations.isEmpty) {
-                return StateCard(
-                  key: const ValueKey('charge-allocations-empty'),
-                  message: l10n.facturationChargeDetailAllocationsEmpty,
-                  icon: Icons.receipt_long_outlined,
-                  accent: AppColors.textSecondary,
-                  accentSoft: AppColors.financeDetailMutedSurface,
-                );
-              }
-
-              final totalPaid = allocations.fold<double>(
-                0,
-                (sum, item) => sum + item.amountInCents,
-              );
-
-              return Column(
-                key: const ValueKey('charge-allocations-content'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FinanceSectionHeader(
-                    icon: Icons.list_alt_outlined,
-                    title: l10n.facturationChargeDetailAllocationsSectionTitle,
-                    subtitle: null,
-                    accent: AppColors.bleuArdoise,
-                    accentSoft: AppColors.surfaceAlt,
-                  ),
-                  const SizedBox(height: AppDimensions.spacingM),
-                  FacturationChargeDetailAllocationsTable(
-                    allocations: allocations.cast<PaymentAllocation>(),
-                    totalInCents: totalPaid,
-                    currency: currency,
-                  ),
-                ],
-              );
-            }(),
-          );
-        },
-      ),
+                ),
+                const SizedBox(height: AppDimensions.spacingM),
+                FacturationChargeDetailAllocationsTable(
+                  allocations: allocations.cast<PaymentAllocation>(),
+                  totalInCents: totalPaid,
+                  currency: currency,
+                ),
+              ],
+            );
+          }(),
+        );
+      },
     );
   }
 }

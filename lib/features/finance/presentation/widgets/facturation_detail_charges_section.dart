@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/st
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charges_error_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charges_table.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class FacturationDetailChargesSection extends StatelessWidget {
@@ -117,10 +117,25 @@ class FacturationDetailChargesSection extends StatelessWidget {
                         );
                       }
 
-                      return FacturationChargesTable(
-                        key: const ValueKey('charges-table'),
-                        charges: state.studentCharges,
-                        onViewRequested: onViewChargeRequested,
+                      return Column(
+                        key: const ValueKey('charges-lines'),
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (
+                            var i = 0;
+                            i < state.studentCharges.length;
+                            i++
+                          ) ...[
+                            FacturationChargeLine(
+                              charge: state.studentCharges[i],
+                              onViewRequested: () => onViewChargeRequested(
+                                state.studentCharges[i],
+                              ),
+                            ),
+                            if (i < state.studentCharges.length - 1)
+                              const SizedBox(height: AppDimensions.spacingS),
+                          ],
+                        ],
                       );
                     }(),
                   ),
@@ -155,7 +170,9 @@ class _SectionHeader extends StatelessWidget {
         ),
         const SizedBox(width: AppDimensions.spacingM),
         Expanded(
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 AppLocalizations.of(
@@ -165,16 +182,14 @@ class _SectionHeader extends StatelessWidget {
                   color: AppColors.bleuArdoise,
                 ),
               ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted,
-                    letterSpacing: 0.2,
-                  ),
+              const SizedBox(height: AppDimensions.spacingXS),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],

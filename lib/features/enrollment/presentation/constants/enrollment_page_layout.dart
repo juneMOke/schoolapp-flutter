@@ -6,12 +6,12 @@ class EnrollmentPageLayout {
   const EnrollmentPageLayout._();
 
   static const EdgeInsets contentPadding = EdgeInsets.zero;
-  static const EdgeInsets firstRegistrationContentPaddingWithFab =
-      EdgeInsets.only(bottom: AppDimensions.fabListBottomPadding);
   // Carte recherche -> barre de resultats.
   static const double searchToSummarySpacing = AppSpacing.sectionGap;
   // Barre de resultats -> resultats.
   static const double summaryToResultsSpacing = AppSpacing.lg;
+  // Tableau -> action inline (bouton de creation, vue tablette).
+  static const double resultsToFooterSpacing = AppSpacing.lg;
   static const EdgeInsets loadingPadding = EdgeInsets.symmetric(
     vertical: AppDimensions.spacingXL + AppDimensions.spacingM,
   );

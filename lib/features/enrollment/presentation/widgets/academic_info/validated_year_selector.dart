@@ -11,6 +11,11 @@ class ValidatedYearSelector extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final bool isChanged;
   final bool enabled;
+
+  /// Lecture seule : non interactif mais garde l'apparence active (segment
+  /// sélectionné mis en évidence, pleine couleur), contrairement à
+  /// [enabled] = false qui grise tout.
+  final bool readOnly;
   final String helpMessage;
 
   const ValidatedYearSelector({
@@ -21,11 +26,13 @@ class ValidatedYearSelector extends StatelessWidget {
     required this.onChanged,
     this.isChanged = false,
     this.enabled = true,
+    this.readOnly = false,
     this.helpMessage = '',
   });
 
   @override
   Widget build(BuildContext context) {
+    final interactive = enabled && !readOnly;
     return SizedBox(
       width: width,
       child: Column(
@@ -40,40 +47,50 @@ class ValidatedYearSelector extends StatelessWidget {
           const SizedBox(height: 6),
           SizedBox(
             width: double.infinity,
-            child: SegmentedButton<bool>(
-              segments: [
-                ButtonSegment<bool>(
-                  value: true,
-                  label: Text(l10n.yearValidated),
-                  icon: const Icon(Icons.check_circle_rounded, size: 16),
+            child: IgnorePointer(
+              ignoring: !interactive,
+              child: ExcludeFocus(
+                excluding: !interactive,
+                child: SegmentedButton<bool>(
+                  segments: [
+                    ButtonSegment<bool>(
+                      value: true,
+                      label: Text(l10n.yearValidated),
+                      icon: const Icon(Icons.check_circle_rounded, size: 16),
+                    ),
+                    ButtonSegment<bool>(
+                      value: false,
+                      label: Text(l10n.yearNotValidated),
+                      icon: const Icon(Icons.cancel_rounded, size: 16),
+                    ),
+                  ],
+                  selected: {validatedPreviousYear},
+                  // En lecture seule, handler no-op : conserve l'apparence active
+                  // (sélection visible) ; taps neutralisés par IgnorePointer.
+                  onSelectionChanged: interactive
+                      ? (selection) {
+                          final selectedValue = selection.firstOrNull;
+                          if (selectedValue != null) {
+                            onChanged(selectedValue);
+                          }
+                        }
+                      : readOnly
+                      ? (_) {}
+                      : null,
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: AppColors.surface,
+                    foregroundColor: AppColors.textSecondary,
+                    selectedForegroundColor: AppColors.textOnDark,
+                    selectedBackgroundColor: AppColors.bleuArdoise,
+                    side: BorderSide(
+                      color: AppColors.bleuArdoise.withValues(alpha: 0.25),
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppRadius.brSm,
+                    ),
+                    textStyle: const TextStyle(fontSize: 13),
+                  ),
                 ),
-                ButtonSegment<bool>(
-                  value: false,
-                  label: Text(l10n.yearNotValidated),
-                  icon: const Icon(Icons.cancel_rounded, size: 16),
-                ),
-              ],
-              selected: {validatedPreviousYear},
-              onSelectionChanged: enabled
-                  ? (selection) {
-                      final selectedValue = selection.firstOrNull;
-                      if (selectedValue != null) {
-                        onChanged(selectedValue);
-                      }
-                    }
-                  : null,
-              style: SegmentedButton.styleFrom(
-                backgroundColor: AppColors.surface,
-                foregroundColor: AppColors.textSecondary,
-                selectedForegroundColor: AppColors.textOnDark,
-                selectedBackgroundColor: AppColors.bleuArdoise,
-                side: BorderSide(
-                  color: AppColors.bleuArdoise.withValues(alpha: 0.25),
-                ),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: AppRadius.brSm,
-                ),
-                textStyle: const TextStyle(fontSize: 13),
               ),
             ),
           ),

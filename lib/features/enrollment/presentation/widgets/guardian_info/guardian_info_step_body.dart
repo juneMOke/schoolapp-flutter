@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -48,13 +49,6 @@ class GuardianInfoStepBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final canAddParent = isEditable && !isLoading;
 
-    final addButton = SecondaryButton(
-      onPressed: canAddParent ? onAddParent : null,
-      icon: Icons.person_add_alt_1_rounded,
-      label: l10n.guardianAddAction,
-      fullWidth: false,
-    );
-
     return AbsorbPointer(
       absorbing: isLoading,
       child: SingleChildScrollView(
@@ -68,32 +62,7 @@ class GuardianInfoStepBody extends StatelessWidget {
                 borderRadius: AppRadius.brMd,
                 border: Border.all(color: AppColors.border),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.guardianInformation,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.guardianPrimaryRequiredHint,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                  addButton,
-                ],
-              ),
+              child: _buildHeader(context, l10n, canAddParent),
             ),
             AnimatedSwitcher(
               duration: AppMotion.medium,
@@ -173,6 +142,67 @@ class GuardianInfoStepBody extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool canAddParent,
+  ) {
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.guardianInformation,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.guardianPrimaryRequiredHint,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stack =
+            constraints.maxWidth < AppBreakpoints.guardianHeaderRowMin;
+        final addButton = SecondaryButton(
+          onPressed: canAddParent ? onAddParent : null,
+          icon: Icons.person_add_alt_1_rounded,
+          label: l10n.guardianAddAction,
+          // Empilé (téléphone) : bouton pleine largeur ; en ligne : intrinsèque.
+          fullWidth: stack,
+        );
+
+        if (stack) {
+          // Téléphone : titre pleine largeur puis bouton dessous — le titre
+          // n'est plus écrasé par le bouton au long libellé.
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              titleBlock,
+              const SizedBox(height: AppSpacing.md),
+              addButton,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: titleBlock),
+            const SizedBox(width: AppSpacing.md),
+            addButton,
+          ],
+        );
+      },
     );
   }
 }

@@ -145,6 +145,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                       required: true,
                       errorText: dateOfBirthError,
                       enabled: isEditable,
+                      readOnly: !isEditable,
                       lastDate: DateTime.now(),
                       initialPickerDate: DateTime(DateTime.now().year - 10),
                       locale: const Locale('fr'),
@@ -175,6 +176,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                       requiredField: true,
                       errorText: nationalityError,
                       enabled: isEditable,
+                      readOnly: !isEditable,
                     ),
                   ),
                   // Genre (contrôle segmenté M/F) — pleine largeur, comme
@@ -188,6 +190,7 @@ class PersonalInfoStepBody extends StatelessWidget {
                       helpMessage: l10n.genderHelp,
                       onChanged: onGenderChanged,
                       enabled: isEditable,
+                      readOnly: !isEditable,
                     ),
                     fullWidth: true,
                   ),

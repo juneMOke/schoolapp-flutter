@@ -36,7 +36,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Please enter a valid email';
 
   @override
-  String get schoolApp => 'ETEELO TECH';
+  String get loginEyebrow => 'Management area';
+
+  @override
+  String get loginSubtitle => 'Access your school\'s dashboard.';
+
+  @override
+  String get loginEmailLabel => 'Email address';
+
+  @override
+  String get loginSubmitting => 'Signing in…';
+
+  @override
+  String get loginSignature => 'eteyelo · the school, in Lingala';
+
+  @override
+  String get loginBrandTitle => 'The Congolese school, now digital.';
+
+  @override
+  String get loginBrandTitleCondensed => 'The school, now digital.';
+
+  @override
+  String get loginBrandTitleHighlight => 'digital';
+
+  @override
+  String get loginBrandSubtitle =>
+      'Registrations, finances, classes and attendance — one app, on every screen.';
+
+  @override
+  String get loginEmailRequired => 'Email address is required.';
+
+  @override
+  String get loginEmailInvalid => 'Invalid email format.';
+
+  @override
+  String get loginPasswordRequired => 'Password is required.';
+
+  @override
+  String get loginErrorInvalidCredentials =>
+      'Incorrect email or password. Check your credentials and try again.';
+
+  @override
+  String get loginErrorNetwork => 'No connection. Check your network.';
+
+  @override
+  String get loginErrorAccountDisabled =>
+      'Account disabled. Contact your school administrator.';
+
+  @override
+  String get loginErrorServer => 'Server error. Please try again shortly.';
+
+  @override
+  String loginErrorRateLimited(int seconds) {
+    return 'Too many attempts. Try again in ${seconds}s';
+  }
+
+  @override
+  String get loginContactAdmin => 'Contact the administrator';
+
+  @override
+  String get showPassword => 'Show';
+
+  @override
+  String get hidePassword => 'Hide';
+
+  @override
+  String get schoolApp => 'ETEELO CONNECT';
+
+  @override
+  String get splashBrandPrimary => 'ETEELO';
+
+  @override
+  String get splashBrandSecondary => 'CONNECT';
+
+  @override
+  String get splashTagline => 'Simplify your school management';
+
+  @override
+  String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
+
+  @override
+  String get bootstrapOfflineBanner => 'Offline mode — cached data';
+
+  @override
+  String get splashErrorTitle => 'Connection failed';
+
+  @override
+  String get splashErrorMessage =>
+      'Unable to load the application data. Check your connection, then try again.';
+
+  @override
+  String get splashErrorRetry => 'Retry';
+
+  @override
+  String splashVersion(String version, String build) {
+    return 'v$version (build $build)';
+  }
 
   @override
   String get logout => 'Logout';
@@ -109,6 +204,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseConfirmPassword => 'Please confirm your password';
 
   @override
+  String get resetEyebrow => 'Password reset';
+
+  @override
+  String get resetBrandTitle => 'Recover your access securely.';
+
+  @override
+  String get resetBrandTitleCondensed => 'Account access recovery.';
+
+  @override
+  String get resetBrandTitleHighlight => 'access';
+
+  @override
+  String get resetBrandSubtitle => 'Reset your password safely.';
+
+  @override
+  String resetStepIndicator(int step, int total, String label) {
+    return 'Step $step of $total · $label';
+  }
+
+  @override
+  String get resetStepLabelEmail => 'Email';
+
+  @override
+  String get resetStepLabelCode => 'Code';
+
+  @override
+  String get resetStepLabelPassword => 'New password';
+
+  @override
+  String get resetBackToLogin => 'Back';
+
+  @override
   String get menuInscriptions => 'Registrations';
 
   @override
@@ -150,6 +277,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Level selection for class distribution';
 
   @override
+  String classesOrganisationHeaderEyebrow(String schoolYear) {
+    return 'Class composition · Year $schoolYear';
+  }
+
+  @override
+  String get classesOrganisationLevelPlaceholder => 'Choose a cycle first';
+
+  @override
   String get classesOrganisationSearchHint =>
       'Select the cycle and level to organize, then run the search to view the current distribution or prepare sub-class distribution.';
 
@@ -167,15 +302,73 @@ class AppLocalizationsEn extends AppLocalizations {
       'Distribute by average';
 
   @override
-  String get classesOrganisationDistributionAction => 'Distribute';
+  String get classesOrganisationDistributeByGenderAction =>
+      'Start gender-based distribution';
 
   @override
-  String get classesOrganisationDistributionConfirmTitle =>
-      'Confirm distribution';
+  String get classesDistributionResultEyebrow => 'Gender distribution';
 
   @override
-  String get classesOrganisationDistributionConfirmMessage =>
-      'Do you want to distribute students for this level?';
+  String get classesDistributionProcessingTitle => 'Distribution in progress…';
+
+  @override
+  String get classesDistributionSuccessTitle => 'Distribution complete';
+
+  @override
+  String get classesDistributionSuccessSubtitle =>
+      'Students were evenly distributed by gender.';
+
+  @override
+  String get classesDistributionRecapTitle => 'Headcount per class';
+
+  @override
+  String classesDistributionClassHeadcount(int count) {
+    return '$count students';
+  }
+
+  @override
+  String get classesDistributionErrorTitle => 'Distribution failed';
+
+  @override
+  String get classesDistributionErrorMessage =>
+      'The classes were left intact. You can try again.';
+
+  @override
+  String get classesDistributionRetry => 'Retry';
+
+  @override
+  String get classesDistributionClose => 'Close';
+
+  @override
+  String get classesDistributionKpiHeadcount => 'Headcount';
+
+  @override
+  String get classesDistributionKpiClasses => 'Classes';
+
+  @override
+  String get classesDistributionKpiBoys => 'Boys';
+
+  @override
+  String get classesDistributionKpiGirls => 'Girls';
+
+  @override
+  String get classesDistributionViewGrid => 'Grid';
+
+  @override
+  String get classesDistributionViewList => 'List';
+
+  @override
+  String classesDistributionClassLabel(String code) {
+    return 'Class $code';
+  }
+
+  @override
+  String classesDistributionClassCapacity(int count, int capacity) {
+    return '$count students · capacity $capacity';
+  }
+
+  @override
+  String get classesDistributionCapacityFull => 'full';
 
   @override
   String get classesOrganisationDistributionSuccess =>
@@ -190,24 +383,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Non-split mode enabled: student list for the selected level.';
 
   @override
-  String get classesOrganisationNoClassrooms =>
-      'No classroom is available for this level.';
+  String get classesOrganisationLoadingTitle => 'Loading classes…';
 
   @override
-  String classesOrganisationClassroomStats(int total, int girls, int boys) {
-    return '$total students - Girls: $girls - Boys: $boys';
-  }
+  String get classesOrganisationEmptyTitle => 'No student to distribute';
+
+  @override
+  String get classesOrganisationEmptyInvite =>
+      'Enroll students in this level to start the distribution.';
+
+  @override
+  String get classesOrganisationOverviewErrorTitle => 'Unable to load';
 
   @override
   String get classesOrganisationTransferDialogTitle => 'Transfer student';
 
   @override
-  String classesOrganisationTransferDialogMessage(String studentName) {
-    return 'Choose the destination classroom for $studentName.';
-  }
+  String get classesReassignCurrentClassState => 'Current class';
 
   @override
-  String get classesOrganisationTransferTargetLabel => 'Destination classroom';
+  String get classesReassignUnassignedState => 'Unassigned';
+
+  @override
+  String get classesReassignCurrentBadge => 'Current';
+
+  @override
+  String get classesReassignFullBadge => 'Full';
+
+  @override
+  String classesReassignOptionStats(int eff, int cap, int boys, int girls) {
+    return '$eff/$cap · B $boys · G $girls';
+  }
 
   @override
   String get classesOrganisationTransferAction => 'Transfer';
@@ -243,8 +449,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationPendingTitle => 'Level not distributed yet';
 
   @override
-  String get classesOrganisationPendingSubtitle =>
-      'Run the initial distribution to create classes for this level.';
+  String classesOrganisationPendingMessage(int count, String levelName) {
+    return '$count students in $levelName aren\'\'t assigned to any class. Automatic distribution balances the classes by gender.';
+  }
 
   @override
   String classesOrganisationPendingStudentsToDistribute(int count) {
@@ -252,64 +459,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String classesOrganisationPendingPlannedClassrooms(int count) {
-    return '$count planned classes';
+  String classesOrganisationGenderBoysPill(int count) {
+    return 'B · $count';
   }
 
   @override
-  String get classesOrganisationAppliedCriterionInfo =>
-      'Applied criterion: balanced distribution by gender (mixed school).';
-
-  @override
-  String classesOrganisationSplitSummary(
-    int studentsCount,
-    int classroomsCount,
-    String criterion,
-  ) {
-    return '$studentsCount students distributed across $classroomsCount classes · Applied criterion: $criterion';
+  String classesOrganisationGenderGirlsPill(int count) {
+    return 'G · $count';
   }
 
   @override
-  String get classesOrganisationClassroomsSectionTitle => 'Constituted classes';
+  String get classesOrganisationUnassignedTitle => 'Unassigned students';
 
   @override
-  String get classesOrganisationUnassignedTitle => 'Students to assign';
-
-  @override
-  String get classesOrganisationUnassignedTitleSuffix =>
-      ' — added after distribution';
+  String get classesOrganisationUnassignedSubtitle =>
+      'New arrivals, cancelled transfers…';
 
   @override
   String get classesOrganisationUnassignedBadge => 'To assign';
 
   @override
-  String classesOrganisationUnassignedSummary(int count) {
-    return '$count students waiting for assignment';
-  }
-
-  @override
   String get classesOrganisationNoMembers => 'No student in this classroom.';
 
   @override
-  String get classesOrganisationAssignAction => 'Assign to a classroom';
+  String get classesOrganisationAssignAction => 'Assign';
 
   @override
-  String get classesOrganisationAssignDialogTitle => 'Assign to a classroom';
-
-  @override
-  String classesOrganisationAssignDialogMessage(String studentName) {
-    return 'Choose the destination classroom for $studentName.';
-  }
-
-  @override
-  String classesOrganisationClassroomPopulation(int count) {
-    return 'Current size: $count';
-  }
-
-  @override
-  String classesOrganisationTransferConfirmMessage(String studentName) {
-    return 'Do you confirm transferring $studentName to this classroom?';
-  }
+  String get classesOrganisationAssignDialogTitle => 'Assign the student';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {
@@ -354,29 +530,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationErrorUnknown => 'An error occurred.';
 
   @override
-  String get classesListHeroTitle => 'Class lists';
-
-  @override
-  String get classesListHeroSubtitle =>
-      'Quickly search students by cycle, level or classroom, then export the displayed results.';
-
-  @override
-  String get classesListHeroFilterChip =>
-      'Multi-criteria search by identity and level.';
-
-  @override
-  String get classesListHeroClassroomChip =>
-      'Optional classroom filtering for the current school year.';
-
-  @override
   String get classesListSearchTitle => 'Search form';
 
   @override
   String get classesListSearchHint => '';
-
-  @override
-  String get classesListValidationAtLeastOneCriterion =>
-      'Provide at least one criterion to run a search.';
 
   @override
   String get classesListClassroomOptionalLabel => 'Classroom (optional)';
@@ -466,6 +623,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home => 'Home';
 
   @override
+  String accueilBannerGreeting(String firstName) {
+    return 'Hello, $firstName';
+  }
+
+  @override
+  String get accueilBannerGreetingGeneric => 'Hello';
+
+  @override
+  String get accueilBannerContextTail =>
+      'Here is the essential view of your school today.';
+
+  @override
+  String get accueilModulesEyebrow => 'Your modules';
+
+  @override
+  String get accueilModulesTitle => 'Where would you like to go?';
+
+  @override
+  String get accueilModulesIntro =>
+      'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.';
+
+  @override
+  String get accueilModuleInscriptionsDescription =>
+      'New enrolments, re-enrolments and pre-enrolments for your students.';
+
+  @override
+  String get accueilModuleFinancesDescription =>
+      'Revenue, invoicing and tracking of school fee collection.';
+
+  @override
+  String get accueilModuleClassesDescription =>
+      'Class composition and student lists by cycle.';
+
+  @override
+  String get accueilModuleDisciplinesDescription =>
+      'Daily attendance, disciplinary records and student follow-up.';
+
+  @override
+  String accueilModuleCardSemantics(String module) {
+    return '$module — open the dashboard';
+  }
+
+  @override
+  String get accueilSignature => 'eteyelo · l\'école en lingala';
+
+  @override
   String get homeTopBarPendingSubtitle => 'Pending files follow-up';
 
   @override
@@ -479,6 +682,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSidebarExpandTooltip => 'Expand menu';
+
+  @override
+  String get homeOpenNavigationDrawerTooltip => 'Open menu';
 
   @override
   String get homeSidebarFooterLabel => 'School dashboard';
@@ -505,7 +711,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reRegistrationSearchHint =>
-      'Enter either First name, Last name and Surname, or the target cycle/level to start the search.';
+      'Find a student or a class from the previous year to re-enroll';
+
+  @override
+  String get reRegistrationSearchHelpPill =>
+      'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.';
+
+  @override
+  String get reRegistrationSearchTitle => 'Search a student';
+
+  @override
+  String get reRegistrationSearchByNameGroup => 'By name';
+
+  @override
+  String get reRegistrationSearchByLevelGroup => 'By cycle / level';
+
+  @override
+  String get reRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get reRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get reRegistrationSearchModeNameBadge => 'Name';
+
+  @override
+  String get reRegistrationSearchModeLevelBadge => 'Cycle / level';
+
+  @override
+  String get reRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
 
   @override
   String get reRegistrationAcademicInfoHelp =>
@@ -1322,7 +1556,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentReadOnlyMessage =>
-      'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.';
+      'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.';
 
   @override
   String get enrollmentEditableTitle => 'Edit mode';
@@ -1527,6 +1761,72 @@ class AppLocalizationsEn extends AppLocalizations {
       'No student matches these criteria. Update the form and try again.';
 
   @override
+  String get facturationEmptyTitle => 'No student found';
+
+  @override
+  String get facturationSearchHelpBanner =>
+      'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.';
+
+  @override
+  String get facturationSearchByStudentGroup => 'By student';
+
+  @override
+  String get facturationSearchByClassGroup => 'By class';
+
+  @override
+  String get facturationSearchOrSeparator => 'OR';
+
+  @override
+  String get facturationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get facturationSearchModeStudentBadge => 'Student';
+
+  @override
+  String get facturationSearchModeClassBadge => 'Class';
+
+  @override
+  String get facturationSearchCycleLabel => 'Cycle';
+
+  @override
+  String get facturationSearchLevelLabel => 'Level';
+
+  @override
+  String get facturationSearchLevelPlaceholder => 'Pick a cycle first';
+
+  @override
+  String facturationBalanceDuePill(String amount) {
+    return '$amount due';
+  }
+
+  @override
+  String get facturationBalanceUpToDatePill => 'Up to date';
+
+  @override
+  String facturationChargeLineRemainingSuffix(String amount) {
+    return '$amount remaining';
+  }
+
+  @override
+  String facturationPaymentRecordedToast(String amount) {
+    return 'Payment of $amount recorded';
+  }
+
+  @override
+  String get facturationChargeStatementCopied =>
+      'Statement copied to clipboard';
+
+  @override
+  String get facturationChargeStatementEmpty =>
+      'No payment to export for this fee.';
+
+  @override
+  String get facturationCsvHeaderFee => 'Fee';
+
+  @override
+  String get facturationCsvHeaderImputedAmount => 'Imputed amount (USD)';
+
+  @override
   String get facturationDetailBackLabel => 'Back to billing';
 
   @override
@@ -1559,6 +1859,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationDetailInfoTitle => 'Financial record';
+
+  @override
+  String get facturationDetailEyebrow => 'Billing';
 
   @override
   String get facturationDetailInfoSubtitle =>
@@ -1597,6 +1900,21 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String facturationDetailPaymentsRecordedWithTotal(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments · $total',
+      one: '1 payment · $total',
+      zero: 'No payment recorded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get facturationPaymentMethodCash => 'Cash';
 
   @override
   String get facturationDetailCollectPaymentAction => 'Collect payment';
@@ -1646,7 +1964,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPaidAtLabel => 'Paid at';
 
   @override
-  String get facturationPaymentAllocationsSectionTitle => 'Payment allocations';
+  String get facturationPaymentAmountPaidLabel => 'Amount paid';
+
+  @override
+  String get facturationPaymentMethodLabel => 'Payment method';
+
+  @override
+  String get facturationPaymentCollectedByLabel => 'Collected by';
+
+  @override
+  String get facturationPaymentReceiptLabel => 'Receipt no.';
+
+  @override
+  String get facturationPaymentStudentLabel => 'Student';
+
+  @override
+  String get facturationPaymentDownloadReceiptLabel => 'Download receipt';
+
+  @override
+  String get facturationPaymentCloseLabel => 'Close';
+
+  @override
+  String get facturationPaymentAllocationsSectionTitle => 'Breakdown by fee';
 
   @override
   String get facturationPaymentAllocationsSectionSubtitle =>
@@ -1808,7 +2147,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationChargeDetailBackLabel => 'Back to billing detail';
 
   @override
-  String get facturationChargeDetailHeroTitle => 'Charge detail';
+  String get facturationChargeDetailHeroTitle => 'Fee details';
 
   @override
   String get facturationChargeDetailHeroSubtitle =>
@@ -1831,7 +2170,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationChargeDetailAllocationsSectionTitle =>
-      'Allocations for this charge';
+      'Applied payments';
 
   @override
   String get facturationChargeDetailAllocationsSectionSubtitle =>
@@ -2117,6 +2456,113 @@ class AppLocalizationsEn extends AppLocalizations {
       'No unpaid charges available for this student.';
 
   @override
+  String get facturationCreatePaymentChargesToSettleTitle => 'Fees to settle';
+
+  @override
+  String get facturationCreatePaymentChargesToSettleSubtitle =>
+      'Check the fees to settle and adjust the amounts.';
+
+  @override
+  String get facturationCreatePaymentAllFeesSettled =>
+      'All fees are already settled.';
+
+  @override
+  String facturationCreatePaymentChargeDue(String amount) {
+    return 'Due $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargePaid(String amount) {
+    return 'Already paid $amount';
+  }
+
+  @override
+  String facturationCreatePaymentChargeRemaining(String amount) {
+    return 'Remaining $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentAmountToSettleLabel => 'Amount to settle';
+
+  @override
+  String get facturationCreatePaymentSettleAllAction => 'Settle all';
+
+  @override
+  String facturationCreatePaymentAmountClampedWarning(String amount) {
+    return 'Amount capped to the remaining balance ($amount).';
+  }
+
+  @override
+  String facturationCreatePaymentRemainingAfter(String amount) {
+    return 'Remaining after: $amount';
+  }
+
+  @override
+  String get facturationCreatePaymentSettledChip => 'Settled';
+
+  @override
+  String get facturationCreatePaymentTotalToCollect => 'Total to collect';
+
+  @override
+  String facturationCreatePaymentCollectAmountAction(String amount) {
+    return 'Collect $amount';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmCollectTitle(String amount) {
+    return 'Collect $amount?';
+  }
+
+  @override
+  String facturationCreatePaymentConfirmSentence(
+    String amount,
+    String student,
+    String payer,
+  ) {
+    return 'You are about to collect $amount for $student, paid by $payer.';
+  }
+
+  @override
+  String get facturationCreatePaymentConfirmDistributionTitle => 'Breakdown';
+
+  @override
+  String get facturationCollectStepConfirm => 'Confirmation';
+
+  @override
+  String get facturationCollectStepResult => 'Result';
+
+  @override
+  String get facturationCollectSimulateFailure => 'Simulate a failure';
+
+  @override
+  String get facturationCollectProcessing => 'Recording the payment…';
+
+  @override
+  String get facturationCollectSuccessTitle => 'Payment recorded';
+
+  @override
+  String facturationCollectReceiptChip(String code) {
+    return 'Receipt no. $code';
+  }
+
+  @override
+  String get facturationCollectErrorTitle => 'Collection failed';
+
+  @override
+  String get facturationCollectErrorNoDebit => 'No amount was debited.';
+
+  @override
+  String facturationCollectIncidentChip(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get facturationCollectEditAction => 'Edit';
+
+  @override
+  String get facturationCollectRetryAction => 'Retry';
+
+  @override
   String get attendanceHeroTitle => 'Attendance';
 
   @override
@@ -2156,8 +2602,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Run a search to display attendance for the selected class.';
 
   @override
+  String get attendanceSelectClassTitle => 'Select a class';
+
+  @override
   String get attendanceEmptySelectionMessage =>
-      'Select a class and a date to take attendance.';
+      'Select a cycle, a level, and then a class to load the attendance list.';
 
   @override
   String get attendanceLoadingMessage => 'Loading attendance records...';
@@ -2221,6 +2670,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendancePresentCount => 'Present';
+
+  @override
+  String get attendanceJustifiedCount => 'Justified';
+
+  @override
+  String get attendanceUnjustifiedCount => 'Unjustified';
+
+  @override
+  String get attendancePendingCount => 'Pending reason';
 
   @override
   String get attendanceAbsentCount => 'Absent';
@@ -2301,6 +2759,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceReasonRequiredHint => 'Reason required for an absence.';
 
   @override
+  String get attendanceMotifRequisLabel => 'Reason required';
+
+  @override
   String get attendanceReasonDisabledHint =>
       'Reason is required only when the student is absent.';
 
@@ -2352,6 +2813,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceErrorUnknown => 'An unexpected error occurred.';
 
   @override
+  String get attendanceSaveCallAction => 'Save attendance';
+
+  @override
+  String get attendanceMarkAllPresentAction => 'All present';
+
+  @override
+  String get attendanceSaveOverlayEyebrow => 'Attendance';
+
+  @override
+  String get attendanceSaveProcessingTitle => 'Saving attendance…';
+
+  @override
+  String get attendanceSaveSuccessTitle => 'Attendance saved!';
+
+  @override
+  String get attendanceSaveSuccessSubtitle =>
+      'Class attendance records have been saved.';
+
+  @override
+  String get attendanceSaveErrorTitle => 'Save failed';
+
+  @override
+  String get attendanceSaveErrorMessage =>
+      'Your entries are preserved. Check your connection and try again.';
+
+  @override
+  String get attendanceSaveRetryAction => 'Retry';
+
+  @override
+  String get attendanceSaveCloseAction => 'Done';
+
+  @override
   String get absenceReasonSickness => 'Sickness';
 
   @override
@@ -2377,6 +2870,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get absenceReasonWorkLeave => 'Work leave';
+
+  @override
+  String get absenceReasonUnjustified => 'Unjustified absence';
 
   @override
   String get absenceReasonOther => 'Other';

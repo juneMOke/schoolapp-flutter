@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
-import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_records_table.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_records_mobile_list.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_toolbar.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_save_overlay.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceResultsSection extends StatelessWidget {
   final AttendanceSearchRequest? lastRequest;
-  final VoidCallback onExportPressed;
   final VoidCallback onRetry;
 
   const AttendanceResultsSection({
     super.key,
     required this.lastRequest,
-    required this.onExportPressed,
     required this.onRetry,
   });
 
@@ -35,30 +35,15 @@ class AttendanceResultsSection extends StatelessWidget {
     final request = lastRequest;
 
     if (request == null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppDimensions.spacingL),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.fact_check_outlined,
-              color: AppColors.textSecondary,
-              size: AppDimensions.spacingXL,
-            ),
-            const SizedBox(height: AppDimensions.spacingS),
-            Text(
-              l10n.attendanceEmptySelectionMessage,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+      return EteeloEmptyResult(
+        medallionIcon: Icons.calendar_today_outlined,
+        label: l10n.attendanceSelectClassTitle,
+        description: l10n.attendanceEmptySelectionMessage,
+        fullWidthCard: true,
+        minHeight: 260,
+        cardPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingL,
+          vertical: AppDimensions.spacingXL,
         ),
       );
     }
@@ -105,6 +90,17 @@ class AttendanceResultsSection extends StatelessWidget {
               .where((row) => !row.present)
               .length;
           final presentCount = totalCount - absentCount;
+          final justifiedCount = state.draftRows
+              .where(
+                (r) =>
+                    !r.present &&
+                    r.absenceReason != null &&
+                    r.absenceReason != AbsenceReason.unjustified,
+              )
+              .length;
+          final unjustifiedCount = state.draftRows
+              .where((r) => r.absenceReason == AbsenceReason.unjustified)
+              .length;
           final missingReasonsCount = state.draftRows
               .where((row) => !row.present && row.absenceReason == null)
               .length;
@@ -115,10 +111,8 @@ class AttendanceResultsSection extends StatelessWidget {
               )
               .toDouble();
 
-          Future<void> onValidatePressed() async {
-            if (!state.canSave || missingReasonsCount > 0) {
-              return;
-            }
+          Future<void> onSaveCallPressed() async {
+            if (!state.canSave || missingReasonsCount > 0) return;
 
             if (absentCount == 0) {
               final confirmed = await showAppConfirmationDialog(
@@ -128,58 +122,68 @@ class AttendanceResultsSection extends StatelessWidget {
                 confirmLabel: l10n.confirm,
                 cancelLabel: l10n.cancel,
               );
-              if (!context.mounted || !confirmed) {
-                return;
-              }
+              if (!context.mounted || !confirmed) return;
             }
 
-            context.read<AttendanceBloc>().add(const AttendanceSaveRequested());
+            if (!context.mounted) return;
+            await showAttendanceSaveOverlay(
+              context: context,
+              attendanceBloc: context.read<AttendanceBloc>(),
+              classroomName: request.selectedClassroom.name,
+              date: request.date,
+              presentCount: presentCount,
+              justifiedCount: justifiedCount,
+              unjustifiedCount: unjustifiedCount,
+            );
           }
 
           child = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _AttendanceActionBar(
+                isSaving: state.saveStatus == AttendanceStatus.loading,
+                canSave: state.canSave && missingReasonsCount == 0,
+                onMarkAllPresent: () => context.read<AttendanceBloc>().add(
+                  const AttendanceMarkAllPresentRequested(),
+                ),
+                onSaveCall: onSaveCallPressed,
+              ),
+              const SizedBox(height: AppDimensions.spacingS),
               AttendanceResultsToolbar(
-                classroomName:
-                    '${request.selectedLevel.label} - ${request.selectedClassroom.name}',
-                formattedDate: MaterialLocalizations.of(
-                  context,
-                ).formatMediumDate(request.date),
-                hasUnsavedChanges: state.hasUnsavedChanges,
                 presentCount: presentCount,
-                absentCount: absentCount,
-                totalCount: totalCount,
+                justifiedCount: justifiedCount,
+                unjustifiedCount: unjustifiedCount,
+                pendingCount: missingReasonsCount,
+                total: totalCount,
               ),
               const SizedBox(height: AppDimensions.spacingS),
               SizedBox(
                 height: panelHeight,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceRaised,
-                    borderRadius: BorderRadius.circular(
-                      AppDimensions.cardRadius,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceRaised,
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.cardRadius,
+                      ),
+                      border: Border.all(color: AppColors.border),
                     ),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppDimensions.spacingS),
-                          child: AttendanceRecordsTable(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: AttendanceRecordsMobileList(
                             rows: state.draftRows,
-                            scrollable: true,
+                            classroomName: request.selectedClassroom.name,
+                            shrinkWrap: false,
                           ),
                         ),
-                      ),
-                      _AttendanceStickyFooter(
-                        missingReasonsCount: missingReasonsCount,
-                        isSaving: state.saveStatus == AttendanceStatus.loading,
-                        canValidate: state.canSave && missingReasonsCount == 0,
-                        onExportPressed: onExportPressed,
-                        onValidatePressed: onValidatePressed,
-                      ),
-                    ],
+                        if (missingReasonsCount > 0)
+                          _RappelAmbreBar(
+                            missingReasonsCount: missingReasonsCount,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -203,20 +207,47 @@ class AttendanceResultsSection extends StatelessWidget {
   }
 }
 
-class _AttendanceStickyFooter extends StatelessWidget {
-  final int missingReasonsCount;
+class _AttendanceActionBar extends StatelessWidget {
   final bool isSaving;
-  final bool canValidate;
-  final VoidCallback onExportPressed;
-  final VoidCallback onValidatePressed;
+  final bool canSave;
+  final VoidCallback onMarkAllPresent;
+  final VoidCallback onSaveCall;
 
-  const _AttendanceStickyFooter({
-    required this.missingReasonsCount,
+  const _AttendanceActionBar({
     required this.isSaving,
-    required this.canValidate,
-    required this.onExportPressed,
-    required this.onValidatePressed,
+    required this.canSave,
+    required this.onMarkAllPresent,
+    required this.onSaveCall,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        EteeloButton.secondary(
+          label: l10n.attendanceMarkAllPresentAction,
+          onPressed: isSaving ? null : onMarkAllPresent,
+          fullWidth: false,
+        ),
+        const SizedBox(width: AppDimensions.spacingS),
+        EteeloButton.primary(
+          label: l10n.attendanceSaveCallAction,
+          isLoading: isSaving,
+          onPressed: canSave ? onSaveCall : null,
+          fullWidth: false,
+        ),
+      ],
+    );
+  }
+}
+
+class _RappelAmbreBar extends StatelessWidget {
+  final int missingReasonsCount;
+
+  const _RappelAmbreBar({required this.missingReasonsCount});
 
   @override
   Widget build(BuildContext context) {
@@ -224,43 +255,36 @@ class _AttendanceStickyFooter extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.warning.withValues(alpha: 0.06),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(AppDimensions.cardRadius),
           bottomRight: Radius.circular(AppDimensions.cardRadius),
         ),
         border: Border(
-          top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+          top: BorderSide(color: AppColors.warning.withValues(alpha: 0.3)),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
         child: Row(
           children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 15,
+              color: AppColors.warning,
+            ),
+            const SizedBox(width: AppDimensions.spacingXS),
             Expanded(
               child: Text(
-                missingReasonsCount > 0
-                    ? l10n.attendanceMissingReasonsStatus(missingReasonsCount)
-                    : l10n.attendanceReadyToValidate,
-                style: AppTextStyles.body.copyWith(
-                  color: missingReasonsCount > 0
-                      ? AppColors.warning
-                      : AppColors.textSecondary,
+                l10n.attendanceMissingReasonsStatus(missingReasonsCount),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.warning,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            SecondaryButton(
-              label: l10n.attendanceExportAction,
-              fullWidth: false,
-              onPressed: onExportPressed,
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            PrimaryButton(
-              label: l10n.attendanceValidateCallAction,
-              fullWidth: false,
-              isLoading: isSaving,
-              onPressed: canValidate ? onValidatePressed : null,
             ),
           ],
         ),

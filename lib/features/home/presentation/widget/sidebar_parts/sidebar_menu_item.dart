@@ -74,18 +74,35 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
             button: true,
             label: widget.menu.title,
             selected: isActive,
-            toggled: widget.menu.subMenus.isNotEmpty
+            // Parent = accordéon (état développé/réduit) ; feuille = null pour
+            // n'exposer que bouton + sélectionné (pas de sémantique
+            // d'interrupteur « désactivé » sur un simple lien, cf. spec §09).
+            expanded: widget.menu.subMenus.isNotEmpty
                 ? widget.isMenuOpened
-                : false,
+                : null,
             child: InkWell(
               borderRadius: AppRadius.brMd,
               hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
               splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
               highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
               onTap: () {
-                context.read<NavigationBloc>().add(
-                  MenuItemSelected(widget.menu.id),
-                );
+                final bloc = context.read<NavigationBloc>();
+                // Item feuille (ex. Accueil) : on sélectionne directement
+                // l'écran (pas d'accordéon) et, en mode tiroir, on le ferme.
+                if (widget.menu.isLeaf) {
+                  bloc.add(
+                    SubMenuItemSelected(
+                      menuId: widget.menu.id,
+                      subMenuId: widget.menu.id,
+                      title: widget.menu.title,
+                    ),
+                  );
+                  if (widget.closeDrawerOnSubMenuSelection) {
+                    Navigator.of(context).maybePop();
+                  }
+                } else {
+                  bloc.add(MenuItemSelected(widget.menu.id));
+                }
               },
               child: AnimatedContainer(
                 duration: AppMotion.fast,

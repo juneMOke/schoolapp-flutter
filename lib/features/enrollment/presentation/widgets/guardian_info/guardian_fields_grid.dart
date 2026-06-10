@@ -116,6 +116,7 @@ class GuardianFieldsGrid extends StatelessWidget {
             label: l10n.guardianRelationshipLabel,
             required: true,
             enabled: isEditable,
+            readOnly: !isEditable,
             value: selectedRelationshipType,
             placeholder: l10n.guardianRelationshipLabel,
             items: RelationshipType.values

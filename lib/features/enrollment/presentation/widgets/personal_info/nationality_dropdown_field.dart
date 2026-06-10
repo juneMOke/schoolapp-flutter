@@ -8,6 +8,7 @@ class NationalityDropdownField extends StatelessWidget {
   final String? errorText;
   final bool requiredField;
   final bool enabled;
+  final bool readOnly;
   final ValueChanged<String?> onChanged;
 
   const NationalityDropdownField({
@@ -19,6 +20,7 @@ class NationalityDropdownField extends StatelessWidget {
     this.errorText,
     this.requiredField = false,
     this.enabled = true,
+    this.readOnly = false,
   });
 
   @override
@@ -27,6 +29,7 @@ class NationalityDropdownField extends StatelessWidget {
       label: label,
       value: value,
       enabled: enabled,
+      readOnly: readOnly,
       required: requiredField,
       errorText: errorText,
       onChanged: onChanged,

@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_read_only_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/step_page_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
@@ -194,6 +195,11 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
                     '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
                 stepAccentColor: _stepAccentColor(currentWizardStep),
                 stepIcon: _stepIcon(currentWizardStep),
+                // Dossier en consultation lecture seule → bandeau d'avis au-dessus
+                // de chaque étape. Exclut le cas Frais-verrouillé-en-création.
+                stepBanner: widget.detailPolicy.isReadOnlyConsultation
+                    ? const EnrollmentReadOnlyBanner()
+                    : null,
                 controls: controls,
               );
             },
@@ -335,6 +341,7 @@ class _EnrollmentStepperLayout extends StatelessWidget {
   final Color stepAccentColor;
   final IconData stepIcon;
   final Widget stepContent;
+  final Widget? stepBanner;
   final Widget controls;
 
   const _EnrollmentStepperLayout({
@@ -349,6 +356,7 @@ class _EnrollmentStepperLayout extends StatelessWidget {
     required this.stepIcon,
     required this.stepContent,
     required this.controls,
+    this.stepBanner,
   });
 
   // Largeur max de la carte d'étape : large, bornée sur très grand écran (au-delà
@@ -411,6 +419,7 @@ class _EnrollmentStepperLayout extends StatelessWidget {
                       subtitle: stepSubtitle,
                       accentColor: stepAccentColor,
                       icon: stepIcon,
+                      banner: stepBanner,
                       child: stepContent,
                     ),
                   ),

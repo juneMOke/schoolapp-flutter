@@ -95,6 +95,7 @@ class AddressFormContent extends StatelessWidget {
                 value: cityValue,
                 errorText: cityErrorText,
                 enabled: isEditable && !isCatalogLoading,
+                readOnly: !isEditable,
                 emptyOptionsHint: cityHint,
                 onChanged: onCityChanged,
               ),
@@ -106,6 +107,7 @@ class AddressFormContent extends StatelessWidget {
                 value: districtValue,
                 errorText: districtErrorText,
                 enabled: isEditable && !isCatalogLoading && cityValue != null,
+                readOnly: !isEditable,
                 emptyOptionsHint: districtHint,
                 onChanged: onDistrictChanged,
               ),
@@ -118,6 +120,7 @@ class AddressFormContent extends StatelessWidget {
                 errorText: municipalityErrorText,
                 enabled:
                     isEditable && !isCatalogLoading && districtValue != null,
+                readOnly: !isEditable,
                 emptyOptionsHint: municipalityHint,
                 onChanged: onMunicipalityChanged,
               ),
@@ -132,6 +135,7 @@ class AddressFormContent extends StatelessWidget {
                     isEditable &&
                     !isCatalogLoading &&
                     municipalityValue != null,
+                readOnly: !isEditable,
                 emptyOptionsHint: neighborhoodHint,
                 onChanged: onNeighborhoodChanged,
               ),
@@ -208,6 +212,7 @@ class _AddressSelectField extends StatelessWidget {
   final String? value;
   final String? errorText;
   final bool enabled;
+  final bool readOnly;
   final String? emptyOptionsHint;
   final ValueChanged<String?> onChanged;
 
@@ -217,6 +222,7 @@ class _AddressSelectField extends StatelessWidget {
     required this.value,
     required this.errorText,
     required this.enabled,
+    required this.readOnly,
     required this.emptyOptionsHint,
     required this.onChanged,
   });
@@ -237,6 +243,7 @@ class _AddressSelectField extends StatelessWidget {
           required: true,
           errorText: errorText,
           enabled: enabled && options.isNotEmpty,
+          readOnly: readOnly,
           placeholder: l10n.selectPlaceholderChoose,
           menuMaxHeight: 320,
           items: options

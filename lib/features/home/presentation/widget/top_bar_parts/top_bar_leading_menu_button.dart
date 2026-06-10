@@ -3,6 +3,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Hamburger de la barre supérieure (compact) : bouton 40×40 aligné sur les
+/// boutons d'action, marge gauche = padding compact de la barre (16), marge
+/// droite 2 avant le titre. Ouvre le tiroir de navigation.
 class TopBarLeadingMenuButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -14,19 +17,37 @@ class TopBarLeadingMenuButton extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(
-        left: HomeNavigationUiTokens.topBarActionsGap,
+        left: HomeNavigationUiTokens.topBarCompactHorizontalPadding,
+        right: HomeNavigationUiTokens.topBarLeadingMarginRight,
       ),
-      child: Material(
-        color: AppColors.textOnDark.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          HomeNavigationUiTokens.topBarActionRadius,
-        ),
-        child: IconButton(
-          tooltip: l10n.homeSidebarExpandTooltip,
-          onPressed: onPressed,
-          icon: const Icon(
-            Icons.menu_rounded,
-            size: HomeNavigationUiTokens.topBarActionIconSize + 2,
+      child: Tooltip(
+        message: l10n.homeOpenNavigationDrawerTooltip,
+        child: Material(
+          color: AppColors.textOnDark.withValues(alpha: 0.06),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              HomeNavigationUiTokens.topBarActionRadius,
+            ),
+            side: BorderSide(
+              color: AppColors.textOnDark.withValues(alpha: 0.14),
+            ),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(
+              HomeNavigationUiTokens.topBarActionRadius,
+            ),
+            onTap: onPressed,
+            child: const SizedBox(
+              width: HomeNavigationUiTokens.topBarActionSize,
+              height: HomeNavigationUiTokens.topBarActionSize,
+              child: Center(
+                child: Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.textOnDark,
+                  size: HomeNavigationUiTokens.topBarActionIconSize + 2,
+                ),
+              ),
+            ),
           ),
         ),
       ),
