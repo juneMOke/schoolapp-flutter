@@ -3,9 +3,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
+  group('EnrollmentResultsResponsiveMode.resolve', () {
+    EnrollmentListingViewMode resolveAt(
+      double width,
+      EnrollmentListingViewMode preferred,
+    ) => EnrollmentResultsResponsiveMode.resolve(
+      containerWidth: width,
+      preferred: preferred,
+    );
+
+    test('auto bascule grille sous 600px et table au-dessus', () {
+      expect(resolveAt(390, EnrollmentListingViewMode.auto).isGrid, isTrue);
+      expect(resolveAt(800, EnrollmentListingViewMode.auto).isTable, isTrue);
+    });
+
+    test('un choix explicite Liste est honoré même sur téléphone', () {
+      // Cœur du correctif : avant, < 600px forçait la grille quoi qu'il arrive.
+      expect(resolveAt(360, EnrollmentListingViewMode.table).isTable, isTrue);
+    });
+
+    test('un choix explicite Grille est honoré sur grand écran', () {
+      expect(resolveAt(1200, EnrollmentListingViewMode.grid).isGrid, isTrue);
+    });
+  });
+
   Widget buildResponsiveHarness({
     required double width,
     required Widget child,

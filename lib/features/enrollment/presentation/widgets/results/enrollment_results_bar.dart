@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/contracts/en
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_counter_filters.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 export 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
@@ -72,7 +73,7 @@ class EnrollmentResultsBar extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final left = _buildCounterAndFilters(l10n, filters);
-              final right = _buildActions(l10n);
+              final right = _buildActions(l10n, constraints.maxWidth);
               final canStayOnSingleLine =
                   constraints.maxWidth >= 760 &&
                   (filters.length <= 2 || !_hasStructuredSort);
@@ -153,13 +154,22 @@ class EnrollmentResultsBar extends StatelessWidget {
     filters: filters,
   );
 
-  Widget _buildActions(AppLocalizations l10n) => EnrollmentResultsBarActions(
-    isLoading: isLoading,
-    sortOptions: sortOptions,
-    selectedSort: selectedSort,
-    onSortChanged: onSortChanged,
-    onViewModeChanged: onViewModeChanged,
-    currentViewMode: currentViewMode,
-    onRefresh: onRefresh,
-  );
+  Widget _buildActions(AppLocalizations l10n, double width) {
+    // Le basculeur reflète le mode RÉELLEMENT rendu (résolu selon la largeur),
+    // pas seulement la préférence brute : en `auto` sur téléphone on rend la
+    // grille → le basculeur surligne « Grille », pas « Liste ».
+    final effectiveMode = EnrollmentResultsResponsiveMode.resolve(
+      containerWidth: width,
+      preferred: currentViewMode,
+    );
+    return EnrollmentResultsBarActions(
+      isLoading: isLoading,
+      sortOptions: sortOptions,
+      selectedSort: selectedSort,
+      onSortChanged: onSortChanged,
+      onViewModeChanged: onViewModeChanged,
+      currentViewMode: effectiveMode,
+      onRefresh: onRefresh,
+    );
+  }
 }

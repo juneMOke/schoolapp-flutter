@@ -9,14 +9,19 @@ class EnrollmentResultsResponsiveMode {
     required double containerWidth,
     required EnrollmentListingViewMode preferred,
   }) {
-    if (containerWidth < AppBreakpoints.dataTableCardsMax) {
-      return EnrollmentListingViewMode.grid;
+    // Un choix explicite (Liste ou Grille) est honoré à toute largeur, y
+    // compris sur téléphone : la table bascule alors en rendu étroit 2 colonnes.
+    if (preferred.isTable) {
+      return EnrollmentListingViewMode.table;
     }
-
     if (preferred.isGrid) {
       return EnrollmentListingViewMode.grid;
     }
 
+    // Mode auto : grille par défaut sous le seuil cartes, table au-dessus.
+    if (containerWidth < AppBreakpoints.dataTableCardsMax) {
+      return EnrollmentListingViewMode.grid;
+    }
     return EnrollmentListingViewMode.table;
   }
 }

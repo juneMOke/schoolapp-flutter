@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
@@ -64,10 +65,26 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       _sortAscending,
     );
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Rendu étroit (téléphone) : la colonne Date fusionne en sous-texte du
+        // nom → 2 colonnes (Élève | Statut) au lieu de 3, pour rester lisible.
+        final isCompact =
+            constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+        return _buildTable(l10n, sorted, isCompact);
+      },
+    );
+  }
+
+  Widget _buildTable(
+    AppLocalizations l10n,
+    List<EnrollmentSummary> sorted,
+    bool isCompact,
+  ) {
     return DataTableView(
-      rows: _buildRows(sorted, l10n),
+      rows: _buildRows(sorted, l10n, isCompact),
       config: DataTableViewConfig(
-        columns: _buildColumns(l10n),
+        columns: _buildColumns(l10n, isCompact),
         isLoading: widget.isLoading,
         isError: widget.isError,
         loadingLabel: widget.loadingLabel ?? l10n.loadingStudents,
@@ -107,7 +124,22 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     );
   }
 
-  List<DataTableColumnDef> _buildColumns(AppLocalizations l10n) {
+  List<DataTableColumnDef> _buildColumns(
+    AppLocalizations l10n,
+    bool isCompact,
+  ) {
+    if (isCompact) {
+      return [
+        DataTableColumnDef(
+          label: l10n.enrollmentStudentColumnLabel,
+          flex: 3,
+          sortable: true,
+          sortIndex: EnrollmentSortColumn.student.index,
+        ),
+        DataTableColumnDef(label: l10n.enrollmentStatusFilterLabel, flex: 2),
+      ];
+    }
+
     return [
       DataTableColumnDef(
         label: l10n.enrollmentStudentColumnLabel,
@@ -128,6 +160,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
   List<DataTableRowSpec> _buildRows(
     List<EnrollmentSummary> enrollments,
     AppLocalizations l10n,
+    bool isCompact,
   ) {
     return enrollments
         .map(
@@ -143,24 +176,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
                 EnrollmentStatus.fromString(enrollment.status),
               ),
             ),
-            cells: [
-              DataTableCellSpec(
-                text: _studentFullName(enrollment),
-                variant: DataTableCellTextVariant.strong,
-              ),
-              DataTableCellSpec(
-                text: _formatDate(enrollment.student.dateOfBirth),
-                variant: DataTableCellTextVariant.mono,
-              ),
-              DataTableCellSpec(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 122),
-                  child: EnrollmentStatusBadge(
-                    status: EnrollmentStatus.fromString(enrollment.status),
-                  ),
-                ),
-              ),
-            ],
+            cells: _buildCells(enrollment, isCompact),
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
               tooltip: l10n.viewDetails,
@@ -172,6 +188,49 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           ),
         )
         .toList(growable: false);
+  }
+
+  List<DataTableCellSpec> _buildCells(
+    EnrollmentSummary enrollment,
+    bool isCompact,
+  ) {
+    final formattedDate = _formatDate(enrollment.student.dateOfBirth);
+
+    // Téléphone : nom + date de naissance en sous-texte → 1 seule colonne Élève.
+    if (isCompact) {
+      return [
+        DataTableCellSpec(
+          text: _studentFullName(enrollment),
+          variant: DataTableCellTextVariant.strong,
+          secondaryText: formattedDate,
+          secondaryVariant: DataTableCellTextVariant.mono,
+        ),
+        _statusCell(enrollment),
+      ];
+    }
+
+    return [
+      DataTableCellSpec(
+        text: _studentFullName(enrollment),
+        variant: DataTableCellTextVariant.strong,
+      ),
+      DataTableCellSpec(
+        text: formattedDate,
+        variant: DataTableCellTextVariant.mono,
+      ),
+      _statusCell(enrollment),
+    ];
+  }
+
+  DataTableCellSpec _statusCell(EnrollmentSummary enrollment) {
+    return DataTableCellSpec(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 122),
+        child: EnrollmentStatusBadge(
+          status: EnrollmentStatus.fromString(enrollment.status),
+        ),
+      ),
+    );
   }
 
   void _onSortChanged(int column, bool ascending) {
