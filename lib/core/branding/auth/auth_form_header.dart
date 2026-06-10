@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// En-tête du panneau formulaire (spec §ANATOMIE 4) : eyebrow « Espace
-/// direction », titre « Connexion » (h1 sémantique), sous-texte.
-class LoginFormHeader extends StatelessWidget {
-  const LoginFormHeader({super.key});
+/// En-tête du panneau formulaire des écrans d'auth (charte §ANATOMIE 4) :
+/// eyebrow (catégorie), titre éditorial Lora (h1 sémantique), sous-texte.
+///
+/// [stepper] est un emplacement optionnel inséré **entre le titre et le
+/// sous-texte** : null pour la connexion, fourni pour le flux de
+/// réinitialisation (indicateur de progression + libellé d'étape).
+class AuthFormHeader extends StatelessWidget {
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final Widget? stepper;
+
+  const AuthFormHeader({
+    super.key,
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    this.stepper,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          l10n.loginEyebrow.toUpperCase(),
+          eyebrow.toUpperCase(),
           style: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 12,
@@ -29,7 +41,7 @@ class LoginFormHeader extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            l10n.login,
+            title,
             style: const TextStyle(
               fontFamily: 'Lora',
               fontSize: 26,
@@ -39,9 +51,10 @@ class LoginFormHeader extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        if (stepper != null) ...[const SizedBox(height: 16), stepper!],
+        SizedBox(height: stepper == null ? 6 : 14),
         Text(
-          l10n.loginSubtitle,
+          subtitle,
           style: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 15,

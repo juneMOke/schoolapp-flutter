@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/branding/auth/auth_brand_content.dart';
+import 'package:school_app_flutter/core/branding/auth/auth_brand_panel.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/login/login_brand_panel.dart';
 
-/// Verrou éditorial à deux panneaux (spec Connexion §01). Pilote la bascule
-/// responsive sur la largeur du **conteneur** ([LayoutBuilder]) :
+/// Verrou éditorial à deux panneaux de la charte d'auth ETEELO CONNECT
+/// (Connexion §01), partagé par la connexion et le flux de réinitialisation.
+/// Pilote la bascule responsive sur la largeur du **conteneur**
+/// ([LayoutBuilder]) :
 /// - ≥ 900 dp : split (Row) — marque à gauche, formulaire à droite.
 /// - 560–900 dp : empilé — bandeau marque + formulaire dessous.
 /// - < 560 dp : empilé — bandeau slim (lockup seul) + formulaire pleine largeur.
 ///
-/// `resizeToAvoidBottomInset` + défilement : au focus d'un champ, le clavier
-/// remonte le formulaire ; en empilé, le bandeau peut défiler hors champ.
-class LoginScreenLayout extends StatelessWidget {
+/// [backButton], s'il est fourni, coiffe la colonne formulaire sur **tous** les
+/// paliers (avant le contenu du form) — un seul emplacement à styliser, jamais
+/// en surimpression du bandeau bleu. Null pour la connexion (entrée principale).
+class AuthShellLayout extends StatelessWidget {
   final Widget form;
+  final AuthBrandContent brand;
+  final Widget? backButton;
 
-  const LoginScreenLayout({super.key, required this.form});
+  const AuthShellLayout({
+    super.key,
+    required this.form,
+    required this.brand,
+    this.backButton,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +36,64 @@ class LoginScreenLayout extends StatelessWidget {
         builder: (context, constraints) {
           final width = constraints.maxWidth;
           if (width >= AppBreakpoints.loginSplitMin) {
-            return _SplitLayout(form: form, containerWidth: width);
+            return _SplitLayout(
+              form: form,
+              brand: brand,
+              backButton: backButton,
+              containerWidth: width,
+            );
           }
           final variant = width >= AppBreakpoints.loginStackedMin
-              ? LoginBrandVariant.band
-              : LoginBrandVariant.slim;
-          return _StackedLayout(form: form, variant: variant);
+              ? BrandPanelVariant.band
+              : BrandPanelVariant.slim;
+          return _StackedLayout(
+            form: form,
+            brand: brand,
+            backButton: backButton,
+            variant: variant,
+          );
         },
       ),
     );
   }
 }
 
+/// Assemble la colonne formulaire (bouton retour optionnel + form), partagée par
+/// les deux paliers.
+class _FormColumn extends StatelessWidget {
+  final Widget form;
+  final Widget? backButton;
+
+  const _FormColumn({required this.form, required this.backButton});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (backButton != null) ...[
+          Align(alignment: Alignment.centerLeft, child: backButton!),
+          const SizedBox(height: 16),
+        ],
+        form,
+      ],
+    );
+  }
+}
+
 class _SplitLayout extends StatelessWidget {
   final Widget form;
+  final AuthBrandContent brand;
+  final Widget? backButton;
   final double containerWidth;
 
-  const _SplitLayout({required this.form, required this.containerWidth});
+  const _SplitLayout({
+    required this.form,
+    required this.brand,
+    required this.backButton,
+    required this.containerWidth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +106,11 @@ class _SplitLayout extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Expanded(
-          child: LoginBrandPanel(variant: LoginBrandVariant.split),
+        Expanded(
+          child: AuthBrandPanel(
+            variant: BrandPanelVariant.split,
+            content: brand,
+          ),
         ),
         SizedBox(
           width: formWidth,
@@ -66,7 +121,7 @@ class _SplitLayout extends StatelessWidget {
                   horizontal: 32,
                   vertical: 40,
                 ),
-                child: form,
+                child: _FormColumn(form: form, backButton: backButton),
               ),
             ),
           ),
@@ -78,16 +133,23 @@ class _SplitLayout extends StatelessWidget {
 
 class _StackedLayout extends StatelessWidget {
   final Widget form;
-  final LoginBrandVariant variant;
+  final AuthBrandContent brand;
+  final Widget? backButton;
+  final BrandPanelVariant variant;
 
-  const _StackedLayout({required this.form, required this.variant});
+  const _StackedLayout({
+    required this.form,
+    required this.brand,
+    required this.backButton,
+    required this.variant,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = variant == LoginBrandVariant.slim ? 26.0 : 24.0;
+    final horizontalPadding = variant == BrandPanelVariant.slim ? 26.0 : 24.0;
 
     // Tout (bandeau + formulaire) dans un même défilement : au clavier, le
-    // bandeau peut sortir par le haut pour libérer le formulaire (spec §01).
+    // bandeau peut sortir par le haut pour libérer le formulaire (charte §01).
     // IntrinsicHeight + Expanded : le formulaire se centre verticalement dans
     // l'espace restant sous le bandeau, tout en restant défilable si l'espace
     // manque (petit écran ou clavier ouvert).
@@ -100,7 +162,7 @@ class _StackedLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  LoginBrandPanel(variant: variant),
+                  AuthBrandPanel(variant: variant, content: brand),
                   Expanded(
                     child: SafeArea(
                       top: false,
@@ -114,7 +176,10 @@ class _StackedLayout extends StatelessWidget {
                               horizontal: horizontalPadding,
                               vertical: 28,
                             ),
-                            child: form,
+                            child: _FormColumn(
+                              form: form,
+                              backButton: backButton,
+                            ),
                           ),
                         ),
                       ),

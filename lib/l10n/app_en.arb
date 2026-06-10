@@ -97,6 +97,29 @@
   "@pleaseConfirmPassword": {
     "description": "Confirm password validation message"
   },
+  "resetEyebrow": "Password reset",
+  "resetBrandTitle": "Recover your access securely.",
+  "resetBrandTitleCondensed": "Account access recovery.",
+  "resetBrandTitleHighlight": "access",
+  "resetBrandSubtitle": "Reset your password safely.",
+  "resetStepIndicator": "Step {step} of {total} · {label}",
+  "@resetStepIndicator": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStepLabelEmail": "Email",
+  "resetStepLabelCode": "Code",
+  "resetStepLabelPassword": "New password",
+  "resetBackToLogin": "Back",
   "menuInscriptions": "Registrations",
   "@menuInscriptions": {
     "description": "Inscriptions menu title"

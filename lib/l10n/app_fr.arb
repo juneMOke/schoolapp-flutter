@@ -94,6 +94,29 @@
   "validateAndLogin": "Valider et se connecter",
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
   "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe",
+  "resetEyebrow": "Réinitialisation",
+  "resetBrandTitle": "Récupération d'accès en toute sécurité.",
+  "resetBrandTitleCondensed": "Récupération d'accès.",
+  "resetBrandTitleHighlight": "d'accès",
+  "resetBrandSubtitle": "Réinitialisez votre mot de passe en toute sécurité.",
+  "resetStepIndicator": "Étape {step} sur {total} · {label}",
+  "@resetStepIndicator": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStepLabelEmail": "E-mail",
+  "resetStepLabelCode": "Code",
+  "resetStepLabelPassword": "Nouveau mot de passe",
+  "resetBackToLogin": "Retour",
   "menuInscriptions": "Inscriptions",
   "menuFinances": "Finances",
   "menuClasses": "Classes",

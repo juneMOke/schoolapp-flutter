@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/branding/auth/auth_form_header.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_email_input.dart';
@@ -11,7 +12,6 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/login/login_banner_data.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/login/login_error_banner.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/login/login_form_header.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/login/login_signature.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -158,7 +158,11 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const LoginFormHeader(),
+              AuthFormHeader(
+                eyebrow: l10n.loginEyebrow,
+                title: l10n.login,
+                subtitle: l10n.loginSubtitle,
+              ),
               const SizedBox(height: 20),
               // Champs verrouillés pendant la soumission (opacité 0.6, spec §07).
               IgnorePointer(

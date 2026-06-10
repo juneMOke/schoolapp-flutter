@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/branding/auth/auth_brand_content.dart';
 import 'package:school_app_flutter/core/branding/eteelo_lockup.dart';
 import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Forme du panneau de marque selon la largeur (spec §01).
-/// - [split] : colonne gauche pleine hauteur (≥ 900 dp).
+/// Forme du panneau de marque selon la largeur (charte Connexion §01).
+/// - [split] : colonne pleine hauteur (≥ 900 dp).
 /// - [band]  : bandeau haut, lockup + titre condensé (560–900 dp).
 /// - [slim]  : bandeau fin, lockup seul (< 560 dp).
-enum LoginBrandVariant { split, band, slim }
+enum BrandPanelVariant { split, band, slim }
 
-/// Panneau de marque ETEELO CONNECT du écran de connexion (spec COMPOSANT 01).
+/// Panneau de marque ETEELO CONNECT partagé par les écrans d'auth
+/// (connexion + réinitialisation). Le rendu est identique ; seul le contenu
+/// éditorial ([AuthBrandContent]) diffère.
 ///
-/// Rôle purement éditorial → décoratif pour l'accessibilité ([ExcludeSemantics]) :
-/// le lecteur d'écran ne lit pas la marque deux fois.
-class LoginBrandPanel extends StatelessWidget {
-  final LoginBrandVariant variant;
+/// Rôle purement éditorial → décoratif pour l'accessibilité
+/// ([ExcludeSemantics]) : le lecteur d'écran ne lit pas la marque deux fois.
+class AuthBrandPanel extends StatelessWidget {
+  final BrandPanelVariant variant;
+  final AuthBrandContent content;
 
-  const LoginBrandPanel({super.key, required this.variant});
+  const AuthBrandPanel({
+    super.key,
+    required this.variant,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return ExcludeSemantics(
       child: DecoratedBox(
         decoration: const BoxDecoration(color: AppColors.bleuProfond),
         child: Stack(
-          children: [const KubaPatternLayer(), _filigrane(), _content(l10n)],
+          children: [const KubaPatternLayer(), _filigrane(), _content()],
         ),
       ),
     );
@@ -36,21 +41,21 @@ class LoginBrandPanel extends StatelessWidget {
 
   /// Filigrane « E » (symbole) débordant à droite — dimension/position selon la
   /// variante. Sur le bandeau slim/band, le Stack le clippe à la hauteur du
-  /// bandeau, d'où l'effet de débordement à l'extrême droite (spec §01).
+  /// bandeau, d'où l'effet de débordement à l'extrême droite (charte §01).
   Widget _filigrane() {
     switch (variant) {
-      case LoginBrandVariant.split:
+      case BrandPanelVariant.split:
         return const _Filigrane(size: 150, right: -34, opacity: 0.07);
-      case LoginBrandVariant.band:
+      case BrandPanelVariant.band:
         return const _Filigrane(size: 128, right: -30, opacity: 0.09);
-      case LoginBrandVariant.slim:
+      case BrandPanelVariant.slim:
         return const _Filigrane(size: 116, right: -26, opacity: 0.10);
     }
   }
 
-  Widget _content(AppLocalizations l10n) {
+  Widget _content() {
     switch (variant) {
-      case LoginBrandVariant.split:
+      case BrandPanelVariant.split:
         return SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -64,8 +69,8 @@ class LoginBrandPanel extends StatelessWidget {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 340),
                     child: _BrandTitle(
-                      title: l10n.loginBrandTitle,
-                      highlight: l10n.loginBrandTitleHighlight,
+                      title: content.title,
+                      highlight: content.highlight,
                       fontSize: 27,
                     ),
                   ),
@@ -73,7 +78,7 @@ class LoginBrandPanel extends StatelessWidget {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 320),
                     child: Text(
-                      l10n.loginBrandSubtitle,
+                      content.subtitle,
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 15,
@@ -87,7 +92,7 @@ class LoginBrandPanel extends StatelessWidget {
             ),
           ),
         );
-      case LoginBrandVariant.band:
+      case BrandPanelVariant.band:
         return SafeArea(
           bottom: false,
           child: Padding(
@@ -99,15 +104,15 @@ class LoginBrandPanel extends StatelessWidget {
                 const EteeloLockup(symbolSize: 36),
                 const SizedBox(height: 14),
                 _BrandTitle(
-                  title: l10n.loginBrandTitleCondensed,
-                  highlight: l10n.loginBrandTitleHighlight,
+                  title: content.condensedTitle,
+                  highlight: content.highlight,
                   fontSize: 20,
                 ),
               ],
             ),
           ),
         );
-      case LoginBrandVariant.slim:
+      case BrandPanelVariant.slim:
         return const SafeArea(
           bottom: false,
           child: Padding(
@@ -122,7 +127,7 @@ class LoginBrandPanel extends StatelessWidget {
   }
 }
 
-/// Titre éditorial Lora avec le mot accentué en Or Doux (spec §01).
+/// Titre éditorial Lora avec le mot accentué en Or Doux (charte §01).
 class _BrandTitle extends StatelessWidget {
   final String title;
   final String highlight;
@@ -163,8 +168,8 @@ class _BrandTitle extends StatelessWidget {
 }
 
 /// « E » blanc semi-transparent (symbole silhouette) débordant à droite du
-/// panneau/bandeau (spec §01, filigrane). Le SVG silhouette a des fills directs
-/// (pas de `<style>`) → rendu fiable, contrairement au logo horizontal.
+/// panneau/bandeau (charte §01, filigrane). Le SVG silhouette a des fills
+/// directs (pas de `<style>`) → rendu fiable, contrairement au logo horizontal.
 class _Filigrane extends StatelessWidget {
   final double size;
   final double right;

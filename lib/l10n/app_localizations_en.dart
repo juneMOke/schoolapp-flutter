@@ -204,6 +204,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseConfirmPassword => 'Please confirm your password';
 
   @override
+  String get resetEyebrow => 'Password reset';
+
+  @override
+  String get resetBrandTitle => 'Recover your access securely.';
+
+  @override
+  String get resetBrandTitleCondensed => 'Account access recovery.';
+
+  @override
+  String get resetBrandTitleHighlight => 'access';
+
+  @override
+  String get resetBrandSubtitle => 'Reset your password safely.';
+
+  @override
+  String resetStepIndicator(int step, int total, String label) {
+    return 'Step $step of $total · $label';
+  }
+
+  @override
+  String get resetStepLabelEmail => 'Email';
+
+  @override
+  String get resetStepLabelCode => 'Code';
+
+  @override
+  String get resetStepLabelPassword => 'New password';
+
+  @override
+  String get resetBackToLogin => 'Back';
+
+  @override
   String get menuInscriptions => 'Registrations';
 
   @override

@@ -5,10 +5,13 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_otp_input.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/auth_error_banner.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/auth_flow_shell.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/reset/reset_flow_layout.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/reset/reset_info_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
+/// Étape 2 du flux de réinitialisation : saisie du code OTP reçu par e-mail.
+/// Conserve `Form`+`validator` (l'OTP n'expose pas d'errorText manuel).
 class ForgotPasswordOtpPage extends StatefulWidget {
   const ForgotPasswordOtpPage({super.key});
 
@@ -56,6 +59,10 @@ class _ForgotPasswordOtpPageState extends State<ForgotPasswordOtpPage> {
         }
       },
       child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
+        buildWhen: (previous, current) =>
+            previous.status != current.status ||
+            previous.userEmail != current.userEmail ||
+            previous.errorMessage != current.errorMessage,
         builder: (context, state) {
           final isLoading = state.status == ForgotPasswordStatus.loading;
           final email = state.userEmail;
@@ -68,36 +75,34 @@ class _ForgotPasswordOtpPageState extends State<ForgotPasswordOtpPage> {
             });
           }
 
-          return AuthFlowShell(
-            title: l10n.otpValidation,
-            subtitle: l10n.enterSixDigitCode,
-            icon: Icons.password_rounded,
-            topAccessory: email == null || email.isEmpty
-                ? null
-                : AuthInfoPill(
-                    icon: Icons.mark_email_unread_outlined,
-                    label: l10n.codeSentTo(email),
-                  ),
-            child: Form(
+          return ResetFlowLayout(
+            currentStep: 2,
+            form: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (email != null && email.isNotEmpty) ...[
+                    ResetInfoPill(
+                      icon: Icons.mark_email_unread_outlined,
+                      label: l10n.codeSentTo(email),
+                    ),
+                    const SizedBox(height: 18),
+                  ],
                   EteeloOtpInput(
                     controller: _otpController,
                     label: l10n.otpCodeLabel,
-                    helperText: l10n.enterSixDigitCode,
                     enabled: !isLoading,
                     validator: (value) => _validateOtp(context, value),
                     onFieldSubmitted: (_) => _submit(),
                   ),
-                  const SizedBox(height: 16),
                   if (state.status == ForgotPasswordStatus.failure &&
                       state.errorMessage != null) ...[
-                    AuthErrorBanner(message: state.errorMessage!),
                     const SizedBox(height: 16),
+                    AuthErrorBanner(message: state.errorMessage!),
                   ],
+                  const SizedBox(height: 20),
                   EteeloButton.primary(
                     onPressed: _submit,
                     label: l10n.validateCode,

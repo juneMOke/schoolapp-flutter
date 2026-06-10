@@ -458,6 +458,66 @@ abstract class AppLocalizations {
   /// **'Please confirm your password'**
   String get pleaseConfirmPassword;
 
+  /// No description provided for @resetEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset'**
+  String get resetEyebrow;
+
+  /// No description provided for @resetBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover your access securely.'**
+  String get resetBrandTitle;
+
+  /// No description provided for @resetBrandTitleCondensed.
+  ///
+  /// In en, this message translates to:
+  /// **'Account access recovery.'**
+  String get resetBrandTitleCondensed;
+
+  /// No description provided for @resetBrandTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'access'**
+  String get resetBrandTitleHighlight;
+
+  /// No description provided for @resetBrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password safely.'**
+  String get resetBrandSubtitle;
+
+  /// No description provided for @resetStepIndicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total} · {label}'**
+  String resetStepIndicator(int step, int total, String label);
+
+  /// No description provided for @resetStepLabelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get resetStepLabelEmail;
+
+  /// No description provided for @resetStepLabelCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get resetStepLabelCode;
+
+  /// No description provided for @resetStepLabelPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get resetStepLabelPassword;
+
+  /// No description provided for @resetBackToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get resetBackToLogin;
+
   /// Inscriptions menu title
   ///
   /// In en, this message translates to:
