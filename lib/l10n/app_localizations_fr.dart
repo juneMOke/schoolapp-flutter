@@ -37,6 +37,71 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Veuillez entrer un email valide';
 
   @override
+  String get loginEyebrow => 'Espace direction';
+
+  @override
+  String get loginSubtitle => 'Accédez au tableau de bord de votre école.';
+
+  @override
+  String get loginEmailLabel => 'Adresse e-mail';
+
+  @override
+  String get loginSubmitting => 'Connexion…';
+
+  @override
+  String get loginSignature => 'eteyelo · l\'école en lingala';
+
+  @override
+  String get loginBrandTitle => 'L\'école congolaise reliée au numérique.';
+
+  @override
+  String get loginBrandTitleCondensed => 'L\'école reliée au numérique.';
+
+  @override
+  String get loginBrandTitleHighlight => 'numérique';
+
+  @override
+  String get loginBrandSubtitle =>
+      'Inscriptions, finances, classes et présences — une seule application, sur tout écran.';
+
+  @override
+  String get loginEmailRequired => 'L\'adresse e-mail est requise.';
+
+  @override
+  String get loginEmailInvalid => 'Format d\'e-mail invalide.';
+
+  @override
+  String get loginPasswordRequired => 'Le mot de passe est requis.';
+
+  @override
+  String get loginErrorInvalidCredentials =>
+      'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
+
+  @override
+  String get loginErrorNetwork => 'Pas de connexion. Vérifiez votre réseau.';
+
+  @override
+  String get loginErrorAccountDisabled =>
+      'Compte désactivé. Contactez l\'administrateur de votre école.';
+
+  @override
+  String get loginErrorServer => 'Erreur serveur. Réessayez dans un instant.';
+
+  @override
+  String loginErrorRateLimited(int seconds) {
+    return 'Trop de tentatives. Réessayez dans $seconds s';
+  }
+
+  @override
+  String get loginContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get showPassword => 'Afficher';
+
+  @override
+  String get hidePassword => 'Masquer';
+
+  @override
   String get schoolApp => 'ETEELO CONNECT';
 
   @override

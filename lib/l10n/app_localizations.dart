@@ -152,6 +152,126 @@ abstract class AppLocalizations {
   /// **'Please enter a valid email'**
   String get pleaseEnterValidEmail;
 
+  /// No description provided for @loginEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Management area'**
+  String get loginEyebrow;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access your school\'s dashboard.'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get loginEmailLabel;
+
+  /// No description provided for @loginSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in…'**
+  String get loginSubmitting;
+
+  /// No description provided for @loginSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'eteyelo · the school, in Lingala'**
+  String get loginSignature;
+
+  /// No description provided for @loginBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Congolese school, now digital.'**
+  String get loginBrandTitle;
+
+  /// No description provided for @loginBrandTitleCondensed.
+  ///
+  /// In en, this message translates to:
+  /// **'The school, now digital.'**
+  String get loginBrandTitleCondensed;
+
+  /// No description provided for @loginBrandTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'digital'**
+  String get loginBrandTitleHighlight;
+
+  /// No description provided for @loginBrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations, finances, classes and attendance — one app, on every screen.'**
+  String get loginBrandSubtitle;
+
+  /// No description provided for @loginEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address is required.'**
+  String get loginEmailRequired;
+
+  /// No description provided for @loginEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format.'**
+  String get loginEmailInvalid;
+
+  /// No description provided for @loginPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required.'**
+  String get loginPasswordRequired;
+
+  /// No description provided for @loginErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password. Check your credentials and try again.'**
+  String get loginErrorInvalidCredentials;
+
+  /// No description provided for @loginErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your network.'**
+  String get loginErrorNetwork;
+
+  /// No description provided for @loginErrorAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Account disabled. Contact your school administrator.'**
+  String get loginErrorAccountDisabled;
+
+  /// No description provided for @loginErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again shortly.'**
+  String get loginErrorServer;
+
+  /// 429 error banner — temporary lockout with countdown
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {seconds}s'**
+  String loginErrorRateLimited(int seconds);
+
+  /// No description provided for @loginContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get loginContactAdmin;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hidePassword;
+
   /// No description provided for @schoolApp.
   ///
   /// In en, this message translates to:

@@ -9,11 +9,13 @@ InputDecoration buildEteeloInputDecoration({
   Widget? suffixIcon,
   String? helperText,
   String? counterText,
+  String? errorText,
 }) {
   return InputDecoration(
     labelText: labelText,
     helperText: helperText,
     counterText: counterText,
+    errorText: errorText,
     labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
     helperStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
     prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),

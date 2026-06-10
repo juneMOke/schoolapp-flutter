@@ -122,6 +122,18 @@ class AppColors {
   static const billingHelpBorder = Color(0xFFCFE0EA);
   static const billingPaymentMedallionSoft = Color(0xFFEDF5EF);
 
+  // Connexion — bandeaux d'erreur en place (spec §08 : une tonalité par type).
+  // Rouge = 401/500 · Bleu ardoise = réseau · Ambre = 403/429.
+  static const loginBannerErrorSurface = Color(0xFFFBEAE7);
+  static const loginBannerErrorBorder = Color(0xFFE7B8B0);
+  static const loginBannerErrorText = Color(0xFF8A2C20);
+  static const loginBannerNetworkSurface = Color(0xFFEBF2F7);
+  static const loginBannerNetworkBorder = Color(0xFFCFE0EA);
+  static const loginBannerNetworkText = Color(0xFF2B566F);
+  static const loginBannerWarningSurface = Color(0xFFFBF0E0);
+  static const loginBannerWarningBorder = Color(0xFFECD4A6);
+  static const loginBannerWarningText = Color(0xFF7A5A16);
+
   // Disciplinary detail palette
   static const disciplinaryDetailCard = surfaceRaised;
   static const disciplinaryDetailAccent = Color(0xFFDC2626);

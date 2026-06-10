@@ -12,6 +12,10 @@ class AppBreakpoints {
   static const double dataTablePhoneMax = 390.0;
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;
+  // Connexion (spec §01) — split deux panneaux ≥ 900 ; empilé 560–900 ;
+  // bandeau slim (lockup seul) < 560.
+  static const double loginSplitMin = 900.0;
+  static const double loginStackedMin = 560.0;
   static const double formMediumMin = 860.0;
   static const double formWideMin = 1280.0;
 

@@ -36,6 +36,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Please enter a valid email';
 
   @override
+  String get loginEyebrow => 'Management area';
+
+  @override
+  String get loginSubtitle => 'Access your school\'s dashboard.';
+
+  @override
+  String get loginEmailLabel => 'Email address';
+
+  @override
+  String get loginSubmitting => 'Signing in…';
+
+  @override
+  String get loginSignature => 'eteyelo · the school, in Lingala';
+
+  @override
+  String get loginBrandTitle => 'The Congolese school, now digital.';
+
+  @override
+  String get loginBrandTitleCondensed => 'The school, now digital.';
+
+  @override
+  String get loginBrandTitleHighlight => 'digital';
+
+  @override
+  String get loginBrandSubtitle =>
+      'Registrations, finances, classes and attendance — one app, on every screen.';
+
+  @override
+  String get loginEmailRequired => 'Email address is required.';
+
+  @override
+  String get loginEmailInvalid => 'Invalid email format.';
+
+  @override
+  String get loginPasswordRequired => 'Password is required.';
+
+  @override
+  String get loginErrorInvalidCredentials =>
+      'Incorrect email or password. Check your credentials and try again.';
+
+  @override
+  String get loginErrorNetwork => 'No connection. Check your network.';
+
+  @override
+  String get loginErrorAccountDisabled =>
+      'Account disabled. Contact your school administrator.';
+
+  @override
+  String get loginErrorServer => 'Server error. Please try again shortly.';
+
+  @override
+  String loginErrorRateLimited(int seconds) {
+    return 'Too many attempts. Try again in ${seconds}s';
+  }
+
+  @override
+  String get loginContactAdmin => 'Contact the administrator';
+
+  @override
+  String get showPassword => 'Show';
+
+  @override
+  String get hidePassword => 'Hide';
+
+  @override
   String get schoolApp => 'ETEELO CONNECT';
 
   @override

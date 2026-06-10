@@ -90,6 +90,13 @@ class AppDimensions {
   static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
 
+  // Connexion — panneau formulaire (spec §01).
+  // Split : largeur = clamp(400, 38% conteneur, 460). Empilé : max 400.
+  static const loginFormPanelMin = 400.0;
+  static const loginFormPanelMax = 460.0;
+  static const loginFormPanelRatio = 0.38;
+  static const loginFormStackedMax = 400.0;
+
   // Attendance page tokens
   static const attendanceStudentAvatarSize = 30.0;
   static const attendanceResultsPanelMinHeight = 360.0;

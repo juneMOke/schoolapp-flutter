@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/login_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/logout_use_case.dart';
@@ -50,22 +51,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  /// Plancher d'affichage du spinner de connexion (spec Connexion §07) : évite
+  /// un flash si l'API répond instantanément.
+  static const _minSubmitDelay = Duration(milliseconds: 400);
+
   Future<void> _onAuthLoginRequested(
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    final result = await _loginUseCase(
+    // On lance la requête puis on attend le plancher : la durée totale vaut
+    // max(durée réelle, 400 ms) sans jamais retarder une réponse lente.
+    final loginFuture = _loginUseCase(
       email: event.email,
       password: event.password,
     );
+    await Future<void>.delayed(_minSubmitDelay);
+    final result = await loginFuture;
     result.fold(
       (failure) => emit(
-        AuthState(status: AuthStatus.failure, errorMessage: failure.message),
+        AuthState(
+          status: AuthStatus.failure,
+          errorMessage: failure.message,
+          errorKind: _mapFailureToKind(failure),
+        ),
       ),
       (session) =>
           emit(AuthState(status: AuthStatus.authenticated, user: session.user)),
     );
+  }
+
+  /// Classe la [Failure] de login pour la tonalité du bandeau (spec §08).
+  /// 403 (compte désactivé) et 429 (verrouillage) ne sont pas distingués tant
+  /// que le backend n'expose pas ces signaux → repli sur [AuthErrorKind.generic].
+  AuthErrorKind _mapFailureToKind(Failure failure) {
+    if (failure is InvalidCredentialsFailure) {
+      return AuthErrorKind.invalidCredentials;
+    }
+    if (failure is NetworkFailure) return AuthErrorKind.network;
+    if (failure is ServerFailure) return AuthErrorKind.server;
+    return AuthErrorKind.generic;
   }
 
   Future<void> _onAuthLogoutRequested(
