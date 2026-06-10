@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/clear_local_bootstrap_use_case.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_local_bootstrap_use_case.dart';
@@ -37,10 +38,26 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
        super(const BootstrapState.initial()) {
     on<BootstrapRemoteCurrentYearRequested>(_onRemoteCurrentYearRequested);
     on<BootstrapRemotePreviousYearRequested>(_onRemotePreviousYearRequested);
+    on<BootstrapRetryRequested>(_onRetryRequested);
     on<BootstrapLocalRequested>(_onLocalRequested);
     on<BootstrapResetRequested>(_onResetRequested);
     on<BootstrapClearLocalRequested>(_onClearLocalRequested);
   }
+
+  /// Relance le bootstrap distant après un échec (réessai depuis le splash).
+  /// Le trigger des fetch distants reste interne au bloc.
+  void _onRetryRequested(
+    BootstrapRetryRequested event,
+    Emitter<BootstrapState> emit,
+  ) {
+    add(const BootstrapRemoteCurrentYearRequested());
+    add(const BootstrapRemotePreviousYearRequested());
+  }
+
+  /// Un échec d'authentification (401/403) signifie que la session n'est plus
+  /// valide côté serveur → main.dart déclenchera un logout.
+  bool _isAuthFailure(Failure failure) =>
+      failure is InvalidCredentialsFailure || failure is UnauthorizedFailure;
 
   Future<void> _onRemoteCurrentYearRequested(
     BootstrapRemoteCurrentYearRequested event,
@@ -51,6 +68,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
         status: BootstrapLoadStatus.loading,
         errorMessage: null,
         operation: BootstrapOperation.remoteCurrentYear,
+        sessionExpired: false,
       ),
     );
 
@@ -63,6 +81,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
             status: BootstrapLoadStatus.failure,
             errorMessage: failure.message,
             operation: BootstrapOperation.remoteCurrentYear,
+            sessionExpired: _isAuthFailure(failure),
           ),
         );
       },
@@ -78,6 +97,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
             source: BootstrapSource.remote,
             errorMessage: null,
             operation: BootstrapOperation.remoteCurrentYear,
+            sessionExpired: false,
           ),
         );
       },
@@ -93,6 +113,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
         status: BootstrapLoadStatus.loading,
         errorMessage: null,
         operation: BootstrapOperation.remotePreviousYear,
+        sessionExpired: false,
       ),
     );
 
@@ -105,6 +126,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
             status: BootstrapLoadStatus.failure,
             errorMessage: failure.message,
             operation: BootstrapOperation.remotePreviousYear,
+            sessionExpired: _isAuthFailure(failure),
           ),
         );
       },
@@ -120,6 +142,7 @@ class BootstrapBloc extends Bloc<BootstrapEvent, BootstrapState> {
             source: BootstrapSource.remote,
             errorMessage: null,
             operation: BootstrapOperation.remotePreviousYear,
+            sessionExpired: false,
           ),
         );
       },

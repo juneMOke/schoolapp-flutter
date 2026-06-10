@@ -57,6 +57,7 @@ class RouterNotifier extends ChangeNotifier {
     return _RouterRefreshSnapshot(
       authStatus: _authBloc.state.status,
       bootstrapBlocksNavigation: _bootstrapBloc.state.blocksNavigation,
+      bootstrapHasBlockingFailure: _bootstrapBloc.state.hasBlockingFailure,
     );
   }
 
@@ -81,10 +82,12 @@ class RouterNotifier extends ChangeNotifier {
 class _RouterRefreshSnapshot {
   final AuthStatus authStatus;
   final bool bootstrapBlocksNavigation;
+  final bool bootstrapHasBlockingFailure;
 
   const _RouterRefreshSnapshot({
     required this.authStatus,
     required this.bootstrapBlocksNavigation,
+    required this.bootstrapHasBlockingFailure,
   });
 
   @override
@@ -92,11 +95,16 @@ class _RouterRefreshSnapshot {
     if (identical(this, other)) return true;
     return other is _RouterRefreshSnapshot &&
         other.authStatus == authStatus &&
-        other.bootstrapBlocksNavigation == bootstrapBlocksNavigation;
+        other.bootstrapBlocksNavigation == bootstrapBlocksNavigation &&
+        other.bootstrapHasBlockingFailure == bootstrapHasBlockingFailure;
   }
 
   @override
-  int get hashCode => Object.hash(authStatus, bootstrapBlocksNavigation);
+  int get hashCode => Object.hash(
+    authStatus,
+    bootstrapBlocksNavigation,
+    bootstrapHasBlockingFailure,
+  );
 }
 
 class AppRouter {
@@ -116,6 +124,7 @@ class AppRouter {
             authState.status == AuthStatus.loading ||
             authState.status == AuthStatus.initial;
         final isBootstrapBlocking = bootstrapState.blocksNavigation;
+        final hasBootstrapFailure = bootstrapState.hasBlockingFailure;
         final isOnSplash = state.matchedLocation == '/splash';
         final isOnAuthFlow =
             state.matchedLocation == '/login' ||
@@ -130,6 +139,12 @@ class AppRouter {
         }
 
         if (isBootstrapBlocking) {
+          return isOnSplash ? null : '/splash';
+        }
+
+        // Échec du bootstrap distant : retenir sur le splash (ErrorView + retry)
+        // au lieu d'éjecter vers /home sans données.
+        if (hasBootstrapFailure) {
           return isOnSplash ? null : '/splash';
         }
 

@@ -40,6 +40,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get schoolApp => 'ETEELO CONNECT';
 
   @override
+  String get splashBrandPrimary => 'ETEELO';
+
+  @override
+  String get splashBrandSecondary => 'CONNECT';
+
+  @override
+  String get splashTagline => 'Simplifier la gestion de votre école';
+
+  @override
+  String get splashSemanticsLabel => 'ETEELO CONNECT — écran de démarrage';
+
+  @override
+  String get bootstrapOfflineBanner => 'Mode hors-ligne — données en cache';
+
+  @override
+  String get splashErrorTitle => 'Connexion impossible';
+
+  @override
+  String get splashErrorMessage =>
+      'Impossible de charger les données de l\'application. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get splashErrorRetry => 'Réessayer';
+
+  @override
+  String splashVersion(String version, String build) {
+    return 'v$version (build $build)';
+  }
+
+  @override
   String get logout => 'Déconnexion';
 
   @override

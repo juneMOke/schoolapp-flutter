@@ -158,6 +158,60 @@ abstract class AppLocalizations {
   /// **'ETEELO TECH'**
   String get schoolApp;
 
+  /// No description provided for @splashBrandPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO'**
+  String get splashBrandPrimary;
+
+  /// No description provided for @splashBrandSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'CONNECT'**
+  String get splashBrandSecondary;
+
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplify your school management'**
+  String get splashTagline;
+
+  /// No description provided for @splashSemanticsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO CONNECT — splash screen'**
+  String get splashSemanticsLabel;
+
+  /// No description provided for @bootstrapOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline mode — cached data'**
+  String get bootstrapOfflineBanner;
+
+  /// No description provided for @splashErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed'**
+  String get splashErrorTitle;
+
+  /// No description provided for @splashErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load the application data. Check your connection, then try again.'**
+  String get splashErrorMessage;
+
+  /// No description provided for @splashErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get splashErrorRetry;
+
+  /// Technical version shown in the splash footer
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} (build {build})'**
+  String splashVersion(String version, String build);
+
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:

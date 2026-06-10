@@ -51,6 +51,7 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_svg: ^2.2.3
   fl_chart: ^0.69.0
+  package_info_plus: ^8.1.0
 
 
 dev_dependencies:
@@ -146,12 +147,23 @@ flutter:
         - asset: assets/fonts/lora/Lora-Italic.ttf
           weight: 400
           style: italic
+    - family: Roboto Mono
+      fonts:
+        - asset: assets/fonts/roboto_mono/RobotoMono-Regular.ttf
+          weight: 400
 
 
+# Splash natif (couche A) — fond Bleu Profond (#0E2D42), symbole crème
+# transparent lisible sur fond sombre. Splash sombre en thème clair ET sombre
+# (color_dark/image_dark identiques) pour un raccord A→B→W sans saut visuel.
 flutter_native_splash:
-  color: "#F7F9FF"
-  image: assets/branding/splash/ic_launcher_xxxhdpi_192px_transparent.png
+  color: "#0E2D42"
+  image: assets/app-icon/ic_launcher_foreground.png
+  color_dark: "#0E2D42"
+  image_dark: assets/app-icon/ic_launcher_foreground.png
   android_12:
-    image: assets/branding/splash/ic_launcher_xxxhdpi_192px_transparent.png
-    color: "#F7F9FF"
+    image: assets/app-icon/ic_launcher_foreground.png
+    color: "#0E2D42"
+    image_dark: assets/app-icon/ic_launcher_foreground.png
+    color_dark: "#0E2D42"
   web: false

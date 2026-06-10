@@ -39,6 +39,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolApp => 'ETEELO TECH';
 
   @override
+  String get splashBrandPrimary => 'ETEELO';
+
+  @override
+  String get splashBrandSecondary => 'CONNECT';
+
+  @override
+  String get splashTagline => 'Simplify your school management';
+
+  @override
+  String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
+
+  @override
+  String get bootstrapOfflineBanner => 'Offline mode — cached data';
+
+  @override
+  String get splashErrorTitle => 'Connection failed';
+
+  @override
+  String get splashErrorMessage =>
+      'Unable to load the application data. Check your connection, then try again.';
+
+  @override
+  String get splashErrorRetry => 'Retry';
+
+  @override
+  String splashVersion(String version, String build) {
+    return 'v$version (build $build)';
+  }
+
+  @override
   String get logout => 'Logout';
 
   @override

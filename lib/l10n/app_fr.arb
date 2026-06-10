@@ -9,6 +9,22 @@
   "pleaseEnterEmail": "Veuillez entrer votre email",
   "pleaseEnterValidEmail": "Veuillez entrer un email valide",
   "schoolApp": "ETEELO CONNECT",
+  "splashBrandPrimary": "ETEELO",
+  "splashBrandSecondary": "CONNECT",
+  "splashTagline": "Simplifier la gestion de votre école",
+  "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
+  "bootstrapOfflineBanner": "Mode hors-ligne — données en cache",
+  "splashErrorTitle": "Connexion impossible",
+  "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
+  "splashErrorRetry": "Réessayer",
+  "splashVersion": "v{version} (build {build})",
+  "@splashVersion": {
+    "description": "Version technique affichée au pied du splash",
+    "placeholders": {
+      "version": { "type": "String" },
+      "build": { "type": "String" }
+    }
+  },
   "logout": "Déconnexion",
   "welcome": "Bienvenue{name} !",
   "@welcome": {
