@@ -336,6 +336,34 @@
   "profile": "Profil",
   "settings": "Paramètres",
   "home": "Accueil",
+  "accueilBannerGreeting": "Bonjour, {firstName}",
+  "@accueilBannerGreeting": {
+    "description": "Salutation du bandeau d'accueil avec le prénom de l'utilisateur connecté.",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerGreetingGeneric": "Bonjour",
+  "accueilBannerContextTail": "Voici l'essentiel de votre école aujourd'hui.",
+  "accueilModulesEyebrow": "Vos modules",
+  "accueilModulesTitle": "Où souhaitez-vous aller ?",
+  "accueilModulesIntro": "Quatre modules couvrent la vie administrative de l'école. Tout reste accessible depuis le menu latéral.",
+  "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
+  "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
+  "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
+  "accueilModuleDisciplinesDescription": "Présences du jour, dossiers de discipline et suivi des élèves.",
+  "accueilModuleCardSemantics": "{module} — ouvrir le tableau de bord",
+  "@accueilModuleCardSemantics": {
+    "description": "Libellé d'accessibilité de la carte module (rôle bouton, destination explicite).",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSignature": "eteyelo · l'école en lingala",
   "homeTopBarPendingSubtitle": "Suivi des dossiers en attente",
   "homeTopBarNotificationsTooltip": "Notifications",
   "homeUserMenuTooltip": "Menu utilisateur",

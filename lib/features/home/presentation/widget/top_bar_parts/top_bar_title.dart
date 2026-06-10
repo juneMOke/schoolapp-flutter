@@ -33,6 +33,7 @@ class TopBarTitle extends StatelessWidget {
       _ => title,
     };
     final leadingIcon = switch (selectedSubMenuId) {
+      MenuConstants.accueilId => Icons.home_outlined,
       MenuConstants.classesListId => Icons.view_list_rounded,
       MenuConstants.organisationId => Icons.grid_view_rounded,
       _ =>

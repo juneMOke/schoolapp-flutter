@@ -344,6 +344,34 @@
   "profile": "Profile",
   "settings": "Settings",
   "home": "Home",
+  "accueilBannerGreeting": "Hello, {firstName}",
+  "@accueilBannerGreeting": {
+    "description": "Home banner greeting with the signed-in user's first name.",
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerGreetingGeneric": "Hello",
+  "accueilBannerContextTail": "Here is the essential view of your school today.",
+  "accueilModulesEyebrow": "Your modules",
+  "accueilModulesTitle": "Where would you like to go?",
+  "accueilModulesIntro": "Four modules cover the administrative life of the school. Everything stays accessible from the side menu.",
+  "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
+  "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
+  "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
+  "accueilModuleCardSemantics": "{module} — open the dashboard",
+  "@accueilModuleCardSemantics": {
+    "description": "Accessibility label for the module card (button role, explicit destination).",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSignature": "eteyelo · l'école en lingala",
   "homeTopBarPendingSubtitle": "Pending files follow-up",
   "homeTopBarNotificationsTooltip": "Notifications",
   "homeUserMenuTooltip": "User menu",

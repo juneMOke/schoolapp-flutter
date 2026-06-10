@@ -627,6 +627,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get home => 'Accueil';
 
   @override
+  String accueilBannerGreeting(String firstName) {
+    return 'Bonjour, $firstName';
+  }
+
+  @override
+  String get accueilBannerGreetingGeneric => 'Bonjour';
+
+  @override
+  String get accueilBannerContextTail =>
+      'Voici l\'essentiel de votre école aujourd\'hui.';
+
+  @override
+  String get accueilModulesEyebrow => 'Vos modules';
+
+  @override
+  String get accueilModulesTitle => 'Où souhaitez-vous aller ?';
+
+  @override
+  String get accueilModulesIntro =>
+      'Quatre modules couvrent la vie administrative de l\'école. Tout reste accessible depuis le menu latéral.';
+
+  @override
+  String get accueilModuleInscriptionsDescription =>
+      'Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.';
+
+  @override
+  String get accueilModuleFinancesDescription =>
+      'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+
+  @override
+  String get accueilModuleClassesDescription =>
+      'Composition des classes et liste des élèves par cycle.';
+
+  @override
+  String get accueilModuleDisciplinesDescription =>
+      'Présences du jour, dossiers de discipline et suivi des élèves.';
+
+  @override
+  String accueilModuleCardSemantics(String module) {
+    return '$module — ouvrir le tableau de bord';
+  }
+
+  @override
+  String get accueilSignature => 'eteyelo · l\'école en lingala';
+
+  @override
   String get homeTopBarPendingSubtitle => 'Suivi des dossiers en attente';
 
   @override

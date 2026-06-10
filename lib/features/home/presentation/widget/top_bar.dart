@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/home/presentation/widget/home_naviga
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_actions.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_leading_menu_button.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_title.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TopBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isCompact;
@@ -26,9 +27,14 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           previous.selectedSubMenuId != current.selectedSubMenuId ||
           previous.selectedMenuId != current.selectedMenuId,
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         final isPreRegistrations =
             state.selectedSubMenuId == MenuConstants.preInscriptionsId;
-        final selectedMenuTitle = _resolveSelectedMenuTitle(state);
+        // Sur l'Accueil, l'eyebrow porte le nom de marque (spec Accueil §09).
+        final selectedMenuTitle =
+            state.selectedSubMenuId == MenuConstants.accueilId
+            ? l10n.schoolApp
+            : _resolveSelectedMenuTitle(state);
 
         return AppBar(
           automaticallyImplyLeading: false,

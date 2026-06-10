@@ -160,6 +160,17 @@ class AppColors {
   static const classesFocusRing = Color(0xFF1A73E8);
   static const classesDisabledBg = Color(0xFFE5E7EB);
 
+  // Accueil — cartes modules (spec Accueil §03 : un accent + un fond doux par
+  // module). Les fonds doux reprennent les teintes de la synthèse d'inscription.
+  static const accueilInscriptionsAccent = bleuArdoise; // #1B4D6B
+  static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
+  static const accueilFinancesAccent = vertSavane; // #3D6B4A
+  static const accueilFinancesSoft = Color(0xFFEDF5EF);
+  static const accueilClassesAccent = orDoux; // #D9A24E
+  static const accueilClassesSoft = Color(0xFFFBF3E3);
+  static const accueilDisciplinesAccent = info; // #2E6E8E
+  static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
+
   // Relationship colours
   static const relationshipFather = Color(0xFF1976D2);
   static const relationshipMother = Color(0xFFC2185B);

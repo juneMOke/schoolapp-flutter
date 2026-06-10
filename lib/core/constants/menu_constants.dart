@@ -1,6 +1,11 @@
 class MenuConstants {
   const MenuConstants._();
 
+  // Accueil — page d'atterrissage post-connexion (item feuille, sans sous-menu).
+  // Sert d'identifiant de contenu pour `selectedSubMenuId` quand on est sur la
+  // page d'accueil (spec Accueil §00/§09).
+  static const String accueilId = 'accueil';
+
   // Menu IDs
   static const String inscriptionsMenuId = 'inscriptions';
   static const String financesMenuId = 'finances';

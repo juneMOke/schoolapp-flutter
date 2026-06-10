@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_l
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -145,6 +146,7 @@ class _HomePageView extends StatelessWidget {
     required bool isCompact,
   }) {
     final hidePageBreadcrumb =
+        state.selectedSubMenuId == MenuConstants.accueilId ||
         state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
         state.selectedSubMenuId == MenuConstants.financesDashboardId ||
         state.selectedSubMenuId == MenuConstants.classesDashboardId ||
@@ -197,6 +199,14 @@ class _HomePageView extends StatelessWidget {
 
   Widget _buildBreadcrumb(BuildContext context, NavigationState state) {
     final l10n = AppLocalizations.of(context)!;
+    // Lookup tolérant : un selectedMenuId qui ne correspondrait à aucun menu
+    // (état incohérent) ne doit jamais faire planter le fil d'Ariane.
+    final selectedMenuMatches = state.menuItems.where(
+      (menu) => menu.id == state.selectedMenuId,
+    );
+    final selectedMenuTitle = selectedMenuMatches.isEmpty
+        ? null
+        : selectedMenuMatches.first.title;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -208,15 +218,13 @@ class _HomePageView extends StatelessWidget {
               color: AppTheme.textSecondaryColor,
             ),
           ),
-          if (state.selectedMenuId != null) ...[
+          if (selectedMenuTitle != null) ...[
             const Text(
               ' / ',
               style: TextStyle(color: AppTheme.textSecondaryColor),
             ),
             Text(
-              state.menuItems
-                  .firstWhere((menu) => menu.id == state.selectedMenuId)
-                  .title,
+              selectedMenuTitle,
               style: AppTextStyles.body.copyWith(
                 color: AppTheme.textSecondaryColor,
               ),
@@ -247,6 +255,8 @@ class _HomePageView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     switch (state.selectedSubMenuId) {
+      case MenuConstants.accueilId:
+        return const AccueilPage();
       case MenuConstants.inscriptionsDashboardId:
         return const EnrollmentStatsDashboardScope(
           child: EnrollmentStatsDashboardPage(),

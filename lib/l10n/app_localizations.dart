@@ -1178,6 +1178,78 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get home;
 
+  /// Home banner greeting with the signed-in user's first name.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {firstName}'**
+  String accueilBannerGreeting(String firstName);
+
+  /// No description provided for @accueilBannerGreetingGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get accueilBannerGreetingGeneric;
+
+  /// No description provided for @accueilBannerContextTail.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is the essential view of your school today.'**
+  String get accueilBannerContextTail;
+
+  /// No description provided for @accueilModulesEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your modules'**
+  String get accueilModulesEyebrow;
+
+  /// No description provided for @accueilModulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where would you like to go?'**
+  String get accueilModulesTitle;
+
+  /// No description provided for @accueilModulesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.'**
+  String get accueilModulesIntro;
+
+  /// No description provided for @accueilModuleInscriptionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'New enrolments, re-enrolments and pre-enrolments for your students.'**
+  String get accueilModuleInscriptionsDescription;
+
+  /// No description provided for @accueilModuleFinancesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue, invoicing and tracking of school fee collection.'**
+  String get accueilModuleFinancesDescription;
+
+  /// No description provided for @accueilModuleClassesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition and student lists by cycle.'**
+  String get accueilModuleClassesDescription;
+
+  /// No description provided for @accueilModuleDisciplinesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily attendance, disciplinary records and student follow-up.'**
+  String get accueilModuleDisciplinesDescription;
+
+  /// Accessibility label for the module card (button role, explicit destination).
+  ///
+  /// In en, this message translates to:
+  /// **'{module} — open the dashboard'**
+  String accueilModuleCardSemantics(String module);
+
+  /// No description provided for @accueilSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'eteyelo · l\'école en lingala'**
+  String get accueilSignature;
+
   /// No description provided for @homeTopBarPendingSubtitle.
   ///
   /// In en, this message translates to:

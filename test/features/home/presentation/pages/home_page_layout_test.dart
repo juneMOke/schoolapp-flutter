@@ -58,9 +58,14 @@ void main() {
     await tester.pumpWidget(buildHarness());
     await tester.pumpAndSettle();
 
-    // Le Scaffold porteur du tiroir est le plus profond (compact).
+    // La page d'accueil monte son propre Scaffold (AppPageBackground) dans le
+    // corps : on cible explicitement la coquille compacte qui porte le tiroir,
+    // et non « le dernier » Scaffold de l'arbre.
+    final drawerScaffold = tester
+        .widgetList<Scaffold>(find.byType(Scaffold))
+        .firstWhere((scaffold) => scaffold.drawer != null);
     final scaffoldState = tester.state<ScaffoldState>(
-      find.byType(Scaffold).last,
+      find.byWidget(drawerScaffold),
     );
     expect(scaffoldState.isDrawerOpen, isFalse);
 
@@ -87,4 +92,37 @@ void main() {
     expect(hasDrawer, isTrue);
     expect(find.byTooltip('Déconnexion'), findsNothing);
   });
+
+  testWidgets(
+    'HomePage compact : taper l\'entrée « Accueil » ferme le tiroir',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(900, 740));
+      addTearDown(() async => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(buildHarness());
+      await tester.pumpAndSettle();
+
+      final drawerScaffold = tester
+          .widgetList<Scaffold>(find.byType(Scaffold))
+          .firstWhere((scaffold) => scaffold.drawer != null);
+      final scaffoldState = tester.state<ScaffoldState>(
+        find.byWidget(drawerScaffold),
+      );
+
+      await tester.tap(find.byTooltip('Ouvrir le menu'));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, isTrue);
+
+      // Item feuille déjà actif : le tap déclenche tout de même maybePop().
+      final accueilInDrawer = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Accueil'),
+      );
+      expect(accueilInDrawer, findsOneWidget);
+      await tester.tap(accueilInDrawer);
+      await tester.pumpAndSettle();
+
+      expect(scaffoldState.isDrawerOpen, isFalse);
+    },
+  );
 }
