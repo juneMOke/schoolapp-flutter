@@ -724,7 +724,7 @@
   "enrollmentStatusRejected": "Rejected",
   "enrollmentStatusCancelled": "Cancelled",
   "enrollmentReadOnlyTitle": "View-only mode",
-  "enrollmentReadOnlyMessage": "This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.",
+  "enrollmentReadOnlyMessage": "Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.",
   "enrollmentEditableTitle": "Edit mode",
   "enrollmentEditableMessage": "This enrollment is in progress (IN_PROGRESS). Information can be updated.",
 

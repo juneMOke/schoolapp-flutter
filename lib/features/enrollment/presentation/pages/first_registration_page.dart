@@ -66,7 +66,6 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
                   academicYearId: screenCtx.academicYearId,
                   isLoading: screenCtx.isLoading,
                   onRefreshRequested: screenCtx.onRefreshRequested,
-                  layout: screenCtx.layout,
                   preferredViewMode: _preferredViewMode,
                   onSortToggled: _onSortToggled,
                   onViewModeChanged: _onViewModeChanged,

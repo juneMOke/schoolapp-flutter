@@ -165,20 +165,12 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
     return parts.join('. ');
   }
 
-  Color _backgroundColor() {
-    if (!widget.enabled) {
-      return AppColors.surfaceAlt;
-    }
-    if (widget.readOnly) {
-      return AppColors.surfaceAlt;
-    }
-    return AppColors.surface;
-  }
+  // Pas de couleur particulière en lecture (readOnly / désactivé) : un champ
+  // non éditable conserve l'apparence d'un champ au repos (même fond, bordure
+  // et couleur de texte que l'état éditable). Seul l'état focus se distingue.
+  Color _backgroundColor() => AppColors.surface;
 
   Color _borderColor(String? resolvedErrorText) {
-    if (!widget.enabled) {
-      return AppColors.stateDisabled;
-    }
     if (resolvedErrorText != null && resolvedErrorText.isNotEmpty) {
       return AppColors.error;
     }
@@ -279,7 +271,7 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
       textAlignVertical: TextAlignVertical.center,
       cursorColor: AppColors.bleuArdoise,
       style: AppTypography.bodyMedium.copyWith(
-        color: widget.enabled ? AppColors.textPrimary : AppColors.textMuted,
+        color: AppColors.textPrimary,
         height: 1.3,
       ),
       decoration: InputDecoration(

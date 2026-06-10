@@ -73,7 +73,7 @@ class EnrollmentResultsBar extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final left = _buildCounterAndFilters(l10n, filters);
-              final right = _buildActions(l10n, constraints.maxWidth);
+              final right = _buildActions(l10n);
               final canStayOnSingleLine =
                   constraints.maxWidth >= 760 &&
                   (filters.length <= 2 || !_hasStructuredSort);
@@ -154,12 +154,10 @@ class EnrollmentResultsBar extends StatelessWidget {
     filters: filters,
   );
 
-  Widget _buildActions(AppLocalizations l10n, double width) {
-    // Le basculeur reflète le mode RÉELLEMENT rendu (résolu selon la largeur),
-    // pas seulement la préférence brute : en `auto` sur téléphone on rend la
-    // grille → le basculeur surligne « Grille », pas « Liste ».
+  Widget _buildActions(AppLocalizations l10n) {
+    // Le basculeur reflète le mode RÉELLEMENT rendu : en `auto` (défaut) on rend
+    // la table → le basculeur surligne « Liste », y compris sur mobile.
     final effectiveMode = EnrollmentResultsResponsiveMode.resolve(
-      containerWidth: width,
       preferred: currentViewMode,
     );
     return EnrollmentResultsBarActions(

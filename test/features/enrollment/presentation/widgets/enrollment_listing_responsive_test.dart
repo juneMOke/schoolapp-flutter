@@ -8,26 +8,22 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
   group('EnrollmentResultsResponsiveMode.resolve', () {
-    EnrollmentListingViewMode resolveAt(
-      double width,
+    EnrollmentListingViewMode resolveMode(
       EnrollmentListingViewMode preferred,
-    ) => EnrollmentResultsResponsiveMode.resolve(
-      containerWidth: width,
-      preferred: preferred,
-    );
+    ) => EnrollmentResultsResponsiveMode.resolve(preferred: preferred);
 
-    test('auto bascule grille sous 600px et table au-dessus', () {
-      expect(resolveAt(390, EnrollmentListingViewMode.auto).isGrid, isTrue);
-      expect(resolveAt(800, EnrollmentListingViewMode.auto).isTable, isTrue);
+    test('auto (défaut) → table, y compris sur mobile', () {
+      // La table est le défaut partout ; la grille n'apparaît que sur choix
+      // explicite (la table a un rendu étroit 2 colonnes adapté au téléphone).
+      expect(resolveMode(EnrollmentListingViewMode.auto).isTable, isTrue);
     });
 
-    test('un choix explicite Liste est honoré même sur téléphone', () {
-      // Cœur du correctif : avant, < 600px forçait la grille quoi qu'il arrive.
-      expect(resolveAt(360, EnrollmentListingViewMode.table).isTable, isTrue);
+    test('un choix explicite Liste est honoré', () {
+      expect(resolveMode(EnrollmentListingViewMode.table).isTable, isTrue);
     });
 
-    test('un choix explicite Grille est honoré sur grand écran', () {
-      expect(resolveAt(1200, EnrollmentListingViewMode.grid).isGrid, isTrue);
+    test('un choix explicite Grille est honoré', () {
+      expect(resolveMode(EnrollmentListingViewMode.grid).isGrid, isTrue);
     });
   });
 
@@ -95,9 +91,8 @@ void main() {
   });
 
   testWidgets('Breakpoint constants are correctly defined', (tester) async {
-    // Verify the constants exist
+    // Verify the constant exists
     expect(AppBreakpoints.enrollmentTableGridSwitchMax, 600.0);
-    expect(AppBreakpoints.enrollmentShellCompactMax, 1024.0);
   });
 
   testWidgets('Results bar shows loading state', (tester) async {

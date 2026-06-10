@@ -18,6 +18,10 @@ class StepPageCard extends StatelessWidget {
   final IconData icon;
   final Widget child;
 
+  /// Bandeau optionnel rendu entre l'en-tête et le corps (ex. avis lecture
+  /// seule en mode consultation). `null` → aucun bandeau.
+  final Widget? banner;
+
   const StepPageCard({
     super.key,
     required this.eyebrow,
@@ -26,6 +30,7 @@ class StepPageCard extends StatelessWidget {
     required this.accentColor,
     required this.icon,
     required this.child,
+    this.banner,
   });
 
   static const double _railWidth = 4;
@@ -61,6 +66,16 @@ class StepPageCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
+                  if (banner != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.stepCardBody,
+                        AppSpacing.stepCardBody,
+                        AppSpacing.stepCardBody,
+                        0,
+                      ),
+                      child: banner,
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.stepCardBody),
                     child: child,
@@ -89,10 +104,15 @@ class StepPageCard extends StatelessWidget {
         vertical: AppSpacing.stepCardHeaderV,
       ),
       decoration: BoxDecoration(
+        // Fond bi-ton très allégé : la base beige tend vers la transparence
+        // (se fond dans le blanc du corps), juste un soupçon de teinte d'étape.
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.surfaceAlt, accentColor.withValues(alpha: 0.08)],
+          colors: [
+            AppColors.surfaceAlt.withValues(alpha: 0.4),
+            accentColor.withValues(alpha: 0.06),
+          ],
         ),
         border: const Border(bottom: BorderSide(color: AppColors.border)),
       ),

@@ -26,6 +26,10 @@ class EteeloDateInput extends StatefulWidget {
   final ValueChanged<DateTime?>? onChanged;
   final bool required;
   final bool enabled;
+
+  /// Lecture seule : champ non interactif mais pleine couleur (comme au repos),
+  /// contrairement à [enabled] = false qui grise le champ.
+  final bool readOnly;
   final String? errorText;
   final String? Function(DateTime?)? validator;
   final DateTime? firstDate;
@@ -46,6 +50,7 @@ class EteeloDateInput extends StatefulWidget {
     this.onChanged,
     this.required = false,
     this.enabled = true,
+    this.readOnly = false,
     this.errorText,
     this.validator,
     this.firstDate,
@@ -74,6 +79,12 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
   /// Vrai pendant l'ouverture du calendrier — simule le focus visuel.
   bool _isPickerOpen = false;
 
+  // Interactif uniquement si activé ET pas en lecture seule.
+  bool get _interactive => widget.enabled && !widget.readOnly;
+
+  // Grisé (repère désactivé) uniquement si désactivé ET pas en lecture seule.
+  bool get _dimmed => !widget.enabled && !widget.readOnly;
+
   // ── Formatage ──────────────────────────────────────────────────────────────
 
   String _formatDate(DateTime date) {
@@ -85,7 +96,7 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
   // ── Styles dynamiques ──────────────────────────────────────────────────────
 
   Color _borderColor(String? resolvedErrorText) {
-    if (!widget.enabled) return AppColors.stateDisabled;
+    if (_dimmed) return AppColors.stateDisabled;
     if (resolvedErrorText != null && resolvedErrorText.isNotEmpty) {
       return AppColors.error;
     }
@@ -108,12 +119,12 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
   }
 
   Color _backgroundColor() =>
-      widget.enabled ? AppColors.surface : AppColors.surfaceAlt;
+      _dimmed ? AppColors.surfaceAlt : AppColors.surface;
 
   // ── Interaction ────────────────────────────────────────────────────────────
 
   Future<void> _pickDate(FormFieldState<DateTime> state) async {
-    if (!widget.enabled) return;
+    if (!_interactive) return;
 
     setState(() => _isPickerOpen = true);
 
@@ -216,7 +227,8 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
       label: _semanticLabel,
       value: displayText,
       button: true,
-      enabled: widget.enabled,
+      enabled: _interactive,
+      readOnly: widget.readOnly,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
@@ -232,7 +244,7 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
           boxShadow: [if (_focusRing() != null) _focusRing()!],
         ),
         child: GestureDetector(
-          onTap: widget.enabled ? () => _pickDate(state) : null,
+          onTap: _interactive ? () => _pickDate(state) : null,
           behavior: HitTestBehavior.opaque,
           child: Row(
             children: [
@@ -241,9 +253,9 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
                   displayText ?? (widget.placeholder ?? ''),
                   style: AppTypography.bodyMedium.copyWith(
                     color: displayText != null
-                        ? (widget.enabled
-                              ? AppColors.textPrimary
-                              : AppColors.textMuted)
+                        ? (_dimmed
+                              ? AppColors.textMuted
+                              : AppColors.textPrimary)
                         : AppColors.textMuted,
                     height: 1.3,
                   ),
@@ -252,9 +264,9 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
               Icon(
                 Icons.calendar_today_rounded,
                 size: 16,
-                color: widget.enabled
-                    ? AppColors.bleuArdoise
-                    : AppColors.stateDisabled,
+                color: _dimmed
+                    ? AppColors.stateDisabled
+                    : AppColors.bleuArdoise,
               ),
             ],
           ),

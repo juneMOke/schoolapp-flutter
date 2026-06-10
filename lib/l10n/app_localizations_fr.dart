@@ -1526,7 +1526,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentReadOnlyMessage =>
-      'Ce dossier est finalisé (COMPLETED). Les informations sont affichées en lecture seule.';
+      'Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.';
 
   @override
   String get enrollmentEditableTitle => 'Mode édition';

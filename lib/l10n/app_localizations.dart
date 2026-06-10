@@ -2777,7 +2777,7 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentReadOnlyMessage.
   ///
   /// In en, this message translates to:
-  /// **'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.'**
+  /// **'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.'**
   String get enrollmentReadOnlyMessage;
 
   /// No description provided for @enrollmentEditableTitle.

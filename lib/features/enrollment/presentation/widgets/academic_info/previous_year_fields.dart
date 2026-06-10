@@ -79,6 +79,7 @@ class PreviousYearFields extends StatelessWidget {
             onChanged: onYearChanged,
             errorText: prevYearError,
             enabled: isEditable,
+            readOnly: !isEditable,
           ),
         ),
         // École
@@ -102,6 +103,7 @@ class PreviousYearFields extends StatelessWidget {
             onChanged: onCycleChanged,
             errorText: prevCycleError,
             enabled: isEditable && !isCatalogLoading && selectedYear != null,
+            readOnly: !isEditable,
           ),
         ),
         // Niveau — cascade : désactivé tant que le cycle est vide.
@@ -114,6 +116,7 @@ class PreviousYearFields extends StatelessWidget {
             onChanged: onLevelChanged,
             errorText: prevLevelError,
             enabled: isEditable && !isCatalogLoading && selectedCycle != null,
+            readOnly: !isEditable,
           ),
         ),
         // Moyenne
@@ -152,6 +155,7 @@ class PreviousYearFields extends StatelessWidget {
             onChanged: onValidatedChanged,
             isChanged: validatedPreviousYearChanged,
             enabled: isEditable,
+            readOnly: !isEditable,
             helpMessage: l10n.yearValidatedHelp,
           ),
           fullWidth: true,

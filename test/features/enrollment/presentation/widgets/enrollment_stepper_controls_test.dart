@@ -266,6 +266,28 @@ void main() {
   );
 
   testWidgets(
+    'Enrollment stepper controls : dernier step → Valider en bouton primaire (check)',
+    (tester) async {
+      await tester.pumpWidget(
+        buildHarness(
+          currentStep: 6,
+          isLast: true,
+          isSummaryStep: true,
+          showSaveAction: true,
+          canSave: true,
+        ),
+      );
+
+      // Valider l'inscription = bouton PRIMAIRE (ElevatedButton) + icône check ;
+      // plus de disquette ni de bouton « Terminer » en doublon.
+      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+      expect(find.byIcon(Icons.save_outlined), findsNothing);
+      expect(find.byIcon(Icons.arrow_forward_rounded), findsNothing);
+    },
+  );
+
+  testWidgets(
     'Enrollment stepper controls integrates abort-save-continue flow',
     (tester) async {
       var previousCount = 0;

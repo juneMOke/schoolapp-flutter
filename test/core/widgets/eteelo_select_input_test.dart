@@ -1,9 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 
 void main() {
   group('EteeloSelectInput', () {
+    testWidgets('en lecture (readOnly) : fond editable + valeur affichee', (
+      tester,
+    ) async {
+      var changed = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EteeloSelectInput<String>(
+              label: 'Cycle',
+              value: 'PRIMAIRE',
+              readOnly: true,
+              items: const [
+                EteeloSelectItem(value: 'PRIMAIRE', label: 'Primaire'),
+              ],
+              onChanged: (_) => changed = true,
+            ),
+          ),
+        ),
+      );
+
+      // Pas de couleur particulière : fond = surface (comme un champ au repos).
+      final container = tester.widget<AnimatedContainer>(
+        find.byType(AnimatedContainer),
+      );
+      expect(
+        (container.decoration! as BoxDecoration).color,
+        equals(AppColors.surface),
+      );
+      // La valeur est affichée en lecture...
+      expect(find.text('Primaire'), findsOneWidget);
+      // ...et le champ est non interactif (aucun DropdownButton à ouvrir).
+      expect(find.byType(DropdownButton<String>), findsNothing);
+      await tester.tap(find.text('Primaire'));
+      await tester.pumpAndSettle();
+      expect(changed, isFalse);
+    });
+
+    testWidgets('desactive sans readOnly : garde le grise (repere cascade)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EteeloSelectInput<String>(
+              label: 'Niveau',
+              value: null,
+              enabled: false,
+              items: const [],
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final container = tester.widget<AnimatedContainer>(
+        find.byType(AnimatedContainer),
+      );
+      expect(
+        (container.decoration! as BoxDecoration).color,
+        equals(AppColors.surfaceAlt),
+      );
+    });
+
     testWidgets('affiche label et placeholder', (tester) async {
       String? selected;
 

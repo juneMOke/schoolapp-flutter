@@ -1510,7 +1510,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentReadOnlyMessage =>
-      'This enrollment is finalized (COMPLETED). Information is displayed in read-only mode.';
+      'Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.';
 
   @override
   String get enrollmentEditableTitle => 'Edit mode';

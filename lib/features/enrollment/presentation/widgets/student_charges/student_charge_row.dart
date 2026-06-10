@@ -15,6 +15,10 @@ class StudentChargeRow extends StatelessWidget {
   final String? amountErrorText;
   final ValueChanged<String> onAmountChanged;
 
+  /// Mode étroit (téléphone) : colonne Actions masquée + montant élargi, pour
+  /// éviter la troncature. Voir [AppBreakpoints.studentChargesActionColMin].
+  final bool compact;
+
   const StudentChargeRow({
     super.key,
     required this.studentCharge,
@@ -23,6 +27,7 @@ class StudentChargeRow extends StatelessWidget {
     required this.currency,
     required this.amountErrorText,
     required this.onAmountChanged,
+    this.compact = false,
   });
 
   @override
@@ -46,7 +51,9 @@ class StudentChargeRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 5,
+            // En étroit, on réduit la part du libellé (il s'enroule) au profit
+            // du montant qui, lui, ne doit pas être tronqué.
+            flex: compact ? 4 : 5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -70,7 +77,7 @@ class StudentChargeRow extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingM),
           Expanded(
-            flex: 4,
+            flex: compact ? 5 : 4,
             child: CurrencyField(
               controller: amountController,
               currency: currency,
@@ -80,17 +87,20 @@ class StudentChargeRow extends StatelessWidget {
               onChanged: onAmountChanged,
             ),
           ),
-          const SizedBox(width: AppDimensions.spacingM),
-          SizedBox(
-            width: AppDimensions.minTouchTarget,
-            child: Center(
-              child: Icon(
-                isEditable ? Icons.edit_outlined : Icons.lock_outline,
-                size: AppDimensions.detailMiniIconSize,
-                color: AppColors.textSecondary,
+          // Colonne Actions (icône edit/lock) masquée en étroit : 2 colonnes.
+          if (!compact) ...[
+            const SizedBox(width: AppDimensions.spacingM),
+            SizedBox(
+              width: AppDimensions.minTouchTarget,
+              child: Center(
+                child: Icon(
+                  isEditable ? Icons.edit_outlined : Icons.lock_outline,
+                  size: AppDimensions.detailMiniIconSize,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

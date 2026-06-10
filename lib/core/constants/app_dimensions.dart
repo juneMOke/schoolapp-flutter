@@ -110,7 +110,6 @@ class AppDimensions {
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;
   static const enrollmentStatsKpiCardMinWidth = 148.0;
-  static const enrollmentStatsKpiCardMobileWidth = 168.0;
   static const enrollmentStatsChartSectionHeight = 220.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;

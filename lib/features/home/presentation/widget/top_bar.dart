@@ -75,6 +75,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
             title: state.currentTitle,
             isPreRegistrations: isPreRegistrations,
             selectedSubMenuId: state.selectedSubMenuId,
+            isCompact: isCompact,
           ),
           actions: [TopBarActions(isCompact: isCompact)],
         );

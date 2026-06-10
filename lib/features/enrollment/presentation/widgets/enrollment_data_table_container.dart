@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_grid_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
@@ -16,10 +15,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/stat
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Adapte l'etat BLoC vers la config de [EnrollmentDataTable] ou [EnrollmentResultsGridView].
-/// Gère le choix table/grid basé sur le layout et le mode vue préféré.
+/// Gère le choix table/grid basé sur le mode vue préféré.
 class EnrollmentDataTableContainer extends StatefulWidget {
   final ValueChanged<EnrollmentSummary> onViewRequested;
-  final EnrollmentListingLayout? layout;
   final EnrollmentListingViewMode preferredViewMode;
   final DataTableDensity tableDensity;
   final VoidCallback? onSortToggled;
@@ -33,7 +31,6 @@ class EnrollmentDataTableContainer extends StatefulWidget {
   const EnrollmentDataTableContainer({
     super.key,
     required this.onViewRequested,
-    this.layout,
     this.preferredViewMode = EnrollmentListingViewMode.auto,
     this.tableDensity = DataTableDensity.comfortable,
     this.onSortToggled,
@@ -54,47 +51,39 @@ class _EnrollmentDataTableContainerState
     extends State<EnrollmentDataTableContainer> {
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final effectiveViewMode = _resolveViewModeForWidth(
-          constraints.maxWidth,
+    // Le mode effectif ne dépend plus de la largeur : auto → table (défaut, y
+    // compris mobile), grille uniquement si explicitement choisie. La table et
+    // la grille gèrent elles-mêmes leur rendu responsive interne.
+    final effectiveViewMode = EnrollmentResultsResponsiveMode.resolve(
+      preferred: widget.preferredViewMode,
+    );
+
+    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+      builder: (context, state) {
+        final stateWidget = _buildStateWidget(
+          context,
+          state,
+          effectiveViewMode,
         );
+        if (stateWidget != null) {
+          return AnimatedSwitcher(
+            duration: AppMotion.layout,
+            switchInCurve: AppMotion.outCurve,
+            switchOutCurve: AppMotion.inCurve,
+            child: stateWidget,
+          );
+        }
 
-        return BlocBuilder<EnrollmentBloc, EnrollmentState>(
-          builder: (context, state) {
-            final stateWidget = _buildStateWidget(
-              context,
-              state,
-              effectiveViewMode,
-            );
-            if (stateWidget != null) {
-              return AnimatedSwitcher(
-                duration: AppMotion.layout,
-                switchInCurve: AppMotion.outCurve,
-                switchOutCurve: AppMotion.inCurve,
-                child: stateWidget,
-              );
-            }
-
-            final l10n = AppLocalizations.of(context)!;
-            return AnimatedSwitcher(
-              duration: AppMotion.layout,
-              switchInCurve: AppMotion.outCurve,
-              switchOutCurve: AppMotion.inCurve,
-              child: effectiveViewMode.isGrid
-                  ? _buildGridView(state, l10n)
-                  : _buildTableView(state, l10n),
-            );
-          },
+        final l10n = AppLocalizations.of(context)!;
+        return AnimatedSwitcher(
+          duration: AppMotion.layout,
+          switchInCurve: AppMotion.outCurve,
+          switchOutCurve: AppMotion.inCurve,
+          child: effectiveViewMode.isGrid
+              ? _buildGridView(state, l10n)
+              : _buildTableView(state, l10n),
         );
       },
-    );
-  }
-
-  EnrollmentListingViewMode _resolveViewModeForWidth(double width) {
-    return EnrollmentResultsResponsiveMode.resolve(
-      containerWidth: width,
-      preferred: widget.preferredViewMode,
     );
   }
 

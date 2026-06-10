@@ -12,12 +12,17 @@ class TopBarTitle extends StatelessWidget {
   final bool isPreRegistrations;
   final String? selectedSubMenuId;
 
+  /// En compact (mobile), l'icône de tête est masquée : on garde le burger
+  /// (leading de l'AppBar) puis directement le titre.
+  final bool isCompact;
+
   const TopBarTitle({
     super.key,
     required this.moduleTitle,
     required this.title,
     required this.isPreRegistrations,
     required this.selectedSubMenuId,
+    this.isCompact = false,
   });
 
   @override
@@ -38,20 +43,23 @@ class TopBarTitle extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          width: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
-          height: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
-          decoration: BoxDecoration(
-            color: AppColors.textOnDark.withValues(alpha: 0.09),
-            borderRadius: AppRadius.brSm,
+        // Mobile : icône de tête masquée → burger puis titre directement.
+        if (!isCompact) ...[
+          Container(
+            width: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
+            height: HomeNavigationUiTokens.topBarTitleLeadingBoxSize,
+            decoration: BoxDecoration(
+              color: AppColors.textOnDark.withValues(alpha: 0.09),
+              borderRadius: AppRadius.brSm,
+            ),
+            child: Icon(
+              leadingIcon,
+              size: HomeNavigationUiTokens.topBarTitleLeadingIconSize,
+              color: AppColors.textOnDark,
+            ),
           ),
-          child: Icon(
-            leadingIcon,
-            size: HomeNavigationUiTokens.topBarTitleLeadingIconSize,
-            color: AppColors.textOnDark,
-          ),
-        ),
-        const SizedBox(width: HomeNavigationUiTokens.topBarTitleGap),
+          const SizedBox(width: HomeNavigationUiTokens.topBarTitleGap),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

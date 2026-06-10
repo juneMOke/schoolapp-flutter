@@ -3,9 +3,7 @@ class AppBreakpoints {
 
   // Global responsive breakpoints (single source of truth).
   static const double detailCompactMax = 760.0;
-  static const double homeMobileMax = 768.0;
   static const double navigationCompactMax = 1024.0;
-  static const double enrollmentShellCompactMax = navigationCompactMax;
   static const double dataTableCardsMax = 600.0;
   static const double fabExtendedMinWidth = dataTableCardsMax;
   static const double tableFooterStackMax = 560.0;
@@ -23,6 +21,21 @@ class AppBreakpoints {
   // création quitte le FAB flottant (qui masquait la pagination) pour devenir
   // un bouton inline sous le tableau. Seuil dédié (découplé de formWideMin).
   static const double enrollmentInlineCreateMin = formWideMin;
+
+  // Étape Tuteurs — en-tête (titre + bouton « Ajouter un tuteur »). Au-delà :
+  // titre et bouton sur une même ligne (Row). En deçà (téléphone) : empilés,
+  // bouton pleine largeur, sinon le titre serait écrasé/illisible.
+  static const double guardianHeaderRowMin = 520.0;
+
+  // Pied d'actions du stepper d'inscription. En deçà (téléphone) : boutons en
+  // icônes seules (Précédent / Enregistrer / Suivant) pour éviter l'overflow ;
+  // au-delà : boutons avec labels + indicateur d'état.
+  static const double stepperControlsCompactMax = 600.0;
+
+  // Étape Frais — tableau des frais. En deçà (téléphone) : colonne Actions
+  // (icône edit/lock) masquée → 2 colonnes (Libellé | Montant) pour que le
+  // montant ne soit pas tronqué. Au-delà : 3 colonnes.
+  static const double studentChargesActionColMin = 480.0;
 
   // Facturation — seuils responsive dédiés (spec §00 : occupation de l'espace).
   // Bascule des tuiles KPI détail en colonne sous cette largeur (très petits

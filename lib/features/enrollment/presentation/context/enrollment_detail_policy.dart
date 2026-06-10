@@ -79,6 +79,14 @@ abstract class EnrollmentDetailPolicy {
 
   bool isStepEditable(EnrollmentWizardStep step);
 
+  /// Le dossier est en consultation lecture seule intégrale (élève déjà
+  /// inscrit, consultable mais non modifiable). Vrai uniquement quand même la
+  /// première étape de données n'est pas éditable — ce qui n'arrive que dans
+  /// les flux de consultation, jamais en création/édition (où seule l'étape
+  /// Frais est verrouillée). Dérivé de [isStepEditable] → toujours cohérent.
+  bool get isReadOnlyConsultation =>
+      !isStepEditable(EnrollmentWizardStep.personalInfo);
+
   bool canSaveStep(EnrollmentWizardStep step) {
     // Le step récapitulatif déclenche la validation du dossier :
     // il est toujours actionnable (l'enrollment ID est vérifié au dispatch).
