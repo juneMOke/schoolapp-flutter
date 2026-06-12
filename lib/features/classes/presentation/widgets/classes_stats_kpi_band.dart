@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_stats.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Bandeau KPI du tableau de bord Classes, aligné sur le composant DS partagé
+/// `KpiBand`/`KpiCard` (même rendu + responsivité que les dashboards Inscription,
+/// Finance et la composition des classes). Les parts filles/garçons sont
+/// exposées via le badge `percent` de la carte (anciens donuts custom).
 class ClassesStatsKpiBand extends StatelessWidget {
   final ClassroomStats stats;
 
@@ -21,85 +25,39 @@ class ClassesStatsKpiBand extends StatelessWidget {
     return Semantics(
       container: true,
       label: l10n.classesStatsKpiBandA11yLabel,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 860;
-            if (isCompact) {
-              return Wrap(
-                spacing: AppDimensions.spacingM,
-                runSpacing: AppDimensions.spacingM,
-                children: [
-                  _KpiPrimaryCell(
-                    label: l10n.classesStatsKpiTotalStudents,
-                    value: totalStudents,
-                  ),
-                  _KpiDonutCell(
-                    label: l10n.classesStatsKpiActiveGirls,
-                    value: stats.kpis.activeGirls,
-                    percent: girlsPercent,
-                    color: AppColors.bleuArdoise,
-                  ),
-                  _KpiDonutCell(
-                    label: l10n.classesStatsKpiActiveBoys,
-                    value: stats.kpis.activeBoys,
-                    percent: boysPercent,
-                    color: AppColors.orDoux,
-                  ),
-                  _KpiSecondaryCell(
-                    label: l10n.classesStatsKpiInactiveStudents,
-                    value: stats.kpis.inactive,
-                    valueColor: AppColors.warning,
-                  ),
-                ],
-              );
-            }
-
-            return Row(
-              children: [
-                Expanded(
-                  child: _KpiPrimaryCell(
-                    label: l10n.classesStatsKpiTotalStudents,
-                    value: totalStudents,
-                  ),
-                ),
-                const _VerticalDivider(),
-                Expanded(
-                  child: _KpiDonutCell(
-                    label: l10n.classesStatsKpiActiveGirls,
-                    value: stats.kpis.activeGirls,
-                    percent: girlsPercent,
-                    color: AppColors.bleuArdoise,
-                  ),
-                ),
-                const _VerticalDivider(),
-                Expanded(
-                  child: _KpiDonutCell(
-                    label: l10n.classesStatsKpiActiveBoys,
-                    value: stats.kpis.activeBoys,
-                    percent: boysPercent,
-                    color: AppColors.orDoux,
-                  ),
-                ),
-                const _VerticalDivider(),
-                Expanded(
-                  child: _KpiSecondaryCell(
-                    label: l10n.classesStatsKpiInactiveStudents,
-                    value: stats.kpis.inactive,
-                    valueColor: AppColors.warning,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+      child: EteeloKpiBand(
+        cards: [
+          EteeloKpiCardData(
+            label: l10n.classesStatsKpiTotalStudents,
+            value: totalStudents,
+            accent: AppColors.bleuProfond,
+            accentSoft: AppColors.bleuProfond.withValues(alpha: 0.12),
+            icon: Icons.groups_rounded,
+          ),
+          EteeloKpiCardData(
+            label: l10n.classesStatsKpiActiveGirls,
+            value: stats.kpis.activeGirls,
+            percent: girlsPercent,
+            accent: AppColors.terreCuite,
+            accentSoft: AppColors.terreCuite.withValues(alpha: 0.12),
+            icon: Icons.girl_rounded,
+          ),
+          EteeloKpiCardData(
+            label: l10n.classesStatsKpiActiveBoys,
+            value: stats.kpis.activeBoys,
+            percent: boysPercent,
+            accent: AppColors.bleuArdoise,
+            accentSoft: AppColors.bleuArdoise.withValues(alpha: 0.12),
+            icon: Icons.boy_rounded,
+          ),
+          EteeloKpiCardData(
+            label: l10n.classesStatsKpiInactiveStudents,
+            value: stats.kpis.inactive,
+            accent: AppColors.warning,
+            accentSoft: AppColors.warning.withValues(alpha: 0.12),
+            icon: Icons.person_off_rounded,
+          ),
+        ],
       ),
     );
   }
@@ -107,185 +65,5 @@ class ClassesStatsKpiBand extends StatelessWidget {
   int _safePercent(int value, int total) {
     if (total <= 0) return 0;
     return ((value * 100) / total).round();
-  }
-}
-
-class _VerticalDivider extends StatelessWidget {
-  const _VerticalDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: AppDimensions.financeStatsKpiDividerHeight,
-      margin: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingM),
-      color: AppColors.border,
-    );
-  }
-}
-
-class _KpiPrimaryCell extends StatelessWidget {
-  final String label;
-  final int value;
-
-  const _KpiPrimaryCell({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: '$label $value',
-      child: ExcludeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              '$value',
-              style: AppTextStyles.totalAmountLora.copyWith(
-                color: AppColors.bleuProfond,
-                fontSize: AppDimensions.financeStatsKpiPrimaryValueFontSize,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _KpiSecondaryCell extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color valueColor;
-
-  const _KpiSecondaryCell({
-    required this.label,
-    required this.value,
-    required this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: '$label $value',
-      child: ExcludeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              '$value',
-              style: AppTextStyles.totalAmountLora.copyWith(
-                color: valueColor,
-                fontSize: AppDimensions.financeStatsKpiSecondaryValueFontSize,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _KpiDonutCell extends StatelessWidget {
-  final String label;
-  final int value;
-  final int percent;
-  final Color color;
-
-  const _KpiDonutCell({
-    required this.label,
-    required this.value,
-    required this.percent,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: '$label $value $percent%',
-      child: ExcludeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Row(
-              children: [
-                _CompactDonut(percent: percent, color: color),
-                const SizedBox(width: AppDimensions.spacingS),
-                Text(
-                  '$value',
-                  style: AppTextStyles.totalAmountLora.copyWith(
-                    color: AppColors.textPrimary,
-                    fontSize:
-                        AppDimensions.financeStatsKpiSecondaryValueFontSize,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CompactDonut extends StatelessWidget {
-  final int percent;
-  final Color color;
-
-  const _CompactDonut({required this.percent, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 44,
-      height: 44,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CircularProgressIndicator(
-            value: 1,
-            strokeWidth: 6,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              AppColors.textMuted.withValues(alpha: 0.25),
-            ),
-          ),
-          CircularProgressIndicator(
-            value: percent.clamp(0, 100) / 100,
-            strokeWidth: 6,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-          Text(
-            '$percent%',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

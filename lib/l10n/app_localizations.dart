@@ -5982,12 +5982,6 @@ abstract class AppLocalizations {
   /// **'Collection rate'**
   String get financeStatsKpiCollectionRate;
 
-  /// No description provided for @financeStatsPercentOfTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent}% of total'**
-  String financeStatsPercentOfTotal(int percent);
-
   /// No description provided for @financeStatsSectionEvolution.
   ///
   /// In en, this message translates to:

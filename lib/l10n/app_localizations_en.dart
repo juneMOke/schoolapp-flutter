@@ -3360,11 +3360,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeStatsKpiCollectionRate => 'Collection rate';
 
   @override
-  String financeStatsPercentOfTotal(int percent) {
-    return '$percent% of total';
-  }
-
-  @override
   String get financeStatsSectionEvolution => 'Collection evolution';
 
   @override

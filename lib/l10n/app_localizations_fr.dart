@@ -1582,7 +1582,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.';
 
   @override
-  String get studentChargesStepTitle => 'Charges de l\'élève';
+  String get studentChargesStepTitle => 'Frais de l\'élève';
 
   @override
   String get studentChargesStepSubtitle =>
@@ -2060,7 +2060,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur inattendue est survenue lors du chargement des allocations.';
 
   @override
-  String get facturationDetailChargesSectionTitle => 'Charges de l\'élève';
+  String get facturationDetailChargesSectionTitle => 'Frais de l\'élève';
 
   @override
   String get facturationDetailChargesSectionSubtitle =>
@@ -3406,11 +3406,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financeStatsKpiCollectionRate => 'Taux de recouvrement';
-
-  @override
-  String financeStatsPercentOfTotal(int percent) {
-    return '$percent% du total';
-  }
 
   @override
   String get financeStatsSectionEvolution => 'Évolution des encaissements';

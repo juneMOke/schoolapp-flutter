@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/components/charts/kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/kpi_card.dart';
-import 'package:school_app_flutter/core/components/charts/kpi_card_data.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 
 void main() {
-  List<KpiCardData> buildCards(int n) => [
+  List<EteeloKpiCardData> buildCards(int n) => [
     for (var i = 0; i < n; i++)
-      KpiCardData(
+      EteeloKpiCardData(
         label: 'KPI$i',
         value: i * 10,
         accent: AppColors.enrollmentStatsAccent,
@@ -20,7 +20,7 @@ void main() {
   testWidgets('KpiBand rend tous les labels', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: KpiBand(cards: buildCards(2))),
+        home: Scaffold(body: EteeloKpiBand(cards: buildCards(2))),
       ),
     );
 
@@ -34,7 +34,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SizedBox(width: 360, child: KpiBand(cards: buildCards(5))),
+            body: SizedBox(
+              width: 360,
+              child: EteeloKpiBand(cards: buildCards(5)),
+            ),
           ),
         ),
       );
@@ -44,14 +47,14 @@ void main() {
       for (var i = 0; i < 5; i++) {
         expect(find.text('KPI$i'), findsOneWidget);
       }
-      expect(find.byType(KpiCard), findsNWidgets(5));
+      expect(find.byType(EteeloKpiCard), findsNWidgets(5));
       // Grille fluide (Wrap), pas de scroll horizontal.
       expect(find.byType(Wrap), findsOneWidget);
       expect(find.byType(SingleChildScrollView), findsNothing);
 
       // Wrap sur plusieurs lignes : la 3e carte passe sous la 1re (2 colonnes).
-      final firstTop = tester.getTopLeft(find.byType(KpiCard).at(0)).dy;
-      final thirdTop = tester.getTopLeft(find.byType(KpiCard).at(2)).dy;
+      final firstTop = tester.getTopLeft(find.byType(EteeloKpiCard).at(0)).dy;
+      final thirdTop = tester.getTopLeft(find.byType(EteeloKpiCard).at(2)).dy;
       expect(thirdTop, greaterThan(firstTop));
     },
   );
@@ -69,7 +72,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: SizedBox(width: 1100, child: KpiBand(cards: buildCards(5))),
+          body: SizedBox(
+            width: 1100,
+            child: EteeloKpiBand(cards: buildCards(5)),
+          ),
         ),
       ),
     );
@@ -77,7 +83,7 @@ void main() {
 
     final tops = <double>{
       for (var i = 0; i < 5; i++)
-        tester.getTopLeft(find.byType(KpiCard).at(i)).dy,
+        tester.getTopLeft(find.byType(EteeloKpiCard).at(i)).dy,
     };
     expect(tops.length, 1);
   });

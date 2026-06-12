@@ -1510,14 +1510,6 @@
       "financeStatsKpiExpected": "Total expected",
       "financeStatsKpiOutstanding": "Outstanding",
       "financeStatsKpiCollectionRate": "Collection rate",
-      "financeStatsPercentOfTotal": "{percent}% of total",
-      "@financeStatsPercentOfTotal": {
-        "placeholders": {
-          "percent": {
-            "type": "int"
-          }
-        }
-      },
       "financeStatsSectionEvolution": "Collection evolution",
       "financeStatsLegendCurrentPeriod": "Current period",
       "financeStatsLegendOtherPeriods": "Other periods",

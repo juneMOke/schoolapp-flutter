@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/charts/kpi_strip.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -162,31 +163,35 @@ class _SummaryBand extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    final kpis = EteeloKpiStrip(
-      items: [
-        EteeloKpiItem(
+    final kpis = EteeloKpiBand(
+      cards: [
+        EteeloKpiCardData(
           label: l10n.classesDistributionKpiHeadcount,
-          value: '$headcount',
-          valueColor: AppColors.bleuProfond,
-          topAccentColor: AppColors.bleuProfond,
+          value: headcount,
+          accent: AppColors.bleuProfond,
+          accentSoft: AppColors.bleuProfond.withValues(alpha: 0.12),
+          icon: Icons.groups_rounded,
         ),
-        EteeloKpiItem(
+        EteeloKpiCardData(
           label: l10n.classesDistributionKpiClasses,
-          value: '$classroomCount',
-          valueColor: AppColors.indigo,
-          topAccentColor: AppColors.indigo,
+          value: classroomCount,
+          accent: AppColors.bleuArdoise,
+          accentSoft: AppColors.bleuArdoise.withValues(alpha: 0.12),
+          icon: Icons.meeting_room_rounded,
         ),
-        EteeloKpiItem(
+        EteeloKpiCardData(
           label: l10n.classesDistributionKpiBoys,
-          value: '$maleCount',
-          valueColor: AppColors.bleuArdoise,
-          topAccentColor: AppColors.bleuArdoise,
+          value: maleCount,
+          accent: AppColors.bleuArdoise,
+          accentSoft: AppColors.bleuArdoise.withValues(alpha: 0.12),
+          icon: Icons.boy_rounded,
         ),
-        EteeloKpiItem(
+        EteeloKpiCardData(
           label: l10n.classesDistributionKpiGirls,
-          value: '$femaleCount',
-          valueColor: AppColors.terreCuite,
-          topAccentColor: AppColors.terreCuite,
+          value: femaleCount,
+          accent: AppColors.terreCuite,
+          accentSoft: AppColors.terreCuite.withValues(alpha: 0.12),
+          icon: Icons.girl_rounded,
         ),
       ],
     );

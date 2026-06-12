@@ -772,7 +772,7 @@
   "enrollmentReadOnlyMessage": "Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.",
   "enrollmentEditableTitle": "Mode édition",
   "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
-  "studentChargesStepTitle": "Charges de l'élève",
+  "studentChargesStepTitle": "Frais de l'élève",
   "studentChargesStepSubtitle": "Montants financiers appliqués à l'élève",
   "studentChargesLoading": "Chargement des charges de l'élève...",
   "studentChargesRetry": "Réessayer",
@@ -934,7 +934,7 @@
   "facturationPaymentAllocationsStorageError": "Une erreur locale empêche l'affichage des allocations.",
   "facturationPaymentAllocationsAuthError": "Une erreur d'authentification empêche le chargement des allocations.",
   "facturationPaymentAllocationsUnknownError": "Une erreur inattendue est survenue lors du chargement des allocations.",
-  "facturationDetailChargesSectionTitle": "Charges de l'élève",
+  "facturationDetailChargesSectionTitle": "Frais de l'élève",
   "facturationDetailChargesSectionSubtitle": "Répartition des montants attendus, payés et restants.",
   "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partielle(s), {dueCount} à régler",
   "@facturationDetailChargesSummary": {
@@ -1513,14 +1513,6 @@
   "financeStatsKpiExpected": "Total attendu",
   "financeStatsKpiOutstanding": "Reste à recouvrer",
   "financeStatsKpiCollectionRate": "Taux de recouvrement",
-  "financeStatsPercentOfTotal": "{percent}% du total",
-  "@financeStatsPercentOfTotal": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
   "financeStatsSectionEvolution": "Évolution des encaissements",
   "financeStatsLegendCurrentPeriod": "Période en cours",
   "financeStatsLegendOtherPeriods": "Autres périodes",

@@ -33,8 +33,6 @@ class AppDimensions {
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
   static const searchFieldGap = 10.0;
-  // Largeur min d'une cellule du bandeau KPI stats (garde-fou anti-écrasement).
-  static const financeStatsKpiCellMinWidth = 220.0;
   // Largeur max de la carte d'invitation « avant recherche » (centrée).
   static const searchInvitationMaxWidth = 620.0;
   static const detailTableMinWidth = 860.0;
@@ -143,8 +141,5 @@ class AppDimensions {
 
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
-  static const financeStatsKpiPrimaryValueFontSize = 32.0;
-  static const financeStatsKpiSecondaryValueFontSize = 22.0;
-  static const financeStatsKpiDividerHeight = 64.0;
   static const financeStatsFeeTypeProgressHeight = 8.0;
 }
