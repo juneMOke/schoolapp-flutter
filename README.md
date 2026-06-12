@@ -102,6 +102,13 @@ Suite à la migration de la Présence sur les widgets d'état partagés (règle 
 - [ ] **Centraliser l'email de support** — adopter `AppConstants.supportEmail` dans les pages d'inscription qui dupliquent encore `support@school.local` (`first_registration_page.dart`, `re_registrations_page.dart`, `pre_registrations_page.dart`).
 - [ ] **Renforcer l'a11y de `EteeloListSkeleton`** — rendre `semanticsLabel` requis (ou fournir un libellé i18n par défaut) pour éviter une région `aria-busy` muette si le widget est réutilisé sans libellé.
 
+### Statistiques (période & mapping d'erreur partagés)
+
+Suite à l'ajout du résumé de présence (`attendance-stats`), qui introduit le `StatsPeriod` partagé (`core/entities/stats_period.dart`) et le mapper d'erreur partagé (`attendance_failure_mapper.dart`). Factorisations différées, non bloquantes :
+
+- [ ] **Migrer finance & enrollment vers `StatsPeriod`** — remplacer les enums dupliqués `FinanceStatsPeriod` et `EnrollmentStatsPeriod` (identiques à `StatsPeriod`) par `core/entities/stats_period.dart`, puis supprimer les deux fichiers. ~15 fichiers + tests à adapter.
+- [ ] **Aligner `DisciplinaryCaseBloc` sur la convention 401/403** — son `_mapFailureToErrorType` mappe encore `UnauthorizedFailure` (HTTP 403) → `unauthorized` (même bug que l'ancien Présence). Comme il utilise son propre `DisciplinaryCaseErrorType`, lui ajouter une variante `forbidden` (+ UI), ou converger vers `AttendanceErrorType` + le mapper partagé `mapFailureToAttendanceErrorType`.
+
 ## Dépannage rapide
 
 - Si `build_runner` échoue: `flutter clean` puis relancer la commande de génération.

@@ -118,6 +118,8 @@ class AppConstants {
   static const String attendanceEndpoint = '/api/v1/attendances';
   static const String attendanceByClassroomEndpoint =
       '/api/v1/attendances/classes/{classroomId}';
+  static const String attendanceStudentSummaryEndpoint =
+      '/api/v1/attendance-stats/students/{studentId}/summary';
   static const String disciplinaryCasesEndpoint = '/api/v1/disciplinary-cases';
   static const String disciplinaryCaseByIdEndpoint =
       '/api/v1/disciplinary-cases/{caseId}';

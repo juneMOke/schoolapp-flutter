@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/update_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_failure_mapper.dart';
 import 'package:school_app_flutter/features/attendances/presentation/models/attendance_editable_row.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 
@@ -48,7 +48,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       (failure) => emit(
         state.copyWith(
           fetchStatus: AttendanceStatus.failure,
-          fetchErrorType: _mapFailureToErrorType(failure),
+          fetchErrorType: mapFailureToAttendanceErrorType(failure),
           saveStatus: AttendanceStatus.initial,
           saveErrorType: AttendanceErrorType.none,
         ),
@@ -164,7 +164,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       (failure) => emit(
         state.copyWith(
           saveStatus: AttendanceStatus.failure,
-          saveErrorType: _mapFailureToErrorType(failure),
+          saveErrorType: mapFailureToAttendanceErrorType(failure),
         ),
       ),
       (_) {
@@ -357,20 +357,4 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         })
         .toList(growable: false);
   }
-
-  AttendanceErrorType _mapFailureToErrorType(Failure failure) =>
-      switch (failure) {
-        NetworkFailure() => AttendanceErrorType.network,
-        NotFoundFailure() => AttendanceErrorType.notFound,
-        ValidationFailure() => AttendanceErrorType.validation,
-        // Convention projet (cf. interceptor Dio + EnrollmentBloc) :
-        // HTTP 403 -> UnauthorizedFailure -> forbidden (acces refuse),
-        // HTTP 401 -> InvalidCredentialsFailure -> 401 (session expiree).
-        UnauthorizedFailure() => AttendanceErrorType.forbidden,
-        InvalidCredentialsFailure() => AttendanceErrorType.invalidCredentials,
-        ServerFailure() => AttendanceErrorType.server,
-        StorageFailure() => AttendanceErrorType.storage,
-        AuthFailure() => AttendanceErrorType.auth,
-        _ => AttendanceErrorType.unknown,
-      };
 }
