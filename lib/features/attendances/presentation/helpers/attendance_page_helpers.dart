@@ -88,6 +88,7 @@ class AttendancePageHelpers {
     AttendanceErrorType.notFound => l10n.attendanceErrorNotFound,
     AttendanceErrorType.validation => l10n.attendanceErrorValidation,
     AttendanceErrorType.unauthorized => l10n.attendanceErrorUnauthorized,
+    AttendanceErrorType.forbidden => l10n.attendanceErrorForbidden,
     AttendanceErrorType.invalidCredentials =>
       l10n.attendanceErrorInvalidCredentials,
     AttendanceErrorType.server => l10n.attendanceErrorServer,

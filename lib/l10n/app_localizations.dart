@@ -4626,11 +4626,23 @@ abstract class AppLocalizations {
   /// **'Loading attendance records...'**
   String get attendanceLoadingMessage;
 
-  /// No description provided for @attendanceEmptyMessage.
+  /// No description provided for @attendanceEmptyStudentsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No attendance found for these filters.'**
-  String get attendanceEmptyMessage;
+  /// **'No students in this class'**
+  String get attendanceEmptyStudentsTitle;
+
+  /// No description provided for @attendanceEmptyStudentsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This class has no students yet. Add students from the class Composition to take attendance.'**
+  String get attendanceEmptyStudentsDescription;
+
+  /// No description provided for @attendanceEmptyOpenComposition.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Composition'**
+  String get attendanceEmptyOpenComposition;
 
   /// No description provided for @attendanceExportAction.
   ///
@@ -4991,6 +5003,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred.'**
   String get attendanceErrorUnknown;
+
+  /// No description provided for @attendanceErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view attendance.'**
+  String get attendanceErrorForbidden;
+
+  /// No description provided for @attendanceErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get attendanceErrorRetry;
+
+  /// No description provided for @attendanceErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get attendanceErrorReconnect;
+
+  /// No description provided for @attendanceErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get attendanceErrorContactAdmin;
+
+  /// No description provided for @attendanceErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get attendanceErrorNetworkTitle;
+
+  /// No description provided for @attendanceErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your internet connection, then try again.'**
+  String get attendanceErrorNetworkMessage;
+
+  /// No description provided for @attendanceErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get attendanceErrorUnauthorizedTitle;
+
+  /// No description provided for @attendanceErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to resume attendance.'**
+  String get attendanceErrorUnauthorizedMessage;
+
+  /// No description provided for @attendanceErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get attendanceErrorForbiddenTitle;
+
+  /// No description provided for @attendanceErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this class\'s attendance.'**
+  String get attendanceErrorForbiddenMessage;
+
+  /// No description provided for @attendanceErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get attendanceErrorServerTitle;
+
+  /// No description provided for @attendanceErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our end. Try again in a moment.'**
+  String get attendanceErrorServerMessage;
+
+  /// No description provided for @attendanceErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String attendanceErrorIncidentCode(String code);
+
+  /// No description provided for @attendanceErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get attendanceErrorUnknownTitle;
+
+  /// No description provided for @attendanceErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading attendance.'**
+  String get attendanceErrorUnknownMessage;
 
   /// No description provided for @attendanceSaveCallAction.
   ///

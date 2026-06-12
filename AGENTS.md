@@ -370,6 +370,44 @@ class AuthState extends Equatable {
 }
 ```
 
+## États partagés (chargement / vide / erreur)
+
+Toute zone de résultats (liste, tableau, panneau) **réutilise** la même
+anatomie d'état. Pas de spinner ni de `StateCard` ad hoc : on branche les trois
+widgets partagés (règle non-négociable #10 de CLAUDE.md).
+
+| État | Widget partagé | Emplacement | Points clés |
+|---|---|---|---|
+| Chargement | `EteeloListSkeleton` (s'appuie sur `EteeloSkeletonBox`) | `lib/core/components/skeletons/` | Squelette « roster » (avatar + identité 2 lignes + pilules) qui conserve l'anatomie réelle. `reduced-motion` respecté (pas de shimmer si `disableAnimations`). `aria-busy` via `Semantics(liveRegion, label)` — passer le libellé i18n via `semanticsLabel`. |
+| Vide | `EteeloEmptyResult` | `lib/core/widgets/eteelo_empty_result.dart` | Médaillon **pointillé** + titre + message + action(s). L'action propose une **issue** (ex. présence vide → renvoi vers Composition via `NavigationBloc`). |
+| Erreur | `EteeloErrorResult` | `lib/core/widgets/eteelo_error_result.dart` | Médaillon + titre + message + action, piloté par `EteeloErrorType`. |
+
+### Anatomie d'erreur — 4 types (`EteeloErrorType`)
+
+| Type | Icône | Teinte | Action |
+|---|---|---|---|
+| `network` | `power_off_rounded` (unplug) | bleu ardoise | Réessayer (manuelle) |
+| `unauthorized` (401) | `lock_outline_rounded` | ambre | Se reconnecter |
+| `forbidden` (403) | `gpp_bad_rounded` (shield-alert) | ambre | Contacter l'administrateur — **jamais « Réessayer »** |
+| `server` (500) | `dns_rounded` (server-crash) | rouge | Réessayer + code incident (`incidentCodeLabel`) |
+
+### Convention par feature
+
+Chaque feature expose un **wrapper mince** `XxxResultsErrorState` qui mappe son
+`XxxErrorType` (issu de `_mapFailureToErrorType`) vers `EteeloErrorType`, fournit
+les chaînes i18n (titre/message/action) et câble les callbacks
+(`onRetry` / `onReconnect` / `onContactAdmin`). Idem `XxxResultsEmptyState`.
+
+- **Référence** : `lib/features/attendances/presentation/widgets/states/`
+  (présence/appel) et `lib/features/enrollment/presentation/widgets/states/`.
+- **Convention de mapping** (interceptor Dio + BLoCs) : HTTP **401** →
+  `InvalidCredentialsFailure` → `unauthorized` (session expirée / Se reconnecter) ;
+  HTTP **403** → `UnauthorizedFailure` → `forbidden` (accès refusé / Contacter
+  l'administrateur). Mappez **les deux** dans `_mapFailureToErrorType` du BLoC,
+  sinon un 403 s'affiche par erreur comme un 401.
+- L'erreur s'affiche **en place** (pas de snackbar redondant pour un échec de
+  chargement).
+
 ## Common Workflows
 
 ### Creating a New Feature

@@ -363,7 +363,10 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         NetworkFailure() => AttendanceErrorType.network,
         NotFoundFailure() => AttendanceErrorType.notFound,
         ValidationFailure() => AttendanceErrorType.validation,
-        UnauthorizedFailure() => AttendanceErrorType.unauthorized,
+        // Convention projet (cf. interceptor Dio + EnrollmentBloc) :
+        // HTTP 403 -> UnauthorizedFailure -> forbidden (acces refuse),
+        // HTTP 401 -> InvalidCredentialsFailure -> 401 (session expiree).
+        UnauthorizedFailure() => AttendanceErrorType.forbidden,
         InvalidCredentialsFailure() => AttendanceErrorType.invalidCredentials,
         ServerFailure() => AttendanceErrorType.server,
         StorageFailure() => AttendanceErrorType.storage,

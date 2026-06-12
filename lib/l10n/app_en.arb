@@ -1178,7 +1178,9 @@
   "attendanceSelectClassTitle": "Select a class",
   "attendanceEmptySelectionMessage": "Select a cycle, a level, and then a class to load the attendance list.",
   "attendanceLoadingMessage": "Loading attendance records...",
-  "attendanceEmptyMessage": "No attendance found for these filters.",
+  "attendanceEmptyStudentsTitle": "No students in this class",
+  "attendanceEmptyStudentsDescription": "This class has no students yet. Add students from the class Composition to take attendance.",
+  "attendanceEmptyOpenComposition": "Open Composition",
   "attendanceExportAction": "Export",
   "attendanceExportTooltip": "Prepare result export",
   "attendanceExportSoon": "Export will be available soon.",
@@ -1263,6 +1265,28 @@
   "attendanceErrorStorage": "A local storage error occurred.",
   "attendanceErrorAuth": "An authentication error occurred.",
   "attendanceErrorUnknown": "An unexpected error occurred.",
+  "attendanceErrorForbidden": "You do not have the required permissions to view attendance.",
+  "attendanceErrorRetry": "Retry",
+  "attendanceErrorReconnect": "Sign in again",
+  "attendanceErrorContactAdmin": "Contact the administrator",
+  "attendanceErrorNetworkTitle": "No connection",
+  "attendanceErrorNetworkMessage": "You appear to be offline. Check your internet connection, then try again.",
+  "attendanceErrorUnauthorizedTitle": "Session expired",
+  "attendanceErrorUnauthorizedMessage": "Your session has expired. Sign in again to resume attendance.",
+  "attendanceErrorForbiddenTitle": "Access denied",
+  "attendanceErrorForbiddenMessage": "You do not have the required permissions to view this class's attendance.",
+  "attendanceErrorServerTitle": "Server error",
+  "attendanceErrorServerMessage": "Something went wrong on our end. Try again in a moment.",
+  "attendanceErrorIncidentCode": "Incident code: {code}",
+  "@attendanceErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceErrorUnknownTitle": "Unable to load",
+  "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
   "attendanceMarkAllPresentAction": "All present",
   "attendanceSaveOverlayEyebrow": "Attendance",

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
@@ -45,54 +44,38 @@ class _PresencesPageState extends State<PresencesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return AppPageBackground(
-      child: MultiBlocListener(
-        listeners: [
-          BlocListener<AttendanceBloc, AttendanceState>(
-            listenWhen: AttendancePageHelpers.listenWhenFetchFailure,
-            listener: (context, state) {
-              if (state.fetchStatus != AttendanceStatus.failure) return;
-              AppSnackBar.showError(
-                context,
-                AttendancePageHelpers.mapAttendanceErrorToMessage(
-                  l10n,
-                  state.fetchErrorType,
-                ),
-              );
-            },
-          ),
-        ],
-        child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-          buildWhen: AttendancePageHelpers.buildWhenBootstrapChanges,
-          builder: (context, bootstrapState) {
-            if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                bootstrapState.status == BootstrapContextLoadStatus.initial) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      // L'erreur de chargement est desormais affichee en place via l'anatomie
+      // d'erreur partagee (AttendanceResultsErrorState) : plus de snackbar
+      // redondant sur echec de fetch.
+      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+        buildWhen: AttendancePageHelpers.buildWhenBootstrapChanges,
+        builder: (context, bootstrapState) {
+          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
+              bootstrapState.status == BootstrapContextLoadStatus.initial) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-                bootstrapState.bootstrap == null) {
-              return BootstrapContextError(
-                onLogout: () {
-                  context.read<AuthBloc>().add(const AuthLogoutRequested());
-                },
-              );
-            }
-
-            final options = AttendancePageHelpers.buildCycleOptions(
-              bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+          if (bootstrapState.status != BootstrapContextLoadStatus.success ||
+              bootstrapState.bootstrap == null) {
+            return BootstrapContextError(
+              onLogout: () {
+                context.read<AuthBloc>().add(const AuthLogoutRequested());
+              },
             );
+          }
 
-            return AttendancePageContent(
-              options: options,
-              lastRequest: _lastRequest,
-              onSearch: _handleSearch,
-              onRetry: _retryLastSearch,
-            );
-          },
-        ),
+          final options = AttendancePageHelpers.buildCycleOptions(
+            bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+          );
+
+          return AttendancePageContent(
+            options: options,
+            lastRequest: _lastRequest,
+            onSearch: _handleSearch,
+            onRetry: _retryLastSearch,
+          );
+        },
       ),
     );
   }

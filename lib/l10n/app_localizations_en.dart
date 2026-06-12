@@ -2612,7 +2612,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceLoadingMessage => 'Loading attendance records...';
 
   @override
-  String get attendanceEmptyMessage => 'No attendance found for these filters.';
+  String get attendanceEmptyStudentsTitle => 'No students in this class';
+
+  @override
+  String get attendanceEmptyStudentsDescription =>
+      'This class has no students yet. Add students from the class Composition to take attendance.';
+
+  @override
+  String get attendanceEmptyOpenComposition => 'Open Composition';
 
   @override
   String get attendanceExportAction => 'Export';
@@ -2811,6 +2818,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendanceErrorUnknown => 'An unexpected error occurred.';
+
+  @override
+  String get attendanceErrorForbidden =>
+      'You do not have the required permissions to view attendance.';
+
+  @override
+  String get attendanceErrorRetry => 'Retry';
+
+  @override
+  String get attendanceErrorReconnect => 'Sign in again';
+
+  @override
+  String get attendanceErrorContactAdmin => 'Contact the administrator';
+
+  @override
+  String get attendanceErrorNetworkTitle => 'No connection';
+
+  @override
+  String get attendanceErrorNetworkMessage =>
+      'You appear to be offline. Check your internet connection, then try again.';
+
+  @override
+  String get attendanceErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get attendanceErrorUnauthorizedMessage =>
+      'Your session has expired. Sign in again to resume attendance.';
+
+  @override
+  String get attendanceErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get attendanceErrorForbiddenMessage =>
+      'You do not have the required permissions to view this class\'s attendance.';
+
+  @override
+  String get attendanceErrorServerTitle => 'Server error';
+
+  @override
+  String get attendanceErrorServerMessage =>
+      'Something went wrong on our end. Try again in a moment.';
+
+  @override
+  String attendanceErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get attendanceErrorUnknownTitle => 'Unable to load';
+
+  @override
+  String get attendanceErrorUnknownMessage =>
+      'An unexpected error occurred while loading attendance.';
 
   @override
   String get attendanceSaveCallAction => 'Save attendance';

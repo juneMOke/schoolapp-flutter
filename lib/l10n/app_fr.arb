@@ -1192,7 +1192,9 @@
   "attendanceSelectClassTitle": "Sélectionnez une classe",
   "attendanceEmptySelectionMessage": "Choisissez un cycle, un niveau puis une classe pour charger la liste d'appel.",
   "attendanceLoadingMessage": "Chargement des présences en cours...",
-  "attendanceEmptyMessage": "Aucune présence trouvée pour ces critères.",
+  "attendanceEmptyStudentsTitle": "Aucun élève dans cette classe",
+  "attendanceEmptyStudentsDescription": "Cette classe ne contient encore aucun élève. Ajoutez des élèves depuis la Composition des classes pour pouvoir faire l'appel.",
+  "attendanceEmptyOpenComposition": "Ouvrir la Composition",
   "attendanceExportAction": "Exporter",
   "attendanceExportTooltip": "Préparer l'export des résultats",
   "attendanceExportSoon": "L'export sera disponible prochainement.",
@@ -1277,6 +1279,28 @@
   "attendanceErrorStorage": "Une erreur de stockage local est survenue.",
   "attendanceErrorAuth": "Une erreur d'authentification est survenue.",
   "attendanceErrorUnknown": "Une erreur inattendue est survenue.",
+  "attendanceErrorForbidden": "Vous n'avez pas les droits requis pour consulter les présences.",
+  "attendanceErrorRetry": "Réessayer",
+  "attendanceErrorReconnect": "Se reconnecter",
+  "attendanceErrorContactAdmin": "Contacter l'administrateur",
+  "attendanceErrorNetworkTitle": "Pas de connexion",
+  "attendanceErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez l'appel.",
+  "attendanceErrorUnauthorizedTitle": "Session expirée",
+  "attendanceErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour reprendre l'appel.",
+  "attendanceErrorForbiddenTitle": "Accès refusé",
+  "attendanceErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter les présences de cette classe.",
+  "attendanceErrorServerTitle": "Erreur du serveur",
+  "attendanceErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "attendanceErrorIncidentCode": "Code incident : {code}",
+  "@attendanceErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceErrorUnknownTitle": "Chargement impossible",
+  "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
   "attendanceMarkAllPresentAction": "Tout présent",
   "attendanceSaveOverlayEyebrow": "Appel",

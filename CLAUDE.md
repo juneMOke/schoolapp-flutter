@@ -37,6 +37,7 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 7. **Cible ~250 lignes max par fichier** — au-delà, décomposer en widgets/usecases.
 8. **`mounted` guard après chaque `await`** dans un `StatefulWidget`.
 9. **`buildWhen` / `listenWhen`** dès qu'un rebuild partiel est possible.
+10. **États (chargement / vide / erreur) via les widgets partagés** — jamais de spinner ni `StateCard` ad hoc pour une zone de résultats. Chargement → `EteeloListSkeleton` / `EteeloSkeletonBox` (reduced-motion respecté). Vide → `EteeloEmptyResult` (médaillon pointillé + action). Erreur → `EteeloErrorResult` via un wrapper `XxxResultsErrorState` (anatomie 4 types : réseau / 401 / 403 / 500, 403 ne propose jamais « Réessayer »). Détails dans AGENTS.md §"États partagés".
 
 ## Modules (`lib/features/`)
 

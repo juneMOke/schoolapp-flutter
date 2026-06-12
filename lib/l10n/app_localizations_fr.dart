@@ -2640,8 +2640,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceLoadingMessage => 'Chargement des présences en cours...';
 
   @override
-  String get attendanceEmptyMessage =>
-      'Aucune présence trouvée pour ces critères.';
+  String get attendanceEmptyStudentsTitle => 'Aucun élève dans cette classe';
+
+  @override
+  String get attendanceEmptyStudentsDescription =>
+      'Cette classe ne contient encore aucun élève. Ajoutez des élèves depuis la Composition des classes pour pouvoir faire l\'appel.';
+
+  @override
+  String get attendanceEmptyOpenComposition => 'Ouvrir la Composition';
 
   @override
   String get attendanceExportAction => 'Exporter';
@@ -2845,6 +2851,59 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get attendanceErrorUnknown => 'Une erreur inattendue est survenue.';
+
+  @override
+  String get attendanceErrorForbidden =>
+      'Vous n\'avez pas les droits requis pour consulter les présences.';
+
+  @override
+  String get attendanceErrorRetry => 'Réessayer';
+
+  @override
+  String get attendanceErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get attendanceErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get attendanceErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get attendanceErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez l\'appel.';
+
+  @override
+  String get attendanceErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get attendanceErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour reprendre l\'appel.';
+
+  @override
+  String get attendanceErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get attendanceErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter les présences de cette classe.';
+
+  @override
+  String get attendanceErrorServerTitle => 'Erreur du serveur';
+
+  @override
+  String get attendanceErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String attendanceErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get attendanceErrorUnknownTitle => 'Chargement impossible';
+
+  @override
+  String get attendanceErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement de l\'appel.';
 
   @override
   String get attendanceSaveCallAction => 'Enregistrer l\'appel';

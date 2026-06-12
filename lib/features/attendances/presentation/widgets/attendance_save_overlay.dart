@@ -106,6 +106,7 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
     AttendanceErrorType.unauthorized ||
     AttendanceErrorType.auth ||
     AttendanceErrorType.invalidCredentials => EteeloErrorType.unauthorized,
+    AttendanceErrorType.forbidden => EteeloErrorType.forbidden,
     AttendanceErrorType.server ||
     AttendanceErrorType.storage => EteeloErrorType.server,
     _ => EteeloErrorType.unknown,

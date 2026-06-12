@@ -94,6 +94,14 @@ Point d'entrée recommandé pour comprendre le projet:
 - [ ] **Wordmark en Inter ExtraBold (800)** — seuls les poids 400/500/600/700 d'Inter sont bundlés, donc « ETEELO » se rabat actuellement sur le poids 700. Ajouter `Inter-ExtraBold.ttf` dans `assets/fonts/inter/` + entrée `pubspec.yaml` pour le vrai 800.
 - [ ] **Alternative « lockup horizontal » en paysage large** (spec splash, COMPOSANT 02) — afficher le logo horizontal complet (`assets/branding/fonce/logo_horizontal_fond_fonce.svg`) à la place du symbole + wordmark texte sur les écrans larges en paysage.
 
+### États partagés (chargement / vide / erreur)
+
+Suite à la migration de la Présence sur les widgets d'état partagés (règle non-négociable #10, cf. `AGENTS.md` §"États partagés"). Améliorations différées, non bloquantes :
+
+- [ ] **Migrer le squelette d'`enrollment` vers le module partagé** — `EnrollmentResultsLoadingSkeleton` (≈244 lignes) duplique encore le pattern. Réutiliser `EteeloListSkeleton` pour le mode liste et créer un `EteeloGridSkeleton` (carte) pour le mode grille, puis brancher l'un ou l'autre selon `isGrid`. Aligne enrollment sur le module `core/components/skeletons/`.
+- [ ] **Centraliser l'email de support** — adopter `AppConstants.supportEmail` dans les pages d'inscription qui dupliquent encore `support@school.local` (`first_registration_page.dart`, `re_registrations_page.dart`, `pre_registrations_page.dart`).
+- [ ] **Renforcer l'a11y de `EteeloListSkeleton`** — rendre `semanticsLabel` requis (ou fournir un libellé i18n par défaut) pour éviter une région `aria-busy` muette si le widget est réutilisé sans libellé.
+
 ## Dépannage rapide
 
 - Si `build_runner` échoue: `flutter clean` puis relancer la commande de génération.
