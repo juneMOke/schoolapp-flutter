@@ -20,6 +20,9 @@ CreateDisciplinaryCaseRequestModel _$CreateDisciplinaryCaseRequestModelFromJson(
   academicYearId: json['academicYearId'] as String,
   title: json['title'] as String,
   content: json['content'] as String,
+  category: json['category'] as String,
+  severity: json['severity'] as String,
+  sanction: json['sanction'] as String,
 );
 
 Map<String, dynamic> _$CreateDisciplinaryCaseRequestModelToJson(
@@ -36,4 +39,7 @@ Map<String, dynamic> _$CreateDisciplinaryCaseRequestModelToJson(
   'academicYearId': instance.academicYearId,
   'title': instance.title,
   'content': instance.content,
+  'category': instance.category,
+  'severity': instance.severity,
+  'sanction': instance.sanction,
 };

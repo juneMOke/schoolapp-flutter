@@ -195,6 +195,10 @@ class AppColors {
   static const enrollmentStatsAccentSoft =
       tokens.AppColors.enrollmentStatsAccentSoft;
   static const enrollmentStatsFirst = tokens.AppColors.enrollmentStatsFirst;
+
+  static const presenceSummaryTintTop = tokens.AppColors.presenceSummaryTintTop;
+  static const presenceSummaryTintBottom =
+      tokens.AppColors.presenceSummaryTintBottom;
   static const enrollmentStatsFirstSoft =
       tokens.AppColors.enrollmentStatsFirstSoft;
   static const enrollmentStatsRe = tokens.AppColors.enrollmentStatsRe;

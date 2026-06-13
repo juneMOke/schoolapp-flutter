@@ -4,6 +4,12 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
@@ -15,11 +21,21 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class DisciplinaryCaseCreateDialog extends StatefulWidget {
   final String studentId;
+  final String studentFirstName;
+  final String studentLastName;
+  final String? studentMiddleName;
+
+  /// Genre de l'élève en valeur API (MALE / FEMALE / OTHER).
+  final String studentGender;
   final String academicYearId;
 
   const DisciplinaryCaseCreateDialog({
     super.key,
     required this.studentId,
+    required this.studentFirstName,
+    required this.studentLastName,
+    this.studentMiddleName,
+    required this.studentGender,
     required this.academicYearId,
   });
 
@@ -35,12 +51,32 @@ class _DisciplinaryCaseCreateDialogState
   late DateTime _selectedDate;
   final _formKey = GlobalKey<FormState>();
 
+  DisciplinaryCategory _category = DisciplinaryCategory.disruptiveBehavior;
+  late DisciplinarySeverity _severity;
+  DisciplinarySanction _sanction = DisciplinarySanction.unknown;
+
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
     _selectedDate = DateTime.now();
+    _severity = _category.defaultSeverity;
+  }
+
+  /// Choisir une catégorie sert de gabarit : pré-remplit la gravité par défaut
+  /// et le titre (s'il est encore vide).
+  void _onCategoryChanged(
+    DisciplinaryCategory category,
+    AppLocalizations l10n,
+  ) {
+    setState(() {
+      _category = category;
+      _severity = category.defaultSeverity;
+      if (_titleController.text.trim().isEmpty) {
+        _titleController.text = category.getDisplayName(l10n);
+      }
+    });
   }
 
   @override
@@ -121,14 +157,17 @@ class _DisciplinaryCaseCreateDialogState
     context.read<DisciplinaryCaseBloc>().add(
       DisciplinaryCaseCreateRequested(
         studentId: widget.studentId,
-        studentFirstName: '',
-        studentLastName: '',
-        studentMiddleName: null,
-        studentGender: StudentGender.other,
+        studentFirstName: widget.studentFirstName,
+        studentLastName: widget.studentLastName,
+        studentMiddleName: widget.studentMiddleName,
+        studentGender: StudentGenderX.fromApiValue(widget.studentGender),
         disciplinaryCaseDate: _selectedDate,
         academicYearId: widget.academicYearId,
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
+        category: _category,
+        severity: _severity,
+        sanction: _sanction,
       ),
     );
   }
@@ -137,7 +176,7 @@ class _DisciplinaryCaseCreateDialogState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return DisciplinaryCaseDialogShell(
-      maxWidth: 500,
+      maxWidth: AppDimensions.disciplinaryCreateDialogMaxWidth,
       child: BlocListener<DisciplinaryCaseBloc, DisciplinaryCaseState>(
         listenWhen: (prev, curr) => prev.createStatus != curr.createStatus,
         listener: (context, state) {
@@ -171,6 +210,9 @@ class _DisciplinaryCaseCreateDialogState
     DisciplinaryCaseState state,
   ) {
     final isLoading = state.createStatus == DisciplinaryCaseStatusState.loading;
+    // reduced-motion : les transitions du formulaire deviennent instantanées.
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
@@ -184,6 +226,12 @@ class _DisciplinaryCaseCreateDialogState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildStatusBlock(l10n),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  _buildCategoryField(l10n, isLoading),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  _buildSeverityField(l10n),
+                  const SizedBox(height: AppDimensions.spacingM),
                   Text(
                     l10n.disciplinaryCaseCreateDialogTitleField,
                     style: AppTextStyles.caption.copyWith(
@@ -243,7 +291,7 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                   const SizedBox(height: AppDimensions.spacingXS),
                   AnimatedOpacity(
-                    duration: AppMotion.fast,
+                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
                     curve: AppMotion.outCurve,
                     opacity: isLoading ? 0.65 : 1,
                     child: InkWell(
@@ -252,7 +300,9 @@ class _DisciplinaryCaseCreateDialogState
                         AppDimensions.spacingM,
                       ),
                       child: AnimatedContainer(
-                        duration: AppMotion.medium,
+                        duration: reduceMotion
+                            ? Duration.zero
+                            : AppMotion.medium,
                         curve: AppMotion.outCurve,
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppDimensions.spacingM),
@@ -276,7 +326,9 @@ class _DisciplinaryCaseCreateDialogState
                             const SizedBox(width: AppDimensions.spacingS),
                             Expanded(
                               child: AnimatedSwitcher(
-                                duration: AppMotion.fast,
+                                duration: reduceMotion
+                                    ? Duration.zero
+                                    : AppMotion.fast,
                                 switchInCurve: AppMotion.outCurve,
                                 switchOutCurve: AppMotion.inCurve,
                                 child: Text(
@@ -297,6 +349,8 @@ class _DisciplinaryCaseCreateDialogState
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  _buildSanctionField(l10n, isLoading),
                 ],
               ),
             ),
@@ -345,14 +399,16 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                   onPressed: isLoading ? null : () => _submit(context),
                   icon: AnimatedSwitcher(
-                    duration: AppMotion.fast,
+                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
                     switchInCurve: AppMotion.outCurve,
                     switchOutCurve: AppMotion.inCurve,
                     child: isLoading
                         ? const SizedBox(
                             key: ValueKey('loading-icon'),
-                            width: 18,
-                            height: 18,
+                            width: AppDimensions
+                                .disciplinaryCreateSubmitSpinnerSize,
+                            height: AppDimensions
+                                .disciplinaryCreateSubmitSpinnerSize,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -366,7 +422,7 @@ class _DisciplinaryCaseCreateDialogState
                           ),
                   ),
                   label: AnimatedSwitcher(
-                    duration: AppMotion.fast,
+                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
                     switchInCurve: AppMotion.outCurve,
                     switchOutCurve: AppMotion.inCurve,
                     child: Text(
@@ -381,6 +437,174 @@ class _DisciplinaryCaseCreateDialogState
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _fieldLabel(String label) => Text(
+    label,
+    style: AppTextStyles.caption.copyWith(
+      color: AppColors.textSecondary,
+      fontWeight: FontWeight.w600,
+    ),
+  );
+
+  Widget _buildStatusBlock(AppLocalizations l10n) {
+    const open = DisciplinaryCaseStatus.open;
+    final color = open.getColor();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _fieldLabel(l10n.disciplinaryStatusAtCreationLabel),
+          const SizedBox(height: AppDimensions.spacingS),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.disciplinaryStatusPillPaddingH,
+              vertical: AppDimensions.disciplinaryStatusPillPaddingV,
+            ),
+            decoration: BoxDecoration(
+              color: color.withValues(
+                alpha: AppDimensions.disciplinaryTintAlpha,
+              ),
+              borderRadius: AppRadius.brPill,
+              border: Border.all(
+                color: color.withValues(
+                  alpha: AppDimensions.disciplinaryTintBorderAlpha,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  open.getIcon(),
+                  size: AppDimensions.disciplinaryStatusPillIconSize,
+                  color: color,
+                ),
+                const SizedBox(width: AppDimensions.spacingXS),
+                Text(
+                  open.getDisplayName(l10n),
+                  style: AppTextStyles.badge.copyWith(color: color),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacingS),
+          Text(
+            l10n.disciplinaryStatusAtCreationHint,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryField(AppLocalizations l10n, bool isLoading) {
+    const categories = [
+      DisciplinaryCategory.disruptiveBehavior,
+      DisciplinaryCategory.lateness,
+      DisciplinaryCategory.repeatedLateness,
+      DisciplinaryCategory.unjustifiedAbsence,
+      DisciplinaryCategory.insolence,
+      DisciplinaryCategory.cheating,
+      DisciplinaryCategory.fighting,
+      DisciplinaryCategory.dressCodeViolation,
+      DisciplinaryCategory.talkingInClass,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabel(l10n.disciplinaryFieldCategory),
+        const SizedBox(height: AppDimensions.spacingXS),
+        DropdownButtonFormField<DisciplinaryCategory>(
+          initialValue: _category,
+          isExpanded: true,
+          decoration: _inputDecoration(
+            labelText: l10n.disciplinaryFieldCategory,
+            hintText: '',
+          ),
+          items: [
+            for (final c in categories)
+              DropdownMenuItem(value: c, child: Text(c.getDisplayName(l10n))),
+          ],
+          onChanged: isLoading
+              ? null
+              : (value) {
+                  if (value != null) _onCategoryChanged(value, l10n);
+                },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSeverityField(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabel(l10n.disciplinaryFieldSeverity),
+        const SizedBox(height: AppDimensions.spacingXS),
+        SegmentedTabFilter<DisciplinarySeverity>(
+          options: [
+            SegmentedTabOption(
+              label: DisciplinarySeverity.minor.getDisplayName(l10n),
+              value: DisciplinarySeverity.minor,
+            ),
+            SegmentedTabOption(
+              label: DisciplinarySeverity.major.getDisplayName(l10n),
+              value: DisciplinarySeverity.major,
+            ),
+            SegmentedTabOption(
+              label: DisciplinarySeverity.serious.getDisplayName(l10n),
+              value: DisciplinarySeverity.serious,
+            ),
+          ],
+          selected: _severity,
+          onSelected: (value) => setState(() => _severity = value),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSanctionField(AppLocalizations l10n, bool isLoading) {
+    const sanctions = [
+      DisciplinarySanction.unknown,
+      DisciplinarySanction.oralWarning,
+      DisciplinarySanction.writtenWarning,
+      DisciplinarySanction.detention,
+      DisciplinarySanction.parentsSummoned,
+      DisciplinarySanction.temporaryExclusion,
+      DisciplinarySanction.disciplinaryCouncil,
+      DisciplinarySanction.permanentExclusion,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabel(l10n.disciplinaryFieldSanction),
+        const SizedBox(height: AppDimensions.spacingXS),
+        DropdownButtonFormField<DisciplinarySanction>(
+          initialValue: _sanction,
+          isExpanded: true,
+          decoration: _inputDecoration(
+            labelText: l10n.disciplinaryFieldSanction,
+            hintText: '',
+          ),
+          items: [
+            for (final s in sanctions)
+              DropdownMenuItem(value: s, child: Text(s.getDisplayName(l10n))),
+          ],
+          onChanged: isLoading
+              ? null
+              : (value) => setState(
+                  () => _sanction = value ?? DisciplinarySanction.unknown,
+                ),
         ),
       ],
     );

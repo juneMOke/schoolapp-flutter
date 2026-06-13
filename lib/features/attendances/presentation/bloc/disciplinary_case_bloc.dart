@@ -115,6 +115,9 @@ class DisciplinaryCaseBloc
       academicYearId: event.academicYearId,
       title: event.title,
       content: event.content,
+      category: event.category,
+      severity: event.severity,
+      sanction: event.sanction,
     );
 
     result.fold(
@@ -160,7 +163,9 @@ class DisciplinaryCaseBloc
         NetworkFailure() => DisciplinaryCaseErrorType.network,
         NotFoundFailure() => DisciplinaryCaseErrorType.notFound,
         ValidationFailure() => DisciplinaryCaseErrorType.validation,
-        UnauthorizedFailure() => DisciplinaryCaseErrorType.unauthorized,
+        // Convention projet : HTTP 403 -> UnauthorizedFailure -> forbidden,
+        // HTTP 401 -> InvalidCredentialsFailure -> 401.
+        UnauthorizedFailure() => DisciplinaryCaseErrorType.forbidden,
         InvalidCredentialsFailure() =>
           DisciplinaryCaseErrorType.invalidCredentials,
         ServerFailure() => DisciplinaryCaseErrorType.server,

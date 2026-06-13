@@ -98,6 +98,37 @@ class AppDimensions {
   static const attendanceStudentAvatarSize = 30.0;
   static const attendanceResultsPanelMinHeight = 360.0;
   static const attendanceResultsPanelMaxHeight = 620.0;
+
+  // Onglet Discipline — carte de cas & frise de statut
+  static const disciplinaryCardAccentWidth = 4.0;
+  static const disciplinaryStepperDotSize = 22.0;
+  static const disciplinaryStepperConnectorWidth = 18.0;
+  static const disciplinaryStepperConnectorHeight = 2.0;
+  static const disciplinaryStepperIconSize = 12.0;
+
+  // Onglet Discipline — chips, pastilles & modale (carte + création)
+  static const disciplinaryChipPaddingH = 10.0;
+  static const disciplinaryChipPaddingV = 4.0;
+  static const disciplinarySanctionChipPaddingV = 5.0;
+  static const disciplinaryStatusPillPaddingH = 12.0;
+  static const disciplinaryStatusPillPaddingV = 6.0;
+  static const disciplinaryChipIconSize = 13.0;
+  static const disciplinaryStatusPillIconSize = 15.0;
+  static const disciplinaryCreateDialogMaxWidth = 500.0;
+  static const disciplinaryCreateSubmitSpinnerSize = 18.0;
+  // Tints alpha récurrents des chips/pastilles (fond + bordure).
+  static const disciplinaryTintAlpha = 0.12;
+  static const disciplinaryTintBorderAlpha = 0.25;
+  static const disciplinarySanctionTintAlpha = 0.10;
+
+  // Onglet Presence — synthese d'assiduite
+  static const presenceMedallionSize = 30.0;
+  static const presenceMedallionRadius = 9.0;
+  static const presenceDistributionBarHeight = 8.0;
+  static const presenceRowAccentBarWidth = 4.0;
+  static const presenceRowAccentBarHeight = 30.0;
+  static const presencePerfectMedallionSize = 64.0;
+  static const presencePerfectIconSize = 30.0;
   static const attendanceCounterValueFontSize = 16.0;
   static const attendanceCycleFieldWidth = 170.0;
   static const attendanceLevelFieldWidth = 170.0;

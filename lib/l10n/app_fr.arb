@@ -1333,8 +1333,54 @@
   "disciplinaryDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
   "disciplinaryTabCasesLabel": "Cas disciplinaires",
   "disciplinaryTabAttendanceHistoryLabel": "Historique de présences",
-  "disciplinaryAttendanceHistoryComingSoon": "L'historique de présences sera ajouté dans une prochaine feature.",
-  "disciplinaryUnknownValue": "-",
+  "presenceStatusPresent": "Présent",
+  "presenceStatusJustified": "Absence justifiée",
+  "presenceStatusUnjustified": "Absence injustifiée",
+  "presenceSummaryTitle": "Synthèse de présence",
+  "presenceSummaryA11yLabel": "Synthèse de présence, taux {rate} %",
+  "@presenceSummaryA11yLabel": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceKpiRate": "Taux de présence",
+  "presenceRateValue": "{rate} %",
+  "@presenceRateValue": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceSchoolDaysCount": "{count, plural, =1{1 jour scolaire} other{{count} jours scolaires}}",
+  "@presenceSchoolDaysCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "presenceDistributionA11yLabel": "Répartition des jours par statut",
+  "presencePresentOutOfTotal": "{present} jours présents sur {total}",
+  "@presencePresentOutOfTotal": {
+    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "presenceAbsenceListTitle": "Détail des absences",
+  "presenceAbsenceDate": "{date}",
+  "@presenceAbsenceDate": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+  },
+  "presencePerfectTitle": "Assiduité parfaite",
+  "presencePerfectMessage": "Aucune absence sur cette période.",
+  "presenceLoadingA11yLabel": "Chargement de la synthèse de présence…",
+  "presencePeriodWeek": "Semaine",
+  "presencePeriodMonth": "Mois",
+  "presencePeriodYear": "Année",
+  "presencePeriodFilterA11yLabel": "Période d'assiduité",
+  "presenceEmptyTitle": "Aucun jour scolaire",
+  "presenceEmptyMessage": "Aucun jour scolaire sur cette période. Choisissez une autre période pour consulter l'assiduité.",
+  "presenceRangeYear": "Année scolaire {name}",
+  "@presenceRangeYear": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "presenceRangeMonth": "{date}",
+  "@presenceRangeMonth": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+  },
+  "presenceRangeWeek": "Semaine du {date}",
+  "@presenceRangeWeek": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
+  },  "disciplinaryUnknownValue": "-",
   "disciplinaryCaseCreateAction": "Nouveau cas",
   "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
   "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
@@ -1386,6 +1432,62 @@
   "disciplinaryCaseStatusInProgress": "En cours",
   "disciplinaryCaseStatusClosed": "Clôturé",
   "disciplinaryCaseStatusUnknown": "Inconnu",
+  "disciplinarySeverityMinor": "Mineure",
+  "disciplinarySeverityMajor": "Majeure",
+  "disciplinarySeveritySerious": "Grave",
+  "disciplinarySeverityUnknown": "Non précisée",
+  "disciplinaryCategoryDisruptiveBehavior": "Comportement perturbateur",
+  "disciplinaryCategoryLateness": "Retard",
+  "disciplinaryCategoryRepeatedLateness": "Retard répété",
+  "disciplinaryCategoryUnjustifiedAbsence": "Absence injustifiée",
+  "disciplinaryCategoryInsolence": "Insolence",
+  "disciplinaryCategoryCheating": "Tricherie",
+  "disciplinaryCategoryFighting": "Bagarre",
+  "disciplinaryCategoryDressCodeViolation": "Tenue non conforme",
+  "disciplinaryCategoryTalkingInClass": "Bavardage en classe",
+  "disciplinaryCategoryUnknown": "Autre",
+  "disciplinarySanctionOralWarning": "Avertissement oral",
+  "disciplinarySanctionWrittenWarning": "Avertissement écrit",
+  "disciplinarySanctionDetention": "Retenue",
+  "disciplinarySanctionParentsSummoned": "Convocation des parents",
+  "disciplinarySanctionTemporaryExclusion": "Exclusion temporaire",
+  "disciplinarySanctionDisciplinaryCouncil": "Conseil de discipline",
+  "disciplinarySanctionPermanentExclusion": "Exclusion définitive",
+  "disciplinarySanctionUnknown": "Aucune sanction",
+  "disciplinaryCaseSeverityChip": "Gravité {severity}",
+  "@disciplinaryCaseSeverityChip": {
+    "placeholders": { "severity": { "type": "String" } }
+  },
+  "disciplinaryAdvanceTakeCharge": "Prendre en charge",
+  "disciplinaryAdvanceClose": "Clôturer",
+  "disciplinaryCaseClosedLabel": "Dossier clôturé",
+  "disciplinaryCasesCountPill": "{count, plural, =1{1 cas} other{{count} cas}}",
+  "@disciplinaryCasesCountPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesOpenPill": "{count, plural, =1{1 ouvert} other{{count} ouverts}}",
+  "@disciplinaryCasesOpenPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesGravePill": "{count, plural, =1{1 grave} other{{count} graves}}",
+  "@disciplinaryCasesGravePill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesEmptyTitle": "Aucun cas de discipline",
+  "disciplinaryCasesEmptyDescription": "Aucun incident enregistré pour cet élève. Tout va bien.",
+  "disciplinaryFieldCategory": "Catégorie",
+  "disciplinaryFieldSeverity": "Gravité",
+  "disciplinaryFieldSanction": "Sanction",
+  "disciplinaryStatusAtCreationLabel": "Statut à l'ouverture",
+  "disciplinaryStatusAtCreationHint": "Le cas sera créé Ouvert. Vous le ferez ensuite évoluer depuis la fiche.",
+  "disciplinaryErrorNetworkTitle": "Pas de connexion",
+  "disciplinaryErrorUnauthorizedTitle": "Session expirée",
+  "disciplinaryErrorForbiddenTitle": "Accès refusé",
+  "disciplinaryErrorServerTitle": "Erreur du serveur",
+  "disciplinaryErrorUnknownTitle": "Chargement impossible",
+  "disciplinaryErrorRetry": "Réessayer",
+  "disciplinaryErrorReconnect": "Se reconnecter",
+  "disciplinaryErrorContactAdmin": "Contacter l'administrateur",
   "enrollmentStatusPreRegistered": "Pré-inscrit",
   "statusPaid": "Payé",
   "statusPartial": "Partiel",

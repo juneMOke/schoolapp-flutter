@@ -6,6 +6,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_detail.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/create_disciplinary_case_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
@@ -34,6 +37,9 @@ final tSummary = const DisciplinaryCaseSummary(
   title: 'Repeated lateness',
   status: DisciplinaryCaseStatus.open,
   content: 'The student arrived late three times this week.',
+  category: DisciplinaryCategory.repeatedLateness,
+  severity: DisciplinarySeverity.minor,
+  sanction: DisciplinarySanction.oralWarning,
 );
 
 final tDetail = const DisciplinaryCaseDetail(
@@ -139,6 +145,9 @@ void main() {
             academicYearId: 'year-1',
             title: 'Repeated lateness',
             content: 'The student arrived late three times this week.',
+            category: DisciplinaryCategory.repeatedLateness,
+            severity: DisciplinarySeverity.minor,
+            sanction: DisciplinarySanction.oralWarning,
           ),
         ).thenAnswer((_) async => Right(tSummary));
       },
@@ -155,6 +164,9 @@ void main() {
           academicYearId: 'year-1',
           title: 'Repeated lateness',
           content: 'The student arrived late three times this week.',
+          category: DisciplinaryCategory.repeatedLateness,
+          severity: DisciplinarySeverity.minor,
+          sanction: DisciplinarySanction.oralWarning,
         ),
       ),
       expect: () => [
@@ -180,6 +192,9 @@ void main() {
             academicYearId: 'year-1',
             title: 'Repeated lateness',
             content: 'The student arrived late three times this week.',
+            category: DisciplinaryCategory.repeatedLateness,
+            severity: DisciplinarySeverity.minor,
+            sanction: DisciplinarySanction.oralWarning,
           ),
         ).called(1);
       },

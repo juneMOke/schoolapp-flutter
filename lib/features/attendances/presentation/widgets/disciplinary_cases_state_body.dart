@@ -1,408 +1,211 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
-import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create_cta.dart';
-import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_table.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_card.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 enum DisciplinaryCasesBodyStatus { loading, empty, error, success }
 
+/// Zone d'état de la liste des cas : squelette / vide / erreur (widgets
+/// partagés) ou liste de [DisciplinaryCaseCard].
 class DisciplinaryCasesStateBody extends StatelessWidget {
   final DisciplinaryCasesBodyStatus status;
   final List<DisciplinaryCaseSummary> cases;
-  final String? errorMessage;
+  final DisciplinaryCaseErrorType errorType;
   final VoidCallback? onRetry;
-  final void Function(DisciplinaryCaseSummary) onViewCase;
-
-  /// Callback optionnel affiché dans l'état vide pour inviter à créer un cas.
+  final VoidCallback? onReconnect;
+  final VoidCallback? onContactAdmin;
   final VoidCallback? onCreateCase;
+
+  /// Avancement de statut (dormant pour l'instant).
+  final void Function(DisciplinaryCaseSummary caseData)? onAdvance;
 
   const DisciplinaryCasesStateBody({
     super.key,
     required this.status,
     required this.cases,
-    this.errorMessage,
+    required this.errorType,
     this.onRetry,
-    required this.onViewCase,
+    this.onReconnect,
+    this.onContactAdmin,
     this.onCreateCase,
+    this.onAdvance,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     final child = switch (status) {
-      DisciplinaryCasesBodyStatus.loading => _buildLoadingContent(l10n),
-      DisciplinaryCasesBodyStatus.empty => _buildEmptyContent(l10n),
-      DisciplinaryCasesBodyStatus.error => _buildErrorContent(l10n),
-      DisciplinaryCasesBodyStatus.success => DisciplinaryCasesTable(
-        cases: cases,
-        onViewCase: onViewCase,
+      DisciplinaryCasesBodyStatus.loading => const _Skeleton(),
+      DisciplinaryCasesBodyStatus.empty => _empty(context),
+      DisciplinaryCasesBodyStatus.error => DisciplinaryCaseResultsErrorState(
+        type: errorType,
+        onRetry: onRetry,
+        onReconnect: onReconnect,
+        onContactAdmin: onContactAdmin,
       ),
+      DisciplinaryCasesBodyStatus.success => _list(),
     };
 
+    // reduced-motion : bascule instantanée entre états (pas de fondu enchaîné).
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return AnimatedSwitcher(
-      duration: AppMotion.standard,
+      duration: reduceMotion ? Duration.zero : AppMotion.standard,
       switchInCurve: AppMotion.outCurve,
       switchOutCurve: AppMotion.inCurve,
       child: KeyedSubtree(
-        key: ValueKey('${status.name}-${cases.length}-${errorMessage ?? ''}'),
+        key: ValueKey('${status.name}-${cases.length}-${errorType.name}'),
         child: child,
       ),
     );
   }
 
-  Widget _buildLoadingContent(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.disciplinaryDetailShadow,
-            blurRadius: AppDimensions.classesOrganisationShadowBlur,
-            offset: Offset(0, AppDimensions.classesOrganisationShadowOffsetY),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCompact =
-              constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
-          return Column(
-            children: [
-              // Desktop header
-              if (!isCompact)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppDimensions.spacingM,
-                    AppDimensions.spacingM,
-                    AppDimensions.spacingM,
-                    AppDimensions.spacingS,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Text(
-                          l10n.disciplinaryCasesTableTitleColumn,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppDimensions.spacingM),
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          l10n.disciplinaryCasesTableStatusColumn,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              // Loading skeletons
-              Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.fromLTRB(
-                    AppDimensions.spacingM,
-                    isCompact ? AppDimensions.spacingM : AppDimensions.spacingS,
-                    AppDimensions.spacingM,
-                    AppDimensions.spacingM,
-                  ),
-                  itemCount: 3,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppDimensions.spacingS),
-                  itemBuilder: (_, index) => _SkeletonCaseRow(
-                    delay: Duration(milliseconds: 100 * index),
-                    isCompact: isCompact,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+  Widget _empty(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return EteeloEmptyResult(
+      medallionIcon: Icons.check_circle_outline_rounded,
+      label: l10n.disciplinaryCasesEmptyTitle,
+      description: l10n.disciplinaryCasesEmptyDescription,
+      secondaryAction: onCreateCase == null
+          ? null
+          : OutlinedButton.icon(
+              onPressed: onCreateCase,
+              icon: const Icon(Icons.add_rounded, size: 16),
+              label: Text(l10n.disciplinaryCaseCreateAction),
+            ),
+      fullWidthCard: true,
+      minHeight: 280,
     );
   }
 
-  Widget _buildEmptyContent(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.disciplinaryDetailShadow,
-            blurRadius: AppDimensions.classesOrganisationShadowBlur,
-            offset: Offset(0, AppDimensions.classesOrganisationShadowOffsetY),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.inbox_outlined,
-                  size: 40,
-                  color: AppColors.textSecondary.withValues(alpha: 0.6),
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Text(
-                l10n.disciplinaryCasesEmptyMessage,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (onCreateCase != null) ...[
-                const SizedBox(height: AppDimensions.spacingL),
-                DisciplinaryCaseCreateCta(
-                  onPressed: onCreateCase!,
-                  label: l10n.disciplinaryCaseCreateAction,
-                  subtitle: l10n.disciplinaryCaseCreateCtaSubtitle,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorContent(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.disciplinaryDetailShadow,
-            blurRadius: AppDimensions.classesOrganisationShadowBlur,
-            offset: Offset(0, AppDimensions.classesOrganisationShadowOffsetY),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.danger.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline,
-                  size: 40,
-                  color: AppColors.danger.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Text(
-                errorMessage ?? l10n.disciplinaryCasesUnknownError,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (onRetry != null) ...[
-                const SizedBox(height: AppDimensions.spacingM),
-                FilledButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(l10n.refresh),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Skeleton loader animé pour les lignes en cours de chargement
-class _SkeletonCaseRow extends StatefulWidget {
-  final Duration delay;
-  final bool isCompact;
-
-  const _SkeletonCaseRow({required this.delay, required this.isCompact});
-
-  @override
-  State<_SkeletonCaseRow> createState() => _SkeletonCaseRowState();
-}
-
-class _SkeletonCaseRowState extends State<_SkeletonCaseRow>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _shimmerController;
-  late Animation<double> _shimmerAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _shimmerAnimation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(_shimmerController);
-
-    Future.delayed(widget.delay, () {
-      if (mounted) {
-        _shimmerController.repeat();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _shimmerController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.disciplinaryDetailInfoSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: widget.isCompact
-          ? _buildCompactSkeleton()
-          : _buildDesktopSkeleton(),
-    );
-  }
-
-  Widget _buildCompactSkeleton() {
+  Widget _list() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ShimmerBox(
-          shimmerAnimation: _shimmerAnimation,
-          height: 20,
-          width: double.infinity,
-        ),
-        const SizedBox(height: AppDimensions.spacingS),
-        _ShimmerBox(
-          shimmerAnimation: _shimmerAnimation,
-          height: 16,
-          width: 120,
-        ),
-        const SizedBox(height: AppDimensions.spacingS),
-        Align(
-          alignment: Alignment.centerRight,
-          child: _ShimmerBox(
-            shimmerAnimation: _shimmerAnimation,
-            height: 40,
-            width: 40,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDesktopSkeleton() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 6,
-          child: _ShimmerBox(
-            shimmerAnimation: _shimmerAnimation,
-            height: 20,
-            width: double.infinity,
-          ),
-        ),
-        const SizedBox(width: AppDimensions.spacingM),
-        Expanded(
-          flex: 4,
-          child: _ShimmerBox(
-            shimmerAnimation: _shimmerAnimation,
-            height: 20,
-            width: double.infinity,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Box avec effet shimmer (chargement)
-class _ShimmerBox extends StatelessWidget {
-  final Animation<double> shimmerAnimation;
-  final double height;
-  final double width;
-
-  const _ShimmerBox({
-    required this.shimmerAnimation,
-    required this.height,
-    required this.width,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: shimmerAnimation,
-      builder: (context, child) {
-        return Container(
-          height: height,
-          width: width,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              stops: [
-                shimmerAnimation.value - 1,
-                shimmerAnimation.value,
-                shimmerAnimation.value + 1,
-              ],
-              colors: [
-                AppColors.border,
-                AppColors.textSecondary.withValues(alpha: 0.1),
-                AppColors.border,
-              ],
+        for (var i = 0; i < cases.length; i++)
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: i == cases.length - 1 ? 0 : AppDimensions.spacingM,
+            ),
+            child: DisciplinaryCaseCard(
+              caseData: cases[i],
+              onAdvance: onAdvance == null ? null : () => onAdvance!(cases[i]),
             ),
           ),
-        );
-      },
+      ],
+    );
+  }
+}
+
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: l10n.disciplinaryCasesLoadingMessage,
+      child: const ExcludeSemantics(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              spacing: AppDimensions.spacingM,
+              runSpacing: AppDimensions.spacingM,
+              children: [_GhostSummary(), _GhostSummary(), _GhostSummary()],
+            ),
+            SizedBox(height: AppDimensions.spacingM),
+            _GhostCaseCard(),
+            SizedBox(height: AppDimensions.spacingM),
+            _GhostCaseCard(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GhostSummary extends StatelessWidget {
+  const _GhostSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: AppDimensions.enrollmentStatsKpiCardMinWidth,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceRaised,
+          borderRadius: BorderRadius.circular(
+            AppDimensions.enrollmentStatsChartRadius,
+          ),
+          border: const Border(
+            left: BorderSide(color: AppColors.border, width: 3),
+          ),
+        ),
+        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            EteeloSkeletonBox(
+              width: 26,
+              height: 26,
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            ),
+            SizedBox(height: AppDimensions.spacingS),
+            EteeloSkeletonBox(width: 50, height: 18),
+            SizedBox(height: AppDimensions.spacingXS),
+            EteeloSkeletonBox(width: 78, height: 9),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GhostCaseCard extends StatelessWidget {
+  const _GhostCaseCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingL,
+        vertical: AppDimensions.spacingM,
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: EteeloSkeletonBox(width: 140, height: 14)),
+              SizedBox(width: AppDimensions.spacingS),
+              EteeloSkeletonBox(
+                width: 88,
+                height: 26,
+                borderRadius: BorderRadius.all(Radius.circular(999)),
+              ),
+            ],
+          ),
+          SizedBox(height: AppDimensions.spacingS),
+          EteeloSkeletonBox(width: double.infinity, height: 10),
+          SizedBox(height: AppDimensions.spacingXS),
+          EteeloSkeletonBox(width: 200, height: 10),
+        ],
+      ),
     );
   }
 }

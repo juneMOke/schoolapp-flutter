@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/dis
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_tab.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_detail_back_button.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_student_compact_header.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/student_attendance_summary_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -166,9 +167,7 @@ class _DisciplinaryStudentDetailPageState
                       academicYearId: intent.academicYearId,
                       onCreateCase: () => _showCreateDialog(context),
                     ),
-                    _AttendanceHistoryPlaceholder(
-                      message: l10n.disciplinaryAttendanceHistoryComingSoon,
-                    ),
+                    StudentAttendanceSummaryTab(studentId: intent.studentId),
                   ],
                 ),
               ),
@@ -258,6 +257,10 @@ class _DisciplinaryStudentDetailPageState
         value: disciplinaryCaseBloc,
         child: DisciplinaryCaseCreateDialog(
           studentId: studentId,
+          studentFirstName: widget.intent.studentFirstName,
+          studentLastName: widget.intent.studentLastName,
+          studentMiddleName: widget.intent.studentMiddleName,
+          studentGender: widget.intent.studentGender,
           academicYearId: academicYearId,
         ),
       ),
@@ -270,28 +273,5 @@ class _DisciplinaryStudentDetailPageState
         ),
       );
     });
-  }
-}
-
-class _AttendanceHistoryPlaceholder extends StatelessWidget {
-  final String message;
-
-  const _AttendanceHistoryPlaceholder({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-        border: Border.all(color: AppColors.border),
-      ),
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      child: Text(
-        message,
-        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-      ),
-    );
   }
 }

@@ -107,7 +107,17 @@ Suite à la migration de la Présence sur les widgets d'état partagés (règle 
 Suite à l'ajout du résumé de présence (`attendance-stats`), qui introduit le `StatsPeriod` partagé (`core/entities/stats_period.dart`) et le mapper d'erreur partagé (`attendance_failure_mapper.dart`). Factorisations différées, non bloquantes :
 
 - [ ] **Migrer finance & enrollment vers `StatsPeriod`** — remplacer les enums dupliqués `FinanceStatsPeriod` et `EnrollmentStatsPeriod` (identiques à `StatsPeriod`) par `core/entities/stats_period.dart`, puis supprimer les deux fichiers. ~15 fichiers + tests à adapter.
-- [ ] **Aligner `DisciplinaryCaseBloc` sur la convention 401/403** — son `_mapFailureToErrorType` mappe encore `UnauthorizedFailure` (HTTP 403) → `unauthorized` (même bug que l'ancien Présence). Comme il utilise son propre `DisciplinaryCaseErrorType`, lui ajouter une variante `forbidden` (+ UI), ou converger vers `AttendanceErrorType` + le mapper partagé `mapFailureToAttendanceErrorType`.
+
+### Discipline — dépendances backend (UI posée, à câbler)
+
+Suite à la refonte de l'onglet Discipline (cartes de cas, frise de statut, modale enrichie). Éléments de la spec laissés **dormants / différés** faute de support backend :
+
+- [ ] **Avancement de statut** — le bouton « Prendre en charge / Clôturer » est présent mais **inerte** (`onAdvance: (_) {}` dans `disciplinary_cases_tab`). Câbler quand un endpoint `PATCH /disciplinary-cases/{id}` (ou équivalent) existera + ajouter l'event/usecase/repo correspondants.
+- [ ] **Journal / historique** des transitions — non implémenté (aucune donnée `history` côté backend).
+- [ ] **Auteur / rapporteur** du cas — champ absent du DTO ; chip auteur non affiché.
+- [ ] **Filtre période** — la liste se charge par `studentId + academicYearId` (pas de paramètre de période) ; le segmenté période de la spec n'est pas posé.
+- [ ] **Modale création** : les champs catégorie/gravité/sanction sont envoyés via `CreateDisciplinaryCaseRequest` — **vérifier que le backend de création les accepte/stocke** (supposé OK).
+- [ ] **Nettoyage** : `disciplinary_cases_table.dart` et `disciplinary_case_view_dialog.dart` (+ le flux `getDisciplinaryCaseDetail`) sont **orphelins** depuis le passage en cartes — à supprimer si confirmé inutiles.
 
 ## Dépannage rapide
 

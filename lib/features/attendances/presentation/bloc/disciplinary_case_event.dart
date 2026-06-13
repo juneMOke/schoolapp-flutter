@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 sealed class DisciplinaryCaseEvent extends Equatable {
@@ -37,6 +40,9 @@ class DisciplinaryCaseCreateRequested extends DisciplinaryCaseEvent {
   final String academicYearId;
   final String title;
   final String content;
+  final DisciplinaryCategory category;
+  final DisciplinarySeverity severity;
+  final DisciplinarySanction sanction;
 
   const DisciplinaryCaseCreateRequested({
     required this.studentId,
@@ -48,6 +54,9 @@ class DisciplinaryCaseCreateRequested extends DisciplinaryCaseEvent {
     required this.academicYearId,
     required this.title,
     required this.content,
+    required this.category,
+    required this.severity,
+    required this.sanction,
   });
 
   @override
@@ -61,6 +70,9 @@ class DisciplinaryCaseCreateRequested extends DisciplinaryCaseEvent {
     academicYearId,
     title,
     content,
+    category,
+    severity,
+    sanction,
   ];
 }
 

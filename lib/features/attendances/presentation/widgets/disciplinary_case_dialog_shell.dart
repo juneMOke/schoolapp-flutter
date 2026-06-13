@@ -25,6 +25,7 @@ class _DisciplinaryCaseDialogShellState
   late AnimationController _entryController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _entryStarted = false;
 
   @override
   void initState() {
@@ -41,8 +42,19 @@ class _DisciplinaryCaseDialogShellState
     _scaleAnimation = Tween<double>(begin: 0.94, end: 1.0).animate(
       CurvedAnimation(parent: _entryController, curve: AppMotion.outCurve),
     );
+  }
 
-    _entryController.forward();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_entryStarted) return;
+    _entryStarted = true;
+    // reduced-motion : pas d'animation d'entrée, on saute à l'état final.
+    if (MediaQuery.of(context).disableAnimations) {
+      _entryController.value = 1.0;
+    } else {
+      _entryController.forward();
+    }
   }
 
   @override
@@ -54,38 +66,44 @@ class _DisciplinaryCaseDialogShellState
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final reduceMotion = mediaQuery.disableAnimations;
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - bottomInset;
     final maxHeight = availableHeight * widget.heightFactor;
 
+    final dialog = Dialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingM,
+        vertical: AppDimensions.spacingL,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: widget.maxWidth,
+          maxHeight: maxHeight,
+        ),
+        child: widget.child,
+      ),
+    );
+
+    // reduced-motion : pas de transition d'entrée ni de glissement clavier.
+    if (reduceMotion) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: dialog,
+      );
+    }
+
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
+      duration: AppMotion.medium,
+      curve: AppMotion.gentleOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: FadeTransition(
         opacity: _fadeAnimation,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: Dialog(
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.spacingM,
-              vertical: AppDimensions.spacingL,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                AppDimensions.sectionCardRadius,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: widget.maxWidth,
-                maxHeight: maxHeight,
-              ),
-              child: widget.child,
-            ),
-          ),
-        ),
+        child: ScaleTransition(scale: _scaleAnimation, child: dialog),
       ),
     );
   }

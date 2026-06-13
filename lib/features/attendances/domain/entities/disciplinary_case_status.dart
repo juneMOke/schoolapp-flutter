@@ -29,10 +29,32 @@ extension DisciplinaryCaseStatusX on DisciplinaryCaseStatus {
     DisciplinaryCaseStatus.unknown => l10n.disciplinaryCaseStatusUnknown,
   };
 
+  /// Couleur de la pastille de statut (cf. spec MÉTIER-7).
   Color getColor() => switch (this) {
-    DisciplinaryCaseStatus.open => AppColors.bleuArdoise,
+    DisciplinaryCaseStatus.open => AppColors.error,
     DisciplinaryCaseStatus.inProgress => AppColors.warning,
-    DisciplinaryCaseStatus.closed => AppColors.success,
+    DisciplinaryCaseStatus.closed => AppColors.textSecondary,
     DisciplinaryCaseStatus.unknown => AppColors.muted,
+  };
+
+  IconData getIcon() => switch (this) {
+    DisciplinaryCaseStatus.open => Icons.error_outline_rounded,
+    DisciplinaryCaseStatus.inProgress => Icons.schedule_rounded,
+    DisciplinaryCaseStatus.closed => Icons.done_all_rounded,
+    DisciplinaryCaseStatus.unknown => Icons.help_outline_rounded,
+  };
+
+  /// Statut suivant dans le cycle linéaire (sens unique) ; `null` si terminal.
+  DisciplinaryCaseStatus? get nextStatus => switch (this) {
+    DisciplinaryCaseStatus.open => DisciplinaryCaseStatus.inProgress,
+    DisciplinaryCaseStatus.inProgress => DisciplinaryCaseStatus.closed,
+    DisciplinaryCaseStatus.closed || DisciplinaryCaseStatus.unknown => null,
+  };
+
+  /// Libellé du bouton qui pousse au statut suivant ; `null` si terminal.
+  String? advanceActionLabel(AppLocalizations l10n) => switch (this) {
+    DisciplinaryCaseStatus.open => l10n.disciplinaryAdvanceTakeCharge,
+    DisciplinaryCaseStatus.inProgress => l10n.disciplinaryAdvanceClose,
+    DisciplinaryCaseStatus.closed || DisciplinaryCaseStatus.unknown => null,
   };
 }

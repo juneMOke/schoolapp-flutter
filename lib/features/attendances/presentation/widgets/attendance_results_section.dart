@@ -103,11 +103,13 @@ class AttendanceResultsSection extends StatelessWidget {
                 (r) =>
                     !r.present &&
                     r.absenceReason != null &&
-                    r.absenceReason != AbsenceReason.unjustified,
+                    !r.absenceReason!.isUnjustified,
               )
               .length;
           final unjustifiedCount = state.draftRows
-              .where((r) => r.absenceReason == AbsenceReason.unjustified)
+              .where(
+                (r) => !r.present && (r.absenceReason?.isUnjustified ?? false),
+              )
               .length;
           final missingReasonsCount = state.draftRows
               .where((row) => !row.present && row.absenceReason == null)

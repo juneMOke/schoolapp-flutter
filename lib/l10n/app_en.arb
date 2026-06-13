@@ -1321,8 +1321,54 @@
    "disciplinaryDetailContextErrorMessage": "Required context for this detail view is missing. Go back to the list and open the detail again.",
    "disciplinaryTabCasesLabel": "Disciplinary cases",
    "disciplinaryTabAttendanceHistoryLabel": "Attendance history",
-   "disciplinaryAttendanceHistoryComingSoon": "Attendance history will be delivered in a future feature.",
-   "disciplinaryUnknownValue": "-",
+  "presenceStatusPresent": "Present",
+  "presenceStatusJustified": "Justified absence",
+  "presenceStatusUnjustified": "Unjustified absence",
+  "presenceSummaryTitle": "Attendance summary",
+  "presenceSummaryA11yLabel": "Attendance summary, rate {rate}%",
+  "@presenceSummaryA11yLabel": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceKpiRate": "Attendance rate",
+  "presenceRateValue": "{rate}%",
+  "@presenceRateValue": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceSchoolDaysCount": "{count, plural, =1{1 school day} other{{count} school days}}",
+  "@presenceSchoolDaysCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "presenceDistributionA11yLabel": "Distribution of days by status",
+  "presencePresentOutOfTotal": "{present} days present out of {total}",
+  "@presencePresentOutOfTotal": {
+    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "presenceAbsenceListTitle": "Absences detail",
+  "presenceAbsenceDate": "{date}",
+  "@presenceAbsenceDate": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+  },
+  "presencePerfectTitle": "Perfect attendance",
+  "presencePerfectMessage": "No absence on this period.",
+  "presenceLoadingA11yLabel": "Loading attendance summary…",
+  "presencePeriodWeek": "Week",
+  "presencePeriodMonth": "Month",
+  "presencePeriodYear": "Year",
+  "presencePeriodFilterA11yLabel": "Attendance period",
+  "presenceEmptyTitle": "No school days",
+  "presenceEmptyMessage": "No school days on this period. Pick another period to view attendance.",
+  "presenceRangeYear": "School year {name}",
+  "@presenceRangeYear": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "presenceRangeMonth": "{date}",
+  "@presenceRangeMonth": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+  },
+  "presenceRangeWeek": "Week of {date}",
+  "@presenceRangeWeek": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
+  },   "disciplinaryUnknownValue": "-",
    "disciplinaryCaseCreateAction": "New case",
    "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
    "disciplinaryCasesSummary": "{total} recorded cases - {open} open",
@@ -1374,6 +1420,62 @@
    "disciplinaryCaseStatusInProgress": "In progress",
    "disciplinaryCaseStatusClosed": "Closed",
    "disciplinaryCaseStatusUnknown": "Unknown",
+  "disciplinarySeverityMinor": "Minor",
+  "disciplinarySeverityMajor": "Major",
+  "disciplinarySeveritySerious": "Serious",
+  "disciplinarySeverityUnknown": "Unspecified",
+  "disciplinaryCategoryDisruptiveBehavior": "Disruptive behavior",
+  "disciplinaryCategoryLateness": "Lateness",
+  "disciplinaryCategoryRepeatedLateness": "Repeated lateness",
+  "disciplinaryCategoryUnjustifiedAbsence": "Unjustified absence",
+  "disciplinaryCategoryInsolence": "Insolence",
+  "disciplinaryCategoryCheating": "Cheating",
+  "disciplinaryCategoryFighting": "Fighting",
+  "disciplinaryCategoryDressCodeViolation": "Dress code violation",
+  "disciplinaryCategoryTalkingInClass": "Talking in class",
+  "disciplinaryCategoryUnknown": "Other",
+  "disciplinarySanctionOralWarning": "Oral warning",
+  "disciplinarySanctionWrittenWarning": "Written warning",
+  "disciplinarySanctionDetention": "Detention",
+  "disciplinarySanctionParentsSummoned": "Parents summoned",
+  "disciplinarySanctionTemporaryExclusion": "Temporary exclusion",
+  "disciplinarySanctionDisciplinaryCouncil": "Disciplinary council",
+  "disciplinarySanctionPermanentExclusion": "Permanent exclusion",
+  "disciplinarySanctionUnknown": "No sanction",
+  "disciplinaryCaseSeverityChip": "Severity {severity}",
+  "@disciplinaryCaseSeverityChip": {
+    "placeholders": { "severity": { "type": "String" } }
+  },
+  "disciplinaryAdvanceTakeCharge": "Take charge",
+  "disciplinaryAdvanceClose": "Close",
+  "disciplinaryCaseClosedLabel": "Case closed",
+  "disciplinaryCasesCountPill": "{count, plural, =1{1 case} other{{count} cases}}",
+  "@disciplinaryCasesCountPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesOpenPill": "{count, plural, =1{1 open} other{{count} open}}",
+  "@disciplinaryCasesOpenPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesGravePill": "{count, plural, =1{1 serious} other{{count} serious}}",
+  "@disciplinaryCasesGravePill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesEmptyTitle": "No discipline case",
+  "disciplinaryCasesEmptyDescription": "No incident recorded for this student. All good.",
+  "disciplinaryFieldCategory": "Category",
+  "disciplinaryFieldSeverity": "Severity",
+  "disciplinaryFieldSanction": "Sanction",
+  "disciplinaryStatusAtCreationLabel": "Status at creation",
+  "disciplinaryStatusAtCreationHint": "The case will be created as Open. You will then advance it from the record.",
+  "disciplinaryErrorNetworkTitle": "No connection",
+  "disciplinaryErrorUnauthorizedTitle": "Session expired",
+  "disciplinaryErrorForbiddenTitle": "Access denied",
+  "disciplinaryErrorServerTitle": "Server error",
+  "disciplinaryErrorUnknownTitle": "Unable to load",
+  "disciplinaryErrorRetry": "Retry",
+  "disciplinaryErrorReconnect": "Sign in again",
+  "disciplinaryErrorContactAdmin": "Contact the administrator",
 
    "enrollmentStatusPreRegistered": "Pre-registered",
 

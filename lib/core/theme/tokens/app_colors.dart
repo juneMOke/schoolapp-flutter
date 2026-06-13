@@ -89,6 +89,10 @@ class AppColors {
   static const enrollmentStatsAccent = bleuArdoise;
   static const enrollmentStatsAccentSoft = Color(0xFFEBF2F7);
   static const enrollmentStatsFirst = vertSavane;
+
+  // Onglet Presence — degrade teinte de la zone de synthese (bleu pale -> creme).
+  static const presenceSummaryTintTop = Color(0xFFEDF3F8);
+  static const presenceSummaryTintBottom = Color(0xFFF6F3EC);
   static const enrollmentStatsFirstSoft = Color(0xFFEDF5EF);
   static const enrollmentStatsRe = orDoux;
   static const enrollmentStatsReSoft = Color(0xFFFBF3E3);

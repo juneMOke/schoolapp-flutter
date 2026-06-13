@@ -44,4 +44,10 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.unjustified => 'UNJUSTIFIED',
     AbsenceReason.other => 'OTHER',
   };
+
+  /// Une absence est consideree injustifiee si son motif est `unjustified` ou
+  /// `unknown` (motif inconnu / non renseigne cote backend). Regle metier
+  /// partagee par l'ecran d'appel et la synthese de presence.
+  bool get isUnjustified =>
+      this == AbsenceReason.unjustified || this == AbsenceReason.unknown;
 }

@@ -2,6 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_detail.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 abstract class DisciplinaryCaseRepository {
@@ -25,5 +28,8 @@ abstract class DisciplinaryCaseRepository {
     required String academicYearId,
     required String title,
     required String content,
+    required DisciplinaryCategory category,
+    required DisciplinarySeverity severity,
+    required DisciplinarySanction sanction,
   });
 }

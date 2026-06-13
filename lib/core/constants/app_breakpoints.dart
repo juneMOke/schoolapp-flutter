@@ -58,4 +58,8 @@ class AppBreakpoints {
   static const double classesCascadeRowMin = 520.0;
   // Tuile élève : en deçà, le bouton d'action passe en icône seule (+ tooltip).
   static const double classesMemberTileCompactMax = 300.0;
+
+  // Carte de cas disciplinaire — pied (frise + action). En deçà : empilement
+  // vertical pour éviter tout débordement ; au-delà : frise et action en Row.
+  static const double disciplinaryCardFooterStackMax = 480.0;
 }
