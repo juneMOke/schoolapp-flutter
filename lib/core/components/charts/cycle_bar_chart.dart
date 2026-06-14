@@ -7,14 +7,28 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 
 /// Graphique en barres verticales générique pour une distribution par catégories.
+///
+/// [showValueLabels] affiche en permanence la valeur au-dessus de chaque barre
+/// (via les tooltips épinglés de fl_chart, sans fond), à la couleur de la barre
+/// — utile pour un rendu « étiquette par barre » sans interaction. Par défaut
+/// off (rendu historique avec tooltip au survol sur fond sombre).
 class CycleBarChart extends StatelessWidget {
   final List<BarChartItem> items;
   final Set<int> highlightedIndexes;
+  final bool showValueLabels;
+  final String Function(double value)? valueLabelFormatter;
+
+  /// Couleur de l'étiquette de valeur par index (défaut : couleur de la barre).
+  /// Permet ex. un libellé neutre sur les barres atténuées et coloré sur le pic.
+  final Color Function(int index)? valueLabelColorBuilder;
 
   const CycleBarChart({
     super.key,
     required this.items,
     this.highlightedIndexes = const <int>{},
+    this.showValueLabels = false,
+    this.valueLabelFormatter,
+    this.valueLabelColorBuilder,
   });
 
   @override
@@ -31,12 +45,34 @@ class CycleBarChart extends StatelessWidget {
         BarChartData(
           maxY: topY,
           barTouchData: BarTouchData(
-            enabled: true,
+            enabled: !showValueLabels,
+            handleBuiltInTouches: !showValueLabels,
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (_) => AppColors.surfaceDark,
+              getTooltipColor: (_) =>
+                  showValueLabels ? Colors.transparent : AppColors.surfaceDark,
               tooltipRoundedRadius: 8,
+              tooltipPadding: showValueLabels
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              fitInsideVertically: true,
+              fitInsideHorizontally: true,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final item = items[group.x.toInt()];
+                if (showValueLabels) {
+                  // Étiquette permanente : valeur seule ; couleur dédiée si
+                  // fournie (sinon couleur de la barre).
+                  return BarTooltipItem(
+                    (valueLabelFormatter ??
+                        NumberFormatterHelper.formatYAxisLabel)(rod.toY),
+                    AppTextStyles.caption.copyWith(
+                      color:
+                          valueLabelColorBuilder?.call(group.x.toInt()) ??
+                          item.color,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: AppTextStyles.tabularFigures,
+                    ),
+                  );
+                }
                 return BarTooltipItem(
                   '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(rod.toY)}',
                   AppTextStyles.caption.copyWith(
@@ -72,6 +108,7 @@ class CycleBarChart extends StatelessWidget {
                   NumberFormatterHelper.formatYAxisLabel(value),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
+                    fontFeatures: AppTextStyles.tabularFigures,
                   ),
                 ),
               ),
@@ -110,6 +147,9 @@ class CycleBarChart extends StatelessWidget {
             for (int i = 0; i < items.length; i++)
               BarChartGroupData(
                 x: i,
+                showingTooltipIndicators: showValueLabels
+                    ? const [0]
+                    : const [],
                 barRods: [
                   BarChartRodData(
                     toY: items[i].value,

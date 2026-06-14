@@ -1754,5 +1754,82 @@
         "type": "String"
       }
     }
-  }
+  },
+  "attendanceOverviewEyebrow": "Disciplines · Présences",
+  "attendanceOverviewTitle": "Tableau de bord",
+  "attendanceOverviewContextSchoolYear": "Année scolaire",
+  "attendanceOverviewContextWindow": "Fenêtre",
+  "attendanceOverviewContextGeneratedAt": "Généré le",
+  "attendanceOverviewContextA11yLabel": "Contexte des statistiques de présence",
+  "attendanceOverviewKpiPresence": "Taux de présence",
+  "attendanceOverviewKpiJustified": "Absences justifiées",
+  "attendanceOverviewKpiUnjustified": "Absences non justifiées",
+  "attendanceOverviewKpiRecordedDays": "Jours enregistrés",
+  "attendanceOverviewRateValue": "{rate} %",
+  "@attendanceOverviewRateValue": {
+    "placeholders": { "rate": { "type": "String" } }
+  },
+  "attendanceOverviewStudentDays": "{count} élève-jours",
+  "@attendanceOverviewStudentDays": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "attendanceOverviewKpiBandA11yLabel": "Indicateurs clés de présence",
+  "attendanceOverviewSplitTitle": "Répartition présence / absences",
+  "attendanceOverviewSplitSumHint": "somme = 100 %",
+  "attendanceOverviewSplitPresence": "Présence",
+  "attendanceOverviewSplitJustified": "Absences justifiées",
+  "attendanceOverviewSplitUnjustified": "Absences non justifiées",
+  "attendanceOverviewSplitA11yLabel": "Présence {presence} %, justifiées {justified} %, non justifiées {unjustified} %",
+  "@attendanceOverviewSplitA11yLabel": {
+    "placeholders": {
+      "presence": { "type": "String" },
+      "justified": { "type": "String" },
+      "unjustified": { "type": "String" }
+    }
+  },
+  "attendanceOverviewEvolutionTitle": "Évolution du taux de présence",
+  "attendanceOverviewEvolutionHintMonth": "par mois",
+  "attendanceOverviewEvolutionHintWeek": "par semaine",
+  "attendanceOverviewEvolutionHintDay": "par jour",
+  "attendanceOverviewEvolutionTarget": "Objectif {rate} %",
+  "@attendanceOverviewEvolutionTarget": {
+    "placeholders": { "rate": { "type": "String" } }
+  },
+  "attendanceOverviewReasonsTitle": "Motifs d'absence",
+  "attendanceOverviewReasonsHint": "école",
+  "attendanceOverviewReasonsCenterLabel": "absences",
+  "attendanceOverviewReasonUnjustified": "Non justifié",
+  "attendanceOverviewReasonUnjustifiedNote": "UNKNOWN/null",
+  "attendanceOverviewWeekdayTitle": "Absences par jour",
+  "attendanceOverviewWeekdayHint": "Lun → Ven",
+  "attendanceWeekdayMon": "Lun",
+  "attendanceWeekdayTue": "Mar",
+  "attendanceWeekdayWed": "Mer",
+  "attendanceWeekdayThu": "Jeu",
+  "attendanceWeekdayFri": "Ven",
+  "attendanceOverviewTopAbsentTitle": "Classes les plus absentéistes",
+  "attendanceOverviewTopAbsentHint": "top 5",
+  "attendanceOverviewByClassTitle": "Présence par classe",
+  "attendanceOverviewColClass": "Classe",
+  "attendanceOverviewColLevel": "Niveau",
+  "attendanceOverviewColPresence": "Présence",
+  "attendanceOverviewColJustified": "Justif.",
+  "attendanceOverviewColUnjustified": "Non justif.",
+  "attendanceOverviewColDistribution": "Répartition",
+  "attendanceOverviewEmptyTitle": "Aucune donnée de présence",
+  "attendanceOverviewEmptyDescription": "Aucun appel n'a été enregistré sur la fenêtre. Les statistiques apparaîtront dès le premier appel saisi.",
+  "attendanceOverviewEmptyAction": "Faire l'appel",
+  "attendanceOverviewLoadingA11yLabel": "Chargement du tableau de bord des présences",
+  "disciplinaryFolderBreadcrumb": "Liste disciplines",
+  "dossierTabsA11yLabel": "Onglets du dossier élève",
+  "dossierTabDisciplineLabel": "Discipline",
+  "dossierTabDisciplineDescription": "Cas, sanctions & suivi",
+  "dossierTabPresenceLabel": "Présence",
+  "dossierTabPresenceDescription": "Absences & retards",
+  "dossierOpenCasesChip": "{count, plural, =1{1 cas ouvert} other{{count} cas ouverts}}",
+  "@dossierOpenCasesChip": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dossierNoOpenCases": "Aucun cas ouvert",
+  "genderOther": "Autre"
 }

@@ -244,7 +244,6 @@ class _DisciplinaryCaseCreateDialogState
                     controller: _titleController,
                     enabled: !isLoading,
                     decoration: _inputDecoration(
-                      labelText: l10n.disciplinaryCaseCreateDialogTitleField,
                       hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
                     ),
                     validator: (value) {
@@ -268,7 +267,6 @@ class _DisciplinaryCaseCreateDialogState
                     controller: _contentController,
                     enabled: !isLoading,
                     decoration: _inputDecoration(
-                      labelText: l10n.disciplinaryCaseCreateDialogContentField,
                       hintText: l10n.disciplinaryCaseCreateDialogContentHint,
                     ),
                     minLines: 3,
@@ -362,8 +360,13 @@ class _DisciplinaryCaseCreateDialogState
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          // Wrap (pas Row) : sur téléphone étroit, si les deux boutons ne
+          // tiennent pas sur une ligne, le bouton principal passe dessous au
+          // lieu de déborder.
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            spacing: AppDimensions.spacingS,
+            runSpacing: AppDimensions.spacingS,
             children: [
               Semantics(
                 label: l10n.cancel,
@@ -378,7 +381,6 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                 ),
               ),
-              const SizedBox(width: AppDimensions.spacingS),
               Semantics(
                 label: l10n.disciplinaryCaseCreateDialogSubmitAction,
                 button: true,
@@ -527,10 +529,7 @@ class _DisciplinaryCaseCreateDialogState
         DropdownButtonFormField<DisciplinaryCategory>(
           initialValue: _category,
           isExpanded: true,
-          decoration: _inputDecoration(
-            labelText: l10n.disciplinaryFieldCategory,
-            hintText: '',
-          ),
+          decoration: _inputDecoration(),
           items: [
             for (final c in categories)
               DropdownMenuItem(value: c, child: Text(c.getDisplayName(l10n))),
@@ -568,6 +567,8 @@ class _DisciplinaryCaseCreateDialogState
           ],
           selected: _severity,
           onSelected: (value) => setState(() => _severity = value),
+          // Modale étroite : onglets équilibrés pleine largeur (pas de débordement).
+          expand: true,
         ),
       ],
     );
@@ -592,10 +593,7 @@ class _DisciplinaryCaseCreateDialogState
         DropdownButtonFormField<DisciplinarySanction>(
           initialValue: _sanction,
           isExpanded: true,
-          decoration: _inputDecoration(
-            labelText: l10n.disciplinaryFieldSanction,
-            hintText: '',
-          ),
+          decoration: _inputDecoration(),
           items: [
             for (final s in sanctions)
               DropdownMenuItem(value: s, child: Text(s.getDisplayName(l10n))),
@@ -668,12 +666,10 @@ class _DisciplinaryCaseCreateDialogState
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String labelText,
-    required String hintText,
-  }) {
+  // Pas de `labelText` : chaque champ porte déjà un libellé au-dessus
+  // (`_fieldLabel` / Text), donc le label flottant ferait doublon.
+  InputDecoration _inputDecoration({String? hintText}) {
     return InputDecoration(
-      labelText: labelText,
       hintText: hintText,
       filled: true,
       fillColor: AppColors.surface,

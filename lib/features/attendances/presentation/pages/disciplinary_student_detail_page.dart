@@ -6,17 +6,24 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create_dialog.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_tab.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_detail_back_button.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_dossier_tabs.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_student_compact_header.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/student_attendance_summary_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
+/// Coquille de la fiche élève (Liste disciplines ▸ détail) : fil d'Ariane,
+/// en-tête d'identité, barre d'onglets `DossierTabs` (Discipline puis Présence)
+/// et panneau teinté de l'onglet actif. Le contenu des onglets vit dans leurs
+/// specs respectives (cas disciplinaires / synthèse de présence).
 class DisciplinaryStudentDetailPage extends StatefulWidget {
   final DisciplinaryStudentDetailIntent intent;
 
@@ -29,9 +36,10 @@ class DisciplinaryStudentDetailPage extends StatefulWidget {
 
 class _DisciplinaryStudentDetailPageState
     extends State<DisciplinaryStudentDetailPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
+    with TickerProviderStateMixin {
+  late final AnimationController _fadeController;
+  late final Animation<double> _fadeAnimation;
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -45,6 +53,7 @@ class _DisciplinaryStudentDetailPageState
       parent: _fadeController,
       curve: AppMotion.outCurve,
     );
+    _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -61,6 +70,7 @@ class _DisciplinaryStudentDetailPageState
   @override
   void dispose() {
     _fadeController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -73,94 +83,60 @@ class _DisciplinaryStudentDetailPageState
       return _buildContextError(context, l10n);
     }
 
-    return DefaultTabController(
-      length: 2,
-      child: AppPageBackground(
-        scrollable: false,
-        appBar: AppBar(
-          leading: IconButton(
-            tooltip: l10n.disciplinaryDetailBackLabel,
-            onPressed: () => _goBack(context),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          titleSpacing: 0,
-          title: Row(
-            children: [
-              Container(
-                width:
-                    AppDimensions.detailMiniIconSize + AppDimensions.spacingM,
-                height:
-                    AppDimensions.detailMiniIconSize + AppDimensions.spacingM,
-                decoration: BoxDecoration(
-                  color: AppColors.bleuArdoise.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.shield_outlined,
-                  color: AppColors.bleuArdoise,
-                  size: AppDimensions.detailMiniIconSize,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l10n.disciplinaryFollowUpTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.sectionTitle.copyWith(
-                        fontFamily: 'Lora',
-                        color: AppColors.bleuArdoise,
-                      ),
-                    ),
-                    Text(
-                      _buildAppBarSubtitle(intent, l10n),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+    return AppPageBackground(
+      scrollable: false,
+      // Pas d'AppBar : la coquille porte son propre fil d'Ariane (spec §1).
+      // SafeArea protège le haut du contenu (statut système) faute d'AppBar.
+      child: SafeArea(
+        top: true,
+        bottom: false,
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DisciplinaryStudentCompactHeader(
-                studentId: intent.studentId,
-                firstName: intent.studentFirstName,
-                lastName: intent.studentLastName,
-                middleName: intent.studentMiddleName,
-                cycleName: intent.levelGroupName,
-                levelName: intent.levelName,
-                classroomName: intent.classroomName,
+              _buildBreadcrumb(context, l10n),
+              const SizedBox(height: AppDimensions.spacingS),
+              BlocBuilder<DisciplinaryCaseBloc, DisciplinaryCaseState>(
+                buildWhen: (prev, curr) =>
+                    prev.listStatus != curr.listStatus ||
+                    prev.cases != curr.cases,
+                builder: (context, state) {
+                  // Compte connu seulement une fois la liste chargée (sinon le
+                  // chip afficherait « Aucun cas ouvert » pendant le chargement).
+                  final int? openCount =
+                      state.listStatus == DisciplinaryCaseStatusState.success
+                      ? _openCasesCount(state)
+                      : null;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DisciplinaryStudentCompactHeader(
+                        studentId: intent.studentId,
+                        firstName: intent.studentFirstName,
+                        lastName: intent.studentLastName,
+                        middleName: intent.studentMiddleName,
+                        gender: intent.studentGender,
+                        levelName: intent.levelName,
+                        classroomName: intent.classroomName,
+                        openCasesCount: openCount,
+                      ),
+                      const SizedBox(height: AppDimensions.spacingM),
+                      DisciplinaryDossierTabs(
+                        controller: _tabController,
+                        openCasesCount: openCount ?? 0,
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: AppDimensions.spacingM),
-              TabBar(
-                labelColor: AppColors.textPrimary,
-                unselectedLabelColor: AppColors.textSecondary,
-                labelStyle: AppTextStyles.action,
-                indicatorColor: AppColors.terreCuite,
-                indicatorWeight: 2,
-                dividerColor: Colors.transparent,
-                tabs: [
-                  Tab(text: l10n.disciplinaryTabCasesLabel),
-                  Tab(text: l10n.disciplinaryTabAttendanceHistoryLabel),
-                ],
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
+              // Le contenu des onglets s'affiche directement sur le fond décoré
+              // standard de la page (halos + motif), comme les autres pages :
+              // plus de panneau peignant un fond plein qui le masquerait.
               Expanded(
                 child: TabBarView(
+                  controller: _tabController,
                   children: [
                     DisciplinaryCasesTab(
                       studentId: intent.studentId,
@@ -178,27 +154,42 @@ class _DisciplinaryStudentDetailPageState
     );
   }
 
+  int _openCasesCount(DisciplinaryCaseState state) => state.cases
+      .where(
+        (c) =>
+            c.status == DisciplinaryCaseStatus.open ||
+            c.status == DisciplinaryCaseStatus.inProgress,
+      )
+      .length;
+
+  /// Fil d'Ariane : lien-retour texte coloré (terre-cuite) vers l'annuaire.
+  Widget _buildBreadcrumb(BuildContext context, AppLocalizations l10n) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: () => _goBack(context),
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.terreCuite,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingXS,
+          ),
+          visualDensity: VisualDensity.compact,
+        ),
+        icon: const Icon(Icons.arrow_back_rounded, size: 16),
+        label: Text(
+          l10n.disciplinaryFolderBreadcrumb,
+          style: AppTextStyles.action.copyWith(color: AppColors.terreCuite),
+        ),
+      ),
+    );
+  }
+
   void _goBack(BuildContext context) {
     if (context.canPop()) {
       context.pop();
       return;
     }
     context.go(AppRoutesNames.presences);
-  }
-
-  String _buildAppBarSubtitle(
-    DisciplinaryStudentDetailIntent intent,
-    AppLocalizations l10n,
-  ) {
-    final fullName = [
-      intent.studentLastName,
-      intent.studentMiddleName,
-      intent.studentFirstName,
-    ].where((part) => (part ?? '').trim().isNotEmpty).join(' ');
-    final classroom = intent.classroomName.trim().isEmpty
-        ? l10n.disciplinaryUnknownValue
-        : intent.classroomName.trim();
-    return '$fullName - $classroom';
   }
 
   Widget _buildContextError(BuildContext context, AppLocalizations l10n) {

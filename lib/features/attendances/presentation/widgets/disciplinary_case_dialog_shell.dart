@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 
@@ -67,13 +68,25 @@ class _DisciplinaryCaseDialogShellState
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final reduceMotion = mediaQuery.disableAnimations;
-    final bottomInset = mediaQuery.viewInsets.bottom;
-    final availableHeight = mediaQuery.size.height - bottomInset;
-    final maxHeight = availableHeight * widget.heightFactor;
+
+    // IMPORTANT : `Dialog` gère lui-même l'inset clavier (viewInsets) et le
+    // safe area. On ne le soustrait donc PAS ici. L'ancienne version cumulait
+    // une `AnimatedPadding(bottom: viewInsets)` ET un `maxHeight - viewInsets`,
+    // ce qui pouvait réduire la zone de contenu jusqu'à une hauteur négative
+    // (Flexible/scroll sans place) -> RenderBox sans taille -> crash au
+    // hit-test sur téléphone. `maxHeight` n'est plus qu'un plafond.
+    final maxHeight = mediaQuery.size.height * widget.heightFactor;
+
+    // Sur téléphone, marge latérale réduite pour exploiter la largeur ; marge
+    // confortable au-delà.
+    final horizontalInset =
+        mediaQuery.size.width < AppBreakpoints.dataTableCardsMax
+        ? AppDimensions.spacingS
+        : AppDimensions.spacingL;
 
     final dialog = Dialog(
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: horizontalInset,
         vertical: AppDimensions.spacingL,
       ),
       shape: RoundedRectangleBorder(
@@ -89,22 +102,12 @@ class _DisciplinaryCaseDialogShellState
       ),
     );
 
-    // reduced-motion : pas de transition d'entrée ni de glissement clavier.
-    if (reduceMotion) {
-      return Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: dialog,
-      );
-    }
+    // reduced-motion : pas de transition d'entrée.
+    if (reduceMotion) return dialog;
 
-    return AnimatedPadding(
-      duration: AppMotion.medium,
-      curve: AppMotion.gentleOut,
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: ScaleTransition(scale: _scaleAnimation, child: dialog),
-      ),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(scale: _scaleAnimation, child: dialog),
     );
   }
 }

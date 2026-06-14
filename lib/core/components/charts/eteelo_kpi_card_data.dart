@@ -17,6 +17,12 @@ class EteeloKpiCardData {
   final Color accentSoft;
   final IconData icon;
 
+  /// Sous-ligne optionnelle affichee sous la valeur (ex. « 510 eleve-jours »).
+  /// Rendue en caption discrete ; les cartes qui en ont sont legerement plus
+  /// hautes ([AppDimensions.kpiCardHeightWithSubline]) — celles qui n'en ont
+  /// pas conservent le rendu et la hauteur historiques.
+  final String? subline;
+
   const EteeloKpiCardData({
     required this.label,
     this.value,
@@ -25,6 +31,7 @@ class EteeloKpiCardData {
     required this.accentSoft,
     required this.icon,
     this.percent,
+    this.subline,
   }) : assert(
          value != null || valueText != null,
          'KpiCardData : fournir value (entier) ou valueText (formaté).',

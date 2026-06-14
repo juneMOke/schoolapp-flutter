@@ -62,4 +62,15 @@ class AppBreakpoints {
   // Carte de cas disciplinaire — pied (frise + action). En deçà : empilement
   // vertical pour éviter tout débordement ; au-delà : frise et action en Row.
   static const double disciplinaryCardFooterStackMax = 480.0;
+
+  // Tableau de bord des présences (Disciplines) — la paire 1fr/1fr
+  // (Jour/Top classes) passe en colonne sous ce seuil.
+  static const double attendanceOverviewTwoColMin = 880.0;
+  // Paire large Évolution(2fr)/Motifs(1fr) : reste côte à côte plus haut, pour
+  // que le donut Motifs (1fr) ait assez de place avant de s'empiler.
+  static const double attendanceOverviewWideTwoColMin = 920.0;
+  // Donut des motifs : bascule en disposition Row (donut + légende listée
+  // motif·%·effectif) dès cette largeur utile — découplé de detailCompactMax
+  // (pensé pour les panneaux pleine largeur), adapté à un panneau 1fr.
+  static const double reasonDonutRowMin = 300.0;
 }

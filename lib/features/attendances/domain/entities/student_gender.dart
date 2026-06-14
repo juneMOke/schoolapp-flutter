@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
 enum StudentGender { male, female, other }
 
 extension StudentGenderX on StudentGender {
@@ -12,5 +14,12 @@ extension StudentGenderX on StudentGender {
     StudentGender.male => 'MALE',
     StudentGender.female => 'FEMALE',
     StudentGender.other => 'OTHER',
+  };
+
+  /// Libellé localisé du genre (réutilise les clés `gender*`).
+  String getDisplayName(AppLocalizations l10n) => switch (this) {
+    StudentGender.male => l10n.genderMale,
+    StudentGender.female => l10n.genderFemale,
+    StudentGender.other => l10n.genderOther,
   };
 }

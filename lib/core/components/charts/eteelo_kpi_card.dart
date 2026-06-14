@@ -13,7 +13,9 @@ class EteeloKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      height: AppDimensions.enrollmentStatsKpiCardHeight,
+      height: data.subline != null
+          ? AppDimensions.kpiCardHeightWithSubline
+          : AppDimensions.enrollmentStatsKpiCardHeight,
       constraints: const BoxConstraints(
         minWidth: AppDimensions.enrollmentStatsKpiCardMinWidth,
       ),
@@ -71,23 +73,47 @@ class EteeloKpiCard extends StatelessWidget {
               child: Text(
                 data.displayValue,
                 maxLines: 1,
-                style: AppTextStyles.pageTitle.copyWith(color: data.accent),
+                style: AppTextStyles.pageTitle.copyWith(
+                  color: data.accent,
+                  fontFeatures: AppTextStyles.tabularFigures,
+                ),
               ),
             ),
           ),
-          // `Flexible` (fit loose) : taille naturelle quand la carte est assez
-          // haute (rendu inchangé), mais se contraint à l'espace restant et
-          // s'ellipse plutôt que de déborder sur les cartes étroites.
-          Flexible(
-            child: Text(
+          // Sans sous-ligne : label en `Flexible` (rendu historique, 2 lignes,
+          // anti-débordement). Avec sous-ligne : label compact (1 ligne) +
+          // sous-ligne discrète (ex. « 510 élève-jours »), carte plus haute.
+          if (data.subline == null)
+            Flexible(
+              child: Text(
+                data.label,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          else ...[
+            Text(
               data.label,
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.textSecondary,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
+            const SizedBox(height: 2),
+            Text(
+              data.subline!,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textMuted,
+                fontFeatures: AppTextStyles.tabularFigures,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );

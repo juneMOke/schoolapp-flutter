@@ -173,4 +173,28 @@ class AppDimensions {
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
   static const financeStatsFeeTypeProgressHeight = 8.0;
+
+  // Disciplines — tableau de bord des presences (attendance overview)
+  static const kpiCardHeightWithSubline = 128.0;
+  static const attendanceOverviewTrendMinRate = 70.0;
+  static const attendanceOverviewTrendMaxRate = 100.0;
+  static const attendanceOverviewTargetRate = 95.0;
+  static const attendanceOverviewDonutCenterRadius = 46.0;
+  static const attendanceOverviewDonutRingThickness = 28.0;
+  static const attendanceOverviewSplitBarHeight = 16.0;
+  static const attendanceOverviewClassSplitBarHeight = 9.0;
+  static const attendanceOverviewTopBarHeight = 8.0;
+  static const attendanceOverviewRankBadgeSize = 24.0;
+  // Seuil d'alerte : un taux d'absence non justifiee >= 4 % passe en rouge gras.
+  static const attendanceOverviewUnjustifiedAlertThreshold = 4.0;
+
+  // Coquille fiche élève (Liste disciplines ▸ détail) — DossierTabs & panneau
+  static const dossierTabsPadding = 6.0;
+  static const dossierTabRadius = 13.0;
+  static const dossierTabMinHeight = 44.0;
+  static const dossierMedallionSize = 40.0;
+  static const dossierMedallionRadius = 12.0;
+  static const dossierBadgeMinSize = 19.0;
+  // Hauteur du dégradé soft → surface du panneau d'onglet.
+  static const dossierPanelTintHeight = 260.0;
 }

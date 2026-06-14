@@ -13,6 +13,21 @@ class EteeloKpiBand extends StatelessWidget {
 
   const EteeloKpiBand({super.key, required this.cards});
 
+  /// Nombre de colonnes pour [count] cartes dans [width] (auto-fill borné par
+  /// la largeur mini de carte). Pour une bande de 4 cartes, on évite le 3+1
+  /// disgracieux (3 colonnes → 2×2) pour suivre la cascade 4 / 2×2 / 1.
+  /// Exposé pour que le squelette de chargement reste iso-grille.
+  static int columnsFor(double width, int count) {
+    const spacing = AppDimensions.spacingM;
+    const minCardWidth = AppDimensions.enrollmentStatsKpiCardMinWidth;
+    var columns = ((width + spacing) / (minCardWidth + spacing)).floor().clamp(
+      1,
+      count,
+    );
+    if (count == 4 && columns == 3) columns = 2;
+    return columns;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (cards.isEmpty) return const SizedBox.shrink();
@@ -20,15 +35,10 @@ class EteeloKpiBand extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = AppDimensions.spacingM;
-        const minCardWidth = AppDimensions.enrollmentStatsKpiCardMinWidth;
         final available = constraints.maxWidth;
 
-        // Auto-fill (sémantique CSS `minmax(min, 1fr)`) : autant de colonnes que
-        // possible sans qu'une carte passe sous sa largeur minimale. Garantit
-        // `cardWidth >= minCardWidth`, donc aucun débordement de carte.
-        final columns = ((available + spacing) / (minCardWidth + spacing))
-            .floor()
-            .clamp(1, cards.length);
+        // Auto-fill (sémantique CSS `minmax(min, 1fr)`), paliers harmonieux.
+        final columns = columnsFor(available, cards.length);
         // Arrondi à l'inférieur : évite qu'un sur-pixel flottant fasse passer la
         // dernière carte à la ligne suivante quand elles tiennent juste.
         final cardWidth = ((available - spacing * (columns - 1)) / columns)

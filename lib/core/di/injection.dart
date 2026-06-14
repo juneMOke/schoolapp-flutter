@@ -16,12 +16,14 @@ import 'package:school_app_flutter/features/attendances/domain/repository/attend
 import 'package:school_app_flutter/features/attendances/domain/repository/attendance_stats_repository.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/disciplinary_case_repository.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/create_disciplinary_case_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_overview_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_list_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_student_attendance_summary_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/update_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
@@ -801,6 +803,16 @@ Future<void> configureDependencies({
     () => StudentAttendanceSummaryBloc(
       getStudentAttendanceSummaryUseCase:
           getIt<GetStudentAttendanceSummaryUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<GetAttendanceOverviewUseCase>(
+    () => GetAttendanceOverviewUseCase(getIt<AttendanceStatsRepository>()),
+  );
+
+  getIt.registerFactory<AttendanceOverviewBloc>(
+    () => AttendanceOverviewBloc(
+      getAttendanceOverviewUseCase: getIt<GetAttendanceOverviewUseCase>(),
     ),
   );
 

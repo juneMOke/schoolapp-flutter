@@ -3897,4 +3897,204 @@ class AppLocalizationsFr extends AppLocalizations {
   String removeFilterNamed(String filter) {
     return 'Retirer le filtre $filter';
   }
+
+  @override
+  String get attendanceOverviewEyebrow => 'Disciplines · Présences';
+
+  @override
+  String get attendanceOverviewTitle => 'Tableau de bord';
+
+  @override
+  String get attendanceOverviewContextSchoolYear => 'Année scolaire';
+
+  @override
+  String get attendanceOverviewContextWindow => 'Fenêtre';
+
+  @override
+  String get attendanceOverviewContextGeneratedAt => 'Généré le';
+
+  @override
+  String get attendanceOverviewContextA11yLabel =>
+      'Contexte des statistiques de présence';
+
+  @override
+  String get attendanceOverviewKpiPresence => 'Taux de présence';
+
+  @override
+  String get attendanceOverviewKpiJustified => 'Absences justifiées';
+
+  @override
+  String get attendanceOverviewKpiUnjustified => 'Absences non justifiées';
+
+  @override
+  String get attendanceOverviewKpiRecordedDays => 'Jours enregistrés';
+
+  @override
+  String attendanceOverviewRateValue(String rate) {
+    return '$rate %';
+  }
+
+  @override
+  String attendanceOverviewStudentDays(String count) {
+    return '$count élève-jours';
+  }
+
+  @override
+  String get attendanceOverviewKpiBandA11yLabel =>
+      'Indicateurs clés de présence';
+
+  @override
+  String get attendanceOverviewSplitTitle => 'Répartition présence / absences';
+
+  @override
+  String get attendanceOverviewSplitSumHint => 'somme = 100 %';
+
+  @override
+  String get attendanceOverviewSplitPresence => 'Présence';
+
+  @override
+  String get attendanceOverviewSplitJustified => 'Absences justifiées';
+
+  @override
+  String get attendanceOverviewSplitUnjustified => 'Absences non justifiées';
+
+  @override
+  String attendanceOverviewSplitA11yLabel(
+    String presence,
+    String justified,
+    String unjustified,
+  ) {
+    return 'Présence $presence %, justifiées $justified %, non justifiées $unjustified %';
+  }
+
+  @override
+  String get attendanceOverviewEvolutionTitle =>
+      'Évolution du taux de présence';
+
+  @override
+  String get attendanceOverviewEvolutionHintMonth => 'par mois';
+
+  @override
+  String get attendanceOverviewEvolutionHintWeek => 'par semaine';
+
+  @override
+  String get attendanceOverviewEvolutionHintDay => 'par jour';
+
+  @override
+  String attendanceOverviewEvolutionTarget(String rate) {
+    return 'Objectif $rate %';
+  }
+
+  @override
+  String get attendanceOverviewReasonsTitle => 'Motifs d\'absence';
+
+  @override
+  String get attendanceOverviewReasonsHint => 'école';
+
+  @override
+  String get attendanceOverviewReasonsCenterLabel => 'absences';
+
+  @override
+  String get attendanceOverviewReasonUnjustified => 'Non justifié';
+
+  @override
+  String get attendanceOverviewReasonUnjustifiedNote => 'UNKNOWN/null';
+
+  @override
+  String get attendanceOverviewWeekdayTitle => 'Absences par jour';
+
+  @override
+  String get attendanceOverviewWeekdayHint => 'Lun → Ven';
+
+  @override
+  String get attendanceWeekdayMon => 'Lun';
+
+  @override
+  String get attendanceWeekdayTue => 'Mar';
+
+  @override
+  String get attendanceWeekdayWed => 'Mer';
+
+  @override
+  String get attendanceWeekdayThu => 'Jeu';
+
+  @override
+  String get attendanceWeekdayFri => 'Ven';
+
+  @override
+  String get attendanceOverviewTopAbsentTitle =>
+      'Classes les plus absentéistes';
+
+  @override
+  String get attendanceOverviewTopAbsentHint => 'top 5';
+
+  @override
+  String get attendanceOverviewByClassTitle => 'Présence par classe';
+
+  @override
+  String get attendanceOverviewColClass => 'Classe';
+
+  @override
+  String get attendanceOverviewColLevel => 'Niveau';
+
+  @override
+  String get attendanceOverviewColPresence => 'Présence';
+
+  @override
+  String get attendanceOverviewColJustified => 'Justif.';
+
+  @override
+  String get attendanceOverviewColUnjustified => 'Non justif.';
+
+  @override
+  String get attendanceOverviewColDistribution => 'Répartition';
+
+  @override
+  String get attendanceOverviewEmptyTitle => 'Aucune donnée de présence';
+
+  @override
+  String get attendanceOverviewEmptyDescription =>
+      'Aucun appel n\'a été enregistré sur la fenêtre. Les statistiques apparaîtront dès le premier appel saisi.';
+
+  @override
+  String get attendanceOverviewEmptyAction => 'Faire l\'appel';
+
+  @override
+  String get attendanceOverviewLoadingA11yLabel =>
+      'Chargement du tableau de bord des présences';
+
+  @override
+  String get disciplinaryFolderBreadcrumb => 'Liste disciplines';
+
+  @override
+  String get dossierTabsA11yLabel => 'Onglets du dossier élève';
+
+  @override
+  String get dossierTabDisciplineLabel => 'Discipline';
+
+  @override
+  String get dossierTabDisciplineDescription => 'Cas, sanctions & suivi';
+
+  @override
+  String get dossierTabPresenceLabel => 'Présence';
+
+  @override
+  String get dossierTabPresenceDescription => 'Absences & retards';
+
+  @override
+  String dossierOpenCasesChip(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cas ouverts',
+      one: '1 cas ouvert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dossierNoOpenCases => 'Aucun cas ouvert';
+
+  @override
+  String get genderOther => 'Autre';
 }
