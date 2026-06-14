@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -25,10 +26,11 @@ class AttendanceOverviewEmptyView extends StatelessWidget {
       autofocusPrimaryAction: onTakeAttendance != null,
       primaryAction: onTakeAttendance == null
           ? null
-          : FilledButton.icon(
+          : EteeloButton.primary(
+              label: l10n.attendanceOverviewEmptyAction,
+              icon: Icons.how_to_reg_outlined,
               onPressed: onTakeAttendance,
-              icon: const Icon(Icons.how_to_reg_outlined, size: 16),
-              label: Text(l10n.attendanceOverviewEmptyAction),
+              fullWidth: false,
             ),
     );
   }

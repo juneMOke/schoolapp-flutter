@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -44,10 +45,11 @@ class AttendanceResultsErrorState extends StatelessWidget {
       message: _message(l10n, viewType),
       primaryAction: action == null
           ? null
-          : FilledButton.icon(
+          : EteeloButton.primary(
+              label: action.label,
+              icon: action.icon,
               onPressed: action.onPressed,
-              icon: Icon(action.icon, size: 16),
-              label: Text(action.label),
+              fullWidth: false,
             ),
       incidentCodeLabel: incidentCodeLabel,
       autofocusPrimaryAction: action != null,

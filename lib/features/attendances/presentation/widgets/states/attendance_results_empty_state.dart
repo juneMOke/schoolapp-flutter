@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,10 +24,11 @@ class AttendanceResultsEmptyState extends StatelessWidget {
       description: l10n.attendanceEmptyStudentsDescription,
       primaryAction: onOpenComposition == null
           ? null
-          : FilledButton.icon(
+          : EteeloButton.primary(
+              label: l10n.attendanceEmptyOpenComposition,
+              icon: Icons.dashboard_customize_outlined,
               onPressed: onOpenComposition,
-              icon: const Icon(Icons.dashboard_customize_outlined, size: 16),
-              label: Text(l10n.attendanceEmptyOpenComposition),
+              fullWidth: false,
             ),
       autofocusPrimaryAction: onOpenComposition != null,
       fullWidthCard: true,

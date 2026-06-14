@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Déclencheur de sélection de date du filtre d'appel, aligné sur le
+/// design-system : [EteeloButton] secondaire (pilule bordée) portant l'icône
+/// calendrier + la date courante. Le libellé « Date » reste accessible via le
+/// tooltip.
 class AttendanceDateButton extends StatelessWidget {
   final DateTime date;
   final Future<void> Function() onPickDate;
@@ -23,38 +26,13 @@ class AttendanceDateButton extends StatelessWidget {
 
     return SizedBox(
       width: width,
-      child: Tooltip(
-        message: l10n.attendanceDateTooltip,
-        child: OutlinedButton.icon(
-          onPressed: onPickDate,
-          icon: const Icon(Icons.calendar_today_outlined),
-          label: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.attendanceDateLabel,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Text(
-                dateLabel,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(0, AppDimensions.minTouchTarget),
-            alignment: Alignment.centerLeft,
-            backgroundColor: AppColors.background,
-            side: const BorderSide(color: AppColors.border),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimensions.spacingS),
-            ),
-          ),
-        ),
+      child: EteeloButton.secondary(
+        label: dateLabel,
+        icon: Icons.calendar_today_outlined,
+        onPressed: onPickDate,
+        size: EteeloButtonSize.regular,
+        fullWidth: true,
+        tooltip: l10n.attendanceDateTooltip,
       ),
     );
   }

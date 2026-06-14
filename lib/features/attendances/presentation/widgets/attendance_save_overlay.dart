@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
@@ -331,18 +332,11 @@ class _SuccessBody extends StatelessWidget {
           unjustifiedCount: unjustifiedCount,
         ),
         const SizedBox(height: AppDimensions.spacingL),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: onClose,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.bleuArdoise,
-              foregroundColor: AppColors.blancCasse,
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              shape: const StadiumBorder(),
-            ),
-            child: Text(l10n.attendanceSaveCloseAction),
-          ),
+        EteeloButton.primary(
+          label: l10n.attendanceSaveCloseAction,
+          onPressed: onClose,
+          size: EteeloButtonSize.regular,
+          fullWidth: true,
         ),
       ],
     );
@@ -456,17 +450,15 @@ class _ErrorBody extends StatelessWidget {
       title: l10n.attendanceSaveErrorTitle,
       message: l10n.attendanceSaveErrorMessage,
       incidentCodeLabel: incidentCode,
-      primaryAction: FilledButton(
+      primaryAction: EteeloButton.primary(
+        label: l10n.attendanceSaveRetryAction,
         onPressed: onRetry,
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(0, AppDimensions.minTouchTarget),
-          shape: const StadiumBorder(),
-        ),
-        child: Text(l10n.attendanceSaveRetryAction),
+        fullWidth: false,
       ),
-      secondaryAction: TextButton(
+      secondaryAction: EteeloButton.ghost(
+        label: l10n.attendanceSaveCloseAction,
         onPressed: onClose,
-        child: Text(l10n.attendanceSaveCloseAction),
+        fullWidth: false,
       ),
     );
   }
