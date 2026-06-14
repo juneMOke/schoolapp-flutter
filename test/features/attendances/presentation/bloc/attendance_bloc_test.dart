@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
@@ -97,6 +98,70 @@ void main() {
           activeClassroomId: 'class-1',
           activeAcademicYearId: 'year-1',
           activeDate: tDate,
+        ),
+      ],
+    );
+
+    // Convention projet : HTTP 403 -> UnauthorizedFailure -> forbidden
+    // (et non 401). Sans ce mapping, un 403 s'afficherait comme un 401.
+    blocTest<AttendanceBloc, AttendanceState>(
+      'mappe UnauthorizedFailure (HTTP 403) vers AttendanceErrorType.forbidden',
+      setUp: () {
+        when(
+          () => mockGetAttendanceUseCase(
+            classroomId: 'class-1',
+            date: tDate,
+            academicYearId: 'year-1',
+          ),
+        ).thenAnswer(
+          (_) async => const Left(UnauthorizedFailure('Access forbidden')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        AttendanceFetchRequested(
+          classroomId: 'class-1',
+          date: tDate,
+          academicYearId: 'year-1',
+        ),
+      ),
+      expect: () => [
+        const AttendanceState(fetchStatus: AttendanceStatus.loading),
+        const AttendanceState(
+          fetchStatus: AttendanceStatus.failure,
+          fetchErrorType: AttendanceErrorType.forbidden,
+        ),
+      ],
+    );
+
+    // HTTP 401 -> InvalidCredentialsFailure -> invalidCredentials (vue : 401).
+    blocTest<AttendanceBloc, AttendanceState>(
+      'mappe InvalidCredentialsFailure (HTTP 401) vers invalidCredentials',
+      setUp: () {
+        when(
+          () => mockGetAttendanceUseCase(
+            classroomId: 'class-1',
+            date: tDate,
+            academicYearId: 'year-1',
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const Left(InvalidCredentialsFailure('Invalid credentials')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        AttendanceFetchRequested(
+          classroomId: 'class-1',
+          date: tDate,
+          academicYearId: 'year-1',
+        ),
+      ),
+      expect: () => [
+        const AttendanceState(fetchStatus: AttendanceStatus.loading),
+        const AttendanceState(
+          fetchStatus: AttendanceStatus.failure,
+          fetchErrorType: AttendanceErrorType.invalidCredentials,
         ),
       ],
     );

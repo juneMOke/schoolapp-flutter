@@ -102,4 +102,11 @@ class AppTextStyles {
     fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
     decoration: TextDecoration.none,
   );
+
+  /// Chiffres tabulaires (largeur de glyphe fixe) à appliquer via `copyWith`
+  /// sur les styles porteurs de nombres (valeurs KPI, taux, axes…) pour un
+  /// alignement stable colonne par colonne et entre périodes.
+  static const List<FontFeature> tabularFigures = <FontFeature>[
+    FontFeature.tabularFigures(),
+  ];
 }

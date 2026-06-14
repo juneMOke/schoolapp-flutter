@@ -94,6 +94,31 @@ Point d'entrée recommandé pour comprendre le projet:
 - [ ] **Wordmark en Inter ExtraBold (800)** — seuls les poids 400/500/600/700 d'Inter sont bundlés, donc « ETEELO » se rabat actuellement sur le poids 700. Ajouter `Inter-ExtraBold.ttf` dans `assets/fonts/inter/` + entrée `pubspec.yaml` pour le vrai 800.
 - [ ] **Alternative « lockup horizontal » en paysage large** (spec splash, COMPOSANT 02) — afficher le logo horizontal complet (`assets/branding/fonce/logo_horizontal_fond_fonce.svg`) à la place du symbole + wordmark texte sur les écrans larges en paysage.
 
+### États partagés (chargement / vide / erreur)
+
+Suite à la migration de la Présence sur les widgets d'état partagés (règle non-négociable #10, cf. `AGENTS.md` §"États partagés"). Améliorations différées, non bloquantes :
+
+- [ ] **Migrer le squelette d'`enrollment` vers le module partagé** — `EnrollmentResultsLoadingSkeleton` (≈244 lignes) duplique encore le pattern. Réutiliser `EteeloListSkeleton` pour le mode liste et créer un `EteeloGridSkeleton` (carte) pour le mode grille, puis brancher l'un ou l'autre selon `isGrid`. Aligne enrollment sur le module `core/components/skeletons/`.
+- [ ] **Centraliser l'email de support** — adopter `AppConstants.supportEmail` dans les pages d'inscription qui dupliquent encore `support@school.local` (`first_registration_page.dart`, `re_registrations_page.dart`, `pre_registrations_page.dart`).
+- [ ] **Renforcer l'a11y de `EteeloListSkeleton`** — rendre `semanticsLabel` requis (ou fournir un libellé i18n par défaut) pour éviter une région `aria-busy` muette si le widget est réutilisé sans libellé.
+
+### Statistiques (période & mapping d'erreur partagés)
+
+Suite à l'ajout du résumé de présence (`attendance-stats`), qui introduit le `StatsPeriod` partagé (`core/entities/stats_period.dart`) et le mapper d'erreur partagé (`attendance_failure_mapper.dart`). Factorisations différées, non bloquantes :
+
+- [ ] **Migrer finance & enrollment vers `StatsPeriod`** — remplacer les enums dupliqués `FinanceStatsPeriod` et `EnrollmentStatsPeriod` (identiques à `StatsPeriod`) par `core/entities/stats_period.dart`, puis supprimer les deux fichiers. ~15 fichiers + tests à adapter.
+
+### Discipline — dépendances backend (UI posée, à câbler)
+
+Suite à la refonte de l'onglet Discipline (cartes de cas, frise de statut, modale enrichie). Éléments de la spec laissés **dormants / différés** faute de support backend :
+
+- [ ] **Avancement de statut** — le bouton « Prendre en charge / Clôturer » est présent mais **inerte** (`onAdvance: (_) {}` dans `disciplinary_cases_tab`). Câbler quand un endpoint `PATCH /disciplinary-cases/{id}` (ou équivalent) existera + ajouter l'event/usecase/repo correspondants.
+- [ ] **Journal / historique** des transitions — non implémenté (aucune donnée `history` côté backend).
+- [ ] **Auteur / rapporteur** du cas — champ absent du DTO ; chip auteur non affiché.
+- [ ] **Filtre période** — la liste se charge par `studentId + academicYearId` (pas de paramètre de période) ; le segmenté période de la spec n'est pas posé.
+- [ ] **Modale création** : les champs catégorie/gravité/sanction sont envoyés via `CreateDisciplinaryCaseRequest` — **vérifier que le backend de création les accepte/stocke** (supposé OK).
+- [ ] **Nettoyage** : `disciplinary_cases_table.dart` et `disciplinary_case_view_dialog.dart` (+ le flux `getDisciplinaryCaseDetail`) sont **orphelins** depuis le passage en cartes — à supprimer si confirmé inutiles.
+
 ## Dépannage rapide
 
 - Si `build_runner` échoue: `flutter clean` puis relancer la commande de génération.

@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
 enum AbsenceReason {
   sickness,
   familyEmergency,
@@ -43,5 +45,26 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.workLeave => 'WORK_LEAVE',
     AbsenceReason.unjustified => 'UNJUSTIFIED',
     AbsenceReason.other => 'OTHER',
+  };
+
+  /// Une absence est consideree injustifiee si son motif est `unjustified` ou
+  /// `unknown` (motif inconnu / non renseigne cote backend). Regle metier
+  /// partagee par l'ecran d'appel et la synthese de presence.
+  bool get isUnjustified =>
+      this == AbsenceReason.unjustified || this == AbsenceReason.unknown;
+
+  /// Libelle localise du motif (reutilise les cles `absenceReason*`).
+  String getDisplayName(AppLocalizations l10n) => switch (this) {
+    AbsenceReason.sickness => l10n.absenceReasonSickness,
+    AbsenceReason.familyEmergency => l10n.absenceReasonFamilyEmergency,
+    AbsenceReason.personal => l10n.absenceReasonPersonal,
+    AbsenceReason.unknown => l10n.absenceReasonUnknown,
+    AbsenceReason.vacation => l10n.absenceReasonVacation,
+    AbsenceReason.underGraduateLeave => l10n.absenceReasonUnderGraduateLeave,
+    AbsenceReason.marriageLeave => l10n.absenceReasonMarriageLeave,
+    AbsenceReason.parentalLeave => l10n.absenceReasonParentalLeave,
+    AbsenceReason.workLeave => l10n.absenceReasonWorkLeave,
+    AbsenceReason.unjustified => l10n.absenceReasonUnjustified,
+    AbsenceReason.other => l10n.absenceReasonOther,
   };
 }

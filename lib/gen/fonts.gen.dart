@@ -16,4 +16,7 @@ class FontFamily {
 
   /// Font family: Lora
   static const String lora = 'Lora';
+
+  /// Font family: Roboto Mono
+  static const String robotoMono = 'Roboto Mono';
 }

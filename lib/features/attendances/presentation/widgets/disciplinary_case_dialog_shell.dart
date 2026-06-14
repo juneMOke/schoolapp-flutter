@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 
@@ -25,6 +26,7 @@ class _DisciplinaryCaseDialogShellState
   late AnimationController _entryController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _entryStarted = false;
 
   @override
   void initState() {
@@ -41,8 +43,19 @@ class _DisciplinaryCaseDialogShellState
     _scaleAnimation = Tween<double>(begin: 0.94, end: 1.0).animate(
       CurvedAnimation(parent: _entryController, curve: AppMotion.outCurve),
     );
+  }
 
-    _entryController.forward();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_entryStarted) return;
+    _entryStarted = true;
+    // reduced-motion : pas d'animation d'entrée, on saute à l'état final.
+    if (MediaQuery.of(context).disableAnimations) {
+      _entryController.value = 1.0;
+    } else {
+      _entryController.forward();
+    }
   }
 
   @override
@@ -54,39 +67,47 @@ class _DisciplinaryCaseDialogShellState
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final bottomInset = mediaQuery.viewInsets.bottom;
-    final availableHeight = mediaQuery.size.height - bottomInset;
-    final maxHeight = availableHeight * widget.heightFactor;
+    final reduceMotion = mediaQuery.disableAnimations;
 
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: Dialog(
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.spacingM,
-              vertical: AppDimensions.spacingL,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                AppDimensions.sectionCardRadius,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: widget.maxWidth,
-                maxHeight: maxHeight,
-              ),
-              child: widget.child,
-            ),
-          ),
-        ),
+    // IMPORTANT : `Dialog` gère lui-même l'inset clavier (viewInsets) et le
+    // safe area. On ne le soustrait donc PAS ici. L'ancienne version cumulait
+    // une `AnimatedPadding(bottom: viewInsets)` ET un `maxHeight - viewInsets`,
+    // ce qui pouvait réduire la zone de contenu jusqu'à une hauteur négative
+    // (Flexible/scroll sans place) -> RenderBox sans taille -> crash au
+    // hit-test sur téléphone. `maxHeight` n'est plus qu'un plafond.
+    final maxHeight = mediaQuery.size.height * widget.heightFactor;
+
+    // Sur téléphone, marge latérale réduite pour exploiter la largeur ; marge
+    // confortable au-delà.
+    final horizontalInset =
+        mediaQuery.size.width < AppBreakpoints.dataTableCardsMax
+        ? AppDimensions.spacingS
+        : AppDimensions.spacingL;
+
+    final dialog = Dialog(
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: horizontalInset,
+        vertical: AppDimensions.spacingL,
       ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: widget.maxWidth,
+          maxHeight: maxHeight,
+        ),
+        child: widget.child,
+      ),
+    );
+
+    // reduced-motion : pas de transition d'entrée.
+    if (reduceMotion) return dialog;
+
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(scale: _scaleAnimation, child: dialog),
     );
   }
 }

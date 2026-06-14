@@ -48,6 +48,16 @@ class $AssetsCatalogsGen {
   List<String> get values => [addressGeoCatalog, educationCyclesCatalog];
 }
 
+class $AssetsPatternsGen {
+  const $AssetsPatternsGen();
+
+  /// File path: assets/patterns/kuba_tile.svg
+  String get kubaTile => 'assets/patterns/kuba_tile.svg';
+
+  /// List of all assets
+  List<String> get values => [kubaTile];
+}
+
 class $LibFeaturesGen {
   const $LibFeaturesGen();
 
@@ -168,6 +178,7 @@ class Assets {
 
   static const $AssetsBrandingGen branding = $AssetsBrandingGen();
   static const $AssetsCatalogsGen catalogs = $AssetsCatalogsGen();
+  static const $AssetsPatternsGen patterns = $AssetsPatternsGen();
   static const $LibGen lib = $LibGen();
 }
 

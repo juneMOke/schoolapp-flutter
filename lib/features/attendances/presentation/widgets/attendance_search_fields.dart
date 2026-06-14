@@ -147,10 +147,18 @@ class _AttendanceDropdownField extends StatelessWidget {
       width: width,
       child: DropdownButtonFormField<String>(
         initialValue: value,
+        // La valeur sélectionnée occupe toute la largeur du champ et s'ellipse
+        // au lieu de déborder (cas du libellé de cycle plus large que le champ).
+        isExpanded: true,
         style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
         decoration: _fieldDecoration(label),
         items: items,
         onChanged: onChanged,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+        iconEnabledColor: AppColors.textSecondary,
+        iconDisabledColor: AppColors.textMuted,
+        dropdownColor: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.spacingS),
       ),
     );
   }

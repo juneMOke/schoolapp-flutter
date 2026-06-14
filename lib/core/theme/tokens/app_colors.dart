@@ -8,6 +8,11 @@ class AppColors {
   static const bleuProfond = Color(0xFF0E2D42);
   static const terreCuite = Color(0xFFB85C2C);
   static const orDoux = Color(0xFFD9A24E);
+  // Dossier discipline (coquille fiche élève) — accents d'onglet & teintes de
+  // panneau (terre-cuite Discipline, bleu-ardoise Présence).
+  static const terreCuiteDark = Color(0xFF9A4A21);
+  static const terreCuiteSoft = Color(0xFFF7EBE3);
+  static const bleuArdoiseSoft = Color(0xFFEBF2F7);
   static const vertSavane = Color(0xFF3D6B4A);
   static const blancCasse = Color(0xFFFAFAF7);
   static const papier = Color(0xFFF1EDE2);
@@ -89,6 +94,10 @@ class AppColors {
   static const enrollmentStatsAccent = bleuArdoise;
   static const enrollmentStatsAccentSoft = Color(0xFFEBF2F7);
   static const enrollmentStatsFirst = vertSavane;
+
+  // Onglet Presence — degrade teinte de la zone de synthese (bleu pale -> creme).
+  static const presenceSummaryTintTop = Color(0xFFEDF3F8);
+  static const presenceSummaryTintBottom = Color(0xFFF6F3EC);
   static const enrollmentStatsFirstSoft = Color(0xFFEDF5EF);
   static const enrollmentStatsRe = orDoux;
   static const enrollmentStatsReSoft = Color(0xFFFBF3E3);
@@ -100,6 +109,14 @@ class AppColors {
   static const enrollmentStatsFemale = Color(0xFFEC4899);
   static const enrollmentStatsCardSurface = surfaceRaised;
   static const enrollmentStatsChartGrid = border;
+
+  // Disciplines — tableau de bord des presences (etats present/justifie/non
+  // justifie + tints doux des cartes KPI, et l'or du donut des motifs).
+  static const presenceStatePresentSoft = Color(0xFFE7F2EC);
+  static const presenceStateJustifiedSoft = Color(0xFFFBF1DF);
+  static const presenceStateUnjustifiedSoft = Color(0xFFFBEAE8);
+  static const attendanceOverviewRecordedSoft = enrollmentStatsAccentSoft;
+  static const absenceReasonGold = Color(0xFFD9A24E);
 
   static const financeDetailChargeRowPaid = Color(0xFFF1FAF2);
   static const financeDetailChargeRowPartial = Color(0xFFFFF7F0);

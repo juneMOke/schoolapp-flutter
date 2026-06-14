@@ -772,7 +772,7 @@
   "enrollmentReadOnlyMessage": "Élève déjà inscrit — dossier consultable mais non modifiable. Parcourez les étapes pour vérifier les informations.",
   "enrollmentEditableTitle": "Mode édition",
   "enrollmentEditableMessage": "Ce dossier est en cours (IN_PROGRESS). Les informations peuvent être modifiées.",
-  "studentChargesStepTitle": "Charges de l'élève",
+  "studentChargesStepTitle": "Frais de l'élève",
   "studentChargesStepSubtitle": "Montants financiers appliqués à l'élève",
   "studentChargesLoading": "Chargement des charges de l'élève...",
   "studentChargesRetry": "Réessayer",
@@ -934,7 +934,7 @@
   "facturationPaymentAllocationsStorageError": "Une erreur locale empêche l'affichage des allocations.",
   "facturationPaymentAllocationsAuthError": "Une erreur d'authentification empêche le chargement des allocations.",
   "facturationPaymentAllocationsUnknownError": "Une erreur inattendue est survenue lors du chargement des allocations.",
-  "facturationDetailChargesSectionTitle": "Charges de l'élève",
+  "facturationDetailChargesSectionTitle": "Frais de l'élève",
   "facturationDetailChargesSectionSubtitle": "Répartition des montants attendus, payés et restants.",
   "facturationDetailChargesSummary": "{totalCount, plural, =0{0 charge} =1{1 charge} other{{totalCount} charges}} · {partialCount} partielle(s), {dueCount} à régler",
   "@facturationDetailChargesSummary": {
@@ -1192,7 +1192,9 @@
   "attendanceSelectClassTitle": "Sélectionnez une classe",
   "attendanceEmptySelectionMessage": "Choisissez un cycle, un niveau puis une classe pour charger la liste d'appel.",
   "attendanceLoadingMessage": "Chargement des présences en cours...",
-  "attendanceEmptyMessage": "Aucune présence trouvée pour ces critères.",
+  "attendanceEmptyStudentsTitle": "Aucun élève dans cette classe",
+  "attendanceEmptyStudentsDescription": "Cette classe ne contient encore aucun élève. Ajoutez des élèves depuis la Composition des classes pour pouvoir faire l'appel.",
+  "attendanceEmptyOpenComposition": "Ouvrir la Composition",
   "attendanceExportAction": "Exporter",
   "attendanceExportTooltip": "Préparer l'export des résultats",
   "attendanceExportSoon": "L'export sera disponible prochainement.",
@@ -1277,6 +1279,28 @@
   "attendanceErrorStorage": "Une erreur de stockage local est survenue.",
   "attendanceErrorAuth": "Une erreur d'authentification est survenue.",
   "attendanceErrorUnknown": "Une erreur inattendue est survenue.",
+  "attendanceErrorForbidden": "Vous n'avez pas les droits requis pour consulter les présences.",
+  "attendanceErrorRetry": "Réessayer",
+  "attendanceErrorReconnect": "Se reconnecter",
+  "attendanceErrorContactAdmin": "Contacter l'administrateur",
+  "attendanceErrorNetworkTitle": "Pas de connexion",
+  "attendanceErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez l'appel.",
+  "attendanceErrorUnauthorizedTitle": "Session expirée",
+  "attendanceErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour reprendre l'appel.",
+  "attendanceErrorForbiddenTitle": "Accès refusé",
+  "attendanceErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter les présences de cette classe.",
+  "attendanceErrorServerTitle": "Erreur du serveur",
+  "attendanceErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "attendanceErrorIncidentCode": "Code incident : {code}",
+  "@attendanceErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceErrorUnknownTitle": "Chargement impossible",
+  "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
   "attendanceMarkAllPresentAction": "Tout présent",
   "attendanceSaveOverlayEyebrow": "Appel",
@@ -1309,8 +1333,54 @@
   "disciplinaryDetailContextErrorMessage": "Les informations nécessaires pour afficher ce détail ne sont pas disponibles. Revenez à la liste puis relancez la consultation.",
   "disciplinaryTabCasesLabel": "Cas disciplinaires",
   "disciplinaryTabAttendanceHistoryLabel": "Historique de présences",
-  "disciplinaryAttendanceHistoryComingSoon": "L'historique de présences sera ajouté dans une prochaine feature.",
-  "disciplinaryUnknownValue": "-",
+  "presenceStatusPresent": "Présent",
+  "presenceStatusJustified": "Absence justifiée",
+  "presenceStatusUnjustified": "Absence injustifiée",
+  "presenceSummaryTitle": "Synthèse de présence",
+  "presenceSummaryA11yLabel": "Synthèse de présence, taux {rate} %",
+  "@presenceSummaryA11yLabel": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceKpiRate": "Taux de présence",
+  "presenceRateValue": "{rate} %",
+  "@presenceRateValue": {
+    "placeholders": { "rate": { "type": "int" } }
+  },
+  "presenceSchoolDaysCount": "{count, plural, =1{1 jour scolaire} other{{count} jours scolaires}}",
+  "@presenceSchoolDaysCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "presenceDistributionA11yLabel": "Répartition des jours par statut",
+  "presencePresentOutOfTotal": "{present} jours présents sur {total}",
+  "@presencePresentOutOfTotal": {
+    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "presenceAbsenceListTitle": "Détail des absences",
+  "presenceAbsenceDate": "{date}",
+  "@presenceAbsenceDate": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+  },
+  "presencePerfectTitle": "Assiduité parfaite",
+  "presencePerfectMessage": "Aucune absence sur cette période.",
+  "presenceLoadingA11yLabel": "Chargement de la synthèse de présence…",
+  "presencePeriodWeek": "Semaine",
+  "presencePeriodMonth": "Mois",
+  "presencePeriodYear": "Année",
+  "presencePeriodFilterA11yLabel": "Période d'assiduité",
+  "presenceEmptyTitle": "Aucun jour scolaire",
+  "presenceEmptyMessage": "Aucun jour scolaire sur cette période. Choisissez une autre période pour consulter l'assiduité.",
+  "presenceRangeYear": "Année scolaire {name}",
+  "@presenceRangeYear": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "presenceRangeMonth": "{date}",
+  "@presenceRangeMonth": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+  },
+  "presenceRangeWeek": "Semaine du {date}",
+  "@presenceRangeWeek": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
+  },  "disciplinaryUnknownValue": "-",
   "disciplinaryCaseCreateAction": "Nouveau cas",
   "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
   "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
@@ -1362,6 +1432,62 @@
   "disciplinaryCaseStatusInProgress": "En cours",
   "disciplinaryCaseStatusClosed": "Clôturé",
   "disciplinaryCaseStatusUnknown": "Inconnu",
+  "disciplinarySeverityMinor": "Mineure",
+  "disciplinarySeverityMajor": "Majeure",
+  "disciplinarySeveritySerious": "Grave",
+  "disciplinarySeverityUnknown": "Non précisée",
+  "disciplinaryCategoryDisruptiveBehavior": "Comportement perturbateur",
+  "disciplinaryCategoryLateness": "Retard",
+  "disciplinaryCategoryRepeatedLateness": "Retard répété",
+  "disciplinaryCategoryUnjustifiedAbsence": "Absence injustifiée",
+  "disciplinaryCategoryInsolence": "Insolence",
+  "disciplinaryCategoryCheating": "Tricherie",
+  "disciplinaryCategoryFighting": "Bagarre",
+  "disciplinaryCategoryDressCodeViolation": "Tenue non conforme",
+  "disciplinaryCategoryTalkingInClass": "Bavardage en classe",
+  "disciplinaryCategoryUnknown": "Autre",
+  "disciplinarySanctionOralWarning": "Avertissement oral",
+  "disciplinarySanctionWrittenWarning": "Avertissement écrit",
+  "disciplinarySanctionDetention": "Retenue",
+  "disciplinarySanctionParentsSummoned": "Convocation des parents",
+  "disciplinarySanctionTemporaryExclusion": "Exclusion temporaire",
+  "disciplinarySanctionDisciplinaryCouncil": "Conseil de discipline",
+  "disciplinarySanctionPermanentExclusion": "Exclusion définitive",
+  "disciplinarySanctionUnknown": "Aucune sanction",
+  "disciplinaryCaseSeverityChip": "Gravité {severity}",
+  "@disciplinaryCaseSeverityChip": {
+    "placeholders": { "severity": { "type": "String" } }
+  },
+  "disciplinaryAdvanceTakeCharge": "Prendre en charge",
+  "disciplinaryAdvanceClose": "Clôturer",
+  "disciplinaryCaseClosedLabel": "Dossier clôturé",
+  "disciplinaryCasesCountPill": "{count, plural, =1{1 cas} other{{count} cas}}",
+  "@disciplinaryCasesCountPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesOpenPill": "{count, plural, =1{1 ouvert} other{{count} ouverts}}",
+  "@disciplinaryCasesOpenPill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesGravePill": "{count, plural, =1{1 grave} other{{count} graves}}",
+  "@disciplinaryCasesGravePill": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCasesEmptyTitle": "Aucun cas de discipline",
+  "disciplinaryCasesEmptyDescription": "Aucun incident enregistré pour cet élève. Tout va bien.",
+  "disciplinaryFieldCategory": "Catégorie",
+  "disciplinaryFieldSeverity": "Gravité",
+  "disciplinaryFieldSanction": "Sanction",
+  "disciplinaryStatusAtCreationLabel": "Statut à l'ouverture",
+  "disciplinaryStatusAtCreationHint": "Le cas sera créé Ouvert. Vous le ferez ensuite évoluer depuis la fiche.",
+  "disciplinaryErrorNetworkTitle": "Pas de connexion",
+  "disciplinaryErrorUnauthorizedTitle": "Session expirée",
+  "disciplinaryErrorForbiddenTitle": "Accès refusé",
+  "disciplinaryErrorServerTitle": "Erreur du serveur",
+  "disciplinaryErrorUnknownTitle": "Chargement impossible",
+  "disciplinaryErrorRetry": "Réessayer",
+  "disciplinaryErrorReconnect": "Se reconnecter",
+  "disciplinaryErrorContactAdmin": "Contacter l'administrateur",
   "enrollmentStatusPreRegistered": "Pré-inscrit",
   "statusPaid": "Payé",
   "statusPartial": "Partiel",
@@ -1513,14 +1639,6 @@
   "financeStatsKpiExpected": "Total attendu",
   "financeStatsKpiOutstanding": "Reste à recouvrer",
   "financeStatsKpiCollectionRate": "Taux de recouvrement",
-  "financeStatsPercentOfTotal": "{percent}% du total",
-  "@financeStatsPercentOfTotal": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
   "financeStatsSectionEvolution": "Évolution des encaissements",
   "financeStatsLegendCurrentPeriod": "Période en cours",
   "financeStatsLegendOtherPeriods": "Autres périodes",
@@ -1636,5 +1754,82 @@
         "type": "String"
       }
     }
-  }
+  },
+  "attendanceOverviewEyebrow": "Disciplines · Présences",
+  "attendanceOverviewTitle": "Tableau de bord",
+  "attendanceOverviewContextSchoolYear": "Année scolaire",
+  "attendanceOverviewContextWindow": "Fenêtre",
+  "attendanceOverviewContextGeneratedAt": "Généré le",
+  "attendanceOverviewContextA11yLabel": "Contexte des statistiques de présence",
+  "attendanceOverviewKpiPresence": "Taux de présence",
+  "attendanceOverviewKpiJustified": "Absences justifiées",
+  "attendanceOverviewKpiUnjustified": "Absences non justifiées",
+  "attendanceOverviewKpiRecordedDays": "Jours enregistrés",
+  "attendanceOverviewRateValue": "{rate} %",
+  "@attendanceOverviewRateValue": {
+    "placeholders": { "rate": { "type": "String" } }
+  },
+  "attendanceOverviewStudentDays": "{count} élève-jours",
+  "@attendanceOverviewStudentDays": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "attendanceOverviewKpiBandA11yLabel": "Indicateurs clés de présence",
+  "attendanceOverviewSplitTitle": "Répartition présence / absences",
+  "attendanceOverviewSplitSumHint": "somme = 100 %",
+  "attendanceOverviewSplitPresence": "Présence",
+  "attendanceOverviewSplitJustified": "Absences justifiées",
+  "attendanceOverviewSplitUnjustified": "Absences non justifiées",
+  "attendanceOverviewSplitA11yLabel": "Présence {presence} %, justifiées {justified} %, non justifiées {unjustified} %",
+  "@attendanceOverviewSplitA11yLabel": {
+    "placeholders": {
+      "presence": { "type": "String" },
+      "justified": { "type": "String" },
+      "unjustified": { "type": "String" }
+    }
+  },
+  "attendanceOverviewEvolutionTitle": "Évolution du taux de présence",
+  "attendanceOverviewEvolutionHintMonth": "par mois",
+  "attendanceOverviewEvolutionHintWeek": "par semaine",
+  "attendanceOverviewEvolutionHintDay": "par jour",
+  "attendanceOverviewEvolutionTarget": "Objectif {rate} %",
+  "@attendanceOverviewEvolutionTarget": {
+    "placeholders": { "rate": { "type": "String" } }
+  },
+  "attendanceOverviewReasonsTitle": "Motifs d'absence",
+  "attendanceOverviewReasonsHint": "école",
+  "attendanceOverviewReasonsCenterLabel": "absences",
+  "attendanceOverviewReasonUnjustified": "Non justifié",
+  "attendanceOverviewReasonUnjustifiedNote": "UNKNOWN/null",
+  "attendanceOverviewWeekdayTitle": "Absences par jour",
+  "attendanceOverviewWeekdayHint": "Lun → Ven",
+  "attendanceWeekdayMon": "Lun",
+  "attendanceWeekdayTue": "Mar",
+  "attendanceWeekdayWed": "Mer",
+  "attendanceWeekdayThu": "Jeu",
+  "attendanceWeekdayFri": "Ven",
+  "attendanceOverviewTopAbsentTitle": "Classes les plus absentéistes",
+  "attendanceOverviewTopAbsentHint": "top 5",
+  "attendanceOverviewByClassTitle": "Présence par classe",
+  "attendanceOverviewColClass": "Classe",
+  "attendanceOverviewColLevel": "Niveau",
+  "attendanceOverviewColPresence": "Présence",
+  "attendanceOverviewColJustified": "Justif.",
+  "attendanceOverviewColUnjustified": "Non justif.",
+  "attendanceOverviewColDistribution": "Répartition",
+  "attendanceOverviewEmptyTitle": "Aucune donnée de présence",
+  "attendanceOverviewEmptyDescription": "Aucun appel n'a été enregistré sur la fenêtre. Les statistiques apparaîtront dès le premier appel saisi.",
+  "attendanceOverviewEmptyAction": "Faire l'appel",
+  "attendanceOverviewLoadingA11yLabel": "Chargement du tableau de bord des présences",
+  "disciplinaryFolderBreadcrumb": "Liste disciplines",
+  "dossierTabsA11yLabel": "Onglets du dossier élève",
+  "dossierTabDisciplineLabel": "Discipline",
+  "dossierTabDisciplineDescription": "Cas, sanctions & suivi",
+  "dossierTabPresenceLabel": "Présence",
+  "dossierTabPresenceDescription": "Absences & retards",
+  "dossierOpenCasesChip": "{count, plural, =1{1 cas ouvert} other{{count} cas ouverts}}",
+  "@dossierOpenCasesChip": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dossierNoOpenCases": "Aucun cas ouvert",
+  "genderOther": "Autre"
 }

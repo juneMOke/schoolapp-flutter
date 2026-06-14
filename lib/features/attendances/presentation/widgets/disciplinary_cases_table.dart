@@ -286,7 +286,7 @@ class DisciplinaryCasesTable extends StatelessWidget {
     DisciplinaryCaseSummary caseData,
     AppLocalizations l10n,
   ) {
-    final date = caseData.disciplinaryCaseDate;
+    final date = caseData.createdAt;
     if (date == null) {
       return l10n.disciplinaryCasesDateUnavailable;
     }

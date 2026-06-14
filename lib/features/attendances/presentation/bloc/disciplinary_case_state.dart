@@ -12,6 +12,7 @@ enum DisciplinaryCaseErrorType {
   notFound,
   validation,
   unauthorized,
+  forbidden,
   invalidCredentials,
   server,
   storage,

@@ -2,6 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 part 'disciplinary_case_summary_model.g.dart';
@@ -18,7 +21,13 @@ class DisciplinaryCaseSummaryModel extends Equatable {
   final String title;
   final String status;
   final String content;
-  final DateTime? disciplinaryCaseDate;
+
+  // Nouveaux champs (DTO). Nullables par resilience au deploiement backend :
+  // l'entite retombe sur `unknown` si la valeur est absente ou inconnue.
+  final String? category;
+  final String? severity;
+  final String? sanction;
+  final DateTime? createdAt;
 
   const DisciplinaryCaseSummaryModel({
     required this.id,
@@ -31,7 +40,10 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     required this.title,
     required this.status,
     required this.content,
-    this.disciplinaryCaseDate,
+    this.category,
+    this.severity,
+    this.sanction,
+    this.createdAt,
   });
 
   factory DisciplinaryCaseSummaryModel.fromJson(Map<String, dynamic> json) =>
@@ -50,7 +62,10 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     title: title,
     status: DisciplinaryCaseStatusX.fromApiValue(status),
     content: content,
-    disciplinaryCaseDate: disciplinaryCaseDate,
+    category: DisciplinaryCategoryX.fromApiValue(category),
+    severity: DisciplinarySeverityX.fromApiValue(severity),
+    sanction: DisciplinarySanctionX.fromApiValue(sanction),
+    createdAt: createdAt,
   );
 
   @override
@@ -65,6 +80,9 @@ class DisciplinaryCaseSummaryModel extends Equatable {
     title,
     status,
     content,
-    disciplinaryCaseDate,
+    category,
+    severity,
+    sanction,
+    createdAt,
   ];
 }

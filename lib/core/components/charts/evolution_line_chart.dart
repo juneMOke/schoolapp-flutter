@@ -11,16 +11,40 @@ import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 /// [points] : données ordonnées (abscisse = index de la liste).
 /// [lineColor] : couleur principale de la ligne.
 /// [highlightColor] : couleur du point mis en évidence.
+///
+/// Par défaut le domaine vertical est dynamique (0 → max×1.2, grille /4 —
+/// rendu historique). Pour un domaine FIXE (ex. un taux 70–100 %), fournir
+/// [minY]/[maxY] (grille en 3 intervalles). [targetLine] ajoute une ligne
+/// d'objectif horizontale pointillée et [leftLabelFormatter] personnalise les
+/// libellés de l'axe Y (ex. suffixe « % »).
 class EvolutionLineChart extends StatelessWidget {
   final List<LineChartPoint> points;
   final Color lineColor;
   final Color highlightColor;
+
+  /// Bornes verticales fixes (optionnelles). Si nulles → domaine dynamique.
+  final double? minY;
+  final double? maxY;
+
+  /// Ligne d'objectif horizontale pointillée (ex. 95). Nulle → aucune.
+  final double? targetLine;
+  final Color? targetLineColor;
+  final String? targetLineLabel;
+
+  /// Formateur des libellés de l'axe Y (défaut : entier via NumberFormatter).
+  final String Function(double value)? leftLabelFormatter;
 
   const EvolutionLineChart({
     super.key,
     required this.points,
     required this.lineColor,
     required this.highlightColor,
+    this.minY,
+    this.maxY,
+    this.targetLine,
+    this.targetLineColor,
+    this.targetLineLabel,
+    this.leftLabelFormatter,
   });
 
   @override
@@ -32,8 +56,18 @@ class EvolutionLineChart extends StatelessWidget {
         FlSpot(i.toDouble(), points[i].value),
     ];
 
-    final maxY = points.map((p) => p.value).reduce((a, b) => a > b ? a : b);
-    final topY = (maxY * 1.2).ceilToDouble().clamp(10.0, double.infinity);
+    final dynamicMax = points
+        .map((p) => p.value)
+        .reduce((a, b) => a > b ? a : b);
+    final bool hasFixedDomain = maxY != null;
+    final double resolvedMinY = minY ?? 0;
+    final double resolvedMaxY =
+        maxY ?? (dynamicMax * 1.2).ceilToDouble().clamp(10.0, double.infinity);
+    // Domaine fixe → 3 intervalles (ex. 70/80/90/100) ; sinon /4 (historique).
+    final double gridInterval = hasFixedDomain
+        ? ((resolvedMaxY - resolvedMinY) / 3).clamp(1.0, double.infinity)
+        : (resolvedMaxY / 4).clamp(1.0, double.infinity);
+    final Color targetColor = targetLineColor ?? AppColors.terreCuite;
 
     return SizedBox(
       height: AppDimensions.enrollmentStatsChartSectionHeight,
@@ -41,17 +75,40 @@ class EvolutionLineChart extends StatelessWidget {
         LineChartData(
           minX: 0,
           maxX: (points.length - 1).toDouble(),
-          minY: 0,
-          maxY: topY,
+          minY: resolvedMinY,
+          maxY: resolvedMaxY,
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: (topY / 4).clamp(1, double.infinity),
+            horizontalInterval: gridInterval,
             getDrawingHorizontalLine: (_) => const FlLine(
               color: AppColors.enrollmentStatsChartGrid,
               strokeWidth: 1,
             ),
           ),
+          extraLinesData: targetLine == null
+              ? const ExtraLinesData()
+              : ExtraLinesData(
+                  horizontalLines: [
+                    HorizontalLine(
+                      y: targetLine!,
+                      color: targetColor,
+                      strokeWidth: 1.3,
+                      dashArray: const [5, 4],
+                      label: targetLineLabel == null
+                          ? HorizontalLineLabel()
+                          : HorizontalLineLabel(
+                              show: true,
+                              alignment: Alignment.topRight,
+                              style: AppTextStyles.caption.copyWith(
+                                color: targetColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              labelResolver: (_) => targetLineLabel!,
+                            ),
+                    ),
+                  ],
+                ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
             topTitles: const AxisTitles(
@@ -64,10 +121,13 @@ class EvolutionLineChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 36,
+                interval: hasFixedDomain ? gridInterval : null,
                 getTitlesWidget: (value, meta) => Text(
-                  NumberFormatterHelper.formatYAxisLabel(value),
+                  (leftLabelFormatter ??
+                      NumberFormatterHelper.formatYAxisLabel)(value),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
+                    fontFeatures: AppTextStyles.tabularFigures,
                   ),
                 ),
               ),

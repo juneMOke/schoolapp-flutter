@@ -7,6 +7,9 @@ class AppColors {
   static const bleuProfond = tokens.AppColors.bleuProfond;
   static const terreCuite = tokens.AppColors.terreCuite;
   static const orDoux = tokens.AppColors.orDoux;
+  static const terreCuiteDark = tokens.AppColors.terreCuiteDark;
+  static const terreCuiteSoft = tokens.AppColors.terreCuiteSoft;
+  static const bleuArdoiseSoft = tokens.AppColors.bleuArdoiseSoft;
   static const vertSavane = tokens.AppColors.vertSavane;
   static const blancCasse = tokens.AppColors.blancCasse;
   static const papier = tokens.AppColors.papier;
@@ -195,6 +198,10 @@ class AppColors {
   static const enrollmentStatsAccentSoft =
       tokens.AppColors.enrollmentStatsAccentSoft;
   static const enrollmentStatsFirst = tokens.AppColors.enrollmentStatsFirst;
+
+  static const presenceSummaryTintTop = tokens.AppColors.presenceSummaryTintTop;
+  static const presenceSummaryTintBottom =
+      tokens.AppColors.presenceSummaryTintBottom;
   static const enrollmentStatsFirstSoft =
       tokens.AppColors.enrollmentStatsFirstSoft;
   static const enrollmentStatsRe = tokens.AppColors.enrollmentStatsRe;
@@ -211,4 +218,15 @@ class AppColors {
       tokens.AppColors.enrollmentStatsCardSurface;
   static const enrollmentStatsChartGrid =
       tokens.AppColors.enrollmentStatsChartGrid;
+
+  // Disciplines — tableau de bord des presences
+  static const presenceStatePresentSoft =
+      tokens.AppColors.presenceStatePresentSoft;
+  static const presenceStateJustifiedSoft =
+      tokens.AppColors.presenceStateJustifiedSoft;
+  static const presenceStateUnjustifiedSoft =
+      tokens.AppColors.presenceStateUnjustifiedSoft;
+  static const attendanceOverviewRecordedSoft =
+      tokens.AppColors.attendanceOverviewRecordedSoft;
+  static const absenceReasonGold = tokens.AppColors.absenceReasonGold;
 }

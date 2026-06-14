@@ -10,6 +10,9 @@ enum AttendanceErrorType {
   notFound,
   validation,
   unauthorized,
+  // 403 (acces refuse) : produit par `UnauthorizedFailure` (HTTP 403) via
+  // `_mapFailureToErrorType`, affiche par l'anatomie d'erreur partagee.
+  forbidden,
   invalidCredentials,
   server,
   storage,

@@ -72,6 +72,12 @@ class SegmentedTabFilter<T> extends StatelessWidget {
   final String? semanticsLabel;
   final SegmentedTabFilterStyle style;
 
+  /// Si `true`, les onglets se partagent équitablement la largeur disponible
+  /// (`Expanded`) — à utiliser dans un conteneur de largeur bornée et étroit
+  /// (ex. modale) pour éviter tout débordement. Par défaut `false` : largeur
+  /// intrinsèque (comportement des filtres de période des dashboards).
+  final bool expand;
+
   const SegmentedTabFilter({
     super.key,
     required this.options,
@@ -79,6 +85,7 @@ class SegmentedTabFilter<T> extends StatelessWidget {
     required this.onSelected,
     this.semanticsLabel,
     this.style = const SegmentedTabFilterStyle(),
+    this.expand = false,
   });
 
   @override
@@ -96,8 +103,11 @@ class SegmentedTabFilter<T> extends StatelessWidget {
         ),
         padding: style.containerPadding,
         child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: options.map((opt) => _buildTab(opt)).toList(),
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            for (final opt in options)
+              if (expand) Expanded(child: _buildTab(opt)) else _buildTab(opt),
+          ],
         ),
       ),
     );

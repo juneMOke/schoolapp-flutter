@@ -38,16 +38,10 @@ class AppBreakpoints {
   static const double studentChargesActionColMin = 480.0;
 
   // Facturation — seuils responsive dédiés (spec §00 : occupation de l'espace).
-  // Bascule des tuiles KPI détail en colonne sous cette largeur (très petits
-  // écrans), pour que le montant tienne en pleine largeur sans réduction.
-  static const double kpiStripStackMax = dataTablePhoneMax; // 390
   // Au-delà : la page détail élargit son contenu et juxtapose Paiements | Frais.
   static const double financeDetailTwoColMin = navigationCompactMax; // 1024
   // Dashboard stats : juxtapose Évolution | Répartition par frais au-delà.
   static const double financeStatsTwoColMin = 1100.0;
-  // KPI band stats : 2 colonnes / 4 colonnes (valeurs conservées à l'identique).
-  static const double financeStatsKpiTwoColMin = 480.0;
-  static const double financeStatsKpiFourColMin = 780.0;
   // Section par type de frais : 2 colonnes / 3 colonnes (valeurs conservées).
   static const double financeStatsFeeTypeTwoColMin = 640.0;
   static const double financeStatsFeeTypeThreeColMin = 980.0;
@@ -64,4 +58,19 @@ class AppBreakpoints {
   static const double classesCascadeRowMin = 520.0;
   // Tuile élève : en deçà, le bouton d'action passe en icône seule (+ tooltip).
   static const double classesMemberTileCompactMax = 300.0;
+
+  // Carte de cas disciplinaire — pied (frise + action). En deçà : empilement
+  // vertical pour éviter tout débordement ; au-delà : frise et action en Row.
+  static const double disciplinaryCardFooterStackMax = 480.0;
+
+  // Tableau de bord des présences (Disciplines) — la paire 1fr/1fr
+  // (Jour/Top classes) passe en colonne sous ce seuil.
+  static const double attendanceOverviewTwoColMin = 880.0;
+  // Paire large Évolution(2fr)/Motifs(1fr) : reste côte à côte plus haut, pour
+  // que le donut Motifs (1fr) ait assez de place avant de s'empiler.
+  static const double attendanceOverviewWideTwoColMin = 920.0;
+  // Donut des motifs : bascule en disposition Row (donut + légende listée
+  // motif·%·effectif) dès cette largeur utile — découplé de detailCompactMax
+  // (pensé pour les panneaux pleine largeur), adapté à un panneau 1fr.
+  static const double reasonDonutRowMin = 300.0;
 }

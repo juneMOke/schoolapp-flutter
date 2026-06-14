@@ -33,8 +33,6 @@ class AppDimensions {
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
   static const searchFieldGap = 10.0;
-  // Largeur min d'une cellule du bandeau KPI stats (garde-fou anti-écrasement).
-  static const financeStatsKpiCellMinWidth = 220.0;
   // Largeur max de la carte d'invitation « avant recherche » (centrée).
   static const searchInvitationMaxWidth = 620.0;
   static const detailTableMinWidth = 860.0;
@@ -100,6 +98,37 @@ class AppDimensions {
   static const attendanceStudentAvatarSize = 30.0;
   static const attendanceResultsPanelMinHeight = 360.0;
   static const attendanceResultsPanelMaxHeight = 620.0;
+
+  // Onglet Discipline — carte de cas & frise de statut
+  static const disciplinaryCardAccentWidth = 4.0;
+  static const disciplinaryStepperDotSize = 22.0;
+  static const disciplinaryStepperConnectorWidth = 18.0;
+  static const disciplinaryStepperConnectorHeight = 2.0;
+  static const disciplinaryStepperIconSize = 12.0;
+
+  // Onglet Discipline — chips, pastilles & modale (carte + création)
+  static const disciplinaryChipPaddingH = 10.0;
+  static const disciplinaryChipPaddingV = 4.0;
+  static const disciplinarySanctionChipPaddingV = 5.0;
+  static const disciplinaryStatusPillPaddingH = 12.0;
+  static const disciplinaryStatusPillPaddingV = 6.0;
+  static const disciplinaryChipIconSize = 13.0;
+  static const disciplinaryStatusPillIconSize = 15.0;
+  static const disciplinaryCreateDialogMaxWidth = 500.0;
+  static const disciplinaryCreateSubmitSpinnerSize = 18.0;
+  // Tints alpha récurrents des chips/pastilles (fond + bordure).
+  static const disciplinaryTintAlpha = 0.12;
+  static const disciplinaryTintBorderAlpha = 0.25;
+  static const disciplinarySanctionTintAlpha = 0.10;
+
+  // Onglet Presence — synthese d'assiduite
+  static const presenceMedallionSize = 30.0;
+  static const presenceMedallionRadius = 9.0;
+  static const presenceDistributionBarHeight = 8.0;
+  static const presenceRowAccentBarWidth = 4.0;
+  static const presenceRowAccentBarHeight = 30.0;
+  static const presencePerfectMedallionSize = 64.0;
+  static const presencePerfectIconSize = 30.0;
   static const attendanceCounterValueFontSize = 16.0;
   static const attendanceCycleFieldWidth = 170.0;
   static const attendanceLevelFieldWidth = 170.0;
@@ -143,8 +172,29 @@ class AppDimensions {
 
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
-  static const financeStatsKpiPrimaryValueFontSize = 32.0;
-  static const financeStatsKpiSecondaryValueFontSize = 22.0;
-  static const financeStatsKpiDividerHeight = 64.0;
   static const financeStatsFeeTypeProgressHeight = 8.0;
+
+  // Disciplines — tableau de bord des presences (attendance overview)
+  static const kpiCardHeightWithSubline = 128.0;
+  static const attendanceOverviewTrendMinRate = 70.0;
+  static const attendanceOverviewTrendMaxRate = 100.0;
+  static const attendanceOverviewTargetRate = 95.0;
+  static const attendanceOverviewDonutCenterRadius = 46.0;
+  static const attendanceOverviewDonutRingThickness = 28.0;
+  static const attendanceOverviewSplitBarHeight = 16.0;
+  static const attendanceOverviewClassSplitBarHeight = 9.0;
+  static const attendanceOverviewTopBarHeight = 8.0;
+  static const attendanceOverviewRankBadgeSize = 24.0;
+  // Seuil d'alerte : un taux d'absence non justifiee >= 4 % passe en rouge gras.
+  static const attendanceOverviewUnjustifiedAlertThreshold = 4.0;
+
+  // Coquille fiche élève (Liste disciplines ▸ détail) — DossierTabs & panneau
+  static const dossierTabsPadding = 6.0;
+  static const dossierTabRadius = 13.0;
+  static const dossierTabMinHeight = 44.0;
+  static const dossierMedallionSize = 40.0;
+  static const dossierMedallionRadius = 12.0;
+  static const dossierBadgeMinSize = 19.0;
+  // Hauteur du dégradé soft → surface du panneau d'onglet.
+  static const dossierPanelTintHeight = 260.0;
 }

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_stats.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_chart_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_empty_state.dart';
@@ -66,8 +67,16 @@ class _FeeTypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Comme à l'étape « Frais scolaires » de l'inscription (phase 6), on affiche
+    // le libellé localisé du type de frais plutôt que son code brut. Repli sur le
+    // code si le type est inconnu (sinon tous les inconnus se confondraient sous
+    // un même libellé générique).
+    final localizedLabel = item.code.localizedFeeLabel(l10n);
+    final label = localizedLabel == l10n.studentChargeFeeCodeFallback
+        ? item.code
+        : localizedLabel;
     final semanticLabel = l10n.financeStatsFeeTypeItemA11yLabel(
-      item.code,
+      label,
       _formatCents(item.collected),
       _formatCents(item.expected),
       item.collectionRate,
@@ -88,7 +97,7 @@ class _FeeTypeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.code,
+                label,
                 style: AppTextStyles.sectionTitle.copyWith(
                   color: AppColors.bleuArdoise,
                 ),

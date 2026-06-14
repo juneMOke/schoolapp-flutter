@@ -14,7 +14,8 @@ abstract final class DisciplinaryCaseHelpers {
     DisciplinaryCaseErrorType.notFound => l10n.disciplinaryCasesNotFound,
     DisciplinaryCaseErrorType.validation =>
       l10n.disciplinaryCasesValidationError,
-    DisciplinaryCaseErrorType.unauthorized =>
+    DisciplinaryCaseErrorType.unauthorized ||
+    DisciplinaryCaseErrorType.forbidden =>
       l10n.disciplinaryCasesUnauthorizedError,
     DisciplinaryCaseErrorType.invalidCredentials =>
       l10n.disciplinaryCasesInvalidCredentialsError,

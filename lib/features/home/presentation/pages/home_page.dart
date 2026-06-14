@@ -8,6 +8,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_page.dart';
+import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_scope.dart';
@@ -157,7 +159,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
-        state.selectedSubMenuId == MenuConstants.disciplinesListId;
+        state.selectedSubMenuId == MenuConstants.disciplinesListId ||
+        state.selectedSubMenuId == MenuConstants.disciplinesDashboardId;
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -286,6 +289,10 @@ class _HomePageView extends StatelessWidget {
       case MenuConstants.disciplinesListId:
         return const ClassesFeatureScope(
           child: ClassesListPage(intent: ClassesListIntent.disciplinesList()),
+        );
+      case MenuConstants.disciplinesDashboardId:
+        return const AttendanceOverviewDashboardScope(
+          child: AttendanceOverviewDashboardPage(),
         );
       default:
         return Container(

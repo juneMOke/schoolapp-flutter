@@ -4626,11 +4626,23 @@ abstract class AppLocalizations {
   /// **'Loading attendance records...'**
   String get attendanceLoadingMessage;
 
-  /// No description provided for @attendanceEmptyMessage.
+  /// No description provided for @attendanceEmptyStudentsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No attendance found for these filters.'**
-  String get attendanceEmptyMessage;
+  /// **'No students in this class'**
+  String get attendanceEmptyStudentsTitle;
+
+  /// No description provided for @attendanceEmptyStudentsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This class has no students yet. Add students from the class Composition to take attendance.'**
+  String get attendanceEmptyStudentsDescription;
+
+  /// No description provided for @attendanceEmptyOpenComposition.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Composition'**
+  String get attendanceEmptyOpenComposition;
 
   /// No description provided for @attendanceExportAction.
   ///
@@ -4992,6 +5004,96 @@ abstract class AppLocalizations {
   /// **'An unexpected error occurred.'**
   String get attendanceErrorUnknown;
 
+  /// No description provided for @attendanceErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view attendance.'**
+  String get attendanceErrorForbidden;
+
+  /// No description provided for @attendanceErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get attendanceErrorRetry;
+
+  /// No description provided for @attendanceErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get attendanceErrorReconnect;
+
+  /// No description provided for @attendanceErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get attendanceErrorContactAdmin;
+
+  /// No description provided for @attendanceErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get attendanceErrorNetworkTitle;
+
+  /// No description provided for @attendanceErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your internet connection, then try again.'**
+  String get attendanceErrorNetworkMessage;
+
+  /// No description provided for @attendanceErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get attendanceErrorUnauthorizedTitle;
+
+  /// No description provided for @attendanceErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to resume attendance.'**
+  String get attendanceErrorUnauthorizedMessage;
+
+  /// No description provided for @attendanceErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get attendanceErrorForbiddenTitle;
+
+  /// No description provided for @attendanceErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this class\'s attendance.'**
+  String get attendanceErrorForbiddenMessage;
+
+  /// No description provided for @attendanceErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get attendanceErrorServerTitle;
+
+  /// No description provided for @attendanceErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our end. Try again in a moment.'**
+  String get attendanceErrorServerMessage;
+
+  /// No description provided for @attendanceErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String attendanceErrorIncidentCode(String code);
+
+  /// No description provided for @attendanceErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get attendanceErrorUnknownTitle;
+
+  /// No description provided for @attendanceErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading attendance.'**
+  String get attendanceErrorUnknownMessage;
+
   /// No description provided for @attendanceSaveCallAction.
   ///
   /// In en, this message translates to:
@@ -5184,11 +5286,149 @@ abstract class AppLocalizations {
   /// **'Attendance history'**
   String get disciplinaryTabAttendanceHistoryLabel;
 
-  /// No description provided for @disciplinaryAttendanceHistoryComingSoon.
+  /// No description provided for @presenceStatusPresent.
   ///
   /// In en, this message translates to:
-  /// **'Attendance history will be delivered in a future feature.'**
-  String get disciplinaryAttendanceHistoryComingSoon;
+  /// **'Present'**
+  String get presenceStatusPresent;
+
+  /// No description provided for @presenceStatusJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified absence'**
+  String get presenceStatusJustified;
+
+  /// No description provided for @presenceStatusUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absence'**
+  String get presenceStatusUnjustified;
+
+  /// No description provided for @presenceSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance summary'**
+  String get presenceSummaryTitle;
+
+  /// No description provided for @presenceSummaryA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance summary, rate {rate}%'**
+  String presenceSummaryA11yLabel(int rate);
+
+  /// No description provided for @presenceKpiRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance rate'**
+  String get presenceKpiRate;
+
+  /// No description provided for @presenceRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String presenceRateValue(int rate);
+
+  /// No description provided for @presenceSchoolDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 school day} other{{count} school days}}'**
+  String presenceSchoolDaysCount(int count);
+
+  /// No description provided for @presenceDistributionA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution of days by status'**
+  String get presenceDistributionA11yLabel;
+
+  /// No description provided for @presencePresentOutOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{present} days present out of {total}'**
+  String presencePresentOutOfTotal(int present, int total);
+
+  /// No description provided for @presenceAbsenceListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences detail'**
+  String get presenceAbsenceListTitle;
+
+  /// No description provided for @presenceAbsenceDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String presenceAbsenceDate(DateTime date);
+
+  /// No description provided for @presencePerfectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect attendance'**
+  String get presencePerfectTitle;
+
+  /// No description provided for @presencePerfectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No absence on this period.'**
+  String get presencePerfectMessage;
+
+  /// No description provided for @presenceLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading attendance summary…'**
+  String get presenceLoadingA11yLabel;
+
+  /// No description provided for @presencePeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get presencePeriodWeek;
+
+  /// No description provided for @presencePeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get presencePeriodMonth;
+
+  /// No description provided for @presencePeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get presencePeriodYear;
+
+  /// No description provided for @presencePeriodFilterA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance period'**
+  String get presencePeriodFilterA11yLabel;
+
+  /// No description provided for @presenceEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No school days'**
+  String get presenceEmptyTitle;
+
+  /// No description provided for @presenceEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No school days on this period. Pick another period to view attendance.'**
+  String get presenceEmptyMessage;
+
+  /// No description provided for @presenceRangeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {name}'**
+  String presenceRangeYear(String name);
+
+  /// No description provided for @presenceRangeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String presenceRangeMonth(DateTime date);
+
+  /// No description provided for @presenceRangeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String presenceRangeWeek(DateTime date);
 
   /// No description provided for @disciplinaryUnknownValue.
   ///
@@ -5441,6 +5681,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get disciplinaryCaseStatusUnknown;
+
+  /// No description provided for @disciplinarySeverityMinor.
+  ///
+  /// In en, this message translates to:
+  /// **'Minor'**
+  String get disciplinarySeverityMinor;
+
+  /// No description provided for @disciplinarySeverityMajor.
+  ///
+  /// In en, this message translates to:
+  /// **'Major'**
+  String get disciplinarySeverityMajor;
+
+  /// No description provided for @disciplinarySeveritySerious.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious'**
+  String get disciplinarySeveritySerious;
+
+  /// No description provided for @disciplinarySeverityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unspecified'**
+  String get disciplinarySeverityUnknown;
+
+  /// No description provided for @disciplinaryCategoryDisruptiveBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Disruptive behavior'**
+  String get disciplinaryCategoryDisruptiveBehavior;
+
+  /// No description provided for @disciplinaryCategoryLateness.
+  ///
+  /// In en, this message translates to:
+  /// **'Lateness'**
+  String get disciplinaryCategoryLateness;
+
+  /// No description provided for @disciplinaryCategoryRepeatedLateness.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated lateness'**
+  String get disciplinaryCategoryRepeatedLateness;
+
+  /// No description provided for @disciplinaryCategoryUnjustifiedAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absence'**
+  String get disciplinaryCategoryUnjustifiedAbsence;
+
+  /// No description provided for @disciplinaryCategoryInsolence.
+  ///
+  /// In en, this message translates to:
+  /// **'Insolence'**
+  String get disciplinaryCategoryInsolence;
+
+  /// No description provided for @disciplinaryCategoryCheating.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheating'**
+  String get disciplinaryCategoryCheating;
+
+  /// No description provided for @disciplinaryCategoryFighting.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighting'**
+  String get disciplinaryCategoryFighting;
+
+  /// No description provided for @disciplinaryCategoryDressCodeViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'Dress code violation'**
+  String get disciplinaryCategoryDressCodeViolation;
+
+  /// No description provided for @disciplinaryCategoryTalkingInClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Talking in class'**
+  String get disciplinaryCategoryTalkingInClass;
+
+  /// No description provided for @disciplinaryCategoryUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get disciplinaryCategoryUnknown;
+
+  /// No description provided for @disciplinarySanctionOralWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Oral warning'**
+  String get disciplinarySanctionOralWarning;
+
+  /// No description provided for @disciplinarySanctionWrittenWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Written warning'**
+  String get disciplinarySanctionWrittenWarning;
+
+  /// No description provided for @disciplinarySanctionDetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Detention'**
+  String get disciplinarySanctionDetention;
+
+  /// No description provided for @disciplinarySanctionParentsSummoned.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents summoned'**
+  String get disciplinarySanctionParentsSummoned;
+
+  /// No description provided for @disciplinarySanctionTemporaryExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary exclusion'**
+  String get disciplinarySanctionTemporaryExclusion;
+
+  /// No description provided for @disciplinarySanctionDisciplinaryCouncil.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary council'**
+  String get disciplinarySanctionDisciplinaryCouncil;
+
+  /// No description provided for @disciplinarySanctionPermanentExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent exclusion'**
+  String get disciplinarySanctionPermanentExclusion;
+
+  /// No description provided for @disciplinarySanctionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'No sanction'**
+  String get disciplinarySanctionUnknown;
+
+  /// No description provided for @disciplinaryCaseSeverityChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Severity {severity}'**
+  String disciplinaryCaseSeverityChip(String severity);
+
+  /// No description provided for @disciplinaryAdvanceTakeCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Take charge'**
+  String get disciplinaryAdvanceTakeCharge;
+
+  /// No description provided for @disciplinaryAdvanceClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get disciplinaryAdvanceClose;
+
+  /// No description provided for @disciplinaryCaseClosedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Case closed'**
+  String get disciplinaryCaseClosedLabel;
+
+  /// No description provided for @disciplinaryCasesCountPill.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 case} other{{count} cases}}'**
+  String disciplinaryCasesCountPill(int count);
+
+  /// No description provided for @disciplinaryCasesOpenPill.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 open} other{{count} open}}'**
+  String disciplinaryCasesOpenPill(int count);
+
+  /// No description provided for @disciplinaryCasesGravePill.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 serious} other{{count} serious}}'**
+  String disciplinaryCasesGravePill(int count);
+
+  /// No description provided for @disciplinaryCasesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No discipline case'**
+  String get disciplinaryCasesEmptyTitle;
+
+  /// No description provided for @disciplinaryCasesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No incident recorded for this student. All good.'**
+  String get disciplinaryCasesEmptyDescription;
+
+  /// No description provided for @disciplinaryFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get disciplinaryFieldCategory;
+
+  /// No description provided for @disciplinaryFieldSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Severity'**
+  String get disciplinaryFieldSeverity;
+
+  /// No description provided for @disciplinaryFieldSanction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanction'**
+  String get disciplinaryFieldSanction;
+
+  /// No description provided for @disciplinaryStatusAtCreationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status at creation'**
+  String get disciplinaryStatusAtCreationLabel;
+
+  /// No description provided for @disciplinaryStatusAtCreationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The case will be created as Open. You will then advance it from the record.'**
+  String get disciplinaryStatusAtCreationHint;
+
+  /// No description provided for @disciplinaryErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get disciplinaryErrorNetworkTitle;
+
+  /// No description provided for @disciplinaryErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get disciplinaryErrorUnauthorizedTitle;
+
+  /// No description provided for @disciplinaryErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get disciplinaryErrorForbiddenTitle;
+
+  /// No description provided for @disciplinaryErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get disciplinaryErrorServerTitle;
+
+  /// No description provided for @disciplinaryErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get disciplinaryErrorUnknownTitle;
+
+  /// No description provided for @disciplinaryErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get disciplinaryErrorRetry;
+
+  /// No description provided for @disciplinaryErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get disciplinaryErrorReconnect;
+
+  /// No description provided for @disciplinaryErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get disciplinaryErrorContactAdmin;
 
   /// No description provided for @enrollmentStatusPreRegistered.
   ///
@@ -5982,12 +6486,6 @@ abstract class AppLocalizations {
   /// **'Collection rate'**
   String get financeStatsKpiCollectionRate;
 
-  /// No description provided for @financeStatsPercentOfTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent}% of total'**
-  String financeStatsPercentOfTotal(int percent);
-
   /// No description provided for @financeStatsSectionEvolution.
   ///
   /// In en, this message translates to:
@@ -6244,6 +6742,358 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove filter {filter}'**
   String removeFilterNamed(String filter);
+
+  /// No description provided for @attendanceOverviewEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline · Attendance'**
+  String get attendanceOverviewEyebrow;
+
+  /// No description provided for @attendanceOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get attendanceOverviewTitle;
+
+  /// No description provided for @attendanceOverviewContextSchoolYear.
+  ///
+  /// In en, this message translates to:
+  /// **'School year'**
+  String get attendanceOverviewContextSchoolYear;
+
+  /// No description provided for @attendanceOverviewContextWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Window'**
+  String get attendanceOverviewContextWindow;
+
+  /// No description provided for @attendanceOverviewContextGeneratedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated on'**
+  String get attendanceOverviewContextGeneratedAt;
+
+  /// No description provided for @attendanceOverviewContextA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance statistics context'**
+  String get attendanceOverviewContextA11yLabel;
+
+  /// No description provided for @attendanceOverviewKpiPresence.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance rate'**
+  String get attendanceOverviewKpiPresence;
+
+  /// No description provided for @attendanceOverviewKpiJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified absences'**
+  String get attendanceOverviewKpiJustified;
+
+  /// No description provided for @attendanceOverviewKpiUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absences'**
+  String get attendanceOverviewKpiUnjustified;
+
+  /// No description provided for @attendanceOverviewKpiRecordedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded days'**
+  String get attendanceOverviewKpiRecordedDays;
+
+  /// No description provided for @attendanceOverviewRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String attendanceOverviewRateValue(String rate);
+
+  /// No description provided for @attendanceOverviewStudentDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} student-days'**
+  String attendanceOverviewStudentDays(String count);
+
+  /// No description provided for @attendanceOverviewKpiBandA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Key attendance indicators'**
+  String get attendanceOverviewKpiBandA11yLabel;
+
+  /// No description provided for @attendanceOverviewSplitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance / absence breakdown'**
+  String get attendanceOverviewSplitTitle;
+
+  /// No description provided for @attendanceOverviewSplitSumHint.
+  ///
+  /// In en, this message translates to:
+  /// **'sum = 100%'**
+  String get attendanceOverviewSplitSumHint;
+
+  /// No description provided for @attendanceOverviewSplitPresence.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendanceOverviewSplitPresence;
+
+  /// No description provided for @attendanceOverviewSplitJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified absences'**
+  String get attendanceOverviewSplitJustified;
+
+  /// No description provided for @attendanceOverviewSplitUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified absences'**
+  String get attendanceOverviewSplitUnjustified;
+
+  /// No description provided for @attendanceOverviewSplitA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Present {presence}%, justified {justified}%, unjustified {unjustified}%'**
+  String attendanceOverviewSplitA11yLabel(
+    String presence,
+    String justified,
+    String unjustified,
+  );
+
+  /// No description provided for @attendanceOverviewEvolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance rate trend'**
+  String get attendanceOverviewEvolutionTitle;
+
+  /// No description provided for @attendanceOverviewEvolutionHintMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'by month'**
+  String get attendanceOverviewEvolutionHintMonth;
+
+  /// No description provided for @attendanceOverviewEvolutionHintWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'by week'**
+  String get attendanceOverviewEvolutionHintWeek;
+
+  /// No description provided for @attendanceOverviewEvolutionHintDay.
+  ///
+  /// In en, this message translates to:
+  /// **'by day'**
+  String get attendanceOverviewEvolutionHintDay;
+
+  /// No description provided for @attendanceOverviewEvolutionTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target {rate}%'**
+  String attendanceOverviewEvolutionTarget(String rate);
+
+  /// No description provided for @attendanceOverviewReasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence reasons'**
+  String get attendanceOverviewReasonsTitle;
+
+  /// No description provided for @attendanceOverviewReasonsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'school'**
+  String get attendanceOverviewReasonsHint;
+
+  /// No description provided for @attendanceOverviewReasonsCenterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'absences'**
+  String get attendanceOverviewReasonsCenterLabel;
+
+  /// No description provided for @attendanceOverviewReasonUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified'**
+  String get attendanceOverviewReasonUnjustified;
+
+  /// No description provided for @attendanceOverviewReasonUnjustifiedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'UNKNOWN/null'**
+  String get attendanceOverviewReasonUnjustifiedNote;
+
+  /// No description provided for @attendanceOverviewWeekdayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences by day'**
+  String get attendanceOverviewWeekdayTitle;
+
+  /// No description provided for @attendanceOverviewWeekdayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon → Fri'**
+  String get attendanceOverviewWeekdayHint;
+
+  /// No description provided for @attendanceWeekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get attendanceWeekdayMon;
+
+  /// No description provided for @attendanceWeekdayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get attendanceWeekdayTue;
+
+  /// No description provided for @attendanceWeekdayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get attendanceWeekdayWed;
+
+  /// No description provided for @attendanceWeekdayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get attendanceWeekdayThu;
+
+  /// No description provided for @attendanceWeekdayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get attendanceWeekdayFri;
+
+  /// No description provided for @attendanceOverviewTopAbsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Most absent classes'**
+  String get attendanceOverviewTopAbsentTitle;
+
+  /// No description provided for @attendanceOverviewTopAbsentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'top 5'**
+  String get attendanceOverviewTopAbsentHint;
+
+  /// No description provided for @attendanceOverviewByClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance by class'**
+  String get attendanceOverviewByClassTitle;
+
+  /// No description provided for @attendanceOverviewColClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get attendanceOverviewColClass;
+
+  /// No description provided for @attendanceOverviewColLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get attendanceOverviewColLevel;
+
+  /// No description provided for @attendanceOverviewColPresence.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceOverviewColPresence;
+
+  /// No description provided for @attendanceOverviewColJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get attendanceOverviewColJustified;
+
+  /// No description provided for @attendanceOverviewColUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified'**
+  String get attendanceOverviewColUnjustified;
+
+  /// No description provided for @attendanceOverviewColDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get attendanceOverviewColDistribution;
+
+  /// No description provided for @attendanceOverviewEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance data'**
+  String get attendanceOverviewEmptyTitle;
+
+  /// No description provided for @attendanceOverviewEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance has been recorded for this window. Statistics will appear as soon as the first attendance is taken.'**
+  String get attendanceOverviewEmptyDescription;
+
+  /// No description provided for @attendanceOverviewEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Take attendance'**
+  String get attendanceOverviewEmptyAction;
+
+  /// No description provided for @attendanceOverviewLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the attendance dashboard'**
+  String get attendanceOverviewLoadingA11yLabel;
+
+  /// No description provided for @disciplinaryFolderBreadcrumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline list'**
+  String get disciplinaryFolderBreadcrumb;
+
+  /// No description provided for @dossierTabsA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student folder tabs'**
+  String get dossierTabsA11yLabel;
+
+  /// No description provided for @dossierTabDisciplineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get dossierTabDisciplineLabel;
+
+  /// No description provided for @dossierTabDisciplineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cases, sanctions & follow-up'**
+  String get dossierTabDisciplineDescription;
+
+  /// No description provided for @dossierTabPresenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get dossierTabPresenceLabel;
+
+  /// No description provided for @dossierTabPresenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences & lateness'**
+  String get dossierTabPresenceDescription;
+
+  /// No description provided for @dossierOpenCasesChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 open case} other{{count} open cases}}'**
+  String dossierOpenCasesChip(int count);
+
+  /// No description provided for @dossierNoOpenCases.
+  ///
+  /// In en, this message translates to:
+  /// **'No open case'**
+  String get dossierNoOpenCases;
+
+  /// No description provided for @genderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get genderOther;
 }
 
 class _AppLocalizationsDelegate

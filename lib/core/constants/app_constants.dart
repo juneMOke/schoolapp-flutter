@@ -109,10 +109,19 @@ class AppConstants {
   static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
 
+  // ─── Support / Contact ───────────────────────────────────────────────────────
+  /// Adresse de contact de l'administration (actions « Contacter l'administrateur »
+  /// des etats d'erreur 403). Centralisee ici pour eviter la duplication.
+  static const String supportEmail = 'support@school.local';
+
   // ─── Attendance ────────────────────────────────────────────────────────────
   static const String attendanceEndpoint = '/api/v1/attendances';
   static const String attendanceByClassroomEndpoint =
       '/api/v1/attendances/classes/{classroomId}';
+  static const String attendanceStudentSummaryEndpoint =
+      '/api/v1/attendance-stats/students/{studentId}/summary';
+  static const String attendanceOverviewEndpoint =
+      '/api/v1/attendance-stats/overview';
   static const String disciplinaryCasesEndpoint = '/api/v1/disciplinary-cases';
   static const String disciplinaryCaseByIdEndpoint =
       '/api/v1/disciplinary-cases/{caseId}';

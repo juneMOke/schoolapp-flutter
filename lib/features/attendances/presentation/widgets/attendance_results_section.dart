@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/core/widgets/state_card.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
@@ -17,6 +20,11 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/att
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_records_mobile_list.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_results_toolbar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_save_overlay.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_empty_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceResultsSection extends StatelessWidget {
@@ -28,6 +36,10 @@ class AttendanceResultsSection extends StatelessWidget {
     required this.lastRequest,
     required this.onRetry,
   });
+
+  Future<void> _contactAdmin() async {
+    await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,35 +66,31 @@ class AttendanceResultsSection extends StatelessWidget {
         late final Widget child;
 
         if (state.fetchStatus == AttendanceStatus.loading) {
-          child = StateCard(
-            message: l10n.attendanceLoadingMessage,
-            icon: Icons.hourglass_top_rounded,
-            accent: AppColors.financeDetailAccent,
-            accentSoft: AppColors.financeDetailAccentSoft,
-            child: const Padding(
-              padding: EdgeInsets.only(top: AppDimensions.spacingS),
-              child: LinearProgressIndicator(),
-            ),
+          // Squelette partage : conserve les lignes d'appel + reduced-motion.
+          child = EteeloListSkeleton(
+            rowCount: 8,
+            semanticsLabel: l10n.attendanceLoadingMessage,
           );
         } else if (state.fetchStatus == AttendanceStatus.failure) {
-          child = StateCard(
-            message: AttendancePageHelpers.mapAttendanceErrorToMessage(
-              l10n,
-              state.fetchErrorType,
-            ),
-            icon: Icons.error_outline,
-            accent: AppColors.danger,
-            accentSoft: AppColors.financeDetailDangerSoft,
-            actionLabel: l10n.refresh,
-            onAction: onRetry,
+          // Anatomie d'erreur partagee (4 types) ; le 403 reste dormant.
+          child = AttendanceResultsErrorState(
+            type: state.fetchErrorType,
+            onRetry: onRetry,
+            onReconnect: () =>
+                context.read<AuthBloc>().add(const AuthLogoutRequested()),
+            onContactAdmin: _contactAdmin,
           );
         } else if (state.fetchStatus != AttendanceStatus.success ||
             state.draftRows.isEmpty) {
-          child = StateCard(
-            message: l10n.attendanceEmptyMessage,
-            icon: Icons.inbox_outlined,
-            accent: AppColors.textSecondary,
-            accentSoft: AppColors.financeDetailMutedSurface,
+          // Etat vide partage : medaillon pointille + renvoi vers Composition.
+          child = AttendanceResultsEmptyState(
+            onOpenComposition: () => context.read<NavigationBloc>().add(
+              SubMenuItemSelected(
+                menuId: MenuConstants.classesMenuId,
+                subMenuId: MenuConstants.organisationId,
+                title: l10n.classesOrganisationHeroTitle,
+              ),
+            ),
           );
         } else {
           final totalCount = state.draftRows.length;
@@ -95,11 +103,13 @@ class AttendanceResultsSection extends StatelessWidget {
                 (r) =>
                     !r.present &&
                     r.absenceReason != null &&
-                    r.absenceReason != AbsenceReason.unjustified,
+                    !r.absenceReason!.isUnjustified,
               )
               .length;
           final unjustifiedCount = state.draftRows
-              .where((r) => r.absenceReason == AbsenceReason.unjustified)
+              .where(
+                (r) => !r.present && (r.absenceReason?.isUnjustified ?? false),
+              )
               .length;
           final missingReasonsCount = state.draftRows
               .where((row) => !row.present && row.absenceReason == null)

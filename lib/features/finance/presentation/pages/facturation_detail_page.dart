@@ -48,10 +48,6 @@ class FacturationDetailPage extends StatelessWidget {
     return value.isEmpty ? l10n.facturationDetailUnknownValue : value;
   }
 
-  String _formatAmountOnly(double cents) {
-    return formatMonetaryAmount(cents / 100);
-  }
-
   void _openCreatePayment(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final chargesState = context.read<StudentChargesBloc>().state;
@@ -220,43 +216,12 @@ class FacturationDetailPage extends StatelessWidget {
 
                             // Tuiles de synthèse affichées directement sur la page
                             // (l'identité élève + classe vit déjà dans l'AppBar).
-                            return FinanceDetailKpiStrip(
-                              items: [
-                                FinanceDetailKpiItem(
-                                  label:
-                                      l10n.facturationDetailHeaderKpiTotalDue,
-                                  value: hasCharges
-                                      ? _formatAmountOnly(totalDue)
-                                      : l10n.facturationDetailUnknownValue,
-                                  suffix: hasCharges ? currency : null,
-                                  valueColor: AppColors.bleuArdoise,
-                                  topAccentColor: AppColors.bleuArdoise,
-                                ),
-                                FinanceDetailKpiItem(
-                                  label: l10n
-                                      .facturationDetailHeaderKpiAlreadyPaid,
-                                  value: hasCharges
-                                      ? _formatAmountOnly(alreadyPaid)
-                                      : l10n.facturationDetailUnknownValue,
-                                  suffix: hasCharges ? currency : null,
-                                  valueColor: AppColors.feeStatusPaid,
-                                  topAccentColor: AppColors.feeStatusPaid,
-                                ),
-                                FinanceDetailKpiItem(
-                                  label:
-                                      l10n.facturationDetailHeaderKpiRemaining,
-                                  value: hasCharges
-                                      ? _formatAmountOnly(remaining)
-                                      : l10n.facturationDetailUnknownValue,
-                                  suffix: hasCharges ? currency : null,
-                                  valueColor: remaining > 0
-                                      ? AppColors.feeStatusDue
-                                      : AppColors.feeStatusPaid,
-                                  topAccentColor: remaining > 0
-                                      ? AppColors.feeStatusDue
-                                      : AppColors.feeStatusPaid,
-                                ),
-                              ],
+                            return FinanceDetailKpiBand(
+                              hasCharges: hasCharges,
+                              totalDueCents: totalDue,
+                              alreadyPaidCents: alreadyPaid,
+                              remainingCents: remaining,
+                              currency: currency,
                             );
                           },
                         ),

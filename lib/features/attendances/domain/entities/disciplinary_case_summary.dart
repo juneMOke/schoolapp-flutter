@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 class DisciplinaryCaseSummary extends Equatable {
@@ -13,7 +16,10 @@ class DisciplinaryCaseSummary extends Equatable {
   final String title;
   final DisciplinaryCaseStatus status;
   final String content;
-  final DateTime? disciplinaryCaseDate;
+  final DisciplinaryCategory category;
+  final DisciplinarySeverity severity;
+  final DisciplinarySanction sanction;
+  final DateTime? createdAt;
 
   const DisciplinaryCaseSummary({
     required this.id,
@@ -26,7 +32,10 @@ class DisciplinaryCaseSummary extends Equatable {
     required this.title,
     required this.status,
     required this.content,
-    this.disciplinaryCaseDate,
+    required this.category,
+    required this.severity,
+    required this.sanction,
+    this.createdAt,
   });
 
   @override
@@ -41,6 +50,9 @@ class DisciplinaryCaseSummary extends Equatable {
     title,
     status,
     content,
-    disciplinaryCaseDate,
+    category,
+    severity,
+    sanction,
+    createdAt,
   ];
 }

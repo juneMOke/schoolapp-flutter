@@ -88,6 +88,11 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
       initialValue: value,
       autofocus: autofocus,
       isExpanded: true,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      iconEnabledColor: AppColors.textSecondary,
+      iconDisabledColor: AppColors.textMuted,
+      dropdownColor: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppDimensions.spacingS),
       style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: l10n.attendanceTableAbsenceReason,
@@ -126,6 +131,7 @@ class AttendanceAbsenceReasonField extends StatelessWidget {
               value: reason,
               child: Text(
                 AttendancePageHelpers.absenceReasonLabel(l10n, reason),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           )

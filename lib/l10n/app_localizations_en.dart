@@ -2612,7 +2612,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceLoadingMessage => 'Loading attendance records...';
 
   @override
-  String get attendanceEmptyMessage => 'No attendance found for these filters.';
+  String get attendanceEmptyStudentsTitle => 'No students in this class';
+
+  @override
+  String get attendanceEmptyStudentsDescription =>
+      'This class has no students yet. Add students from the class Composition to take attendance.';
+
+  @override
+  String get attendanceEmptyOpenComposition => 'Open Composition';
 
   @override
   String get attendanceExportAction => 'Export';
@@ -2813,6 +2820,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceErrorUnknown => 'An unexpected error occurred.';
 
   @override
+  String get attendanceErrorForbidden =>
+      'You do not have the required permissions to view attendance.';
+
+  @override
+  String get attendanceErrorRetry => 'Retry';
+
+  @override
+  String get attendanceErrorReconnect => 'Sign in again';
+
+  @override
+  String get attendanceErrorContactAdmin => 'Contact the administrator';
+
+  @override
+  String get attendanceErrorNetworkTitle => 'No connection';
+
+  @override
+  String get attendanceErrorNetworkMessage =>
+      'You appear to be offline. Check your internet connection, then try again.';
+
+  @override
+  String get attendanceErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get attendanceErrorUnauthorizedMessage =>
+      'Your session has expired. Sign in again to resume attendance.';
+
+  @override
+  String get attendanceErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get attendanceErrorForbiddenMessage =>
+      'You do not have the required permissions to view this class\'s attendance.';
+
+  @override
+  String get attendanceErrorServerTitle => 'Server error';
+
+  @override
+  String get attendanceErrorServerMessage =>
+      'Something went wrong on our end. Try again in a moment.';
+
+  @override
+  String attendanceErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get attendanceErrorUnknownTitle => 'Unable to load';
+
+  @override
+  String get attendanceErrorUnknownMessage =>
+      'An unexpected error occurred while loading attendance.';
+
+  @override
   String get attendanceSaveCallAction => 'Save attendance';
 
   @override
@@ -2915,8 +2975,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryTabAttendanceHistoryLabel => 'Attendance history';
 
   @override
-  String get disciplinaryAttendanceHistoryComingSoon =>
-      'Attendance history will be delivered in a future feature.';
+  String get presenceStatusPresent => 'Present';
+
+  @override
+  String get presenceStatusJustified => 'Justified absence';
+
+  @override
+  String get presenceStatusUnjustified => 'Unjustified absence';
+
+  @override
+  String get presenceSummaryTitle => 'Attendance summary';
+
+  @override
+  String presenceSummaryA11yLabel(int rate) {
+    return 'Attendance summary, rate $rate%';
+  }
+
+  @override
+  String get presenceKpiRate => 'Attendance rate';
+
+  @override
+  String presenceRateValue(int rate) {
+    return '$rate%';
+  }
+
+  @override
+  String presenceSchoolDaysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school days',
+      one: '1 school day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceDistributionA11yLabel => 'Distribution of days by status';
+
+  @override
+  String presencePresentOutOfTotal(int present, int total) {
+    return '$present days present out of $total';
+  }
+
+  @override
+  String get presenceAbsenceListTitle => 'Absences detail';
+
+  @override
+  String presenceAbsenceDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get presencePerfectTitle => 'Perfect attendance';
+
+  @override
+  String get presencePerfectMessage => 'No absence on this period.';
+
+  @override
+  String get presenceLoadingA11yLabel => 'Loading attendance summary…';
+
+  @override
+  String get presencePeriodWeek => 'Week';
+
+  @override
+  String get presencePeriodMonth => 'Month';
+
+  @override
+  String get presencePeriodYear => 'Year';
+
+  @override
+  String get presencePeriodFilterA11yLabel => 'Attendance period';
+
+  @override
+  String get presenceEmptyTitle => 'No school days';
+
+  @override
+  String get presenceEmptyMessage =>
+      'No school days on this period. Pick another period to view attendance.';
+
+  @override
+  String presenceRangeYear(String name) {
+    return 'School year $name';
+  }
+
+  @override
+  String presenceRangeMonth(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String presenceRangeWeek(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Week of $dateString';
+  }
 
   @override
   String get disciplinaryUnknownValue => '-';
@@ -3058,6 +3220,166 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disciplinaryCaseStatusUnknown => 'Unknown';
+
+  @override
+  String get disciplinarySeverityMinor => 'Minor';
+
+  @override
+  String get disciplinarySeverityMajor => 'Major';
+
+  @override
+  String get disciplinarySeveritySerious => 'Serious';
+
+  @override
+  String get disciplinarySeverityUnknown => 'Unspecified';
+
+  @override
+  String get disciplinaryCategoryDisruptiveBehavior => 'Disruptive behavior';
+
+  @override
+  String get disciplinaryCategoryLateness => 'Lateness';
+
+  @override
+  String get disciplinaryCategoryRepeatedLateness => 'Repeated lateness';
+
+  @override
+  String get disciplinaryCategoryUnjustifiedAbsence => 'Unjustified absence';
+
+  @override
+  String get disciplinaryCategoryInsolence => 'Insolence';
+
+  @override
+  String get disciplinaryCategoryCheating => 'Cheating';
+
+  @override
+  String get disciplinaryCategoryFighting => 'Fighting';
+
+  @override
+  String get disciplinaryCategoryDressCodeViolation => 'Dress code violation';
+
+  @override
+  String get disciplinaryCategoryTalkingInClass => 'Talking in class';
+
+  @override
+  String get disciplinaryCategoryUnknown => 'Other';
+
+  @override
+  String get disciplinarySanctionOralWarning => 'Oral warning';
+
+  @override
+  String get disciplinarySanctionWrittenWarning => 'Written warning';
+
+  @override
+  String get disciplinarySanctionDetention => 'Detention';
+
+  @override
+  String get disciplinarySanctionParentsSummoned => 'Parents summoned';
+
+  @override
+  String get disciplinarySanctionTemporaryExclusion => 'Temporary exclusion';
+
+  @override
+  String get disciplinarySanctionDisciplinaryCouncil => 'Disciplinary council';
+
+  @override
+  String get disciplinarySanctionPermanentExclusion => 'Permanent exclusion';
+
+  @override
+  String get disciplinarySanctionUnknown => 'No sanction';
+
+  @override
+  String disciplinaryCaseSeverityChip(String severity) {
+    return 'Severity $severity';
+  }
+
+  @override
+  String get disciplinaryAdvanceTakeCharge => 'Take charge';
+
+  @override
+  String get disciplinaryAdvanceClose => 'Close';
+
+  @override
+  String get disciplinaryCaseClosedLabel => 'Case closed';
+
+  @override
+  String disciplinaryCasesCountPill(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cases',
+      one: '1 case',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disciplinaryCasesOpenPill(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open',
+      one: '1 open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disciplinaryCasesGravePill(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count serious',
+      one: '1 serious',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get disciplinaryCasesEmptyTitle => 'No discipline case';
+
+  @override
+  String get disciplinaryCasesEmptyDescription =>
+      'No incident recorded for this student. All good.';
+
+  @override
+  String get disciplinaryFieldCategory => 'Category';
+
+  @override
+  String get disciplinaryFieldSeverity => 'Severity';
+
+  @override
+  String get disciplinaryFieldSanction => 'Sanction';
+
+  @override
+  String get disciplinaryStatusAtCreationLabel => 'Status at creation';
+
+  @override
+  String get disciplinaryStatusAtCreationHint =>
+      'The case will be created as Open. You will then advance it from the record.';
+
+  @override
+  String get disciplinaryErrorNetworkTitle => 'No connection';
+
+  @override
+  String get disciplinaryErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get disciplinaryErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get disciplinaryErrorServerTitle => 'Server error';
+
+  @override
+  String get disciplinaryErrorUnknownTitle => 'Unable to load';
+
+  @override
+  String get disciplinaryErrorRetry => 'Retry';
+
+  @override
+  String get disciplinaryErrorReconnect => 'Sign in again';
+
+  @override
+  String get disciplinaryErrorContactAdmin => 'Contact the administrator';
 
   @override
   String get enrollmentStatusPreRegistered => 'Pre-registered';
@@ -3360,11 +3682,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeStatsKpiCollectionRate => 'Collection rate';
 
   @override
-  String financeStatsPercentOfTotal(int percent) {
-    return '$percent% of total';
-  }
-
-  @override
   String get financeStatsSectionEvolution => 'Collection evolution';
 
   @override
@@ -3525,4 +3842,201 @@ class AppLocalizationsEn extends AppLocalizations {
   String removeFilterNamed(String filter) {
     return 'Remove filter $filter';
   }
+
+  @override
+  String get attendanceOverviewEyebrow => 'Discipline · Attendance';
+
+  @override
+  String get attendanceOverviewTitle => 'Dashboard';
+
+  @override
+  String get attendanceOverviewContextSchoolYear => 'School year';
+
+  @override
+  String get attendanceOverviewContextWindow => 'Window';
+
+  @override
+  String get attendanceOverviewContextGeneratedAt => 'Generated on';
+
+  @override
+  String get attendanceOverviewContextA11yLabel =>
+      'Attendance statistics context';
+
+  @override
+  String get attendanceOverviewKpiPresence => 'Attendance rate';
+
+  @override
+  String get attendanceOverviewKpiJustified => 'Justified absences';
+
+  @override
+  String get attendanceOverviewKpiUnjustified => 'Unjustified absences';
+
+  @override
+  String get attendanceOverviewKpiRecordedDays => 'Recorded days';
+
+  @override
+  String attendanceOverviewRateValue(String rate) {
+    return '$rate%';
+  }
+
+  @override
+  String attendanceOverviewStudentDays(String count) {
+    return '$count student-days';
+  }
+
+  @override
+  String get attendanceOverviewKpiBandA11yLabel => 'Key attendance indicators';
+
+  @override
+  String get attendanceOverviewSplitTitle => 'Attendance / absence breakdown';
+
+  @override
+  String get attendanceOverviewSplitSumHint => 'sum = 100%';
+
+  @override
+  String get attendanceOverviewSplitPresence => 'Present';
+
+  @override
+  String get attendanceOverviewSplitJustified => 'Justified absences';
+
+  @override
+  String get attendanceOverviewSplitUnjustified => 'Unjustified absences';
+
+  @override
+  String attendanceOverviewSplitA11yLabel(
+    String presence,
+    String justified,
+    String unjustified,
+  ) {
+    return 'Present $presence%, justified $justified%, unjustified $unjustified%';
+  }
+
+  @override
+  String get attendanceOverviewEvolutionTitle => 'Attendance rate trend';
+
+  @override
+  String get attendanceOverviewEvolutionHintMonth => 'by month';
+
+  @override
+  String get attendanceOverviewEvolutionHintWeek => 'by week';
+
+  @override
+  String get attendanceOverviewEvolutionHintDay => 'by day';
+
+  @override
+  String attendanceOverviewEvolutionTarget(String rate) {
+    return 'Target $rate%';
+  }
+
+  @override
+  String get attendanceOverviewReasonsTitle => 'Absence reasons';
+
+  @override
+  String get attendanceOverviewReasonsHint => 'school';
+
+  @override
+  String get attendanceOverviewReasonsCenterLabel => 'absences';
+
+  @override
+  String get attendanceOverviewReasonUnjustified => 'Unjustified';
+
+  @override
+  String get attendanceOverviewReasonUnjustifiedNote => 'UNKNOWN/null';
+
+  @override
+  String get attendanceOverviewWeekdayTitle => 'Absences by day';
+
+  @override
+  String get attendanceOverviewWeekdayHint => 'Mon → Fri';
+
+  @override
+  String get attendanceWeekdayMon => 'Mon';
+
+  @override
+  String get attendanceWeekdayTue => 'Tue';
+
+  @override
+  String get attendanceWeekdayWed => 'Wed';
+
+  @override
+  String get attendanceWeekdayThu => 'Thu';
+
+  @override
+  String get attendanceWeekdayFri => 'Fri';
+
+  @override
+  String get attendanceOverviewTopAbsentTitle => 'Most absent classes';
+
+  @override
+  String get attendanceOverviewTopAbsentHint => 'top 5';
+
+  @override
+  String get attendanceOverviewByClassTitle => 'Attendance by class';
+
+  @override
+  String get attendanceOverviewColClass => 'Class';
+
+  @override
+  String get attendanceOverviewColLevel => 'Level';
+
+  @override
+  String get attendanceOverviewColPresence => 'Attendance';
+
+  @override
+  String get attendanceOverviewColJustified => 'Justified';
+
+  @override
+  String get attendanceOverviewColUnjustified => 'Unjustified';
+
+  @override
+  String get attendanceOverviewColDistribution => 'Breakdown';
+
+  @override
+  String get attendanceOverviewEmptyTitle => 'No attendance data';
+
+  @override
+  String get attendanceOverviewEmptyDescription =>
+      'No attendance has been recorded for this window. Statistics will appear as soon as the first attendance is taken.';
+
+  @override
+  String get attendanceOverviewEmptyAction => 'Take attendance';
+
+  @override
+  String get attendanceOverviewLoadingA11yLabel =>
+      'Loading the attendance dashboard';
+
+  @override
+  String get disciplinaryFolderBreadcrumb => 'Discipline list';
+
+  @override
+  String get dossierTabsA11yLabel => 'Student folder tabs';
+
+  @override
+  String get dossierTabDisciplineLabel => 'Discipline';
+
+  @override
+  String get dossierTabDisciplineDescription => 'Cases, sanctions & follow-up';
+
+  @override
+  String get dossierTabPresenceLabel => 'Attendance';
+
+  @override
+  String get dossierTabPresenceDescription => 'Absences & lateness';
+
+  @override
+  String dossierOpenCasesChip(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open cases',
+      one: '1 open case',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dossierNoOpenCases => 'No open case';
+
+  @override
+  String get genderOther => 'Other';
 }
