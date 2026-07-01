@@ -126,6 +126,20 @@ class AppConstants {
   static const String disciplinaryCaseByIdEndpoint =
       '/api/v1/disciplinary-cases/{caseId}';
 
+  // ─── Academics ───────────────────────────────────────────────────────────
+  /// Cours de l'enseignant connecté, regroupés par classe (résolu via le JWT).
+  static const String myCoursesEndpoint = '/api/v1/academics/cours/mes-cours';
+
+  /// Détail de notation d'un cours par période (semestre/trimestre) puis
+  /// sous-période. `{coursId}` est résolu via `@Path`.
+  static const String coursNotationDetailEndpoint =
+      '/api/v1/academics/cours/{coursId}/notation';
+
+  /// Création d'une évaluation (interro/devoir/examen) sous un cours.
+  /// `{coursId}` est résolu via `@Path` ; l'école vient du JWT (multi-tenant).
+  static const String createEvaluationEndpoint =
+      '/api/v1/academics/cours/{coursId}/evaluations';
+
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;

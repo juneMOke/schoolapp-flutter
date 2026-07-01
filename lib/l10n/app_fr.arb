@@ -333,6 +333,128 @@
   "subMenuClassesList": "Listes de classe",
   "subMenuAttendance": "Présences",
   "subMenuDisciplinesList": "Disciplines",
+  "menuCourses": "Cours",
+  "subMenuMyCourses": "Mes cours",
+  "myCoursesEyebrow": "Cours",
+  "myCoursesTitle": "Mes cours",
+  "myCoursesCount": "{classCount, plural, =1{1 classe} other{{classCount} classes}} · {courseCount, plural, =1{1 cours} other{{courseCount} cours}}",
+  "@myCoursesCount": {
+    "placeholders": {
+      "classCount": { "type": "int" },
+      "courseCount": { "type": "int" }
+    }
+  },
+  "myCoursesExpandAll": "Tout déplier",
+  "myCoursesCollapseAll": "Tout replier",
+  "myCoursesClassCourseCount": "{count, plural, =1{1 cours} other{{count} cours}}",
+  "@myCoursesClassCourseCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesStudentCount": "{count, plural, =0{Aucun élève} =1{1 élève} other{{count} élèves}}",
+  "@myCoursesStudentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesLoadingA11yLabel": "Chargement de vos cours",
+  "myCoursesEmptyTitle": "Aucun cours affecté",
+  "myCoursesEmptyDescription": "Aucun cours ne vous est rattaché pour le moment. Les cours que vous enseignez apparaîtront ici, regroupés par classe.",
+  "myCoursesErrorNetworkTitle": "Pas de connexion",
+  "myCoursesErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis réessayez.",
+  "myCoursesErrorUnauthorizedTitle": "Session expirée",
+  "myCoursesErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour consulter vos cours.",
+  "myCoursesErrorForbiddenTitle": "Accès refusé",
+  "myCoursesErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter ces cours.",
+  "myCoursesErrorServerTitle": "Erreur du serveur",
+  "myCoursesErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "myCoursesErrorUnknownTitle": "Chargement impossible",
+  "myCoursesErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de vos cours.",
+  "myCoursesErrorRetry": "Réessayer",
+  "myCoursesErrorReconnect": "Se reconnecter",
+  "myCoursesErrorContactAdmin": "Contacter l'administrateur",
+  "myCoursesErrorIncidentCode": "Code incident : {code}",
+  "@myCoursesErrorIncidentCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "courseDetailBackToCourses": "Mes cours",
+  "courseDetailEvaluationCount": "{count, plural, =0{Aucune évaluation} =1{1 évaluation} other{{count} évaluations}}",
+  "@courseDetailEvaluationCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailToGrade": "{count, plural, =1{1 à saisir} other{{count} à saisir}}",
+  "@courseDetailToGrade": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailNextEvalEyebrow": "Prochaine évaluation",
+  "courseDetailEvalMetaShort": "{date} · /{max} pts",
+  "@courseDetailEvalMetaShort": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+  },
+  "courseDetailEvalMeta": "{date} · /{max} pts · poids {poids}",
+  "@courseDetailEvalMeta": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+  },
+  "courseDetailPeriodLabel": "Période {ordre}",
+  "@courseDetailPeriodLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailSubPeriodLabel": "Sous-période {ordre}",
+  "@courseDetailSubPeriodLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailExamLabel": "Examen",
+  "courseDetailStatutClosed": "Clôturée",
+  "courseDetailStatutCurrent": "En cours",
+  "courseDetailStatutUpcoming": "À venir",
+  "courseDetailBucketNotes": "{saisies}/{total} notes · {evals, plural, =1{1 éval.} other{{evals} éval.}}",
+  "@courseDetailBucketNotes": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+  },
+  "courseDetailBucketNoEval": "Aucune évaluation",
+  "courseDetailExamToPlan": "À planifier",
+  "courseDetailNoteGlobaleTitle": "Note globale — {label}",
+  "@courseDetailNoteGlobaleTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailProvisional": "provisoire",
+  "courseDetailClassAverageLabel": "Moyenne de classe",
+  "courseDetailAbove50": "{count}/{total} élèves ≥ 50 %",
+  "@courseDetailAbove50": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailNoAverage": "Pas encore de moyenne",
+  "courseDetailByStudent": "Par élève",
+  "courseDetailBadgeGraded": "Notée",
+  "courseDetailBadgeInProgress": "En cours · {saisies}/{total}",
+  "@courseDetailBadgeInProgress": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailBadgeUpcoming": "À venir",
+  "courseDetailEvalExpected": "{count, plural, =1{1 élève attendu} other{{count} élèves attendus}}",
+  "@courseDetailEvalExpected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailReleveTitle": "Notes globales — {label}",
+  "@courseDetailReleveTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailReleveKpiAverage": "Moyenne",
+  "courseDetailReleveKpiAbove50": "≥ 50 %",
+  "courseDetailReleveKpiEvals": "Évals",
+  "courseDetailSortRanking": "Classement",
+  "courseDetailSortAlpha": "Alphabétique",
+  "courseDetailReleveMethod": "Note globale = points obtenus ÷ maximum, pondérés par le poids.",
+  "courseDetailReleveEmpty": "Aucune note saisie",
+  "courseDetailLoadingA11yLabel": "Chargement du cours",
+  "courseDetailEmptyTitle": "Aucune évaluation",
+  "courseDetailEmptyDescription": "Ce cours n'a pas encore d'évaluation.",
+  "courseDetailBucketEmptyUpcoming": "Sélection à venir — aucune évaluation planifiée pour l'instant.",
+  "courseDetailBucketEmptyNone": "Aucune évaluation rattachée à cette sélection.",
+  "courseDetailErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.",
+  "courseDetailErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour consulter ce cours.",
+  "courseDetailErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter ce cours.",
+  "courseDetailErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "courseDetailErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement du cours.",
+  "courseDetailErrorNotFoundTitle": "Cours introuvable",
+  "courseDetailErrorNotFoundMessage": "Ce cours n'existe plus ou n'est pas accessible.",
   "profile": "Profil",
   "settings": "Paramètres",
   "home": "Accueil",

@@ -44,6 +44,8 @@ class AppRoutesNames {
   static const String disciplinesList =
       '/disciplines/${MenuConstants.disciplinesListId}';
 
+  static const String myCourses = '/cours/${MenuConstants.myCoursesId}';
+
   static String disciplinaryStudentDetailPath({
     required String studentId,
     required String academicYearId,

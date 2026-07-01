@@ -26,6 +26,15 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/create_evaluation_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_cours_notation_detail_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_my_courses_usecase.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -845,6 +854,46 @@ Future<void> configureDependencies({
       getDisciplinaryCaseDetailUseCase:
           getIt<GetDisciplinaryCaseDetailUseCase>(),
       createDisciplinaryCaseUseCase: getIt<CreateDisciplinaryCaseUseCase>(),
+    ),
+  );
+
+  // ── Academics (cours de l'enseignant connecté) ──────────────────────────────
+  getIt.registerLazySingleton<CourseRemoteDataSource>(
+    () => CourseRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<CourseRepository>(
+    () => CourseRepositoryImpl(
+      remoteDataSource: getIt<CourseRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetMyCoursesUseCase>(
+    () => GetMyCoursesUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<GetCoursNotationDetailUseCase>(
+    () => GetCoursNotationDetailUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<CreateEvaluationUseCase>(
+    () => CreateEvaluationUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<CourseBloc>(
+    () => CourseBloc(getMyCoursesUseCase: getIt<GetMyCoursesUseCase>()),
+  );
+
+  getIt.registerFactory<CoursNotationBloc>(
+    () => CoursNotationBloc(
+      getCoursNotationDetailUseCase: getIt<GetCoursNotationDetailUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<CreateEvaluationBloc>(
+    () => CreateEvaluationBloc(
+      createEvaluationUseCase: getIt<CreateEvaluationUseCase>(),
     ),
   );
 }

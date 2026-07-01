@@ -16,6 +16,7 @@ class MenuFactory {
       _createFinancesMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
+      _createCoursesMenu(l10n),
     ];
   }
 
@@ -128,6 +129,22 @@ class MenuFactory {
           id: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
           route: AppRoutesNames.disciplinesList,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Cours avec son sous-menu « Mes cours ».
+  static MenuItem _createCoursesMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.coursesMenuId,
+      title: l10n.menuCourses,
+      icon: Icons.menu_book_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.myCoursesId,
+          title: l10n.subMenuMyCourses,
+          route: AppRoutesNames.myCourses,
         ),
       ],
     );

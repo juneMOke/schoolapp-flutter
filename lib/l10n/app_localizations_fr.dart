@@ -618,6 +618,317 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuDisciplinesList => 'Disciplines';
 
   @override
+  String get menuCourses => 'Cours';
+
+  @override
+  String get subMenuMyCourses => 'Mes cours';
+
+  @override
+  String get myCoursesEyebrow => 'Cours';
+
+  @override
+  String get myCoursesTitle => 'Mes cours';
+
+  @override
+  String myCoursesCount(int classCount, int courseCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classCount,
+      locale: localeName,
+      other: '$classCount classes',
+      one: '1 classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      courseCount,
+      locale: localeName,
+      other: '$courseCount cours',
+      one: '1 cours',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get myCoursesExpandAll => 'Tout déplier';
+
+  @override
+  String get myCoursesCollapseAll => 'Tout replier';
+
+  @override
+  String myCoursesClassCourseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours',
+      one: '1 cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String myCoursesStudentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'Aucun élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myCoursesLoadingA11yLabel => 'Chargement de vos cours';
+
+  @override
+  String get myCoursesEmptyTitle => 'Aucun cours affecté';
+
+  @override
+  String get myCoursesEmptyDescription =>
+      'Aucun cours ne vous est rattaché pour le moment. Les cours que vous enseignez apparaîtront ici, regroupés par classe.';
+
+  @override
+  String get myCoursesErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get myCoursesErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion internet, puis réessayez.';
+
+  @override
+  String get myCoursesErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get myCoursesErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour consulter vos cours.';
+
+  @override
+  String get myCoursesErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get myCoursesErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter ces cours.';
+
+  @override
+  String get myCoursesErrorServerTitle => 'Erreur du serveur';
+
+  @override
+  String get myCoursesErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get myCoursesErrorUnknownTitle => 'Chargement impossible';
+
+  @override
+  String get myCoursesErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement de vos cours.';
+
+  @override
+  String get myCoursesErrorRetry => 'Réessayer';
+
+  @override
+  String get myCoursesErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get myCoursesErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String myCoursesErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get courseDetailBackToCourses => 'Mes cours';
+
+  @override
+  String courseDetailEvaluationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courseDetailToGrade(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count à saisir',
+      one: '1 à saisir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courseDetailNextEvalEyebrow => 'Prochaine évaluation';
+
+  @override
+  String courseDetailEvalMetaShort(String date, String max) {
+    return '$date · /$max pts';
+  }
+
+  @override
+  String courseDetailEvalMeta(String date, String max, int poids) {
+    return '$date · /$max pts · poids $poids';
+  }
+
+  @override
+  String courseDetailPeriodLabel(int ordre) {
+    return 'Période $ordre';
+  }
+
+  @override
+  String courseDetailSubPeriodLabel(int ordre) {
+    return 'Sous-période $ordre';
+  }
+
+  @override
+  String get courseDetailExamLabel => 'Examen';
+
+  @override
+  String get courseDetailStatutClosed => 'Clôturée';
+
+  @override
+  String get courseDetailStatutCurrent => 'En cours';
+
+  @override
+  String get courseDetailStatutUpcoming => 'À venir';
+
+  @override
+  String courseDetailBucketNotes(int saisies, int total, int evals) {
+    String _temp0 = intl.Intl.pluralLogic(
+      evals,
+      locale: localeName,
+      other: '$evals éval.',
+      one: '1 éval.',
+    );
+    return '$saisies/$total notes · $_temp0';
+  }
+
+  @override
+  String get courseDetailBucketNoEval => 'Aucune évaluation';
+
+  @override
+  String get courseDetailExamToPlan => 'À planifier';
+
+  @override
+  String courseDetailNoteGlobaleTitle(String label) {
+    return 'Note globale — $label';
+  }
+
+  @override
+  String get courseDetailProvisional => 'provisoire';
+
+  @override
+  String get courseDetailClassAverageLabel => 'Moyenne de classe';
+
+  @override
+  String courseDetailAbove50(int count, int total) {
+    return '$count/$total élèves ≥ 50 %';
+  }
+
+  @override
+  String get courseDetailNoAverage => 'Pas encore de moyenne';
+
+  @override
+  String get courseDetailByStudent => 'Par élève';
+
+  @override
+  String get courseDetailBadgeGraded => 'Notée';
+
+  @override
+  String courseDetailBadgeInProgress(int saisies, int total) {
+    return 'En cours · $saisies/$total';
+  }
+
+  @override
+  String get courseDetailBadgeUpcoming => 'À venir';
+
+  @override
+  String courseDetailEvalExpected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves attendus',
+      one: '1 élève attendu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courseDetailReleveTitle(String label) {
+    return 'Notes globales — $label';
+  }
+
+  @override
+  String get courseDetailReleveKpiAverage => 'Moyenne';
+
+  @override
+  String get courseDetailReleveKpiAbove50 => '≥ 50 %';
+
+  @override
+  String get courseDetailReleveKpiEvals => 'Évals';
+
+  @override
+  String get courseDetailSortRanking => 'Classement';
+
+  @override
+  String get courseDetailSortAlpha => 'Alphabétique';
+
+  @override
+  String get courseDetailReleveMethod =>
+      'Note globale = points obtenus ÷ maximum, pondérés par le poids.';
+
+  @override
+  String get courseDetailReleveEmpty => 'Aucune note saisie';
+
+  @override
+  String get courseDetailLoadingA11yLabel => 'Chargement du cours';
+
+  @override
+  String get courseDetailEmptyTitle => 'Aucune évaluation';
+
+  @override
+  String get courseDetailEmptyDescription =>
+      'Ce cours n\'a pas encore d\'évaluation.';
+
+  @override
+  String get courseDetailBucketEmptyUpcoming =>
+      'Sélection à venir — aucune évaluation planifiée pour l\'instant.';
+
+  @override
+  String get courseDetailBucketEmptyNone =>
+      'Aucune évaluation rattachée à cette sélection.';
+
+  @override
+  String get courseDetailErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get courseDetailErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour consulter ce cours.';
+
+  @override
+  String get courseDetailErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter ce cours.';
+
+  @override
+  String get courseDetailErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get courseDetailErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement du cours.';
+
+  @override
+  String get courseDetailErrorNotFoundTitle => 'Cours introuvable';
+
+  @override
+  String get courseDetailErrorNotFoundMessage =>
+      'Ce cours n\'existe plus ou n\'est pas accessible.';
+
+  @override
   String get profile => 'Profil';
 
   @override

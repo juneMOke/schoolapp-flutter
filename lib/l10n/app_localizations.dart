@@ -1160,6 +1160,432 @@ abstract class AppLocalizations {
   /// **'Disciplines List'**
   String get subMenuDisciplinesList;
 
+  /// No description provided for @menuCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses'**
+  String get menuCourses;
+
+  /// No description provided for @subMenuMyCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get subMenuMyCourses;
+
+  /// No description provided for @myCoursesEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses'**
+  String get myCoursesEyebrow;
+
+  /// No description provided for @myCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get myCoursesTitle;
+
+  /// No description provided for @myCoursesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}'**
+  String myCoursesCount(int classCount, int courseCount);
+
+  /// No description provided for @myCoursesExpandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand all'**
+  String get myCoursesExpandAll;
+
+  /// No description provided for @myCoursesCollapseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse all'**
+  String get myCoursesCollapseAll;
+
+  /// No description provided for @myCoursesClassCourseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course} other{{count} courses}}'**
+  String myCoursesClassCourseCount(int count);
+
+  /// No description provided for @myCoursesStudentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No students} =1{1 student} other{{count} students}}'**
+  String myCoursesStudentCount(int count);
+
+  /// No description provided for @myCoursesLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your courses'**
+  String get myCoursesLoadingA11yLabel;
+
+  /// No description provided for @myCoursesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No course assigned'**
+  String get myCoursesEmptyTitle;
+
+  /// No description provided for @myCoursesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No course is linked to you yet. The courses you teach will appear here, grouped by class.'**
+  String get myCoursesEmptyDescription;
+
+  /// No description provided for @myCoursesErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get myCoursesErrorNetworkTitle;
+
+  /// No description provided for @myCoursesErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your internet connection, then try again.'**
+  String get myCoursesErrorNetworkMessage;
+
+  /// No description provided for @myCoursesErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get myCoursesErrorUnauthorizedTitle;
+
+  /// No description provided for @myCoursesErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view your courses.'**
+  String get myCoursesErrorUnauthorizedMessage;
+
+  /// No description provided for @myCoursesErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get myCoursesErrorForbiddenTitle;
+
+  /// No description provided for @myCoursesErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view these courses.'**
+  String get myCoursesErrorForbiddenMessage;
+
+  /// No description provided for @myCoursesErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get myCoursesErrorServerTitle;
+
+  /// No description provided for @myCoursesErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again in a moment.'**
+  String get myCoursesErrorServerMessage;
+
+  /// No description provided for @myCoursesErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get myCoursesErrorUnknownTitle;
+
+  /// No description provided for @myCoursesErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading your courses.'**
+  String get myCoursesErrorUnknownMessage;
+
+  /// No description provided for @myCoursesErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get myCoursesErrorRetry;
+
+  /// No description provided for @myCoursesErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get myCoursesErrorReconnect;
+
+  /// No description provided for @myCoursesErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get myCoursesErrorContactAdmin;
+
+  /// No description provided for @myCoursesErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String myCoursesErrorIncidentCode(String code);
+
+  /// No description provided for @courseDetailBackToCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get courseDetailBackToCourses;
+
+  /// No description provided for @courseDetailEvaluationCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No evaluation} =1{1 evaluation} other{{count} evaluations}}'**
+  String courseDetailEvaluationCount(int count);
+
+  /// No description provided for @courseDetailToGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 to grade} other{{count} to grade}}'**
+  String courseDetailToGrade(int count);
+
+  /// No description provided for @courseDetailNextEvalEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next evaluation'**
+  String get courseDetailNextEvalEyebrow;
+
+  /// No description provided for @courseDetailEvalMetaShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts'**
+  String courseDetailEvalMetaShort(String date, String max);
+
+  /// No description provided for @courseDetailEvalMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts · weight {poids}'**
+  String courseDetailEvalMeta(String date, String max, int poids);
+
+  /// No description provided for @courseDetailPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {ordre}'**
+  String courseDetailPeriodLabel(int ordre);
+
+  /// No description provided for @courseDetailSubPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-period {ordre}'**
+  String courseDetailSubPeriodLabel(int ordre);
+
+  /// No description provided for @courseDetailExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get courseDetailExamLabel;
+
+  /// No description provided for @courseDetailStatutClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get courseDetailStatutClosed;
+
+  /// No description provided for @courseDetailStatutCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get courseDetailStatutCurrent;
+
+  /// No description provided for @courseDetailStatutUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get courseDetailStatutUpcoming;
+
+  /// No description provided for @courseDetailBucketNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}'**
+  String courseDetailBucketNotes(int saisies, int total, int evals);
+
+  /// No description provided for @courseDetailBucketNoEval.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation'**
+  String get courseDetailBucketNoEval;
+
+  /// No description provided for @courseDetailExamToPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'To be scheduled'**
+  String get courseDetailExamToPlan;
+
+  /// No description provided for @courseDetailNoteGlobaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall mark — {label}'**
+  String courseDetailNoteGlobaleTitle(String label);
+
+  /// No description provided for @courseDetailProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional'**
+  String get courseDetailProvisional;
+
+  /// No description provided for @courseDetailClassAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class average'**
+  String get courseDetailClassAverageLabel;
+
+  /// No description provided for @courseDetailAbove50.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{total} students ≥ 50%'**
+  String courseDetailAbove50(int count, int total);
+
+  /// No description provided for @courseDetailNoAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'No average yet'**
+  String get courseDetailNoAverage;
+
+  /// No description provided for @courseDetailByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get courseDetailByStudent;
+
+  /// No description provided for @courseDetailBadgeGraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Graded'**
+  String get courseDetailBadgeGraded;
+
+  /// No description provided for @courseDetailBadgeInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress · {saisies}/{total}'**
+  String courseDetailBadgeInProgress(int saisies, int total);
+
+  /// No description provided for @courseDetailBadgeUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get courseDetailBadgeUpcoming;
+
+  /// No description provided for @courseDetailEvalExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student expected} other{{count} students expected}}'**
+  String courseDetailEvalExpected(int count);
+
+  /// No description provided for @courseDetailReleveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall marks — {label}'**
+  String courseDetailReleveTitle(String label);
+
+  /// No description provided for @courseDetailReleveKpiAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get courseDetailReleveKpiAverage;
+
+  /// No description provided for @courseDetailReleveKpiAbove50.
+  ///
+  /// In en, this message translates to:
+  /// **'≥ 50%'**
+  String get courseDetailReleveKpiAbove50;
+
+  /// No description provided for @courseDetailReleveKpiEvals.
+  ///
+  /// In en, this message translates to:
+  /// **'Evals'**
+  String get courseDetailReleveKpiEvals;
+
+  /// No description provided for @courseDetailSortRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get courseDetailSortRanking;
+
+  /// No description provided for @courseDetailSortAlpha.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get courseDetailSortAlpha;
+
+  /// No description provided for @courseDetailReleveMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall mark = points earned ÷ maximum, weighted by coefficient.'**
+  String get courseDetailReleveMethod;
+
+  /// No description provided for @courseDetailReleveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No marks entered'**
+  String get courseDetailReleveEmpty;
+
+  /// No description provided for @courseDetailLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading course'**
+  String get courseDetailLoadingA11yLabel;
+
+  /// No description provided for @courseDetailEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation'**
+  String get courseDetailEmptyTitle;
+
+  /// No description provided for @courseDetailEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no evaluation yet.'**
+  String get courseDetailEmptyDescription;
+
+  /// No description provided for @courseDetailBucketEmptyUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming selection — no evaluation scheduled yet.'**
+  String get courseDetailBucketEmptyUpcoming;
+
+  /// No description provided for @courseDetailBucketEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation attached to this selection.'**
+  String get courseDetailBucketEmptyNone;
+
+  /// No description provided for @courseDetailErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your connection, then try again.'**
+  String get courseDetailErrorNetworkMessage;
+
+  /// No description provided for @courseDetailErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view this course.'**
+  String get courseDetailErrorUnauthorizedMessage;
+
+  /// No description provided for @courseDetailErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this course.'**
+  String get courseDetailErrorForbiddenMessage;
+
+  /// No description provided for @courseDetailErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Try again in a moment.'**
+  String get courseDetailErrorServerMessage;
+
+  /// No description provided for @courseDetailErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading the course.'**
+  String get courseDetailErrorUnknownMessage;
+
+  /// No description provided for @courseDetailErrorNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course not found'**
+  String get courseDetailErrorNotFoundTitle;
+
+  /// No description provided for @courseDetailErrorNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course no longer exists or is not accessible.'**
+  String get courseDetailErrorNotFoundMessage;
+
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:
