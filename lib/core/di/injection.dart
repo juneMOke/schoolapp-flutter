@@ -28,13 +28,18 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/discip
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/notation_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/notation_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/create_evaluation_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_cours_notation_detail_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_my_courses_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/saisir_note_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -894,6 +899,30 @@ Future<void> configureDependencies({
   getIt.registerFactory<CreateEvaluationBloc>(
     () => CreateEvaluationBloc(
       createEvaluationUseCase: getIt<CreateEvaluationUseCase>(),
+    ),
+  );
+
+  // ── Academics — Notation : saisie des notes (grille + PUT par élève) ────────
+  // Réutilise le CourseRemoteDataSource déjà enregistré ci-dessus.
+  getIt.registerLazySingleton<NotationRepository>(
+    () => NotationRepositoryImpl(
+      remoteDataSource: getIt<CourseRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetNotesElevesUseCase>(
+    () => GetNotesElevesUseCase(getIt<NotationRepository>()),
+  );
+
+  getIt.registerFactory<SaisirNoteUseCase>(
+    () => SaisirNoteUseCase(getIt<NotationRepository>()),
+  );
+
+  getIt.registerFactory<SaisieNotesBloc>(
+    () => SaisieNotesBloc(
+      getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+      saisirNoteUseCase: getIt<SaisirNoteUseCase>(),
     ),
   );
 }

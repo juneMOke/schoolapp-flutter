@@ -5,6 +5,9 @@ import 'package:school_app_flutter/features/academics/data/models/course_summary
 import 'package:school_app_flutter/features/academics/data/models/notation/cours_notation_detail_model.dart';
 import 'package:school_app_flutter/features/academics/data/models/notation/create_evaluation_request_model.dart';
 import 'package:school_app_flutter/features/academics/data/models/notation/evaluation_model.dart';
+import 'package:school_app_flutter/features/academics/data/models/notation/note_eleve_model.dart';
+import 'package:school_app_flutter/features/academics/data/models/notation/note_evaluation_model.dart';
+import 'package:school_app_flutter/features/academics/data/models/notation/saisir_note_request_model.dart';
 
 part 'course_remote_data_source.g.dart';
 
@@ -38,5 +41,22 @@ abstract class CourseRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Path('coursId') String coursId,
     @Body() CreateEvaluationRequestModel request,
+  );
+
+  /// Grille de saisie : chaque élève de la classe du cours + sa note (nulle si
+  /// pas encore saisie) pour l'évaluation [evaluationId].
+  @GET(AppConstants.notesElevesEndpoint)
+  Future<List<NoteEleveModel>> getNotesEleves(
+    @Extras() Map<String, dynamic> extras,
+    @Path('evaluationId') String evaluationId,
+  );
+
+  /// Saisit/rattrape (upsert idempotent) la note d'un élève pour l'évaluation
+  /// [evaluationId] et renvoie la note persistée.
+  @PUT(AppConstants.saisirNoteEndpoint)
+  Future<NoteEvaluationModel> saisirNote(
+    @Extras() Map<String, dynamic> extras,
+    @Path('evaluationId') String evaluationId,
+    @Body() SaisirNoteRequestModel request,
   );
 }

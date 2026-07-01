@@ -140,6 +140,16 @@ class AppConstants {
   static const String createEvaluationEndpoint =
       '/api/v1/academics/cours/{coursId}/evaluations';
 
+  /// Grille de saisie : chaque élève de la classe du cours + sa note pour
+  /// l'évaluation `{evaluationId}` (résolu via `@Path`).
+  static const String notesElevesEndpoint =
+      '/api/v1/academics/evaluations/{evaluationId}/notes/eleves';
+
+  /// Saisie/rattrapage (upsert idempotent) de la note d'un élève pour
+  /// l'évaluation `{evaluationId}` (résolu via `@Path`).
+  static const String saisirNoteEndpoint =
+      '/api/v1/academics/evaluations/{evaluationId}/notes';
+
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;
