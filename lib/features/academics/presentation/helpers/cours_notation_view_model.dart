@@ -13,18 +13,6 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/acade
 /// Genre d'un pas de la frise : une sous-période ou l'examen de période.
 enum BucketKind { sousPeriode, examen }
 
-/// Découpage de l'année scolaire, **dérivé** du nombre de périodes (le contrat
-/// notation ne le porte pas) : 2 périodes → semestres, sinon → trimestres.
-/// Détermine le libellé des onglets de premier niveau (« Semestre N » /
-/// « Trimestre N », spec §2).
-enum PeriodeDecoupage { semestre, trimestre }
-
-/// Découpage **dérivé** du nombre de périodes scolaires (règle métier partagée
-/// par la page détail et la modale de création) : 2 → semestres, sinon →
-/// trimestres.
-PeriodeDecoupage periodeDecoupageFromCount(int periodeCount) =>
-    periodeCount == 2 ? PeriodeDecoupage.semestre : PeriodeDecoupage.trimestre;
-
 /// Vue dérivée d'une [CoursNotationDetail] pour la page détail (spec §10).
 ///
 /// Aplatit le contrat backend (périodes ▸ sous-périodes ▸ évaluations groupées)
@@ -34,10 +22,6 @@ PeriodeDecoupage periodeDecoupageFromCount(int periodeCount) =>
 /// stockés. [now] est injecté pour la testabilité (calcul de prochaine éval).
 class CoursNotationViewModel extends Equatable {
   final int effectif;
-
-  /// Découpage de l'année (semestres / trimestres), dérivé du nombre de périodes.
-  final PeriodeDecoupage decoupage;
-
   final List<PeriodeVm> periodes;
 
   /// Nombre total d'évaluations (toutes périodes, sous-périodes et examens).
@@ -51,7 +35,6 @@ class CoursNotationViewModel extends Equatable {
 
   const CoursNotationViewModel({
     required this.effectif,
-    required this.decoupage,
     required this.periodes,
     required this.totalEvaluations,
     required this.aSaisir,
@@ -73,12 +56,8 @@ class CoursNotationViewModel extends Equatable {
     required DateTime now,
   }) {
     final effectif = detail.effectif;
-    // Le contrat notation ne porte pas le découpage : on le DÉRIVE du nombre de
-    // périodes scolaires (cf. [periodeDecoupageFromCount]).
-    final decoupage = periodeDecoupageFromCount(detail.periodes.length);
     final periodes = [
-      for (final p in detail.periodes)
-        PeriodeVm._fromPeriode(p, effectif, decoupage),
+      for (final p in detail.periodes) PeriodeVm._fromPeriode(p, effectif),
     ];
 
     final allEvals = [
@@ -97,7 +76,6 @@ class CoursNotationViewModel extends Equatable {
 
     return CoursNotationViewModel(
       effectif: effectif,
-      decoupage: decoupage,
       periodes: periodes,
       totalEvaluations: allEvals.length,
       aSaisir: allEvals.where((e) => e.state != EvalState.complete).length,
@@ -108,7 +86,6 @@ class CoursNotationViewModel extends Equatable {
   @override
   List<Object?> get props => [
     effectif,
-    decoupage,
     periodes,
     totalEvaluations,
     aSaisir,
@@ -123,16 +100,11 @@ class PeriodeVm extends Equatable {
   final BucketStatut statut;
   final List<BucketVm> buckets;
 
-  /// Découpage de l'année dont dépend le libellé de l'onglet (« Semestre N » /
-  /// « Trimestre N ») — identique pour toutes les périodes d'un même cours.
-  final PeriodeDecoupage decoupage;
-
   const PeriodeVm({
     required this.id,
     required this.ordre,
     required this.statut,
     required this.buckets,
-    required this.decoupage,
   });
 
   /// Clé du bucket sélectionné par défaut : le « en cours », sinon le premier
@@ -146,11 +118,7 @@ class PeriodeVm extends Equatable {
     return buckets.first.key;
   }
 
-  factory PeriodeVm._fromPeriode(
-    PeriodeNotation p,
-    int effectif,
-    PeriodeDecoupage decoupage,
-  ) {
+  factory PeriodeVm._fromPeriode(PeriodeNotation p, int effectif) {
     final buckets = <BucketVm>[
       for (final sp in p.sousPeriodes) BucketVm._fromSousPeriode(sp, effectif),
       if (p.examen != null) BucketVm._fromExamen(p.examen!, effectif),
@@ -164,12 +132,11 @@ class PeriodeVm extends Equatable {
         StatutPeriode.unknown => BucketStatut.upcoming,
       },
       buckets: buckets,
-      decoupage: decoupage,
     );
   }
 
   @override
-  List<Object?> get props => [id, ordre, statut, buckets, decoupage];
+  List<Object?> get props => [id, ordre, statut, buckets];
 }
 
 /// Un pas de la frise (spec §3) + le panneau associé (spec §4).

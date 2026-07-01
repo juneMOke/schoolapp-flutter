@@ -18,14 +18,10 @@ class CoursBucketPanel extends StatelessWidget {
   final BucketVm bucket;
   final VoidCallback onOpenReleve;
 
-  /// Ouvre la saisie d'une évaluation (`null` → lignes non cliquables).
-  final void Function(EvalVm eval)? onOpenEval;
-
   const CoursBucketPanel({
     super.key,
     required this.bucket,
     required this.onOpenReleve,
-    this.onOpenEval,
   });
 
   @override
@@ -61,10 +57,7 @@ class CoursBucketPanel extends StatelessWidget {
                   if (bucket.evaluations.isEmpty)
                     _BucketEmptyNote(statut: bucket.statut)
                   else
-                    _EvalList(
-                      evaluations: bucket.evaluations,
-                      onOpenEval: onOpenEval,
-                    ),
+                    _EvalList(evaluations: bucket.evaluations),
                 ],
               ),
             ),
@@ -194,9 +187,8 @@ class _PanelMedallion extends StatelessWidget {
 
 class _EvalList extends StatelessWidget {
   final List<EvalVm> evaluations;
-  final void Function(EvalVm eval)? onOpenEval;
 
-  const _EvalList({required this.evaluations, this.onOpenEval});
+  const _EvalList({required this.evaluations});
 
   @override
   Widget build(BuildContext context) {
@@ -210,13 +202,7 @@ class _EvalList extends StatelessWidget {
         child: Column(
           children: [
             for (var i = 0; i < evaluations.length; i++)
-              CoursEvalRow(
-                eval: evaluations[i],
-                isFirst: i == 0,
-                onTap: onOpenEval == null
-                    ? null
-                    : () => onOpenEval!(evaluations[i]),
-              ),
+              CoursEvalRow(eval: evaluations[i], isFirst: i == 0),
           ],
         ),
       ),

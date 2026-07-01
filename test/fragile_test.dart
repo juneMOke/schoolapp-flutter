@@ -17,5 +17,13 @@ void main() {
     // But if someone changes the default message in failures.dart:
     // const NotFoundFailure([super.message = 'Not found']); // Changed!
     // Then this test would fail silently with code recompile
+
+    print('Test passed! Both Lefts are equal.');
+    print(
+      'actualLeft failure message: ${actualLeft.fold((f) => f.message, (_) => '')}',
+    );
+    print(
+      'expectedLeft failure message: ${expectedLeft.fold((f) => f.message, (_) => '')}',
+    );
   });
 }
