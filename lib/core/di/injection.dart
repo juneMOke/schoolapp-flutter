@@ -39,6 +39,7 @@ import 'package:school_app_flutter/features/academics/domain/usecases/saisir_not
 import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/evaluation_notes_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
@@ -923,6 +924,15 @@ Future<void> configureDependencies({
     () => SaisieNotesBloc(
       getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
       saisirNoteUseCase: getIt<SaisirNoteUseCase>(),
+    ),
+  );
+
+  // ── Academics — Notation : consultation des notes par élève (lecture seule) ─
+  // Réutilise GetNotesElevesUseCase (même endpoint que la grille de saisie) ;
+  // l'en-tête Evaluation est fourni par l'écran appelant, pas rechargé ici.
+  getIt.registerFactory<EvaluationNotesBloc>(
+    () => EvaluationNotesBloc(
+      getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
     ),
   );
 }
