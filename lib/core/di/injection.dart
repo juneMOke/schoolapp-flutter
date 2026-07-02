@@ -42,6 +42,16 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/course_b
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/evaluation_notes_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_bloc.dart';
+import 'package:school_app_flutter/features/schedule/data/datasources/schedule_remote_data_source.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
+import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/create_session_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/create_time_slot_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/delete_session_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/get_classroom_grid_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/get_my_timetable_usecase.dart';
+import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_edit_bloc.dart';
+import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -992,6 +1002,53 @@ Future<void> configureDependencies({
   getIt.registerFactory<EvaluationNotesBloc>(
     () => EvaluationNotesBloc(
       getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+    ),
+  );
+
+  // ── Schedule (emploi du temps — endpoints authentifiés) ─────────────────────
+  getIt.registerLazySingleton<ScheduleRemoteDataSource>(
+    () => ScheduleRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ScheduleRepository>(
+    () => ScheduleRepositoryImpl(
+      remoteDataSource: getIt<ScheduleRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetMyTimetableUseCase>(
+    () => GetMyTimetableUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<GetClassroomGridUseCase>(
+    () => GetClassroomGridUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<CreateTimeSlotUseCase>(
+    () => CreateTimeSlotUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<CreateSessionUseCase>(
+    () => CreateSessionUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<DeleteSessionUseCase>(
+    () => DeleteSessionUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<TimetableBloc>(
+    () => TimetableBloc(
+      getMyTimetable: getIt<GetMyTimetableUseCase>(),
+      getClassroomGrid: getIt<GetClassroomGridUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<ScheduleEditBloc>(
+    () => ScheduleEditBloc(
+      createTimeSlot: getIt<CreateTimeSlotUseCase>(),
+      createSession: getIt<CreateSessionUseCase>(),
+      deleteSession: getIt<DeleteSessionUseCase>(),
     ),
   );
 
