@@ -7856,6 +7856,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get genderOther;
+
+  /// No description provided for @scheduleErrorNoTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'No teacher is linked to your account.'**
+  String get scheduleErrorNoTeacher;
+
+  /// No description provided for @scheduleErrorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This time slot is already taken (teacher or class).'**
+  String get scheduleErrorConflict;
+
+  /// No description provided for @scheduleErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading the timetable.'**
+  String get scheduleErrorGeneric;
+
+  /// No description provided for @scheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No session scheduled.'**
+  String get scheduleEmpty;
 }
 
 class _AppLocalizationsDelegate

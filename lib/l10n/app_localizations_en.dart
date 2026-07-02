@@ -4575,4 +4575,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genderOther => 'Other';
+
+  @override
+  String get scheduleErrorNoTeacher => 'No teacher is linked to your account.';
+
+  @override
+  String get scheduleErrorConflict =>
+      'This time slot is already taken (teacher or class).';
+
+  @override
+  String get scheduleErrorGeneric =>
+      'An error occurred while loading the timetable.';
+
+  @override
+  String get scheduleEmpty => 'No session scheduled.';
 }

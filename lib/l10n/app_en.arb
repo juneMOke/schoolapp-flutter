@@ -2045,5 +2045,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "dossierNoOpenCases": "No open case",
-  "genderOther": "Other"
+  "genderOther": "Other",
+  "scheduleErrorNoTeacher": "No teacher is linked to your account.",
+  "scheduleErrorConflict": "This time slot is already taken (teacher or class).",
+  "scheduleErrorGeneric": "An error occurred while loading the timetable.",
+  "scheduleEmpty": "No session scheduled."
 }

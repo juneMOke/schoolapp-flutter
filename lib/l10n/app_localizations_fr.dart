@@ -4634,4 +4634,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get genderOther => 'Autre';
+
+  @override
+  String get scheduleErrorNoTeacher =>
+      'Aucun enseignant n\'est lié à votre compte.';
+
+  @override
+  String get scheduleErrorConflict =>
+      'Ce créneau est déjà occupé (enseignant ou classe).';
+
+  @override
+  String get scheduleErrorGeneric =>
+      'Une erreur est survenue lors du chargement de l\'emploi du temps.';
+
+  @override
+  String get scheduleEmpty => 'Aucune séance planifiée.';
 }

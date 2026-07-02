@@ -2048,5 +2048,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "dossierNoOpenCases": "Aucun cas ouvert",
-  "genderOther": "Autre"
+  "genderOther": "Autre",
+  "scheduleErrorNoTeacher": "Aucun enseignant n'est lié à votre compte.",
+  "scheduleErrorConflict": "Ce créneau est déjà occupé (enseignant ou classe).",
+  "scheduleErrorGeneric": "Une erreur est survenue lors du chargement de l'emploi du temps.",
+  "scheduleEmpty": "Aucune séance planifiée."
 }

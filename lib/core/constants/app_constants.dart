@@ -150,6 +150,22 @@ class AppConstants {
   static const String saisirNoteEndpoint =
       '/api/v1/academics/evaluations/{evaluationId}/notes';
 
+  // ─── Schedule (emploi du temps) ────────────────────────────────────────────
+  /// Emploi du temps de l'enseignant connecté (résolu via le JWT).
+  static const String myTimetableEndpoint = '/api/v1/schedule/my-timetable';
+
+  /// Grille d'une classe (conseil pédagogique / admin).
+  static const String classroomGridEndpoint = '/api/v1/schedule/grid';
+
+  /// Création d'un créneau de sonnerie (une ligne de la grille).
+  static const String timeSlotsEndpoint = '/api/v1/schedule/time-slots';
+
+  /// Placement d'un cours à l'emploi du temps.
+  static const String sessionsEndpoint = '/api/v1/schedule/sessions';
+
+  /// Retrait d'une séance. `{id}` est résolu via `@Path`.
+  static const String sessionByIdEndpoint = '/api/v1/schedule/sessions/{id}';
+
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;
