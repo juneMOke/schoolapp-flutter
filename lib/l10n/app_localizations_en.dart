@@ -925,6 +925,231 @@ class AppLocalizationsEn extends AppLocalizations {
       'This course no longer exists or is not accessible.';
 
   @override
+  String get evalTypeInterro => 'Quiz';
+
+  @override
+  String get evalTypeDevoir => 'Assignment';
+
+  @override
+  String get evalTypeExamen => 'Exam';
+
+  @override
+  String get evalCreateTitle => 'New evaluation';
+
+  @override
+  String get evalCreateFieldPeriode => 'Period';
+
+  @override
+  String get evalCreateFieldSousPeriode => 'Sub-period';
+
+  @override
+  String get evalCreateExamPlaceholder => 'Term exam';
+
+  @override
+  String get evalCreateFieldDate => 'Date';
+
+  @override
+  String get evalCreateFieldDateHint => 'dd/mm/yyyy';
+
+  @override
+  String get evalCreateFieldMax => 'Maximum';
+
+  @override
+  String get evalCreateFieldPoids => 'Weight';
+
+  @override
+  String get evalCreateFieldChapitres => 'Related chapters';
+
+  @override
+  String get evalCreateChapitresComingSoon => 'Coming soon';
+
+  @override
+  String get evalCreateCancel => 'Cancel';
+
+  @override
+  String get evalCreateSubmit => 'Create evaluation';
+
+  @override
+  String evalCreateHint(int count, String classroom) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $count students in $classroom will be added',
+      one: 'The student in $classroom will be added',
+    );
+    return '$_temp0 with the “Pending” status.';
+  }
+
+  @override
+  String get evalCreateSuccessToast => 'Evaluation created';
+
+  @override
+  String get evalCreateErrorToast =>
+      'Creating the evaluation failed. Please try again.';
+
+  @override
+  String get evalDetailBack => 'Back to course';
+
+  @override
+  String get evalBadgeComplete => 'Closed';
+
+  @override
+  String evalBadgePartial(int done, int total) {
+    return 'Grading · $done/$total';
+  }
+
+  @override
+  String get evalBadgeUpcoming => 'Upcoming';
+
+  @override
+  String evalChipMax(String max) {
+    return 'Maximum: $max pts';
+  }
+
+  @override
+  String evalChipPoids(int poids) {
+    return 'Weight: $poids';
+  }
+
+  @override
+  String get evalModeTable => 'Table';
+
+  @override
+  String get evalModeFocus => 'Focus';
+
+  @override
+  String evalCountNotee(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count graded',
+      one: '$count graded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evalCountEnAttente(int count) {
+    return '$count pending';
+  }
+
+  @override
+  String evalCountAbsJust(int count) {
+    return '$count exc. abs.';
+  }
+
+  @override
+  String evalCountAbsNonJust(int count) {
+    return '$count unexc. abs.';
+  }
+
+  @override
+  String get evalStatutNotee => 'Graded';
+
+  @override
+  String get evalStatutEnAttente => 'Pending';
+
+  @override
+  String get evalStatutAbsJust => 'Exc. abs.';
+
+  @override
+  String get evalStatutAbsNonJust => 'Unexc. abs.';
+
+  @override
+  String evalNoteMaxError(String max) {
+    return 'max $max';
+  }
+
+  @override
+  String get evalAbsenceJustifieTooltip => 'Excused absence';
+
+  @override
+  String get evalAbsenceNonJustifieTooltip => 'Unexcused absence';
+
+  @override
+  String get evalFocusClear => 'Clear · pending';
+
+  @override
+  String get evalFocusPrevious => 'Previous';
+
+  @override
+  String get evalFocusNext => 'Next';
+
+  @override
+  String get evalFocusLast => 'Last student';
+
+  @override
+  String evalFocusPosition(int index, int total) {
+    return 'Student $index / $total';
+  }
+
+  @override
+  String evalSaveCounter(int done, int total) {
+    return '$done / $total entered';
+  }
+
+  @override
+  String evalSaveErrorsAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades above the maximum',
+      one: '1 grade above the maximum',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evalSaveButton => 'Save grades';
+
+  @override
+  String get evalSaveButtonSaving => 'Saving…';
+
+  @override
+  String evalSaveSuccessToast(int notees, int enAttente) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notees,
+      locale: localeName,
+      other: '$notees graded',
+      one: '$notees graded',
+    );
+    return 'Grades saved — $_temp0 · $enAttente pending';
+  }
+
+  @override
+  String get evalSaveErrorToast => 'Saving failed. Your entries are kept.';
+
+  @override
+  String get evalSaisieEmptyTitle => 'No students';
+
+  @override
+  String get evalSaisieEmptyDescription =>
+      'No students are enrolled in this class.';
+
+  @override
+  String get evalSaisieLoadingA11y => 'Loading grade entry';
+
+  @override
+  String get evalSaisieErrorNetworkMessage =>
+      'You appear to be offline. Check your connection, then try again.';
+
+  @override
+  String get evalSaisieErrorUnauthorizedMessage =>
+      'Your session has expired. Sign in again to enter grades.';
+
+  @override
+  String get evalSaisieErrorForbiddenMessage =>
+      'You don\'t have the required permissions to enter these grades.';
+
+  @override
+  String get evalSaisieErrorServerMessage =>
+      'Something went wrong on our side. Try again in a moment.';
+
+  @override
+  String get evalSaisieErrorUnknownMessage =>
+      'An unexpected error occurred while loading grade entry.';
+
+  @override
   String get profile => 'Profile';
 
   @override

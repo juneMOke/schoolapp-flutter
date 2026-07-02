@@ -8,18 +8,29 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/detai
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne d'évaluation (spec §5) : carré de type · identité · avancement · badge
-/// de statut. Non interactive — la saisie des notes (3ᵉ niveau) fait l'objet
-/// d'une spec dédiée et n'est pas câblée (pas de chevron).
+/// de statut. Cliquable ([onTap] non nul → chevron) pour ouvrir la saisie des
+/// notes (3ᵉ niveau).
 class CoursEvalRow extends StatelessWidget {
   final EvalVm eval;
   final bool isFirst;
+  final VoidCallback? onTap;
 
-  const CoursEvalRow({super.key, required this.eval, required this.isFirst});
+  const CoursEvalRow({
+    super.key,
+    required this.eval,
+    required this.isFirst,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final typeVisual = evalTypeVisual(eval.type);
+    final showChevron = onTap != null;
+    const chevron = Icon(
+      Icons.chevron_right_rounded,
+      color: AppColors.bleuArdoise,
+    );
 
     final identity = Column(
       mainAxisSize: MainAxisSize.min,
@@ -48,7 +59,7 @@ class CoursEvalRow extends StatelessWidget {
       ],
     );
 
-    return Container(
+    final content = Container(
       decoration: BoxDecoration(
         border: Border(
           top: isFirst
@@ -92,6 +103,7 @@ class CoursEvalRow extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (showChevron) chevron,
               ],
             );
           }
@@ -105,9 +117,23 @@ class CoursEvalRow extends StatelessWidget {
               progress,
               const SizedBox(width: AppSpacing.md),
               badge,
+              if (showChevron) ...[
+                const SizedBox(width: AppSpacing.sm),
+                chevron,
+              ],
             ],
           );
         },
+      ),
+    );
+
+    if (onTap == null) return content;
+    return Semantics(
+      button: true,
+      label: eval.nom,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(onTap: onTap, child: content),
       ),
     );
   }

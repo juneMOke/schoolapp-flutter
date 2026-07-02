@@ -460,6 +460,101 @@
   "courseDetailErrorUnknownMessage": "An unexpected error occurred while loading the course.",
   "courseDetailErrorNotFoundTitle": "Course not found",
   "courseDetailErrorNotFoundMessage": "This course no longer exists or is not accessible.",
+  "evalTypeInterro": "Quiz",
+  "evalTypeDevoir": "Assignment",
+  "evalTypeExamen": "Exam",
+  "evalCreateTitle": "New evaluation",
+  "evalCreateFieldPeriode": "Period",
+  "evalCreateFieldSousPeriode": "Sub-period",
+  "evalCreateExamPlaceholder": "Term exam",
+  "evalCreateFieldDate": "Date",
+  "evalCreateFieldDateHint": "dd/mm/yyyy",
+  "evalCreateFieldMax": "Maximum",
+  "evalCreateFieldPoids": "Weight",
+  "evalCreateFieldChapitres": "Related chapters",
+  "evalCreateChapitresComingSoon": "Coming soon",
+  "evalCreateCancel": "Cancel",
+  "evalCreateSubmit": "Create evaluation",
+  "evalCreateHint": "{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
+  "@evalCreateHint": {
+    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+  },
+  "evalCreateSuccessToast": "Evaluation created",
+  "evalCreateErrorToast": "Creating the evaluation failed. Please try again.",
+  "evalDetailBack": "Back to course",
+  "evalBadgeComplete": "Closed",
+  "evalBadgePartial": "Grading · {done}/{total}",
+  "@evalBadgePartial": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalBadgeUpcoming": "Upcoming",
+  "evalChipMax": "Maximum: {max} pts",
+  "@evalChipMax": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalChipPoids": "Weight: {poids}",
+  "@evalChipPoids": {
+    "placeholders": { "poids": { "type": "int" } }
+  },
+  "evalModeTable": "Table",
+  "evalModeFocus": "Focus",
+  "evalCountNotee": "{count, plural, =1{{count} graded} other{{count} graded}}",
+  "@evalCountNotee": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountEnAttente": "{count} pending",
+  "@evalCountEnAttente": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsJust": "{count} exc. abs.",
+  "@evalCountAbsJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsNonJust": "{count} unexc. abs.",
+  "@evalCountAbsNonJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalStatutNotee": "Graded",
+  "evalStatutEnAttente": "Pending",
+  "evalStatutAbsJust": "Exc. abs.",
+  "evalStatutAbsNonJust": "Unexc. abs.",
+  "evalNoteMaxError": "max {max}",
+  "@evalNoteMaxError": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalAbsenceJustifieTooltip": "Excused absence",
+  "evalAbsenceNonJustifieTooltip": "Unexcused absence",
+  "evalFocusClear": "Clear · pending",
+  "evalFocusPrevious": "Previous",
+  "evalFocusNext": "Next",
+  "evalFocusLast": "Last student",
+  "evalFocusPosition": "Student {index} / {total}",
+  "@evalFocusPosition": {
+    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveCounter": "{done} / {total} entered",
+  "@evalSaveCounter": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveErrorsAlert": "{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}",
+  "@evalSaveErrorsAlert": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalSaveButton": "Save grades",
+  "evalSaveButtonSaving": "Saving…",
+  "evalSaveSuccessToast": "Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
+  "@evalSaveSuccessToast": {
+    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+  },
+  "evalSaveErrorToast": "Saving failed. Your entries are kept.",
+  "evalSaisieEmptyTitle": "No students",
+  "evalSaisieEmptyDescription": "No students are enrolled in this class.",
+  "evalSaisieLoadingA11y": "Loading grade entry",
+  "evalSaisieErrorNetworkMessage": "You appear to be offline. Check your connection, then try again.",
+  "evalSaisieErrorUnauthorizedMessage": "Your session has expired. Sign in again to enter grades.",
+  "evalSaisieErrorForbiddenMessage": "You don't have the required permissions to enter these grades.",
+  "evalSaisieErrorServerMessage": "Something went wrong on our side. Try again in a moment.",
+  "evalSaisieErrorUnknownMessage": "An unexpected error occurred while loading grade entry.",
   "@subMenuDisciplinesList": {
     "description": "Disciplines list sub-menu title"
   },

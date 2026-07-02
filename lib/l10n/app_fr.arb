@@ -455,6 +455,101 @@
   "courseDetailErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement du cours.",
   "courseDetailErrorNotFoundTitle": "Cours introuvable",
   "courseDetailErrorNotFoundMessage": "Ce cours n'existe plus ou n'est pas accessible.",
+  "evalTypeInterro": "Interrogation",
+  "evalTypeDevoir": "Devoir",
+  "evalTypeExamen": "Examen",
+  "evalCreateTitle": "Nouvelle évaluation",
+  "evalCreateFieldPeriode": "Période",
+  "evalCreateFieldSousPeriode": "Sous-période",
+  "evalCreateExamPlaceholder": "Examen semestriel",
+  "evalCreateFieldDate": "Date",
+  "evalCreateFieldDateHint": "jj/mm/aaaa",
+  "evalCreateFieldMax": "Maximum",
+  "evalCreateFieldPoids": "Poids",
+  "evalCreateFieldChapitres": "Chapitres concernés",
+  "evalCreateChapitresComingSoon": "Bientôt disponible",
+  "evalCreateCancel": "Annuler",
+  "evalCreateSubmit": "Créer l'évaluation",
+  "evalCreateHint": "{count, plural, =1{L'élève de {classroom} sera ajouté} other{Les {count} élèves de {classroom} seront ajoutés}} avec le statut « En attente ».",
+  "@evalCreateHint": {
+    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+  },
+  "evalCreateSuccessToast": "Évaluation créée",
+  "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
+  "evalDetailBack": "Retour au cours",
+  "evalBadgeComplete": "Clôturée",
+  "evalBadgePartial": "Saisie en cours · {done}/{total}",
+  "@evalBadgePartial": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalBadgeUpcoming": "À venir",
+  "evalChipMax": "Maximum : {max} pts",
+  "@evalChipMax": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalChipPoids": "Poids : {poids}",
+  "@evalChipPoids": {
+    "placeholders": { "poids": { "type": "int" } }
+  },
+  "evalModeTable": "Tableau",
+  "evalModeFocus": "Focus",
+  "evalCountNotee": "{count, plural, =1{{count} notée} other{{count} notées}}",
+  "@evalCountNotee": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountEnAttente": "{count} en attente",
+  "@evalCountEnAttente": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsJust": "{count} abs. just.",
+  "@evalCountAbsJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsNonJust": "{count} abs. non just.",
+  "@evalCountAbsNonJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalStatutNotee": "Notée",
+  "evalStatutEnAttente": "En attente",
+  "evalStatutAbsJust": "Abs. just.",
+  "evalStatutAbsNonJust": "Abs. non just.",
+  "evalNoteMaxError": "max {max}",
+  "@evalNoteMaxError": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalAbsenceJustifieTooltip": "Absence justifiée",
+  "evalAbsenceNonJustifieTooltip": "Absence non justifiée",
+  "evalFocusClear": "Effacer · en attente",
+  "evalFocusPrevious": "Précédent",
+  "evalFocusNext": "Suivant",
+  "evalFocusLast": "Dernier élève",
+  "evalFocusPosition": "Élève {index} / {total}",
+  "@evalFocusPosition": {
+    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveCounter": "{done} / {total} saisies",
+  "@evalSaveCounter": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveErrorsAlert": "{count, plural, =1{1 note au-dessus du maximum} other{{count} notes au-dessus du maximum}}",
+  "@evalSaveErrorsAlert": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalSaveButton": "Enregistrer les notes",
+  "evalSaveButtonSaving": "Enregistrement…",
+  "evalSaveSuccessToast": "Notes enregistrées — {notees, plural, =1{{notees} notée} other{{notees} notées}} · {enAttente} en attente",
+  "@evalSaveSuccessToast": {
+    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+  },
+  "evalSaveErrorToast": "Échec de l'enregistrement. Vos saisies sont conservées.",
+  "evalSaisieEmptyTitle": "Aucun élève",
+  "evalSaisieEmptyDescription": "Aucun élève n'est inscrit dans cette classe.",
+  "evalSaisieLoadingA11y": "Chargement de la saisie des notes",
+  "evalSaisieErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.",
+  "evalSaisieErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour saisir les notes.",
+  "evalSaisieErrorForbiddenMessage": "Vous n'avez pas les droits requis pour saisir ces notes.",
+  "evalSaisieErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "evalSaisieErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de la saisie.",
   "profile": "Profil",
   "settings": "Paramètres",
   "home": "Accueil",

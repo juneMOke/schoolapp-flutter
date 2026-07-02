@@ -929,6 +929,232 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce cours n\'existe plus ou n\'est pas accessible.';
 
   @override
+  String get evalTypeInterro => 'Interrogation';
+
+  @override
+  String get evalTypeDevoir => 'Devoir';
+
+  @override
+  String get evalTypeExamen => 'Examen';
+
+  @override
+  String get evalCreateTitle => 'Nouvelle évaluation';
+
+  @override
+  String get evalCreateFieldPeriode => 'Période';
+
+  @override
+  String get evalCreateFieldSousPeriode => 'Sous-période';
+
+  @override
+  String get evalCreateExamPlaceholder => 'Examen semestriel';
+
+  @override
+  String get evalCreateFieldDate => 'Date';
+
+  @override
+  String get evalCreateFieldDateHint => 'jj/mm/aaaa';
+
+  @override
+  String get evalCreateFieldMax => 'Maximum';
+
+  @override
+  String get evalCreateFieldPoids => 'Poids';
+
+  @override
+  String get evalCreateFieldChapitres => 'Chapitres concernés';
+
+  @override
+  String get evalCreateChapitresComingSoon => 'Bientôt disponible';
+
+  @override
+  String get evalCreateCancel => 'Annuler';
+
+  @override
+  String get evalCreateSubmit => 'Créer l\'évaluation';
+
+  @override
+  String evalCreateHint(int count, String classroom) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les $count élèves de $classroom seront ajoutés',
+      one: 'L\'élève de $classroom sera ajouté',
+    );
+    return '$_temp0 avec le statut « En attente ».';
+  }
+
+  @override
+  String get evalCreateSuccessToast => 'Évaluation créée';
+
+  @override
+  String get evalCreateErrorToast =>
+      'La création de l\'évaluation a échoué. Réessayez.';
+
+  @override
+  String get evalDetailBack => 'Retour au cours';
+
+  @override
+  String get evalBadgeComplete => 'Clôturée';
+
+  @override
+  String evalBadgePartial(int done, int total) {
+    return 'Saisie en cours · $done/$total';
+  }
+
+  @override
+  String get evalBadgeUpcoming => 'À venir';
+
+  @override
+  String evalChipMax(String max) {
+    return 'Maximum : $max pts';
+  }
+
+  @override
+  String evalChipPoids(int poids) {
+    return 'Poids : $poids';
+  }
+
+  @override
+  String get evalModeTable => 'Tableau';
+
+  @override
+  String get evalModeFocus => 'Focus';
+
+  @override
+  String evalCountNotee(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notées',
+      one: '$count notée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evalCountEnAttente(int count) {
+    return '$count en attente';
+  }
+
+  @override
+  String evalCountAbsJust(int count) {
+    return '$count abs. just.';
+  }
+
+  @override
+  String evalCountAbsNonJust(int count) {
+    return '$count abs. non just.';
+  }
+
+  @override
+  String get evalStatutNotee => 'Notée';
+
+  @override
+  String get evalStatutEnAttente => 'En attente';
+
+  @override
+  String get evalStatutAbsJust => 'Abs. just.';
+
+  @override
+  String get evalStatutAbsNonJust => 'Abs. non just.';
+
+  @override
+  String evalNoteMaxError(String max) {
+    return 'max $max';
+  }
+
+  @override
+  String get evalAbsenceJustifieTooltip => 'Absence justifiée';
+
+  @override
+  String get evalAbsenceNonJustifieTooltip => 'Absence non justifiée';
+
+  @override
+  String get evalFocusClear => 'Effacer · en attente';
+
+  @override
+  String get evalFocusPrevious => 'Précédent';
+
+  @override
+  String get evalFocusNext => 'Suivant';
+
+  @override
+  String get evalFocusLast => 'Dernier élève';
+
+  @override
+  String evalFocusPosition(int index, int total) {
+    return 'Élève $index / $total';
+  }
+
+  @override
+  String evalSaveCounter(int done, int total) {
+    return '$done / $total saisies';
+  }
+
+  @override
+  String evalSaveErrorsAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes au-dessus du maximum',
+      one: '1 note au-dessus du maximum',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evalSaveButton => 'Enregistrer les notes';
+
+  @override
+  String get evalSaveButtonSaving => 'Enregistrement…';
+
+  @override
+  String evalSaveSuccessToast(int notees, int enAttente) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notees,
+      locale: localeName,
+      other: '$notees notées',
+      one: '$notees notée',
+    );
+    return 'Notes enregistrées — $_temp0 · $enAttente en attente';
+  }
+
+  @override
+  String get evalSaveErrorToast =>
+      'Échec de l\'enregistrement. Vos saisies sont conservées.';
+
+  @override
+  String get evalSaisieEmptyTitle => 'Aucun élève';
+
+  @override
+  String get evalSaisieEmptyDescription =>
+      'Aucun élève n\'est inscrit dans cette classe.';
+
+  @override
+  String get evalSaisieLoadingA11y => 'Chargement de la saisie des notes';
+
+  @override
+  String get evalSaisieErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get evalSaisieErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour saisir les notes.';
+
+  @override
+  String get evalSaisieErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour saisir ces notes.';
+
+  @override
+  String get evalSaisieErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get evalSaisieErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement de la saisie.';
+
+  @override
   String get profile => 'Profil';
 
   @override

@@ -1586,6 +1586,342 @@ abstract class AppLocalizations {
   /// **'This course no longer exists or is not accessible.'**
   String get courseDetailErrorNotFoundMessage;
 
+  /// No description provided for @evalTypeInterro.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get evalTypeInterro;
+
+  /// No description provided for @evalTypeDevoir.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment'**
+  String get evalTypeDevoir;
+
+  /// No description provided for @evalTypeExamen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get evalTypeExamen;
+
+  /// No description provided for @evalCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New evaluation'**
+  String get evalCreateTitle;
+
+  /// No description provided for @evalCreateFieldPeriode.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get evalCreateFieldPeriode;
+
+  /// No description provided for @evalCreateFieldSousPeriode.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-period'**
+  String get evalCreateFieldSousPeriode;
+
+  /// No description provided for @evalCreateExamPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Term exam'**
+  String get evalCreateExamPlaceholder;
+
+  /// No description provided for @evalCreateFieldDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get evalCreateFieldDate;
+
+  /// No description provided for @evalCreateFieldDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'dd/mm/yyyy'**
+  String get evalCreateFieldDateHint;
+
+  /// No description provided for @evalCreateFieldMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get evalCreateFieldMax;
+
+  /// No description provided for @evalCreateFieldPoids.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get evalCreateFieldPoids;
+
+  /// No description provided for @evalCreateFieldChapitres.
+  ///
+  /// In en, this message translates to:
+  /// **'Related chapters'**
+  String get evalCreateFieldChapitres;
+
+  /// No description provided for @evalCreateChapitresComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get evalCreateChapitresComingSoon;
+
+  /// No description provided for @evalCreateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get evalCreateCancel;
+
+  /// No description provided for @evalCreateSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Create evaluation'**
+  String get evalCreateSubmit;
+
+  /// No description provided for @evalCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
+  String evalCreateHint(int count, String classroom);
+
+  /// No description provided for @evalCreateSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation created'**
+  String get evalCreateSuccessToast;
+
+  /// No description provided for @evalCreateErrorToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating the evaluation failed. Please try again.'**
+  String get evalCreateErrorToast;
+
+  /// No description provided for @evalDetailBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to course'**
+  String get evalDetailBack;
+
+  /// No description provided for @evalBadgeComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get evalBadgeComplete;
+
+  /// No description provided for @evalBadgePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Grading · {done}/{total}'**
+  String evalBadgePartial(int done, int total);
+
+  /// No description provided for @evalBadgeUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get evalBadgeUpcoming;
+
+  /// No description provided for @evalChipMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum: {max} pts'**
+  String evalChipMax(String max);
+
+  /// No description provided for @evalChipPoids.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight: {poids}'**
+  String evalChipPoids(int poids);
+
+  /// No description provided for @evalModeTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get evalModeTable;
+
+  /// No description provided for @evalModeFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get evalModeFocus;
+
+  /// No description provided for @evalCountNotee.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} graded} other{{count} graded}}'**
+  String evalCountNotee(int count);
+
+  /// No description provided for @evalCountEnAttente.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending'**
+  String evalCountEnAttente(int count);
+
+  /// No description provided for @evalCountAbsJust.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} exc. abs.'**
+  String evalCountAbsJust(int count);
+
+  /// No description provided for @evalCountAbsNonJust.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unexc. abs.'**
+  String evalCountAbsNonJust(int count);
+
+  /// No description provided for @evalStatutNotee.
+  ///
+  /// In en, this message translates to:
+  /// **'Graded'**
+  String get evalStatutNotee;
+
+  /// No description provided for @evalStatutEnAttente.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get evalStatutEnAttente;
+
+  /// No description provided for @evalStatutAbsJust.
+  ///
+  /// In en, this message translates to:
+  /// **'Exc. abs.'**
+  String get evalStatutAbsJust;
+
+  /// No description provided for @evalStatutAbsNonJust.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexc. abs.'**
+  String get evalStatutAbsNonJust;
+
+  /// No description provided for @evalNoteMaxError.
+  ///
+  /// In en, this message translates to:
+  /// **'max {max}'**
+  String evalNoteMaxError(String max);
+
+  /// No description provided for @evalAbsenceJustifieTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused absence'**
+  String get evalAbsenceJustifieTooltip;
+
+  /// No description provided for @evalAbsenceNonJustifieTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absence'**
+  String get evalAbsenceNonJustifieTooltip;
+
+  /// No description provided for @evalFocusClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear · pending'**
+  String get evalFocusClear;
+
+  /// No description provided for @evalFocusPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get evalFocusPrevious;
+
+  /// No description provided for @evalFocusNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get evalFocusNext;
+
+  /// No description provided for @evalFocusLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last student'**
+  String get evalFocusLast;
+
+  /// No description provided for @evalFocusPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {index} / {total}'**
+  String evalFocusPosition(int index, int total);
+
+  /// No description provided for @evalSaveCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} entered'**
+  String evalSaveCounter(int done, int total);
+
+  /// No description provided for @evalSaveErrorsAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
+  String evalSaveErrorsAlert(int count);
+
+  /// No description provided for @evalSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save grades'**
+  String get evalSaveButton;
+
+  /// No description provided for @evalSaveButtonSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get evalSaveButtonSaving;
+
+  /// No description provided for @evalSaveSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
+  String evalSaveSuccessToast(int notees, int enAttente);
+
+  /// No description provided for @evalSaveErrorToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving failed. Your entries are kept.'**
+  String get evalSaveErrorToast;
+
+  /// No description provided for @evalSaisieEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students'**
+  String get evalSaisieEmptyTitle;
+
+  /// No description provided for @evalSaisieEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No students are enrolled in this class.'**
+  String get evalSaisieEmptyDescription;
+
+  /// No description provided for @evalSaisieLoadingA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading grade entry'**
+  String get evalSaisieLoadingA11y;
+
+  /// No description provided for @evalSaisieErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your connection, then try again.'**
+  String get evalSaisieErrorNetworkMessage;
+
+  /// No description provided for @evalSaisieErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to enter grades.'**
+  String get evalSaisieErrorUnauthorizedMessage;
+
+  /// No description provided for @evalSaisieErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have the required permissions to enter these grades.'**
+  String get evalSaisieErrorForbiddenMessage;
+
+  /// No description provided for @evalSaisieErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Try again in a moment.'**
+  String get evalSaisieErrorServerMessage;
+
+  /// No description provided for @evalSaisieErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading grade entry.'**
+  String get evalSaisieErrorUnknownMessage;
+
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:
