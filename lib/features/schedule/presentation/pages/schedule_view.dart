@@ -43,7 +43,10 @@ class ScheduleView extends StatefulWidget {
 }
 
 class _ScheduleViewState extends State<ScheduleView> {
-  ScheduleViewMode _mode = ScheduleViewMode.week;
+  /// `null` = aucun choix explicite → mode par défaut résolu selon la largeur
+  /// (Jour sur téléphone / petit écran, Semaine sinon). Dès que l'utilisateur
+  /// bascule, `_mode` est fixé et prime sur le défaut.
+  ScheduleViewMode? _mode;
   Weekday? _selectedDay;
 
   @override
@@ -65,6 +68,9 @@ class _ScheduleViewState extends State<ScheduleView> {
 
   @override
   Widget build(BuildContext context) {
+    // Choix explicite s'il existe, sinon défaut selon la largeur disponible.
+    final mode =
+        _mode ?? defaultScheduleViewMode(MediaQuery.sizeOf(context).width);
     return BlocBuilder<TimetableBloc, TimetableState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||
@@ -75,8 +81,8 @@ class _ScheduleViewState extends State<ScheduleView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ScheduleToolbar(
-              mode: _mode,
-              onModeChanged: (mode) => setState(() => _mode = mode),
+              mode: mode,
+              onModeChanged: (m) => setState(() => _mode = m),
             ),
             const SizedBox(height: AppSpacing.xl),
             AnimatedSize(
@@ -91,7 +97,7 @@ class _ScheduleViewState extends State<ScheduleView> {
                   key: ValueKey<String>(
                     '${state.status.name}-${state.errorType.name}',
                   ),
-                  child: _buildBody(context, state),
+                  child: _buildBody(context, state, mode),
                 ),
               ),
             ),
@@ -101,10 +107,14 @@ class _ScheduleViewState extends State<ScheduleView> {
     );
   }
 
-  Widget _buildBody(BuildContext context, TimetableState state) {
+  Widget _buildBody(
+    BuildContext context,
+    TimetableState state,
+    ScheduleViewMode mode,
+  ) {
     return switch (state.status) {
       TimetableStatus.loading => const ScheduleTimetableSkeleton(),
-      TimetableStatus.success => _buildReady(state.timetable),
+      TimetableStatus.success => _buildReady(state.timetable, mode),
       TimetableStatus.failure => ScheduleResultsErrorState(
         type: state.errorType,
         onRetry: () => context.read<TimetableBloc>().add(
@@ -118,7 +128,7 @@ class _ScheduleViewState extends State<ScheduleView> {
     };
   }
 
-  Widget _buildReady(WeeklyTimetable? timetable) {
+  Widget _buildReady(WeeklyTimetable? timetable, ScheduleViewMode mode) {
     if (timetable == null || ScheduleTimeFormat.sessionCount(timetable) == 0) {
       return const ScheduleResultsEmptyState();
     }
@@ -133,7 +143,7 @@ class _ScheduleViewState extends State<ScheduleView> {
       timetable: timetable,
       palette: palette,
       today: today,
-      mode: _mode,
+      mode: mode,
       selectedDay: _effectiveDay(timetable.days, today),
       onDaySelected: (day) => setState(() => _selectedDay = day),
       onOpenCell: onOpenCell,

@@ -77,37 +77,41 @@ class ScheduleTimetableSkeleton extends StatelessWidget {
     // Cases éparses : une poignée de créneaux occupés, en quinconce.
     bool filled(int day) => (day + index) % 3 == 0;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(
-          width: _gutter,
-          height: 54,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: AppSpacing.sm),
-              child: EteeloSkeletonBox(width: 28, height: 9),
-            ),
-          ),
-        ),
-        for (var d = 0; d < _dayCount; d++)
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(minHeight: 54),
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                border: Border(left: BorderSide(color: AppColors.border)),
+    // IntrinsicHeight borne la hauteur de la ligne (sinon `stretch` force une
+    // hauteur infinie dans le Column scrollable) — même garde que la vraie grille.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(
+            width: _gutter,
+            height: 54,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: AppSpacing.sm),
+                child: EteeloSkeletonBox(width: 28, height: 9),
               ),
-              child: filled(d)
-                  ? const EteeloSkeletonBox(
-                      height: 40,
-                      borderRadius: AppRadius.brSm,
-                    )
-                  : null,
             ),
           ),
-      ],
+          for (var d = 0; d < _dayCount; d++)
+            Expanded(
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 54),
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  border: Border(left: BorderSide(color: AppColors.border)),
+                ),
+                child: filled(d)
+                    ? const EteeloSkeletonBox(
+                        height: 40,
+                        borderRadius: AppRadius.brSm,
+                      )
+                    : null,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

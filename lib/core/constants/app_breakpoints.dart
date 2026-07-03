@@ -73,4 +73,9 @@ class AppBreakpoints {
   // motif·%·effectif) dès cette largeur utile — découplé de detailCompactMax
   // (pensé pour les panneaux pleine largeur), adapté à un panneau 1fr.
   static const double reasonDonutRowMin = 300.0;
+
+  // Emploi du temps — vue par défaut. En deçà (téléphone / petit écran), on ouvre
+  // en mode Jour : la grille hebdomadaire (5 jours) y est trop serrée. Au-delà,
+  // mode Semaine. L'utilisateur peut toujours basculer via la barre.
+  static const double scheduleWeekDefaultMin = dataTableCardsMax; // 600
 }
