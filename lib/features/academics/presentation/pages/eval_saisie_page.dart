@@ -90,8 +90,9 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
 
   Future<void> _contactAdmin() async {
     await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
-    if (!mounted)
+    if (!mounted) {
       return; // garde mounted après await (règle non-négociable #8).
+    }
   }
 
   void _save() {

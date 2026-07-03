@@ -131,8 +131,9 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
       brancheNom: _brancheNom(detail),
       classroomName: widget.args.classroomName,
     );
-    if (!mounted)
+    if (!mounted) {
       return; // garde mounted après await (règle non-négociable #8).
+    }
     if (created == null) return;
     AppSnackBar.showSuccess(context, l10n.evalCreateSuccessToast);
     // Recharge le cours : la nouvelle évaluation apparaîtra avec son nom backend,

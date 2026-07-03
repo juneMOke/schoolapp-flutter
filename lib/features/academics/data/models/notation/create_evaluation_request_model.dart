@@ -56,8 +56,9 @@ class CreateEvaluationRequestModel {
     if (poids != null) json['poids'] = poids;
     // Rattachement temporel exclusif : un seul des deux ids non nul.
     if (sousPeriodeId != null) json['sousPeriodeId'] = sousPeriodeId;
-    if (periodeScolaireId != null)
+    if (periodeScolaireId != null) {
       json['periodeScolaireId'] = periodeScolaireId;
+    }
     // Relation n-n optionnelle : omise si vide.
     if (chapitreIds.isNotEmpty) json['chapitreIds'] = chapitreIds;
     return json;
