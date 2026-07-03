@@ -338,6 +338,228 @@
     "description": "Attendance sub-menu title"
   },
   "subMenuDisciplinesList": "Disciplines List",
+  "menuCourses": "Courses",
+  "subMenuMyCourses": "My courses",
+  "subMenuTimetable": "Timetable",
+  "myCoursesCount": "{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}",
+  "@myCoursesCount": {
+    "placeholders": {
+      "classCount": { "type": "int" },
+      "courseCount": { "type": "int" }
+    }
+  },
+  "myCoursesExpandAll": "Expand all",
+  "myCoursesCollapseAll": "Collapse all",
+  "myCoursesClassCourseCount": "{count, plural, =1{1 course} other{{count} courses}}",
+  "@myCoursesClassCourseCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesStudentCount": "{count, plural, =0{No students} =1{1 student} other{{count} students}}",
+  "@myCoursesStudentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesLoadingA11yLabel": "Loading your courses",
+  "myCoursesEmptyTitle": "No course assigned",
+  "myCoursesEmptyDescription": "No course is linked to you yet. The courses you teach will appear here, grouped by class.",
+  "myCoursesErrorNetworkTitle": "No connection",
+  "myCoursesErrorNetworkMessage": "You appear to be offline. Check your internet connection, then try again.",
+  "myCoursesErrorUnauthorizedTitle": "Session expired",
+  "myCoursesErrorUnauthorizedMessage": "Your session has expired. Sign in again to view your courses.",
+  "myCoursesErrorForbiddenTitle": "Access denied",
+  "myCoursesErrorForbiddenMessage": "You do not have the required permissions to view these courses.",
+  "myCoursesErrorServerTitle": "Server error",
+  "myCoursesErrorServerMessage": "Something went wrong on our side. Please try again in a moment.",
+  "myCoursesErrorUnknownTitle": "Unable to load",
+  "myCoursesErrorUnknownMessage": "An unexpected error occurred while loading your courses.",
+  "myCoursesErrorRetry": "Try again",
+  "myCoursesErrorReconnect": "Sign in again",
+  "myCoursesErrorContactAdmin": "Contact the administrator",
+  "myCoursesErrorIncidentCode": "Incident code: {code}",
+  "@myCoursesErrorIncidentCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "courseDetailBackToCourses": "My courses",
+  "courseDetailEvaluationCount": "{count, plural, =0{No evaluation} =1{1 evaluation} other{{count} evaluations}}",
+  "@courseDetailEvaluationCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailToGrade": "{count, plural, =1{1 to grade} other{{count} to grade}}",
+  "@courseDetailToGrade": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailNextEvalEyebrow": "Next evaluation",
+  "courseDetailEvalMetaShort": "{date} · /{max} pts",
+  "@courseDetailEvalMetaShort": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+  },
+  "courseDetailEvalMeta": "{date} · /{max} pts · weight {poids}",
+  "@courseDetailEvalMeta": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+  },
+  "courseDetailSemesterLabel": "Semester {ordre}",
+  "@courseDetailSemesterLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailTrimesterLabel": "Term {ordre}",
+  "@courseDetailTrimesterLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailPeriodLabel": "Period {ordre}",
+  "@courseDetailPeriodLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailExamLabel": "Exam",
+  "courseDetailStatutClosed": "Closed",
+  "courseDetailStatutCurrent": "In progress",
+  "courseDetailStatutUpcoming": "Upcoming",
+  "courseDetailBucketNotes": "{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}",
+  "@courseDetailBucketNotes": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+  },
+  "courseDetailBucketNoEval": "No evaluation",
+  "courseDetailExamToPlan": "To be scheduled",
+  "courseDetailNoteGlobaleTitle": "Overall mark — {label}",
+  "@courseDetailNoteGlobaleTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailProvisional": "provisional",
+  "courseDetailClassAverageLabel": "Class average",
+  "courseDetailAbove50": "{count}/{total} students ≥ 50%",
+  "@courseDetailAbove50": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailNoAverage": "No average yet",
+  "courseDetailByStudent": "By student",
+  "courseDetailBadgeGraded": "Graded",
+  "courseDetailBadgeInProgress": "In progress · {saisies}/{total}",
+  "@courseDetailBadgeInProgress": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailBadgeUpcoming": "Upcoming",
+  "courseDetailEvalExpected": "{count, plural, =1{1 student expected} other{{count} students expected}}",
+  "@courseDetailEvalExpected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailReleveTitle": "Overall marks — {label}",
+  "@courseDetailReleveTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailReleveKpiAverage": "Average",
+  "courseDetailReleveKpiAbove50": "≥ 50%",
+  "courseDetailReleveKpiEvals": "Evals",
+  "courseDetailSortRanking": "Ranking",
+  "courseDetailSortAlpha": "Alphabetical",
+  "courseDetailReleveMethod": "Overall mark = points earned ÷ maximum, weighted by coefficient.",
+  "courseDetailReleveEmpty": "No marks entered",
+  "courseDetailLoadingA11yLabel": "Loading course",
+  "courseDetailEmptyTitle": "No evaluation",
+  "courseDetailEmptyDescription": "This course has no evaluation yet.",
+  "courseDetailBucketEmptyUpcoming": "Upcoming selection — no evaluation scheduled yet.",
+  "courseDetailBucketEmptyNone": "No evaluation attached to this selection.",
+  "courseDetailErrorNetworkMessage": "You appear to be offline. Check your connection, then try again.",
+  "courseDetailErrorUnauthorizedMessage": "Your session has expired. Sign in again to view this course.",
+  "courseDetailErrorForbiddenMessage": "You do not have the required permissions to view this course.",
+  "courseDetailErrorServerMessage": "Something went wrong on our side. Try again in a moment.",
+  "courseDetailErrorUnknownMessage": "An unexpected error occurred while loading the course.",
+  "courseDetailErrorNotFoundTitle": "Course not found",
+  "courseDetailErrorNotFoundMessage": "This course no longer exists or is not accessible.",
+  "evalTypeInterro": "Quiz",
+  "evalTypeDevoir": "Assignment",
+  "evalTypeExamen": "Exam",
+  "evalCreateTitle": "New evaluation",
+  "evalCreateFieldSemestre": "Semester",
+  "evalCreateFieldTrimestre": "Term",
+  "evalCreateFieldSousPeriode": "Period",
+  "evalCreateExamPlaceholder": "Term exam",
+  "evalCreateFieldDate": "Date",
+  "evalCreateFieldDateHint": "dd/mm/yyyy",
+  "evalCreateFieldMax": "Maximum",
+  "evalCreateFieldPoids": "Weight",
+  "evalCreateFieldChapitres": "Related chapters",
+  "evalCreateChapitresComingSoon": "Coming soon",
+  "evalCreateCancel": "Cancel",
+  "evalCreateSubmit": "Create evaluation",
+  "evalCreateHint": "{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
+  "@evalCreateHint": {
+    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+  },
+  "evalCreateSuccessToast": "Evaluation created",
+  "evalCreateErrorToast": "Creating the evaluation failed. Please try again.",
+  "evalCreateClosedPeriodError": "Closed period: you can't add an evaluation to it.",
+  "evalDetailBack": "Back to course",
+  "evalBadgeComplete": "Closed",
+  "evalBadgePartial": "Grading · {done}/{total}",
+  "@evalBadgePartial": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalBadgeUpcoming": "Upcoming",
+  "evalChipMax": "Maximum: {max} pts",
+  "@evalChipMax": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalChipPoids": "Weight: {poids}",
+  "@evalChipPoids": {
+    "placeholders": { "poids": { "type": "int" } }
+  },
+  "evalModeTable": "Table",
+  "evalModeFocus": "Focus",
+  "evalCountNotee": "{count, plural, =1{{count} graded} other{{count} graded}}",
+  "@evalCountNotee": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountEnAttente": "{count} pending",
+  "@evalCountEnAttente": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsJust": "{count} exc. abs.",
+  "@evalCountAbsJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsNonJust": "{count} unexc. abs.",
+  "@evalCountAbsNonJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalStatutNotee": "Graded",
+  "evalStatutEnAttente": "Pending",
+  "evalStatutAbsJust": "Exc. abs.",
+  "evalStatutAbsNonJust": "Unexc. abs.",
+  "evalNoteMaxError": "max {max}",
+  "@evalNoteMaxError": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalAbsenceJustifieTooltip": "Excused absence",
+  "evalAbsenceNonJustifieTooltip": "Unexcused absence",
+  "evalFocusClear": "Clear · pending",
+  "evalFocusPrevious": "Previous",
+  "evalFocusNext": "Next",
+  "evalFocusLast": "Last student",
+  "evalFocusPosition": "Student {index} / {total}",
+  "@evalFocusPosition": {
+    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveCounter": "{done} / {total} entered",
+  "@evalSaveCounter": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveErrorsAlert": "{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}",
+  "@evalSaveErrorsAlert": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalSaveButton": "Save grades",
+  "evalSaveButtonSaving": "Saving…",
+  "evalSaveSuccessToast": "Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
+  "@evalSaveSuccessToast": {
+    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+  },
+  "evalSaveErrorToast": "Saving failed. Your entries are kept.",
+  "evalSaisieEmptyTitle": "No students",
+  "evalSaisieEmptyDescription": "No students are enrolled in this class.",
+  "evalSaisieLoadingA11y": "Loading grade entry",
+  "evalSaisieErrorNetworkMessage": "You appear to be offline. Check your connection, then try again.",
+  "evalSaisieErrorUnauthorizedMessage": "Your session has expired. Sign in again to enter grades.",
+  "evalSaisieErrorForbiddenMessage": "You don't have the required permissions to enter these grades.",
+  "evalSaisieErrorServerMessage": "Something went wrong on our side. Try again in a moment.",
+  "evalSaisieErrorUnknownMessage": "An unexpected error occurred while loading grade entry.",
   "@subMenuDisciplinesList": {
     "description": "Disciplines list sub-menu title"
   },
@@ -1828,5 +2050,189 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "dossierNoOpenCases": "No open case",
-  "genderOther": "Other"
+  "genderOther": "Other",
+  "scheduleErrorNoTeacher": "No teacher is linked to your account.",
+  "scheduleErrorConflict": "This time slot is already taken (teacher or class).",
+  "scheduleErrorGeneric": "An error occurred while loading the timetable.",
+  "scheduleEmpty": "No session scheduled.",
+  "scheduleEyebrow": "Courses",
+  "scheduleTitle": "My timetable",
+  "scheduleViewWeek": "Week",
+  "scheduleViewDay": "Day",
+  "scheduleViewToggleSemantics": "Switch between Week and Day view",
+  "scheduleWeekTitle": "Typical week",
+  "scheduleLoadSummary": "{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class",
+  "@scheduleLoadSummary": {
+    "description": "Weekly load counter: number of sessions and total teaching hours.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "hours": { "type": "double", "format": "decimalPattern" }
+    }
+  },
+  "scheduleToday": "today",
+  "scheduleTodaySemantics": "Today",
+  "scheduleBreak": "Break",
+  "scheduleLoadingSemantics": "Loading the timetable",
+  "scheduleEmptyDescription": "No slot is scheduled for you this week. The timetable is managed by the academic office.",
+  "scheduleEmptyDayTitle": "No class this day",
+  "scheduleEmptyDayDescription": "No session is scheduled on {day}.",
+  "@scheduleEmptyDayDescription": {
+    "description": "Day view empty state, with the selected day.",
+    "placeholders": {
+      "day": { "type": "String" }
+    }
+  },
+  "scheduleWeekdayLongMon": "Monday",
+  "scheduleWeekdayLongTue": "Tuesday",
+  "scheduleWeekdayLongWed": "Wednesday",
+  "scheduleWeekdayLongThu": "Thursday",
+  "scheduleWeekdayLongFri": "Friday",
+  "scheduleWeekdayLongSat": "Saturday",
+  "scheduleWeekdayShortMon": "Mon",
+  "scheduleWeekdayShortTue": "Tue",
+  "scheduleWeekdayShortWed": "Wed",
+  "scheduleWeekdayShortThu": "Thu",
+  "scheduleWeekdayShortFri": "Fri",
+  "scheduleWeekdayShortSat": "Sat",
+  "scheduleErrorNetworkTitle": "Connection lost",
+  "scheduleErrorNetworkMessage": "We couldn't reach the server. Check your connection and try again.",
+  "scheduleErrorUnauthorizedTitle": "Session expired",
+  "scheduleErrorUnauthorizedMessage": "Your session has expired. Reconnect to view the timetable.",
+  "scheduleErrorForbiddenTitle": "Access denied",
+  "scheduleErrorForbiddenMessage": "You don't have permission to view this timetable. Contact your administrator.",
+  "scheduleErrorServerTitle": "Server error",
+  "scheduleErrorServerMessage": "Something went wrong on the server. Try again in a moment.",
+  "scheduleErrorUnknownTitle": "Something went wrong",
+  "scheduleErrorUnknownMessage": "The timetable can't be loaded right now. Try again.",
+  "scheduleErrorRetry": "Retry",
+  "scheduleErrorReconnect": "Reconnect",
+  "scheduleErrorContactAdmin": "Contact administrator",
+  "scheduleErrorIncidentCode": "Incident code: {code}",
+  "@scheduleErrorIncidentCode": {
+    "description": "Incident code shown under a server (500) error.",
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "menuResultats": "Results",
+  "subMenuResultatsClasse": "Results by class",
+
+  "resultatsSearchEyebrow": "Results",
+  "resultatsSearchTitle": "Search results",
+  "resultatsSearchModeSemantics": "Search mode",
+  "resultatsSearchByClass": "By class",
+  "resultatsSearchByStudent": "By student",
+  "resultatsSearchActionClasse": "Show results",
+  "resultatsSearchActionEleve": "Find the student",
+  "resultatsFieldLastName": "Last name",
+  "resultatsFieldMiddleName": "Middle name",
+  "resultatsFieldFirstName": "First name(s)",
+  "resultatsFieldClassroom": "Class",
+
+  "resultatsDecoupageTrimestres": "Terms",
+  "resultatsDecoupageSemestres": "Semesters",
+  "resultatsDecoupagePeriodes": "Periods",
+  "resultatsPeriodShortTrimestre": "T{ordre}",
+  "@resultatsPeriodShortTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodShortSemestre": "S{ordre}",
+  "@resultatsPeriodShortSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodShortGeneric": "P{ordre}",
+  "@resultatsPeriodShortGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongTrimestre": "Term {ordre}",
+  "@resultatsPeriodLongTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongSemestre": "Semester {ordre}",
+  "@resultatsPeriodLongSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongGeneric": "Period {ordre}",
+  "@resultatsPeriodLongGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsSubPeriodColumn": "P{ordre}",
+  "@resultatsSubPeriodColumn": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodsError": "Unable to load periods.",
+  "resultatsPeriodsEmpty": "No period available.",
+
+  "resultatsGenderMale": "Boy",
+  "resultatsGenderFemale": "Girl",
+  "resultatsGenderOther": "Other",
+  "resultatsDash": "—",
+  "resultatsPercentValue": "{value}%",
+  "@resultatsPercentValue": { "placeholders": { "value": { "type": "int" } } },
+  "resultatsNoteOverMax": "{note}/{max}",
+  "@resultatsNoteOverMax": { "placeholders": { "note": { "type": "String" }, "max": { "type": "String" } } },
+  "resultatsPlaceValue": "{place} / {total}",
+  "@resultatsPlaceValue": { "placeholders": { "place": { "type": "int" }, "total": { "type": "int" } } },
+  "resultatsDeltaPts": "{value} pts",
+  "@resultatsDeltaPts": { "placeholders": { "value": { "type": "String" } } },
+
+  "resultatsColumnRank": "#",
+  "resultatsColumnEleve": "Student",
+  "resultatsColumnMoyenne": "Average {period}",
+  "@resultatsColumnMoyenne": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsNonClasseBadge": "Unranked",
+
+  "resultatsSummaryAverageCaption": "Average · {period}",
+  "@resultatsSummaryAverageCaption": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsSummaryReussites": "{count, plural, =0{0 passing} =1{1 passing} other{{count} passing}}",
+  "@resultatsSummaryReussites": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryEchecs": "{count, plural, =0{0 failing} =1{1 failing} other{{count} failing}}",
+  "@resultatsSummaryEchecs": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryNonClasses": "{count, plural, =0{0 unranked} =1{1 unranked} other{{count} unranked}}",
+  "@resultatsSummaryNonClasses": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryFootnote": "{effectif} students · pass threshold {seuil}%",
+  "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
+
+  "resultatsEleveResultsCount": "{count, plural, =1{1 student found} other{{count} students found}}",
+  "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
+
+  "resultatsFocusClassroom": "Class {classroom}",
+  "@resultatsFocusClassroom": { "placeholders": { "classroom": { "type": "String" } } },
+  "resultatsFocusBack": "Back to class view",
+  "resultatsFocusAnnualAverage": "Annual average",
+  "resultatsFocusRankOf": "of {count} ranked",
+  "@resultatsFocusRankOf": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsFocusNoBulletin": "Student unranked for this period: no detailed report.",
+
+  "resultatsProgressionTitle": "Progress over the year",
+  "resultatsProgressionPointLabel": "P{index}",
+  "@resultatsProgressionPointLabel": { "placeholders": { "index": { "type": "int" } } },
+  "resultatsStrengthsTitle": "Strengths",
+  "resultatsWeaknessesTitle": "To improve",
+
+  "resultatsOfficialBulletinTitle": "Official report card",
+  "resultatsOfficialBulletinSubtitle": "Domains & subjects, coursework + exam marks, maxima, rank — printable national template.",
+  "resultatsComingSoon": "Coming soon",
+
+  "resultatsBulletinTitle": "Report by domain · {period}",
+  "@resultatsBulletinTitle": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsBulletinLegend": "mark / maximum",
+  "resultatsBulletinSubtotal": "Subtotal",
+  "resultatsBulletinTotal": "Totals obtained",
+
+  "resultatsSynthesePercent": "Percentage",
+  "resultatsSynthesePlace": "Rank",
+  "resultatsSyntheseApplication": "Application",
+  "resultatsSyntheseConduite": "Conduct",
+
+  "resultatsIdleTitle": "Choose a class or a student",
+  "resultatsIdleDescription": "Select a cycle, a level and a class, then a period to display the results.",
+  "resultatsLoadingSemantics": "Loading results",
+  "resultatsEmptyClasse": "No students to display for this class.",
+  "resultatsEmptyClasseTitle": "No results for this class",
+  "resultatsEmptyEleveTitle": "No students found",
+  "resultatsEmptyEleveDescription": "Check the spelling of the last, middle or first name, or broaden your search.",
+  "resultatsEmptyAdjustAction": "Adjust search",
+
+  "resultatsErrorRetry": "Try again",
+  "resultatsErrorReconnect": "Sign in again",
+  "resultatsErrorContactAdmin": "Contact the administrator",
+  "resultatsErrorIncidentCode": "Incident code: {code}",
+  "@resultatsErrorIncidentCode": { "placeholders": { "code": { "type": "String" } } },
+  "resultatsErrorNetworkTitle": "Connection lost",
+  "resultatsErrorNetworkMessage": "Check your internet connection and try again.",
+  "resultatsErrorUnauthorizedTitle": "Session expired",
+  "resultatsErrorUnauthorizedMessage": "Your session has expired. Sign in again to continue.",
+  "resultatsErrorForbiddenTitle": "Access denied",
+  "resultatsErrorForbiddenMessage": "You don't have the required permissions to view these results.",
+  "resultatsErrorServerTitle": "Server error",
+  "resultatsErrorServerMessage": "Something went wrong on our side. Please try again shortly.",
+  "resultatsErrorUnknownTitle": "Something went wrong",
+  "resultatsErrorUnknownMessage": "An unexpected problem occurred. Please try again."
 }

@@ -196,4 +196,29 @@ class AppColors {
   static const relationshipAunt = Color(0xFF7E57C2);
   static const relationshipGrandparent = Color(0xFF00897B);
   static const relationshipOther = Color(0xFF546E7A);
+
+  // Academics — détail d'un cours (spec Détail-Cours).
+  // Types d'évaluation : interro = info · devoir = terre-cuite · examen = violet
+  // académique (avec leurs voiles doux pour les carrés de type).
+  static const academicsInterro = info;
+  static const academicsInterroSoft = Color(0xFFEAF3F7);
+  static const academicsDevoir = terreCuite;
+  static const academicsDevoirSoft = Color(0xFFF8EEE7);
+  static const academicsExamen = Color(0xFF7B1FA2);
+  static const academicsExamenSoft = Color(0xFFF4EAF8);
+  // Statut d'une période / sous-période / examen : clôturée = vert · en cours =
+  // ambre · à venir = neutre (réutilise les sémantiques + voiles doux).
+  static const academicsStatutClosed = vertSavane;
+  static const academicsStatutClosedSoft = Color(0xFFEBF2ED);
+  static const academicsStatutCurrent = warning;
+  static const academicsStatutCurrentSoft = Color(0xFFFBF1DF);
+  static const academicsStatutUpcoming = textMuted;
+  static const academicsStatutUpcomingSoft = surfaceAlt;
+  // Tonalité de la note globale : < 50 % échec · 50–59 % fragile · ≥ 60 % bonne.
+  static const academicsScoreFail = error;
+  static const academicsScoreFailSoft = Color(0xFFFBEAE7);
+  static const academicsScoreWeak = warning;
+  static const academicsScoreWeakSoft = Color(0xFFFBF1DF);
+  static const academicsScoreGood = vertSavane;
+  static const academicsScoreGoodSoft = Color(0xFFEBF2ED);
 }

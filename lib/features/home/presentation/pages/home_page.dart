@@ -25,6 +25,12 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_f
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/features/academics/presentation/pages/courses_coordinator_page.dart';
+import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
+import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
+import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_feature_scope.dart';
+import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_coordinator_page.dart';
+import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
@@ -160,7 +166,10 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
         state.selectedSubMenuId == MenuConstants.disciplinesListId ||
-        state.selectedSubMenuId == MenuConstants.disciplinesDashboardId;
+        state.selectedSubMenuId == MenuConstants.disciplinesDashboardId ||
+        state.selectedSubMenuId == MenuConstants.myCoursesId ||
+        state.selectedSubMenuId == MenuConstants.timetableId ||
+        state.selectedSubMenuId == MenuConstants.resultatsClasseId;
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -294,6 +303,12 @@ class _HomePageView extends StatelessWidget {
         return const AttendanceOverviewDashboardScope(
           child: AttendanceOverviewDashboardPage(),
         );
+      case MenuConstants.myCoursesId:
+        return const CoursesFeatureScope(child: CoursesCoordinatorPage());
+      case MenuConstants.timetableId:
+        return const ScheduleFeatureScope(child: ScheduleCoordinatorPage());
+      case MenuConstants.resultatsClasseId:
+        return const ResultatsFeatureScope(child: ResultatsCoordinatorPage());
       default:
         return Container(
           width: double.infinity,

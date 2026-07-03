@@ -26,6 +26,42 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/attend
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/notation_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/notation_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/create_evaluation_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_cours_notation_detail_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_my_courses_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/saisir_note_usecase.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/evaluation_notes_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_bloc.dart';
+import 'package:school_app_flutter/features/resultats/data/datasources/resultats_remote_data_source.dart';
+import 'package:school_app_flutter/features/resultats/data/repositories/resultats_repository_impl.dart';
+import 'package:school_app_flutter/features/resultats/domain/repositories/resultats_repository.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_periodes_scolaires_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_resultat_focus_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_resultats_classe_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/search_roster_usecase.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/eleve_search_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/periodes_scolaires_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/resultat_focus_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/resultats_classe_bloc.dart';
+import 'package:school_app_flutter/features/schedule/data/datasources/schedule_remote_data_source.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
+import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/create_session_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/create_time_slot_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/delete_session_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/get_classroom_grid_usecase.dart';
+import 'package:school_app_flutter/features/schedule/domain/usecases/get_my_timetable_usecase.dart';
+import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_edit_bloc.dart';
+import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -204,6 +240,15 @@ Future<void> configureDependencies({
                 requestOptions: e.requestOptions,
                 response: e.response,
                 error: const NotFoundFailure('Resource not found'),
+                type: e.type,
+              ),
+            );
+          } else if (e.response?.statusCode == 409) {
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: const ConflictFailure('Conflict'),
                 type: e.type,
               ),
             );
@@ -845,6 +890,174 @@ Future<void> configureDependencies({
       getDisciplinaryCaseDetailUseCase:
           getIt<GetDisciplinaryCaseDetailUseCase>(),
       createDisciplinaryCaseUseCase: getIt<CreateDisciplinaryCaseUseCase>(),
+    ),
+  );
+
+  // ── Academics (cours de l'enseignant connecté) ──────────────────────────────
+  getIt.registerLazySingleton<CourseRemoteDataSource>(
+    () => CourseRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<CourseRepository>(
+    () => CourseRepositoryImpl(
+      remoteDataSource: getIt<CourseRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetMyCoursesUseCase>(
+    () => GetMyCoursesUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<GetCoursNotationDetailUseCase>(
+    () => GetCoursNotationDetailUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<CreateEvaluationUseCase>(
+    () => CreateEvaluationUseCase(getIt<CourseRepository>()),
+  );
+
+  getIt.registerFactory<CourseBloc>(
+    () => CourseBloc(getMyCoursesUseCase: getIt<GetMyCoursesUseCase>()),
+  );
+
+  getIt.registerFactory<CoursNotationBloc>(
+    () => CoursNotationBloc(
+      getCoursNotationDetailUseCase: getIt<GetCoursNotationDetailUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<CreateEvaluationBloc>(
+    () => CreateEvaluationBloc(
+      createEvaluationUseCase: getIt<CreateEvaluationUseCase>(),
+    ),
+  );
+
+  // ── Academics — Notation : saisie des notes (grille + PUT par élève) ────────
+  // Réutilise le CourseRemoteDataSource déjà enregistré ci-dessus.
+  getIt.registerLazySingleton<NotationRepository>(
+    () => NotationRepositoryImpl(
+      remoteDataSource: getIt<CourseRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetNotesElevesUseCase>(
+    () => GetNotesElevesUseCase(getIt<NotationRepository>()),
+  );
+
+  getIt.registerFactory<SaisirNoteUseCase>(
+    () => SaisirNoteUseCase(getIt<NotationRepository>()),
+  );
+
+  getIt.registerFactory<SaisieNotesBloc>(
+    () => SaisieNotesBloc(
+      getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+      saisirNoteUseCase: getIt<SaisirNoteUseCase>(),
+    ),
+  );
+
+  // ── Academics — Notation : consultation des notes par élève (lecture seule) ─
+  // Réutilise GetNotesElevesUseCase (même endpoint que la grille de saisie) ;
+  // l'en-tête Evaluation est fourni par l'écran appelant, pas rechargé ici.
+  getIt.registerFactory<EvaluationNotesBloc>(
+    () => EvaluationNotesBloc(
+      getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+    ),
+  );
+
+  // ── Schedule (emploi du temps — endpoints authentifiés) ─────────────────────
+  getIt.registerLazySingleton<ScheduleRemoteDataSource>(
+    () => ScheduleRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ScheduleRepository>(
+    () => ScheduleRepositoryImpl(
+      remoteDataSource: getIt<ScheduleRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetMyTimetableUseCase>(
+    () => GetMyTimetableUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<GetClassroomGridUseCase>(
+    () => GetClassroomGridUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<CreateTimeSlotUseCase>(
+    () => CreateTimeSlotUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<CreateSessionUseCase>(
+    () => CreateSessionUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<DeleteSessionUseCase>(
+    () => DeleteSessionUseCase(getIt<ScheduleRepository>()),
+  );
+
+  getIt.registerFactory<TimetableBloc>(
+    () => TimetableBloc(
+      getMyTimetable: getIt<GetMyTimetableUseCase>(),
+      getClassroomGrid: getIt<GetClassroomGridUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<ScheduleEditBloc>(
+    () => ScheduleEditBloc(
+      createTimeSlot: getIt<CreateTimeSlotUseCase>(),
+      createSession: getIt<CreateSessionUseCase>(),
+      deleteSession: getIt<DeleteSessionUseCase>(),
+    ),
+  );
+
+  // ── Résultats par classe (lecture seule — endpoints authentifiés) ───────────
+  getIt.registerLazySingleton<ResultatsRemoteDataSource>(
+    () => ResultatsRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ResultatsRepository>(
+    () => ResultatsRepositoryImpl(
+      remoteDataSource: getIt<ResultatsRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetResultatsClasseUseCase>(
+    () => GetResultatsClasseUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<GetResultatFocusUseCase>(
+    () => GetResultatFocusUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<SearchRosterUseCase>(
+    () => SearchRosterUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<GetPeriodesScolairesUseCase>(
+    () => GetPeriodesScolairesUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<ResultatsClasseBloc>(
+    () => ResultatsClasseBloc(
+      getResultatsClasse: getIt<GetResultatsClasseUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<ResultatFocusBloc>(
+    () => ResultatFocusBloc(getResultatFocus: getIt<GetResultatFocusUseCase>()),
+  );
+
+  getIt.registerFactory<EleveSearchBloc>(
+    () => EleveSearchBloc(searchRoster: getIt<SearchRosterUseCase>()),
+  );
+
+  getIt.registerFactory<PeriodesScolairesBloc>(
+    () => PeriodesScolairesBloc(
+      getPeriodesScolaires: getIt<GetPeriodesScolairesUseCase>(),
     ),
   );
 }

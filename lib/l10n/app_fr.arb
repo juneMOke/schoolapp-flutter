@@ -333,6 +333,228 @@
   "subMenuClassesList": "Listes de classe",
   "subMenuAttendance": "Présences",
   "subMenuDisciplinesList": "Disciplines",
+  "menuCourses": "Cours",
+  "subMenuMyCourses": "Mes cours",
+  "subMenuTimetable": "Emploi du temps",
+  "myCoursesCount": "{classCount, plural, =1{1 classe} other{{classCount} classes}} · {courseCount, plural, =1{1 cours} other{{courseCount} cours}}",
+  "@myCoursesCount": {
+    "placeholders": {
+      "classCount": { "type": "int" },
+      "courseCount": { "type": "int" }
+    }
+  },
+  "myCoursesExpandAll": "Tout déplier",
+  "myCoursesCollapseAll": "Tout replier",
+  "myCoursesClassCourseCount": "{count, plural, =1{1 cours} other{{count} cours}}",
+  "@myCoursesClassCourseCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesStudentCount": "{count, plural, =0{Aucun élève} =1{1 élève} other{{count} élèves}}",
+  "@myCoursesStudentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "myCoursesLoadingA11yLabel": "Chargement de vos cours",
+  "myCoursesEmptyTitle": "Aucun cours affecté",
+  "myCoursesEmptyDescription": "Aucun cours ne vous est rattaché pour le moment. Les cours que vous enseignez apparaîtront ici, regroupés par classe.",
+  "myCoursesErrorNetworkTitle": "Pas de connexion",
+  "myCoursesErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis réessayez.",
+  "myCoursesErrorUnauthorizedTitle": "Session expirée",
+  "myCoursesErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour consulter vos cours.",
+  "myCoursesErrorForbiddenTitle": "Accès refusé",
+  "myCoursesErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter ces cours.",
+  "myCoursesErrorServerTitle": "Erreur du serveur",
+  "myCoursesErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "myCoursesErrorUnknownTitle": "Chargement impossible",
+  "myCoursesErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de vos cours.",
+  "myCoursesErrorRetry": "Réessayer",
+  "myCoursesErrorReconnect": "Se reconnecter",
+  "myCoursesErrorContactAdmin": "Contacter l'administrateur",
+  "myCoursesErrorIncidentCode": "Code incident : {code}",
+  "@myCoursesErrorIncidentCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "courseDetailBackToCourses": "Mes cours",
+  "courseDetailEvaluationCount": "{count, plural, =0{Aucune évaluation} =1{1 évaluation} other{{count} évaluations}}",
+  "@courseDetailEvaluationCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailToGrade": "{count, plural, =1{1 à saisir} other{{count} à saisir}}",
+  "@courseDetailToGrade": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailNextEvalEyebrow": "Prochaine évaluation",
+  "courseDetailEvalMetaShort": "{date} · /{max} pts",
+  "@courseDetailEvalMetaShort": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+  },
+  "courseDetailEvalMeta": "{date} · /{max} pts · poids {poids}",
+  "@courseDetailEvalMeta": {
+    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+  },
+  "courseDetailSemesterLabel": "Semestre {ordre}",
+  "@courseDetailSemesterLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailTrimesterLabel": "Trimestre {ordre}",
+  "@courseDetailTrimesterLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailPeriodLabel": "Période {ordre}",
+  "@courseDetailPeriodLabel": {
+    "placeholders": { "ordre": { "type": "int" } }
+  },
+  "courseDetailExamLabel": "Examen",
+  "courseDetailStatutClosed": "Clôturée",
+  "courseDetailStatutCurrent": "En cours",
+  "courseDetailStatutUpcoming": "À venir",
+  "courseDetailBucketNotes": "{saisies}/{total} notes · {evals, plural, =1{1 éval.} other{{evals} éval.}}",
+  "@courseDetailBucketNotes": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+  },
+  "courseDetailBucketNoEval": "Aucune évaluation",
+  "courseDetailExamToPlan": "À planifier",
+  "courseDetailNoteGlobaleTitle": "Note globale — {label}",
+  "@courseDetailNoteGlobaleTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailProvisional": "provisoire",
+  "courseDetailClassAverageLabel": "Moyenne de classe",
+  "courseDetailAbove50": "{count}/{total} élèves ≥ 50 %",
+  "@courseDetailAbove50": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailNoAverage": "Pas encore de moyenne",
+  "courseDetailByStudent": "Par élève",
+  "courseDetailBadgeGraded": "Notée",
+  "courseDetailBadgeInProgress": "En cours · {saisies}/{total}",
+  "@courseDetailBadgeInProgress": {
+    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "courseDetailBadgeUpcoming": "À venir",
+  "courseDetailEvalExpected": "{count, plural, =1{1 élève attendu} other{{count} élèves attendus}}",
+  "@courseDetailEvalExpected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "courseDetailReleveTitle": "Notes globales — {label}",
+  "@courseDetailReleveTitle": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "courseDetailReleveKpiAverage": "Moyenne",
+  "courseDetailReleveKpiAbove50": "≥ 50 %",
+  "courseDetailReleveKpiEvals": "Évals",
+  "courseDetailSortRanking": "Classement",
+  "courseDetailSortAlpha": "Alphabétique",
+  "courseDetailReleveMethod": "Note globale = points obtenus ÷ maximum, pondérés par le poids.",
+  "courseDetailReleveEmpty": "Aucune note saisie",
+  "courseDetailLoadingA11yLabel": "Chargement du cours",
+  "courseDetailEmptyTitle": "Aucune évaluation",
+  "courseDetailEmptyDescription": "Ce cours n'a pas encore d'évaluation.",
+  "courseDetailBucketEmptyUpcoming": "Sélection à venir — aucune évaluation planifiée pour l'instant.",
+  "courseDetailBucketEmptyNone": "Aucune évaluation rattachée à cette sélection.",
+  "courseDetailErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.",
+  "courseDetailErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour consulter ce cours.",
+  "courseDetailErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter ce cours.",
+  "courseDetailErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "courseDetailErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement du cours.",
+  "courseDetailErrorNotFoundTitle": "Cours introuvable",
+  "courseDetailErrorNotFoundMessage": "Ce cours n'existe plus ou n'est pas accessible.",
+  "evalTypeInterro": "Interrogation",
+  "evalTypeDevoir": "Devoir",
+  "evalTypeExamen": "Examen",
+  "evalCreateTitle": "Nouvelle évaluation",
+  "evalCreateFieldSemestre": "Semestre",
+  "evalCreateFieldTrimestre": "Trimestre",
+  "evalCreateFieldSousPeriode": "Période",
+  "evalCreateExamPlaceholder": "Examen semestriel",
+  "evalCreateFieldDate": "Date",
+  "evalCreateFieldDateHint": "jj/mm/aaaa",
+  "evalCreateFieldMax": "Maximum",
+  "evalCreateFieldPoids": "Poids",
+  "evalCreateFieldChapitres": "Chapitres concernés",
+  "evalCreateChapitresComingSoon": "Bientôt disponible",
+  "evalCreateCancel": "Annuler",
+  "evalCreateSubmit": "Créer l'évaluation",
+  "evalCreateHint": "{count, plural, =1{L'élève de {classroom} sera ajouté} other{Les {count} élèves de {classroom} seront ajoutés}} avec le statut « En attente ».",
+  "@evalCreateHint": {
+    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+  },
+  "evalCreateSuccessToast": "Évaluation créée",
+  "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
+  "evalCreateClosedPeriodError": "Période clôturée : impossible d'y ajouter une évaluation.",
+  "evalDetailBack": "Retour au cours",
+  "evalBadgeComplete": "Clôturée",
+  "evalBadgePartial": "Saisie en cours · {done}/{total}",
+  "@evalBadgePartial": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalBadgeUpcoming": "À venir",
+  "evalChipMax": "Maximum : {max} pts",
+  "@evalChipMax": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalChipPoids": "Poids : {poids}",
+  "@evalChipPoids": {
+    "placeholders": { "poids": { "type": "int" } }
+  },
+  "evalModeTable": "Tableau",
+  "evalModeFocus": "Focus",
+  "evalCountNotee": "{count, plural, =1{{count} notée} other{{count} notées}}",
+  "@evalCountNotee": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountEnAttente": "{count} en attente",
+  "@evalCountEnAttente": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsJust": "{count} abs. just.",
+  "@evalCountAbsJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalCountAbsNonJust": "{count} abs. non just.",
+  "@evalCountAbsNonJust": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalStatutNotee": "Notée",
+  "evalStatutEnAttente": "En attente",
+  "evalStatutAbsJust": "Abs. just.",
+  "evalStatutAbsNonJust": "Abs. non just.",
+  "evalNoteMaxError": "max {max}",
+  "@evalNoteMaxError": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "evalAbsenceJustifieTooltip": "Absence justifiée",
+  "evalAbsenceNonJustifieTooltip": "Absence non justifiée",
+  "evalFocusClear": "Effacer · en attente",
+  "evalFocusPrevious": "Précédent",
+  "evalFocusNext": "Suivant",
+  "evalFocusLast": "Dernier élève",
+  "evalFocusPosition": "Élève {index} / {total}",
+  "@evalFocusPosition": {
+    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveCounter": "{done} / {total} saisies",
+  "@evalSaveCounter": {
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "evalSaveErrorsAlert": "{count, plural, =1{1 note au-dessus du maximum} other{{count} notes au-dessus du maximum}}",
+  "@evalSaveErrorsAlert": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "evalSaveButton": "Enregistrer les notes",
+  "evalSaveButtonSaving": "Enregistrement…",
+  "evalSaveSuccessToast": "Notes enregistrées — {notees, plural, =1{{notees} notée} other{{notees} notées}} · {enAttente} en attente",
+  "@evalSaveSuccessToast": {
+    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+  },
+  "evalSaveErrorToast": "Échec de l'enregistrement. Vos saisies sont conservées.",
+  "evalSaisieEmptyTitle": "Aucun élève",
+  "evalSaisieEmptyDescription": "Aucun élève n'est inscrit dans cette classe.",
+  "evalSaisieLoadingA11y": "Chargement de la saisie des notes",
+  "evalSaisieErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.",
+  "evalSaisieErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour saisir les notes.",
+  "evalSaisieErrorForbiddenMessage": "Vous n'avez pas les droits requis pour saisir ces notes.",
+  "evalSaisieErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "evalSaisieErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de la saisie.",
   "profile": "Profil",
   "settings": "Paramètres",
   "home": "Accueil",
@@ -1831,5 +2053,189 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "dossierNoOpenCases": "Aucun cas ouvert",
-  "genderOther": "Autre"
+  "genderOther": "Autre",
+  "scheduleErrorNoTeacher": "Aucun enseignant n'est lié à votre compte.",
+  "scheduleErrorConflict": "Ce créneau est déjà occupé (enseignant ou classe).",
+  "scheduleErrorGeneric": "Une erreur est survenue lors du chargement de l'emploi du temps.",
+  "scheduleEmpty": "Aucune séance planifiée.",
+  "scheduleEyebrow": "Cours",
+  "scheduleTitle": "Mon emploi du temps",
+  "scheduleViewWeek": "Semaine",
+  "scheduleViewDay": "Jour",
+  "scheduleViewToggleSemantics": "Basculer entre la vue Semaine et la vue Jour",
+  "scheduleWeekTitle": "Semaine type",
+  "scheduleLoadSummary": "{count, plural, =1{{count} séance} other{{count} séances}} · {hours} h de cours",
+  "@scheduleLoadSummary": {
+    "description": "Compteur de charge de la semaine : nombre de séances et heures de cours cumulées.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "hours": { "type": "double", "format": "decimalPattern" }
+    }
+  },
+  "scheduleToday": "auj.",
+  "scheduleTodaySemantics": "Aujourd'hui",
+  "scheduleBreak": "Récréation",
+  "scheduleLoadingSemantics": "Chargement de l'emploi du temps",
+  "scheduleEmptyDescription": "Aucun créneau n'est planifié pour vous cette semaine. L'emploi du temps est géré par la direction des études.",
+  "scheduleEmptyDayTitle": "Aucun cours ce jour",
+  "scheduleEmptyDayDescription": "Aucune séance n'est planifiée le {day}.",
+  "@scheduleEmptyDayDescription": {
+    "description": "État vide de la vue Jour, avec le jour sélectionné.",
+    "placeholders": {
+      "day": { "type": "String" }
+    }
+  },
+  "scheduleWeekdayLongMon": "Lundi",
+  "scheduleWeekdayLongTue": "Mardi",
+  "scheduleWeekdayLongWed": "Mercredi",
+  "scheduleWeekdayLongThu": "Jeudi",
+  "scheduleWeekdayLongFri": "Vendredi",
+  "scheduleWeekdayLongSat": "Samedi",
+  "scheduleWeekdayShortMon": "Lun.",
+  "scheduleWeekdayShortTue": "Mar.",
+  "scheduleWeekdayShortWed": "Mer.",
+  "scheduleWeekdayShortThu": "Jeu.",
+  "scheduleWeekdayShortFri": "Ven.",
+  "scheduleWeekdayShortSat": "Sam.",
+  "scheduleErrorNetworkTitle": "Connexion interrompue",
+  "scheduleErrorNetworkMessage": "Impossible de joindre le serveur. Vérifiez votre connexion, puis réessayez.",
+  "scheduleErrorUnauthorizedTitle": "Session expirée",
+  "scheduleErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour consulter l'emploi du temps.",
+  "scheduleErrorForbiddenTitle": "Accès refusé",
+  "scheduleErrorForbiddenMessage": "Vous n'avez pas les droits pour consulter cet emploi du temps. Contactez l'administrateur.",
+  "scheduleErrorServerTitle": "Erreur serveur",
+  "scheduleErrorServerMessage": "Une erreur est survenue côté serveur. Réessayez dans un instant.",
+  "scheduleErrorUnknownTitle": "Une erreur est survenue",
+  "scheduleErrorUnknownMessage": "Impossible de charger l'emploi du temps pour le moment. Réessayez.",
+  "scheduleErrorRetry": "Réessayer",
+  "scheduleErrorReconnect": "Se reconnecter",
+  "scheduleErrorContactAdmin": "Contacter l'administrateur",
+  "scheduleErrorIncidentCode": "Code incident : {code}",
+  "@scheduleErrorIncidentCode": {
+    "description": "Code d'incident affiché sous une erreur serveur (500).",
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "menuResultats": "Résultats",
+  "subMenuResultatsClasse": "Résultats par classe",
+
+  "resultatsSearchEyebrow": "Résultats",
+  "resultatsSearchTitle": "Rechercher des résultats",
+  "resultatsSearchModeSemantics": "Mode de recherche",
+  "resultatsSearchByClass": "Par classe",
+  "resultatsSearchByStudent": "Par élève",
+  "resultatsSearchActionClasse": "Afficher les résultats",
+  "resultatsSearchActionEleve": "Retrouver l'élève",
+  "resultatsFieldLastName": "Nom",
+  "resultatsFieldMiddleName": "Postnom",
+  "resultatsFieldFirstName": "Prénom(s)",
+  "resultatsFieldClassroom": "Classe",
+
+  "resultatsDecoupageTrimestres": "Trimestres",
+  "resultatsDecoupageSemestres": "Semestres",
+  "resultatsDecoupagePeriodes": "Périodes",
+  "resultatsPeriodShortTrimestre": "T{ordre}",
+  "@resultatsPeriodShortTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodShortSemestre": "S{ordre}",
+  "@resultatsPeriodShortSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodShortGeneric": "P{ordre}",
+  "@resultatsPeriodShortGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongTrimestre": "Trimestre {ordre}",
+  "@resultatsPeriodLongTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongSemestre": "Semestre {ordre}",
+  "@resultatsPeriodLongSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodLongGeneric": "Période {ordre}",
+  "@resultatsPeriodLongGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsSubPeriodColumn": "P{ordre}",
+  "@resultatsSubPeriodColumn": { "placeholders": { "ordre": { "type": "int" } } },
+  "resultatsPeriodsError": "Impossible de charger les périodes.",
+  "resultatsPeriodsEmpty": "Aucune période disponible.",
+
+  "resultatsGenderMale": "Garçon",
+  "resultatsGenderFemale": "Fille",
+  "resultatsGenderOther": "Autre",
+  "resultatsDash": "—",
+  "resultatsPercentValue": "{value} %",
+  "@resultatsPercentValue": { "placeholders": { "value": { "type": "int" } } },
+  "resultatsNoteOverMax": "{note}/{max}",
+  "@resultatsNoteOverMax": { "placeholders": { "note": { "type": "String" }, "max": { "type": "String" } } },
+  "resultatsPlaceValue": "{place} / {total}",
+  "@resultatsPlaceValue": { "placeholders": { "place": { "type": "int" }, "total": { "type": "int" } } },
+  "resultatsDeltaPts": "{value} pts",
+  "@resultatsDeltaPts": { "placeholders": { "value": { "type": "String" } } },
+
+  "resultatsColumnRank": "#",
+  "resultatsColumnEleve": "Élève",
+  "resultatsColumnMoyenne": "Moyenne {period}",
+  "@resultatsColumnMoyenne": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsNonClasseBadge": "Non classé",
+
+  "resultatsSummaryAverageCaption": "Moyenne · {period}",
+  "@resultatsSummaryAverageCaption": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsSummaryReussites": "{count, plural, =0{0 réussite} =1{1 réussite} other{{count} réussites}}",
+  "@resultatsSummaryReussites": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryEchecs": "{count, plural, =0{0 échec} =1{1 échec} other{{count} échecs}}",
+  "@resultatsSummaryEchecs": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryNonClasses": "{count, plural, =0{0 non classé} =1{1 non classé} other{{count} non classés}}",
+  "@resultatsSummaryNonClasses": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsSummaryFootnote": "{effectif} élèves · seuil de réussite {seuil} %",
+  "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
+
+  "resultatsEleveResultsCount": "{count, plural, =1{1 élève trouvé} other{{count} élèves trouvés}}",
+  "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
+
+  "resultatsFocusClassroom": "Classe {classroom}",
+  "@resultatsFocusClassroom": { "placeholders": { "classroom": { "type": "String" } } },
+  "resultatsFocusBack": "Retour à la vue classe",
+  "resultatsFocusAnnualAverage": "Moyenne annuelle",
+  "resultatsFocusRankOf": "sur {count} classés",
+  "@resultatsFocusRankOf": { "placeholders": { "count": { "type": "int" } } },
+  "resultatsFocusNoBulletin": "Élève non classé sur cette période : pas de bulletin détaillé.",
+
+  "resultatsProgressionTitle": "Progression sur l'année",
+  "resultatsProgressionPointLabel": "P{index}",
+  "@resultatsProgressionPointLabel": { "placeholders": { "index": { "type": "int" } } },
+  "resultatsStrengthsTitle": "Points forts",
+  "resultatsWeaknessesTitle": "À renforcer",
+
+  "resultatsOfficialBulletinTitle": "Bulletin officiel",
+  "resultatsOfficialBulletinSubtitle": "Domaines & branches, notes journalières + examen, maxima, place — gabarit national imprimable.",
+  "resultatsComingSoon": "Bientôt disponible",
+
+  "resultatsBulletinTitle": "Bulletin par domaine · {period}",
+  "@resultatsBulletinTitle": { "placeholders": { "period": { "type": "String" } } },
+  "resultatsBulletinLegend": "note / maximum",
+  "resultatsBulletinSubtotal": "Sous-total",
+  "resultatsBulletinTotal": "Totaux obtenus",
+
+  "resultatsSynthesePercent": "Pourcentage",
+  "resultatsSynthesePlace": "Place",
+  "resultatsSyntheseApplication": "Application",
+  "resultatsSyntheseConduite": "Conduite",
+
+  "resultatsIdleTitle": "Choisissez une classe ou un élève",
+  "resultatsIdleDescription": "Sélectionnez un cycle, un niveau et une classe, puis une période pour afficher les résultats.",
+  "resultatsLoadingSemantics": "Chargement des résultats",
+  "resultatsEmptyClasse": "Aucun élève à afficher pour cette classe.",
+  "resultatsEmptyClasseTitle": "Aucun résultat pour cette classe",
+  "resultatsEmptyEleveTitle": "Aucun élève trouvé",
+  "resultatsEmptyEleveDescription": "Vérifiez l'orthographe du nom, du postnom ou du prénom, ou élargissez la recherche.",
+  "resultatsEmptyAdjustAction": "Ajuster la recherche",
+
+  "resultatsErrorRetry": "Réessayer",
+  "resultatsErrorReconnect": "Se reconnecter",
+  "resultatsErrorContactAdmin": "Contacter l'administrateur",
+  "resultatsErrorIncidentCode": "Code incident : {code}",
+  "@resultatsErrorIncidentCode": { "placeholders": { "code": { "type": "String" } } },
+  "resultatsErrorNetworkTitle": "Connexion interrompue",
+  "resultatsErrorNetworkMessage": "Vérifiez votre connexion internet puis réessayez.",
+  "resultatsErrorUnauthorizedTitle": "Session expirée",
+  "resultatsErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
+  "resultatsErrorForbiddenTitle": "Accès refusé",
+  "resultatsErrorForbiddenMessage": "Vous n'avez pas les droits requis pour consulter ces résultats.",
+  "resultatsErrorServerTitle": "Erreur serveur",
+  "resultatsErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
+  "resultatsErrorUnknownTitle": "Une erreur est survenue",
+  "resultatsErrorUnknownMessage": "Un problème inattendu est survenu. Réessayez."
 }

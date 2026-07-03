@@ -26,6 +26,12 @@ class ValidationFailure extends Failure {
   const ValidationFailure([super.message = 'Invalid request data']);
 }
 
+/// HTTP 409 : conflit d'état côté serveur (ex. double-booking d'un créneau
+/// d'emploi du temps pour un enseignant ou une classe).
+class ConflictFailure extends Failure {
+  const ConflictFailure([super.message = 'Conflict']);
+}
+
 class ServerFailure extends Failure {
   const ServerFailure([super.message = 'Server error occurred']);
 }

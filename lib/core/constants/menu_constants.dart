@@ -11,6 +11,8 @@ class MenuConstants {
   static const String financesMenuId = 'finances';
   static const String classesMenuId = 'classes';
   static const String disciplinesMenuId = 'disciplines';
+  static const String coursesMenuId = 'courses';
+  static const String resultatsMenuId = 'resultats';
 
   // Sub-menu IDs
   static const String inscriptionsDashboardId = 'inscriptions-dashboard';
@@ -28,4 +30,9 @@ class MenuConstants {
   static const String disciplinesDashboardId = 'disciplines-dashboard';
   static const String presencesId = 'presences';
   static const String disciplinesListId = 'disciplines-list';
+
+  static const String myCoursesId = 'my-courses';
+  static const String timetableId = 'timetable';
+
+  static const String resultatsClasseId = 'resultats-classe';
 }

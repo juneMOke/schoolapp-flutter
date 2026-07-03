@@ -229,4 +229,28 @@ class AppColors {
   static const attendanceOverviewRecordedSoft =
       tokens.AppColors.attendanceOverviewRecordedSoft;
   static const absenceReasonGold = tokens.AppColors.absenceReasonGold;
+
+  // Academics — détail d'un cours (spec Détail-Cours)
+  static const academicsInterro = tokens.AppColors.academicsInterro;
+  static const academicsInterroSoft = tokens.AppColors.academicsInterroSoft;
+  static const academicsDevoir = tokens.AppColors.academicsDevoir;
+  static const academicsDevoirSoft = tokens.AppColors.academicsDevoirSoft;
+  static const academicsExamen = tokens.AppColors.academicsExamen;
+  static const academicsExamenSoft = tokens.AppColors.academicsExamenSoft;
+  static const academicsStatutClosed = tokens.AppColors.academicsStatutClosed;
+  static const academicsStatutClosedSoft =
+      tokens.AppColors.academicsStatutClosedSoft;
+  static const academicsStatutCurrent = tokens.AppColors.academicsStatutCurrent;
+  static const academicsStatutCurrentSoft =
+      tokens.AppColors.academicsStatutCurrentSoft;
+  static const academicsStatutUpcoming =
+      tokens.AppColors.academicsStatutUpcoming;
+  static const academicsStatutUpcomingSoft =
+      tokens.AppColors.academicsStatutUpcomingSoft;
+  static const academicsScoreFail = tokens.AppColors.academicsScoreFail;
+  static const academicsScoreFailSoft = tokens.AppColors.academicsScoreFailSoft;
+  static const academicsScoreWeak = tokens.AppColors.academicsScoreWeak;
+  static const academicsScoreWeakSoft = tokens.AppColors.academicsScoreWeakSoft;
+  static const academicsScoreGood = tokens.AppColors.academicsScoreGood;
+  static const academicsScoreGoodSoft = tokens.AppColors.academicsScoreGoodSoft;
 }

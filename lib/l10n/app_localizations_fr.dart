@@ -618,6 +618,552 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuDisciplinesList => 'Disciplines';
 
   @override
+  String get menuCourses => 'Cours';
+
+  @override
+  String get subMenuMyCourses => 'Mes cours';
+
+  @override
+  String get subMenuTimetable => 'Emploi du temps';
+
+  @override
+  String myCoursesCount(int classCount, int courseCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classCount,
+      locale: localeName,
+      other: '$classCount classes',
+      one: '1 classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      courseCount,
+      locale: localeName,
+      other: '$courseCount cours',
+      one: '1 cours',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get myCoursesExpandAll => 'Tout déplier';
+
+  @override
+  String get myCoursesCollapseAll => 'Tout replier';
+
+  @override
+  String myCoursesClassCourseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours',
+      one: '1 cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String myCoursesStudentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'Aucun élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myCoursesLoadingA11yLabel => 'Chargement de vos cours';
+
+  @override
+  String get myCoursesEmptyTitle => 'Aucun cours affecté';
+
+  @override
+  String get myCoursesEmptyDescription =>
+      'Aucun cours ne vous est rattaché pour le moment. Les cours que vous enseignez apparaîtront ici, regroupés par classe.';
+
+  @override
+  String get myCoursesErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get myCoursesErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion internet, puis réessayez.';
+
+  @override
+  String get myCoursesErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get myCoursesErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour consulter vos cours.';
+
+  @override
+  String get myCoursesErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get myCoursesErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter ces cours.';
+
+  @override
+  String get myCoursesErrorServerTitle => 'Erreur du serveur';
+
+  @override
+  String get myCoursesErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get myCoursesErrorUnknownTitle => 'Chargement impossible';
+
+  @override
+  String get myCoursesErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement de vos cours.';
+
+  @override
+  String get myCoursesErrorRetry => 'Réessayer';
+
+  @override
+  String get myCoursesErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get myCoursesErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String myCoursesErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get courseDetailBackToCourses => 'Mes cours';
+
+  @override
+  String courseDetailEvaluationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courseDetailToGrade(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count à saisir',
+      one: '1 à saisir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courseDetailNextEvalEyebrow => 'Prochaine évaluation';
+
+  @override
+  String courseDetailEvalMetaShort(String date, String max) {
+    return '$date · /$max pts';
+  }
+
+  @override
+  String courseDetailEvalMeta(String date, String max, int poids) {
+    return '$date · /$max pts · poids $poids';
+  }
+
+  @override
+  String courseDetailSemesterLabel(int ordre) {
+    return 'Semestre $ordre';
+  }
+
+  @override
+  String courseDetailTrimesterLabel(int ordre) {
+    return 'Trimestre $ordre';
+  }
+
+  @override
+  String courseDetailPeriodLabel(int ordre) {
+    return 'Période $ordre';
+  }
+
+  @override
+  String get courseDetailExamLabel => 'Examen';
+
+  @override
+  String get courseDetailStatutClosed => 'Clôturée';
+
+  @override
+  String get courseDetailStatutCurrent => 'En cours';
+
+  @override
+  String get courseDetailStatutUpcoming => 'À venir';
+
+  @override
+  String courseDetailBucketNotes(int saisies, int total, int evals) {
+    String _temp0 = intl.Intl.pluralLogic(
+      evals,
+      locale: localeName,
+      other: '$evals éval.',
+      one: '1 éval.',
+    );
+    return '$saisies/$total notes · $_temp0';
+  }
+
+  @override
+  String get courseDetailBucketNoEval => 'Aucune évaluation';
+
+  @override
+  String get courseDetailExamToPlan => 'À planifier';
+
+  @override
+  String courseDetailNoteGlobaleTitle(String label) {
+    return 'Note globale — $label';
+  }
+
+  @override
+  String get courseDetailProvisional => 'provisoire';
+
+  @override
+  String get courseDetailClassAverageLabel => 'Moyenne de classe';
+
+  @override
+  String courseDetailAbove50(int count, int total) {
+    return '$count/$total élèves ≥ 50 %';
+  }
+
+  @override
+  String get courseDetailNoAverage => 'Pas encore de moyenne';
+
+  @override
+  String get courseDetailByStudent => 'Par élève';
+
+  @override
+  String get courseDetailBadgeGraded => 'Notée';
+
+  @override
+  String courseDetailBadgeInProgress(int saisies, int total) {
+    return 'En cours · $saisies/$total';
+  }
+
+  @override
+  String get courseDetailBadgeUpcoming => 'À venir';
+
+  @override
+  String courseDetailEvalExpected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves attendus',
+      one: '1 élève attendu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courseDetailReleveTitle(String label) {
+    return 'Notes globales — $label';
+  }
+
+  @override
+  String get courseDetailReleveKpiAverage => 'Moyenne';
+
+  @override
+  String get courseDetailReleveKpiAbove50 => '≥ 50 %';
+
+  @override
+  String get courseDetailReleveKpiEvals => 'Évals';
+
+  @override
+  String get courseDetailSortRanking => 'Classement';
+
+  @override
+  String get courseDetailSortAlpha => 'Alphabétique';
+
+  @override
+  String get courseDetailReleveMethod =>
+      'Note globale = points obtenus ÷ maximum, pondérés par le poids.';
+
+  @override
+  String get courseDetailReleveEmpty => 'Aucune note saisie';
+
+  @override
+  String get courseDetailLoadingA11yLabel => 'Chargement du cours';
+
+  @override
+  String get courseDetailEmptyTitle => 'Aucune évaluation';
+
+  @override
+  String get courseDetailEmptyDescription =>
+      'Ce cours n\'a pas encore d\'évaluation.';
+
+  @override
+  String get courseDetailBucketEmptyUpcoming =>
+      'Sélection à venir — aucune évaluation planifiée pour l\'instant.';
+
+  @override
+  String get courseDetailBucketEmptyNone =>
+      'Aucune évaluation rattachée à cette sélection.';
+
+  @override
+  String get courseDetailErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get courseDetailErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour consulter ce cours.';
+
+  @override
+  String get courseDetailErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter ce cours.';
+
+  @override
+  String get courseDetailErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get courseDetailErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement du cours.';
+
+  @override
+  String get courseDetailErrorNotFoundTitle => 'Cours introuvable';
+
+  @override
+  String get courseDetailErrorNotFoundMessage =>
+      'Ce cours n\'existe plus ou n\'est pas accessible.';
+
+  @override
+  String get evalTypeInterro => 'Interrogation';
+
+  @override
+  String get evalTypeDevoir => 'Devoir';
+
+  @override
+  String get evalTypeExamen => 'Examen';
+
+  @override
+  String get evalCreateTitle => 'Nouvelle évaluation';
+
+  @override
+  String get evalCreateFieldSemestre => 'Semestre';
+
+  @override
+  String get evalCreateFieldTrimestre => 'Trimestre';
+
+  @override
+  String get evalCreateFieldSousPeriode => 'Période';
+
+  @override
+  String get evalCreateExamPlaceholder => 'Examen semestriel';
+
+  @override
+  String get evalCreateFieldDate => 'Date';
+
+  @override
+  String get evalCreateFieldDateHint => 'jj/mm/aaaa';
+
+  @override
+  String get evalCreateFieldMax => 'Maximum';
+
+  @override
+  String get evalCreateFieldPoids => 'Poids';
+
+  @override
+  String get evalCreateFieldChapitres => 'Chapitres concernés';
+
+  @override
+  String get evalCreateChapitresComingSoon => 'Bientôt disponible';
+
+  @override
+  String get evalCreateCancel => 'Annuler';
+
+  @override
+  String get evalCreateSubmit => 'Créer l\'évaluation';
+
+  @override
+  String evalCreateHint(int count, String classroom) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les $count élèves de $classroom seront ajoutés',
+      one: 'L\'élève de $classroom sera ajouté',
+    );
+    return '$_temp0 avec le statut « En attente ».';
+  }
+
+  @override
+  String get evalCreateSuccessToast => 'Évaluation créée';
+
+  @override
+  String get evalCreateErrorToast =>
+      'La création de l\'évaluation a échoué. Réessayez.';
+
+  @override
+  String get evalCreateClosedPeriodError =>
+      'Période clôturée : impossible d\'y ajouter une évaluation.';
+
+  @override
+  String get evalDetailBack => 'Retour au cours';
+
+  @override
+  String get evalBadgeComplete => 'Clôturée';
+
+  @override
+  String evalBadgePartial(int done, int total) {
+    return 'Saisie en cours · $done/$total';
+  }
+
+  @override
+  String get evalBadgeUpcoming => 'À venir';
+
+  @override
+  String evalChipMax(String max) {
+    return 'Maximum : $max pts';
+  }
+
+  @override
+  String evalChipPoids(int poids) {
+    return 'Poids : $poids';
+  }
+
+  @override
+  String get evalModeTable => 'Tableau';
+
+  @override
+  String get evalModeFocus => 'Focus';
+
+  @override
+  String evalCountNotee(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notées',
+      one: '$count notée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evalCountEnAttente(int count) {
+    return '$count en attente';
+  }
+
+  @override
+  String evalCountAbsJust(int count) {
+    return '$count abs. just.';
+  }
+
+  @override
+  String evalCountAbsNonJust(int count) {
+    return '$count abs. non just.';
+  }
+
+  @override
+  String get evalStatutNotee => 'Notée';
+
+  @override
+  String get evalStatutEnAttente => 'En attente';
+
+  @override
+  String get evalStatutAbsJust => 'Abs. just.';
+
+  @override
+  String get evalStatutAbsNonJust => 'Abs. non just.';
+
+  @override
+  String evalNoteMaxError(String max) {
+    return 'max $max';
+  }
+
+  @override
+  String get evalAbsenceJustifieTooltip => 'Absence justifiée';
+
+  @override
+  String get evalAbsenceNonJustifieTooltip => 'Absence non justifiée';
+
+  @override
+  String get evalFocusClear => 'Effacer · en attente';
+
+  @override
+  String get evalFocusPrevious => 'Précédent';
+
+  @override
+  String get evalFocusNext => 'Suivant';
+
+  @override
+  String get evalFocusLast => 'Dernier élève';
+
+  @override
+  String evalFocusPosition(int index, int total) {
+    return 'Élève $index / $total';
+  }
+
+  @override
+  String evalSaveCounter(int done, int total) {
+    return '$done / $total saisies';
+  }
+
+  @override
+  String evalSaveErrorsAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes au-dessus du maximum',
+      one: '1 note au-dessus du maximum',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evalSaveButton => 'Enregistrer les notes';
+
+  @override
+  String get evalSaveButtonSaving => 'Enregistrement…';
+
+  @override
+  String evalSaveSuccessToast(int notees, int enAttente) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notees,
+      locale: localeName,
+      other: '$notees notées',
+      one: '$notees notée',
+    );
+    return 'Notes enregistrées — $_temp0 · $enAttente en attente';
+  }
+
+  @override
+  String get evalSaveErrorToast =>
+      'Échec de l\'enregistrement. Vos saisies sont conservées.';
+
+  @override
+  String get evalSaisieEmptyTitle => 'Aucun élève';
+
+  @override
+  String get evalSaisieEmptyDescription =>
+      'Aucun élève n\'est inscrit dans cette classe.';
+
+  @override
+  String get evalSaisieLoadingA11y => 'Chargement de la saisie des notes';
+
+  @override
+  String get evalSaisieErrorNetworkMessage =>
+      'Vous semblez hors-ligne. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get evalSaisieErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour saisir les notes.';
+
+  @override
+  String get evalSaisieErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour saisir ces notes.';
+
+  @override
+  String get evalSaisieErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get evalSaisieErrorUnknownMessage =>
+      'Une erreur inattendue est survenue lors du chargement de la saisie.';
+
+  @override
   String get profile => 'Profil';
 
   @override
@@ -4097,4 +4643,500 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get genderOther => 'Autre';
+
+  @override
+  String get scheduleErrorNoTeacher =>
+      'Aucun enseignant n\'est lié à votre compte.';
+
+  @override
+  String get scheduleErrorConflict =>
+      'Ce créneau est déjà occupé (enseignant ou classe).';
+
+  @override
+  String get scheduleErrorGeneric =>
+      'Une erreur est survenue lors du chargement de l\'emploi du temps.';
+
+  @override
+  String get scheduleEmpty => 'Aucune séance planifiée.';
+
+  @override
+  String get scheduleEyebrow => 'Cours';
+
+  @override
+  String get scheduleTitle => 'Mon emploi du temps';
+
+  @override
+  String get scheduleViewWeek => 'Semaine';
+
+  @override
+  String get scheduleViewDay => 'Jour';
+
+  @override
+  String get scheduleViewToggleSemantics =>
+      'Basculer entre la vue Semaine et la vue Jour';
+
+  @override
+  String get scheduleWeekTitle => 'Semaine type';
+
+  @override
+  String scheduleLoadSummary(int count, double hours) {
+    final intl.NumberFormat hoursNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String hoursString = hoursNumberFormat.format(hours);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '$count séance',
+    );
+    return '$_temp0 · $hoursString h de cours';
+  }
+
+  @override
+  String get scheduleToday => 'auj.';
+
+  @override
+  String get scheduleTodaySemantics => 'Aujourd\'hui';
+
+  @override
+  String get scheduleBreak => 'Récréation';
+
+  @override
+  String get scheduleLoadingSemantics => 'Chargement de l\'emploi du temps';
+
+  @override
+  String get scheduleEmptyDescription =>
+      'Aucun créneau n\'est planifié pour vous cette semaine. L\'emploi du temps est géré par la direction des études.';
+
+  @override
+  String get scheduleEmptyDayTitle => 'Aucun cours ce jour';
+
+  @override
+  String scheduleEmptyDayDescription(String day) {
+    return 'Aucune séance n\'est planifiée le $day.';
+  }
+
+  @override
+  String get scheduleWeekdayLongMon => 'Lundi';
+
+  @override
+  String get scheduleWeekdayLongTue => 'Mardi';
+
+  @override
+  String get scheduleWeekdayLongWed => 'Mercredi';
+
+  @override
+  String get scheduleWeekdayLongThu => 'Jeudi';
+
+  @override
+  String get scheduleWeekdayLongFri => 'Vendredi';
+
+  @override
+  String get scheduleWeekdayLongSat => 'Samedi';
+
+  @override
+  String get scheduleWeekdayShortMon => 'Lun.';
+
+  @override
+  String get scheduleWeekdayShortTue => 'Mar.';
+
+  @override
+  String get scheduleWeekdayShortWed => 'Mer.';
+
+  @override
+  String get scheduleWeekdayShortThu => 'Jeu.';
+
+  @override
+  String get scheduleWeekdayShortFri => 'Ven.';
+
+  @override
+  String get scheduleWeekdayShortSat => 'Sam.';
+
+  @override
+  String get scheduleErrorNetworkTitle => 'Connexion interrompue';
+
+  @override
+  String get scheduleErrorNetworkMessage =>
+      'Impossible de joindre le serveur. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get scheduleErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get scheduleErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour consulter l\'emploi du temps.';
+
+  @override
+  String get scheduleErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get scheduleErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits pour consulter cet emploi du temps. Contactez l\'administrateur.';
+
+  @override
+  String get scheduleErrorServerTitle => 'Erreur serveur';
+
+  @override
+  String get scheduleErrorServerMessage =>
+      'Une erreur est survenue côté serveur. Réessayez dans un instant.';
+
+  @override
+  String get scheduleErrorUnknownTitle => 'Une erreur est survenue';
+
+  @override
+  String get scheduleErrorUnknownMessage =>
+      'Impossible de charger l\'emploi du temps pour le moment. Réessayez.';
+
+  @override
+  String get scheduleErrorRetry => 'Réessayer';
+
+  @override
+  String get scheduleErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get scheduleErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String scheduleErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get menuResultats => 'Résultats';
+
+  @override
+  String get subMenuResultatsClasse => 'Résultats par classe';
+
+  @override
+  String get resultatsSearchEyebrow => 'Résultats';
+
+  @override
+  String get resultatsSearchTitle => 'Rechercher des résultats';
+
+  @override
+  String get resultatsSearchModeSemantics => 'Mode de recherche';
+
+  @override
+  String get resultatsSearchByClass => 'Par classe';
+
+  @override
+  String get resultatsSearchByStudent => 'Par élève';
+
+  @override
+  String get resultatsSearchActionClasse => 'Afficher les résultats';
+
+  @override
+  String get resultatsSearchActionEleve => 'Retrouver l\'élève';
+
+  @override
+  String get resultatsFieldLastName => 'Nom';
+
+  @override
+  String get resultatsFieldMiddleName => 'Postnom';
+
+  @override
+  String get resultatsFieldFirstName => 'Prénom(s)';
+
+  @override
+  String get resultatsFieldClassroom => 'Classe';
+
+  @override
+  String get resultatsDecoupageTrimestres => 'Trimestres';
+
+  @override
+  String get resultatsDecoupageSemestres => 'Semestres';
+
+  @override
+  String get resultatsDecoupagePeriodes => 'Périodes';
+
+  @override
+  String resultatsPeriodShortTrimestre(int ordre) {
+    return 'T$ordre';
+  }
+
+  @override
+  String resultatsPeriodShortSemestre(int ordre) {
+    return 'S$ordre';
+  }
+
+  @override
+  String resultatsPeriodShortGeneric(int ordre) {
+    return 'P$ordre';
+  }
+
+  @override
+  String resultatsPeriodLongTrimestre(int ordre) {
+    return 'Trimestre $ordre';
+  }
+
+  @override
+  String resultatsPeriodLongSemestre(int ordre) {
+    return 'Semestre $ordre';
+  }
+
+  @override
+  String resultatsPeriodLongGeneric(int ordre) {
+    return 'Période $ordre';
+  }
+
+  @override
+  String resultatsSubPeriodColumn(int ordre) {
+    return 'P$ordre';
+  }
+
+  @override
+  String get resultatsPeriodsError => 'Impossible de charger les périodes.';
+
+  @override
+  String get resultatsPeriodsEmpty => 'Aucune période disponible.';
+
+  @override
+  String get resultatsGenderMale => 'Garçon';
+
+  @override
+  String get resultatsGenderFemale => 'Fille';
+
+  @override
+  String get resultatsGenderOther => 'Autre';
+
+  @override
+  String get resultatsDash => '—';
+
+  @override
+  String resultatsPercentValue(int value) {
+    return '$value %';
+  }
+
+  @override
+  String resultatsNoteOverMax(String note, String max) {
+    return '$note/$max';
+  }
+
+  @override
+  String resultatsPlaceValue(int place, int total) {
+    return '$place / $total';
+  }
+
+  @override
+  String resultatsDeltaPts(String value) {
+    return '$value pts';
+  }
+
+  @override
+  String get resultatsColumnRank => '#';
+
+  @override
+  String get resultatsColumnEleve => 'Élève';
+
+  @override
+  String resultatsColumnMoyenne(String period) {
+    return 'Moyenne $period';
+  }
+
+  @override
+  String get resultatsNonClasseBadge => 'Non classé';
+
+  @override
+  String resultatsSummaryAverageCaption(String period) {
+    return 'Moyenne · $period';
+  }
+
+  @override
+  String resultatsSummaryReussites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count réussites',
+      one: '1 réussite',
+      zero: '0 réussite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryEchecs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échecs',
+      one: '1 échec',
+      zero: '0 échec',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryNonClasses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count non classés',
+      one: '1 non classé',
+      zero: '0 non classé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryFootnote(int effectif, int seuil) {
+    return '$effectif élèves · seuil de réussite $seuil %';
+  }
+
+  @override
+  String resultatsEleveResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves trouvés',
+      one: '1 élève trouvé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsFocusClassroom(String classroom) {
+    return 'Classe $classroom';
+  }
+
+  @override
+  String get resultatsFocusBack => 'Retour à la vue classe';
+
+  @override
+  String get resultatsFocusAnnualAverage => 'Moyenne annuelle';
+
+  @override
+  String resultatsFocusRankOf(int count) {
+    return 'sur $count classés';
+  }
+
+  @override
+  String get resultatsFocusNoBulletin =>
+      'Élève non classé sur cette période : pas de bulletin détaillé.';
+
+  @override
+  String get resultatsProgressionTitle => 'Progression sur l\'année';
+
+  @override
+  String resultatsProgressionPointLabel(int index) {
+    return 'P$index';
+  }
+
+  @override
+  String get resultatsStrengthsTitle => 'Points forts';
+
+  @override
+  String get resultatsWeaknessesTitle => 'À renforcer';
+
+  @override
+  String get resultatsOfficialBulletinTitle => 'Bulletin officiel';
+
+  @override
+  String get resultatsOfficialBulletinSubtitle =>
+      'Domaines & branches, notes journalières + examen, maxima, place — gabarit national imprimable.';
+
+  @override
+  String get resultatsComingSoon => 'Bientôt disponible';
+
+  @override
+  String resultatsBulletinTitle(String period) {
+    return 'Bulletin par domaine · $period';
+  }
+
+  @override
+  String get resultatsBulletinLegend => 'note / maximum';
+
+  @override
+  String get resultatsBulletinSubtotal => 'Sous-total';
+
+  @override
+  String get resultatsBulletinTotal => 'Totaux obtenus';
+
+  @override
+  String get resultatsSynthesePercent => 'Pourcentage';
+
+  @override
+  String get resultatsSynthesePlace => 'Place';
+
+  @override
+  String get resultatsSyntheseApplication => 'Application';
+
+  @override
+  String get resultatsSyntheseConduite => 'Conduite';
+
+  @override
+  String get resultatsIdleTitle => 'Choisissez une classe ou un élève';
+
+  @override
+  String get resultatsIdleDescription =>
+      'Sélectionnez un cycle, un niveau et une classe, puis une période pour afficher les résultats.';
+
+  @override
+  String get resultatsLoadingSemantics => 'Chargement des résultats';
+
+  @override
+  String get resultatsEmptyClasse =>
+      'Aucun élève à afficher pour cette classe.';
+
+  @override
+  String get resultatsEmptyClasseTitle => 'Aucun résultat pour cette classe';
+
+  @override
+  String get resultatsEmptyEleveTitle => 'Aucun élève trouvé';
+
+  @override
+  String get resultatsEmptyEleveDescription =>
+      'Vérifiez l\'orthographe du nom, du postnom ou du prénom, ou élargissez la recherche.';
+
+  @override
+  String get resultatsEmptyAdjustAction => 'Ajuster la recherche';
+
+  @override
+  String get resultatsErrorRetry => 'Réessayer';
+
+  @override
+  String get resultatsErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get resultatsErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String resultatsErrorIncidentCode(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get resultatsErrorNetworkTitle => 'Connexion interrompue';
+
+  @override
+  String get resultatsErrorNetworkMessage =>
+      'Vérifiez votre connexion internet puis réessayez.';
+
+  @override
+  String get resultatsErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get resultatsErrorUnauthorizedMessage =>
+      'Votre session a expiré. Reconnectez-vous pour continuer.';
+
+  @override
+  String get resultatsErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get resultatsErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits requis pour consulter ces résultats.';
+
+  @override
+  String get resultatsErrorServerTitle => 'Erreur serveur';
+
+  @override
+  String get resultatsErrorServerMessage =>
+      'Une erreur est survenue de notre côté. Réessayez dans un instant.';
+
+  @override
+  String get resultatsErrorUnknownTitle => 'Une erreur est survenue';
+
+  @override
+  String get resultatsErrorUnknownMessage =>
+      'Un problème inattendu est survenu. Réessayez.';
 }

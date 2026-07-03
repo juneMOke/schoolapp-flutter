@@ -16,6 +16,8 @@ class MenuFactory {
       _createFinancesMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
+      _createCoursesMenu(l10n),
+      _createResultatsMenu(l10n),
     ];
   }
 
@@ -128,6 +130,43 @@ class MenuFactory {
           id: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
           route: AppRoutesNames.disciplinesList,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Cours avec son sous-menu « Mes cours ».
+  static MenuItem _createCoursesMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.coursesMenuId,
+      title: l10n.menuCourses,
+      icon: Icons.menu_book_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.myCoursesId,
+          title: l10n.subMenuMyCourses,
+          route: AppRoutesNames.myCourses,
+        ),
+        SubMenuItem(
+          id: MenuConstants.timetableId,
+          title: l10n.subMenuTimetable,
+          route: AppRoutesNames.timetable,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Résultats avec son sous-menu « Résultats par classe ».
+  static MenuItem _createResultatsMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.resultatsMenuId,
+      title: l10n.menuResultats,
+      icon: Icons.leaderboard_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.resultatsClasseId,
+          title: l10n.subMenuResultatsClasse,
+          route: AppRoutesNames.resultatsClasse,
         ),
       ],
     );

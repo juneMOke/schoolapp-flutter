@@ -1160,6 +1160,780 @@ abstract class AppLocalizations {
   /// **'Disciplines List'**
   String get subMenuDisciplinesList;
 
+  /// No description provided for @menuCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses'**
+  String get menuCourses;
+
+  /// No description provided for @subMenuMyCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get subMenuMyCourses;
+
+  /// No description provided for @subMenuTimetable.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetable'**
+  String get subMenuTimetable;
+
+  /// No description provided for @myCoursesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}'**
+  String myCoursesCount(int classCount, int courseCount);
+
+  /// No description provided for @myCoursesExpandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand all'**
+  String get myCoursesExpandAll;
+
+  /// No description provided for @myCoursesCollapseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse all'**
+  String get myCoursesCollapseAll;
+
+  /// No description provided for @myCoursesClassCourseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course} other{{count} courses}}'**
+  String myCoursesClassCourseCount(int count);
+
+  /// No description provided for @myCoursesStudentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No students} =1{1 student} other{{count} students}}'**
+  String myCoursesStudentCount(int count);
+
+  /// No description provided for @myCoursesLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your courses'**
+  String get myCoursesLoadingA11yLabel;
+
+  /// No description provided for @myCoursesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No course assigned'**
+  String get myCoursesEmptyTitle;
+
+  /// No description provided for @myCoursesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No course is linked to you yet. The courses you teach will appear here, grouped by class.'**
+  String get myCoursesEmptyDescription;
+
+  /// No description provided for @myCoursesErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get myCoursesErrorNetworkTitle;
+
+  /// No description provided for @myCoursesErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your internet connection, then try again.'**
+  String get myCoursesErrorNetworkMessage;
+
+  /// No description provided for @myCoursesErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get myCoursesErrorUnauthorizedTitle;
+
+  /// No description provided for @myCoursesErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view your courses.'**
+  String get myCoursesErrorUnauthorizedMessage;
+
+  /// No description provided for @myCoursesErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get myCoursesErrorForbiddenTitle;
+
+  /// No description provided for @myCoursesErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view these courses.'**
+  String get myCoursesErrorForbiddenMessage;
+
+  /// No description provided for @myCoursesErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get myCoursesErrorServerTitle;
+
+  /// No description provided for @myCoursesErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again in a moment.'**
+  String get myCoursesErrorServerMessage;
+
+  /// No description provided for @myCoursesErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get myCoursesErrorUnknownTitle;
+
+  /// No description provided for @myCoursesErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading your courses.'**
+  String get myCoursesErrorUnknownMessage;
+
+  /// No description provided for @myCoursesErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get myCoursesErrorRetry;
+
+  /// No description provided for @myCoursesErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get myCoursesErrorReconnect;
+
+  /// No description provided for @myCoursesErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get myCoursesErrorContactAdmin;
+
+  /// No description provided for @myCoursesErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String myCoursesErrorIncidentCode(String code);
+
+  /// No description provided for @courseDetailBackToCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get courseDetailBackToCourses;
+
+  /// No description provided for @courseDetailEvaluationCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No evaluation} =1{1 evaluation} other{{count} evaluations}}'**
+  String courseDetailEvaluationCount(int count);
+
+  /// No description provided for @courseDetailToGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 to grade} other{{count} to grade}}'**
+  String courseDetailToGrade(int count);
+
+  /// No description provided for @courseDetailNextEvalEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next evaluation'**
+  String get courseDetailNextEvalEyebrow;
+
+  /// No description provided for @courseDetailEvalMetaShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts'**
+  String courseDetailEvalMetaShort(String date, String max);
+
+  /// No description provided for @courseDetailEvalMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts · weight {poids}'**
+  String courseDetailEvalMeta(String date, String max, int poids);
+
+  /// No description provided for @courseDetailSemesterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester {ordre}'**
+  String courseDetailSemesterLabel(int ordre);
+
+  /// No description provided for @courseDetailTrimesterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Term {ordre}'**
+  String courseDetailTrimesterLabel(int ordre);
+
+  /// No description provided for @courseDetailPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {ordre}'**
+  String courseDetailPeriodLabel(int ordre);
+
+  /// No description provided for @courseDetailExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get courseDetailExamLabel;
+
+  /// No description provided for @courseDetailStatutClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get courseDetailStatutClosed;
+
+  /// No description provided for @courseDetailStatutCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get courseDetailStatutCurrent;
+
+  /// No description provided for @courseDetailStatutUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get courseDetailStatutUpcoming;
+
+  /// No description provided for @courseDetailBucketNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}'**
+  String courseDetailBucketNotes(int saisies, int total, int evals);
+
+  /// No description provided for @courseDetailBucketNoEval.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation'**
+  String get courseDetailBucketNoEval;
+
+  /// No description provided for @courseDetailExamToPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'To be scheduled'**
+  String get courseDetailExamToPlan;
+
+  /// No description provided for @courseDetailNoteGlobaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall mark — {label}'**
+  String courseDetailNoteGlobaleTitle(String label);
+
+  /// No description provided for @courseDetailProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional'**
+  String get courseDetailProvisional;
+
+  /// No description provided for @courseDetailClassAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class average'**
+  String get courseDetailClassAverageLabel;
+
+  /// No description provided for @courseDetailAbove50.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{total} students ≥ 50%'**
+  String courseDetailAbove50(int count, int total);
+
+  /// No description provided for @courseDetailNoAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'No average yet'**
+  String get courseDetailNoAverage;
+
+  /// No description provided for @courseDetailByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get courseDetailByStudent;
+
+  /// No description provided for @courseDetailBadgeGraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Graded'**
+  String get courseDetailBadgeGraded;
+
+  /// No description provided for @courseDetailBadgeInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress · {saisies}/{total}'**
+  String courseDetailBadgeInProgress(int saisies, int total);
+
+  /// No description provided for @courseDetailBadgeUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get courseDetailBadgeUpcoming;
+
+  /// No description provided for @courseDetailEvalExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student expected} other{{count} students expected}}'**
+  String courseDetailEvalExpected(int count);
+
+  /// No description provided for @courseDetailReleveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall marks — {label}'**
+  String courseDetailReleveTitle(String label);
+
+  /// No description provided for @courseDetailReleveKpiAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get courseDetailReleveKpiAverage;
+
+  /// No description provided for @courseDetailReleveKpiAbove50.
+  ///
+  /// In en, this message translates to:
+  /// **'≥ 50%'**
+  String get courseDetailReleveKpiAbove50;
+
+  /// No description provided for @courseDetailReleveKpiEvals.
+  ///
+  /// In en, this message translates to:
+  /// **'Evals'**
+  String get courseDetailReleveKpiEvals;
+
+  /// No description provided for @courseDetailSortRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get courseDetailSortRanking;
+
+  /// No description provided for @courseDetailSortAlpha.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get courseDetailSortAlpha;
+
+  /// No description provided for @courseDetailReleveMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall mark = points earned ÷ maximum, weighted by coefficient.'**
+  String get courseDetailReleveMethod;
+
+  /// No description provided for @courseDetailReleveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No marks entered'**
+  String get courseDetailReleveEmpty;
+
+  /// No description provided for @courseDetailLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading course'**
+  String get courseDetailLoadingA11yLabel;
+
+  /// No description provided for @courseDetailEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation'**
+  String get courseDetailEmptyTitle;
+
+  /// No description provided for @courseDetailEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no evaluation yet.'**
+  String get courseDetailEmptyDescription;
+
+  /// No description provided for @courseDetailBucketEmptyUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming selection — no evaluation scheduled yet.'**
+  String get courseDetailBucketEmptyUpcoming;
+
+  /// No description provided for @courseDetailBucketEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No evaluation attached to this selection.'**
+  String get courseDetailBucketEmptyNone;
+
+  /// No description provided for @courseDetailErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your connection, then try again.'**
+  String get courseDetailErrorNetworkMessage;
+
+  /// No description provided for @courseDetailErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view this course.'**
+  String get courseDetailErrorUnauthorizedMessage;
+
+  /// No description provided for @courseDetailErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the required permissions to view this course.'**
+  String get courseDetailErrorForbiddenMessage;
+
+  /// No description provided for @courseDetailErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Try again in a moment.'**
+  String get courseDetailErrorServerMessage;
+
+  /// No description provided for @courseDetailErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading the course.'**
+  String get courseDetailErrorUnknownMessage;
+
+  /// No description provided for @courseDetailErrorNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Course not found'**
+  String get courseDetailErrorNotFoundTitle;
+
+  /// No description provided for @courseDetailErrorNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course no longer exists or is not accessible.'**
+  String get courseDetailErrorNotFoundMessage;
+
+  /// No description provided for @evalTypeInterro.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get evalTypeInterro;
+
+  /// No description provided for @evalTypeDevoir.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment'**
+  String get evalTypeDevoir;
+
+  /// No description provided for @evalTypeExamen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get evalTypeExamen;
+
+  /// No description provided for @evalCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New evaluation'**
+  String get evalCreateTitle;
+
+  /// No description provided for @evalCreateFieldSemestre.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester'**
+  String get evalCreateFieldSemestre;
+
+  /// No description provided for @evalCreateFieldTrimestre.
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get evalCreateFieldTrimestre;
+
+  /// No description provided for @evalCreateFieldSousPeriode.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get evalCreateFieldSousPeriode;
+
+  /// No description provided for @evalCreateExamPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Term exam'**
+  String get evalCreateExamPlaceholder;
+
+  /// No description provided for @evalCreateFieldDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get evalCreateFieldDate;
+
+  /// No description provided for @evalCreateFieldDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'dd/mm/yyyy'**
+  String get evalCreateFieldDateHint;
+
+  /// No description provided for @evalCreateFieldMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get evalCreateFieldMax;
+
+  /// No description provided for @evalCreateFieldPoids.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get evalCreateFieldPoids;
+
+  /// No description provided for @evalCreateFieldChapitres.
+  ///
+  /// In en, this message translates to:
+  /// **'Related chapters'**
+  String get evalCreateFieldChapitres;
+
+  /// No description provided for @evalCreateChapitresComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get evalCreateChapitresComingSoon;
+
+  /// No description provided for @evalCreateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get evalCreateCancel;
+
+  /// No description provided for @evalCreateSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Create evaluation'**
+  String get evalCreateSubmit;
+
+  /// No description provided for @evalCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
+  String evalCreateHint(int count, String classroom);
+
+  /// No description provided for @evalCreateSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation created'**
+  String get evalCreateSuccessToast;
+
+  /// No description provided for @evalCreateErrorToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating the evaluation failed. Please try again.'**
+  String get evalCreateErrorToast;
+
+  /// No description provided for @evalCreateClosedPeriodError.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed period: you can\'t add an evaluation to it.'**
+  String get evalCreateClosedPeriodError;
+
+  /// No description provided for @evalDetailBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to course'**
+  String get evalDetailBack;
+
+  /// No description provided for @evalBadgeComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get evalBadgeComplete;
+
+  /// No description provided for @evalBadgePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Grading · {done}/{total}'**
+  String evalBadgePartial(int done, int total);
+
+  /// No description provided for @evalBadgeUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get evalBadgeUpcoming;
+
+  /// No description provided for @evalChipMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum: {max} pts'**
+  String evalChipMax(String max);
+
+  /// No description provided for @evalChipPoids.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight: {poids}'**
+  String evalChipPoids(int poids);
+
+  /// No description provided for @evalModeTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get evalModeTable;
+
+  /// No description provided for @evalModeFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get evalModeFocus;
+
+  /// No description provided for @evalCountNotee.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} graded} other{{count} graded}}'**
+  String evalCountNotee(int count);
+
+  /// No description provided for @evalCountEnAttente.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending'**
+  String evalCountEnAttente(int count);
+
+  /// No description provided for @evalCountAbsJust.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} exc. abs.'**
+  String evalCountAbsJust(int count);
+
+  /// No description provided for @evalCountAbsNonJust.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unexc. abs.'**
+  String evalCountAbsNonJust(int count);
+
+  /// No description provided for @evalStatutNotee.
+  ///
+  /// In en, this message translates to:
+  /// **'Graded'**
+  String get evalStatutNotee;
+
+  /// No description provided for @evalStatutEnAttente.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get evalStatutEnAttente;
+
+  /// No description provided for @evalStatutAbsJust.
+  ///
+  /// In en, this message translates to:
+  /// **'Exc. abs.'**
+  String get evalStatutAbsJust;
+
+  /// No description provided for @evalStatutAbsNonJust.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexc. abs.'**
+  String get evalStatutAbsNonJust;
+
+  /// No description provided for @evalNoteMaxError.
+  ///
+  /// In en, this message translates to:
+  /// **'max {max}'**
+  String evalNoteMaxError(String max);
+
+  /// No description provided for @evalAbsenceJustifieTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused absence'**
+  String get evalAbsenceJustifieTooltip;
+
+  /// No description provided for @evalAbsenceNonJustifieTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absence'**
+  String get evalAbsenceNonJustifieTooltip;
+
+  /// No description provided for @evalFocusClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear · pending'**
+  String get evalFocusClear;
+
+  /// No description provided for @evalFocusPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get evalFocusPrevious;
+
+  /// No description provided for @evalFocusNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get evalFocusNext;
+
+  /// No description provided for @evalFocusLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last student'**
+  String get evalFocusLast;
+
+  /// No description provided for @evalFocusPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Student {index} / {total}'**
+  String evalFocusPosition(int index, int total);
+
+  /// No description provided for @evalSaveCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} entered'**
+  String evalSaveCounter(int done, int total);
+
+  /// No description provided for @evalSaveErrorsAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
+  String evalSaveErrorsAlert(int count);
+
+  /// No description provided for @evalSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save grades'**
+  String get evalSaveButton;
+
+  /// No description provided for @evalSaveButtonSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get evalSaveButtonSaving;
+
+  /// No description provided for @evalSaveSuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
+  String evalSaveSuccessToast(int notees, int enAttente);
+
+  /// No description provided for @evalSaveErrorToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving failed. Your entries are kept.'**
+  String get evalSaveErrorToast;
+
+  /// No description provided for @evalSaisieEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students'**
+  String get evalSaisieEmptyTitle;
+
+  /// No description provided for @evalSaisieEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No students are enrolled in this class.'**
+  String get evalSaisieEmptyDescription;
+
+  /// No description provided for @evalSaisieLoadingA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading grade entry'**
+  String get evalSaisieLoadingA11y;
+
+  /// No description provided for @evalSaisieErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Check your connection, then try again.'**
+  String get evalSaisieErrorNetworkMessage;
+
+  /// No description provided for @evalSaisieErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to enter grades.'**
+  String get evalSaisieErrorUnauthorizedMessage;
+
+  /// No description provided for @evalSaisieErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have the required permissions to enter these grades.'**
+  String get evalSaisieErrorForbiddenMessage;
+
+  /// No description provided for @evalSaisieErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Try again in a moment.'**
+  String get evalSaisieErrorServerMessage;
+
+  /// No description provided for @evalSaisieErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while loading grade entry.'**
+  String get evalSaisieErrorUnknownMessage;
+
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:
@@ -7094,6 +7868,780 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get genderOther;
+
+  /// No description provided for @scheduleErrorNoTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'No teacher is linked to your account.'**
+  String get scheduleErrorNoTeacher;
+
+  /// No description provided for @scheduleErrorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This time slot is already taken (teacher or class).'**
+  String get scheduleErrorConflict;
+
+  /// No description provided for @scheduleErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading the timetable.'**
+  String get scheduleErrorGeneric;
+
+  /// No description provided for @scheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No session scheduled.'**
+  String get scheduleEmpty;
+
+  /// No description provided for @scheduleEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses'**
+  String get scheduleEyebrow;
+
+  /// No description provided for @scheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My timetable'**
+  String get scheduleTitle;
+
+  /// No description provided for @scheduleViewWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get scheduleViewWeek;
+
+  /// No description provided for @scheduleViewDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get scheduleViewDay;
+
+  /// No description provided for @scheduleViewToggleSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch between Week and Day view'**
+  String get scheduleViewToggleSemantics;
+
+  /// No description provided for @scheduleWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical week'**
+  String get scheduleWeekTitle;
+
+  /// Weekly load counter: number of sessions and total teaching hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class'**
+  String scheduleLoadSummary(int count, double hours);
+
+  /// No description provided for @scheduleToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get scheduleToday;
+
+  /// No description provided for @scheduleTodaySemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get scheduleTodaySemantics;
+
+  /// No description provided for @scheduleBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get scheduleBreak;
+
+  /// No description provided for @scheduleLoadingSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the timetable'**
+  String get scheduleLoadingSemantics;
+
+  /// No description provided for @scheduleEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No slot is scheduled for you this week. The timetable is managed by the academic office.'**
+  String get scheduleEmptyDescription;
+
+  /// No description provided for @scheduleEmptyDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No class this day'**
+  String get scheduleEmptyDayTitle;
+
+  /// Day view empty state, with the selected day.
+  ///
+  /// In en, this message translates to:
+  /// **'No session is scheduled on {day}.'**
+  String scheduleEmptyDayDescription(String day);
+
+  /// No description provided for @scheduleWeekdayLongMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get scheduleWeekdayLongMon;
+
+  /// No description provided for @scheduleWeekdayLongTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get scheduleWeekdayLongTue;
+
+  /// No description provided for @scheduleWeekdayLongWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get scheduleWeekdayLongWed;
+
+  /// No description provided for @scheduleWeekdayLongThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get scheduleWeekdayLongThu;
+
+  /// No description provided for @scheduleWeekdayLongFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get scheduleWeekdayLongFri;
+
+  /// No description provided for @scheduleWeekdayLongSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get scheduleWeekdayLongSat;
+
+  /// No description provided for @scheduleWeekdayShortMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get scheduleWeekdayShortMon;
+
+  /// No description provided for @scheduleWeekdayShortTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get scheduleWeekdayShortTue;
+
+  /// No description provided for @scheduleWeekdayShortWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get scheduleWeekdayShortWed;
+
+  /// No description provided for @scheduleWeekdayShortThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get scheduleWeekdayShortThu;
+
+  /// No description provided for @scheduleWeekdayShortFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get scheduleWeekdayShortFri;
+
+  /// No description provided for @scheduleWeekdayShortSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get scheduleWeekdayShortSat;
+
+  /// No description provided for @scheduleErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost'**
+  String get scheduleErrorNetworkTitle;
+
+  /// No description provided for @scheduleErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t reach the server. Check your connection and try again.'**
+  String get scheduleErrorNetworkMessage;
+
+  /// No description provided for @scheduleErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get scheduleErrorUnauthorizedTitle;
+
+  /// No description provided for @scheduleErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Reconnect to view the timetable.'**
+  String get scheduleErrorUnauthorizedMessage;
+
+  /// No description provided for @scheduleErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get scheduleErrorForbiddenTitle;
+
+  /// No description provided for @scheduleErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to view this timetable. Contact your administrator.'**
+  String get scheduleErrorForbiddenMessage;
+
+  /// No description provided for @scheduleErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get scheduleErrorServerTitle;
+
+  /// No description provided for @scheduleErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on the server. Try again in a moment.'**
+  String get scheduleErrorServerMessage;
+
+  /// No description provided for @scheduleErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get scheduleErrorUnknownTitle;
+
+  /// No description provided for @scheduleErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The timetable can\'t be loaded right now. Try again.'**
+  String get scheduleErrorUnknownMessage;
+
+  /// No description provided for @scheduleErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scheduleErrorRetry;
+
+  /// No description provided for @scheduleErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get scheduleErrorReconnect;
+
+  /// No description provided for @scheduleErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact administrator'**
+  String get scheduleErrorContactAdmin;
+
+  /// Incident code shown under a server (500) error.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String scheduleErrorIncidentCode(String code);
+
+  /// No description provided for @menuResultats.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get menuResultats;
+
+  /// No description provided for @subMenuResultatsClasse.
+  ///
+  /// In en, this message translates to:
+  /// **'Results by class'**
+  String get subMenuResultatsClasse;
+
+  /// No description provided for @resultatsSearchEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get resultatsSearchEyebrow;
+
+  /// No description provided for @resultatsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get resultatsSearchTitle;
+
+  /// No description provided for @resultatsSearchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get resultatsSearchModeSemantics;
+
+  /// No description provided for @resultatsSearchByClass.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get resultatsSearchByClass;
+
+  /// No description provided for @resultatsSearchByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get resultatsSearchByStudent;
+
+  /// No description provided for @resultatsSearchActionClasse.
+  ///
+  /// In en, this message translates to:
+  /// **'Show results'**
+  String get resultatsSearchActionClasse;
+
+  /// No description provided for @resultatsSearchActionEleve.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the student'**
+  String get resultatsSearchActionEleve;
+
+  /// No description provided for @resultatsFieldLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get resultatsFieldLastName;
+
+  /// No description provided for @resultatsFieldMiddleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle name'**
+  String get resultatsFieldMiddleName;
+
+  /// No description provided for @resultatsFieldFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name(s)'**
+  String get resultatsFieldFirstName;
+
+  /// No description provided for @resultatsFieldClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get resultatsFieldClassroom;
+
+  /// No description provided for @resultatsDecoupageTrimestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get resultatsDecoupageTrimestres;
+
+  /// No description provided for @resultatsDecoupageSemestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Semesters'**
+  String get resultatsDecoupageSemestres;
+
+  /// No description provided for @resultatsDecoupagePeriodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Periods'**
+  String get resultatsDecoupagePeriodes;
+
+  /// No description provided for @resultatsPeriodShortTrimestre.
+  ///
+  /// In en, this message translates to:
+  /// **'T{ordre}'**
+  String resultatsPeriodShortTrimestre(int ordre);
+
+  /// No description provided for @resultatsPeriodShortSemestre.
+  ///
+  /// In en, this message translates to:
+  /// **'S{ordre}'**
+  String resultatsPeriodShortSemestre(int ordre);
+
+  /// No description provided for @resultatsPeriodShortGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'P{ordre}'**
+  String resultatsPeriodShortGeneric(int ordre);
+
+  /// No description provided for @resultatsPeriodLongTrimestre.
+  ///
+  /// In en, this message translates to:
+  /// **'Term {ordre}'**
+  String resultatsPeriodLongTrimestre(int ordre);
+
+  /// No description provided for @resultatsPeriodLongSemestre.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester {ordre}'**
+  String resultatsPeriodLongSemestre(int ordre);
+
+  /// No description provided for @resultatsPeriodLongGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {ordre}'**
+  String resultatsPeriodLongGeneric(int ordre);
+
+  /// No description provided for @resultatsSubPeriodColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'P{ordre}'**
+  String resultatsSubPeriodColumn(int ordre);
+
+  /// No description provided for @resultatsPeriodsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load periods.'**
+  String get resultatsPeriodsError;
+
+  /// No description provided for @resultatsPeriodsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No period available.'**
+  String get resultatsPeriodsEmpty;
+
+  /// No description provided for @resultatsGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Boy'**
+  String get resultatsGenderMale;
+
+  /// No description provided for @resultatsGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Girl'**
+  String get resultatsGenderFemale;
+
+  /// No description provided for @resultatsGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get resultatsGenderOther;
+
+  /// No description provided for @resultatsDash.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get resultatsDash;
+
+  /// No description provided for @resultatsPercentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}%'**
+  String resultatsPercentValue(int value);
+
+  /// No description provided for @resultatsNoteOverMax.
+  ///
+  /// In en, this message translates to:
+  /// **'{note}/{max}'**
+  String resultatsNoteOverMax(String note, String max);
+
+  /// No description provided for @resultatsPlaceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} / {total}'**
+  String resultatsPlaceValue(int place, int total);
+
+  /// No description provided for @resultatsDeltaPts.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} pts'**
+  String resultatsDeltaPts(String value);
+
+  /// No description provided for @resultatsColumnRank.
+  ///
+  /// In en, this message translates to:
+  /// **'#'**
+  String get resultatsColumnRank;
+
+  /// No description provided for @resultatsColumnEleve.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get resultatsColumnEleve;
+
+  /// No description provided for @resultatsColumnMoyenne.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {period}'**
+  String resultatsColumnMoyenne(String period);
+
+  /// No description provided for @resultatsNonClasseBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unranked'**
+  String get resultatsNonClasseBadge;
+
+  /// No description provided for @resultatsSummaryAverageCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Average · {period}'**
+  String resultatsSummaryAverageCaption(String period);
+
+  /// No description provided for @resultatsSummaryReussites.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 passing} =1{1 passing} other{{count} passing}}'**
+  String resultatsSummaryReussites(int count);
+
+  /// No description provided for @resultatsSummaryEchecs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 failing} =1{1 failing} other{{count} failing}}'**
+  String resultatsSummaryEchecs(int count);
+
+  /// No description provided for @resultatsSummaryNonClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 unranked} =1{1 unranked} other{{count} unranked}}'**
+  String resultatsSummaryNonClasses(int count);
+
+  /// No description provided for @resultatsSummaryFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'{effectif} students · pass threshold {seuil}%'**
+  String resultatsSummaryFootnote(int effectif, int seuil);
+
+  /// No description provided for @resultatsEleveResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student found} other{{count} students found}}'**
+  String resultatsEleveResultsCount(int count);
+
+  /// No description provided for @resultatsFocusClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {classroom}'**
+  String resultatsFocusClassroom(String classroom);
+
+  /// No description provided for @resultatsFocusBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to class view'**
+  String get resultatsFocusBack;
+
+  /// No description provided for @resultatsFocusAnnualAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual average'**
+  String get resultatsFocusAnnualAverage;
+
+  /// No description provided for @resultatsFocusRankOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {count} ranked'**
+  String resultatsFocusRankOf(int count);
+
+  /// No description provided for @resultatsFocusNoBulletin.
+  ///
+  /// In en, this message translates to:
+  /// **'Student unranked for this period: no detailed report.'**
+  String get resultatsFocusNoBulletin;
+
+  /// No description provided for @resultatsProgressionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress over the year'**
+  String get resultatsProgressionTitle;
+
+  /// No description provided for @resultatsProgressionPointLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'P{index}'**
+  String resultatsProgressionPointLabel(int index);
+
+  /// No description provided for @resultatsStrengthsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengths'**
+  String get resultatsStrengthsTitle;
+
+  /// No description provided for @resultatsWeaknessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To improve'**
+  String get resultatsWeaknessesTitle;
+
+  /// No description provided for @resultatsOfficialBulletinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Official report card'**
+  String get resultatsOfficialBulletinTitle;
+
+  /// No description provided for @resultatsOfficialBulletinSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Domains & subjects, coursework + exam marks, maxima, rank — printable national template.'**
+  String get resultatsOfficialBulletinSubtitle;
+
+  /// No description provided for @resultatsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get resultatsComingSoon;
+
+  /// No description provided for @resultatsBulletinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report by domain · {period}'**
+  String resultatsBulletinTitle(String period);
+
+  /// No description provided for @resultatsBulletinLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'mark / maximum'**
+  String get resultatsBulletinLegend;
+
+  /// No description provided for @resultatsBulletinSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get resultatsBulletinSubtotal;
+
+  /// No description provided for @resultatsBulletinTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals obtained'**
+  String get resultatsBulletinTotal;
+
+  /// No description provided for @resultatsSynthesePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get resultatsSynthesePercent;
+
+  /// No description provided for @resultatsSynthesePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get resultatsSynthesePlace;
+
+  /// No description provided for @resultatsSyntheseApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get resultatsSyntheseApplication;
+
+  /// No description provided for @resultatsSyntheseConduite.
+  ///
+  /// In en, this message translates to:
+  /// **'Conduct'**
+  String get resultatsSyntheseConduite;
+
+  /// No description provided for @resultatsIdleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class or a student'**
+  String get resultatsIdleTitle;
+
+  /// No description provided for @resultatsIdleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cycle, a level and a class, then a period to display the results.'**
+  String get resultatsIdleDescription;
+
+  /// No description provided for @resultatsLoadingSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading results'**
+  String get resultatsLoadingSemantics;
+
+  /// No description provided for @resultatsEmptyClasse.
+  ///
+  /// In en, this message translates to:
+  /// **'No students to display for this class.'**
+  String get resultatsEmptyClasse;
+
+  /// No description provided for @resultatsEmptyClasseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for this class'**
+  String get resultatsEmptyClasseTitle;
+
+  /// No description provided for @resultatsEmptyEleveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found'**
+  String get resultatsEmptyEleveTitle;
+
+  /// No description provided for @resultatsEmptyEleveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the spelling of the last, middle or first name, or broaden your search.'**
+  String get resultatsEmptyEleveDescription;
+
+  /// No description provided for @resultatsEmptyAdjustAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust search'**
+  String get resultatsEmptyAdjustAction;
+
+  /// No description provided for @resultatsErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get resultatsErrorRetry;
+
+  /// No description provided for @resultatsErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get resultatsErrorReconnect;
+
+  /// No description provided for @resultatsErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get resultatsErrorContactAdmin;
+
+  /// No description provided for @resultatsErrorIncidentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String resultatsErrorIncidentCode(String code);
+
+  /// No description provided for @resultatsErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost'**
+  String get resultatsErrorNetworkTitle;
+
+  /// No description provided for @resultatsErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get resultatsErrorNetworkMessage;
+
+  /// No description provided for @resultatsErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get resultatsErrorUnauthorizedTitle;
+
+  /// No description provided for @resultatsErrorUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to continue.'**
+  String get resultatsErrorUnauthorizedMessage;
+
+  /// No description provided for @resultatsErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get resultatsErrorForbiddenTitle;
+
+  /// No description provided for @resultatsErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have the required permissions to view these results.'**
+  String get resultatsErrorForbiddenMessage;
+
+  /// No description provided for @resultatsErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get resultatsErrorServerTitle;
+
+  /// No description provided for @resultatsErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again shortly.'**
+  String get resultatsErrorServerMessage;
+
+  /// No description provided for @resultatsErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get resultatsErrorUnknownTitle;
+
+  /// No description provided for @resultatsErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected problem occurred. Please try again.'**
+  String get resultatsErrorUnknownMessage;
 }
 
 class _AppLocalizationsDelegate
