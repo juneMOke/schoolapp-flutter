@@ -12,6 +12,8 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/create_evaluation_request.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_event.dart';
@@ -55,9 +57,15 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
     final now = DateTime.now();
     _date = DateTime(now.year, now.month, now.day);
     if (_periodes.isNotEmpty) {
-      _periodeId = _periodes.first.periodeScolaireId;
-      final sps = _periodes.first.sousPeriodes;
-      _sousPeriodeId = sps.isNotEmpty ? sps.first.sousPeriodeId : null;
+      // Défaut : la première période encore OUVERTE (repli sur la première si
+      // toutes clôturées), pour ne pas ouvrir le formulaire sur une cible
+      // verrouillée quand un choix valide existe.
+      final periode = _periodes.firstWhere(
+        (p) => p.statut != StatutPeriode.cloturee,
+        orElse: () => _periodes.first,
+      );
+      _periodeId = periode.periodeScolaireId;
+      _sousPeriodeId = _defaultSousPeriodeId(periode);
     }
     final defaults = evalTypeDefaults(_type);
     _maxController = TextEditingController(text: _fmt(defaults.max));
@@ -81,7 +89,39 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
     return null;
   }
 
+  SousPeriodeNotation? get _selectedSousPeriode {
+    final sps = _selectedPeriode?.sousPeriodes ?? const <SousPeriodeNotation>[];
+    for (final sp in sps) {
+      if (sp.sousPeriodeId == _sousPeriodeId) return sp;
+    }
+    return null;
+  }
+
+  /// Id de la première sous-période OUVERTE de [periode] (repli sur la première ;
+  /// `null` si aucune).
+  String? _defaultSousPeriodeId(PeriodeNotation periode) {
+    final sps = periode.sousPeriodes;
+    if (sps.isEmpty) return null;
+    final sp = sps.firstWhere(
+      (s) => s.statut != StatutPeriode.cloturee,
+      orElse: () => sps.first,
+    );
+    return sp.sousPeriodeId;
+  }
+
   bool get _isExamen => _type == TypeEvaluation.examen;
+
+  bool get _isPeriodeClosed =>
+      _selectedPeriode?.statut == StatutPeriode.cloturee;
+
+  bool get _isSousPeriodeClosed =>
+      _selectedSousPeriode?.statut == StatutPeriode.cloturee;
+
+  /// Cible verrouillée : on n'ajoute pas d'évaluation à une période clôturée.
+  /// Examen → la période scolaire ; journalière → la sous-période (ou son
+  /// parent clôturé, par sécurité).
+  bool get _isTargetClosed =>
+      _isExamen ? _isPeriodeClosed : _isPeriodeClosed || _isSousPeriodeClosed;
 
   double get _maxValue =>
       double.tryParse(_maxController.text.trim().replaceAll(',', '.')) ?? 0;
@@ -107,15 +147,21 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
     if (id == null) return;
     setState(() {
       _periodeId = id;
-      final sps = _selectedPeriode?.sousPeriodes ?? const [];
+      final periode = _selectedPeriode;
+      final sps = periode?.sousPeriodes ?? const <SousPeriodeNotation>[];
       final stillThere = sps.any((sp) => sp.sousPeriodeId == _sousPeriodeId);
       if (!stillThere) {
-        _sousPeriodeId = sps.isNotEmpty ? sps.first.sousPeriodeId : null;
+        _sousPeriodeId = periode == null
+            ? null
+            : _defaultSousPeriodeId(periode);
       }
     });
   }
 
   void _submit() {
+    // Garde métier : jamais d'évaluation sur une période clôturée (le bouton est
+    // déjà désactivé, ceci couvre les chemins programmatiques).
+    if (_isTargetClosed) return;
     final request = _isExamen
         ? CreateEvaluationRequest.examen(
             date: _date!,
@@ -216,6 +262,9 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
             label: decoupageFieldLabel(l10n, decoupage),
             value: _periodeId,
             onChanged: _onPeriodeChanged,
+            errorText: _isPeriodeClosed
+                ? l10n.evalCreateClosedPeriodError
+                : null,
             items: [
               for (final p in _periodes)
                 EteeloSelectItem<String>(
@@ -232,6 +281,11 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
             value: _isExamen ? null : _sousPeriodeId,
             enabled: !_isExamen,
             placeholder: _isExamen ? l10n.evalCreateExamPlaceholder : null,
+            // Erreur affichée ici seulement si le blocage vient de la
+            // sous-période (sinon il est déjà signalé sur la période scolaire).
+            errorText: (!_isExamen && !_isPeriodeClosed && _isSousPeriodeClosed)
+                ? l10n.evalCreateClosedPeriodError
+                : null,
             onChanged: (id) => setState(() => _sousPeriodeId = id),
             items: [
               for (final sp in _selectedPeriode?.sousPeriodes ?? const [])
@@ -288,7 +342,9 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
             icon: Icons.check_rounded,
             isLoading: state.isInProgress,
             size: EteeloButtonSize.regular,
-            onPressed: (_isValid && !state.isInProgress) ? _submit : null,
+            onPressed: (_isValid && !_isTargetClosed && !state.isInProgress)
+                ? _submit
+                : null,
           ),
         ),
       ],

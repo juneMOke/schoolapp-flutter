@@ -1700,6 +1700,12 @@ abstract class AppLocalizations {
   /// **'Creating the evaluation failed. Please try again.'**
   String get evalCreateErrorToast;
 
+  /// No description provided for @evalCreateClosedPeriodError.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed period: you can\'t add an evaluation to it.'**
+  String get evalCreateClosedPeriodError;
+
   /// No description provided for @evalDetailBack.
   ///
   /// In en, this message translates to:

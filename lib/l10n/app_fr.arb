@@ -480,6 +480,7 @@
   },
   "evalCreateSuccessToast": "Évaluation créée",
   "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
+  "evalCreateClosedPeriodError": "Période clôturée : impossible d'y ajouter une évaluation.",
   "evalDetailBack": "Retour au cours",
   "evalBadgeComplete": "Clôturée",
   "evalBadgePartial": "Saisie en cours · {done}/{total}",

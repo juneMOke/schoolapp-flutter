@@ -997,6 +997,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'La création de l\'évaluation a échoué. Réessayez.';
 
   @override
+  String get evalCreateClosedPeriodError =>
+      'Période clôturée : impossible d\'y ajouter une évaluation.';
+
+  @override
   String get evalDetailBack => 'Retour au cours';
 
   @override

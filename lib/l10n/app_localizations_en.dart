@@ -993,6 +993,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Creating the evaluation failed. Please try again.';
 
   @override
+  String get evalCreateClosedPeriodError =>
+      'Closed period: you can\'t add an evaluation to it.';
+
+  @override
   String get evalDetailBack => 'Back to course';
 
   @override

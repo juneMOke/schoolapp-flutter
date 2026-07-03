@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
@@ -16,10 +17,14 @@ class MockCreateEvaluationUseCase extends Mock
     implements CreateEvaluationUseCase {}
 
 void main() {
-  SousPeriodeNotation sp(String id, int ordre) => SousPeriodeNotation(
+  SousPeriodeNotation sp(
+    String id,
+    int ordre, {
+    StatutPeriode statut = StatutPeriode.ouverte,
+  }) => SousPeriodeNotation(
     sousPeriodeId: id,
     ordre: ordre,
-    statut: StatutPeriode.ouverte,
+    statut: statut,
     nombreElevesNotes: 0,
     nombreEleves50: 0,
     moyennesEleves: const [],
@@ -47,7 +52,7 @@ void main() {
     ],
   );
 
-  Widget host() => MaterialApp(
+  Widget host([CoursNotationDetail? override]) => MaterialApp(
     locale: const Locale('fr'),
     localizationsDelegates: const [
       AppLocalizations.delegate,
@@ -62,7 +67,10 @@ void main() {
           create: (_) => CreateEvaluationBloc(
             createEvaluationUseCase: MockCreateEvaluationUseCase(),
           ),
-          child: EvalCreationForm(detail: detail, classroomName: '6e A'),
+          child: EvalCreationForm(
+            detail: override ?? detail,
+            classroomName: '6e A',
+          ),
         ),
       ),
     ),
@@ -91,4 +99,61 @@ void main() {
       expect(find.text('Examen semestriel'), findsOneWidget);
     },
   );
+
+  const closedError =
+      "Période clôturée : impossible d'y ajouter une évaluation.";
+
+  CoursNotationDetail detailWith(
+    StatutPeriode periodeStatut,
+    StatutPeriode sousPeriodeStatut,
+  ) => CoursNotationDetail(
+    coursId: 'c1',
+    classroomId: 'cl1',
+    brancheNom: 'Mathématiques',
+    effectif: 28,
+    periodes: [
+      PeriodeNotation(
+        periodeScolaireId: 'p1',
+        ordre: 1,
+        statut: periodeStatut,
+        sousPeriodes: [sp('sp1', 1, statut: sousPeriodeStatut)],
+      ),
+    ],
+  );
+
+  EteeloButton submitButton(WidgetTester tester) => tester.widget<EteeloButton>(
+    find.widgetWithText(EteeloButton, "Créer l'évaluation"),
+  );
+
+  testWidgets('période scolaire clôturée : bloque + message', (tester) async {
+    await tester.pumpWidget(
+      host(detailWith(StatutPeriode.cloturee, StatutPeriode.cloturee)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(closedError), findsOneWidget);
+    expect(submitButton(tester).onPressed, isNull);
+  });
+
+  testWidgets('sous-période clôturée (période ouverte) : bloque aussi', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(detailWith(StatutPeriode.ouverte, StatutPeriode.cloturee)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(closedError), findsOneWidget);
+    expect(submitButton(tester).onPressed, isNull);
+  });
+
+  testWidgets('tout ouvert + champs valides : bouton actif, aucun blocage', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host()); // détail par défaut : périodes ouvertes
+    await tester.pumpAndSettle();
+
+    expect(find.text(closedError), findsNothing);
+    expect(submitButton(tester).onPressed, isNotNull);
+  });
 }

@@ -485,6 +485,7 @@
   },
   "evalCreateSuccessToast": "Evaluation created",
   "evalCreateErrorToast": "Creating the evaluation failed. Please try again.",
+  "evalCreateClosedPeriodError": "Closed period: you can't add an evaluation to it.",
   "evalDetailBack": "Back to course",
   "evalBadgeComplete": "Closed",
   "evalBadgePartial": "Grading · {done}/{total}",
