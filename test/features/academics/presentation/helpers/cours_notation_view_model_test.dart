@@ -129,6 +129,22 @@ void main() {
 
   final now = DateTime(2026, 6, 1);
 
+  CoursNotationDetail detailWithPeriodes(int count) => CoursNotationDetail(
+    coursId: 'c',
+    classroomId: 'cl',
+    brancheNom: 'X',
+    effectif: 10,
+    periodes: [
+      for (var i = 0; i < count; i++)
+        PeriodeNotation(
+          periodeScolaireId: 'p${i + 1}',
+          ordre: i + 1,
+          statut: StatutPeriode.ouverte,
+          sousPeriodes: const [],
+        ),
+    ],
+  );
+
   test('aplatit périodes/sous-périodes/examen et dérive les statuts', () {
     final vm = CoursNotationViewModel.fromDetail(buildDetail(), now: now);
 
@@ -197,5 +213,34 @@ void main() {
     final vm = CoursNotationViewModel.fromDetail(detail, now: now);
     expect(vm.isEmpty, isTrue);
     expect(vm.prochaineEval, isNull);
+  });
+
+  test('découpage dérivé : 2 périodes -> semestres', () {
+    final vm = CoursNotationViewModel.fromDetail(buildDetail(), now: now);
+    expect(vm.decoupage, PeriodeDecoupage.semestre);
+    // Le découpage se propage à chaque onglet (pilote « Semestre N »).
+    expect(
+      vm.periodes.every((p) => p.decoupage == PeriodeDecoupage.semestre),
+      isTrue,
+    );
+  });
+
+  test('découpage dérivé : 3 ou 1 période(s) -> trimestres', () {
+    final tri = CoursNotationViewModel.fromDetail(
+      detailWithPeriodes(3),
+      now: now,
+    );
+    expect(tri.decoupage, PeriodeDecoupage.trimestre);
+    expect(
+      tri.periodes.every((p) => p.decoupage == PeriodeDecoupage.trimestre),
+      isTrue,
+    );
+
+    // Cas limite : une seule période reste un trimestre (« sinon trimestre »).
+    final uni = CoursNotationViewModel.fromDetail(
+      detailWithPeriodes(1),
+      now: now,
+    );
+    expect(uni.decoupage, PeriodeDecoupage.trimestre);
   });
 }

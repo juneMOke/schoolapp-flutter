@@ -111,7 +111,7 @@ void main() {
               context,
               brancheNom: 'Mathématiques',
               classroomName: '7e CTEB A',
-              label: 'Sous-période 2',
+              label: 'Période 2',
               bucket: bucket,
             ),
           ),

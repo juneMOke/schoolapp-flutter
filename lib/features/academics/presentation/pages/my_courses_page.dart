@@ -3,13 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
-import 'package:school_app_flutter/features/academics/presentation/widgets/my_courses_header.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/my_courses_skeleton.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/my_courses_success_view.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/states/my_courses_results_empty_state.dart';
@@ -59,8 +57,6 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const MyCoursesHeader(),
-              const SizedBox(height: AppSpacing.xl),
               AnimatedSize(
                 duration: AppMotion.standard,
                 curve: AppMotion.outCurve,
