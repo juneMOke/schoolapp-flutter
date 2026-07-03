@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/t
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_state.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_type_cards.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -204,19 +206,21 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   }
 
   Widget _cascade(AppLocalizations l10n) {
+    // Découpage dérivé du nombre de périodes (mêmes libellés que la page détail).
+    final decoupage = periodeDecoupageFromCount(_periodes.length);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: EteeloSelectInput<String>(
-            label: l10n.evalCreateFieldPeriode,
+            label: decoupageFieldLabel(l10n, decoupage),
             value: _periodeId,
             onChanged: _onPeriodeChanged,
             items: [
               for (final p in _periodes)
                 EteeloSelectItem<String>(
                   value: p.periodeScolaireId,
-                  label: l10n.courseDetailPeriodLabel(p.ordre),
+                  label: periodeScolaireLabel(l10n, p.ordre, decoupage),
                 ),
             ],
           ),
@@ -233,7 +237,7 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
               for (final sp in _selectedPeriode?.sousPeriodes ?? const [])
                 EteeloSelectItem<String>(
                   value: sp.sousPeriodeId,
-                  label: l10n.courseDetailSubPeriodLabel(sp.ordre),
+                  label: l10n.courseDetailPeriodLabel(sp.ordre),
                 ),
             ],
           ),

@@ -620,10 +620,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuMyCourses => 'My courses';
 
   @override
-  String get myCoursesEyebrow => 'Courses';
-
-  @override
-  String get myCoursesTitle => 'My courses';
+  String get subMenuTimetable => 'Timetable';
 
   @override
   String myCoursesCount(int classCount, int courseCount) {
@@ -770,13 +767,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String courseDetailPeriodLabel(int ordre) {
-    return 'Period $ordre';
+  String courseDetailSemesterLabel(int ordre) {
+    return 'Semester $ordre';
   }
 
   @override
-  String courseDetailSubPeriodLabel(int ordre) {
-    return 'Sub-period $ordre';
+  String courseDetailTrimesterLabel(int ordre) {
+    return 'Term $ordre';
+  }
+
+  @override
+  String courseDetailPeriodLabel(int ordre) {
+    return 'Period $ordre';
   }
 
   @override
@@ -937,10 +939,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateTitle => 'New evaluation';
 
   @override
-  String get evalCreateFieldPeriode => 'Period';
+  String get evalCreateFieldSemestre => 'Semester';
 
   @override
-  String get evalCreateFieldSousPeriode => 'Sub-period';
+  String get evalCreateFieldTrimestre => 'Term';
+
+  @override
+  String get evalCreateFieldSousPeriode => 'Period';
 
   @override
   String get evalCreateExamPlaceholder => 'Term exam';
@@ -4589,4 +4594,483 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scheduleEmpty => 'No session scheduled.';
+
+  @override
+  String get scheduleEyebrow => 'Courses';
+
+  @override
+  String get scheduleTitle => 'My timetable';
+
+  @override
+  String get scheduleViewWeek => 'Week';
+
+  @override
+  String get scheduleViewDay => 'Day';
+
+  @override
+  String get scheduleViewToggleSemantics => 'Switch between Week and Day view';
+
+  @override
+  String get scheduleWeekTitle => 'Typical week';
+
+  @override
+  String scheduleLoadSummary(int count, double hours) {
+    final intl.NumberFormat hoursNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String hoursString = hoursNumberFormat.format(hours);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '$count session',
+    );
+    return '$_temp0 · $hoursString h of class';
+  }
+
+  @override
+  String get scheduleToday => 'today';
+
+  @override
+  String get scheduleTodaySemantics => 'Today';
+
+  @override
+  String get scheduleBreak => 'Break';
+
+  @override
+  String get scheduleLoadingSemantics => 'Loading the timetable';
+
+  @override
+  String get scheduleEmptyDescription =>
+      'No slot is scheduled for you this week. The timetable is managed by the academic office.';
+
+  @override
+  String get scheduleEmptyDayTitle => 'No class this day';
+
+  @override
+  String scheduleEmptyDayDescription(String day) {
+    return 'No session is scheduled on $day.';
+  }
+
+  @override
+  String get scheduleWeekdayLongMon => 'Monday';
+
+  @override
+  String get scheduleWeekdayLongTue => 'Tuesday';
+
+  @override
+  String get scheduleWeekdayLongWed => 'Wednesday';
+
+  @override
+  String get scheduleWeekdayLongThu => 'Thursday';
+
+  @override
+  String get scheduleWeekdayLongFri => 'Friday';
+
+  @override
+  String get scheduleWeekdayLongSat => 'Saturday';
+
+  @override
+  String get scheduleWeekdayShortMon => 'Mon';
+
+  @override
+  String get scheduleWeekdayShortTue => 'Tue';
+
+  @override
+  String get scheduleWeekdayShortWed => 'Wed';
+
+  @override
+  String get scheduleWeekdayShortThu => 'Thu';
+
+  @override
+  String get scheduleWeekdayShortFri => 'Fri';
+
+  @override
+  String get scheduleWeekdayShortSat => 'Sat';
+
+  @override
+  String get scheduleErrorNetworkTitle => 'Connection lost';
+
+  @override
+  String get scheduleErrorNetworkMessage =>
+      'We couldn\'t reach the server. Check your connection and try again.';
+
+  @override
+  String get scheduleErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get scheduleErrorUnauthorizedMessage =>
+      'Your session has expired. Reconnect to view the timetable.';
+
+  @override
+  String get scheduleErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get scheduleErrorForbiddenMessage =>
+      'You don\'t have permission to view this timetable. Contact your administrator.';
+
+  @override
+  String get scheduleErrorServerTitle => 'Server error';
+
+  @override
+  String get scheduleErrorServerMessage =>
+      'Something went wrong on the server. Try again in a moment.';
+
+  @override
+  String get scheduleErrorUnknownTitle => 'Something went wrong';
+
+  @override
+  String get scheduleErrorUnknownMessage =>
+      'The timetable can\'t be loaded right now. Try again.';
+
+  @override
+  String get scheduleErrorRetry => 'Retry';
+
+  @override
+  String get scheduleErrorReconnect => 'Reconnect';
+
+  @override
+  String get scheduleErrorContactAdmin => 'Contact administrator';
+
+  @override
+  String scheduleErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get menuResultats => 'Results';
+
+  @override
+  String get subMenuResultatsClasse => 'Results by class';
+
+  @override
+  String get resultatsSearchEyebrow => 'Results';
+
+  @override
+  String get resultatsSearchTitle => 'Search results';
+
+  @override
+  String get resultatsSearchModeSemantics => 'Search mode';
+
+  @override
+  String get resultatsSearchByClass => 'By class';
+
+  @override
+  String get resultatsSearchByStudent => 'By student';
+
+  @override
+  String get resultatsSearchActionClasse => 'Show results';
+
+  @override
+  String get resultatsSearchActionEleve => 'Find the student';
+
+  @override
+  String get resultatsFieldLastName => 'Last name';
+
+  @override
+  String get resultatsFieldMiddleName => 'Middle name';
+
+  @override
+  String get resultatsFieldFirstName => 'First name(s)';
+
+  @override
+  String get resultatsFieldClassroom => 'Class';
+
+  @override
+  String get resultatsDecoupageTrimestres => 'Terms';
+
+  @override
+  String get resultatsDecoupageSemestres => 'Semesters';
+
+  @override
+  String get resultatsDecoupagePeriodes => 'Periods';
+
+  @override
+  String resultatsPeriodShortTrimestre(int ordre) {
+    return 'T$ordre';
+  }
+
+  @override
+  String resultatsPeriodShortSemestre(int ordre) {
+    return 'S$ordre';
+  }
+
+  @override
+  String resultatsPeriodShortGeneric(int ordre) {
+    return 'P$ordre';
+  }
+
+  @override
+  String resultatsPeriodLongTrimestre(int ordre) {
+    return 'Term $ordre';
+  }
+
+  @override
+  String resultatsPeriodLongSemestre(int ordre) {
+    return 'Semester $ordre';
+  }
+
+  @override
+  String resultatsPeriodLongGeneric(int ordre) {
+    return 'Period $ordre';
+  }
+
+  @override
+  String resultatsSubPeriodColumn(int ordre) {
+    return 'P$ordre';
+  }
+
+  @override
+  String get resultatsPeriodsError => 'Unable to load periods.';
+
+  @override
+  String get resultatsPeriodsEmpty => 'No period available.';
+
+  @override
+  String get resultatsGenderMale => 'Boy';
+
+  @override
+  String get resultatsGenderFemale => 'Girl';
+
+  @override
+  String get resultatsGenderOther => 'Other';
+
+  @override
+  String get resultatsDash => '—';
+
+  @override
+  String resultatsPercentValue(int value) {
+    return '$value%';
+  }
+
+  @override
+  String resultatsNoteOverMax(String note, String max) {
+    return '$note/$max';
+  }
+
+  @override
+  String resultatsPlaceValue(int place, int total) {
+    return '$place / $total';
+  }
+
+  @override
+  String resultatsDeltaPts(String value) {
+    return '$value pts';
+  }
+
+  @override
+  String get resultatsColumnRank => '#';
+
+  @override
+  String get resultatsColumnEleve => 'Student';
+
+  @override
+  String resultatsColumnMoyenne(String period) {
+    return 'Average $period';
+  }
+
+  @override
+  String get resultatsNonClasseBadge => 'Unranked';
+
+  @override
+  String resultatsSummaryAverageCaption(String period) {
+    return 'Average · $period';
+  }
+
+  @override
+  String resultatsSummaryReussites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count passing',
+      one: '1 passing',
+      zero: '0 passing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryEchecs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count failing',
+      one: '1 failing',
+      zero: '0 failing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryNonClasses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unranked',
+      one: '1 unranked',
+      zero: '0 unranked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsSummaryFootnote(int effectif, int seuil) {
+    return '$effectif students · pass threshold $seuil%';
+  }
+
+  @override
+  String resultatsEleveResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students found',
+      one: '1 student found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultatsFocusClassroom(String classroom) {
+    return 'Class $classroom';
+  }
+
+  @override
+  String get resultatsFocusBack => 'Back to class view';
+
+  @override
+  String get resultatsFocusAnnualAverage => 'Annual average';
+
+  @override
+  String resultatsFocusRankOf(int count) {
+    return 'of $count ranked';
+  }
+
+  @override
+  String get resultatsFocusNoBulletin =>
+      'Student unranked for this period: no detailed report.';
+
+  @override
+  String get resultatsProgressionTitle => 'Progress over the year';
+
+  @override
+  String resultatsProgressionPointLabel(int index) {
+    return 'P$index';
+  }
+
+  @override
+  String get resultatsStrengthsTitle => 'Strengths';
+
+  @override
+  String get resultatsWeaknessesTitle => 'To improve';
+
+  @override
+  String get resultatsOfficialBulletinTitle => 'Official report card';
+
+  @override
+  String get resultatsOfficialBulletinSubtitle =>
+      'Domains & subjects, coursework + exam marks, maxima, rank — printable national template.';
+
+  @override
+  String get resultatsComingSoon => 'Coming soon';
+
+  @override
+  String resultatsBulletinTitle(String period) {
+    return 'Report by domain · $period';
+  }
+
+  @override
+  String get resultatsBulletinLegend => 'mark / maximum';
+
+  @override
+  String get resultatsBulletinSubtotal => 'Subtotal';
+
+  @override
+  String get resultatsBulletinTotal => 'Totals obtained';
+
+  @override
+  String get resultatsSynthesePercent => 'Percentage';
+
+  @override
+  String get resultatsSynthesePlace => 'Rank';
+
+  @override
+  String get resultatsSyntheseApplication => 'Application';
+
+  @override
+  String get resultatsSyntheseConduite => 'Conduct';
+
+  @override
+  String get resultatsIdleTitle => 'Choose a class or a student';
+
+  @override
+  String get resultatsIdleDescription =>
+      'Select a cycle, a level and a class, then a period to display the results.';
+
+  @override
+  String get resultatsLoadingSemantics => 'Loading results';
+
+  @override
+  String get resultatsEmptyClasse => 'No students to display for this class.';
+
+  @override
+  String get resultatsEmptyClasseTitle => 'No results for this class';
+
+  @override
+  String get resultatsEmptyEleveTitle => 'No students found';
+
+  @override
+  String get resultatsEmptyEleveDescription =>
+      'Check the spelling of the last, middle or first name, or broaden your search.';
+
+  @override
+  String get resultatsEmptyAdjustAction => 'Adjust search';
+
+  @override
+  String get resultatsErrorRetry => 'Try again';
+
+  @override
+  String get resultatsErrorReconnect => 'Sign in again';
+
+  @override
+  String get resultatsErrorContactAdmin => 'Contact the administrator';
+
+  @override
+  String resultatsErrorIncidentCode(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get resultatsErrorNetworkTitle => 'Connection lost';
+
+  @override
+  String get resultatsErrorNetworkMessage =>
+      'Check your internet connection and try again.';
+
+  @override
+  String get resultatsErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get resultatsErrorUnauthorizedMessage =>
+      'Your session has expired. Sign in again to continue.';
+
+  @override
+  String get resultatsErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get resultatsErrorForbiddenMessage =>
+      'You don\'t have the required permissions to view these results.';
+
+  @override
+  String get resultatsErrorServerTitle => 'Server error';
+
+  @override
+  String get resultatsErrorServerMessage =>
+      'Something went wrong on our side. Please try again shortly.';
+
+  @override
+  String get resultatsErrorUnknownTitle => 'Something went wrong';
+
+  @override
+  String get resultatsErrorUnknownMessage =>
+      'An unexpected problem occurred. Please try again.';
 }

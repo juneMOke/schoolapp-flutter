@@ -50,7 +50,7 @@ void main() {
   final args = EvalDetailArgs(
     brancheNom: 'Mathématiques',
     classroomName: '6e A',
-    rattachementLabel: 'Période 1 · Sous-période 1',
+    rattachementLabel: 'Semestre 1 · Période 1',
     eval: EvalVm(
       id: 'e1',
       type: TypeEvaluation.interro,

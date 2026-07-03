@@ -150,6 +150,31 @@ class AppConstants {
   static const String saisirNoteEndpoint =
       '/api/v1/academics/evaluations/{evaluationId}/notes';
 
+  // ─── Résultats par classe (lecture seule, calcul live) ─────────────────────
+  /// Vue classe (synthèse + table roster × sous-période) pour une grande
+  /// période. `classroomId`, `periodeScolaireId` et `seuil?` en query.
+  static const String resultatsClasseEndpoint =
+      '/api/v1/academics/resultats/classe';
+
+  /// Vue focus d'un élève. `{studentId}` résolu via `@Path` ; `classroomId` et
+  /// `periodeScolaireId` en query.
+  static const String resultatFocusEndpoint =
+      '/api/v1/academics/resultats/classe/{studentId}';
+
+  /// Recherche roster scopée classe (mode « Par élève »). `{classroomId}`
+  /// résolu via `@Path` ; `academicYearId` requis + `nom`/`postnom`/`prenom`.
+  static const String classroomMembersSearchEndpoint =
+      '/api/v1/classrooms/{classroomId}/members/search';
+
+  /// Grandes périodes (trimestres/semestres) **d'une classe**, chaque entrée
+  /// portant le `periodeScolaireId` exigé par la vue classe / focus, la période
+  /// `courant` marquée, et un `libelle` déjà synthétisé côté serveur.
+  ///
+  /// Scopé **classe** (`classroomId` requis) : le backend résout l'année × cycle
+  /// depuis la classe. Trié par `ordre` asc. Auth JWT (`@Extras() requiredAuth`).
+  static const String resultatsPeriodesEndpoint =
+      '/api/v1/academics/resultats/periodes';
+
   // ─── Schedule (emploi du temps) ────────────────────────────────────────────
   /// Emploi du temps de l'enseignant connecté (résolu via le JWT).
   static const String myTimetableEndpoint = '/api/v1/schedule/my-timetable';

@@ -41,6 +41,17 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/course_b
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/evaluation_notes_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_bloc.dart';
+import 'package:school_app_flutter/features/resultats/data/datasources/resultats_remote_data_source.dart';
+import 'package:school_app_flutter/features/resultats/data/repositories/resultats_repository_impl.dart';
+import 'package:school_app_flutter/features/resultats/domain/repositories/resultats_repository.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_periodes_scolaires_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_resultat_focus_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/get_resultats_classe_usecase.dart';
+import 'package:school_app_flutter/features/resultats/domain/usecases/search_roster_usecase.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/eleve_search_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/periodes_scolaires_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/resultat_focus_bloc.dart';
+import 'package:school_app_flutter/features/resultats/presentation/bloc/resultats_classe_bloc.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
@@ -999,6 +1010,54 @@ Future<void> configureDependencies({
       createTimeSlot: getIt<CreateTimeSlotUseCase>(),
       createSession: getIt<CreateSessionUseCase>(),
       deleteSession: getIt<DeleteSessionUseCase>(),
+    ),
+  );
+
+  // ── Résultats par classe (lecture seule — endpoints authentifiés) ───────────
+  getIt.registerLazySingleton<ResultatsRemoteDataSource>(
+    () => ResultatsRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<ResultatsRepository>(
+    () => ResultatsRepositoryImpl(
+      remoteDataSource: getIt<ResultatsRemoteDataSource>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+
+  getIt.registerFactory<GetResultatsClasseUseCase>(
+    () => GetResultatsClasseUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<GetResultatFocusUseCase>(
+    () => GetResultatFocusUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<SearchRosterUseCase>(
+    () => SearchRosterUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<GetPeriodesScolairesUseCase>(
+    () => GetPeriodesScolairesUseCase(getIt<ResultatsRepository>()),
+  );
+
+  getIt.registerFactory<ResultatsClasseBloc>(
+    () => ResultatsClasseBloc(
+      getResultatsClasse: getIt<GetResultatsClasseUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<ResultatFocusBloc>(
+    () => ResultatFocusBloc(getResultatFocus: getIt<GetResultatFocusUseCase>()),
+  );
+
+  getIt.registerFactory<EleveSearchBloc>(
+    () => EleveSearchBloc(searchRoster: getIt<SearchRosterUseCase>()),
+  );
+
+  getIt.registerFactory<PeriodesScolairesBloc>(
+    () => PeriodesScolairesBloc(
+      getPeriodesScolaires: getIt<GetPeriodesScolairesUseCase>(),
     ),
   );
 }

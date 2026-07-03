@@ -24,7 +24,7 @@ void main() {
   EvalDetailArgs args(EvalState state) => EvalDetailArgs(
     brancheNom: 'Mathématiques',
     classroomName: '6e A',
-    rattachementLabel: 'Période 1 · Sous-période 2',
+    rattachementLabel: 'Semestre 1 · Période 2',
     eval: EvalVm(
       id: 'e1',
       type: TypeEvaluation.interro,
@@ -51,7 +51,7 @@ void main() {
     expect(find.text('Maximum : 10 pts'), findsOneWidget);
     expect(find.text('Poids : 1'), findsOneWidget);
     expect(find.text('6e A'), findsOneWidget);
-    expect(find.text('Période 1 · Sous-période 2'), findsOneWidget);
+    expect(find.text('Semestre 1 · Période 2'), findsOneWidget);
     expect(find.text('Proportionnalité'), findsOneWidget); // ligne chapitres
   });
 
