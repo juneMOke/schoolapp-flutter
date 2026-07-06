@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Table `outbox` — file d'écriture différée idempotente (socle).
@@ -48,4 +49,5 @@ const List<TableSchema> coreOfflineTables = [outboxTable, syncMetaTable];
 List<TableSchema> buildOfflineSchema() => [
   ...coreOfflineTables,
   // ── branches offline : ajouter les tables de module ci-dessous ──
+  ...enrollmentFinanceOfflineTables, // branche A (Inscription + Facturation)
 ];

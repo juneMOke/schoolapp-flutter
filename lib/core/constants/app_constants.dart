@@ -211,4 +211,27 @@ class AppConstants {
   // ⚠️ Ces endpoints n'existent pas encore côté serveur (specs « miroir back »).
   // Ils sont câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
   // Les branches offline ajoutent ici leurs endpoints /api/v1/sync/* dédiés.
+
+  // ── Offline sync — Inscription/Facturation ──
+  // Endpoints /api/v1/sync/* PENDING-BACKEND (contrats câblés côté client).
+  /// Agrégat d'inscription : POST 1..N commandes, 1 ACK par item.
+  static const String syncEnrollmentsEndpoint = '/api/v1/sync/enrollments';
+
+  /// Pull delta du référentiel (cycles, niveaux, années…). Curseur updatedSince.
+  static const String syncReferentielEndpoint = '/api/v1/sync/referentiel';
+
+  /// Cohorte N-1 (réinscription), statique sur la saison.
+  static const String syncReinscriptionCohortEndpoint =
+      '/api/v1/sync/reinscription-cohort';
+
+  /// Préinscriptions embarquées (delta opportuniste).
+  static const String syncPreEnrollmentsEndpoint =
+      '/api/v1/sync/pre-enrollments';
+
+  /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
+  static const String syncFinanceTariffsEndpoint =
+      '/api/v1/sync/finance/tariffs';
+
+  /// Pull delta du grand-livre (créances autoritaires + paiements + allocations).
+  static const String syncFinanceLedgerEndpoint = '/api/v1/sync/finance/ledger';
 }
