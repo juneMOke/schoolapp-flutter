@@ -53,6 +53,15 @@ dependencies:
   fl_chart: ^0.69.0
   package_info_plus: ^8.1.0
 
+  # ── Offline-first (socle) ────────────────────────────────────────────────
+  # Base locale chiffrée (SQLCipher), génération d'UUID client (idempotence),
+  # détection de connectivité pour le vidage opportuniste de l'outbox.
+  sqflite_sqlcipher: ^3.1.0+1
+  sqflite_common: ^2.5.4+6
+  path: ^1.9.0
+  uuid: ^4.5.1
+  connectivity_plus: ^6.1.0
+
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +81,8 @@ dev_dependencies:
   retrofit_generator: ^10.2.3
   flutter_gen_runner: ^5.13.0+1
   flutter_launcher_icons: ^0.14.1
+  # Base sqflite en mémoire pour les tests unitaires des DAO/outbox (hors device).
+  sqflite_common_ffi: ^2.3.4
 
 
 # For information on the generic Dart part of this file, see the

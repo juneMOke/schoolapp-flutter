@@ -194,4 +194,21 @@ class AppConstants {
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;
+
+  // ─── Offline / Socle local chiffré ───────────────────────────────────────────
+  /// Nom du fichier de la base locale chiffrée (SQLCipher).
+  static const String offlineDbName = 'school_offline.db';
+
+  /// Version du schéma sqflite local. Bump = nouvelle étape de migration
+  /// (onUpgrade dans AppDatabase). V1 = création greenfield.
+  static const int offlineDbSchemaVersion = 1;
+
+  /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
+  /// générée au premier lancement (cf. DatabaseKeyService).
+  static const String sqlCipherKeyStorageKey = 'sqlcipher_db_key';
+
+  // ─── Offline sync — contrats miroir backend ──────────────────────────────────
+  // ⚠️ Ces endpoints n'existent pas encore côté serveur (specs « miroir back »).
+  // Ils sont câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
+  // Les branches offline ajoutent ici leurs endpoints /api/v1/sync/* dédiés.
 }

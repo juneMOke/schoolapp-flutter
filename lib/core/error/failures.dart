@@ -47,3 +47,11 @@ class StorageFailure extends Failure {
 class AuthFailure extends Failure {
   const AuthFailure([super.message = 'Authentication error']);
 }
+
+/// 409 Conflict — verrou optimiste périmé au flush de l'outbox
+/// (version/last-write-wins). Le moteur de synchro déclenche un refetch + rejeu.
+class ConflictFailure extends Failure {
+  const ConflictFailure([
+    super.message = 'Conflict — resource version is stale',
+  ]);
+}
