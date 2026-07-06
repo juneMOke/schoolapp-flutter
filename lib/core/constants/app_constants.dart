@@ -126,71 +126,6 @@ class AppConstants {
   static const String disciplinaryCaseByIdEndpoint =
       '/api/v1/disciplinary-cases/{caseId}';
 
-  // ─── Academics ───────────────────────────────────────────────────────────
-  /// Cours de l'enseignant connecté, regroupés par classe (résolu via le JWT).
-  static const String myCoursesEndpoint = '/api/v1/academics/cours/mes-cours';
-
-  /// Détail de notation d'un cours par période (semestre/trimestre) puis
-  /// sous-période. `{coursId}` est résolu via `@Path`.
-  static const String coursNotationDetailEndpoint =
-      '/api/v1/academics/cours/{coursId}/notation';
-
-  /// Création d'une évaluation (interro/devoir/examen) sous un cours.
-  /// `{coursId}` est résolu via `@Path` ; l'école vient du JWT (multi-tenant).
-  static const String createEvaluationEndpoint =
-      '/api/v1/academics/cours/{coursId}/evaluations';
-
-  /// Grille de saisie : chaque élève de la classe du cours + sa note pour
-  /// l'évaluation `{evaluationId}` (résolu via `@Path`).
-  static const String notesElevesEndpoint =
-      '/api/v1/academics/evaluations/{evaluationId}/notes/eleves';
-
-  /// Saisie/rattrapage (upsert idempotent) de la note d'un élève pour
-  /// l'évaluation `{evaluationId}` (résolu via `@Path`).
-  static const String saisirNoteEndpoint =
-      '/api/v1/academics/evaluations/{evaluationId}/notes';
-
-  // ─── Résultats par classe (lecture seule, calcul live) ─────────────────────
-  /// Vue classe (synthèse + table roster × sous-période) pour une grande
-  /// période. `classroomId`, `periodeScolaireId` et `seuil?` en query.
-  static const String resultatsClasseEndpoint =
-      '/api/v1/academics/resultats/classe';
-
-  /// Vue focus d'un élève. `{studentId}` résolu via `@Path` ; `classroomId` et
-  /// `periodeScolaireId` en query.
-  static const String resultatFocusEndpoint =
-      '/api/v1/academics/resultats/classe/{studentId}';
-
-  /// Recherche roster scopée classe (mode « Par élève »). `{classroomId}`
-  /// résolu via `@Path` ; `academicYearId` requis + `nom`/`postnom`/`prenom`.
-  static const String classroomMembersSearchEndpoint =
-      '/api/v1/classrooms/{classroomId}/members/search';
-
-  /// Grandes périodes (trimestres/semestres) **d'une classe**, chaque entrée
-  /// portant le `periodeScolaireId` exigé par la vue classe / focus, la période
-  /// `courant` marquée, et un `libelle` déjà synthétisé côté serveur.
-  ///
-  /// Scopé **classe** (`classroomId` requis) : le backend résout l'année × cycle
-  /// depuis la classe. Trié par `ordre` asc. Auth JWT (`@Extras() requiredAuth`).
-  static const String resultatsPeriodesEndpoint =
-      '/api/v1/academics/resultats/periodes';
-
-  // ─── Schedule (emploi du temps) ────────────────────────────────────────────
-  /// Emploi du temps de l'enseignant connecté (résolu via le JWT).
-  static const String myTimetableEndpoint = '/api/v1/schedule/my-timetable';
-
-  /// Grille d'une classe (conseil pédagogique / admin).
-  static const String classroomGridEndpoint = '/api/v1/schedule/grid';
-
-  /// Création d'un créneau de sonnerie (une ligne de la grille).
-  static const String timeSlotsEndpoint = '/api/v1/schedule/time-slots';
-
-  /// Placement d'un cours à l'emploi du temps.
-  static const String sessionsEndpoint = '/api/v1/schedule/sessions';
-
-  /// Retrait d'une séance. `{id}` est résolu via `@Path`.
-  static const String sessionByIdEndpoint = '/api/v1/schedule/sessions/{id}';
-
   // ─── Pagination ────────────────────────────────────────────────────────────
   /// Taille de page par défaut pour les listes d'enrollments.
   static const int enrollmentDefaultPageSize = 10;
@@ -212,26 +147,10 @@ class AppConstants {
   // Ils sont câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
   // Les branches offline ajoutent ici leurs endpoints /api/v1/sync/* dédiés.
 
-  // ── Offline sync — Inscription/Facturation ──
-  // Endpoints /api/v1/sync/* PENDING-BACKEND (contrats câblés côté client).
-  /// Agrégat d'inscription : POST 1..N commandes, 1 ACK par item.
-  static const String syncEnrollmentsEndpoint = '/api/v1/sync/enrollments';
-
-  /// Pull delta du référentiel (cycles, niveaux, années…). Curseur updatedSince.
-  static const String syncReferentielEndpoint = '/api/v1/sync/referentiel';
-
-  /// Cohorte N-1 (réinscription), statique sur la saison.
-  static const String syncReinscriptionCohortEndpoint =
-      '/api/v1/sync/reinscription-cohort';
-
-  /// Préinscriptions embarquées (delta opportuniste).
-  static const String syncPreEnrollmentsEndpoint =
-      '/api/v1/sync/pre-enrollments';
-
-  /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
-  static const String syncFinanceTariffsEndpoint =
-      '/api/v1/sync/finance/tariffs';
-
-  /// Pull delta du grand-livre (créances autoritaires + paiements + allocations).
-  static const String syncFinanceLedgerEndpoint = '/api/v1/sync/finance/ledger';
+  // ── Offline sync — Classe/Présence/Discipline ──
+  /// GET delta des classes + rosters (miroir back CB-2). Le pull renvoie les
+  /// `ref_classrooms` + `ref_classroom_members` modifiés depuis `updatedSince`,
+  /// plus un curseur serveur. Query : `academicYearId`, `updatedSince` (epoch ms).
+  /// 304 Not Modified honoré (delta minimal). N'EXISTE PAS encore côté back.
+  static const String syncClassroomsEndpoint = '/api/v1/sync/classrooms';
 }

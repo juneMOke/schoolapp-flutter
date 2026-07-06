@@ -3,7 +3,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
-import 'package:school_app_flutter/core/di/offline_modules/enrollment_finance_offline_di.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
@@ -11,6 +10,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
 import 'package:uuid/uuid.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
@@ -65,6 +65,6 @@ Future<void> registerOfflineCore(GetIt getIt) async {
 /// Appelé en fin de `configureDependencies()` (après les features online, dont
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
-  registerEnrollmentFinanceOffline(getIt); // branche A
-  // registerClassroomAttendanceOffline(getIt);   // branche B
+  // registerEnrollmentFinanceOffline(getIt);     // branche A
+  registerClassroomAttendanceOffline(getIt); // branche B
 }
