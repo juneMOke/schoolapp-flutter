@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_logout_button.dart';
@@ -15,6 +18,11 @@ class TopBarActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Pastille d'état de synchro globale (source : SyncStatusCubit racine).
+        BlocBuilder<SyncStatusCubit, SyncStatus>(
+          builder: (context, status) => SyncIndicator(status: status),
+        ),
+        const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
         TopBarNotificationButton(onPressed: () {}),
         const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
         if (!isCompact) ...[

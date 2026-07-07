@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 
 class AttendanceFeatureScope extends StatefulWidget {
@@ -17,6 +19,8 @@ class AttendanceFeatureScope extends StatefulWidget {
 class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
   late final AttendanceBloc _attendanceBloc;
   late final DisciplinaryCaseBloc _disciplinaryCaseBloc;
+  late final AttendanceOfflineBloc _attendanceOfflineBloc;
+  late final DisciplinaryCaseOfflineBloc _disciplinaryCaseOfflineBloc;
   late final BootstrapCurrentYearBloc _bootstrapCurrentYearBloc;
 
   @override
@@ -24,6 +28,9 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
     super.initState();
     _attendanceBloc = GetIt.instance<AttendanceBloc>();
     _disciplinaryCaseBloc = GetIt.instance<DisciplinaryCaseBloc>();
+    _attendanceOfflineBloc = GetIt.instance<AttendanceOfflineBloc>();
+    _disciplinaryCaseOfflineBloc =
+        GetIt.instance<DisciplinaryCaseOfflineBloc>();
     _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
   }
 
@@ -31,6 +38,8 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
   void dispose() {
     _attendanceBloc.close();
     _disciplinaryCaseBloc.close();
+    _attendanceOfflineBloc.close();
+    _disciplinaryCaseOfflineBloc.close();
     _bootstrapCurrentYearBloc.close();
     super.dispose();
   }
@@ -41,6 +50,12 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
       providers: [
         BlocProvider<AttendanceBloc>.value(value: _attendanceBloc),
         BlocProvider<DisciplinaryCaseBloc>.value(value: _disciplinaryCaseBloc),
+        BlocProvider<AttendanceOfflineBloc>.value(
+          value: _attendanceOfflineBloc,
+        ),
+        BlocProvider<DisciplinaryCaseOfflineBloc>.value(
+          value: _disciplinaryCaseOfflineBloc,
+        ),
         BlocProvider<BootstrapCurrentYearBloc>.value(
           value: _bootstrapCurrentYearBloc,
         ),

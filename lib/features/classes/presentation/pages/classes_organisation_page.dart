@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/classes/presentation/helpers/classes
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_distribution_result_dialog.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_page_content.dart';
@@ -52,15 +54,22 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
-      child: BlocListener<ClassroomBloc, ClassroomState>(
-        // La distribution est désormais gérée par la sur-couche de résultat
-        // (PARCOURS 4) ; ce listener ne traite plus que la réassignation.
-        listenWhen: ClassesOrganisationPageHelpers.listenReassignStatus,
+      child: BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
+        // La réassignation passe désormais par le BLoC offline (PUT serveur +
+        // re-pull local best-effort). Les lectures (aperçu, roster) restent sur
+        // ClassroomBloc online. Action online → PAS d'état pending-sync ici.
+        listenWhen: (previous, current) =>
+            previous.reassignStatus != current.reassignStatus,
         listener: (context, state) {
           if (state.reassignStatus == ClassroomStatus.success) {
+            // Succès partiel (Right(false)) : déplacement serveur acquis mais
+            // re-pull local KO → message nuancé. Les lectures étant online, on
+            // recharge quand même l'aperçu qui reflète l'état serveur à jour.
             AppSnackBar.showSuccess(
               context,
-              l10n.classesOrganisationTransferSuccess,
+              state.reassignRePullFailed
+                  ? l10n.offlineQueuedGeneric
+                  : l10n.classesOrganisationTransferSuccess,
             );
             final selectedLevel = _selectedLevel;
             if (selectedLevel != null) {
@@ -124,12 +133,18 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
 
   Future<void> _handleReassignTap(ClassroomMemberReassignIntent intent) async {
     final l10n = AppLocalizations.of(context)!;
-    final classroomState = context.read<ClassroomBloc>().state;
-    if (classroomState.reassignStatus == ClassroomStatus.loading) {
+    // Anti-double-envoi : la réassignation en cours vit sur le BLoC offline.
+    final offlineReassignStatus = context
+        .read<ClassroomOfflineBloc>()
+        .state
+        .reassignStatus;
+    if (offlineReassignStatus == ClassroomStatus.loading) {
       AppSnackBar.showInfo(context, l10n.classesOrganisationTransferInProgress);
       return;
     }
 
+    // L'aperçu de distribution (lecture) reste porté par le ClassroomBloc online.
+    final classroomState = context.read<ClassroomBloc>().state;
     final selectedLevel = _selectedLevel;
     if (selectedLevel == null) {
       return;

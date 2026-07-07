@@ -7,8 +7,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -38,10 +39,23 @@ Future<void> showClassesOrganisationReassignDialog({
     return;
   }
 
-  context.read<ClassroomBloc>().add(
-    ClassroomMemberReassignRequested(
+  // Réassignation ONLINE via le BLoC offline (PUT serveur + re-pull local
+  // best-effort) : PAS d'outbox ici. L'année scolaire courante, requise par le
+  // use-case, est lue sur le BootstrapCurrentYearBloc porté par le scope.
+  final academicYearId =
+      context
+          .read<BootstrapCurrentYearBloc>()
+          .state
+          .bootstrap
+          ?.academicYear
+          .id ??
+      '';
+
+  context.read<ClassroomOfflineBloc>().add(
+    MemberReassignRequested(
       classroomMemberId: intent.classroomMemberId,
       targetClassroomId: selectedTargetId,
+      academicYearId: academicYearId,
     ),
   );
 }

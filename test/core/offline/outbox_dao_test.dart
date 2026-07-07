@@ -135,6 +135,18 @@ void main() {
     expect(deleted, 1);
   });
 
+  test('errorCount ne compte que les entrées en SYNC_ERROR', () async {
+    await dao.enqueue(entry(id: 'a'));
+    await dao.enqueue(entry(id: 'b'));
+    await dao.enqueue(entry(id: 'c'));
+    expect(await dao.errorCount(), 0);
+    await dao.markSyncError('a', 'rejet');
+    await dao.markSyncError('b', 'rejet');
+    expect(await dao.errorCount(), 2);
+    // pendingCount et errorCount sont disjoints.
+    expect(await dao.pendingCount(), 1);
+  });
+
   test('enqueue avec même id remplace (idempotence de re-enqueue)', () async {
     await dao.enqueue(entry(id: 'e1', attempts: 0));
     await dao.enqueue(entry(id: 'e1', attempts: 5));

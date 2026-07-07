@@ -103,6 +103,16 @@ class OutboxDao {
     return (rows.first['c'] as int?) ?? 0;
   }
 
+  /// Nombre d'entrées en erreur de synchro (rejet métier non rejouable
+  /// automatiquement) — alimente l'état « conflit » de la pastille globale.
+  Future<int> errorCount() async {
+    final rows = await _db.rawQuery(
+      'SELECT COUNT(*) AS c FROM $table WHERE status = ?',
+      [OutboxStatus.syncError.dbValue],
+    );
+    return (rows.first['c'] as int?) ?? 0;
+  }
+
   /// Purge les entrées acquittées (housekeeping optionnel).
   Future<int> deleteAcked() {
     return _db.delete(

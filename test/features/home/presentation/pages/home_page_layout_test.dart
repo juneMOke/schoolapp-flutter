@@ -1,15 +1,34 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+class _MockSyncStatusCubit extends MockCubit<SyncStatus>
+    implements SyncStatusCubit {}
+
 void main() {
+  // La barre supérieure monte désormais la pastille de synchro globale
+  // (BlocBuilder<SyncStatusCubit>) fournie à la racine en production ; ici on
+  // fournit un cubit mocké figé sur « synced ».
   Widget buildHarness() {
-    return const MaterialApp(
-      locale: Locale('fr'),
+    final syncStatusCubit = _MockSyncStatusCubit();
+    whenListen(
+      syncStatusCubit,
+      const Stream<SyncStatus>.empty(),
+      initialState: SyncStatus.synced,
+    );
+    return MaterialApp(
+      locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: HomePage(),
+      home: BlocProvider<SyncStatusCubit>.value(
+        value: syncStatusCubit,
+        child: const HomePage(),
+      ),
     );
   }
 

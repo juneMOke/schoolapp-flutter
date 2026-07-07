@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/discipli
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create_dialog.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_tab.dart';
@@ -239,13 +240,18 @@ class _DisciplinaryStudentDetailPageState
 
   void _showCreateDialog(BuildContext context) {
     final disciplinaryCaseBloc = context.read<DisciplinaryCaseBloc>();
+    // Écriture offline-first : le dialog dispatche désormais sur le BLoC
+    // offline (scopé par AttendanceFeatureScope). showDialog monte sous le
+    // Navigator racine, hors du scope : on relaie donc le BLoC via .value.
+    final disciplinaryCaseOfflineBloc = context
+        .read<DisciplinaryCaseOfflineBloc>();
     final studentId = widget.intent.studentId;
     final academicYearId = widget.intent.academicYearId;
 
     showDialog(
       context: context,
-      builder: (context) => BlocProvider<DisciplinaryCaseBloc>.value(
-        value: disciplinaryCaseBloc,
+      builder: (context) => BlocProvider<DisciplinaryCaseOfflineBloc>.value(
+        value: disciplinaryCaseOfflineBloc,
         child: DisciplinaryCaseCreateDialog(
           studentId: studentId,
           studentFirstName: widget.intent.studentFirstName,

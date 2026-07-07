@@ -4,19 +4,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
+import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class MockClassroomBloc extends MockBloc<ClassroomEvent, ClassroomState>
-    implements ClassroomBloc {}
+// La réassignation passe désormais par le BLoC offline (PUT online + re-pull
+// best-effort) ; l'année scolaire courante est lue sur le BootstrapCurrentYearBloc.
+class MockClassroomOfflineBloc
+    extends MockBloc<ClassroomOfflineEvent, ClassroomOfflineState>
+    implements ClassroomOfflineBloc {}
+
+class MockBootstrapCurrentYearBloc
+    extends MockBloc<BootstrapContextEvent, BootstrapContextState>
+    implements BootstrapCurrentYearBloc {}
 
 void main() {
-  late MockClassroomBloc bloc;
+  late MockClassroomOfflineBloc bloc;
+  late MockBootstrapCurrentYearBloc bootstrapBloc;
 
   const options = [
     ClassroomReassignOption(
@@ -66,8 +76,12 @@ void main() {
   );
 
   setUp(() {
-    bloc = MockClassroomBloc();
-    when(() => bloc.state).thenReturn(const ClassroomState());
+    bloc = MockClassroomOfflineBloc();
+    when(() => bloc.state).thenReturn(const ClassroomOfflineState());
+    bootstrapBloc = MockBootstrapCurrentYearBloc();
+    when(
+      () => bootstrapBloc.state,
+    ).thenReturn(const BootstrapContextState.initial());
   });
 
   Future<void> openDialog(
@@ -84,8 +98,11 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<ClassroomBloc>.value(
-          value: bloc,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<ClassroomOfflineBloc>.value(value: bloc),
+            BlocProvider<BootstrapCurrentYearBloc>.value(value: bootstrapBloc),
+          ],
           child: Builder(
             builder: (context) => Scaffold(
               body: Center(
@@ -138,9 +155,10 @@ void main() {
 
     verify(
       () => bloc.add(
-        const ClassroomMemberReassignRequested(
+        const MemberReassignRequested(
           classroomMemberId: 'm1',
           targetClassroomId: 'c2',
+          academicYearId: '',
         ),
       ),
     ).called(1);
@@ -162,9 +180,10 @@ void main() {
 
       verify(
         () => bloc.add(
-          const ClassroomMemberReassignRequested(
+          const MemberReassignRequested(
             classroomMemberId: 'm9',
             targetClassroomId: 'c2',
+            academicYearId: '',
           ),
         ),
       ).called(1);

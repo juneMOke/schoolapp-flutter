@@ -14,6 +14,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
@@ -139,6 +140,7 @@ class AttendanceResultsSection extends StatelessWidget {
             await showAttendanceSaveOverlay(
               context: context,
               attendanceBloc: context.read<AttendanceBloc>(),
+              offlineBloc: context.read<AttendanceOfflineBloc>(),
               classroomName: request.selectedClassroom.name,
               date: request.date,
               presentCount: presentCount,

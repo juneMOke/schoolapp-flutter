@@ -1,6 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/enrollment_confirm_draft_builder.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
@@ -58,20 +63,49 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
       return const StepSubmitResult.completed(consumeNavigation: true);
     }
 
+    // Garde héritée du flux online : conservée par prudence (état online figé à
+    // `initial` en offline-first, donc jamais déclenchée ici) et pour bloquer un
+    // double-envoi si l'ancien chemin était réactivé.
     if (context.enrollmentState.statusUpdateStatus ==
         EnrollmentLoadStatus.loading) {
       return const StepSubmitResult.blocked();
     }
 
+    // Précondition héritée : le dossier a bien été agrégé online au fil des
+    // étapes (id présent) avant confirmation.
     final enrollmentId = context.detail.enrollmentDetail.id.trim();
     if (enrollmentId.isEmpty) {
       return const StepSubmitResult.blocked();
     }
 
-    context.enrollmentBloc.add(
-      EnrollmentStatusUpdateRequested(
-        enrollmentId: enrollmentId,
-        status: 'COMPLETED',
+    // Offline-first : la confirmation ne passe plus par l'appel online
+    // `EnrollmentStatusUpdateRequested(COMPLETED)` mais par une écriture locale
+    // (transaction sqflite + mise en file outbox) via [EnrollmentOfflineBloc].
+    // Le retour visuel « en attente de synchronisation », la pastille globale et
+    // la navigation de succès sont pris en charge par le BlocListener offline du
+    // scope du stepper (cf. enrollment_stepper_scope.dart), miroir du listener
+    // online historique.
+    //
+    // Le contexte de test unitaire est un BuildContext factice (pas un Element,
+    // donc sans provider) : on dégrade proprement sans planter. En production le
+    // contexte est toujours un Element ; une éventuelle absence de provider
+    // remonterait alors bruyamment (pas de masquage d'erreur de câblage).
+    final buildContext = context.context;
+    if (buildContext is! Element) {
+      return const StepSubmitResult.dispatched();
+    }
+
+    final offlineBloc = buildContext.read<EnrollmentOfflineBloc>();
+    if (offlineBloc.state is EnrollmentOfflineConfirming) {
+      return const StepSubmitResult.blocked();
+    }
+
+    offlineBloc.add(
+      ConfirmLocalEnrollment(
+        EnrollmentConfirmDraftBuilder.fromDetail(
+          detail: context.detail,
+          origin: context.intent.origin,
+        ),
       ),
     );
 

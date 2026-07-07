@@ -1715,6 +1715,14 @@
     "statusPendingUpload": "Pending upload",
     "statusSyncConflict": "Conflict",
 
+    "offlineQueuedGeneric": "Saved — pending synchronization",
+    "offlinePaymentQueued": "Payment saved — pending synchronization",
+    "offlineEnrollmentQueued": "Enrollment saved — pending synchronization",
+    "offlineAttendanceQueued": "Attendance saved — pending synchronization",
+    "offlineDisciplinaryCaseQueued": "Disciplinary case saved — pending synchronization",
+    "offlineDisciplinaryCaseUpdatedQueued": "Case updated — pending synchronization",
+    "offlineWriteError": "Local save failed",
+
     "previous": "Previous",
     "next": "Next",
 

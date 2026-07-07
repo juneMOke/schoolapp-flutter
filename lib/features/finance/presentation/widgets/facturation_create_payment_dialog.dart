@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
@@ -29,6 +30,7 @@ Future<void> showFacturationCreatePaymentDialog(
   required FacturationCreatePaymentIntent intent,
   required PaymentsBloc paymentsBloc,
   required StudentChargesBloc studentChargesBloc,
+  required FinanceOfflineBloc financeOfflineBloc,
 }) {
   void refreshDetail() {
     paymentsBloc.add(
@@ -49,8 +51,14 @@ Future<void> showFacturationCreatePaymentDialog(
     context: context,
     barrierDismissible: true,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => BlocProvider<PaymentsBloc>.value(
-      value: paymentsBloc,
+    // Les dialogs vivent sur une route au-dessus de l'arbre de la page : les
+    // BLoCs sont fournis explicitement (lecture : PaymentsBloc online ;
+    // écriture : FinanceOfflineBloc offline-first).
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider<PaymentsBloc>.value(value: paymentsBloc),
+        BlocProvider<FinanceOfflineBloc>.value(value: financeOfflineBloc),
+      ],
       child: FacturationCreatePaymentDialogView(
         intent: intent,
         onPaymentCreated: refreshDetail,
@@ -186,7 +194,7 @@ class _FacturationCreatePaymentDialogViewState
     }
 
     final retained = _entries.where((e) => e.effectiveCents > 0).toList();
-    final bloc = context.read<PaymentsBloc>();
+    final offlineBloc = context.read<FinanceOfflineBloc>();
 
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
@@ -215,7 +223,7 @@ class _FacturationCreatePaymentDialogViewState
     // résultat et le toast est remplacé par la popin.
     final outcome = await showFacturationCreatePaymentConfirmDialog(
       context,
-      paymentsBloc: bloc,
+      financeOfflineBloc: offlineBloc,
       totalLabel: _formatWithCurrency(total, currency),
       studentName: _studentFullName(l10n),
       payerName: _payerFullName(l10n),

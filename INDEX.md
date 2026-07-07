@@ -16,6 +16,7 @@
 ├── 🚀 GITHUB_RELEASE_STEP_BY_STEP.md ← Guide clic par clic GitHub release
 ├── 🧭 GITHUB_RELEASE_RUNBOOK.md      ← Runbook opérationnel écran par écran
 ├── ✅ GITHUB_RELEASE_CHECKLIST.md    ← Checklist 1 page imprimable
+├── 📴 OFFLINE.md                    ← Architecture offline-first (décisions, câblage, gaps backend)
 ├── 📑 INDEX.md                     ← Ce fichier
 │
 └── [Autres fichiers du projet...]
@@ -304,6 +305,9 @@ Exemples:
 
 **...voulez une version imprimable**
 → Cliquez sur `GITHUB_RELEASE_CHECKLIST.md`
+
+**...travaillez sur la couche offline-first**
+→ Cliquez sur `OFFLINE.md`
 
 **...ne savez pas par où commencer**
 → Vous êtes ici (LISEZ CE FICHIER D'ABORD!)

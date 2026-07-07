@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -50,6 +51,7 @@ class _MyAppState extends State<MyApp> {
   late final AuthBloc _authBloc;
   late final BootstrapBloc _bootstrapBloc;
   late final ForgotPasswordBloc _forgotPasswordBloc;
+  late final SyncStatusCubit _syncStatusCubit;
   late final GoRouter _router;
 
   @override
@@ -61,6 +63,9 @@ class _MyAppState extends State<MyApp> {
         const BootstrapLocalRequested(key: AppConstants.bootstrapPayloadKey),
       );
     _forgotPasswordBloc = getIt<ForgotPasswordBloc>();
+    // Cubit global de synchro : instance unique app-lifetime, fournie à tout
+    // l'arbre via `.value` (top bar + écrans write-path la lisent par contexte).
+    _syncStatusCubit = getIt<SyncStatusCubit>();
     _router = AppRouter.createRouter(_authBloc, _bootstrapBloc);
   }
 
@@ -69,6 +74,7 @@ class _MyAppState extends State<MyApp> {
     _bootstrapBloc.close();
     _forgotPasswordBloc.close();
     _authBloc.close();
+    _syncStatusCubit.close();
     super.dispose();
   }
 
@@ -79,6 +85,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<BootstrapBloc>.value(value: _bootstrapBloc),
         BlocProvider<ForgotPasswordBloc>.value(value: _forgotPasswordBloc),
+        BlocProvider<SyncStatusCubit>.value(value: _syncStatusCubit),
       ],
       child: MultiBlocListener(
         listeners: [

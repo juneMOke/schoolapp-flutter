@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Issue de la sur-couche d'encaissement (confirmation → résultat).
@@ -34,7 +39,7 @@ class FacturationConfirmAllocationItem {
 /// sinon.
 Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   BuildContext context, {
-  required PaymentsBloc paymentsBloc,
+  required FinanceOfflineBloc financeOfflineBloc,
   required String totalLabel,
   required String studentName,
   required String payerName,
@@ -46,8 +51,10 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
     context: context,
     barrierDismissible: false,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => BlocProvider<PaymentsBloc>.value(
-      value: paymentsBloc,
+    // Route au-dessus de l'arbre de la page : le BLoC offline est fourni
+    // explicitement (l'encaissement est écrit en local puis mis en file outbox).
+    builder: (_) => BlocProvider<FinanceOfflineBloc>.value(
+      value: financeOfflineBloc,
       child: _CollectFlowDialog(
         totalLabel: totalLabel,
         studentName: studentName,
@@ -98,18 +105,24 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       _phase = _Phase.processing;
       _awaitingBloc = true;
     });
-    context.read<PaymentsBloc>().add(widget.request);
+    // Écriture offline-first : on écrit en local + mise en file outbox au lieu
+    // de l'appel réseau. La confirmation « succès » reflète la mise en file
+    // (pending-sync), pas encore l'acquittement serveur.
+    context.read<FinanceOfflineBloc>().add(
+      RecordLocalPayment(recordPaymentDraftFromRequest(widget.request)),
+    );
   }
 
-  void _onBlocState(PaymentsState state) {
+  void _onBlocState(FinanceOfflineState state) {
     if (!mounted || !_awaitingBloc) return;
-    if (state.createStatus == PaymentsStatus.success) {
+    if (state is FinanceOfflinePaymentPendingSync) {
       _awaitingBloc = false;
-      // Le rafraîchissement du détail est déclenché APRÈS fermeture de la popin
-      // (cf. _onCollect) pour qu'un éventuel échec de refresh ne contredise pas
-      // l'écran de succès. La liste est déjà à jour (le bloc insère le paiement).
+      // Encaissement écrit localement (en attente de synchro) : on allume la
+      // pastille globale et le rafraîchissement du détail est déclenché APRÈS
+      // fermeture de la popin (cf. _onCollect).
+      context.read<SyncStatusCubit>().notifyLocalWrite();
       setState(() => _phase = _Phase.success);
-    } else if (state.createStatus == PaymentsStatus.failure) {
+    } else if (state is FinanceOfflineError) {
       _awaitingBloc = false;
       setState(() {
         _phase = _Phase.error;
@@ -139,8 +152,8 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
     final resultActive = _phase != _Phase.confirm;
 
-    return BlocListener<PaymentsBloc, PaymentsState>(
-      listenWhen: (prev, curr) => prev.createStatus != curr.createStatus,
+    return BlocListener<FinanceOfflineBloc, FinanceOfflineState>(
+      listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
       listener: (_, state) => _onBlocState(state),
       // Pendant le traitement, la sortie est neutralisée (croix, scrim ET
       // bouton retour système) : une issue succès|échec est toujours rendue
@@ -358,7 +371,7 @@ class _ResultBody extends StatelessWidget {
       _Phase.error => (
         EteeloResultKind.error,
         l10n.facturationCollectErrorTitle,
-        l10n.facturationCollectErrorNoDebit,
+        l10n.offlineWriteError,
       ),
       _ => (EteeloResultKind.processing, l10n.facturationCollectProcessing, ''),
     };
@@ -388,6 +401,14 @@ class _ResultBody extends StatelessWidget {
             ),
           ],
           if (phase == _Phase.success) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            // Retour pending-sync : l'encaissement est en file, pas encore
+            // synchronisé avec le serveur.
+            Text(
+              l10n.offlinePaymentQueued,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
             const SizedBox(height: AppDimensions.spacingM),
             _ResultChip(
               icon: Icons.receipt_long_outlined,

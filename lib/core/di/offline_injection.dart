@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
@@ -51,6 +52,17 @@ Future<void> registerOfflineCore(GetIt getIt) async {
     () => SyncEngine(
       outbox: getIt<OutboxDao>(),
       connectivity: getIt<ConnectivityService>(),
+    ),
+  );
+
+  // Cubit global d'état de synchro : source de la pastille du top bar. En
+  // factory (règle #2), fourni UNE fois à la racine (`main.dart`, `.value`), ce
+  // qui garantit une instance unique app-lifetime accessible via `context`.
+  getIt.registerFactory<SyncStatusCubit>(
+    () => SyncStatusCubit(
+      outbox: getIt<OutboxDao>(),
+      connectivity: getIt<ConnectivityService>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
 }

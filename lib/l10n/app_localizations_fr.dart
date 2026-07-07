@@ -4005,6 +4005,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusSyncConflict => 'Conflit';
 
   @override
+  String get offlineQueuedGeneric =>
+      'Enregistré — en attente de synchronisation';
+
+  @override
+  String get offlinePaymentQueued =>
+      'Paiement enregistré — en attente de synchronisation';
+
+  @override
+  String get offlineEnrollmentQueued =>
+      'Inscription enregistrée — en attente de synchronisation';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Appel enregistré — en attente de synchronisation';
+
+  @override
+  String get offlineDisciplinaryCaseQueued =>
+      'Cas disciplinaire enregistré — en attente de synchronisation';
+
+  @override
+  String get offlineDisciplinaryCaseUpdatedQueued =>
+      'Cas mis à jour — en attente de synchronisation';
+
+  @override
+  String get offlineWriteError => 'Échec de l\'enregistrement local';
+
+  @override
   String get previous => 'Précédent';
 
   @override

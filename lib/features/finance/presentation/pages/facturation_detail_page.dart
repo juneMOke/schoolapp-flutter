@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
@@ -88,6 +89,7 @@ class FacturationDetailPage extends StatelessWidget {
       ),
       paymentsBloc: context.read<PaymentsBloc>(),
       studentChargesBloc: context.read<StudentChargesBloc>(),
+      financeOfflineBloc: context.read<FinanceOfflineBloc>(),
     );
   }
 
@@ -146,6 +148,11 @@ class FacturationDetailPage extends StatelessWidget {
         BlocProvider<PaymentsBloc>(create: (_) => getIt<PaymentsBloc>()),
         BlocProvider<StudentChargesBloc>(
           create: (_) => getIt<StudentChargesBloc>(),
+        ),
+        // Chemin d'écriture offline-first de l'encaissement (file outbox).
+        // La lecture (paiements/créances) reste sur les BLoCs online ci-dessus.
+        BlocProvider<FinanceOfflineBloc>(
+          create: (_) => getIt<FinanceOfflineBloc>(),
         ),
       ],
       child: AppPageBackground(

@@ -6792,6 +6792,48 @@ abstract class AppLocalizations {
   /// **'Conflict'**
   String get statusSyncConflict;
 
+  /// No description provided for @offlineQueuedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved — pending synchronization'**
+  String get offlineQueuedGeneric;
+
+  /// No description provided for @offlinePaymentQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment saved — pending synchronization'**
+  String get offlinePaymentQueued;
+
+  /// No description provided for @offlineEnrollmentQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment saved — pending synchronization'**
+  String get offlineEnrollmentQueued;
+
+  /// No description provided for @offlineAttendanceQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved — pending synchronization'**
+  String get offlineAttendanceQueued;
+
+  /// No description provided for @offlineDisciplinaryCaseQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case saved — pending synchronization'**
+  String get offlineDisciplinaryCaseQueued;
+
+  /// No description provided for @offlineDisciplinaryCaseUpdatedQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Case updated — pending synchronization'**
+  String get offlineDisciplinaryCaseUpdatedQueued;
+
+  /// No description provided for @offlineWriteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Local save failed'**
+  String get offlineWriteError;
+
   /// No description provided for @previous.
   ///
   /// In en, this message translates to:

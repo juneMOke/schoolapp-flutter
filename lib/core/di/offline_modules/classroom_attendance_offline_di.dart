@@ -34,6 +34,10 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_offline_disciplinary_cases_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/update_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/update_disciplinary_case_status_usecase.dart';
+// ── BLoCs de présentation offline ──
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 
 /// Registrar DI de la branche offline **Classe + Présence/Discipline**.
 ///
@@ -134,6 +138,30 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt.registerFactory<UpdateDisciplinaryCaseStatusUseCase>(
     () => UpdateDisciplinaryCaseStatusUseCase(
       getIt<DisciplinaryCaseRepository>(),
+    ),
+  );
+
+  // ── BLoCs (registerFactory) ──
+  getIt.registerFactory<ClassroomOfflineBloc>(
+    () => ClassroomOfflineBloc(
+      syncClassrooms: getIt<SyncClassroomsUseCase>(),
+      getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
+      getRoster: getIt<GetOfflineRosterUseCase>(),
+      reassignMember: getIt<ReassignMemberOnlineUseCase>(),
+    ),
+  );
+  getIt.registerFactory<AttendanceOfflineBloc>(
+    () => AttendanceOfflineBloc(
+      loadDaily: getIt<LoadDailyAttendanceUseCase>(),
+      recordDaily: getIt<RecordDailyAttendanceOfflineUseCase>(),
+      getRate: getIt<GetLocalAttendanceRateUseCase>(),
+    ),
+  );
+  getIt.registerFactory<DisciplinaryCaseOfflineBloc>(
+    () => DisciplinaryCaseOfflineBloc(
+      createCase: getIt<CreateDisciplinaryCaseOfflineUseCase>(),
+      updateCase: getIt<UpdateDisciplinaryCaseOfflineUseCase>(),
+      getCases: getIt<GetOfflineDisciplinaryCasesUseCase>(),
     ),
   );
 

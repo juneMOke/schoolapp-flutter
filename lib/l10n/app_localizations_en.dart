@@ -3963,6 +3963,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSyncConflict => 'Conflict';
 
   @override
+  String get offlineQueuedGeneric => 'Saved — pending synchronization';
+
+  @override
+  String get offlinePaymentQueued => 'Payment saved — pending synchronization';
+
+  @override
+  String get offlineEnrollmentQueued =>
+      'Enrollment saved — pending synchronization';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Attendance saved — pending synchronization';
+
+  @override
+  String get offlineDisciplinaryCaseQueued =>
+      'Disciplinary case saved — pending synchronization';
+
+  @override
+  String get offlineDisciplinaryCaseUpdatedQueued =>
+      'Case updated — pending synchronization';
+
+  @override
+  String get offlineWriteError => 'Local save failed';
+
+  @override
   String get previous => 'Previous';
 
   @override
