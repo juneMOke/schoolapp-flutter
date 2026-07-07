@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
@@ -55,6 +56,13 @@ Future<void> registerOfflineCore(GetIt getIt) async {
     ),
   );
 
+  // Orchestrateur de pull delta (SOC-1) — pendant *lecture* du SyncEngine. Les
+  // branches enregistrent leurs `PullHandler` dessus dans
+  // `registerOfflineModules()` ; déclenché au retour online par le cubit ci-dessous.
+  getIt.registerLazySingleton<PullCoordinator>(
+    () => PullCoordinator(connectivity: getIt<ConnectivityService>()),
+  );
+
   // Cubit global d'état de synchro : source de la pastille du top bar. En
   // factory (règle #2), fourni UNE fois à la racine (`main.dart`, `.value`), ce
   // qui garantit une instance unique app-lifetime accessible via `context`.
@@ -63,6 +71,7 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       outbox: getIt<OutboxDao>(),
       connectivity: getIt<ConnectivityService>(),
       syncEngine: getIt<SyncEngine>(),
+      pullCoordinator: getIt<PullCoordinator>(),
     ),
   );
 }

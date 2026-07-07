@@ -63,10 +63,11 @@ void main() {
     attempts: attempts,
   );
 
-  SyncEngine buildEngine() => SyncEngine(
+  SyncEngine buildEngine({int maxAttempts = 50}) => SyncEngine(
     outbox: dao,
     connectivity: connectivityService,
     now: () => fixedNow,
+    maxAttempts: maxAttempts,
   );
 
   void goOnline() {
@@ -185,6 +186,59 @@ void main() {
     final report = await engine.flush();
     expect(report.noHandler, 1);
     expect(await dao.pendingCount(), 1);
+  });
+
+  test(
+    'poison : au-delà de maxAttempts → SYNC_ERROR (plus de retry)',
+    () async {
+      goOnline();
+      // attempts déjà à 2 ; maxAttempts=2 → la prochaine tentative (3) dépasse.
+      await dao.enqueue(entry(id: 'e1', attempts: 2));
+      final engine = buildEngine(maxAttempts: 2)
+        ..registerHandler(
+          RecordingHandler(
+            'ENROLLMENT',
+            const OutboxDispatchResult.retry('timeout'),
+            [],
+          ),
+        );
+      final report = await engine.flush();
+      expect(report.poisoned, 1);
+      expect(report.retried, 0);
+      final rows = await db.query('outbox', where: 'id = ?', whereArgs: ['e1']);
+      expect(rows.first['status'], OutboxStatus.syncError.dbValue);
+      expect(rows.first['last_error'], contains('poison'));
+    },
+  );
+
+  test('en dessous du seuil : reste en retry (non poisonné)', () async {
+    goOnline();
+    await dao.enqueue(entry(id: 'e1', attempts: 1));
+    final engine = buildEngine(maxAttempts: 5)
+      ..registerHandler(
+        RecordingHandler(
+          'ENROLLMENT',
+          const OutboxDispatchResult.retry('timeout'),
+          [],
+        ),
+      );
+    final report = await engine.flush();
+    expect(report.retried, 1);
+    expect(report.poisoned, 0);
+    final rows = await db.query('outbox', where: 'id = ?', whereArgs: ['e1']);
+    expect(rows.first['status'], OutboxStatus.pending.dbValue);
+  });
+
+  test('purge : une entrée ACKED est supprimée après le flush', () async {
+    goOnline();
+    await dao.enqueue(entry(id: 'e1'));
+    final engine = buildEngine()
+      ..registerHandler(
+        RecordingHandler('ENROLLMENT', const OutboxDispatchResult.acked(), []),
+      );
+    await engine.flush();
+    final rows = await db.query('outbox', where: 'id = ?', whereArgs: ['e1']);
+    expect(rows, isEmpty);
   });
 
   test('flush concurrent : le second est skipped', () async {

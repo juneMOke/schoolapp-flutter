@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 /// Cubit global d'état de synchronisation : source de vérité de la
@@ -19,9 +20,11 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 ///  - sinon → [SyncStatus.synced].
 ///
 /// Sert aussi de colle du « sync loop » : à chaque passage à *online* il
-/// déclenche un flush opportuniste de l'outbox (aucun autre déclencheur global
-/// n'existait). Les écrans qui écrivent en local appellent [notifyLocalWrite]
-/// après une écriture réussie pour rafraîchir immédiatement la pastille.
+/// déclenche un flush opportuniste de l'outbox **puis un pull delta**
+/// ([PullCoordinator], optionnel) des ressources de référence — aucun autre
+/// déclencheur global n'existe. Les écrans qui écrivent en local appellent
+/// [notifyLocalWrite] après une écriture réussie pour rafraîchir immédiatement
+/// la pastille (push seul, **sans** pull).
 ///
 /// **Entièrement défensif** : aucun accès plugin/base ne doit faire remonter une
 /// exception dans l'arbre de widgets — les tests ne mockent pas
@@ -31,6 +34,7 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
   final OutboxDao _outbox;
   final ConnectivityService _connectivity;
   final SyncEngine _syncEngine;
+  final PullCoordinator? _pullCoordinator;
 
   StreamSubscription<bool>? _connectivitySub;
 
@@ -38,9 +42,11 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     required OutboxDao outbox,
     required ConnectivityService connectivity,
     required SyncEngine syncEngine,
+    PullCoordinator? pullCoordinator,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
+       _pullCoordinator = pullCoordinator,
        super(SyncStatus.synced) {
     _listenConnectivity();
     unawaited(refresh());
@@ -63,7 +69,26 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
       _safeEmit(SyncStatus.offline);
       return;
     }
-    await _flushAndRefresh();
+    await _syncOnReconnect();
+  }
+
+  /// Au retour *online* : on POUSSE (vidage outbox) puis on TIRE (pull delta des
+  /// ressources de référence) pour rafraîchir le cache local, puis on recalcule
+  /// la pastille. Le pull est silencieux (304 fréquent) et **n'altère pas**
+  /// l'état de synchro, qui ne reflète que la file de push.
+  Future<void> _syncOnReconnect() async {
+    _safeEmit(SyncStatus.syncing);
+    try {
+      await _syncEngine.flush();
+    } catch (_) {
+      // flush() encapsule déjà ses erreurs ; garde-fou par prudence.
+    }
+    try {
+      await _pullCoordinator?.pullAll();
+    } catch (_) {
+      // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.
+    }
+    await refresh();
   }
 
   /// Recalcule le statut depuis l'état courant du réseau et de l'outbox.

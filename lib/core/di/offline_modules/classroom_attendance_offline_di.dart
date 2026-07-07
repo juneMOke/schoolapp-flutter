@@ -2,10 +2,14 @@ import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+// ── Bootstrap (dépendance des pull handlers : année courante) ──
+import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
 // ── Classe (offline) ──
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_handler.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_sync_api.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
@@ -178,6 +182,14 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       remoteDataSource: getIt<DisciplinaryCaseRemoteDataSource>(),
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
       requiredAuth: requiredAuth,
+    ),
+  );
+
+  // ── Handlers de pull delta (routés par ressource sur le coordinateur) ──
+  getIt<PullCoordinator>().registerHandler(
+    ClassroomPullHandler(
+      offlineRepository: getIt<ClassroomOfflineRepository>(),
+      bootstrapRepository: getIt<BootstrapLocalRepository>(),
     ),
   );
 }

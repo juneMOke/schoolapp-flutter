@@ -56,7 +56,7 @@ pas** (refetch online) ; un **encaissement local n'apparaît pas** avant l'ACK.
 | **B2** | Curseur de pull `int` epoch côté Flutter vs **ISO-8601** côté back | `classroom_sync_api.dart:22` (`@Query int?`) ; `classroom_delta_model.dart` (`_asIntOrNull`) ; `sync_meta` `cursor INTEGER` | `serverCursor` ISO → `null` → **pull complet en boucle** ; `int` envoyé → `400` dès qu'un curseur réel est stocké | **Corrigé (Phase 0)** |
 | **B3** | Discipline : refetch post-création via le BLoC **online** | `disciplinary_student_detail_page.dart:264-272` | Cas créé hors-ligne **invisible** | Ouvert (Phase 2) |
 | **B4** | Présence : stockage « par exception » → 0 ligne = « tous présents » **=** « appel non fait » | `attendance_local_data_source.dart:81-98` | Ambiguïté d'état (AF-1 non tenu) ; taux 100 % ambigu | Ouvert (Phase 4) |
-| **B5** | Outbox : pas de cap poison ; `deleteAcked()`/`pendingReadyForSchool()` jamais appelés | `sync_engine.dart:120-128` ; `outbox_dao.dart:40,117` | Entrée en échec `PENDING` **indéfiniment** ; ACKED s'accumulent ; garde tenant inactif | Ouvert (Phase 1) |
+| **B5** | Outbox : pas de cap poison ; `deleteAcked()`/`pendingReadyForSchool()` jamais appelés | `sync_engine.dart:120-128` ; `outbox_dao.dart:40,117` | Entrée en échec `PENDING` **indéfiniment** ; ACKED s'accumulent ; garde tenant inactif | ✅ Phase 1 (cap poison + purge) ; tenant scope **différé** (voir SOC-3) |
 
 ---
 
@@ -66,11 +66,18 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
 ⏳ = **attente backend V1.1 légitime** (ne rien forcer).
 
 ### Socle transverse
-- `SOC-1` **P0** — `SyncEngine` **push-only** : aucune orchestration de PULL
-  (sauf Classe, isolée). Attendance/Notes/Schedule livrés mais **jamais
-  pull-és**. *(linchpin de tout le reste)* — `sync_engine.dart:69-118`.
-- `SOC-2` **P1** — pas de cap poison, `deleteAcked()` jamais appelé (= B5).
-- `SOC-3` **P1** — flush non scopé tenant (`pendingReadyForSchool` = code mort).
+- `SOC-1` **P0** — ✅ **Phase 1** : orchestration de PULL livrée
+  (`PullCoordinator` + `PullHandler`, déclenchée au retour online par
+  `SyncStatusCubit`, curseur ISO via `SyncMetaDao`). **Classe** branchée
+  (`ClassroomPullHandler`, résout l'année via bootstrap local). *Reste* :
+  handlers Présence (client `@GET /sync/attendance` à créer) et
+  Notes/Schedule (modules absents → Phase 3).
+- `SOC-2` **P1** — ✅ **Phase 1** : cap poison-message (`maxAttempts` →
+  `SYNC_ERROR`) + purge `deleteAcked()` en fin de flush.
+- `SOC-3` **P1** — ⏸ **différé** : flush scopé tenant. Activer
+  `pendingReadyForSchool` **filtrerait tout** aujourd'hui (les writers ne
+  renseignent pas `school_id`, nullable) → à câbler **avec** l'écriture du
+  `school_id` à l'enqueue, pas avant. Mono-établissement V1 : non bloquant.
 
 ### Inscription
 - `ENR-1` **P1** — lectures locales listes/détail/recherche **jamais branchées**.
@@ -131,12 +138,17 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
    schéma `sync_meta`).
 4. **B1** — reclassé (limite domaine, voir §5), pas de correctif cosmétique.
 
-### Phase 1 — Socle : orchestrer le PULL (`SOC-1`, prérequis de tout) · P0
-- Orchestration de pull par ressource (curseur `SyncMetaDao` ISO), déclenchée
-  au **retour online** + à la demande.
-- Clients `@GET` pour attendance / academics / schedule (modèle `classroom_sync_api`).
-- Housekeeping outbox (`SOC-2/3` = B5) : cap tentatives → `SYNC_ERROR`,
-  `deleteAcked()`, décision `pendingReadyForSchool`.
+### Phase 1 — Socle : orchestrer le PULL (`SOC-1`, prérequis de tout) · P0 — ✅ LIVRÉE
+- ✅ `PullCoordinator` + `PullHandler` (`lib/core/offline/`) : registre par
+  ressource, pré-garde connectivité, verrou anti-concurrence, isolation par
+  handler. Déclenché au **retour online** par `SyncStatusCubit` (push → pull →
+  refresh) ; curseur ISO via `SyncMetaDao`.
+- ✅ `ClassroomPullHandler` branché (résout l'année via bootstrap local).
+- ✅ Housekeeping outbox : cap poison (`maxAttempts` → `SYNC_ERROR`) +
+  `deleteAcked()` en fin de flush.
+- ⏭ **Reporté** : client `@GET /sync/attendance` + `AttendancePullHandler`
+  (Présence) ; handlers Notes/Schedule (modules absents → Phase 3) ; flush scopé
+  tenant (`SOC-3`, cf. ci-dessus).
 
 ### Phase 2 — Effondrer les « deux blocs » : lectures en local · P0/P1
 Dispatcher les read-events offline existants, débrancher la lecture online :
@@ -174,6 +186,12 @@ pas comme quick-fix Phase 0.**
 ---
 
 ## Journal
+- **2026-07-07** — **Phase 1 socle livrée** (working tree). `PullCoordinator` +
+  `PullHandler` (SOC-1) déclenchés au retour online par `SyncStatusCubit` ;
+  `ClassroomPullHandler` (année via bootstrap local) ; housekeeping outbox cap
+  poison + purge (SOC-2). `SOC-3` (tenant) différé (writers ne posent pas
+  `school_id`). Revue adversariale : 0 bug dur ; 2 notes bénignes documentées.
+  `flutter analyze` clean, **818 tests verts** (+15), format conforme.
 - **2026-07-07** — Création + **Phase 0 livrée**. Audit 7 modules (14 agents,
   0 erreur, écarts vérifiés en contradictoire). Phase 0 : doc-vérité
   (`app_constants`, `OFFLINE.md §4/§6`) + **B2** (curseur `int`→ISO String :

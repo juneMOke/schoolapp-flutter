@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 class MockOutboxDao extends Mock implements OutboxDao {}
@@ -13,6 +14,8 @@ class MockOutboxDao extends Mock implements OutboxDao {}
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
 class MockSyncEngine extends Mock implements SyncEngine {}
+
+class MockPullCoordinator extends Mock implements PullCoordinator {}
 
 void main() {
   late MockOutboxDao outbox;
@@ -140,6 +143,40 @@ void main() {
     await pumpEventQueue();
     // Ne lève pas ; l'état reste cohérent.
     expect(cubit.state, SyncStatus.synced);
+    await cubit.close();
+  });
+
+  test('retour online : déclenche flush PUIS pull delta', () async {
+    final pull = MockPullCoordinator();
+    when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    final cubit = SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      pullCoordinator: pull,
+    );
+    await pumpEventQueue();
+    statusController.add(true);
+    await pumpEventQueue();
+    verify(() => syncEngine.flush()).called(1);
+    verify(() => pull.pullAll()).called(1);
+    await cubit.close();
+  });
+
+  test('notifyLocalWrite : pousse mais ne tire PAS (aucun pull)', () async {
+    final pull = MockPullCoordinator();
+    when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    final cubit = SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      pullCoordinator: pull,
+    );
+    await pumpEventQueue();
+    await cubit.notifyLocalWrite();
+    await pumpEventQueue();
+    verify(() => syncEngine.flush()).called(1);
+    verifyNever(() => pull.pullAll());
     await cubit.close();
   });
 }

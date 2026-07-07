@@ -22,6 +22,14 @@ Document de référence des choix d'implémentation de la couche **offline-first
 - **`SyncEngine`** — vide l'outbox en FIFO, route chaque entrée vers le
   `OutboxSyncHandler` de son `aggregateType`, marque ACKED / SYNC_ERROR / retry.
   Un seul flush à la fois. Déclenché à la demande **et** au passage *online*.
+  **Housekeeping** (Phase 1) : cap poison-message (`maxAttempts` → `SYNC_ERROR`)
+  + purge `deleteAcked()` en fin de flush.
+- **`PullCoordinator`** + **`PullHandler`** (Phase 1) — pendant *lecture* du
+  `SyncEngine` : registre de handlers de **pull delta** par ressource, pré-garde
+  connectivité, verrou anti-concurrence, isolation par handler. Déclenché au
+  **retour online** par `SyncStatusCubit` (push → pull → refresh). Premier
+  handler branché : `ClassroomPullHandler` (`/sync/classrooms`, année résolue via
+  bootstrap local). Curseur `updatedSince` **ISO-8601** via `SyncMetaDao`.
 - `SyncMetaDao` (curseurs de pull + fraîcheur), `ConnectivityService`,
   `IdGenerator`, `ConflictFailure` (+ branche 409 de l'intercepteur Dio).
 
