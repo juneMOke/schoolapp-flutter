@@ -73,7 +73,7 @@ void main() {
         (_) async => ClassroomDeltaModel(
           classrooms: [classroom('c1')],
           members: [member('m1')],
-          serverCursor: 1234,
+          serverCursor: '2026-06-01T08:00:00.000Z',
         ),
       );
 
@@ -83,26 +83,40 @@ void main() {
       expect(outcome.notModified, isFalse);
       expect(outcome.classroomsUpserted, 1);
       expect(outcome.membersUpserted, 1);
-      expect(await syncMeta.getCursor('classrooms'), 1234);
+      expect(
+        await syncMeta.getCursor('classrooms'),
+        '2026-06-01T08:00:00.000Z',
+      );
       expect(await syncMeta.getSyncedAt('classrooms'), 10000);
       expect(await local.countActiveRoster('c1'), 1);
     });
 
     test('passe le curseur mémorisé comme updatedSince', () async {
-      await syncMeta.setCursor('classrooms', cursor: 500, syncedAt: 1);
-      when(
-        () => api.pullClassrooms(any(), yearId, any()),
-      ).thenAnswer((_) async => const ClassroomDeltaModel(serverCursor: 600));
+      await syncMeta.setCursor(
+        'classrooms',
+        cursor: '2026-06-02T08:00:00.000Z',
+        syncedAt: 1,
+      );
+      when(() => api.pullClassrooms(any(), yearId, any())).thenAnswer(
+        (_) async =>
+            const ClassroomDeltaModel(serverCursor: '2026-06-03T08:00:00.000Z'),
+      );
 
       await repo.syncClassrooms(academicYearId: yearId);
 
-      verify(() => api.pullClassrooms(auth, yearId, 500)).called(1);
+      verify(
+        () => api.pullClassrooms(auth, yearId, '2026-06-02T08:00:00.000Z'),
+      ).called(1);
     });
 
     test(
       'delta vide → notModified, curseur conservé, fraîcheur bumpée',
       () async {
-        await syncMeta.setCursor('classrooms', cursor: 777, syncedAt: 1);
+        await syncMeta.setCursor(
+          'classrooms',
+          cursor: '2026-06-04T08:00:00.000Z',
+          syncedAt: 1,
+        );
         when(
           () => api.pullClassrooms(any(), yearId, any()),
         ).thenAnswer((_) async => const ClassroomDeltaModel());
@@ -111,13 +125,20 @@ void main() {
 
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.notModified, isTrue);
-        expect(await syncMeta.getCursor('classrooms'), 777);
+        expect(
+          await syncMeta.getCursor('classrooms'),
+          '2026-06-04T08:00:00.000Z',
+        );
         expect(await syncMeta.getSyncedAt('classrooms'), 10000);
       },
     );
 
     test('DioException 304 → notModified sans écriture', () async {
-      await syncMeta.setCursor('classrooms', cursor: 777, syncedAt: 1);
+      await syncMeta.setCursor(
+        'classrooms',
+        cursor: '2026-06-04T08:00:00.000Z',
+        syncedAt: 1,
+      );
       when(() => api.pullClassrooms(any(), yearId, any())).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: '/sync/classrooms'),
@@ -133,7 +154,10 @@ void main() {
       expect(result.isRight(), isTrue);
       final outcome = result.getOrElse(() => throw StateError('left'));
       expect(outcome.notModified, isTrue);
-      expect(await syncMeta.getCursor('classrooms'), 777);
+      expect(
+        await syncMeta.getCursor('classrooms'),
+        '2026-06-04T08:00:00.000Z',
+      );
     });
 
     test('DioException porteuse d\'un Failure → Left', () async {
@@ -159,7 +183,11 @@ void main() {
         ],
         syncedAt: 8888,
       );
-      await syncMeta.setCursor('classrooms', cursor: 1, syncedAt: 8888);
+      await syncMeta.setCursor(
+        'classrooms',
+        cursor: '2026-06-05T08:00:00.000Z',
+        syncedAt: 8888,
+      );
     });
 
     test('getClassrooms expose la fraîcheur (synced_at)', () async {

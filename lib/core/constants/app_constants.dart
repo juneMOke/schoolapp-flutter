@@ -143,14 +143,42 @@ class AppConstants {
   static const String sqlCipherKeyStorageKey = 'sqlcipher_db_key';
 
   // ─── Offline sync — contrats miroir backend ──────────────────────────────────
-  // ⚠️ Ces endpoints n'existent pas encore côté serveur (specs « miroir back »).
-  // Ils sont câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
-  // Les branches offline ajoutent ici leurs endpoints /api/v1/sync/* dédiés.
+  // État au 2026-07-07 (cf. ETAT_IMPLEMENTATION_Backend_V1.md, OFFLINE_GAP_ANALYSIS.md) :
+  //  • LIVRÉS V1.0 (consommables) : GET /api/v1/sync/classrooms (+ attendance,
+  //    academics/cours, academics/notes, schedule — à déclarer ici lors de leur
+  //    branchement, cf. Phase 1/3 du plan d'alignement).
+  //  • NON livrés (V1.1, câblage miroir en attente) : l'agrégat d'inscription, le
+  //    référentiel/cohorte/pré-inscriptions et les pulls finance ci-dessous.
+  // Câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
+
+  // ── Offline sync — Inscription/Facturation ──
+  // ⏳ NON livrés côté back (V1.1) : câblage miroir en attente (Dio mocké en test).
+  /// Agrégat d'inscription : POST 1..N commandes, 1 ACK par item.
+  static const String syncEnrollmentsEndpoint = '/api/v1/sync/enrollments';
+
+  /// Pull delta du référentiel (cycles, niveaux, années…). Curseur updatedSince.
+  static const String syncReferentielEndpoint = '/api/v1/sync/referentiel';
+
+  /// Cohorte N-1 (réinscription), statique sur la saison.
+  static const String syncReinscriptionCohortEndpoint =
+      '/api/v1/sync/reinscription-cohort';
+
+  /// Préinscriptions embarquées (delta opportuniste).
+  static const String syncPreEnrollmentsEndpoint =
+      '/api/v1/sync/pre-enrollments';
+
+  /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
+  static const String syncFinanceTariffsEndpoint =
+      '/api/v1/sync/finance/tariffs';
+
+  /// Pull delta du grand-livre (créances autoritaires + paiements + allocations).
+  static const String syncFinanceLedgerEndpoint = '/api/v1/sync/finance/ledger';
 
   // ── Offline sync — Classe/Présence/Discipline ──
-  /// GET delta des classes + rosters (miroir back CB-2). Le pull renvoie les
-  /// `ref_classrooms` + `ref_classroom_members` modifiés depuis `updatedSince`,
-  /// plus un curseur serveur. Query : `academicYearId`, `updatedSince` (epoch ms).
-  /// 304 Not Modified honoré (delta minimal). N'EXISTE PAS encore côté back.
+  /// GET delta des classes + rosters (CB-2). Renvoie les `ref_classrooms` +
+  /// `ref_classroom_members` modifiés depuis `updatedSince` (ISO-8601), plus un
+  /// `serverCursor` (ISO). Query : `academicYearId`, `updatedSince`.
+  /// 304 Not Modified honoré (delta minimal).
+  /// ✅ LIVRÉ V1.0 côté back (2026-07-07) — roster ACTIVE+INACTIVE.
   static const String syncClassroomsEndpoint = '/api/v1/sync/classrooms';
 }

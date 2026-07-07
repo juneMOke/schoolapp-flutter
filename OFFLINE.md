@@ -78,10 +78,15 @@ online est **retiré** ; l'écriture passe par le BLoC offline → base locale +
 mise en file **outbox**. La pastille de synchro s'allume via
 `SyncStatusCubit.notifyLocalWrite()`.
 
-**Lecture = online.** Les listes/détails/rosters restent branchés sur les BLoCs
-online existants. Motif : les endpoints de **pull** `/api/v1/sync/*` n'existent
-pas encore, donc le cache local n'est pas peuplé — brancher les lectures sur
-l'offline afficherait du **vide**.
+**Lecture = online (dette, plus une fatalité).** Les listes/détails/rosters
+restent branchés sur les BLoCs online existants. Ce choix datait de l'ère « P0 »
+où les pulls `/api/v1/sync/*` n'existaient pas. **Depuis le 2026-07-07 la vague
+V1.0 back est livrée** (`/sync/classrooms`, `/sync/attendance`,
+`/sync/academics/*`, `/sync/schedule`) : la bascule des lectures en local
+(peupler puis lire sqflite) est désormais **débloquée** et devient une **dette à
+résorber** (`OFFLINE_GAP_ANALYSIS.md`, Phase 2). Restent réellement
+backend-gated : le pull ledger Facturation et l'agrégat/cohorte Inscription
+(V1.1).
 
 **Conséquences assumées (tant que `/sync/*` n'est pas livré) :**
 
@@ -164,12 +169,18 @@ jamais). Voir §6 pour les suivis (draft RE/PRE, reprise après kill).
 
 ## 6. Gaps backend & TODO différés
 
-**Endpoints backend absents** (contrats miroir câblés côté client, testés avec
-Dio mocké) :
+**Mise à jour 2026-07-07 :** les **pulls de lecture V1.0 sont livrés** côté back
+(`/sync/classrooms`, `/sync/attendance`, `/sync/academics/cours|notes`,
+`/sync/schedule`) — cf. `OFFLINE_GAP_ANALYSIS.md`. Ils ne sont pas encore
+consommés côté Flutter (dette Phase 1/2).
 
-- `POST /api/v1/sync/*` (push agrégats) — **inexistants**.
-- `PUT /disciplinary-cases/{id}` — **inexistant** (créé côté datasource client).
-- Pull référentiel / cohorte Inscription (F5) — non implémenté.
+**Endpoints backend réellement absents** (contrats miroir câblés côté client,
+testés avec Dio mocké) :
+
+- `POST /api/v1/sync/enrollments` (agrégat d'inscription G1) — **inexistant** (V1.1).
+- Pulls finance `/sync/finance/tariffs` + `/ledger` — **inexistants** (V1.1).
+- Pull référentiel / cohorte Inscription (F5) — non implémenté (V1.1).
+- `PUT /disciplinary-cases/{id}` avec `version`/LWW (DG-2) — **inexistant** (V1.1).
 
 **Fait depuis :** wizard inscription **NEW** en draft local persisté (M1+M2, voir
 §5) ; alignement `ConnectivityService` sur les invariants `connectivity_plus`

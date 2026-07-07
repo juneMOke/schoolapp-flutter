@@ -7,7 +7,7 @@ class ClassroomSyncOutcome extends Equatable {
   final int membersUpserted;
   final bool notModified;
   final int syncedAt;
-  final int? cursor;
+  final String? cursor;
 
   const ClassroomSyncOutcome({
     required this.classroomsUpserted,
@@ -17,7 +17,7 @@ class ClassroomSyncOutcome extends Equatable {
     this.cursor,
   });
 
-  const ClassroomSyncOutcome.notModifiedAt(int syncedAt, int? cursor)
+  const ClassroomSyncOutcome.notModifiedAt(int syncedAt, String? cursor)
     : this(
         classroomsUpserted: 0,
         membersUpserted: 0,

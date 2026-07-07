@@ -23,7 +23,7 @@ class _ClassroomSyncApi implements ClassroomSyncApi {
   Future<ClassroomDeltaModel> pullClassrooms(
     Map<String, dynamic> extras,
     String academicYearId,
-    int? updatedSince,
+    String? updatedSince,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);

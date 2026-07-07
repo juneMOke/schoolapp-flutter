@@ -75,7 +75,11 @@ void main() {
       members: [member('s1'), member('s2'), member('s3')],
       syncedAt: 9999,
     );
-    await syncMeta.setCursor('classrooms', cursor: 1, syncedAt: 9999);
+    await syncMeta.setCursor(
+      'classrooms',
+      cursor: '2026-06-05T08:00:00.000Z',
+      syncedAt: 9999,
+    );
   });
 
   tearDown(() async => db.close());

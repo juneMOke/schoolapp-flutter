@@ -31,7 +31,7 @@ const TableSchema syncMetaTable = TableSchema(
   createTableSql: '''
     CREATE TABLE sync_meta (
       resource TEXT PRIMARY KEY,
-      cursor INTEGER,
+      cursor TEXT,
       synced_at INTEGER
     )
   ''',

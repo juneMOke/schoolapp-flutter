@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/classes/data/models/offline/classroo
 class ClassroomDeltaModel extends Equatable {
   final List<ClassroomDto> classrooms;
   final List<ClassroomMemberDto> members;
-  final int? serverCursor;
+  final String? serverCursor;
 
   const ClassroomDeltaModel({
     this.classrooms = const [],
@@ -19,11 +19,10 @@ class ClassroomDeltaModel extends Equatable {
     this.serverCursor,
   });
 
-  static int? _asIntOrNull(Object? v) {
+  static String? _asStringOrNull(Object? v) {
     if (v == null) return null;
-    if (v is int) return v;
-    if (v is num) return v.toInt();
-    return int.tryParse(v.toString());
+    if (v is String) return v;
+    return v.toString();
   }
 
   factory ClassroomDeltaModel.fromJson(Map<String, dynamic> json) {
@@ -36,7 +35,7 @@ class ClassroomDeltaModel extends Equatable {
       members: rawMembers
           .map((e) => ClassroomMemberDto.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
-      serverCursor: _asIntOrNull(json['serverCursor']),
+      serverCursor: _asStringOrNull(json['serverCursor']),
     );
   }
 

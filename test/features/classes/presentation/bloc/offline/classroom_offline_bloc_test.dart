@@ -58,7 +58,7 @@ const tSyncOutcome = ClassroomSyncOutcome(
   membersUpserted: 40,
   notModified: false,
   syncedAt: 1720000000000,
-  cursor: 12,
+  cursor: '2026-06-06T08:00:00.000Z',
 );
 
 void main() {
