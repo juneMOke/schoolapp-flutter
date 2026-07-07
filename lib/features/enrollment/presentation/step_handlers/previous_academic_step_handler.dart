@@ -62,6 +62,7 @@ class PreviousAcademicStepHandler extends BaseEnrollmentStepHandler {
     return PreviousAcademicInfoStep(
       enrollmentDetail: context.detail.enrollmentDetail,
       enrollmentId: context.detail.enrollmentDetail.id,
+      useOfflineDraft: isNewOffline(context),
       showInlineSaveButton: false,
       flowStepIndex: step.index,
       onRefreshRequested: context.onRefreshRequested,

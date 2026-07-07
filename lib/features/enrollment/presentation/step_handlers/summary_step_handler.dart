@@ -2,11 +2,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/enrollment_confirm_draft_builder.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
@@ -95,6 +99,21 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
       return const StepSubmitResult.dispatched();
     }
 
+    // Parcours NEW (première inscription) : la confirmation finalise le
+    // brouillon local persisté par étape (DRAFT → PENDING_SYNC) via le
+    // [EnrollmentDraftBloc]. La navigation de succès + le toast « en attente de
+    // synchro » sont pris en charge par le listener du scope du stepper.
+    if (context.intent.origin == EnrollmentDetailOrigin.newFirstRegistration) {
+      final draftBloc = buildContext.read<EnrollmentDraftBloc>();
+      if (draftBloc.state is EnrollmentDraftSaving) {
+        return const StepSubmitResult.blocked();
+      }
+      draftBloc.add(FinalizeDraftRequested(enrollmentId));
+      return const StepSubmitResult.dispatched();
+    }
+
+    // Parcours RE/PRE (élève préexistant) : câblage conservateur inchangé — la
+    // confirmation projette l'agrégat online sur le chemin local-first.
     final offlineBloc = buildContext.read<EnrollmentOfflineBloc>();
     if (offlineBloc.state is EnrollmentOfflineConfirming) {
       return const StepSubmitResult.blocked();

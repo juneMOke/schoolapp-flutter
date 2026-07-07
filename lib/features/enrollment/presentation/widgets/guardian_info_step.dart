@@ -5,6 +5,10 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
@@ -18,6 +22,10 @@ class GuardianInfoStep extends StatefulWidget {
   final List<ParentSummary> parentDetails;
   final String studentId;
   final String enrollmentId;
+
+  /// Parcours NEW offline-first : l'étape remplace les tuteurs du brouillon local
+  /// (pas de séquençage create/update/unlink serveur).
+  final bool useOfflineDraft;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -29,6 +37,7 @@ class GuardianInfoStep extends StatefulWidget {
     required this.parentDetails,
     required this.studentId,
     required this.enrollmentId,
+    this.useOfflineDraft = false,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.onRefreshRequested,
@@ -50,6 +59,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   final List<String> _pendingParentIds = <String>[];
   bool _isBatchSaving = false;
+  bool _awaitingDraftSave = false;
   String? _pendingUnlinkParentId;
 
   bool _isDirty = false;
@@ -444,7 +454,74 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
     if (!_isDirty || _isBatchSaving) return;
 
+    if (widget.useOfflineDraft) {
+      _dispatchDraftGuardians();
+      return;
+    }
+
     _queueAndStartSave();
+  }
+
+  /// Écrit tous les tuteurs saisis dans le brouillon local (sémantique
+  /// « remplace l'ensemble » — pas de create/update/unlink individuel).
+  void _dispatchDraftGuardians() {
+    final studentId = widget.studentId.trim();
+    if (studentId.isEmpty) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.validatePersonalInfoHint,
+      );
+      return;
+    }
+
+    _awaitingDraftSave = true;
+    _isBatchSaving = true;
+    _onSavingChanged(true);
+    context.read<EnrollmentDraftBloc>().add(
+      SaveDraftGuardiansRequested(
+        studentId: studentId,
+        parents: _buildConfirmParentDrafts(),
+      ),
+    );
+  }
+
+  List<ConfirmParentDraft> _buildConfirmParentDrafts() {
+    return _editableParentDetails
+        .map((parent) => _currentValuesByParentId[parent.id])
+        .whereType<ParentItemValue>()
+        .map(
+          (value) => ConfirmParentDraft(
+            firstName: value.firstName.trim(),
+            lastName: value.lastName.trim(),
+            surname: value.surname.trim().isEmpty ? null : value.surname.trim(),
+            phoneNumber: value.phoneNumber.trim(),
+            email: value.email.trim().isEmpty
+                ? null
+                : _normalizeEmailForApi(value.email),
+            relationshipType: value.relationshipType.name.toUpperCase(),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  void _onDraftSaved() {
+    _awaitingDraftSave = false;
+    _isBatchSaving = false;
+    _onSavingChanged(false);
+    if (_showValidationHints) {
+      setState(() => _showValidationHints = false);
+    }
+    AppSnackBar.showSuccess(
+      context,
+      AppLocalizations.of(context)!.academicInfoSaveSuccess,
+    );
+    widget.onRefreshRequested?.call();
+  }
+
+  void _onDraftError(String message) {
+    _awaitingDraftSave = false;
+    _isBatchSaving = false;
+    _onSavingChanged(false);
   }
 
   bool _isDraftParentId(String parentId) {
@@ -538,6 +615,16 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
     if (!mounted || !confirmed) return;
 
+    // Parcours NEW : suppression locale puis ré-écriture de l'ensemble des
+    // tuteurs dans le brouillon (jamais d'appel d'unlink serveur).
+    if (widget.useOfflineDraft) {
+      _onRemoveGuardian(parentId);
+      if (_editableParentDetails.isNotEmpty) {
+        _dispatchDraftGuardians();
+      }
+      return;
+    }
+
     // Draft : suppression locale uniquement (pas encore persisté en base).
     if (_isDraftParentId(parentId)) {
       _onRemoveGuardian(parentId);
@@ -571,97 +658,103 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ParentBloc>.value(
-      value: _parentBloc,
-      child: BlocConsumer<ParentBloc, ParentState>(
-        listenWhen: (prev, curr) => prev.status != curr.status,
-        listener: (context, state) {
-          final savingNow =
-              _isBatchSaving || state.status == ParentUpdateStatus.loading;
-          _onSavingChanged(savingNow);
+    return EnrollmentDraftStepSaveListener(
+      enabled: widget.useOfflineDraft,
+      isAwaiting: () => _awaitingDraftSave,
+      onSaved: _onDraftSaved,
+      onError: _onDraftError,
+      child: BlocProvider<ParentBloc>.value(
+        value: _parentBloc,
+        child: BlocConsumer<ParentBloc, ParentState>(
+          listenWhen: (prev, curr) => prev.status != curr.status,
+          listener: (context, state) {
+            final savingNow =
+                _isBatchSaving || state.status == ParentUpdateStatus.loading;
+            _onSavingChanged(savingNow);
 
-          if (state.status == ParentUpdateStatus.success) {
-            if (_pendingParentIds.isNotEmpty) {
-              final savedParentId = _pendingParentIds.removeAt(0);
+            if (state.status == ParentUpdateStatus.success) {
+              if (_pendingParentIds.isNotEmpty) {
+                final savedParentId = _pendingParentIds.removeAt(0);
 
-              if (state.operation == ParentOperation.create &&
-                  state.updatedParent != null) {
-                _replaceDraftWithCreated(savedParentId, state.updatedParent!);
-              } else {
-                _markParentAsSaved(savedParentId);
+                if (state.operation == ParentOperation.create &&
+                    state.updatedParent != null) {
+                  _replaceDraftWithCreated(savedParentId, state.updatedParent!);
+                } else {
+                  _markParentAsSaved(savedParentId);
+                }
               }
-            }
 
-            if (_pendingParentIds.isNotEmpty) {
-              _dispatchNextParentUpdate();
-              return;
-            }
+              if (_pendingParentIds.isNotEmpty) {
+                _dispatchNextParentUpdate();
+                return;
+              }
 
-            _isBatchSaving = false;
-            _recomputeFormState();
-            _onSavingChanged(false);
-
-            if (_showValidationHints) {
-              setState(() => _showValidationHints = false);
-            }
-            widget.onRefreshRequested?.call();
-
-            final l10n = AppLocalizations.of(context)!;
-            AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
-          } else if (state.status == ParentUpdateStatus.failure) {
-            _pendingParentIds.clear();
-            _isBatchSaving = false;
-            _onSavingChanged(false);
-
-            final l10n = AppLocalizations.of(context)!;
-            AppSnackBar.showError(
-              context,
-              l10n.academicInfoSaveError(state.errorMessage ?? ''),
-              onRetry: submitForm,
-              retryLabel: l10n.enrollmentErrorRetry,
-            );
-          } else if (state.status == ParentUpdateStatus.unlinkSuccess) {
-            final pendingId = _pendingUnlinkParentId;
-            if (pendingId != null) {
-              _onRemoveGuardian(pendingId);
+              _isBatchSaving = false;
+              _recomputeFormState();
               _onSavingChanged(false);
-              _pendingUnlinkParentId = null;
+
+              if (_showValidationHints) {
+                setState(() => _showValidationHints = false);
+              }
+              widget.onRefreshRequested?.call();
 
               final l10n = AppLocalizations.of(context)!;
-              AppSnackBar.showSuccess(context, l10n.guardianUnlinkSuccess);
+              AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
+            } else if (state.status == ParentUpdateStatus.failure) {
+              _pendingParentIds.clear();
+              _isBatchSaving = false;
+              _onSavingChanged(false);
+
+              final l10n = AppLocalizations.of(context)!;
+              AppSnackBar.showError(
+                context,
+                l10n.academicInfoSaveError(state.errorMessage ?? ''),
+                onRetry: submitForm,
+                retryLabel: l10n.enrollmentErrorRetry,
+              );
+            } else if (state.status == ParentUpdateStatus.unlinkSuccess) {
+              final pendingId = _pendingUnlinkParentId;
+              if (pendingId != null) {
+                _onRemoveGuardian(pendingId);
+                _onSavingChanged(false);
+                _pendingUnlinkParentId = null;
+
+                final l10n = AppLocalizations.of(context)!;
+                AppSnackBar.showSuccess(context, l10n.guardianUnlinkSuccess);
+              }
+            } else if (state.status == ParentUpdateStatus.unlinkFailure) {
+              _pendingUnlinkParentId = null;
+              _onSavingChanged(false);
+
+              final l10n = AppLocalizations.of(context)!;
+              AppSnackBar.showError(
+                context,
+                l10n.guardianUnlinkError(state.errorMessage ?? ''),
+              );
             }
-          } else if (state.status == ParentUpdateStatus.unlinkFailure) {
-            _pendingUnlinkParentId = null;
-            _onSavingChanged(false);
+          },
+          builder: (context, state) {
+            final isLoading =
+                _isBatchSaving || state.status == ParentUpdateStatus.loading;
 
-            final l10n = AppLocalizations.of(context)!;
-            AppSnackBar.showError(
-              context,
-              l10n.guardianUnlinkError(state.errorMessage ?? ''),
+            return GuardianInfoStepBody(
+              parentDetails: _editableParentDetails,
+              onItemStateChanged: _onParentItemStateChanged,
+              onItemValueChanged: _onParentItemValueChanged,
+              onAddParent: _onAddGuardian,
+              onRemoveParent: _onRemoveGuardianRequested,
+              onOpenParent: _onOpenParent,
+              onPrimaryParentChanged: _onPrimaryParentChanged,
+              expandedParentId: _expandedParentId,
+              primaryParentId: _primaryParentId,
+              isLoading: isLoading,
+              canSave: _canSave,
+              showInlineSaveButton: widget.showInlineSaveButton,
+              onSave: _onSave,
+              isEditable: widget.isEditable,
             );
-          }
-        },
-        builder: (context, state) {
-          final isLoading =
-              _isBatchSaving || state.status == ParentUpdateStatus.loading;
-
-          return GuardianInfoStepBody(
-            parentDetails: _editableParentDetails,
-            onItemStateChanged: _onParentItemStateChanged,
-            onItemValueChanged: _onParentItemValueChanged,
-            onAddParent: _onAddGuardian,
-            onRemoveParent: _onRemoveGuardianRequested,
-            onOpenParent: _onOpenParent,
-            onPrimaryParentChanged: _onPrimaryParentChanged,
-            expandedParentId: _expandedParentId,
-            primaryParentId: _primaryParentId,
-            isLoading: isLoading,
-            canSave: _canSave,
-            showInlineSaveButton: widget.showInlineSaveButton,
-            onSave: _onSave,
-            isEditable: widget.isEditable,
-          );
-        },
+          },
+        ),
       ),
     );
   }

@@ -3,11 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler_registry.dart';
@@ -47,6 +50,9 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
   // Confirmation offline confirmée (pending-sync) déjà traitée : évite un double
   // retour visuel / une double navigation si l'état est ré-émis.
   bool _handledPendingSync = false;
+
+  bool get _isNewOffline =>
+      widget.detailIntent.origin == EnrollmentDetailOrigin.newFirstRegistration;
 
   EnrollmentStepFlowPlan _buildFlowPlan(EnrollmentDetail detail) {
     return EnrollmentStepHandlerRegistry.buildPlanFromHandlers(
@@ -119,16 +125,47 @@ class _EnrollmentStepperScopeState extends State<EnrollmentStepperScope> {
     }
   }
 
+  // Réaction offline-first du parcours NEW : le brouillon local finalisé
+  // (DRAFT → PENDING_SYNC) déclenche la même issue de succès que le flux online,
+  // et toute erreur d'écriture locale (étape OU finalisation) remonte ici en une
+  // seule source de toast (les étapes ne font que déverrouiller leur bouton).
+  void _onDraftConfirmState(BuildContext context, EnrollmentDraftState state) {
+    final l10n = AppLocalizations.of(context)!;
+    if (state is EnrollmentDraftFinalizedPendingSync) {
+      if (_handledPendingSync) return;
+      _handledPendingSync = true;
+      context.read<SyncStatusCubit>().notifyLocalWrite();
+      AppSnackBar.showInfo(context, l10n.offlineEnrollmentQueued);
+      EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(context);
+    } else if (state is EnrollmentDraftError) {
+      AppSnackBar.showError(context, l10n.offlineWriteError);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<EnrollmentStepperFlowBloc>.value(
       value: _flowBloc,
-      child: BlocListener<EnrollmentOfflineBloc, EnrollmentOfflineState>(
-        listenWhen: (previous, current) =>
-            previous != current &&
-            (current is EnrollmentOfflineConfirmedPendingSync ||
-                current is EnrollmentOfflineError),
-        listener: _onOfflineConfirmState,
+      child: MultiBlocListener(
+        listeners: [
+          // RE/PRE : confirmation local-first via EnrollmentOfflineBloc.
+          BlocListener<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+            listenWhen: (previous, current) =>
+                previous != current &&
+                (current is EnrollmentOfflineConfirmedPendingSync ||
+                    current is EnrollmentOfflineError),
+            listener: _onOfflineConfirmState,
+          ),
+          // NEW : finalisation du brouillon + erreurs d'écriture locale.
+          if (_isNewOffline)
+            BlocListener<EnrollmentDraftBloc, EnrollmentDraftState>(
+              listenWhen: (previous, current) =>
+                  previous != current &&
+                  (current is EnrollmentDraftFinalizedPendingSync ||
+                      current is EnrollmentDraftError),
+              listener: _onDraftConfirmState,
+            ),
+        ],
         child: EnrollmentStepper(
           enrollmentDetail: widget.enrollmentDetail,
           detailIntent: widget.detailIntent,

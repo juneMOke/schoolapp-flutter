@@ -7,7 +7,10 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
@@ -293,6 +296,20 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
 
   void _refreshAfterSave() {
     if (!mounted) return;
+
+    // Parcours NEW offline-first : la ré-hydratation entre étapes se fait depuis
+    // la base LOCALE (brouillon) et non via un GET serveur. L'agrégat est
+    // reconstruit par la page hôte à la réception du détail local.
+    if (widget.detailIntent.origin ==
+        EnrollmentDetailOrigin.newFirstRegistration) {
+      final enrollmentId = widget.enrollmentDetail.enrollmentDetail.id.trim();
+      if (enrollmentId.isEmpty) return;
+      context.read<EnrollmentDraftBloc>().add(
+        LoadDraftDetailRequested(enrollmentId),
+      );
+      return;
+    }
+
     final enrollmentBloc = context.read<EnrollmentBloc>();
     widget.detailPolicy.requestLoad(
       enrollmentBloc,

@@ -63,6 +63,7 @@ class TargetAcademicStepHandler extends BaseEnrollmentStepHandler {
       studentDetail: context.detail.studentDetail,
       studentId: resolveStudentId(context),
       enrollmentId: context.detail.enrollmentDetail.id,
+      useOfflineDraft: isNewOffline(context),
       showInlineSaveButton: false,
       flowStepIndex: step.index,
       onRefreshRequested: context.onRefreshRequested,

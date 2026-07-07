@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_detail_mapper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
@@ -30,13 +37,29 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   late EnrollmentDetailIntent _effectiveIntent;
   int _currentStep = 0;
 
+  // Parcours NEW offline-first : ids client figés + dernier détail lu en base
+  // locale, conservés à travers les états transitoires du brouillon.
+  DraftIds? _draftIds;
+  LocalEnrollmentDetail? _draftLocal;
+
+  // Mémoïsation de l'agrégat NEW : EnrollmentDetail n'est pas Equatable, donc
+  // recréer une instance à chaque build resynchroniserait le stepper (perte de
+  // l'étape/dirty). On ne recompose que si une entrée (identité) a changé.
+  EnrollmentDetail? _cachedAggregate;
+  LocalEnrollmentDetail? _cachedLocal;
+  DraftIds? _cachedIds;
+  Bootstrap? _cachedBootstrap;
+
+  bool get _isNewOffline =>
+      _effectiveIntent.origin == EnrollmentDetailOrigin.newFirstRegistration;
+
   @override
   void initState() {
     super.initState();
     _policy = EnrollmentDetailPolicyResolver.fromIntent(widget.intent);
     _effectiveIntent = widget.intent;
     _requestBootstrapContexts();
-    _requestDetail();
+    _initializeJourney();
   }
 
   @override
@@ -49,9 +72,18 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
       _currentStep = 0;
       if (shouldRefreshFromRouter) {
         _requestBootstrapContexts();
-        _requestDetail();
+        _initializeJourney();
       }
     }
+  }
+
+  /// Amorce du parcours : brouillon local (NEW) ou chargement serveur (autres).
+  void _initializeJourney() {
+    if (_isNewOffline) {
+      context.read<EnrollmentDraftBloc>().add(const StartDraftRequested());
+      return;
+    }
+    _requestDetail();
   }
 
   void _requestDetail() {
@@ -100,10 +132,34 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     enrollmentBloc.add(const EnrollmentCreateResultConsumed());
   }
 
+  // Conserve les ids client (au démarrage) puis le détail local (après chaque
+  // écriture d'étape) pour reconstruire l'agrégat NEW sans GET serveur.
+  void _onDraftAggregateState(
+    BuildContext context,
+    EnrollmentDraftState state,
+  ) {
+    if (state is EnrollmentDraftStarted) {
+      setState(
+        () => _draftIds = DraftIds(
+          enrollmentId: state.enrollmentId,
+          studentId: state.studentId,
+        ),
+      );
+    } else if (state is EnrollmentDraftDetailLoaded) {
+      setState(() => _draftLocal = state.detail);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (_isNewOffline) {
+      return _buildNewOffline(context, l10n);
+    }
+    return _buildServer(context, l10n);
+  }
 
+  Widget _buildServer(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: PreferredSize(
@@ -171,6 +227,101 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
         ),
       ),
     );
+  }
+
+  // Parcours NEW : agrégat reconstruit depuis le brouillon local (mapper) ou une
+  // amorce vide + année courante avant la 1re étape. Aucun appel serveur.
+  Widget _buildNewOffline(BuildContext context, AppLocalizations l10n) {
+    return BlocListener<EnrollmentDraftBloc, EnrollmentDraftState>(
+      listenWhen: (previous, current) =>
+          previous != current &&
+          (current is EnrollmentDraftStarted ||
+              current is EnrollmentDraftDetailLoaded),
+      listener: _onDraftAggregateState,
+      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+        builder: (context, bootstrapState) {
+          final detail = _resolveNewOfflineDetail(bootstrapState.bootstrap);
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(68),
+              child: EnrollmentJourneyAppBar(
+                modeLabel: _buildJourneyModeLabel(l10n),
+                studentDisplayName: _newOfflineDisplayName(detail, l10n),
+                currentStep: _currentStep,
+                totalSteps: EnrollmentWizardStep.values.length,
+              ),
+            ),
+            body: detail == null
+                ? const EnrollmentDetailPageStateShell(
+                    child: EnrollmentDetailLoadingTemplate(),
+                  )
+                : EnrollmentDetailContentShell(
+                    child: EnrollmentStepperScope(
+                      enrollmentDetail: detail,
+                      detailIntent: _effectiveIntent,
+                      detailPolicy: _policy,
+                      onStepChanged: _onStepChanged,
+                    ),
+                  ),
+          );
+        },
+      ),
+    );
+  }
+
+  EnrollmentDetail? _resolveNewOfflineDetail(Bootstrap? bootstrap) {
+    final local = _draftLocal;
+    final ids = _draftIds;
+
+    if (_cachedAggregate != null &&
+        identical(_cachedLocal, local) &&
+        identical(_cachedIds, ids) &&
+        identical(_cachedBootstrap, bootstrap)) {
+      return _cachedAggregate;
+    }
+
+    final aggregate = _composeNewOfflineDetail(local, ids, bootstrap);
+    _cachedLocal = local;
+    _cachedIds = ids;
+    _cachedBootstrap = bootstrap;
+    _cachedAggregate = aggregate;
+    return aggregate;
+  }
+
+  EnrollmentDetail? _composeNewOfflineDetail(
+    LocalEnrollmentDetail? local,
+    DraftIds? ids,
+    Bootstrap? bootstrap,
+  ) {
+    if (local != null) {
+      return mapLocalToEnrollmentDetail(
+        local,
+        levels: schoolLevelsFromBootstrap(bootstrap),
+        groups: schoolLevelGroupsFromBootstrap(bootstrap),
+      );
+    }
+
+    if (ids != null && bootstrap != null) {
+      return buildDraftSeedDetail(
+        enrollmentId: ids.enrollmentId,
+        studentId: ids.studentId,
+        academicYearId: bootstrap.academicYear.id,
+      );
+    }
+
+    return null;
+  }
+
+  String _newOfflineDisplayName(
+    EnrollmentDetail? detail,
+    AppLocalizations l10n,
+  ) {
+    if (detail == null) {
+      return l10n.enrollmentUnknownStudent;
+    }
+    final name = _buildStudentDisplayName(detail);
+    return name.trim().isEmpty ? l10n.enrollmentUnknownStudent : name;
   }
 
   bool _isEnrollmentCreated(EnrollmentState previous, EnrollmentState current) {
