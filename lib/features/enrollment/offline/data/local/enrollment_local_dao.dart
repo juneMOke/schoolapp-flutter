@@ -140,6 +140,251 @@ class EnrollmentLocalDao {
     return p.id;
   }
 
+  // ── Écriture : DRAFT incrémental (refonte offline-first wizard) ─────────────
+
+  /// Insère la ligne élève en état **DRAFT** (id client figé au démarrage du
+  /// wizard). Remplace une éventuelle ligne de même id (ré-entrée sur l'étape).
+  Future<void> insertDraftStudent(StudentLocalModel student) async {
+    final map = student.toMap()..['sync_status'] = SyncState.draft.dbValue;
+    await _db.insert(
+      'students',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Insère la ligne inscription en état **DRAFT** (id client figé au démarrage).
+  Future<void> insertDraftEnrollment(EnrollmentLocalModel enrollment) async {
+    final map = enrollment.toMap()..['sync_status'] = SyncState.draft.dbValue;
+    await _db.insert(
+      'enrollments',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// UPDATE **partiel colonne-à-colonne** d'un draft élève : n'écrit QUE les
+  /// colonnes fournies (jamais un `toMap()` complet, qui écraserait à NULL les
+  /// champs pas encore saisis). Gardé sur `sync_status = 'DRAFT'` pour ne jamais
+  /// toucher un dossier déjà confirmé.
+  Future<void> updateDraftStudentColumns(
+    String studentId,
+    Map<String, Object?> columns, {
+    required int nowMs,
+  }) async {
+    if (columns.isEmpty) return;
+    await _db.update(
+      'students',
+      {...columns, 'updated_at': nowMs},
+      where: 'id = ? AND sync_status = ?',
+      whereArgs: [studentId, SyncState.draft.dbValue],
+    );
+  }
+
+  /// UPDATE partiel colonne-à-colonne d'un draft inscription (même garde-fou).
+  Future<void> updateDraftEnrollmentColumns(
+    String enrollmentId,
+    Map<String, Object?> columns, {
+    required int nowMs,
+  }) async {
+    if (columns.isEmpty) return;
+    await _db.update(
+      'enrollments',
+      {...columns, 'updated_at': nowMs},
+      where: 'id = ? AND sync_status = ?',
+      whereArgs: [enrollmentId, SyncState.draft.dbValue],
+    );
+  }
+
+  /// Remplace les tuteurs d'un draft (étape Tuteurs) : réétablit les liens
+  /// `student_parent` de l'élève et upsert les parents (get-or-create par
+  /// téléphone). Un parent créé naît **DRAFT** ; un parent existant (fratrie,
+  /// éventuellement déjà synchro) voit ses champs mis à jour mais **n'est jamais
+  /// rétrogradé** en DRAFT.
+  Future<void> replaceDraftParents(
+    String studentId,
+    List<ParentDraft> parents, {
+    required int nowMs,
+  }) async {
+    await _db.transaction((txn) async {
+      await txn.delete(
+        'student_parent',
+        where: 'student_id = ?',
+        whereArgs: [studentId],
+      );
+      for (final draft in parents) {
+        final resolvedId = await _upsertDraftParent(txn, draft.parent);
+        await txn.insert('student_parent', {
+          'student_id': studentId,
+          'parent_id': resolvedId,
+          'relationship_type': draft.relationshipType,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    });
+  }
+
+  /// Variante DRAFT de [_upsertParent] : un parent nouvellement créé naît en
+  /// `DRAFT` (au lieu du défaut PENDING_SYNC du modèle) ; un parent existant
+  /// n'a que ses champs rafraîchis (sync_status intact).
+  Future<String> _upsertDraftParent(
+    DatabaseExecutor txn,
+    ParentLocalModel p,
+  ) async {
+    final existing = await txn.query(
+      'parents',
+      columns: ['id'],
+      where: 'phone_number = ?',
+      whereArgs: [p.phoneNumber],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) {
+      final id = existing.first['id'] as String;
+      await txn.update(
+        'parents',
+        {
+          'first_name': p.firstName,
+          'last_name': p.lastName,
+          'surname': p.surname,
+          'email': p.email,
+          'updated_at': p.updatedAt,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return id;
+    }
+    final map = p.toMap()..['sync_status'] = SyncState.draft.dbValue;
+    await txn.insert(
+      'parents',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return p.id;
+  }
+
+  /// Confirmation du draft (étape Résumé) : dans **une transaction**, bascule
+  /// DRAFT → PENDING_SYNC sur l'élève, l'inscription et ses tuteurs DRAFT, crée
+  /// le document provisoire si absent, et enfile **une** entrée outbox à **id
+  /// déterministe** (`outbox-enr-<id>`) → un second appel remplace l'entrée
+  /// (idempotent). No-op renvoyant `false` si l'inscription n'est plus en DRAFT
+  /// (re-confirmation) ou introuvable ; `true` si la bascule a eu lieu.
+  Future<bool> finalizeDraft(
+    String enrollmentId, {
+    GeneratedDocumentLocalModel? document,
+    bool emitDocument = true,
+    String? schoolId,
+    required int nowMs,
+  }) async {
+    return _db.transaction<bool>((txn) async {
+      final eRows = await txn.query(
+        'enrollments',
+        where: 'id = ?',
+        whereArgs: [enrollmentId],
+        limit: 1,
+      );
+      if (eRows.isEmpty) return false;
+      final enrollment = EnrollmentLocalModel.fromMap(eRows.first);
+      if (enrollment.syncStatus != SyncState.draft.dbValue) return false;
+
+      final sRows = await txn.query(
+        'students',
+        where: 'id = ?',
+        whereArgs: [enrollment.studentId],
+        limit: 1,
+      );
+      if (sRows.isEmpty) return false;
+      final student = StudentLocalModel.fromMap(sRows.first);
+
+      // Tuteurs liés : payload + bascule DRAFT → PENDING_SYNC.
+      final linkRows = await txn.query(
+        'student_parent',
+        where: 'student_id = ?',
+        whereArgs: [enrollment.studentId],
+      );
+      final parents = <ParentPayload>[];
+      for (final link in linkRows) {
+        final pRows = await txn.query(
+          'parents',
+          where: 'id = ?',
+          whereArgs: [link['parent_id']],
+          limit: 1,
+        );
+        if (pRows.isEmpty) continue;
+        final parent = ParentLocalModel.fromMap(pRows.first);
+        if (parent.syncStatus == SyncState.draft.dbValue) {
+          await txn.update(
+            'parents',
+            {'sync_status': SyncState.pendingSync.dbValue},
+            where: 'id = ?',
+            whereArgs: [parent.id],
+          );
+        }
+        parents.add(
+          ParentPayload(
+            clientId: parent.id,
+            firstName: parent.firstName,
+            lastName: parent.lastName,
+            surname: parent.surname,
+            phoneNumber: parent.phoneNumber,
+            email: parent.email,
+            relationshipType: (link['relationship_type'] as String?) ?? 'OTHER',
+          ),
+        );
+      }
+
+      // Document provisoire si demandé et absent.
+      if (emitDocument && document != null) {
+        final docRows = await txn.query(
+          'generated_documents',
+          columns: ['id'],
+          where: 'enrollment_id = ?',
+          whereArgs: [enrollmentId],
+          limit: 1,
+        );
+        if (docRows.isEmpty) {
+          await txn.insert(
+            'generated_documents',
+            document.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+
+      // Bascule élève + inscription.
+      await txn.update(
+        'students',
+        {'sync_status': SyncState.pendingSync.dbValue, 'updated_at': nowMs},
+        where: 'id = ?',
+        whereArgs: [student.id],
+      );
+      await txn.update(
+        'enrollments',
+        {'sync_status': SyncState.pendingSync.dbValue, 'updated_at': nowMs},
+        where: 'id = ?',
+        whereArgs: [enrollmentId],
+      );
+
+      // Outbox : 1 agrégat = 1 entrée, id déterministe (idempotence re-confirm).
+      final command = EnrollmentCommand(
+        enrollment: _enrollmentPayload(enrollment),
+        student: _studentPayload(student),
+        parents: parents,
+        emitDocument: emitDocument,
+      );
+      final entry = OutboxEntry(
+        id: 'outbox-enr-$enrollmentId',
+        aggregateType: 'ENROLLMENT',
+        aggregateId: enrollmentId,
+        operation: OutboxOperation.create,
+        payload: jsonEncode(command.toJson()),
+        schoolId: schoolId,
+        createdAt: nowMs,
+      );
+      await OutboxDao(txn).enqueue(entry);
+      return true;
+    });
+  }
+
   // ── ACK / remap (F4) ───────────────────────────────────────────────────────
 
   /// Applique un ACK dans une transaction : COMMITTED → remap (matricule/email,
@@ -333,7 +578,11 @@ class EnrollmentLocalDao {
 
   /// Liste des dossiers, optionnellement filtrée par statut métier.
   Future<List<LocalEnrollmentListItem>> getEnrollments({String? status}) async {
-    final where = status == null ? '' : 'WHERE e.status = ?';
+    // Les brouillons (DRAFT) du wizard offline ne remontent pas dans les listes.
+    final where = status == null
+        ? "WHERE e.sync_status != '${SyncState.draft.dbValue}'"
+        : "WHERE e.sync_status != '${SyncState.draft.dbValue}' "
+              'AND e.status = ?';
     final rows = await _db.rawQuery(
       '$_listSelect $where ORDER BY e.updated_at DESC, e.enrollment_date DESC',
       status == null ? const [] : [status],
@@ -345,7 +594,9 @@ class EnrollmentLocalDao {
   Future<List<LocalEnrollmentListItem>> searchByName(String query) async {
     final like = '%${query.trim()}%';
     final rows = await _db.rawQuery(
-      '$_listSelect WHERE s.last_name LIKE ? OR s.first_name LIKE ? '
+      '$_listSelect '
+      "WHERE e.sync_status != '${SyncState.draft.dbValue}' "
+      'AND (s.last_name LIKE ? OR s.first_name LIKE ?) '
       'ORDER BY s.last_name ASC',
       [like, like],
     );
@@ -355,7 +606,9 @@ class EnrollmentLocalDao {
   /// Recherche par date de naissance exacte (yyyy-MM-dd).
   Future<List<LocalEnrollmentListItem>> searchByDateOfBirth(String dob) async {
     final rows = await _db.rawQuery(
-      '$_listSelect WHERE s.date_of_birth = ? ORDER BY s.last_name ASC',
+      '$_listSelect '
+      "WHERE e.sync_status != '${SyncState.draft.dbValue}' "
+      'AND s.date_of_birth = ? ORDER BY s.last_name ASC',
       [dob],
     );
     return rows.map(_listItem).toList();
@@ -367,7 +620,7 @@ class EnrollmentLocalDao {
     String? schoolLevelId,
     String? schoolLevelGroupId,
   }) async {
-    final clauses = <String>[];
+    final clauses = <String>["e.sync_status != '${SyncState.draft.dbValue}'"];
     final args = <Object?>[];
     if (academicYearId != null) {
       clauses.add('e.academic_year_id = ?');

@@ -306,4 +306,129 @@ void main() {
       expect(await dao.isStudentEnrollmentSynced('unknown'), isTrue);
     });
   });
+
+  group('DRAFT incrémental (refonte offline-first wizard)', () {
+    test('insertDraft* écrit en DRAFT et reste hors des listes', () async {
+      await dao.insertDraftStudent(student());
+      await dao.insertDraftEnrollment(enrollment());
+
+      expect(
+        (await db.query('students')).first['sync_status'],
+        SyncState.draft.dbValue,
+      );
+      expect(
+        (await db.query('enrollments')).first['sync_status'],
+        SyncState.draft.dbValue,
+      );
+      // Aucune fuite dans les listes/recherches.
+      expect(await dao.getEnrollments(), isEmpty);
+      expect(await dao.searchByName('Moke'), isEmpty);
+      expect(await dao.searchByDateOfBirth('2015-04-02'), isEmpty);
+      expect(
+        await dao.searchByAcademicInfo(academicYearId: 'ay-2026'),
+        isEmpty,
+      );
+    });
+
+    test('updateDraftStudentColumns : partiel, n\'écrase pas les autres '
+        'colonnes, reste DRAFT', () async {
+      await dao.insertDraftStudent(student());
+      await dao.updateDraftStudentColumns('s1', {'city': 'Goma'}, nowMs: 200);
+
+      final s = (await db.query('students')).first;
+      expect(s['city'], 'Goma');
+      expect(s['first_name'], 'Amina'); // inchangé
+      expect(s['sync_status'], SyncState.draft.dbValue);
+    });
+
+    test(
+      'updateDraftStudentColumns ne touche pas un dossier non-DRAFT',
+      () async {
+        await dao.confirmEnrollment(
+          student: student(),
+          enrollment: enrollment(),
+          parents: [parent()],
+          outboxEntryId: 'ob1',
+          nowMs: 1000,
+        ); // PENDING_SYNC
+        await dao.updateDraftStudentColumns('s1', {'city': 'Goma'}, nowMs: 200);
+        expect((await db.query('students')).first['city'], isNull);
+      },
+    );
+
+    test('replaceDraftParents lie en DRAFT et remplace au ré-appel', () async {
+      await dao.insertDraftStudent(student());
+      await dao.replaceDraftParents('s1', [
+        parent(id: 'p1', phone: '+243111'),
+      ], nowMs: 200);
+      expect(await db.query('student_parent'), hasLength(1));
+      expect(
+        (await db.query('parents')).first['sync_status'],
+        SyncState.draft.dbValue,
+      );
+
+      await dao.replaceDraftParents('s1', [
+        parent(id: 'p2', phone: '+243222', rel: 'FATHER'),
+      ], nowMs: 300);
+      final links = await db.query('student_parent');
+      expect(links, hasLength(1));
+      expect(links.first['relationship_type'], 'FATHER');
+    });
+
+    test(
+      'finalizeDraft : DRAFT→PENDING_SYNC (élève+inscription+tuteurs), 1 '
+      'outbox à id déterministe, apparaît dans les listes, idempotent',
+      () async {
+        await dao.insertDraftStudent(student());
+        await dao.insertDraftEnrollment(enrollment());
+        await dao.replaceDraftParents('s1', [parent()], nowMs: 200);
+        expect(await dao.getEnrollments(), isEmpty); // draft caché
+
+        final ok = await dao.finalizeDraft(
+          'e1',
+          document: doc(),
+          schoolId: 'school-1',
+          nowMs: 1000,
+        );
+        expect(ok, isTrue);
+        expect(
+          (await db.query('students')).first['sync_status'],
+          SyncState.pendingSync.dbValue,
+        );
+        expect(
+          (await db.query('enrollments')).first['sync_status'],
+          SyncState.pendingSync.dbValue,
+        );
+        expect(
+          (await db.query('parents')).first['sync_status'],
+          SyncState.pendingSync.dbValue,
+        );
+
+        final ob = await db.query('outbox');
+        expect(ob, hasLength(1));
+        expect(ob.first['id'], 'outbox-enr-e1');
+        expect(ob.first['aggregate_id'], 'e1');
+        expect(ob.first['school_id'], 'school-1');
+        final payload =
+            jsonDecode(ob.first['payload'] as String) as Map<String, dynamic>;
+        expect(payload['parents'], hasLength(1));
+
+        // Le dossier confirmé apparaît désormais dans les listes.
+        expect(await dao.getEnrollments(), hasLength(1));
+
+        // Re-confirmation : no-op idempotent, pas de doublon outbox.
+        final again = await dao.finalizeDraft(
+          'e1',
+          document: doc(),
+          nowMs: 2000,
+        );
+        expect(again, isFalse);
+        expect(await db.query('outbox'), hasLength(1));
+      },
+    );
+
+    test('finalizeDraft renvoie false si l\'inscription est absente', () async {
+      expect(await dao.finalizeDraft('ghost', nowMs: 1000), isFalse);
+    });
+  });
 }

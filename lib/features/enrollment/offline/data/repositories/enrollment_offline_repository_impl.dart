@@ -123,6 +123,201 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     }
   }
 
+  // ── Wizard offline-first : brouillon local persisté (M1) ────────────────────
+
+  @override
+  DraftIds startDraft({String? existingStudentId}) => DraftIds(
+    enrollmentId: _idGenerator.newId(),
+    studentId: existingStudentId ?? _idGenerator.newId(),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> saveDraftIdentity({
+    required String enrollmentId,
+    required String studentId,
+    required String firstName,
+    required String lastName,
+    String? surname,
+    required String gender,
+    required String dateOfBirth,
+    String? birthPlace,
+    String? nationality,
+    String? matriculationNumber,
+    required String enrollmentType,
+    required String status,
+    required String academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+    required String enrollmentDate,
+  }) => _guardUnit(() async {
+    final now = _now();
+    await _dao.insertDraftStudent(
+      StudentLocalModel(
+        id: studentId,
+        firstName: firstName,
+        lastName: lastName,
+        surname: surname,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        birthPlace: birthPlace,
+        nationality: nationality,
+        matriculationNumber: matriculationNumber,
+        updatedAt: now,
+      ),
+    );
+    await _dao.insertDraftEnrollment(
+      EnrollmentLocalModel(
+        id: enrollmentId,
+        studentId: studentId,
+        enrollmentType: enrollmentType,
+        status: status,
+        academicYearId: academicYearId,
+        schoolLevelId: schoolLevelId,
+        schoolLevelGroupId: schoolLevelGroupId,
+        enrollmentDate: enrollmentDate,
+        updatedAt: now,
+      ),
+    );
+  });
+
+  @override
+  Future<Either<Failure, Unit>> saveDraftAddress({
+    required String studentId,
+    String? city,
+    String? district,
+    String? municipality,
+    String? neighborhood,
+    String? address,
+    String? phoneNumber,
+  }) => _guardUnit(
+    () => _dao.updateDraftStudentColumns(studentId, <String, Object?>{
+      'city': ?city,
+      'district': ?district,
+      'municipality': ?municipality,
+      'neighborhood': ?neighborhood,
+      'address': ?address,
+      'phone_number': ?phoneNumber,
+    }, nowMs: _now()),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> saveDraftPreviousAcademic({
+    required String enrollmentId,
+    String? previousSchoolName,
+    String? previousAcademicYear,
+    String? previousSchoolLevelGroup,
+    String? previousSchoolLevel,
+    double? previousRate,
+    int? previousRank,
+    bool? validatedPreviousYear,
+    String? transferReason,
+  }) => _guardUnit(() {
+    final validated = validatedPreviousYear == null
+        ? null
+        : (validatedPreviousYear ? 1 : 0);
+    return _dao.updateDraftEnrollmentColumns(enrollmentId, <String, Object?>{
+      'previous_school_name': ?previousSchoolName,
+      'previous_academic_year': ?previousAcademicYear,
+      'previous_school_level_group': ?previousSchoolLevelGroup,
+      'previous_school_level': ?previousSchoolLevel,
+      'previous_rate': ?previousRate,
+      'previous_rank': ?previousRank,
+      'validated_previous_year': ?validated,
+      'transfer_reason': ?transferReason,
+    }, nowMs: _now());
+  });
+
+  @override
+  Future<Either<Failure, Unit>> saveDraftTargetAcademic({
+    required String enrollmentId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _guardUnit(
+    () => _dao.updateDraftEnrollmentColumns(enrollmentId, <String, Object?>{
+      'school_level_id': ?schoolLevelId,
+      'school_level_group_id': ?schoolLevelGroupId,
+    }, nowMs: _now()),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> saveDraftGuardians({
+    required String studentId,
+    required List<ConfirmParentDraft> parents,
+  }) => _guardUnit(() {
+    final now = _now();
+    final drafts = parents
+        .map(
+          (p) => ParentDraft(
+            parent: ParentLocalModel(
+              id: _idGenerator.newId(),
+              firstName: p.firstName,
+              lastName: p.lastName,
+              surname: p.surname,
+              phoneNumber: p.phoneNumber,
+              email: p.email,
+              updatedAt: now,
+            ),
+            relationshipType: p.relationshipType,
+          ),
+        )
+        .toList();
+    return _dao.replaceDraftParents(studentId, drafts, nowMs: now);
+  });
+
+  @override
+  Future<Either<Failure, LocalEnrollmentDetail>> getDraftDetail(
+    String enrollmentId,
+  ) => getDetail(enrollmentId);
+
+  @override
+  Future<Either<Failure, Unit>> finalizeDraft({
+    required String enrollmentId,
+    bool emitDocument = true,
+  }) async {
+    try {
+      final now = _now();
+      final document = emitDocument
+          ? GeneratedDocumentLocalModel(
+              id: _idGenerator.newId(),
+              docDomain: 'ENROLLMENT',
+              enrollmentId: enrollmentId,
+              docType: 'AI',
+              number: 'PROV-${enrollmentId.substring(0, 8).toUpperCase()}',
+              createdAt: now,
+            )
+          : null;
+      final ok = await _dao.finalizeDraft(
+        enrollmentId,
+        document: document,
+        emitDocument: emitDocument,
+        nowMs: now,
+      );
+      if (!ok) {
+        return const Left(
+          NotFoundFailure('Brouillon introuvable ou déjà confirmé'),
+        );
+      }
+      // Flush opportuniste (n'attend pas l'ACK : retour UI immédiat).
+      unawaited(_syncEngine.flush());
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure('Échec de la confirmation locale : $e'));
+    }
+  }
+
+  /// Encapsule une écriture locale sans valeur de retour en `Either` (parité
+  /// avec `_guardList` : StorageFailure sur exception).
+  Future<Either<Failure, Unit>> _guardUnit(Future<void> Function() run) async {
+    try {
+      await run();
+      return const Right(unit);
+    } catch (e) {
+      return Left(
+        StorageFailure('Échec de l\'enregistrement du brouillon : $e'),
+      );
+    }
+  }
+
   @override
   Future<Either<Failure, List<LocalEnrollmentListItem>>> getEnrollments({
     String? status,

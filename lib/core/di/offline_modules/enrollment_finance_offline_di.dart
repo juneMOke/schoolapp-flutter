@@ -9,9 +9,18 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/confirm_enrollment_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/finalize_draft_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_draft_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_address_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_guardians_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_identity_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_previous_academic_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_target_academic_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/start_draft_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
@@ -76,6 +85,32 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<SearchLocalEnrollmentsUseCase>(
     () => SearchLocalEnrollmentsUseCase(getIt<EnrollmentOfflineRepository>()),
   );
+  // Wizard offline-first : brouillon local persisté (M1).
+  getIt.registerFactory<StartDraftUseCase>(
+    () => StartDraftUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveDraftIdentityUseCase>(
+    () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveDraftAddressUseCase>(
+    () => SaveDraftAddressUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveDraftPreviousAcademicUseCase>(
+    () =>
+        SaveDraftPreviousAcademicUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveDraftTargetAcademicUseCase>(
+    () => SaveDraftTargetAcademicUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SaveDraftGuardiansUseCase>(
+    () => SaveDraftGuardiansUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<GetDraftDetailUseCase>(
+    () => GetDraftDetailUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<FinalizeDraftUseCase>(
+    () => FinalizeDraftUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
   getIt.registerFactory<RecordPaymentUseCase>(
     () => RecordPaymentUseCase(getIt<FinanceOfflineRepository>()),
   );
@@ -96,6 +131,18 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       search: getIt<SearchLocalEnrollmentsUseCase>(),
       getDetail: getIt<GetLocalEnrollmentDetailUseCase>(),
       confirm: getIt<ConfirmEnrollmentUseCase>(),
+    ),
+  );
+  getIt.registerFactory<EnrollmentDraftBloc>(
+    () => EnrollmentDraftBloc(
+      startDraft: getIt<StartDraftUseCase>(),
+      saveIdentity: getIt<SaveDraftIdentityUseCase>(),
+      saveAddress: getIt<SaveDraftAddressUseCase>(),
+      savePreviousAcademic: getIt<SaveDraftPreviousAcademicUseCase>(),
+      saveTargetAcademic: getIt<SaveDraftTargetAcademicUseCase>(),
+      saveGuardians: getIt<SaveDraftGuardiansUseCase>(),
+      getDetail: getIt<GetDraftDetailUseCase>(),
+      finalize: getIt<FinalizeDraftUseCase>(),
     ),
   );
   getIt.registerFactory<FinanceOfflineBloc>(

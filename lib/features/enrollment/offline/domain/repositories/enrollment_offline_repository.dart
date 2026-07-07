@@ -95,6 +95,16 @@ class ConfirmEnrollmentDraft {
   });
 }
 
+/// Couple d'identifiants client figés au démarrage d'un brouillon de wizard
+/// (aucune écriture DB à ce stade : les colonnes NOT NULL empêchent d'insérer
+/// une ligne vide, l'insertion réelle a lieu à l'étape 0 `saveDraftIdentity`).
+class DraftIds {
+  final String enrollmentId;
+  final String studentId;
+
+  const DraftIds({required this.enrollmentId, required this.studentId});
+}
+
 /// Repository offline-first du module Inscription : écritures local-first
 /// (confirmation) et lectures servies depuis sqflite.
 abstract class EnrollmentOfflineRepository {
@@ -103,6 +113,83 @@ abstract class EnrollmentOfflineRepository {
   Future<Either<Failure, String>> confirmEnrollment(
     ConfirmEnrollmentDraft draft,
   );
+
+  // ── Wizard offline-first : brouillon local persisté (M1) ────────────────────
+
+  /// Démarre un brouillon : génère (sans écrire) les ids client. `studentId`
+  /// réutilise `existingStudentId` s'il est fourni (RE/PRE), sinon un uuid neuf
+  /// (NEW) ; `enrollmentId` est toujours un uuid neuf.
+  DraftIds startDraft({String? existingStudentId});
+
+  /// Étape 0 : crée les 2 lignes DRAFT (élève + inscription) — porte tous les
+  /// champs NOT NULL. Ré-appelable (remplace la ligne de même id).
+  Future<Either<Failure, Unit>> saveDraftIdentity({
+    required String enrollmentId,
+    required String studentId,
+    required String firstName,
+    required String lastName,
+    String? surname,
+    required String gender,
+    required String dateOfBirth,
+    String? birthPlace,
+    String? nationality,
+    String? matriculationNumber,
+    required String enrollmentType,
+    required String status,
+    required String academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+    required String enrollmentDate,
+  });
+
+  /// Étape Adresse : UPDATE partiel de l'élève DRAFT (colonnes non-null).
+  Future<Either<Failure, Unit>> saveDraftAddress({
+    required String studentId,
+    String? city,
+    String? district,
+    String? municipality,
+    String? neighborhood,
+    String? address,
+    String? phoneNumber,
+  });
+
+  /// Étape Antécédents : UPDATE partiel de l'inscription DRAFT (previous_*).
+  Future<Either<Failure, Unit>> saveDraftPreviousAcademic({
+    required String enrollmentId,
+    String? previousSchoolName,
+    String? previousAcademicYear,
+    String? previousSchoolLevelGroup,
+    String? previousSchoolLevel,
+    double? previousRate,
+    int? previousRank,
+    bool? validatedPreviousYear,
+    String? transferReason,
+  });
+
+  /// Étape Affectation : UPDATE partiel de l'inscription DRAFT (niveau visé).
+  Future<Either<Failure, Unit>> saveDraftTargetAcademic({
+    required String enrollmentId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  });
+
+  /// Étape Tuteurs : remplace les tuteurs du brouillon (ids provisoires générés).
+  Future<Either<Failure, Unit>> saveDraftGuardians({
+    required String studentId,
+    required List<ConfirmParentDraft> parents,
+  });
+
+  /// Détail du brouillon (élève + tuteurs + documents). NotFound si absent.
+  Future<Either<Failure, LocalEnrollmentDetail>> getDraftDetail(
+    String enrollmentId,
+  );
+
+  /// Étape Résumé : DRAFT → PENDING_SYNC + document provisoire + enqueue outbox
+  /// idempotente, puis flush opportuniste. NotFound si déjà confirmé/absent.
+  Future<Either<Failure, Unit>> finalizeDraft({
+    required String enrollmentId,
+    bool emitDocument = true,
+  });
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> getEnrollments({
     String? status,
