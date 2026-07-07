@@ -67,6 +67,7 @@ DISCIPLINARY_CASE.
 | **Discipline** | Régime A (create id-client) + C (update LWW) ; sanction toujours renvoyée au PUT | Idempotence + réconciliation best-effort |
 | **Écriture UI** | **OFFLINE-FIRST STRICT** (voir §4) | Cible offline-first assumée |
 | **Lecture UI** | **GARDÉE ONLINE** (voir §4) | Cache non peuplé sans pull → basculer afficherait du vide |
+| **Wizard inscription NEW** | **Draft local persisté par étape** (pas seulement au résumé) — voir §5 | Vrai offline-first du parcours de création ; reprise possible ; zéro appel serveur pendant le parcours |
 
 ---
 
@@ -118,7 +119,7 @@ l'offline afficherait du **vide**.
 | **Appel présence** | `attendance_save_overlay.dart` | `AttendanceOfflineBloc` · `RecordDailyAttendanceRequested` |
 | **Cas discipline** | `disciplinary_case_create_dialog.dart` `_submit()` (+ avancement `onAdvance`) | `DisciplinaryCaseOfflineBloc` · `CreateOfflineDisciplinaryCase` / `UpdateOfflineDisciplinaryCase` |
 | **Réassignation classe** | `classes_organisation_reassign_dialog.dart` | `ClassroomOfflineBloc` · `MemberReassignRequested` (**online**, pas d'outbox ; gère le succès partiel `reassignRePullFailed`) |
-| **Confirmation inscription** | `summary_step_handler.dart` `submit()` | `EnrollmentOfflineBloc` · `ConfirmLocalEnrollment` (draft via `enrollment_confirm_draft_builder.dart`) |
+| **Inscription — confirmation RE/PRE** | `summary_step_handler.dart` `submit()` | `EnrollmentOfflineBloc` · `ConfirmLocalEnrollment` (projette l'agrégat online ; NEW suit le flux draft, voir plus bas) |
 
 **BLoCs de présentation offline** : la chaîne A (Inscription/Facturation) les
 avait déjà ; la chaîne B en était dépourvue → créés dans cette itération
@@ -126,12 +127,38 @@ avait déjà ; la chaîne B en était dépourvue → créés dans cette itérati
 enregistrés dans `classroom_attendance_offline_di.dart`. Ces BLoCs mappent leurs
 échecs via des chaînes FR en dur (aligné sur `FinanceOfflineBloc`, pas de l10n).
 
-**Inscription — approche conservatrice (non-cassante).** Le wizard sauvegarde de
-façon **incrémentale online** au fil des étapes ; on **ne refactore pas** cela.
-Seule la **confirmation finale** bascule offline. Il en résulte une
-double-écriture conceptuelle transitoire (création incrémentale online +
-confirmation offline), **inoffensive** tant que `/sync/*` est absent (l'outbox ne
-pousse pas). La refonte offline-first complète du wizard reste à faire (§6).
+### Wizard inscription NEW — draft local persisté (M1 + M2)
+
+Le parcours **NEW first-registration** va plus loin que « offline-first strict » :
+il n'appelle **plus le serveur pendant le parcours**. Architecture :
+
+- **M1 — data/domaine** (`enrollment/offline/`) : l'id client (`enrollmentId` +
+  `studentId`) est figé au **démarrage** du wizard (`startDraft`, plus au serveur).
+  Chaque étape écrit un **brouillon local** (`sync_status='DRAFT'`) via
+  `EnrollmentDraftBloc` → repo `saveDraft{Identity,Address,PreviousAcademic,
+  TargetAcademic,Guardians}` → DAO `insertDraft*` / `updateDraftColumns` (**UPDATE
+  colonne-à-colonne**, jamais un `toMap()` complet qui écraserait à NULL les
+  champs pas encore saisis) / `replaceDraftParents`. Le résumé appelle
+  `finalizeDraft` : DRAFT → PENDING_SYNC (élève + inscription + tuteurs) + **une**
+  entrée outbox à **id déterministe** (`outbox-enr-<id>`, donc idempotent). Les
+  brouillons sont **exclus des listes** (`WHERE sync_status != 'DRAFT'`).
+- **M2 — présentation** : l'agrégat entre étapes est **re-lu depuis la base
+  locale** (`getDraftDetail`) et projeté par `local_enrollment_detail_mapper`
+  (résout `schoolLevelId`/`schoolLevelGroupId` en objets `SchoolLevel`/
+  `SchoolLevelGroup` via le **bootstrap** déjà chargé). La page détail a un
+  **double chemin** serveur/local mémoïsé par `identical()` (car `EnrollmentDetail`
+  n'est pas `Equatable` — recomposer resynchroniserait le stepper).
+
+**Gating strict** sur `EnrollmentDetailOrigin.newFirstRegistration` (flag
+`useOfflineDraft` propagé aux étapes, défaut `false`). **RE / PRE / édition
+restent online** (confirmation conservatrice `ConfirmLocalEnrollment`, ligne du
+tableau ci-dessus) — aucun changement de comportement pour eux.
+
+**Limites v1 (assumées)** : reprise après kill non gérée (un remount NEW
+régénère les ids → brouillon orphelin) ; pas de placeholder matricule « en cours »
+dans l'UI ; suppression d'un tuteur = remplacement local ; le chemin de création
+serveur historique est laissé **inerte** (NEW routé offline, RE/PRE ne créent
+jamais). Voir §6 pour les suivis (draft RE/PRE, reprise après kill).
 
 ---
 
@@ -144,27 +171,39 @@ Dio mocké) :
 - `PUT /disciplinary-cases/{id}` — **inexistant** (créé côté datasource client).
 - Pull référentiel / cohorte Inscription (F5) — non implémenté.
 
+**Fait depuis :** wizard inscription **NEW** en draft local persisté (M1+M2, voir
+§5) ; alignement `ConnectivityService` sur les invariants `connectivity_plus`
+(`isOnline` = état radio seulement).
+
 **TODO différés :**
 
-- Refonte offline-first complète du **wizard inscription** (arrêter les saves
-  incrémentales online, tout confirmer atomiquement).
+- **Draft RE/PRE** : étendre le draft persisté aux réinscriptions/pré-inscriptions
+  (charger l'élève serveur existant dans un brouillon local ; RE/PRE restent
+  online aujourd'hui).
+- **Reprise après kill** du wizard NEW : reprendre le brouillon orphelin au
+  remount au lieu de régénérer des ids.
 - **Migration des lectures → offline** quand le pull `/sync/*` sera livré.
 - Réconciliation `version` LWW discipline (read model sans version/updatedAt).
 - Réponse enrichie présence (AG-3) → `markDaySynced`.
 - Visibilité `content` par rôle (DF-3).
 - Pastille `onTap` → bottom-sheet détail de synchro.
-- Builder inscription : genre `other` éventuel replié sur `MALE` (à raffiner).
+- Genre `other` éventuel replié sur `MALE` (builder de confirmation ET mapper
+  draft — à raffiner).
 
 ---
 
 ## 7. Tests & validation
 
 - Socle : tests DAO (`outbox_dao_test`, incl. `errorCount`), `sync_engine_test`,
-  `sync_state_test`, `sync_status_cubit_test`.
+  `sync_state_test`, `sync_status_cubit_test`, `connectivity_service_test`.
 - Chaîne A/B : tests data/domain/sync + tests des 3 BLoCs offline créés.
 - 3 tests widget existants réécrits pour le chemin offline (encaissement,
   réassignation, layout home).
-- État validé : `flutter analyze` **clean**, **768 tests verts**, `dart format`
+- Wizard NEW draft (M1+M2) : DAO draft (`enrollment_local_dao_test`), repo/bloc
+  draft (`enrollment_draft_*_test`), mapper (`local_enrollment_detail_mapper_test`),
+  gating présentation (`summary_step_handler_offline_gating_test`,
+  `personal_info_step_offline_dispatch_test`).
+- État validé : `flutter analyze` **clean**, **803 tests verts**, `dart format`
   conforme.
 
 ---
