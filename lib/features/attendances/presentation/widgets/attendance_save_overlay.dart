@@ -86,8 +86,8 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
   void _startSave() {
     if (_awaitingBloc) return;
 
-    // Contexte de recherche courant (renseigné au fetch, exactement ce que
-    // lisait AttendanceSaveRequested côté online).
+    // Contexte de recherche courant (renseigné au fetch), repris tel quel pour
+    // l'écriture offline dispatchée ci-dessous.
     final attendanceState = context.read<AttendanceBloc>().state;
     final classroomId = attendanceState.activeClassroomId;
     final academicYearId = attendanceState.activeAcademicYearId;

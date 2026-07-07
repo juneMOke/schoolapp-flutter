@@ -1,27 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/update_attendance_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_failure_mapper.dart';
 import 'package:school_app_flutter/features/attendances/presentation/models/attendance_editable_row.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 
+/// BLoC de la liste d'appel : **lecture** (offline-first) + **brouillon
+/// éditable** (bascule présence, motif, note, « tout présent »).
+///
+/// **Lecture = offline-first (Phase 2)** : l'appel du jour est lu depuis le
+/// cache LOCAL via [LoadDailyAttendanceUseCase] (roster `ref_classroom_members`
+/// présent par défaut + exceptions locales), et non plus du réseau. Le roster
+/// local est alimenté par le pull Classe au retour online ; hors ligne, l'appel
+/// reste consultable.
+///
+/// **Écriture** : ce BLoC ne sauvegarde plus lui-même. La confirmation de
+/// l'appel est dispatchée par l'UI (`attendance_save_overlay`) vers
+/// `AttendanceOfflineBloc` (écriture locale + outbox). L'ancien chemin d'écriture
+/// online (`AttendanceSaveRequested` → `UpdateAttendanceUseCase`) a été retiré.
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
-  final GetAttendanceUseCase _getAttendanceUseCase;
-  final UpdateAttendanceUseCase _updateAttendanceUseCase;
+  final LoadDailyAttendanceUseCase _loadDailyAttendance;
 
-  AttendanceBloc({
-    required GetAttendanceUseCase getAttendanceUseCase,
-    required UpdateAttendanceUseCase updateAttendanceUseCase,
-  }) : _getAttendanceUseCase = getAttendanceUseCase,
-       _updateAttendanceUseCase = updateAttendanceUseCase,
-       super(const AttendanceState()) {
+  AttendanceBloc({required LoadDailyAttendanceUseCase loadDailyAttendance})
+    : _loadDailyAttendance = loadDailyAttendance,
+      super(const AttendanceState()) {
     on<AttendanceFetchRequested>(_onFetchRequested);
     on<AttendancePresenceToggled>(_onPresenceToggled);
     on<AttendanceAbsenceReasonChanged>(_onAbsenceReasonChanged);
     on<AttendanceAbsenceNoteChanged>(_onAbsenceNoteChanged);
-    on<AttendanceSaveRequested>(_onSaveRequested);
     on<AttendanceSaveStatusResetRequested>(_onSaveStatusResetRequested);
     on<AttendanceResetRequested>(_onResetRequested);
     on<AttendanceMarkAllPresentRequested>(_onMarkAllPresentRequested);
@@ -38,7 +45,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       ),
     );
 
-    final result = await _getAttendanceUseCase(
+    final result = await _loadDailyAttendance(
       classroomId: event.classroomId,
       date: event.date,
       academicYearId: event.academicYearId,
@@ -115,74 +122,6 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       emit,
       event.studentId,
       (row) => row.present ? row : row.copyWith(absenceReasonNote: event.note),
-    );
-  }
-
-  Future<void> _onSaveRequested(
-    AttendanceSaveRequested event,
-    Emitter<AttendanceState> emit,
-  ) async {
-    if (state.fetchStatus != AttendanceStatus.success ||
-        state.draftRows.isEmpty) {
-      return;
-    }
-
-    if (state.hasValidationErrors ||
-        state.activeClassroomId == null ||
-        state.activeAcademicYearId == null ||
-        state.activeDate == null) {
-      emit(
-        state.copyWith(
-          saveStatus: AttendanceStatus.failure,
-          saveErrorType: AttendanceErrorType.validation,
-        ),
-      );
-      return;
-    }
-
-    if (!state.hasUnsavedChanges) {
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        saveStatus: AttendanceStatus.loading,
-        saveErrorType: AttendanceErrorType.none,
-      ),
-    );
-
-    final result = await _updateAttendanceUseCase(
-      classroomId: state.activeClassroomId!,
-      date: state.activeDate!,
-      academicYearId: state.activeAcademicYearId!,
-      updates: state.draftRows
-          .map((row) => row.toUpdate())
-          .toList(growable: false),
-    );
-
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          saveStatus: AttendanceStatus.failure,
-          saveErrorType: mapFailureToAttendanceErrorType(failure),
-        ),
-      ),
-      (_) {
-        final syncedRecords = _syncRecordsWithDraftRows(
-          state.records,
-          state.draftRows,
-        );
-        emit(
-          state.copyWith(
-            records: syncedRecords,
-            saveStatus: AttendanceStatus.success,
-            saveErrorType: AttendanceErrorType.none,
-            hasUnsavedChanges: false,
-            hasValidationErrors: false,
-            modifiedStudentIds: const <String>{},
-          ),
-        );
-      },
     );
   }
 
@@ -321,40 +260,5 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
 
   bool _hasValidationErrors(List<AttendanceEditableRow> draftRows) {
     return draftRows.any((row) => row.hasValidationError);
-  }
-
-  List<AttendanceRecord> _syncRecordsWithDraftRows(
-    List<AttendanceRecord> records,
-    List<AttendanceEditableRow> draftRows,
-  ) {
-    final draftByStudentId = {for (final row in draftRows) row.studentId: row};
-
-    return records
-        .map((record) {
-          final draft = draftByStudentId[record.studentId];
-          if (draft == null) {
-            return record;
-          }
-
-          return AttendanceRecord(
-            id: record.id,
-            studentId: record.studentId,
-            studentFirstName: record.studentFirstName,
-            studentLastName: record.studentLastName,
-            studentMiddleName: record.studentMiddleName,
-            studentGender: record.studentGender,
-            classroomId: record.classroomId,
-            academicYearId: record.academicYearId,
-            attendanceDate: record.attendanceDate,
-            present: draft.present,
-            absenceReason: draft.present ? null : draft.absenceReason,
-            absenceReasonNote: draft.present
-                ? null
-                : draft.absenceReasonNote.trim().isEmpty
-                ? null
-                : draft.absenceReasonNote.trim(),
-          );
-        })
-        .toList(growable: false);
   }
 }

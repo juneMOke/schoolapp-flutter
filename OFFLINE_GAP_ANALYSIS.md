@@ -108,7 +108,10 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
 - `PRE-1` **P1** — réponse enrichie 200 (AG-3) **non consommée** (`markDaySynced`
   ne lit ni `id`/`version`/`updatedAt`).
 - `PRE-2` **P1** — `GET /sync/attendance` livré mais **aucun client Flutter**.
-- `PRE-3` **P1** — lecture liste + taux restent online.
+- `PRE-3` **P1** — ✅ **Phase 2 (partiel)** : lecture de l'appel du jour basculée
+  en LOCAL — source de `AttendanceBloc` redirigée `GetAttendanceUseCase` →
+  `LoadDailyAttendanceUseCase` (roster local + exceptions). Reste : taux dérivé
+  AF-3 (pas de surface UI → décision produit).
 - `PRE-4` **P2** — ambiguïté « par exception » (= B4).
 - `PRE-5` **P2** — taux dérivé en Dart (cosmétique, acceptable).
 
@@ -151,9 +154,45 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
   tenant (`SOC-3`, cf. ci-dessus).
 
 ### Phase 2 — Effondrer les « deux blocs » : lectures en local · P0/P1
-Dispatcher les read-events offline existants, débrancher la lecture online :
-Classe (`CLS-1/2/4`) → Discipline (`DIS-1/2/3`, corrige B3) → Présence
-(`PRE-1/2/3`) → Facturation (`FAC-1/4/6`) → Inscription (`ENR-1`).
+> **Reconception (recon 4 agents, 2026-07-07)** : PAS un balayage uniforme. Une
+> lecture ne peut passer en local que si le cache local **contient la donnée**.
+> Seuls 2 modules sur 5 sont réellement basculables maintenant ; les 3 autres
+> sont *gated* (régression sans pull, ou refonte requise).
+
+**Basculables maintenant** (cache peuplé par un vrai pull) :
+- **Classe** (`CLS-1/2/4`) — cache via pull Phase 1. ⚠ Le state offline diffère
+  du online (compteurs pré-agrégés + roster à la demande vs classes-avec-membres
+  inline + `unassignedEnrollments`). `unassignedEnrollments` **non représentable**
+  offline → garder la surface « non réparti » online. Effort **M-L**.
+- **Présence** (`PRE-3`, lecture appel) — ✅ **FAIT** : source de `AttendanceBloc`
+  redirigée `GetAttendanceUseCase` → `LoadDailyAttendanceUseCase` (pas de swap de
+  BLoC — lecture entrelacée avec le brouillon éditable). L'appel du jour se lit
+  du cache local (roster + exceptions). AF-3 (taux dérivé) reste non surfacé →
+  décision produit. `GetAttendanceUseCase` conservé dormant.
+
+**Gated (à NE PAS basculer maintenant)** :
+- **Discipline** (`DIS-1`) — pas de pull → seuls les cas créés *localement*
+  seraient visibles ⇒ **régression fonctionnelle** (cas serveur masqués).
+  Acceptation PO requise. `DIS-2`/B3 (refetch post-création local) et `DIS-3`
+  (déclencheur traitement) restent faisables **isolément**. Mapper
+  `OfflineDisciplinaryCase→DisciplinaryCaseSummary` à créer (mapping statut
+  lossy).
+- **Facturation** (`FAC-1/4/6`) — pas de pull ledger (FF7) → élève pré-existant
+  vide en local. Voie viable = **hybride** (online autoritaire + surimposition
+  de l'optimiste local). Nécessite d'abord une **refonte de `FinanceOfflineState`**
+  (mono-usage charges XOR paiements aujourd'hui). Effort **L**.
+- **Inscription** (`ENR-1`) — pas de pull → basculer masquerait l'historique
+  serveur ⇒ **prématuré**. Retenir **Option A** : lectures online conservées,
+  *read-your-writes* local seulement (déjà partiel via refresh post-confirmation).
+  Le code de lecture offline reste actif dormant (à activer au pull).
+
+**Décisions produit à trancher avant d'exécuter** : (a) AF-3 surface du taux ;
+(b) Discipline — accepter « cas serveur invisibles hors-ligne » ou attendre le
+pull ; (c) Facturation — hybride B (recommandé) vs attendre FF7.
+
+**Dette transverse relevée** : les states d'erreur offline ne portent qu'un
+`String` (pas de `ErrorType`) → à typer pour la règle #10 ; chaînes FR en dur
+dans les blocs offline à router en enum + l10n.
 
 ### Phase 3 — Fermer les modules manquants · P0 (gros)
 `NOT-1..8` — créer Notes/Bulletins + Emploi du temps + couche offline
@@ -186,6 +225,21 @@ pas comme quick-fix Phase 0.**
 ---
 
 ## Journal
+- **2026-07-07** — **Phase 2 · Présence livrée** (working tree). Lecture de
+  l'appel basculée en local : `AttendanceBloc` lit `LoadDailyAttendanceUseCase`
+  (offline) au lieu de `GetAttendanceUseCase` (online) — signature identique,
+  drop-in. DI repointée, test bloc migré + cas `StorageFailure→storage` ajouté.
+  **Nettoyage** : retrait du chemin d'écriture online mort (`AttendanceSaveRequested`
+  → `UpdateAttendanceUseCase`) de `AttendanceBloc`/event/DI/test — l'écriture ne
+  vit plus que dans `AttendanceOfflineBloc` (overlay). `saveStatus`/`saveErrorType`
+  laissés (gelés, lus par l'UI) = dette vestigiale notée. `flutter analyze` clean,
+  **817 tests verts**, format conforme. AF-3 (taux) non fait (décision produit).
+- **2026-07-07** — **Recon Phase 2** (4 agents parallèles, lecture seule). Constat
+  reconfigurant : Phase 2 ≠ balayage uniforme. Basculables maintenant = **Classe**
+  + **Présence** (cache peuplé par un vrai pull). *Gated* = Discipline (régression
+  sans pull), Facturation (hybride + refonte state), Inscription (prématuré →
+  Option A). Phase 3 **bloquée** (feat/academics non mergée). Plan mis à jour
+  ci-dessus. Aucun code exécuté à cette étape.
 - **2026-07-07** — **Phase 1 socle livrée** (working tree). `PullCoordinator` +
   `PullHandler` (SOC-1) déclenchés au retour online par `SyncStatusCubit` ;
   `ClassroomPullHandler` (année via bootstrap local) ; housekeeping outbox cap
