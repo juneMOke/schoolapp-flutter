@@ -160,10 +160,14 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
 > sont *gated* (régression sans pull, ou refonte requise).
 
 **Basculables maintenant** (cache peuplé par un vrai pull) :
-- **Classe** (`CLS-1/2/4`) — cache via pull Phase 1. ⚠ Le state offline diffère
-  du online (compteurs pré-agrégés + roster à la demande vs classes-avec-membres
-  inline + `unassignedEnrollments`). `unassignedEnrollments` **non représentable**
-  offline → garder la surface « non réparti » online. Effort **M-L**.
+- **Classe** (`CLS-1/2`) — ✅ **FAIT (consultation)** : le roster d'une classe
+  (page **liste**, CF3) se lit en LOCAL — `ClassroomBloc._onClassroomMembersRequested`
+  redirigé vers `GetOfflineRosterUseCase` (pattern Présence, widgets inchangés ;
+  handler **batch** et organisation **inchangés online**) + pull au montage +
+  coordination `syncStatus` (échec=snackbar, succès=relecture). Restent **online
+  par conception** : organisation/répartition, `unassignedEnrollments`, stats
+  école. `CLS-4` (fraîcheur affichée) non fait. Résidu : « cache absent » non
+  distingué de « classe vide » (raffinement).
 - **Présence** (`PRE-3`, lecture appel) — ✅ **FAIT** : source de `AttendanceBloc`
   redirigée `GetAttendanceUseCase` → `LoadDailyAttendanceUseCase` (pas de swap de
   BLoC — lecture entrelacée avec le brouillon éditable). L'appel du jour se lit
@@ -225,6 +229,15 @@ pas comme quick-fix Phase 0.**
 ---
 
 ## Journal
+- **2026-07-07** — **Phase 2 · Classe (consultation) livrée** (working tree).
+  Roster d'une classe (page liste, CF3) lu en LOCAL : `ClassroomBloc` handler
+  single redirigé vers `GetOfflineRosterUseCase` (batch/organisation intacts
+  online) ; pull `ClassroomsSyncRequested` au montage (bootstrap→success) pour
+  peupler `ref_classroom_members` ; coordination `ClassroomOfflineBloc.syncStatus`
+  (échec=snackbar parité online, succès=relecture). Revue adverse : 1 bug moyen
+  (pull en échec avalé → roster vide silencieux) **corrigé** (snackbar + relecture) ;
+  reste sain. Test bloc single migré (offline roster + StorageFailure→storage).
+  `flutter analyze` clean, **817 tests verts**, format conforme.
 - **2026-07-07** — **Phase 2 · Présence livrée** (working tree). Lecture de
   l'appel basculée en local : `AttendanceBloc` lit `LoadDailyAttendanceUseCase`
   (offline) au lieu de `GetAttendanceUseCase` (online) — signature identique,

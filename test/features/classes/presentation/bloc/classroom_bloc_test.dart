@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_me
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
@@ -27,6 +28,9 @@ class MockDistributeStudentsToClassroomsUseCase extends Mock
 
 class MockGetClassroomMembersUseCase extends Mock
     implements GetClassroomMembersUseCase {}
+
+class MockGetOfflineRosterUseCase extends Mock
+    implements GetOfflineRosterUseCase {}
 
 class MockGetLevelDistributionOverviewUseCase extends Mock
     implements GetLevelDistributionOverviewUseCase {}
@@ -97,6 +101,7 @@ const tClassroom = Classroom(
 void main() {
   late MockGetClassroomsUseCase mockGetClassroomsUseCase;
   late MockGetClassroomMembersUseCase mockGetClassroomMembersUseCase;
+  late MockGetOfflineRosterUseCase mockGetOfflineRosterUseCase;
   late MockDistributeStudentsToClassroomsUseCase
   mockDistributeStudentsToClassroomsUseCase;
   late MockGetLevelDistributionOverviewUseCase
@@ -106,6 +111,7 @@ void main() {
   setUp(() {
     mockGetClassroomsUseCase = MockGetClassroomsUseCase();
     mockGetClassroomMembersUseCase = MockGetClassroomMembersUseCase();
+    mockGetOfflineRosterUseCase = MockGetOfflineRosterUseCase();
     mockDistributeStudentsToClassroomsUseCase =
         MockDistributeStudentsToClassroomsUseCase();
     mockGetLevelDistributionOverviewUseCase =
@@ -116,6 +122,7 @@ void main() {
   ClassroomBloc buildBloc() => ClassroomBloc(
     getClassroomsUseCase: mockGetClassroomsUseCase,
     getClassroomMembersUseCase: mockGetClassroomMembersUseCase,
+    getOfflineRosterUseCase: mockGetOfflineRosterUseCase,
     distributeStudentsToClassroomsUseCase:
         mockDistributeStudentsToClassroomsUseCase,
     getLevelDistributionOverviewUseCase:
@@ -260,10 +267,7 @@ void main() {
       'emits members [loading, success] when classroom members are loaded',
       setUp: () {
         when(
-          () => mockGetClassroomMembersUseCase(
-            classroomId: tClassroomId,
-            academicYearId: tAcademicYearId,
-          ),
+          () => mockGetOfflineRosterUseCase(classroomId: tClassroomId),
         ).thenAnswer((_) async => const Right([tClassroomMember]));
       },
       build: buildBloc,
@@ -286,14 +290,13 @@ void main() {
     );
 
     blocTest<ClassroomBloc, ClassroomState>(
-      'emits members failure with notFound error type on NotFoundFailure',
+      'emits members failure with storage error type on StorageFailure',
       setUp: () {
         when(
-          () => mockGetClassroomMembersUseCase(
-            classroomId: tClassroomId,
-            academicYearId: tAcademicYearId,
-          ),
-        ).thenAnswer((_) async => const Left(NotFoundFailure('Not found')));
+          () => mockGetOfflineRosterUseCase(classroomId: tClassroomId),
+        ).thenAnswer(
+          (_) async => const Left(StorageFailure('local read failed')),
+        );
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -309,7 +312,7 @@ void main() {
         ),
         ClassroomState(
           membersStatus: ClassroomStatus.failure,
-          membersErrorType: ClassroomErrorType.notFound,
+          membersErrorType: ClassroomErrorType.storage,
         ),
       ],
     );

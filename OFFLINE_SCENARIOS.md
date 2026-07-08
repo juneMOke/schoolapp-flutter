@@ -110,7 +110,7 @@ sinon backoff+poison) puis pull Classe (roster frais).
 
 ## Module Classe (consultation)
 
-**État : lecture ⏳ à basculer (approche arrêtée) · écriture (réassignation) ✅ online · pull ✅ (socle) mais non déclenché à la demande.**
+**État : lecture ✅ basculée (consultation roster local) · écriture (réassignation) ✅ online · pull déclenché au montage de la page consultation.**
 
 ### Surfaces et périmètre
 Le module a 3 surfaces distinctes ; **seule la consultation** est cible offline (CF3) :
@@ -133,11 +133,14 @@ Reste **ONLINE V1** (CF4 Option A) : `classes_organisation_reassign_dialog` → 
 ### 3. Pull — peupler le cache roster
 `ClassroomPullHandler` (livré Phase 1) → `GET /api/v1/sync/classrooms?updatedSince=<ISO>` → upsert `ref_classrooms` + `ref_classroom_members`. Déclenché **au retour online** par le socle. **Manque** : un déclenchement **à la demande** (au montage / à la recherche), car au 1er lancement *déjà online* il n'y a pas de transition ⇒ cache vide ⇒ roster vide. La bascule doit donc **coordonner « peupler-puis-lire »** : à la sélection d'une classe, dispatcher `ClassroomsSyncRequested` (pull) puis relire le roster local à la complétion du pull (listener sur `ClassroomOfflineBloc.syncStatus`).
 
-### Approche d'implémentation retenue (read-switch)
-1. Injecter `GetOfflineRosterUseCase` dans `ClassroomBloc` ; l'utiliser dans `_onClassroomMembersRequested` (single) à la place de `GetClassroomMembersUseCase`. Batch inchangé.
-2. `classes_list_page._handleSearch` (classe) : dispatcher `ClassroomsSyncRequested(academicYearId)` (pull) + `ClassroomMembersRequested` (lecture cache immédiate) ; ajouter un `BlocListener<ClassroomOfflineBloc>` qui **relit** le roster à la complétion du pull (fraîcheur).
-3. États chargement/vide/erreur : inchangés (le mapping d'erreur locale → `storage` existe déjà via `mapClassroomErrorToMessage`).
-4. Tests : le test `ClassroomBloc` du handler single passe du mock `GetClassroomMembersUseCase` au mock `GetOfflineRosterUseCase` (le batch garde l'online).
+### Implémentation livrée (read-switch)
+1. `GetOfflineRosterUseCase` injecté dans `ClassroomBloc` ; utilisé dans `_onClassroomMembersRequested` (single) à la place de `GetClassroomMembersUseCase` (`academicYearId` ignoré — roster scopé classe). Handler **batch inchangé** (online).
+2. `classes_list_page` : `BlocListener<BootstrapCurrentYearBloc>` déclenche **un** pull `ClassroomsSyncRequested` au montage (status→success), pour peupler `ref_classroom_members` — le pull socle ne se déclenche qu'au retour online (transition), insuffisant au 1er lancement déjà-online.
+3. **Coordination pull ↔ lecture** (correctif revue adverse) : `BlocListener<ClassroomOfflineBloc>` sur `syncStatus` → **échec = snackbar** (parité avec l'ancienne lecture online ; sinon un pull en échec afficherait un roster « vide » silencieux — régression) ; **succès = relecture** du roster affiché (fraîcheur ; gère la recherche pendant le pull).
+4. États chargement/vide/erreur inchangés ; `StorageFailure → storage` déjà mappé.
+5. Tests : le handler single teste `GetOfflineRosterUseCase` (succès + `StorageFailure→storage`) ; le batch garde l'online. `flutter analyze` clean, **817 tests verts**.
+
+**Résidu assumé** : un pull en échec avec une classe consultée montre un roster vide (état « succès ») **plus** un snackbar d'erreur — le « cache absent » n'est pas encore distingué de « classe réellement vide » (raffinement ultérieur). Recherche nominale d'élève = **online** (Inscription, gated).
 
 ### Ce qui NE bascule PAS (documenté)
 - Organisation / répartition / non-affectés (`unassignedEnrollments` absents du cache local) → **online**.

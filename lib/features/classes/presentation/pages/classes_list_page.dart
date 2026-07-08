@@ -14,6 +14,9 @@ import 'package:school_app_flutter/features/classes/presentation/context/classes
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_export_helper.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
@@ -35,6 +38,9 @@ class ClassesListPage extends StatefulWidget {
 class _ClassesListPageState extends State<ClassesListPage> {
   ClassesListSearchRequest? _lastRequest;
   late ClassesListPolicy _policy;
+
+  /// Garde-fou : un seul pull des classes/rosters par montage (CF2).
+  bool _classroomsPullRequested = false;
 
   @override
   void initState() {
@@ -67,6 +73,25 @@ class _ClassesListPageState extends State<ClassesListPage> {
     return AppPageBackground(
       child: MultiBlocListener(
         listeners: [
+          // Consultation offline-first (CF3) : dès que l'année courante est
+          // connue, peupler le cache local classes/rosters (pull CF2) pour que
+          // la lecture du roster (ClassroomBloc, redirigée en local) trouve des
+          // données. Une seule fois par montage.
+          BlocListener<BootstrapCurrentYearBloc, BootstrapContextState>(
+            listenWhen: (previous, current) =>
+                previous.status != current.status &&
+                current.status == BootstrapContextLoadStatus.success,
+            listener: (context, state) {
+              final academicYearId = state.bootstrap?.academicYear.id ?? '';
+              if (academicYearId.isEmpty || _classroomsPullRequested) {
+                return;
+              }
+              _classroomsPullRequested = true;
+              context.read<ClassroomOfflineBloc>().add(
+                ClassroomsSyncRequested(academicYearId: academicYearId),
+              );
+            },
+          ),
           BlocListener<EnrollmentBloc, EnrollmentState>(
             listenWhen:
                 ClassesListPageHelpers.listenWhenEnrollmentStatusChanges,
@@ -92,6 +117,50 @@ class _ClassesListPageState extends State<ClassesListPage> {
                   ),
                 );
               }
+            },
+          ),
+          // Consultation offline-first : le pull des classes/rosters est
+          // découplé de la lecture. On surface son ÉCHEC (parité avec l'ancienne
+          // lecture online qui remontait l'erreur réseau, sinon le roster
+          // s'afficherait « vide » en silence) et on RELIT le roster affiché une
+          // fois le cache peuplé.
+          BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
+            listenWhen: (previous, current) =>
+                previous.syncStatus != current.syncStatus,
+            listener: (context, state) {
+              if (state.syncStatus == ClassroomStatus.failure) {
+                AppSnackBar.showError(
+                  context,
+                  l10n.classesOrganisationErrorUnknown,
+                );
+                return;
+              }
+              if (state.syncStatus != ClassroomStatus.success) {
+                return;
+              }
+              final request = _lastRequest;
+              if (request == null ||
+                  !request.targetsClassroom ||
+                  request.selectedClassroom == null) {
+                return;
+              }
+              final academicYearId =
+                  context
+                      .read<BootstrapCurrentYearBloc>()
+                      .state
+                      .bootstrap
+                      ?.academicYear
+                      .id ??
+                  '';
+              if (academicYearId.isEmpty) {
+                return;
+              }
+              context.read<ClassroomBloc>().add(
+                ClassroomMembersRequested(
+                  classroomId: request.selectedClassroom!.id,
+                  academicYearId: academicYearId,
+                ),
+              );
             },
           ),
         ],

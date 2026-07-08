@@ -72,6 +72,7 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
@@ -561,6 +562,10 @@ Future<void> configureDependencies({
     () => ClassroomBloc(
       getClassroomsUseCase: getIt<GetClassroomsUseCase>(),
       getClassroomMembersUseCase: getIt<GetClassroomMembersUseCase>(),
+      // Roster consultation offline-first (CF3) : lecture locale
+      // (ref_classroom_members). GetClassroomMembersUseCase reste utilisé par le
+      // handler batch (organisation). Résolu paresseusement (registerOfflineModules).
+      getOfflineRosterUseCase: getIt<GetOfflineRosterUseCase>(),
       distributeStudentsToClassroomsUseCase:
           getIt<DistributeStudentsToClassroomsUseCase>(),
       getLevelDistributionOverviewUseCase:

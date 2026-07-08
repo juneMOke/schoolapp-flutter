@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/classes/domain/usecases/distribute_s
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -11,6 +12,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final GetClassroomsUseCase _getClassroomsUseCase;
   final GetClassroomMembersUseCase _getClassroomMembersUseCase;
+  final GetOfflineRosterUseCase _getOfflineRosterUseCase;
   final DistributeStudentsToClassroomsUseCase
   _distributeStudentsToClassroomsUseCase;
   final GetLevelDistributionOverviewUseCase
@@ -20,6 +22,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   ClassroomBloc({
     required GetClassroomsUseCase getClassroomsUseCase,
     required GetClassroomMembersUseCase getClassroomMembersUseCase,
+    required GetOfflineRosterUseCase getOfflineRosterUseCase,
     required DistributeStudentsToClassroomsUseCase
     distributeStudentsToClassroomsUseCase,
     required GetLevelDistributionOverviewUseCase
@@ -27,6 +30,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     required ReassignClassroomMemberUseCase reassignClassroomMemberUseCase,
   }) : _getClassroomsUseCase = getClassroomsUseCase,
        _getClassroomMembersUseCase = getClassroomMembersUseCase,
+       _getOfflineRosterUseCase = getOfflineRosterUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
        _getLevelDistributionOverviewUseCase =
@@ -164,9 +168,11 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
       ),
     );
 
-    final result = await _getClassroomMembersUseCase(
+    // Lecture offline-first (CF3, Phase 2) : le roster d'une classe vient du
+    // cache LOCAL (`ref_classroom_members`), peuplé par le pull Classe. Le
+    // handler batch (organisation / distribution) reste online.
+    final result = await _getOfflineRosterUseCase(
       classroomId: event.classroomId,
-      academicYearId: event.academicYearId,
     );
 
     result.fold(
