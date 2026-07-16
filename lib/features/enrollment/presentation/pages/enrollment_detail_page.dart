@@ -21,7 +21,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_content_shell.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_app_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_scaffold.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -306,17 +306,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           levels: schoolLevelsFromBootstrap(bootstrapState.bootstrap),
           groups: schoolLevelGroupsFromBootstrap(bootstrapState.bootstrap),
         );
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(68),
-            child: EnrollmentJourneyAppBar(
-              modeLabel: _buildJourneyModeLabel(l10n),
-              studentDisplayName: _localDraftDisplayName(detail, l10n),
-              currentStep: _currentStep,
-              totalSteps: EnrollmentWizardStep.values.length,
-            ),
-          ),
+        return EnrollmentJourneyScaffold(
+          modeLabel: _buildJourneyModeLabel(l10n),
+          studentDisplayName: _localDraftDisplayName(detail, l10n),
+          currentStep: _currentStep,
           body: EnrollmentDetailContentShell(
             child: EnrollmentStepperScope(
               enrollmentDetail: detail,
@@ -338,17 +331,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     BuildContext context,
     AppLocalizations l10n,
   ) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(68),
-        child: EnrollmentJourneyAppBar(
-          modeLabel: _buildJourneyModeLabel(l10n),
-          studentDisplayName: l10n.enrollmentUnknownStudent,
-          currentStep: _currentStep,
-          totalSteps: EnrollmentWizardStep.values.length,
-        ),
-      ),
+    return EnrollmentJourneyScaffold(
+      modeLabel: _buildJourneyModeLabel(l10n),
+      studentDisplayName: l10n.enrollmentUnknownStudent,
+      currentStep: _currentStep,
       body: BlocBuilder<EnrollmentOfflineBloc, EnrollmentOfflineState>(
         buildWhen: (previous, current) =>
             current is EnrollmentOfflineLoading ||
@@ -407,17 +393,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
             );
           }
           final detail = _resolveLocalDraftDetail(bootstrapState.bootstrap);
-          return Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(68),
-              child: EnrollmentJourneyAppBar(
-                modeLabel: _buildJourneyModeLabel(l10n),
-                studentDisplayName: _localDraftDisplayName(detail, l10n),
-                currentStep: _currentStep,
-                totalSteps: EnrollmentWizardStep.values.length,
-              ),
-            ),
+          return EnrollmentJourneyScaffold(
+            modeLabel: _buildJourneyModeLabel(l10n),
+            studentDisplayName: _localDraftDisplayName(detail, l10n),
+            currentStep: _currentStep,
             body: detail == null
                 ? _buildLocalDraftPending()
                 : EnrollmentDetailContentShell(
