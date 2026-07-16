@@ -36,9 +36,22 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     try {
       final now = _now();
       final paymentId = _idGenerator.newId();
-      final total =
-          draft.amountInCents ??
-          draft.allocations.fold<int>(0, (s, a) => s + a.amountInCents);
+      final allocationsTotal = draft.allocations.fold<int>(
+        0,
+        (s, a) => s + a.amountInCents,
+      );
+      final total = draft.amountInCents ?? allocationsTotal;
+      // Invariant FRONT §6 step7 / §8 : le total du paiement = Σ des allocations.
+      // Fail-fast LOCAL plutôt que de subir un 422 serveur qui immobiliserait
+      // l'argent (paiement bloqué en SYNC_ERROR).
+      if (total != allocationsTotal) {
+        return Left(
+          ValidationFailure(
+            'Total du paiement ($total) ≠ somme des allocations '
+            '($allocationsTotal).',
+          ),
+        );
+      }
 
       final payment = PaymentLocalModel(
         id: paymentId,

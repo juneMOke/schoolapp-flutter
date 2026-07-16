@@ -136,6 +136,34 @@ void main() {
     expect(rows.first['last_error'], 'timeout');
   });
 
+  test(
+    'blocked : reste PENDING, délai fixe, SANS attempts++ ni poison',
+    () async {
+      goOnline();
+      // attempts DÉJÀ au-delà du seuil poison : un `retry` basculerait en
+      // SYNC_ERROR ; un `blocked` (attente d'une dépendance) ne doit JAMAIS
+      // poisonner ni consommer de tentative (FRONT §6.3).
+      await dao.enqueue(entry(id: 'e1', attempts: 60));
+      final engine = buildEngine(maxAttempts: 50)
+        ..registerHandler(
+          RecordingHandler(
+            'ENROLLMENT',
+            const OutboxDispatchResult.blocked('inscription non ACKED'),
+            [],
+          ),
+        );
+      final report = await engine.flush();
+      expect(report.blocked, 1);
+      expect(report.poisoned, 0);
+
+      final rows = await db.query('outbox', where: 'id = ?', whereArgs: ['e1']);
+      expect(rows.first['status'], OutboxStatus.pending.dbValue);
+      expect(rows.first['attempts'], 60, reason: 'aucune tentative consommée');
+      expect(rows.first['next_attempt_at'], fixedNow + 5000);
+      expect(rows.first['last_error'], 'inscription non ACKED');
+    },
+  );
+
   test('failed : passe SYNC_ERROR (rejet métier)', () async {
     goOnline();
     await dao.enqueue(entry(id: 'e1'));

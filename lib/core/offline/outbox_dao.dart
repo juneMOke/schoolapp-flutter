@@ -94,6 +94,27 @@ class OutboxDao {
     );
   }
 
+  /// Repousse une entrée **en attente d'une dépendance** (pas un échec) : reste
+  /// PENDING, `next_attempt_at` avancé d'un délai fixe court, **sans** toucher
+  /// `attempts` (donc jamais de poison ni de backoff). Cf.
+  /// `OutboxDispatchOutcome.blocked`.
+  Future<void> defer(
+    String id, {
+    required int nextAttemptAt,
+    String? reason,
+  }) async {
+    await _db.update(
+      table,
+      {
+        'status': OutboxStatus.pending.dbValue,
+        'next_attempt_at': nextAttemptAt,
+        'last_error': reason,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   /// Nombre d'entrées encore en attente (badge « en attente de synchro »).
   Future<int> pendingCount() async {
     final rows = await _db.rawQuery(

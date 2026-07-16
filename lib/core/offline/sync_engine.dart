@@ -18,6 +18,10 @@ class SyncFlushReport {
   final int noHandler;
   final int poisoned;
 
+  /// Entrées en attente d'une dépendance (ex. inscription non ACKED) : repoussées
+  /// sans consommer de tentative ni de poison (cf. `OutboxDispatchOutcome.blocked`).
+  final int blocked;
+
   const SyncFlushReport({
     this.skipped = false,
     this.offline = false,
@@ -26,12 +30,14 @@ class SyncFlushReport {
     this.failed = 0,
     this.noHandler = 0,
     this.poisoned = 0,
+    this.blocked = 0,
   });
 
   const SyncFlushReport.skipped() : this(skipped: true);
   const SyncFlushReport.offline() : this(offline: true);
 
-  int get processed => acked + retried + failed + noHandler + poisoned;
+  int get processed =>
+      acked + retried + failed + noHandler + poisoned + blocked;
 }
 
 /// Moteur de synchro : vide l'outbox en FIFO, route chaque entrée vers le
@@ -50,6 +56,11 @@ class SyncEngine {
   /// Backoff : plafond (5 min) et plancher (1 s).
   static const int _minBackoffMs = 1000;
   static const int _maxBackoffMs = 300000;
+
+  /// Délai fixe court de re-tentative d'une entrée `blocked` (attente d'une
+  /// dépendance) — NON exponentiel, ne consomme aucune tentative. Le flush étant
+  /// opportuniste, ce délai évite seulement un hot-loop entre deux signaux.
+  static const int _blockedDelayMs = 5000;
 
   /// Seuil poison-message : au-delà, une entrée en échec transitoire répété
   /// bascule en `SYNC_ERROR` au lieu d'être retentée indéfiniment. L'entrée
@@ -91,6 +102,7 @@ class SyncEngine {
 
       final entries = await _outbox.pendingReady(_now(), limit: batchLimit);
       var acked = 0, retried = 0, failed = 0, noHandler = 0, poisoned = 0;
+      var blocked = 0;
 
       for (final entry in entries) {
         final handler = _handlers[entry.aggregateType];
@@ -113,6 +125,16 @@ class SyncEngine {
               } else {
                 retried++;
               }
+            case OutboxDispatchOutcome.blocked:
+              // Attente d'une dépendance : on repousse d'un délai fixe court
+              // SANS toucher attempts (ni backoff, ni poison). L'argent reste
+              // en file, jamais faussement en SYNC_ERROR (FRONT §6.3).
+              await _outbox.defer(
+                entry.id,
+                nextAttemptAt: _now() + _blockedDelayMs,
+                reason: result.error,
+              );
+              blocked++;
             case OutboxDispatchOutcome.failed:
               await _outbox.markSyncError(entry.id, result.error);
               failed++;
@@ -140,6 +162,7 @@ class SyncEngine {
         failed: failed,
         noHandler: noHandler,
         poisoned: poisoned,
+        blocked: blocked,
       );
     } finally {
       _flushing = false;

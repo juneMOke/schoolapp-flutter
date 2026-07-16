@@ -7,11 +7,13 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 /// frais : `min(max(0, saisie), attendu − payé)`. Une allocation à 0 n'est pas
 /// retenue ; la somme des montants effectifs alimente le total du paiement.
 
-/// Restant dû d'un frais, en cents (jamais négatif).
-int chargeRemainingInCents(StudentCharge charge) {
-  final remaining = charge.expectedAmountInCents - charge.amountPaidInCents;
-  return remaining <= 0 ? 0 : remaining.round();
-}
+/// Restant dû COMPOSÉ d'un frais, en cents (jamais négatif) : miroir serveur
+/// MOINS les encaissements de ce poste non encore remontés (FRONT §5/§6). C'est
+/// cette borne — pas le miroir serveur seul — qui empêche de re-percevoir sur le
+/// même guichet un poste déjà soldé localement (prévention locale du trop-perçu,
+/// §8 #3-4).
+int chargeRemainingInCents(StudentCharge charge) =>
+    charge.remainingInCents.round();
 
 /// Saisie monétaire convertie en cents (0 si vide, invalide ou ≤ 0).
 int parseAmountToCents(String rawAmount) {

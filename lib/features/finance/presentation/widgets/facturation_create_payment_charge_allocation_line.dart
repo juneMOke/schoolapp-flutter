@@ -101,7 +101,7 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
               _format(charge.expectedAmountInCents),
             ),
             paidLabel: l10n.facturationCreatePaymentChargePaid(
-              _format(charge.amountPaidInCents),
+              _format(charge.paidTotalInCents),
             ),
             remainingLabel: l10n.facturationCreatePaymentChargeRemaining(
               _format(remaining),

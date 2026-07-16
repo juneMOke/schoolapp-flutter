@@ -108,19 +108,17 @@ void main() {
     now: () => 9000,
   );
 
-  test(
-    'garde FIFO : inscription non synchronisée → retry, aucun POST',
-    () async {
-      final handler = handlerWithGate(false);
-      final result = await handler.dispatch(await pendingEntry());
-      expect(result.outcome, OutboxDispatchOutcome.retry);
-      verifyNever(() => api.commitPayment(any(), any()));
-      expect(
-        (await db.query('payments')).first['sync_status'],
-        SyncState.pendingSync.dbValue,
-      );
-    },
-  );
+  test('garde FIFO : inscription non synchronisée → blocked (attente propre, '
+      'jamais retry/SYNC_ERROR), aucun POST', () async {
+    final handler = handlerWithGate(false);
+    final result = await handler.dispatch(await pendingEntry());
+    expect(result.outcome, OutboxDispatchOutcome.blocked);
+    verifyNever(() => api.commitPayment(any(), any()));
+    expect(
+      (await db.query('payments')).first['sync_status'],
+      SyncState.pendingSync.dbValue,
+    );
+  });
 
   test(
     'inscription SYNCED → POST → acked + soldes autoritaires écrasés',

@@ -16,8 +16,9 @@ typedef EnrollmentSyncGate = Future<bool> Function(String studentId);
 /// Handler d'outbox de l'agrégat PAYMENT (FF-Lot 4).
 ///
 /// **Garde FIFO** : si le paiement référence un élève dont l'inscription locale
-/// n'est pas encore SYNCED, on `retry` (l'agrégat ENROLLMENT doit partir avant —
-/// l'uuid honoré garantit alors `payment.student_id` = id serveur). Sinon POST →
+/// n'est pas encore SYNCED, on renvoie `blocked` — attente PROPRE, pas un `retry`
+/// (l'agrégat ENROLLMENT doit partir avant — l'uuid honoré garantit alors
+/// `payment.student_id` = id serveur). Sinon POST →
 /// ACK : remap payment/allocations + créances provisoires + ÉCRASE les soldes
 /// autoritaires → `acked`. Idempotent sur `payment.id`.
 class PaymentOutboxHandler implements OutboxSyncHandler {
@@ -52,11 +53,14 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
 
-    // Garde FIFO : l'inscription de l'élève doit être SYNCED d'abord.
+    // Garde FIFO : le paiement ATTEND l'ACK de l'inscription de l'élève. C'est
+    // une attente PROPRE (`blocked`) — ni attempts++, ni backoff, ni faux
+    // SYNC_ERROR : l'argent reçu ne doit jamais être surfacé comme un conflit de
+    // synchro (FRONT §6.3). Le lien se lève automatiquement à l'ACK.
     final ready = await _isStudentEnrollmentSynced(request.studentId);
     if (!ready) {
-      return const OutboxDispatchResult.retry(
-        'Inscription de l\'élève non synchronisée (FIFO)',
+      return const OutboxDispatchResult.blocked(
+        'Inscription de l\'élève non synchronisée (dépendance)',
       );
     }
 
