@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 
@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/repositori
 class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   final EnrollmentReadDao _readDao;
   final EnrollmentDraftDao _draftDao;
-  final EnrollmentRefDao _refDao;
+  final EnrollmentSeedDao _seedDao;
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
   final int Function() _now;
@@ -26,13 +26,13 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   EnrollmentOfflineRepositoryImpl({
     required EnrollmentReadDao readDao,
     required EnrollmentDraftDao draftDao,
-    required EnrollmentRefDao refDao,
+    required EnrollmentSeedDao seedDao,
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
     int Function()? now,
   }) : _readDao = readDao,
        _draftDao = draftDao,
-       _refDao = refDao,
+       _seedDao = seedDao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
        _now = now ?? systemClock;
@@ -377,7 +377,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? schoolLevelId,
     String? schoolLevelGroupId,
   }) => _guardRead(() async {
-    final candidates = await _refDao.searchReenrollmentCandidates(
+    final candidates = await _seedDao.searchReenrollmentCandidates(
       schoolLevelId: schoolLevelId,
       schoolLevelGroupId: schoolLevelGroupId,
     );
@@ -385,7 +385,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     // d'un élève masquerait à tort son candidat de réinscription pour l'année
     // N. Année non résolue (référentiel non pullé) → aucun overlay (le vivier
     // s'affiche seul, tap → seed).
-    final currentYearId = await _refDao.findCurrentAcademicYearId();
+    final currentYearId = await _seedDao.findCurrentAcademicYearId();
     final localDossiers = currentYearId == null
         ? const <LocalEnrollmentListItem>[]
         : await _readDao.getEnrollments(academicYearId: currentYearId);
@@ -407,7 +407,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   Future<Either<Failure, ReenrollmentCandidate>> getReenrollmentCandidate(
     String studentId,
   ) => _guardReadRequired(
-    () => _refDao.findReenrollmentCandidateByStudentId(studentId),
+    () => _seedDao.findReenrollmentCandidateByStudentId(studentId),
     notFoundMessage: 'Candidat de réinscription introuvable en local',
   );
 
@@ -415,7 +415,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   Future<Either<Failure, PreEnrollmentCandidate>> getPreEnrollment(
     String preEnrollmentId,
   ) => _guardReadRequired(
-    () => _refDao.findPreEnrollmentById(preEnrollmentId),
+    () => _seedDao.findPreEnrollmentById(preEnrollmentId),
     notFoundMessage: 'Préinscription introuvable en local',
   );
 

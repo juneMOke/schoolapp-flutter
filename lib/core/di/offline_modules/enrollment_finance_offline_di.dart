@@ -8,7 +8,9 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
@@ -64,8 +66,17 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentAckDao>(
     () => EnrollmentAckDao(getIt<Database>()),
   );
-  getIt.registerLazySingleton<EnrollmentRefDao>(
-    () => EnrollmentRefDao(getIt<Database>()),
+  // DAO de pull Inscription : découpés par discipline d'écriture — référentiel
+  // (bundle full), viviers seed RE/PRE (cohorte + préinscriptions + lectures),
+  // réconciliation (delta UPDATE-only + snapshots hydratants).
+  getIt.registerLazySingleton<EnrollmentReferentialDao>(
+    () => EnrollmentReferentialDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<EnrollmentSeedDao>(
+    () => EnrollmentSeedDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<EnrollmentReconciliationDao>(
+    () => EnrollmentReconciliationDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<FinanceLocalDao>(
     () => FinanceLocalDao(getIt<Database>(), getIt<IdGenerator>()),
@@ -87,7 +98,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => EnrollmentOfflineRepositoryImpl(
       readDao: getIt<EnrollmentReadDao>(),
       draftDao: getIt<EnrollmentDraftDao>(),
-      refDao: getIt<EnrollmentRefDao>(),
+      seedDao: getIt<EnrollmentSeedDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
     ),
@@ -105,7 +116,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentPullRepository>(
     () => EnrollmentPullRepositoryImpl(
       api: getIt<EnrollmentPullApi>(),
-      refDao: getIt<EnrollmentRefDao>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      seedDao: getIt<EnrollmentSeedDao>(),
+      reconciliationDao: getIt<EnrollmentReconciliationDao>(),
       replaceTariffs: (tariffs, academicYearIds) => getIt<FinanceLocalDao>()
           .replaceTariffsForYears(tariffs, academicYearIds: academicYearIds),
       syncMetaDao: getIt<SyncMetaDao>(),

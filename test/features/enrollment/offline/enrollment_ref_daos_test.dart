@@ -2,18 +2,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 
 import '../../offline_full_db.dart';
 
 void main() {
   late Database db;
-  late EnrollmentRefDao dao;
+  late EnrollmentReferentialDao referentialDao;
+  late EnrollmentSeedDao seedDao;
+  late EnrollmentReconciliationDao reconciliationDao;
 
   setUp(() async {
     db = await openFullOfflineDb();
-    dao = EnrollmentRefDao(db);
+    referentialDao = EnrollmentReferentialDao(db);
+    seedDao = EnrollmentSeedDao(db);
+    reconciliationDao = EnrollmentReconciliationDao(db);
   });
 
   tearDown(() async {
@@ -136,7 +142,10 @@ void main() {
 
   group('upsertReferential', () {
     test('insère années/cycles/niveaux et renvoie le compte', () async {
-      final count = await dao.upsertReferential(bundle(), syncedAt: 500);
+      final count = await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 500,
+      );
 
       expect(count, 3);
       final year = (await db.query('ref_academic_years')).single;
@@ -151,8 +160,8 @@ void main() {
     });
 
     test('est idempotent — rejouer remplace sans dupliquer', () async {
-      await dao.upsertReferential(bundle(), syncedAt: 500);
-      await dao.upsertReferential(
+      await referentialDao.upsertReferential(bundle(), syncedAt: 500);
+      await referentialDao.upsertReferential(
         bundle(
           years: const [
             RefAcademicYearDto(id: 'ay-1', name: '2026-2027', isCurrent: true),
@@ -168,8 +177,8 @@ void main() {
     });
 
     test('remet is_current à zéro : jamais deux années courantes', () async {
-      await dao.upsertReferential(bundle(), syncedAt: 500);
-      await dao.upsertReferential(
+      await referentialDao.upsertReferential(bundle(), syncedAt: 500);
+      await referentialDao.upsertReferential(
         bundle(
           years: const [
             RefAcademicYearDto(id: 'ay-2', name: '2027', isCurrent: true),
@@ -189,8 +198,8 @@ void main() {
     test(
       'un bundle sans années ne touche ni is_current ni les tables',
       () async {
-        await dao.upsertReferential(bundle(), syncedAt: 500);
-        final count = await dao.upsertReferential(
+        await referentialDao.upsertReferential(bundle(), syncedAt: 500);
+        final count = await referentialDao.upsertReferential(
           bundle(years: const [], groups: const [], levels: const []),
           syncedAt: 600,
         );
@@ -203,7 +212,7 @@ void main() {
     );
 
     test('purge les cycles/niveaux disparus du snapshot (scopé année)', () async {
-      await dao.upsertReferential(
+      await referentialDao.upsertReferential(
         bundle(
           groups: const [
             RefSchoolLevelGroupDto(
@@ -244,7 +253,7 @@ void main() {
       );
 
       // Nouveau snapshot de la même année SANS grp-2/lvl-2 (supprimés serveur).
-      await dao.upsertReferential(bundle(), syncedAt: 600);
+      await referentialDao.upsertReferential(bundle(), syncedAt: 600);
 
       expect((await db.query('ref_school_level_groups')).map((r) => r['id']), [
         'grp-1',
@@ -280,7 +289,7 @@ void main() {
         'synced_at': 1,
       });
 
-      await dao.upsertReferential(bundle(), syncedAt: 600);
+      await referentialDao.upsertReferential(bundle(), syncedAt: 600);
 
       expect(await db.query('ref_academic_years'), hasLength(2));
       expect(
@@ -306,11 +315,11 @@ void main() {
     test(
       'remplace intégralement le snapshot (les radiés disparaissent)',
       () async {
-        await dao.replaceReenrollmentCohort([
+        await seedDao.replaceReenrollmentCohort([
           candidate(studentId: 'stu-1'),
           candidate(studentId: 'stu-2'),
         ], syncedAt: 500);
-        final count = await dao.replaceReenrollmentCohort([
+        final count = await seedDao.replaceReenrollmentCohort([
           candidate(studentId: 'stu-2'),
         ], syncedAt: 600);
 
@@ -327,12 +336,12 @@ void main() {
     test(
       'un snapshot vide VIDE la table et compte les lignes purgées',
       () async {
-        await dao.replaceReenrollmentCohort([
+        await seedDao.replaceReenrollmentCohort([
           candidate(studentId: 'stu-1'),
           candidate(studentId: 'stu-2'),
         ], syncedAt: 500);
 
-        final affected = await dao.replaceReenrollmentCohort(
+        final affected = await seedDao.replaceReenrollmentCohort(
           const [],
           syncedAt: 600,
         );
@@ -346,7 +355,7 @@ void main() {
   group('searchReenrollmentCandidates', () {
     setUp(() async {
       // Deux candidats à des niveaux différents, dans deux groupes différents.
-      await dao.replaceReenrollmentCohort([
+      await seedDao.replaceReenrollmentCohort([
         candidate(studentId: 'stu-A', previousSchoolLevelId: 'lvl-A'),
         candidate(studentId: 'stu-B', previousSchoolLevelId: 'lvl-B'),
       ], syncedAt: 1);
@@ -371,7 +380,7 @@ void main() {
     });
 
     test('filtre par niveau (previous_school_level_id)', () async {
-      final result = await dao.searchReenrollmentCandidates(
+      final result = await seedDao.searchReenrollmentCandidates(
         schoolLevelId: 'lvl-A',
       );
       expect(result.map((c) => c.studentId), ['stu-A']);
@@ -380,7 +389,7 @@ void main() {
     test(
       'filtre par groupe → niveaux du groupe (sous-select ref_school_levels)',
       () async {
-        final result = await dao.searchReenrollmentCandidates(
+        final result = await seedDao.searchReenrollmentCandidates(
           schoolLevelGroupId: 'grp-2',
         );
         expect(result.map((c) => c.studentId), ['stu-B']);
@@ -388,12 +397,12 @@ void main() {
     );
 
     test('sans filtre → tout le vivier (trié par nom)', () async {
-      final result = await dao.searchReenrollmentCandidates();
+      final result = await seedDao.searchReenrollmentCandidates();
       expect(result.map((c) => c.studentId).toSet(), {'stu-A', 'stu-B'});
     });
 
     test('niveau sans candidat → vide', () async {
-      final result = await dao.searchReenrollmentCandidates(
+      final result = await seedDao.searchReenrollmentCandidates(
         schoolLevelId: 'lvl-inconnu',
       );
       expect(result, isEmpty);
@@ -402,7 +411,7 @@ void main() {
 
   group('upsertPreEnrollments', () {
     test('upsert + updated_at ISO converti en epoch ms', () async {
-      final count = await dao.upsertPreEnrollments([
+      final count = await seedDao.upsertPreEnrollments([
         preEnrollment(),
       ], syncedAt: 500);
 
@@ -416,8 +425,8 @@ void main() {
     });
 
     test('rejouer le même id remplace la ligne (delta idempotent)', () async {
-      await dao.upsertPreEnrollments([preEnrollment()], syncedAt: 500);
-      await dao.upsertPreEnrollments([
+      await seedDao.upsertPreEnrollments([preEnrollment()], syncedAt: 500);
+      await seedDao.upsertPreEnrollments([
         preEnrollment(firstName: 'Benjamin', updatedAt: '2026-07-08T11:00:00Z'),
       ], syncedAt: 600);
 
@@ -430,7 +439,7 @@ void main() {
         '(anti poison-page, #21)', () async {
       // Une valeur non-ISO ne doit PAS lever : sinon l'apply de toute la page
       // échouerait et le curseur ne bougerait jamais → ressource figée en boucle.
-      final count = await dao.upsertPreEnrollments([
+      final count = await seedDao.upsertPreEnrollments([
         preEnrollment(updatedAt: 'pas-une-date'),
       ], syncedAt: 500);
 
@@ -444,7 +453,9 @@ void main() {
   group('applyEnrollmentDelta', () {
     test('met à jour une ligne SYNCED plus ancienne (LWW)', () async {
       await seedEnrollment();
-      final applied = await dao.applyEnrollmentDelta([delta()], syncedAt: 999);
+      final applied = await reconciliationDao.applyEnrollmentDelta([
+        delta(),
+      ], syncedAt: 999);
 
       expect(applied, 1);
       final row = (await db.query('enrollments')).single;
@@ -461,7 +472,7 @@ void main() {
       await seedEnrollment(id: 'e1', syncStatus: SyncState.draft.dbValue);
       await seedEnrollment(id: 'e2', syncStatus: SyncState.pendingSync.dbValue);
 
-      final applied = await dao.applyEnrollmentDelta([
+      final applied = await reconciliationDao.applyEnrollmentDelta([
         delta(id: 'e1'),
         delta(id: 'e2'),
       ], syncedAt: 999);
@@ -479,7 +490,7 @@ void main() {
       ).millisecondsSinceEpoch;
       await seedEnrollment(updatedAt: localMs);
 
-      final applied = await dao.applyEnrollmentDelta([
+      final applied = await reconciliationDao.applyEnrollmentDelta([
         delta(updatedAt: '2026-07-08T10:00:00Z'),
       ], syncedAt: 999);
 
@@ -494,7 +505,7 @@ void main() {
         ).millisecondsSinceEpoch;
         await seedEnrollment(updatedAt: ms);
 
-        final applied = await dao.applyEnrollmentDelta([
+        final applied = await reconciliationDao.applyEnrollmentDelta([
           delta(updatedAt: '2026-07-08T10:00:00Z'),
         ], syncedAt: 999);
 
@@ -507,7 +518,7 @@ void main() {
       await seedStudent(matricule: 'ANCIEN-0001');
       await seedEnrollment();
 
-      await dao.applyEnrollmentDelta([
+      await reconciliationDao.applyEnrollmentDelta([
         const EnrollmentDeltaDto(
           id: 'e1',
           studentId: 'stu-1',
@@ -527,7 +538,7 @@ void main() {
       await seedStudent(matricule: 'ANCIEN-0001');
       await seedEnrollment(syncStatus: SyncState.pendingSync.dbValue);
 
-      await dao.applyEnrollmentDelta([
+      await reconciliationDao.applyEnrollmentDelta([
         const EnrollmentDeltaDto(
           id: 'e1',
           studentId: 'stu-1',
@@ -557,7 +568,7 @@ void main() {
         });
         await seedEnrollment(); // niveau lvl-1, cycle grp-1
 
-        await dao.applyEnrollmentDelta([
+        await reconciliationDao.applyEnrollmentDelta([
           delta(schoolLevelId: 'lvl-2'),
         ], syncedAt: 999);
 
@@ -571,7 +582,7 @@ void main() {
         '(best-effort)', () async {
       await seedEnrollment(); // ref_school_levels vide
 
-      await dao.applyEnrollmentDelta([
+      await reconciliationDao.applyEnrollmentDelta([
         delta(schoolLevelId: 'lvl-9'),
       ], syncedAt: 999);
 
@@ -583,7 +594,7 @@ void main() {
     test('academicYearId absent du delta → conserve l\'année locale', () async {
       await seedEnrollment();
 
-      await dao.applyEnrollmentDelta([
+      await reconciliationDao.applyEnrollmentDelta([
         const EnrollmentDeltaDto(
           id: 'e1',
           studentId: 'stu-1',
@@ -599,7 +610,7 @@ void main() {
     });
 
     test('ignore un id inconnu (dossier d\'une autre tablette — V1)', () async {
-      final applied = await dao.applyEnrollmentDelta([
+      final applied = await reconciliationDao.applyEnrollmentDelta([
         delta(id: 'inconnu'),
       ], syncedAt: 999);
 
@@ -611,7 +622,7 @@ void main() {
       'schoolLevelId absent → conserve le niveau local (COALESCE)',
       () async {
         await seedEnrollment();
-        await dao.applyEnrollmentDelta([
+        await reconciliationDao.applyEnrollmentDelta([
           delta(schoolLevelId: null),
         ], syncedAt: 999);
 
@@ -625,7 +636,7 @@ void main() {
         'FormatException (anti poison-page, #21)', () async {
       await seedEnrollment(updatedAt: 1000);
 
-      final applied = await dao.applyEnrollmentDelta([
+      final applied = await reconciliationDao.applyEnrollmentDelta([
         delta(updatedAt: 'pas-une-date'),
       ], syncedAt: 5000);
 
@@ -640,9 +651,11 @@ void main() {
     test(
       'candidat présent → entité mappée (matricule, identité, solde)',
       () async {
-        await dao.replaceReenrollmentCohort([candidate()], syncedAt: 1);
+        await seedDao.replaceReenrollmentCohort([candidate()], syncedAt: 1);
 
-        final found = await dao.findReenrollmentCandidateByStudentId('stu-1');
+        final found = await seedDao.findReenrollmentCandidateByStudentId(
+          'stu-1',
+        );
 
         expect(found, isNotNull);
         expect(found!.studentId, 'stu-1');
@@ -654,15 +667,18 @@ void main() {
     );
 
     test('cohorte vide / élève absent → null', () async {
-      expect(await dao.findReenrollmentCandidateByStudentId('inconnu'), isNull);
+      expect(
+        await seedDao.findReenrollmentCandidateByStudentId('inconnu'),
+        isNull,
+      );
     });
   });
 
   group('lectures seed local (findPreEnrollmentById)', () {
     test('préinscription présente → entité mappée', () async {
-      await dao.upsertPreEnrollments([preEnrollment()], syncedAt: 1);
+      await seedDao.upsertPreEnrollments([preEnrollment()], syncedAt: 1);
 
-      final found = await dao.findPreEnrollmentById('pre-1');
+      final found = await seedDao.findPreEnrollmentById('pre-1');
 
       expect(found, isNotNull);
       expect(found!.id, 'pre-1');
@@ -671,7 +687,7 @@ void main() {
     });
 
     test('snapshot vide / id absent → null', () async {
-      expect(await dao.findPreEnrollmentById('inconnu'), isNull);
+      expect(await seedDao.findPreEnrollmentById('inconnu'), isNull);
     });
   });
 
@@ -688,11 +704,11 @@ void main() {
         'is_current': 1,
       });
 
-      expect(await dao.findCurrentAcademicYearId(), 'ay-cur');
+      expect(await seedDao.findCurrentAcademicYearId(), 'ay-cur');
     });
 
     test('aucune année courante (référentiel non pullé) → null', () async {
-      expect(await dao.findCurrentAcademicYearId(), isNull);
+      expect(await seedDao.findCurrentAcademicYearId(), isNull);
     });
   });
 
@@ -742,7 +758,7 @@ void main() {
 
     test('updatedAt ET serverUpdatedAt illisibles → repli syncedAt, agrégat '
         'hydraté sans FormatException (anti poison-page, #21)', () async {
-      final applied = await dao.upsertEnrollmentSnapshots([
+      final applied = await reconciliationDao.upsertEnrollmentSnapshots([
         aggregate(updatedAt: 'pas-une-date', serverUpdatedAt: 'non-plus'),
       ], syncedAt: 1234);
 
@@ -755,7 +771,7 @@ void main() {
     test(
       'base vide → dossier visible via EnrollmentReadDao.getEnrollments',
       () async {
-        final applied = await dao.upsertEnrollmentSnapshots([
+        final applied = await reconciliationDao.upsertEnrollmentSnapshots([
           aggregate(),
         ], syncedAt: 1000);
 
@@ -793,7 +809,7 @@ void main() {
           ),
       ];
 
-      final applied = await dao.upsertEnrollmentSnapshots(
+      final applied = await reconciliationDao.upsertEnrollmentSnapshots(
         items,
         syncedAt: 1000,
       );
@@ -820,7 +836,9 @@ void main() {
         'updated_at': 5,
       });
 
-      await dao.upsertEnrollmentSnapshots([aggregate()], syncedAt: 1000);
+      await reconciliationDao.upsertEnrollmentSnapshots([
+        aggregate(),
+      ], syncedAt: 1000);
 
       // Pas de doublon : un seul parent (le local), non rétrogradé en SYNCED.
       final parents = await db.query('parents');
@@ -835,10 +853,12 @@ void main() {
 
     test('téléphone canonique corrigé côté serveur → rafraîchi par id (pas de '
         'doublon)', () async {
-      await dao.upsertEnrollmentSnapshots([aggregate()], syncedAt: 1000);
+      await reconciliationDao.upsertEnrollmentSnapshots([
+        aggregate(),
+      ], syncedAt: 1000);
 
       // Pull #2 : MÊME id canonique, téléphone corrigé.
-      await dao.upsertEnrollmentSnapshots([
+      await reconciliationDao.upsertEnrollmentSnapshots([
         aggregate(
           parents: const [
             ParentSnapshotDto(
@@ -859,7 +879,7 @@ void main() {
 
     test('deux tuteurs distincts au même téléphone → non fusionnés (résolution '
         'par id)', () async {
-      await dao.upsertEnrollmentSnapshots([
+      await reconciliationDao.upsertEnrollmentSnapshots([
         aggregate(
           parents: const [
             ParentSnapshotDto(
@@ -885,7 +905,7 @@ void main() {
     });
 
     test('tuteur retiré du dossier serveur → lien SYNCED purgé', () async {
-      await dao.upsertEnrollmentSnapshots([
+      await reconciliationDao.upsertEnrollmentSnapshots([
         aggregate(
           parents: const [
             ParentSnapshotDto(
@@ -908,7 +928,7 @@ void main() {
       expect(await db.query('student_parent'), hasLength(2));
 
       // Pull #2 : la mère (par-B) a été retirée du dossier serveur.
-      await dao.upsertEnrollmentSnapshots([
+      await reconciliationDao.upsertEnrollmentSnapshots([
         aggregate(
           parents: const [
             ParentSnapshotDto(

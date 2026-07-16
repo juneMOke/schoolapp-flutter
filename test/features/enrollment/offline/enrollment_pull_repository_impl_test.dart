@@ -5,7 +5,9 @@ import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
@@ -36,7 +38,9 @@ void main() {
     clock = 10000;
     repo = EnrollmentPullRepositoryImpl(
       api: api,
-      refDao: EnrollmentRefDao(db),
+      referentialDao: EnrollmentReferentialDao(db),
+      seedDao: EnrollmentSeedDao(db),
+      reconciliationDao: EnrollmentReconciliationDao(db),
       replaceTariffs: (tariffs, academicYearIds) async {
         capturedTariffs.addAll(tariffs);
         capturedYears = academicYearIds;
@@ -290,7 +294,9 @@ void main() {
         'avancé', () async {
       final failingRepo = EnrollmentPullRepositoryImpl(
         api: api,
-        refDao: EnrollmentRefDao(db),
+        referentialDao: EnrollmentReferentialDao(db),
+        seedDao: EnrollmentSeedDao(db),
+        reconciliationDao: EnrollmentReconciliationDao(db),
         replaceTariffs: (_, _) async =>
             throw StateError('ref_fee_tariffs indisponible'),
         syncMetaDao: syncMeta,

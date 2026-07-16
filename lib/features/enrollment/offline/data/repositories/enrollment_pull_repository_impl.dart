@@ -5,7 +5,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -30,7 +32,9 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 /// [replaceTariffs].
 class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   final EnrollmentPullApi api;
-  final EnrollmentRefDao refDao;
+  final EnrollmentReferentialDao referentialDao;
+  final EnrollmentSeedDao seedDao;
+  final EnrollmentReconciliationDao reconciliationDao;
   final Future<void> Function(
     List<FeeTariffLocalModel> tariffs,
     List<String> academicYearIds,
@@ -56,7 +60,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
 
   const EnrollmentPullRepositoryImpl({
     required this.api,
-    required this.refDao,
+    required this.referentialDao,
+    required this.seedDao,
+    required this.reconciliationDao,
     required this.replaceTariffs,
     required this.syncMetaDao,
     required this.requiredAuth,
@@ -99,7 +105,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     // posé QU'au succès total (jamais sur un roster partiel/échoué), sa présence
     // vaut « roster complet en cache pour cette saison » → court-circuit sans
     // réseau. Année non résolue (base fraîche) → clé de repli non scopée.
-    final currentYearId = await refDao.findCurrentAcademicYearId();
+    final currentYearId = await seedDao.findCurrentAcademicYearId();
     final markerKey = _cohortMarkerKey(currentYearId);
     final done = await syncMetaDao.getCursor(markerKey);
     if (done != null) {
@@ -139,7 +145,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           ServerFailure('Reenrollment cohort roster incomplete'),
         );
       }
-      final upserted = await refDao.replaceReenrollmentCohort(
+      final upserted = await seedDao.replaceReenrollmentCohort(
         all,
         syncedAt: syncedAt,
       );
@@ -165,7 +171,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         request: (cursor) =>
             api.pullPreEnrollments(requiredAuth, cursor, pageLimit),
         apply: (items, syncedAt) =>
-            refDao.upsertPreEnrollments(items, syncedAt: syncedAt),
+            seedDao.upsertPreEnrollments(items, syncedAt: syncedAt),
       );
 
   @override
@@ -175,7 +181,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         request: (cursor) =>
             api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
         apply: (items, syncedAt) =>
-            refDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
+            reconciliationDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
       );
 
   @override
@@ -184,8 +190,10 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         resource: snapshotsResource,
         request: (cursor) =>
             api.pullEnrollmentSnapshots(requiredAuth, cursor, null, pageLimit),
-        apply: (items, syncedAt) =>
-            refDao.upsertEnrollmentSnapshots(items, syncedAt: syncedAt),
+        apply: (items, syncedAt) => reconciliationDao.upsertEnrollmentSnapshots(
+          items,
+          syncedAt: syncedAt,
+        ),
       );
 
   /// Squelette de pull **keyset** (préinscriptions / delta / snapshots) :
@@ -248,14 +256,17 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     }
   }
 
-  /// Années/cycles/niveaux via [refDao] + grille tarifaire via [replaceTariffs]
+  /// Années/cycles/niveaux via [referentialDao] + grille tarifaire via [replaceTariffs]
   /// (`label` serveur nullable replié sur `fee_code` : colonne NOT NULL), le
   /// tout **scopé** aux années du bundle (purge des lignes disparues du
   /// snapshot). Deux transactions distinctes (le seam ne traverse pas les
   /// modules) : un échec des tarifs laisse le référentiel appliqué mais le
   /// curseur N'AVANCE PAS → l'intégralité est rejouée au pull suivant.
   Future<int> _applyReferential(ReferentialBundleDto body, int syncedAt) async {
-    final upserted = await refDao.upsertReferential(body, syncedAt: syncedAt);
+    final upserted = await referentialDao.upsertReferential(
+      body,
+      syncedAt: syncedAt,
+    );
     final yearIds = <String>{
       for (final y in body.academicYears) y.id,
       for (final g in body.schoolLevelGroups) g.academicYearId,

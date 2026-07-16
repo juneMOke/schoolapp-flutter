@@ -1,0 +1,201 @@
+import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/db_batching.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao_support.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
+
+/// Viviers de (ré)inscription : cohorte N-1 (`ref_previous_year_students`) et
+/// préinscriptions (`ref_pre_enrollments`). Porte à la fois les **écritures de
+/// pull** (remplacement cohorte / upsert préinscriptions) et les **lectures de
+/// seed** (photo de départ des brouillons RE/PRE), plus la résolution de
+/// l'année courante qui **scope par saison** ces viviers.
+class EnrollmentSeedDao {
+  final Database _db;
+
+  const EnrollmentSeedDao(this._db);
+
+  /// Remplace la cohorte N-1 (`ref_previous_year_students`). Sémantique
+  /// snapshot : la cohorte est bornée/statique (pull complet always-200 à chaque
+  /// cycle online, jamais de 304), le remplacement intégral évacue les radiés.
+  /// Un 200 avec liste vide VIDE donc la table (cohorte réellement vidée côté
+  /// serveur). Renvoie le nombre de lignes affectées : insérées, ou **purgées**
+  /// quand le snapshot est vide (un wipe est un vrai changement local, pas un
+  /// `notModified`).
+  Future<int> replaceReenrollmentCohort(
+    List<ReenrollmentCandidateDto> items, {
+    required int syncedAt,
+  }) async {
+    var affected = items.length;
+    await _db.transaction((txn) async {
+      final removed = await txn.delete('ref_previous_year_students');
+      if (items.isEmpty) affected = removed;
+      final batch = txn.batch();
+      for (final c in items) {
+        batch.insert(
+          'ref_previous_year_students',
+          {
+            'student_id': c.studentId,
+            'matriculation_number': c.matriculationNumber,
+            'first_name': c.firstName,
+            'last_name': c.lastName,
+            'surname': c.surname,
+            'gender': c.gender,
+            'date_of_birth': c.dateOfBirth,
+            'birth_place': c.birthPlace,
+            'previous_academic_year_id': c.previousAcademicYearId,
+            'previous_school_level_id': c.previousSchoolLevelId,
+            'previous_classroom_id': c.previousClassroomId,
+            'guardian_name': c.guardianName,
+            'guardian_phone': c.guardianPhone,
+            'previous_balance_in_cents': c.previousBalanceInCents,
+            'currency': c.currency,
+            'synced_at': syncedAt,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    });
+    return affected;
+  }
+
+  /// Upsert delta des préinscriptions (`ref_pre_enrollments`). `updated_at`
+  /// ISO-8601 du serveur converti en epoch ms local (colonne INTEGER) — le
+  /// curseur de pull, lui, reste le `serverTime` opaque (jamais cette colonne).
+  Future<int> upsertPreEnrollments(
+    List<PreEnrollmentDto> items, {
+    required int syncedAt,
+  }) async {
+    await applyInBatches(
+      _db,
+      items,
+      apply: (txn, chunk) async {
+        final batch = txn.batch();
+        for (final p in chunk) {
+          batch.insert('ref_pre_enrollments', {
+            'id': p.id,
+            'first_name': p.firstName,
+            'last_name': p.lastName,
+            'surname': p.surname,
+            'gender': p.gender,
+            'date_of_birth': p.dateOfBirth,
+            'birth_place': p.birthPlace,
+            'desired_school_level_id': p.desiredSchoolLevelId,
+            'guardian_name': p.guardianName,
+            'guardian_phone': p.guardianPhone,
+            'updated_at': isoToEpochMillis(p.updatedAt, fallback: syncedAt),
+            'synced_at': syncedAt,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        await batch.commit(noResult: true);
+      },
+    );
+    return items.length;
+  }
+
+  // ── Lectures (seed RE/PRE depuis le local) ──────────────────────────────────
+
+  /// `id` de l'année académique **courante** (`is_current = 1`) telle que
+  /// peuplée par le pull référentiel. `null` = référentiel non encore synchronisé
+  /// (base fraîche / hors-ligne). Sert à **scoper par saison** le marqueur de
+  /// skip de la cohorte N-1 (invalidation automatique au rollover d'année).
+  Future<String?> findCurrentAcademicYearId() async {
+    final rows = await _db.query(
+      'ref_academic_years',
+      columns: ['id'],
+      where: 'is_current = 1',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['id'] as String?;
+  }
+
+  /// Candidat de réinscription par `student_id` canonique (photo de départ du
+  /// brouillon RE). `null` = cohorte non peuplée (pull dormant) ou élève absent.
+  Future<ReenrollmentCandidate?> findReenrollmentCandidateByStudentId(
+    String studentId,
+  ) async {
+    final rows = await _db.query(
+      'ref_previous_year_students',
+      where: 'student_id = ?',
+      whereArgs: [studentId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return _candidateFromRow(rows.first);
+  }
+
+  /// Recherche des candidats à la réinscription (vivier N-1) filtrée par niveau.
+  /// La cohorte ne stocke que `previous_school_level_id` : le filtre par *groupe*
+  /// passe donc par les niveaux de ce groupe (référentiel local
+  /// `ref_school_levels`). Le raffinage nom/DOB reste côté présentation (parité
+  /// avec `searchByAcademicInfo`). Trié par nom pour une liste stable.
+  Future<List<ReenrollmentCandidate>> searchReenrollmentCandidates({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) async {
+    final clauses = <String>[];
+    final args = <Object?>[];
+    if (schoolLevelId != null) {
+      clauses.add('previous_school_level_id = ?');
+      args.add(schoolLevelId);
+    } else if (schoolLevelGroupId != null) {
+      clauses.add(
+        'previous_school_level_id IN '
+        '(SELECT id FROM ref_school_levels WHERE level_group_id = ?)',
+      );
+      args.add(schoolLevelGroupId);
+    }
+    final where = clauses.isEmpty ? '' : 'WHERE ${clauses.join(' AND ')}';
+    final rows = await _db.rawQuery(
+      'SELECT * FROM ref_previous_year_students $where '
+      'ORDER BY last_name, first_name',
+      args,
+    );
+    return rows.map(_candidateFromRow).toList();
+  }
+
+  ReenrollmentCandidate _candidateFromRow(Map<String, Object?> r) =>
+      ReenrollmentCandidate(
+        studentId: r['student_id'] as String,
+        matriculationNumber: r['matriculation_number'] as String,
+        firstName: r['first_name'] as String,
+        lastName: r['last_name'] as String,
+        surname: r['surname'] as String?,
+        gender: r['gender'] as String,
+        dateOfBirth: r['date_of_birth'] as String,
+        birthPlace: r['birth_place'] as String?,
+        previousAcademicYearId: r['previous_academic_year_id'] as String?,
+        previousSchoolLevelId: r['previous_school_level_id'] as String?,
+        previousClassroomId: r['previous_classroom_id'] as String?,
+        guardianName: r['guardian_name'] as String?,
+        guardianPhone: r['guardian_phone'] as String?,
+        previousBalanceInCents: (r['previous_balance_in_cents'] as int?) ?? 0,
+        currency: r['currency'] as String?,
+      );
+
+  /// Préinscription par `id` (photo de départ du brouillon PRE). `null` =
+  /// snapshot non peuplé (pull dormant) ou préinscription absente.
+  Future<PreEnrollmentCandidate?> findPreEnrollmentById(String id) async {
+    final rows = await _db.query(
+      'ref_pre_enrollments',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return PreEnrollmentCandidate(
+      id: r['id'] as String,
+      firstName: r['first_name'] as String,
+      lastName: r['last_name'] as String,
+      surname: r['surname'] as String?,
+      gender: r['gender'] as String?,
+      dateOfBirth: r['date_of_birth'] as String?,
+      birthPlace: r['birth_place'] as String?,
+      desiredSchoolLevelId: r['desired_school_level_id'] as String?,
+      guardianName: r['guardian_name'] as String?,
+      guardianPhone: r['guardian_phone'] as String?,
+    );
+  }
+}

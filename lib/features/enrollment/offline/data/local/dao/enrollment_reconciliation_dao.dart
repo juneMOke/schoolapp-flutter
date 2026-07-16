@@ -1,326 +1,18 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao_support.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_models.dart';
-import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 
-/// Peuple les tables de référence Inscription (`ref_*`) et réconcilie les
-/// `enrollments` depuis les PULL (miroir `openapi_enrollment_sync.yaml`).
-/// Écriture seule, alimentée par `EnrollmentPullRepositoryImpl` — jamais par
-/// l'UI. La grille tarifaire du bundle référentiel est confiée à
-/// `FinanceLocalDao.replaceTariffsForYears` (table `ref_fee_tariffs`,
-/// module Facturation).
-class EnrollmentRefDao {
+/// Réconcilie la table `enrollments` (et `students`/`parents`/`student_parent`)
+/// depuis les deux flux descendants du pull : le **delta maigre** (UPDATE-only,
+/// réconciliation multi-tablettes) et les **snapshots hydratants** (UPSERT
+/// write-preserving, reconstitution d'une tablette neuve). Écriture seule,
+/// alimentée par `EnrollmentPullRepositoryImpl`.
+class EnrollmentReconciliationDao {
   final Database _db;
 
-  const EnrollmentRefDao(this._db);
-
-  /// Applique le bundle référentiel : années, cycles, niveaux (D1/D2).
-  ///
-  /// Le 200 du contrat renvoie **le bundle complet** (snapshot) : les cycles et
-  /// niveaux des années couvertes par le bundle qui n'y figurent plus sont
-  /// **purgés** (sinon une ligne supprimée côté serveur resterait fantôme pour
-  /// toujours, le bundle always-200 étant re-caché en entier à chaque pull). La
-  /// purge est
-  /// **scopée aux années du bundle** — `ref_academic_years` n'est jamais
-  /// purgée : le bundle est restreint à l'année active, or l'année N-1 doit
-  /// survivre (références de la cohorte de réinscription). `is_current` est un
-  /// snapshot : remis à zéro avant application pour ne jamais garder deux
-  /// années « courantes ». Renvoie le nombre de lignes écrites.
-  Future<int> upsertReferential(
-    ReferentialBundleDto bundle, {
-    required int syncedAt,
-  }) async {
-    final yearIds = <String>{
-      for (final y in bundle.academicYears) y.id,
-      for (final g in bundle.schoolLevelGroups) g.academicYearId,
-    }.toList(growable: false);
-    final groupIds = [for (final g in bundle.schoolLevelGroups) g.id];
-    final levelIds = [for (final l in bundle.schoolLevels) l.id];
-
-    await _db.transaction((txn) async {
-      if (bundle.academicYears.isNotEmpty) {
-        await txn.update('ref_academic_years', {'is_current': 0});
-      }
-      await _purgeScopedReferential(txn, yearIds, groupIds, levelIds);
-      final batch = txn.batch();
-      for (final y in bundle.academicYears) {
-        batch.insert('ref_academic_years', {
-          'id': y.id,
-          'name': y.name,
-          'start_date': y.startDate,
-          'end_date': y.endDate,
-          'is_current': y.isCurrent ? 1 : 0,
-          'synced_at': syncedAt,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
-      }
-      for (final g in bundle.schoolLevelGroups) {
-        batch.insert('ref_school_level_groups', {
-          'id': g.id,
-          'name': g.name,
-          'code': g.code,
-          'period_type': g.periodType,
-          'academic_year_id': g.academicYearId,
-          'display_order': g.displayOrder,
-          'synced_at': syncedAt,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
-      }
-      for (final l in bundle.schoolLevels) {
-        batch.insert('ref_school_levels', {
-          'id': l.id,
-          'name': l.name,
-          'code': l.code,
-          'level_group_id': l.levelGroupId,
-          'display_order': l.displayOrder,
-          'split_into_classrooms': l.splitIntoClassrooms ? 1 : 0,
-          'synced_at': syncedAt,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
-      }
-      await batch.commit(noResult: true);
-    });
-    return bundle.academicYears.length +
-        bundle.schoolLevelGroups.length +
-        bundle.schoolLevels.length;
-  }
-
-  /// Évacue cycles et niveaux disparus du snapshot, sans sortir du périmètre
-  /// des années couvertes par le bundle (un bundle sans année n'autorise
-  /// aucune purge — symétrique du garde `is_current`).
-  Future<void> _purgeScopedReferential(
-    Transaction txn,
-    List<String> yearIds,
-    List<String> bundleGroupIds,
-    List<String> bundleLevelIds,
-  ) async {
-    if (yearIds.isEmpty) return;
-    // Scope des cycles = cycles locaux des années du bundle ∪ cycles du bundle
-    // (capturé AVANT la purge : les niveaux d'un cycle supprimé partent aussi).
-    final localGroups = await txn.query(
-      'ref_school_level_groups',
-      columns: ['id'],
-      where: 'academic_year_id IN (${_marks(yearIds)})',
-      whereArgs: yearIds,
-    );
-    final scopedGroupIds = <String>{
-      for (final r in localGroups) r['id'] as String,
-      ...bundleGroupIds,
-    }.toList(growable: false);
-    if (scopedGroupIds.isNotEmpty) {
-      final keepLevels = bundleLevelIds.isEmpty
-          ? ''
-          : ' AND id NOT IN (${_marks(bundleLevelIds)})';
-      await txn.delete(
-        'ref_school_levels',
-        where: 'level_group_id IN (${_marks(scopedGroupIds)})$keepLevels',
-        whereArgs: [...scopedGroupIds, ...bundleLevelIds],
-      );
-    }
-    final keepGroups = bundleGroupIds.isEmpty
-        ? ''
-        : ' AND id NOT IN (${_marks(bundleGroupIds)})';
-    await txn.delete(
-      'ref_school_level_groups',
-      where: 'academic_year_id IN (${_marks(yearIds)})$keepGroups',
-      whereArgs: [...yearIds, ...bundleGroupIds],
-    );
-  }
-
-  static String _marks(List<Object?> args) =>
-      List.filled(args.length, '?').join(', ');
-
-  /// ISO-8601 serveur → epoch ms, **tolérant** : une valeur absente ou malformée
-  /// retombe sur [fallback] au lieu de lever `FormatException`. Sans cette garde,
-  /// un seul horodatage serveur invalide ferait échouer l'apply de TOUTE la page
-  /// de pull — et comme le curseur `sync_meta` n'avance qu'après un apply réussi,
-  /// la même page empoisonnée serait re-demandée puis re-rejetée à chaque cycle,
-  /// **figeant définitivement (et en silence) la ressource** (cf. revue #21).
-  static int _isoToEpochMillis(String iso, {required int fallback}) =>
-      DateTime.tryParse(iso)?.millisecondsSinceEpoch ?? fallback;
-
-  /// Remplace la cohorte N-1 (`ref_previous_year_students`). Sémantique
-  /// snapshot : la cohorte est bornée/statique (pull complet always-200 à chaque
-  /// cycle online, jamais de 304), le remplacement intégral évacue les radiés.
-  /// Un 200 avec liste vide VIDE donc la table (cohorte réellement vidée côté
-  /// serveur). Renvoie le nombre de lignes affectées : insérées, ou **purgées**
-  /// quand le snapshot est vide (un wipe est un vrai changement local, pas un
-  /// `notModified`).
-  Future<int> replaceReenrollmentCohort(
-    List<ReenrollmentCandidateDto> items, {
-    required int syncedAt,
-  }) async {
-    var affected = items.length;
-    await _db.transaction((txn) async {
-      final removed = await txn.delete('ref_previous_year_students');
-      if (items.isEmpty) affected = removed;
-      final batch = txn.batch();
-      for (final c in items) {
-        batch.insert(
-          'ref_previous_year_students',
-          {
-            'student_id': c.studentId,
-            'matriculation_number': c.matriculationNumber,
-            'first_name': c.firstName,
-            'last_name': c.lastName,
-            'surname': c.surname,
-            'gender': c.gender,
-            'date_of_birth': c.dateOfBirth,
-            'birth_place': c.birthPlace,
-            'previous_academic_year_id': c.previousAcademicYearId,
-            'previous_school_level_id': c.previousSchoolLevelId,
-            'previous_classroom_id': c.previousClassroomId,
-            'guardian_name': c.guardianName,
-            'guardian_phone': c.guardianPhone,
-            'previous_balance_in_cents': c.previousBalanceInCents,
-            'currency': c.currency,
-            'synced_at': syncedAt,
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    });
-    return affected;
-  }
-
-  /// Upsert delta des préinscriptions (`ref_pre_enrollments`). `updated_at`
-  /// ISO-8601 du serveur converti en epoch ms local (colonne INTEGER) — le
-  /// curseur de pull, lui, reste le `serverTime` opaque (jamais cette colonne).
-  Future<int> upsertPreEnrollments(
-    List<PreEnrollmentDto> items, {
-    required int syncedAt,
-  }) async {
-    await applyInBatches(
-      _db,
-      items,
-      apply: (txn, chunk) async {
-        final batch = txn.batch();
-        for (final p in chunk) {
-          batch.insert('ref_pre_enrollments', {
-            'id': p.id,
-            'first_name': p.firstName,
-            'last_name': p.lastName,
-            'surname': p.surname,
-            'gender': p.gender,
-            'date_of_birth': p.dateOfBirth,
-            'birth_place': p.birthPlace,
-            'desired_school_level_id': p.desiredSchoolLevelId,
-            'guardian_name': p.guardianName,
-            'guardian_phone': p.guardianPhone,
-            'updated_at': _isoToEpochMillis(p.updatedAt, fallback: syncedAt),
-            'synced_at': syncedAt,
-          }, conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-        await batch.commit(noResult: true);
-      },
-    );
-    return items.length;
-  }
-
-  // ── Lectures (seed RE/PRE depuis le local) ──────────────────────────────────
-
-  /// `id` de l'année académique **courante** (`is_current = 1`) telle que
-  /// peuplée par le pull référentiel. `null` = référentiel non encore synchronisé
-  /// (base fraîche / hors-ligne). Sert à **scoper par saison** le marqueur de
-  /// skip de la cohorte N-1 (invalidation automatique au rollover d'année).
-  Future<String?> findCurrentAcademicYearId() async {
-    final rows = await _db.query(
-      'ref_academic_years',
-      columns: ['id'],
-      where: 'is_current = 1',
-      limit: 1,
-    );
-    if (rows.isEmpty) return null;
-    return rows.first['id'] as String?;
-  }
-
-  /// Candidat de réinscription par `student_id` canonique (photo de départ du
-  /// brouillon RE). `null` = cohorte non peuplée (pull dormant) ou élève absent.
-  Future<ReenrollmentCandidate?> findReenrollmentCandidateByStudentId(
-    String studentId,
-  ) async {
-    final rows = await _db.query(
-      'ref_previous_year_students',
-      where: 'student_id = ?',
-      whereArgs: [studentId],
-      limit: 1,
-    );
-    if (rows.isEmpty) return null;
-    return _candidateFromRow(rows.first);
-  }
-
-  /// Recherche des candidats à la réinscription (vivier N-1) filtrée par niveau.
-  /// La cohorte ne stocke que `previous_school_level_id` : le filtre par *groupe*
-  /// passe donc par les niveaux de ce groupe (référentiel local
-  /// `ref_school_levels`). Le raffinage nom/DOB reste côté présentation (parité
-  /// avec `searchByAcademicInfo`). Trié par nom pour une liste stable.
-  Future<List<ReenrollmentCandidate>> searchReenrollmentCandidates({
-    String? schoolLevelId,
-    String? schoolLevelGroupId,
-  }) async {
-    final clauses = <String>[];
-    final args = <Object?>[];
-    if (schoolLevelId != null) {
-      clauses.add('previous_school_level_id = ?');
-      args.add(schoolLevelId);
-    } else if (schoolLevelGroupId != null) {
-      clauses.add(
-        'previous_school_level_id IN '
-        '(SELECT id FROM ref_school_levels WHERE level_group_id = ?)',
-      );
-      args.add(schoolLevelGroupId);
-    }
-    final where = clauses.isEmpty ? '' : 'WHERE ${clauses.join(' AND ')}';
-    final rows = await _db.rawQuery(
-      'SELECT * FROM ref_previous_year_students $where '
-      'ORDER BY last_name, first_name',
-      args,
-    );
-    return rows.map(_candidateFromRow).toList();
-  }
-
-  ReenrollmentCandidate _candidateFromRow(Map<String, Object?> r) =>
-      ReenrollmentCandidate(
-        studentId: r['student_id'] as String,
-        matriculationNumber: r['matriculation_number'] as String,
-        firstName: r['first_name'] as String,
-        lastName: r['last_name'] as String,
-        surname: r['surname'] as String?,
-        gender: r['gender'] as String,
-        dateOfBirth: r['date_of_birth'] as String,
-        birthPlace: r['birth_place'] as String?,
-        previousAcademicYearId: r['previous_academic_year_id'] as String?,
-        previousSchoolLevelId: r['previous_school_level_id'] as String?,
-        previousClassroomId: r['previous_classroom_id'] as String?,
-        guardianName: r['guardian_name'] as String?,
-        guardianPhone: r['guardian_phone'] as String?,
-        previousBalanceInCents: (r['previous_balance_in_cents'] as int?) ?? 0,
-        currency: r['currency'] as String?,
-      );
-
-  /// Préinscription par `id` (photo de départ du brouillon PRE). `null` =
-  /// snapshot non peuplé (pull dormant) ou préinscription absente.
-  Future<PreEnrollmentCandidate?> findPreEnrollmentById(String id) async {
-    final rows = await _db.query(
-      'ref_pre_enrollments',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (rows.isEmpty) return null;
-    final r = rows.first;
-    return PreEnrollmentCandidate(
-      id: r['id'] as String,
-      firstName: r['first_name'] as String,
-      lastName: r['last_name'] as String,
-      surname: r['surname'] as String?,
-      gender: r['gender'] as String?,
-      dateOfBirth: r['date_of_birth'] as String?,
-      birthPlace: r['birth_place'] as String?,
-      desiredSchoolLevelId: r['desired_school_level_id'] as String?,
-      guardianName: r['guardian_name'] as String?,
-      guardianPhone: r['guardian_phone'] as String?,
-    );
-  }
+  const EnrollmentReconciliationDao(this._db);
 
   /// Réconciliation descendante des `enrollments` (multi-tablettes).
   /// **UPDATE-only + LWW** :
@@ -369,7 +61,7 @@ class EnrollmentRefDao {
     EnrollmentDeltaDto d,
     int syncedAt,
   ) async {
-    final updatedMs = _isoToEpochMillis(d.updatedAt, fallback: syncedAt);
+    final updatedMs = isoToEpochMillis(d.updatedAt, fallback: syncedAt);
     final changed = await txn.rawUpdate(
       'UPDATE enrollments SET '
       'status = ?, '
@@ -707,7 +399,7 @@ class EnrollmentRefDao {
   ) async {
     final keepClause = keepParentIds.isEmpty
         ? ''
-        : ' AND parent_id NOT IN (${_marks(keepParentIds)})';
+        : ' AND parent_id NOT IN (${sqlMarks(keepParentIds)})';
     await txn.rawDelete(
       'DELETE FROM student_parent WHERE student_id = ? AND parent_id IN '
       '(SELECT id FROM parents WHERE sync_status = ?)$keepClause',
@@ -717,9 +409,9 @@ class EnrollmentRefDao {
 
   /// Horloge LWW d'un agrégat snapshot : `updatedAt` (heure métier) s'il est
   /// présent, sinon repli sur `serverUpdatedAt`. Conversion ISO → epoch ms
-  /// **tolérante** (comme [_isoToEpochMillis]) : si l'heure métier est malformée
-  /// on retente `serverUpdatedAt`, puis en dernier ressort [fallback] — jamais de
-  /// `FormatException` qui figerait le pull snapshot.
+  /// **tolérante** : si l'heure métier est malformée on retente `serverUpdatedAt`,
+  /// puis en dernier ressort [fallback] — jamais de `FormatException` qui
+  /// figerait le pull snapshot (cf. revue #21).
   static int _snapshotLwwMillis(
     String? updatedAt,
     String serverUpdatedAt, {

@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
@@ -18,7 +18,7 @@ class MockEnrollmentReadDao extends Mock implements EnrollmentReadDao {}
 
 class MockEnrollmentDraftDao extends Mock implements EnrollmentDraftDao {}
 
-class MockEnrollmentRefDao extends Mock implements EnrollmentRefDao {}
+class MockEnrollmentSeedDao extends Mock implements EnrollmentSeedDao {}
 
 class MockIdGenerator extends Mock implements IdGenerator {}
 
@@ -27,7 +27,7 @@ class MockSyncEngine extends Mock implements SyncEngine {}
 void main() {
   late MockEnrollmentReadDao readDao;
   late MockEnrollmentDraftDao draftDao;
-  late MockEnrollmentRefDao refDao;
+  late MockEnrollmentSeedDao seedDao;
   late MockIdGenerator idGen;
   late MockSyncEngine syncEngine;
   late EnrollmentOfflineRepositoryImpl repo;
@@ -68,13 +68,13 @@ void main() {
   setUp(() {
     readDao = MockEnrollmentReadDao();
     draftDao = MockEnrollmentDraftDao();
-    refDao = MockEnrollmentRefDao();
+    seedDao = MockEnrollmentSeedDao();
     idGen = MockIdGenerator();
     syncEngine = MockSyncEngine();
     repo = EnrollmentOfflineRepositoryImpl(
       readDao: readDao,
       draftDao: draftDao,
-      refDao: refDao,
+      seedDao: seedDao,
       idGenerator: idGen,
       syncEngine: syncEngine,
       now: () => clock,
@@ -628,7 +628,7 @@ void main() {
         dateOfBirth: '2015-04-02',
       );
       when(
-        () => refDao.findReenrollmentCandidateByStudentId('s1'),
+        () => seedDao.findReenrollmentCandidateByStudentId('s1'),
       ).thenAnswer((_) async => candidate);
 
       final result = await repo.getReenrollmentCandidate('s1');
@@ -640,7 +640,7 @@ void main() {
       'getReenrollmentCandidate absent (cohorte vide) → Left(NotFoundFailure)',
       () async {
         when(
-          () => refDao.findReenrollmentCandidateByStudentId(any()),
+          () => seedDao.findReenrollmentCandidateByStudentId(any()),
         ).thenAnswer((_) async => null);
 
         final result = await repo.getReenrollmentCandidate('s1');
@@ -660,7 +660,7 @@ void main() {
         lastName: 'Moke',
       );
       when(
-        () => refDao.findPreEnrollmentById('pre-1'),
+        () => seedDao.findPreEnrollmentById('pre-1'),
       ).thenAnswer((_) async => pre);
 
       final result = await repo.getPreEnrollment('pre-1');
@@ -672,7 +672,7 @@ void main() {
       'getPreEnrollment absent (snapshot vide) → Left(NotFoundFailure)',
       () async {
         when(
-          () => refDao.findPreEnrollmentById(any()),
+          () => seedDao.findPreEnrollmentById(any()),
         ).thenAnswer((_) async => null);
 
         final result = await repo.getPreEnrollment('pre-1');
@@ -700,13 +700,13 @@ void main() {
       'année courante résolue → superpose les dossiers de CETTE année',
       () async {
         when(
-          () => refDao.searchReenrollmentCandidates(
+          () => seedDao.searchReenrollmentCandidates(
             schoolLevelId: any(named: 'schoolLevelId'),
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
           ),
         ).thenAnswer((_) async => [cand]);
         when(
-          () => refDao.findCurrentAcademicYearId(),
+          () => seedDao.findCurrentAcademicYearId(),
         ).thenAnswer((_) async => 'ay-cur');
         when(
           () => readDao.getEnrollments(
@@ -736,13 +736,13 @@ void main() {
       'année courante non résolue → aucun overlay (getEnrollments non appelé)',
       () async {
         when(
-          () => refDao.searchReenrollmentCandidates(
+          () => seedDao.searchReenrollmentCandidates(
             schoolLevelId: any(named: 'schoolLevelId'),
             schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
           ),
         ).thenAnswer((_) async => [cand]);
         when(
-          () => refDao.findCurrentAcademicYearId(),
+          () => seedDao.findCurrentAcademicYearId(),
         ).thenAnswer((_) async => null);
 
         final result = await repo.searchReenrollmentCohort();
