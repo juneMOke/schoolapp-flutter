@@ -1,4 +1,5 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_dto.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
 
@@ -20,24 +21,40 @@ class ClassroomLocalDataSource {
     required List<ClassroomMemberDto> members,
     required int syncedAt,
   }) async {
-    await _db.transaction((txn) async {
-      final batch = txn.batch();
-      for (final c in classrooms) {
-        batch.insert(
-          classroomsTable,
-          c.toMap(syncedAt: syncedAt),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      for (final m in members) {
-        batch.insert(
-          membersTable,
-          m.toMap(syncedAt: syncedAt),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    });
+    // Découpage en lots (classes puis membres, listes indépendantes sans FK) :
+    // le verrou de l'unique connexion sqflite est relâché entre les lots, pour
+    // ne pas geler les lectures UI sur un gros roster. REPLACE idempotent →
+    // apply partielle sûre (le pull n'avance son curseur qu'après l'apply complet).
+    await applyInBatches(
+      _db,
+      classrooms,
+      apply: (txn, chunk) async {
+        final batch = txn.batch();
+        for (final c in chunk) {
+          batch.insert(
+            classroomsTable,
+            c.toMap(syncedAt: syncedAt),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+        await batch.commit(noResult: true);
+      },
+    );
+    await applyInBatches(
+      _db,
+      members,
+      apply: (txn, chunk) async {
+        final batch = txn.batch();
+        for (final m in chunk) {
+          batch.insert(
+            membersTable,
+            m.toMap(syncedAt: syncedAt),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+        await batch.commit(noResult: true);
+      },
+    );
   }
 
   /// Classes d'une année (et niveau optionnel), triées par nom. Lecture directe

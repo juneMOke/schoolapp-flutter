@@ -5,7 +5,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_models.dart'
+import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
@@ -70,6 +70,32 @@ void main() {
     'currency': 'USD',
     'status': status,
     'sync_status': 'SYNCED',
+  });
+
+  group('upsertLedger (FF7 hydratation)', () {
+    test('gros grand-livre (> taille de lot) : toutes les créances appliquées '
+        'à travers plusieurs lots', () async {
+      // 250 > kPullApplyBatchSize (100) → au moins 3 lots (le verrou est relâché
+      // entre les lots) ; garantit qu'aucune créance n'est perdue à la frontière.
+      const count = 250;
+      await dao.upsertLedger(
+        charges: [
+          for (var i = 0; i < count; i++)
+            StudentChargeLocalModel(
+              id: 'ch-$i',
+              studentId: 'stu-$i',
+              feeCode: 'TUITION',
+              label: 'Scolarité',
+              expectedAmountInCents: 100000,
+              currency: 'USD',
+            ),
+        ],
+      );
+
+      expect(await db.query('student_charges'), hasLength(count));
+      expect(await dao.getChargesByStudent('stu-0'), hasLength(1));
+      expect(await dao.getChargesByStudent('stu-249'), hasLength(1));
+    });
   });
 
   group('recordPayment (FF3)', () {

@@ -72,6 +72,24 @@ void main() {
     expect(rows.first['synced_at'], 5000);
   });
 
+  test('gros roster (> taille de lot) : tous les membres appliqués à travers '
+      'plusieurs lots', () async {
+    // 250 > kPullApplyBatchSize (100) → au moins 3 lots ; garantit qu'aucun
+    // membre n'est perdu à la frontière des lots (verrou relâché entre lots).
+    const count = 250;
+    await dao.upsertDelta(
+      classrooms: [classroom()],
+      members: [
+        for (var i = 0; i < count; i++)
+          member(id: 'm$i', first: 'Prenom$i', last: 'Nom$i'),
+      ],
+      syncedAt: 5000,
+    );
+
+    expect(await dao.getRoster(classroomId), hasLength(count));
+    expect(await db.query('ref_classroom_members'), hasLength(count));
+  });
+
   test('upsertDelta est idempotent (REPLACE sur la PK)', () async {
     await dao.upsertDelta(
       classrooms: [classroom(total: 30)],

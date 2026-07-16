@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_models.dart'
+import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';

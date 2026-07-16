@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_models.dart'
+import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
@@ -288,16 +289,38 @@ class FinanceLocalDao {
 
   // ── Pull autoritaire (FF2) ─────────────────────────────────────────────────
 
-  Future<void> upsertTariffs(List<FeeTariffLocalModel> tariffs) async {
-    final batch = _db.batch();
-    for (final t in tariffs) {
-      batch.insert(
-        'ref_fee_tariffs',
-        t.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+  /// Remplace la grille tarifaire des années couvertes par le bundle
+  /// référentiel (snapshot **scopé**) : purge les lignes de ces années
+  /// absentes du nouveau bundle (un tarif supprimé côté serveur ne doit pas
+  /// rester fantôme — money-grade), puis upsert. Les tarifs d'autres années
+  /// ne sont pas touchés ; sans année fournie, aucune purge (upsert seul).
+  Future<void> replaceTariffsForYears(
+    List<FeeTariffLocalModel> tariffs, {
+    required List<String> academicYearIds,
+  }) async {
+    await _db.transaction((txn) async {
+      if (academicYearIds.isNotEmpty) {
+        final keepIds = [for (final t in tariffs) t.id];
+        final years = List.filled(academicYearIds.length, '?').join(', ');
+        final keep = keepIds.isEmpty
+            ? ''
+            : ' AND id NOT IN (${List.filled(keepIds.length, '?').join(', ')})';
+        await txn.delete(
+          'ref_fee_tariffs',
+          where: 'academic_year_id IN ($years)$keep',
+          whereArgs: [...academicYearIds, ...keepIds],
+        );
+      }
+      final batch = txn.batch();
+      for (final t in tariffs) {
+        batch.insert(
+          'ref_fee_tariffs',
+          t.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    });
   }
 
   Future<void> upsertLedger({
@@ -305,30 +328,51 @@ class FinanceLocalDao {
     List<PaymentLocalModel> payments = const [],
     List<PaymentAllocationLocalModel> allocations = const [],
   }) async {
-    await _db.transaction((txn) async {
-      for (final p in payments) {
-        await txn.insert(
-          'payments',
-          p.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      for (final a in allocations) {
-        await txn.insert(
-          'payment_allocations',
-          a.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      for (final c in charges) {
-        await txn.insert(
-          'student_charges',
-          c.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-        await _recomputeOptimistic(txn, c.id);
-      }
-    });
+    // Découpage en lots (verrou relâché entre les lots) — grand-livre
+    // potentiellement volumineux. Ordre PORTEUR : paiements + allocations
+    // D'ABORD, créances EN DERNIER, car `_recomputeOptimistic` somme les
+    // allocations des paiements PENDING (déjà committées par les lots
+    // précédents). Upserts REPLACE idempotents → apply partielle sûre.
+    await applyInBatches(
+      _db,
+      payments,
+      apply: (txn, chunk) async {
+        for (final p in chunk) {
+          await txn.insert(
+            'payments',
+            p.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      },
+    );
+    await applyInBatches(
+      _db,
+      allocations,
+      apply: (txn, chunk) async {
+        for (final a in chunk) {
+          await txn.insert(
+            'payment_allocations',
+            a.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      },
+    );
+    await applyInBatches(
+      _db,
+      charges,
+      apply: (txn, chunk) async {
+        for (final c in chunk) {
+          await txn.insert(
+            'student_charges',
+            c.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          await _recomputeOptimistic(txn, c.id);
+        }
+      },
+    );
   }
 
   // ── Lectures ────────────────────────────────────────────────────────────────
