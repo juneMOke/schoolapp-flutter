@@ -3374,18 +3374,6 @@ abstract class AppLocalizations {
   /// **'Go to First Registration'**
   String get goToFirstRegistration;
 
-  /// No description provided for @enrollmentStatusUpdateSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Status updated successfully.'**
-  String get enrollmentStatusUpdateSuccess;
-
-  /// No description provided for @enrollmentStatusUpdateError.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update status: {message}'**
-  String enrollmentStatusUpdateError(String message);
-
   /// No description provided for @personalInfoSaveHintBeforeContinue.
   ///
   /// In en, this message translates to:
@@ -3577,6 +3565,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In Progress'**
   String get enrollmentStatusInProgress;
+
+  /// Listing row badge: enrollment started locally (unfinalized/unsynced draft), resumed on tap.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get enrollmentDraftBadge;
+
+  /// Listing row type pill: re-enrollment dossier (RE_ENROLLMENT type), shown instead of the 'Pre-registered' status.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrollment'**
+  String get enrollmentTypeReEnrollment;
+
+  /// Re-enrollments page pill: prior-year cohort candidate not yet re-enrolled (no local dossier, tap = start). Replaces 'Pending' in this context.
+  ///
+  /// In en, this message translates to:
+  /// **'To re-enroll'**
+  String get enrollmentReenrollmentCandidateBadge;
 
   /// No description provided for @enrollmentStatusAdminCompleted.
   ///

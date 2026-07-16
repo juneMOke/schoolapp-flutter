@@ -1969,14 +1969,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goToFirstRegistration => 'Retourner à la première inscription';
 
   @override
-  String get enrollmentStatusUpdateSuccess => 'Statut mis à jour avec succès.';
-
-  @override
-  String enrollmentStatusUpdateError(String message) {
-    return 'Erreur lors de la mise à jour du statut : $message';
-  }
-
-  @override
   String get personalInfoSaveHintBeforeContinue =>
       'Veuillez enregistrer vos modifications avant de continuer.';
 
@@ -2094,6 +2086,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get enrollmentStatusInProgress => 'En cours';
+
+  @override
+  String get enrollmentDraftBadge => 'Brouillon';
+
+  @override
+  String get enrollmentTypeReEnrollment => 'Réinscription';
+
+  @override
+  String get enrollmentReenrollmentCandidateBadge => 'À réinscrire';
 
   @override
   String get enrollmentStatusAdminCompleted => 'Complété (Administratif)';

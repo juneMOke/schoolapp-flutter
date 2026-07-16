@@ -908,15 +908,6 @@
   "validateEnrollment": "Valider l'inscription",
   "validatingEnrollment": "Validation en cours...",
   "goToFirstRegistration": "Retourner à la première inscription",
-  "enrollmentStatusUpdateSuccess": "Statut mis à jour avec succès.",
-  "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
-  "@enrollmentStatusUpdateError": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
   "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
   "requiredFieldError": "Le champ {field} est requis.",
@@ -984,6 +975,18 @@
   "enrollmentStudentColumnLabel": "Eleve",
   "enrollmentStatusFilterLabel": "Statut",
   "enrollmentStatusInProgress": "En cours",
+  "enrollmentDraftBadge": "Brouillon",
+  "@enrollmentDraftBadge": {
+    "description": "Badge sur une ligne de listing : dossier commencé localement (brouillon non finalisé/non synchronisé), repris au tap."
+  },
+  "enrollmentTypeReEnrollment": "Réinscription",
+  "@enrollmentTypeReEnrollment": {
+    "description": "Pastille de type sur une ligne de listing : dossier de réinscription (type RE_ENROLLMENT), affichée à la place du statut « Pré-inscrit »."
+  },
+  "enrollmentReenrollmentCandidateBadge": "À réinscrire",
+  "@enrollmentReenrollmentCandidateBadge": {
+    "description": "Pastille sur la page Réinscriptions : candidat du vivier N-1 pas encore réinscrit (aucun dossier local, tap = démarrer). Remplace « En attente » dans ce contexte."
+  },
   "enrollmentStatusAdminCompleted": "Complété (Administratif)",
   "enrollmentStatusFinancialCompleted": "Complété (Financier)",
   "enrollmentStatusCompleted": "Complété",

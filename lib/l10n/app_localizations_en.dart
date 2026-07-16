@@ -1954,14 +1954,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToFirstRegistration => 'Go to First Registration';
 
   @override
-  String get enrollmentStatusUpdateSuccess => 'Status updated successfully.';
-
-  @override
-  String enrollmentStatusUpdateError(String message) {
-    return 'Failed to update status: $message';
-  }
-
-  @override
   String get personalInfoSaveHintBeforeContinue =>
       'Please save your changes before continuing.';
 
@@ -2077,6 +2069,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentStatusInProgress => 'In Progress';
+
+  @override
+  String get enrollmentDraftBadge => 'Draft';
+
+  @override
+  String get enrollmentTypeReEnrollment => 'Re-enrollment';
+
+  @override
+  String get enrollmentReenrollmentCandidateBadge => 'To re-enroll';
 
   @override
   String get enrollmentStatusAdminCompleted => 'Admin Completed';

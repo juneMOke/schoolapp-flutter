@@ -895,13 +895,6 @@
   "validateEnrollment": "Validate enrollment",
   "validatingEnrollment": "Validating...",
   "goToFirstRegistration": "Go to First Registration",
-  "enrollmentStatusUpdateSuccess": "Status updated successfully.",
-  "enrollmentStatusUpdateError": "Failed to update status: {message}",
-  "@enrollmentStatusUpdateError": {
-    "placeholders": {
-      "message": { "type": "String" }
-    }
-  },
   "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
   "personalInfoValidationReasonsTitle": "Please correct the following fields:",
   "requiredFieldError": "The {field} field is required.",
@@ -967,6 +960,18 @@
   "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
   "enrollmentStatusInProgress": "In Progress",
+  "enrollmentDraftBadge": "Draft",
+  "@enrollmentDraftBadge": {
+    "description": "Listing row badge: enrollment started locally (unfinalized/unsynced draft), resumed on tap."
+  },
+  "enrollmentTypeReEnrollment": "Re-enrollment",
+  "@enrollmentTypeReEnrollment": {
+    "description": "Listing row type pill: re-enrollment dossier (RE_ENROLLMENT type), shown instead of the 'Pre-registered' status."
+  },
+  "enrollmentReenrollmentCandidateBadge": "To re-enroll",
+  "@enrollmentReenrollmentCandidateBadge": {
+    "description": "Re-enrollments page pill: prior-year cohort candidate not yet re-enrolled (no local dossier, tap = start). Replaces 'Pending' in this context."
+  },
   "enrollmentStatusAdminCompleted": "Admin Completed",
   "enrollmentStatusFinancialCompleted": "Financial Completed",
   "enrollmentStatusCompleted": "Completed",
