@@ -11,5 +11,11 @@ class GetLocalEnrollmentsUseCase {
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> call({
     String? status,
-  }) => _repository.getEnrollments(status: status);
+    String? academicYearId,
+    String? enrollmentType,
+  }) => _repository.getEnrollments(
+    status: status,
+    academicYearId: academicYearId,
+    enrollmentType: enrollmentType,
+  );
 }

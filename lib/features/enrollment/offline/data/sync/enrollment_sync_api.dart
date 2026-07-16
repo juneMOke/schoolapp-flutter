@@ -5,17 +5,18 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 
 part 'enrollment_sync_api.g.dart';
 
-/// Interface Dart de l'endpoint agrégat d'inscription (F-Lot 4).
-/// `POST /api/v1/sync/enrollments` : 1..N agrégats en attente, 1 ACK par item
-/// corrélé par `clientEnrollmentId`. Le token porte le `school_id` (jamais dans
-/// le payload).
+/// Interface Dart du commit d'inscription (contrat `openapi_enrollment_sync`).
+/// `POST /api/v1/sync/enrollments` : UN agrégat {enrollment, student, parents},
+/// idempotent sur `enrollment.id`. 201/200 → réponse canonique
+/// [EnrollmentAggregateResponse] ; 422 → rejet terminal (DioException, géré par
+/// le handler). Le token porte le `school_id` (jamais dans le payload).
 @RestApi()
 abstract class EnrollmentSyncApi {
   factory EnrollmentSyncApi(Dio dio, {String baseUrl}) = _EnrollmentSyncApi;
 
   @POST(AppConstants.syncEnrollmentsEndpoint)
-  Future<EnrollmentCommitResult> commit(
+  Future<EnrollmentAggregateResponse> submit(
     @Extras() Map<String, dynamic> extras,
-    @Body() EnrollmentCommitBatch batch,
+    @Body() EnrollmentAggregateRequest aggregate,
   );
 }

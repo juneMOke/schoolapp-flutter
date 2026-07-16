@@ -6,8 +6,10 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_dao.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_models.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
@@ -16,30 +18,64 @@ import '../../offline_full_db.dart';
 
 class MockEnrollmentSyncApi extends Mock implements EnrollmentSyncApi {}
 
+const _fallbackCommand = EnrollmentCommand(
+  enrollment: EnrollmentPayload(
+    id: 'e0',
+    enrollmentType: 'NEW_ENROLLMENT',
+    status: 'IN_PROGRESS',
+    academicYearId: 'ay-0',
+    enrollmentDate: '2026-01-01',
+  ),
+  student: StudentPayload(
+    id: 's0',
+    firstName: 'A',
+    lastName: 'B',
+    surname: 'C',
+    gender: 'FEMALE',
+    dateOfBirth: '2015-01-01',
+    birthPlace: 'X',
+    nationality: 'CD',
+  ),
+  parents: [],
+);
+
+DioException _httpError(int status, {Object? data}) => DioException(
+  requestOptions: RequestOptions(path: '/api/v1/enrollments'),
+  response: Response(
+    requestOptions: RequestOptions(path: '/api/v1/enrollments'),
+    statusCode: status,
+    data: data,
+  ),
+);
+
 void main() {
   late Database db;
-  late EnrollmentLocalDao dao;
+  late EnrollmentDraftDao draftDao;
+  late EnrollmentAckDao ackDao;
   late MockEnrollmentSyncApi api;
   late EnrollmentOutboxHandler handler;
 
   setUpAll(() {
-    registerFallbackValue(const EnrollmentCommitBatch([]));
+    registerFallbackValue(const EnrollmentAggregateRequest(_fallbackCommand));
     registerFallbackValue(<String, dynamic>{});
   });
 
   setUp(() async {
     db = await openFullOfflineDb();
-    dao = EnrollmentLocalDao(db);
+    draftDao = EnrollmentDraftDao(db);
+    ackDao = EnrollmentAckDao(db);
     api = MockEnrollmentSyncApi();
     handler = EnrollmentOutboxHandler(
       api: api,
-      dao: dao,
+      dao: ackDao,
       extras: const {},
       now: () => 9000,
     );
 
-    await dao.confirmEnrollment(
-      student: const StudentLocalModel(
+    // Dossier PENDING_SYNC + entrée outbox via le VRAI chemin de production
+    // (draft-par-étape → finalize), l'ancien one-shot commit ayant été retiré.
+    await draftDao.insertDraftStudent(
+      const StudentLocalModel(
         id: 's1',
         firstName: 'Amina',
         lastName: 'Moke',
@@ -47,7 +83,9 @@ void main() {
         dateOfBirth: '2015-04-02',
         updatedAt: 100,
       ),
-      enrollment: const EnrollmentLocalModel(
+    );
+    await draftDao.insertDraftEnrollment(
+      const EnrollmentLocalModel(
         id: 'e1',
         studentId: 's1',
         enrollmentType: 'NEW_ENROLLMENT',
@@ -55,17 +93,20 @@ void main() {
         academicYearId: 'ay-1',
         enrollmentDate: '2026-07-06',
       ),
-      parents: [
-        const ParentDraft(
-          parent: ParentLocalModel(
-            id: 'p-prov',
-            firstName: 'Sarah',
-            lastName: 'Moke',
-            phoneNumber: '+243111',
-          ),
-          relationshipType: 'MOTHER',
+    );
+    await draftDao.replaceDraftParents('s1', [
+      const ParentDraft(
+        parent: ParentLocalModel(
+          id: 'p-prov',
+          firstName: 'Sarah',
+          lastName: 'Moke',
+          phoneNumber: '+243111',
         ),
-      ],
+        relationshipType: 'MOTHER',
+      ),
+    ], nowMs: 1000);
+    await draftDao.finalizeDraft(
+      'e1',
       document: const GeneratedDocumentLocalModel(
         id: 'd1',
         docDomain: 'ENROLLMENT',
@@ -74,7 +115,6 @@ void main() {
         docType: 'AI',
         number: 'PROV-ABCDEF12',
       ),
-      outboxEntryId: 'ob1',
       nowMs: 1000,
     );
   });
@@ -86,18 +126,20 @@ void main() {
   Future<OutboxEntry> pendingEntry() async =>
       (await OutboxDao(db).pendingReady(9999)).single;
 
-  test('COMMITTED → acked + remap appliqué en base', () async {
-    when(() => api.commit(any(), any())).thenAnswer(
-      (_) async => const EnrollmentCommitResult([
-        EnrollmentAck(
-          clientEnrollmentId: 'e1',
-          outcome: 'COMMITTED',
-          enrollment: AckEnrollment(id: 'e1', enrollmentCode: 'ETL-1'),
-          student: AckStudent(id: 's1', matriculationNumber: 'MAT-1'),
-          parents: [AckParent(clientId: 'p-prov', id: 'p-canon')],
-          document: AckDocument(id: 'd1', number: 'ETL-AI-1'),
-        ),
-      ]),
+  test('201/200 → acked + remap canonique appliqué en base', () async {
+    when(() => api.submit(any(), any())).thenAnswer(
+      (_) async => const EnrollmentAggregateResponse(
+        enrollment: ResponseEnrollment(id: 'e1', enrollmentCode: 'ETL-1'),
+        student: ResponseStudent(id: 's1', matriculationNumber: 'MAT-1'),
+        parents: [ParentRemap(providedId: 'p-prov', canonicalId: 'p-canon')],
+        documents: [
+          GeneratedDocumentDto(
+            type: 'ENROLLMENT_CERTIFICATE',
+            documentNumber: 'ETL-AI-1',
+            status: 'DEFINITIVE',
+          ),
+        ],
+      ),
     );
 
     final result = await handler.dispatch(await pendingEntry());
@@ -113,15 +155,12 @@ void main() {
     );
   });
 
-  test('VALIDATION_ERROR → failed + SYNC_ERROR local', () async {
-    when(() => api.commit(any(), any())).thenAnswer(
-      (_) async => const EnrollmentCommitResult([
-        EnrollmentAck(
-          clientEnrollmentId: 'e1',
-          outcome: 'VALIDATION_ERROR',
-          error: AckError(message: 'Champ requis'),
-        ),
-      ]),
+  test('422 → failed + SYNC_ERROR local (message extrait du corps)', () async {
+    when(() => api.submit(any(), any())).thenThrow(
+      _httpError(
+        422,
+        data: {'code': 'VALIDATION_FAILED', 'message': 'Champ requis'},
+      ),
     );
 
     final result = await handler.dispatch(await pendingEntry());
@@ -131,30 +170,39 @@ void main() {
       (await db.query('enrollments')).first['sync_status'],
       SyncState.syncError.dbValue,
     );
+    expect(
+      (await db.query('students')).first['sync_status'],
+      SyncState.syncError.dbValue,
+    );
   });
 
-  test('erreur réseau (DioException) → retry (idempotent)', () async {
-    when(() => api.commit(any(), any())).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(path: '/x'),
-        error: 'net',
-      ),
-    );
+  test(
+    'erreur réseau (DioException sans réponse) → retry (idempotent)',
+    () async {
+      when(() => api.submit(any(), any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/v1/enrollments'),
+          error: 'net',
+        ),
+      );
 
+      final result = await handler.dispatch(await pendingEntry());
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      // Rien n'a changé : le dossier reste PENDING_SYNC.
+      expect(
+        (await db.query('enrollments')).first['sync_status'],
+        SyncState.pendingSync.dbValue,
+      );
+    },
+  );
+
+  test('5xx → retry (transitoire, pas un rejet métier)', () async {
+    when(() => api.submit(any(), any())).thenThrow(_httpError(503));
     final result = await handler.dispatch(await pendingEntry());
     expect(result.outcome, OutboxDispatchOutcome.retry);
-    // Rien n'a changé : le dossier reste PENDING_SYNC.
     expect(
       (await db.query('enrollments')).first['sync_status'],
       SyncState.pendingSync.dbValue,
     );
-  });
-
-  test('ACK absent pour l\'agrégat → retry', () async {
-    when(
-      () => api.commit(any(), any()),
-    ).thenAnswer((_) async => const EnrollmentCommitResult([]));
-    final result = await handler.dispatch(await pendingEntry());
-    expect(result.outcome, OutboxDispatchOutcome.retry);
   });
 }

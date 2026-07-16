@@ -44,6 +44,10 @@ class ConfirmEnrollmentDraft {
 
   final String enrollmentType; // NEW_ENROLLMENT|RE_ENROLLMENT|PRE_ENROLLMENT
   final String status; // IN_PROGRESS (NEW) | PRE_REGISTERED (RE/PRE)
+
+  /// Référence d'origine du dossier (contrat agrégat) : matricule (RE),
+  /// id de préinscription (PRE), null (NEW).
+  final String? sourceRef;
   final String academicYearId;
   final String? schoolLevelId;
   final String? schoolLevelGroupId;
@@ -78,6 +82,7 @@ class ConfirmEnrollmentDraft {
     this.matriculationNumber,
     required this.enrollmentType,
     required this.status,
+    this.sourceRef,
     required this.academicYearId,
     this.schoolLevelId,
     this.schoolLevelGroupId,
@@ -108,18 +113,23 @@ class DraftIds {
 /// Repository offline-first du module Inscription : écritures local-first
 /// (confirmation) et lectures servies depuis sqflite.
 abstract class EnrollmentOfflineRepository {
-  /// Confirme un dossier (transaction locale + enqueue outbox). Renvoie l'id
-  /// d'inscription (uuid client) immédiatement, sans attente réseau.
-  Future<Either<Failure, String>> confirmEnrollment(
-    ConfirmEnrollmentDraft draft,
-  );
-
   // ── Wizard offline-first : brouillon local persisté (M1) ────────────────────
 
   /// Démarre un brouillon : génère (sans écrire) les ids client. `studentId`
   /// réutilise `existingStudentId` s'il est fourni (RE/PRE), sinon un uuid neuf
   /// (NEW) ; `enrollmentId` est toujours un uuid neuf.
   DraftIds startDraft({String? existingStudentId});
+
+  /// Amorce un brouillon **complet** (RE/PRE/édition) depuis un dossier chargé
+  /// — la photo de départ que les étapes éditeront colonne-à-colonne.
+  /// `enrollmentId` conserve un id serveur connu (PRE, édition) ; absent →
+  /// uuid client neuf (RE, nouveau dossier N). `seed.studentId` connu = élève
+  /// canonique (RE/PRE) ; null = uuid neuf. ValidationFailure si un dossier
+  /// local de même id est déjà confirmé (non-DRAFT).
+  Future<Either<Failure, DraftIds>> seedDraft(
+    ConfirmEnrollmentDraft seed, {
+    String? enrollmentId,
+  });
 
   /// Étape 0 : crée les 2 lignes DRAFT (élève + inscription) — porte tous les
   /// champs NOT NULL. Ré-appelable (remplace la ligne de même id).
@@ -193,15 +203,9 @@ abstract class EnrollmentOfflineRepository {
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> getEnrollments({
     String? status,
+    String? academicYearId,
+    String? enrollmentType,
   });
-
-  Future<Either<Failure, List<LocalEnrollmentListItem>>> searchByName(
-    String query,
-  );
-
-  Future<Either<Failure, List<LocalEnrollmentListItem>>> searchByDateOfBirth(
-    String dateOfBirth,
-  );
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> searchByAcademicInfo({
     String? academicYearId,
@@ -209,5 +213,37 @@ abstract class EnrollmentOfflineRepository {
     String? schoolLevelGroupId,
   });
 
+  /// Recherche de **réinscription** : le vivier N-1 (cohorte locale filtrée par
+  /// niveau) + les dossiers locaux de l'année **courante** (résolue via
+  /// `is_current`) pour la superposition read-your-writes. Le scope année
+  /// courante évite qu'un dossier N-1 terminé masque le candidat à réinscrire.
+  Future<Either<Failure, ReenrollmentSearchResult>> searchReenrollmentCohort({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  });
+
+  /// **Sonde au tap** RE : renvoie la référence d'un dossier local existant pour
+  /// `(studentId, academicYearId)` — `null` si aucun. Backstop robuste contre une
+  /// liste périmée / une année divergente : au tap d'un candidat, on ré-résout
+  /// par `studentId` pour ouvrir le dossier existant (reprise/lecture seule)
+  /// plutôt que de seeder un doublon.
+  Future<Either<Failure, LocalDossierRef?>> probeLocalReenrollmentDossier({
+    required String studentId,
+    required String academicYearId,
+  });
+
   Future<Either<Failure, LocalEnrollmentDetail>> getDetail(String enrollmentId);
+
+  /// Candidat de réinscription (cohorte N-1 locale) par `student_id` — photo de
+  /// départ du brouillon RE. `NotFoundFailure` si la cohorte n'est pas peuplée
+  /// (pull dormant) ou l'élève absent.
+  Future<Either<Failure, ReenrollmentCandidate>> getReenrollmentCandidate(
+    String studentId,
+  );
+
+  /// Préinscription locale par `id` — photo de départ du brouillon PRE.
+  /// `NotFoundFailure` si le snapshot n'est pas peuplé (pull dormant) ou absente.
+  Future<Either<Failure, PreEnrollmentCandidate>> getPreEnrollment(
+    String preEnrollmentId,
+  );
 }

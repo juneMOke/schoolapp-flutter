@@ -20,17 +20,17 @@ class _EnrollmentSyncApi implements EnrollmentSyncApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<EnrollmentCommitResult> commit(
+  Future<EnrollmentAggregateResponse> submit(
     Map<String, dynamic> extras,
-    EnrollmentCommitBatch batch,
+    EnrollmentAggregateRequest aggregate,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(batch.toJson());
-    final _options = _setStreamType<EnrollmentCommitResult>(
+    _data.addAll(aggregate.toJson());
+    final _options = _setStreamType<EnrollmentAggregateResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -41,9 +41,9 @@ class _EnrollmentSyncApi implements EnrollmentSyncApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late EnrollmentCommitResult _value;
+    late EnrollmentAggregateResponse _value;
     try {
-      _value = EnrollmentCommitResult.fromJson(_result.data!);
+      _value = EnrollmentAggregateResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
