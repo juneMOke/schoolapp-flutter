@@ -1489,18 +1489,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentDetailLoadErrorTitle => 'Unable to load enrollment file';
 
   @override
-  String get enrollmentDetailLoadErrorFallback =>
-      'An error occurred while loading enrollment details.';
-
-  @override
   String get enrollmentDetailRetryAction => 'Retry';
-
-  @override
-  String get enrollmentDetailNotFoundTitle => 'Details not found';
-
-  @override
-  String get enrollmentDetailNotFoundMessage =>
-      'This enrollment file does not exist or is no longer available.';
 
   @override
   String get gender => 'Gender';

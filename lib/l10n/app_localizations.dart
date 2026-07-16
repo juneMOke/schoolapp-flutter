@@ -2486,29 +2486,11 @@ abstract class AppLocalizations {
   /// **'Unable to load enrollment file'**
   String get enrollmentDetailLoadErrorTitle;
 
-  /// No description provided for @enrollmentDetailLoadErrorFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'An error occurred while loading enrollment details.'**
-  String get enrollmentDetailLoadErrorFallback;
-
   /// No description provided for @enrollmentDetailRetryAction.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get enrollmentDetailRetryAction;
-
-  /// No description provided for @enrollmentDetailNotFoundTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Details not found'**
-  String get enrollmentDetailNotFoundTitle;
-
-  /// No description provided for @enrollmentDetailNotFoundMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This enrollment file does not exist or is no longer available.'**
-  String get enrollmentDetailNotFoundMessage;
 
   /// No description provided for @gender.
   ///

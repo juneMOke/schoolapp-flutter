@@ -1497,18 +1497,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de charger le dossier';
 
   @override
-  String get enrollmentDetailLoadErrorFallback =>
-      'Erreur lors du chargement des détails.';
-
-  @override
   String get enrollmentDetailRetryAction => 'Réessayer';
-
-  @override
-  String get enrollmentDetailNotFoundTitle => 'Détails introuvables';
-
-  @override
-  String get enrollmentDetailNotFoundMessage =>
-      'Ce dossier n\'existe pas ou n\'est plus disponible.';
 
   @override
   String get gender => 'Genre';
