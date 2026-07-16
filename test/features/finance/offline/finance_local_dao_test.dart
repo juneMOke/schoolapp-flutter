@@ -340,4 +340,83 @@ void main() {
       expect(charges.single.optimisticRemainingInCents, 60000);
     });
   });
+
+  group('replaceTariffsForYears (FF2 pull scopé)', () {
+    FeeTariffLocalModel tariff(String id, {String year = 'ay-1'}) =>
+        FeeTariffLocalModel(
+          id: id,
+          academicYearId: year,
+          feeCode: 'INSCRIPTION',
+          label: 'Inscription',
+          amountInCents: 5000,
+          currency: 'USD',
+          updatedAt: 10,
+        );
+
+    Future<List<Object?>> tariffIdsFor(String year) async => (await db.query(
+      'ref_fee_tariffs',
+      columns: ['id'],
+      where: 'academic_year_id = ?',
+      whereArgs: [year],
+    )).map((r) => r['id']).toList();
+
+    test('purge les tarifs disparus de l\'année scopée, garde les autres '
+        'années', () async {
+      await insertTariff('t1', 'INSCRIPTION', 5000); // ay-1
+      await insertTariff('t2', 'TUITION', 9000); // ay-1
+      await db.insert('ref_fee_tariffs', {
+        'id': 't-other',
+        'fee_code': 'INSCRIPTION',
+        'label': 'INSCRIPTION',
+        'amount_in_cents': 5000,
+        'currency': 'USD',
+        'academic_year_id': 'ay-2',
+      });
+
+      // Nouveau bundle ay-1 : garde t2, ajoute t3, laisse tomber t1.
+      await dao.replaceTariffsForYears(
+        [tariff('t2'), tariff('t3')],
+        academicYearIds: ['ay-1'],
+      );
+
+      expect((await tariffIdsFor('ay-1')).toSet(), {'t2', 't3'}); // t1 purgé
+      expect(await tariffIdsFor('ay-2'), [
+        't-other',
+      ]); // année non scopée intacte
+    });
+
+    test(
+      'bundle vide pour une année → vide cette année (tarif retiré serveur)',
+      () async {
+        await insertTariff('t1', 'INSCRIPTION', 5000);
+        await dao.replaceTariffsForYears([], academicYearIds: ['ay-1']);
+        expect(await tariffIdsFor('ay-1'), isEmpty);
+      },
+    );
+
+    test('grande grille (> 2x taille de lot) : purge complète sans dépasser '
+        'SQLITE_MAX_VARIABLE_NUMBER', () async {
+      // 1200 > 2x _deleteChunkSize (500) → la purge traverse ≥3 lots de DELETE ;
+      // le test garantit qu'aucune ligne n'est perdue ni oubliée aux frontières.
+      final batch = db.batch();
+      for (var i = 0; i < 1200; i++) {
+        batch.insert('ref_fee_tariffs', {
+          'id': 't-$i',
+          'fee_code': 'FEE',
+          'label': 'FEE',
+          'amount_in_cents': 100,
+          'currency': 'USD',
+          'academic_year_id': 'ay-1',
+        });
+      }
+      await batch.commit(noResult: true);
+
+      await dao.replaceTariffsForYears(
+        [tariff('t-42')],
+        academicYearIds: ['ay-1'],
+      );
+
+      expect((await tariffIdsFor('ay-1')).toSet(), {'t-42'}); // 1199 purgés
+    });
+  });
 }

@@ -294,22 +294,45 @@ class FinanceLocalDao {
   /// absentes du nouveau bundle (un tarif supprimé côté serveur ne doit pas
   /// rester fantôme — money-grade), puis upsert. Les tarifs d'autres années
   /// ne sont pas touchés ; sans année fournie, aucune purge (upsert seul).
+  /// Taille de lot des purges `id IN (...)` — bornée bien en-deçà de
+  /// `SQLITE_MAX_VARIABLE_NUMBER` (999 sur les SQLite anciens d'Android 10).
+  static const int _deleteChunkSize = 500;
+
   Future<void> replaceTariffsForYears(
     List<FeeTariffLocalModel> tariffs, {
     required List<String> academicYearIds,
   }) async {
     await _db.transaction((txn) async {
       if (academicYearIds.isNotEmpty) {
-        final keepIds = [for (final t in tariffs) t.id];
+        // Diff calculé en Dart puis purge par lots bornés : on NE lie PAS un `?`
+        // par tarif conservé. Un `id NOT IN (…)` non borné dépasse
+        // SQLITE_MAX_VARIABLE_NUMBER dès qu'une grille compte >~999 lignes (cf.
+        // revue #21) et **fige alors le curseur référentiel** (l'apply lève →
+        // curseur non avancé → re-pull en boucle). Les années scopées sont peu
+        // nombreuses (bundle année active) → leur `IN (…)` reste petit.
         final years = List.filled(academicYearIds.length, '?').join(', ');
-        final keep = keepIds.isEmpty
-            ? ''
-            : ' AND id NOT IN (${List.filled(keepIds.length, '?').join(', ')})';
-        await txn.delete(
+        final existing = await txn.query(
           'ref_fee_tariffs',
-          where: 'academic_year_id IN ($years)$keep',
-          whereArgs: [...academicYearIds, ...keepIds],
+          columns: ['id'],
+          where: 'academic_year_id IN ($years)',
+          whereArgs: academicYearIds,
         );
+        final keepIds = {for (final t in tariffs) t.id};
+        final staleIds = [
+          for (final r in existing)
+            if (!keepIds.contains(r['id'] as String)) r['id'] as String,
+        ];
+        for (var i = 0; i < staleIds.length; i += _deleteChunkSize) {
+          final end = i + _deleteChunkSize < staleIds.length
+              ? i + _deleteChunkSize
+              : staleIds.length;
+          final chunk = staleIds.sublist(i, end);
+          await txn.delete(
+            'ref_fee_tariffs',
+            where: 'id IN (${List.filled(chunk.length, '?').join(', ')})',
+            whereArgs: chunk,
+          );
+        }
       }
       final batch = txn.batch();
       for (final t in tariffs) {
