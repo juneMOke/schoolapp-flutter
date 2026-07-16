@@ -14,7 +14,6 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/enrollment_confirm_draft_builder.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_detail_mapper.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_summary_mapper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
@@ -62,14 +61,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   /// [isUnsyncedLocalWrite] seul laisserait passer).
   bool _forceLocalReadOnly = false;
 
-  /// Sonde locale en cours (listing → détail) : tant qu'elle n'a pas répondu, on
-  /// masque l'erreur du GET serveur concurrent. Pour un dossier LOCAL non
-  /// synchronisé, ce GET est voué à échouer (id client absent du serveur) ;
-  /// sans ce masque, son échec (surtout hors-ligne, quasi immédiat) pourrait
-  /// peindre un écran d'erreur l'espace d'une frame avant que la lecture locale
-  /// ne bascule en consultation lecture seule. Voir [_onLocalDetail].
-  bool _probingLocalDetail = false;
-
   /// Origine « première inscription » (listing) : seule à pouvoir pointer un
   /// dossier LOCAL (les items de superposition read-your-writes). RE/PRE/NEW
   /// ne sont jamais dans le cache local `enrollments` par leur enrollmentId.
@@ -86,11 +77,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
 
   bool get _isNewOffline =>
       _effectiveIntent.origin == EnrollmentDetailOrigin.newFirstRegistration;
-
-  /// Toute création/édition passe par le brouillon local (NEW vierge, RE/PRE/
-  /// reprise seedés depuis le dossier serveur) ; la consultation pure reste
-  /// servie par le détail online.
-  bool get _usesLocalDraft => _policy.usesLocalDraft;
 
   @override
   void initState() {
@@ -124,7 +110,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     _seededIntent = null;
     _localReadOnly = null;
     _forceLocalReadOnly = false;
-    _probingLocalDetail = false;
     if (_isNewOffline) {
       context.read<EnrollmentOfflineBloc>().add(const StartDraftRequested());
       return;
@@ -147,7 +132,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     // DRAFT éditables sont, eux, routés en amont vers `localDraftResume` par le
     // scaffold et n'atteignent jamais cette origine.
     if (_isFirstRegistrationListing) {
-      _probingLocalDetail = true;
       context.read<EnrollmentOfflineBloc>().add(
         LoadLocalEnrollmentDetail(_effectiveIntent.enrollmentId),
       );
@@ -168,25 +152,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   //  - la **sonde au tap RE** ayant trouvé un dossier finalisé
   //    (`_forceLocalReadOnly`).
   void _onLocalDetail(BuildContext context, EnrollmentOfflineState state) {
-    // Dossier LOCAL trouvé → bascule en consultation lecture seule (et fin de la
-    // sonde).
+    // Dossier LOCAL trouvé → bascule en consultation lecture seule.
     if (state is EnrollmentOfflineDetailLoaded &&
         (_forceLocalReadOnly ||
             _isFirstRegistrationListing ||
             isUnsyncedLocalWrite(state.detail.enrollment.syncState))) {
-      setState(() {
-        _localReadOnly = state.detail;
-        _probingLocalDetail = false;
-      });
-      return;
-    }
-    // Sonde terminée sans dossier read-your-writes (SYNCED, introuvable, ou
-    // erreur locale) → on lève le masque : le chemin serveur/reprise reprend
-    // avec son propre état (dont l'écran d'erreur du GET, s'il a échoué).
-    if (_probingLocalDetail &&
-        (state is EnrollmentOfflineDetailLoaded ||
-            state is EnrollmentOfflineError)) {
-      setState(() => _probingLocalDetail = false);
+      setState(() => _localReadOnly = state.detail);
     }
   }
 
@@ -228,28 +199,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     } else if (state is EnrollmentDraftDetailLoaded) {
       setState(() => _draftLocal = state.detail);
     }
-  }
-
-  // Photographie le dossier serveur en brouillon local, une seule fois par
-  // entrée (reprise firstRegistration) : la suite du wizard édite le brouillon
-  // par étape. RE/PRE seedent désormais depuis le local (_maybeSeedFromLocalRef).
-  void _onServerDetailLoadedForSeed(
-    BuildContext context,
-    EnrollmentState state,
-  ) {
-    final detail = _policy.detail(state);
-    if (detail == null || _seededIntent == _effectiveIntent) return;
-    _seededIntent = _effectiveIntent;
-    context.read<EnrollmentOfflineBloc>().add(
-      SeedDraftRequested(
-        EnrollmentConfirmDraftBuilder.fromDetail(
-          detail: detail,
-          origin: _effectiveIntent.origin,
-          sourceRef: _policy.seedSourceRef(_effectiveIntent),
-        ),
-        enrollmentId: _policy.seedEnrollmentId(_effectiveIntent),
-      ),
-    );
   }
 
   // Seed RE/PRE **depuis le local** : dès que l'année courante (bootstrap) est
@@ -337,10 +286,11 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           if (_isFirstRegistrationListing) {
             return _buildFirstRegistrationConsultation(context, l10n);
           }
-          if (_usesLocalDraft) {
-            return _buildLocalDraft(context, l10n);
-          }
-          return _buildServer(context, l10n);
+          // Tout le reste (NEW / RE / PRE / reprise) édite un brouillon local :
+          // ces origines ont toutes `usesLocalDraft == true`. La consultation
+          // pure passe par `_localReadOnly` / la Première inscription ci-dessus,
+          // jamais par un rendu piloté par le détail online.
+          return _buildLocalDraft(context, l10n);
         },
       ),
     );
@@ -423,76 +373,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     );
   }
 
-  Widget _buildServer(BuildContext context, AppLocalizations l10n) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(68),
-        child: BlocSelector<EnrollmentBloc, EnrollmentState, String>(
-          selector: (state) {
-            final detail = _policy.detail(state);
-            if (detail == null) {
-              return l10n.enrollmentUnknownStudent;
-            }
-
-            return _buildStudentDisplayName(detail);
-          },
-          builder: (context, studentDisplayName) {
-            return EnrollmentJourneyAppBar(
-              modeLabel: _buildJourneyModeLabel(l10n),
-              studentDisplayName: studentDisplayName,
-              currentStep: _currentStep,
-              totalSteps: EnrollmentWizardStep.values.length,
-            );
-          },
-        ),
-      ),
-      body: BlocBuilder<EnrollmentBloc, EnrollmentState>(
-        buildWhen: _shouldRebuildEnrollmentDetail,
-        builder: (context, state) {
-          final loadStatus = _policy.loadStatus(state);
-          final detail = _policy.detail(state);
-
-          if (loadStatus == EnrollmentLoadStatus.loading) {
-            return const EnrollmentDetailPageStateShell(
-              child: EnrollmentDetailLoadingTemplate(),
-            );
-          }
-
-          if (loadStatus == EnrollmentLoadStatus.failure) {
-            return EnrollmentDetailPageStateShell(
-              child: EnrollmentDetailErrorTemplate(
-                message:
-                    state.errorMessage ??
-                    l10n.enrollmentDetailLoadErrorFallback,
-                onRetry: _requestDetail,
-              ),
-            );
-          }
-
-          if (detail == null) {
-            return const EnrollmentDetailPageStateShell(
-              child: EnrollmentDetailEmptyTemplate(),
-            );
-          }
-
-          return EnrollmentDetailContentShell(
-            child: EnrollmentStepperScope(
-              enrollmentDetail: detail,
-              detailIntent: _effectiveIntent,
-              detailPolicy: _policy,
-              onStepChanged: _onStepChanged,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   // Parcours brouillon (NEW/RE/PRE/reprise) : agrégat reconstruit depuis le
   // brouillon local (mapper). NEW démarre vierge (amorce ids + année courante) ;
   // RE/PRE seedent depuis le LOCAL (cohorte / préinscriptions) dès que l'année
-  // courante est là ; la reprise firstRegistration seede encore du serveur.
+  // courante est là ; la reprise d'un brouillon local charge l'agrégat par id.
   Widget _buildLocalDraft(BuildContext context, AppLocalizations l10n) {
     return MultiBlocListener(
       listeners: [
@@ -510,13 +394,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
               previous != current && current is EnrollmentReenrollmentExisting,
           listener: _onReenrollmentExisting,
         ),
-        if (_policy.requiresDraftSeed && !_policy.seedsFromLocalRef)
-          BlocListener<EnrollmentBloc, EnrollmentState>(
-            listenWhen: (previous, current) =>
-                _policy.loadStatus(previous) != _policy.loadStatus(current) &&
-                _policy.loadStatus(current) == EnrollmentLoadStatus.success,
-            listener: _onServerDetailLoadedForSeed,
-          ),
       ],
       child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
         builder: (context, bootstrapState) {
@@ -542,7 +419,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
               ),
             ),
             body: detail == null
-                ? _buildLocalDraftPending(l10n)
+                ? _buildLocalDraftPending()
                 : EnrollmentDetailContentShell(
                     child: EnrollmentStepperScope(
                       enrollmentDetail: detail,
@@ -557,10 +434,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     );
   }
 
-  /// Brouillon pas encore prêt : NEW attend l'amorce locale (spinner) ; RE/PRE
-  /// suivent le seed LOCAL (échec = cohorte/snapshot non peuplés → retry) ; la
-  /// reprise firstRegistration suit le chargement serveur préalable.
-  Widget _buildLocalDraftPending(AppLocalizations l10n) {
+  /// Brouillon pas encore prêt : NEW/reprise attendent l'amorce locale
+  /// (spinner) ; RE/PRE suivent le seed LOCAL (échec = cohorte/snapshot non
+  /// peuplés → écran d'erreur + « Réessayer »).
+  Widget _buildLocalDraftPending() {
     if (_policy.seedsFromLocalRef) {
       // Seed depuis le local : l'échec (cohorte/préinscriptions non peuplées,
       // pull dormant) remonte en EnrollmentDraftError. La **sonde au tap** qui
@@ -594,31 +471,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
         },
       );
     }
-    if (!_policy.requiresDraftSeed) {
-      return const EnrollmentDetailPageStateShell(
-        child: EnrollmentDetailLoadingTemplate(),
-      );
-    }
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
-      buildWhen: _shouldRebuildEnrollmentDetail,
-      builder: (context, state) {
-        // Sonde locale en cours : on masque l'échec (transitoire) du GET
-        // serveur derrière le chargement, le temps que la lecture locale
-        // bascule le cas échéant en consultation lecture seule.
-        if (!_probingLocalDetail &&
-            _policy.loadStatus(state) == EnrollmentLoadStatus.failure) {
-          return EnrollmentDetailPageStateShell(
-            child: EnrollmentDetailErrorTemplate(
-              message:
-                  state.errorMessage ?? l10n.enrollmentDetailLoadErrorFallback,
-              onRetry: _requestDetail,
-            ),
-          );
-        }
-        return const EnrollmentDetailPageStateShell(
-          child: EnrollmentDetailLoadingTemplate(),
-        );
-      },
+    // NEW vierge / reprise d'un brouillon local : simple attente de l'amorce
+    // locale (ids + année courante, ou chargement du brouillon par id) → spinner.
+    return const EnrollmentDetailPageStateShell(
+      child: EnrollmentDetailLoadingTemplate(),
     );
   }
 
@@ -676,16 +532,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     }
     final name = _buildStudentDisplayName(detail);
     return name.trim().isEmpty ? l10n.enrollmentUnknownStudent : name;
-  }
-
-  /// Rebuild detail UI only when fields used by the screen rendering changed.
-  bool _shouldRebuildEnrollmentDetail(
-    EnrollmentState previous,
-    EnrollmentState current,
-  ) {
-    return _policy.loadStatus(previous) != _policy.loadStatus(current) ||
-        _policy.detail(previous) != _policy.detail(current) ||
-        previous.errorMessage != current.errorMessage;
   }
 
   String _buildStudentDisplayName(EnrollmentDetail detail) {
