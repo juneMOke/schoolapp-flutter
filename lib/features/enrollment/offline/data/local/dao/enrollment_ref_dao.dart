@@ -128,6 +128,15 @@ class EnrollmentRefDao {
   static String _marks(List<Object?> args) =>
       List.filled(args.length, '?').join(', ');
 
+  /// ISO-8601 serveur → epoch ms, **tolérant** : une valeur absente ou malformée
+  /// retombe sur [fallback] au lieu de lever `FormatException`. Sans cette garde,
+  /// un seul horodatage serveur invalide ferait échouer l'apply de TOUTE la page
+  /// de pull — et comme le curseur `sync_meta` n'avance qu'après un apply réussi,
+  /// la même page empoisonnée serait re-demandée puis re-rejetée à chaque cycle,
+  /// **figeant définitivement (et en silence) la ressource** (cf. revue #21).
+  static int _isoToEpochMillis(String iso, {required int fallback}) =>
+      DateTime.tryParse(iso)?.millisecondsSinceEpoch ?? fallback;
+
   /// Remplace la cohorte N-1 (`ref_previous_year_students`). Sémantique
   /// snapshot : la cohorte est bornée/statique (pull complet always-200 à chaque
   /// cycle online, jamais de 304), le remplacement intégral évacue les radiés.
@@ -197,7 +206,7 @@ class EnrollmentRefDao {
             'desired_school_level_id': p.desiredSchoolLevelId,
             'guardian_name': p.guardianName,
             'guardian_phone': p.guardianPhone,
-            'updated_at': DateTime.parse(p.updatedAt).millisecondsSinceEpoch,
+            'updated_at': _isoToEpochMillis(p.updatedAt, fallback: syncedAt),
             'synced_at': syncedAt,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
@@ -360,7 +369,7 @@ class EnrollmentRefDao {
     EnrollmentDeltaDto d,
     int syncedAt,
   ) async {
-    final updatedMs = DateTime.parse(d.updatedAt).millisecondsSinceEpoch;
+    final updatedMs = _isoToEpochMillis(d.updatedAt, fallback: syncedAt);
     final changed = await txn.rawUpdate(
       'UPDATE enrollments SET '
       'status = ?, '
@@ -448,7 +457,11 @@ class EnrollmentRefDao {
   ) async {
     final e = agg.enrollment;
     final s = agg.student;
-    final lwwMs = _snapshotLwwMillis(e.updatedAt, agg.serverUpdatedAt);
+    final lwwMs = _snapshotLwwMillis(
+      e.updatedAt,
+      agg.serverUpdatedAt,
+      fallback: syncedAt,
+    );
 
     // Garde write-preserving : inscription OU élève local non synchronisé → on
     // saute tout l'agrégat (pas de demi-écriture ni de re-lien tuteur).
@@ -703,12 +716,21 @@ class EnrollmentRefDao {
   }
 
   /// Horloge LWW d'un agrégat snapshot : `updatedAt` (heure métier) s'il est
-  /// présent, sinon repli sur `serverUpdatedAt` (toujours fourni). ISO → epoch ms.
-  static int _snapshotLwwMillis(String? updatedAt, String serverUpdatedAt) {
-    final iso = (updatedAt != null && updatedAt.isNotEmpty)
+  /// présent, sinon repli sur `serverUpdatedAt`. Conversion ISO → epoch ms
+  /// **tolérante** (comme [_isoToEpochMillis]) : si l'heure métier est malformée
+  /// on retente `serverUpdatedAt`, puis en dernier ressort [fallback] — jamais de
+  /// `FormatException` qui figerait le pull snapshot.
+  static int _snapshotLwwMillis(
+    String? updatedAt,
+    String serverUpdatedAt, {
+    required int fallback,
+  }) {
+    final primary = (updatedAt != null && updatedAt.isNotEmpty)
         ? updatedAt
         : serverUpdatedAt;
-    return DateTime.parse(iso).millisecondsSinceEpoch;
+    return DateTime.tryParse(primary)?.millisecondsSinceEpoch ??
+        DateTime.tryParse(serverUpdatedAt)?.millisecondsSinceEpoch ??
+        fallback;
   }
 
   static int? _boolToInt(bool? value) => value == null ? null : (value ? 1 : 0);

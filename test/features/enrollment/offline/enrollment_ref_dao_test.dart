@@ -426,13 +426,18 @@ void main() {
       expect(rows.single['first_name'], 'Benjamin');
     });
 
-    test('updatedAt illisible → FormatException (repo → ServerFailure)', () {
-      expect(
-        () => dao.upsertPreEnrollments([
-          preEnrollment(updatedAt: 'pas-une-date'),
-        ], syncedAt: 500),
-        throwsFormatException,
-      );
+    test('updatedAt illisible → repli sur syncedAt, jamais de FormatException '
+        '(anti poison-page, #21)', () async {
+      // Une valeur non-ISO ne doit PAS lever : sinon l'apply de toute la page
+      // échouerait et le curseur ne bougerait jamais → ressource figée en boucle.
+      final count = await dao.upsertPreEnrollments([
+        preEnrollment(updatedAt: 'pas-une-date'),
+      ], syncedAt: 500);
+
+      expect(count, 1);
+      final row = (await db.query('ref_pre_enrollments')).single;
+      expect(row['first_name'], 'Beni');
+      expect(row['updated_at'], 500); // repli = syncedAt
     });
   });
 
@@ -615,6 +620,20 @@ void main() {
         expect(row['status'], 'ACTIVE');
       },
     );
+
+    test('updatedAt illisible → repli syncedAt, dossier réconcilié sans '
+        'FormatException (anti poison-page, #21)', () async {
+      await seedEnrollment(updatedAt: 1000);
+
+      final applied = await dao.applyEnrollmentDelta([
+        delta(updatedAt: 'pas-une-date'),
+      ], syncedAt: 5000);
+
+      expect(applied, 1);
+      final row = (await db.query('enrollments')).single;
+      expect(row['status'], 'ACTIVE');
+      expect(row['updated_at'], 5000); // repli = syncedAt (LWW passe)
+    });
   });
 
   group('lectures seed local (findReenrollmentCandidateByStudentId)', () {
@@ -681,6 +700,8 @@ void main() {
     EnrollmentAggregateSnapshotDto aggregate({
       String enrollmentId = 'e-snap-1',
       String studentId = 'stu-snap-1',
+      String? updatedAt = '2026-07-08T09:00:00Z',
+      String serverUpdatedAt = '2026-07-08T10:00:00Z',
       List<ParentSnapshotDto> parents = const [
         ParentSnapshotDto(
           id: 'par-snap-1',
@@ -704,7 +725,7 @@ void main() {
         surname: 'Divine',
         dateOfBirth: '2015-05-05',
         gender: 'FEMALE',
-        updatedAt: '2026-07-08T09:00:00Z',
+        updatedAt: updatedAt,
       ),
       student: StudentSnapshotDto(
         id: studentId,
@@ -716,8 +737,20 @@ void main() {
         dateOfBirth: '2015-05-05',
       ),
       parents: parents,
-      serverUpdatedAt: '2026-07-08T10:00:00Z',
+      serverUpdatedAt: serverUpdatedAt,
     );
+
+    test('updatedAt ET serverUpdatedAt illisibles → repli syncedAt, agrégat '
+        'hydraté sans FormatException (anti poison-page, #21)', () async {
+      final applied = await dao.upsertEnrollmentSnapshots([
+        aggregate(updatedAt: 'pas-une-date', serverUpdatedAt: 'non-plus'),
+      ], syncedAt: 1234);
+
+      expect(applied, 1);
+      final row = (await db.query('enrollments')).single;
+      expect(row['id'], 'e-snap-1');
+      expect(row['updated_at'], 1234); // repli = syncedAt
+    });
 
     test(
       'base vide → dossier visible via EnrollmentReadDao.getEnrollments',

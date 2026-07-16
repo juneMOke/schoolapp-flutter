@@ -668,7 +668,11 @@ void main() {
       },
     );
 
-    test('payload illisible (updatedAt) → ServerFailure', () async {
+    test('updatedAt illisible → PAS de blocage : ligne appliquée (repli) et '
+        'curseur AVANCE (anti poison-page, #21)', () async {
+      // Régression : avant #21, un seul horodatage malformé levait FormatException
+      // → Left(ServerFailure) → curseur figé → la MÊME page rejouée à l'infini,
+      // ressource bloquée en silence. Désormais la page s'applique et avance.
       when(() => api.pullPreEnrollments(any(), any(), any())).thenAnswer(
         (_) async => httpOk(
           PreEnrollmentsPageDto(
@@ -680,7 +684,13 @@ void main() {
 
       final result = await repo.syncPreEnrollments();
 
-      expect(result.fold((f) => f, (_) => null), isA<ServerFailure>());
+      expect(result.isRight(), isTrue);
+      expect(
+        await syncMeta.getCursor(
+          EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+        ),
+        'WM-PRE', // curseur avancé : plus de rejeu infini de la page empoisonnée
+      );
     });
 
     test('304 → notModified, curseur conservé', () async {
