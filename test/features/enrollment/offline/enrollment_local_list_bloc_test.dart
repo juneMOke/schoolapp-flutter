@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -404,4 +406,34 @@ void main() {
     expect: () => const <EnrollmentLocalListState>[],
     verify: (_) => verifyNever(() => getLocal(status: any(named: 'status'))),
   );
+
+  group('course de requêtes concurrentes (restartable)', () {
+    test('un résultat périmé résolu en DERNIER ne repeint pas la liste', () async {
+      // A (lente) puis B (rapide) : B doit gagner ; quand A se résout ensuite,
+      // elle est périmée → ni cache ni emit (sinon la barre montrerait B mais la
+      // liste afficherait A).
+      final slowA = Completer<Either<Failure, List<LocalEnrollmentListItem>>>();
+      when(() => getLocal(status: 'A')).thenAnswer((_) => slowA.future);
+      when(
+        () => getLocal(status: 'B'),
+      ).thenAnswer((_) async => Right([_item(enrollmentId: 'b1')]));
+
+      final bloc = build();
+      bloc.add(const LocalListByStatusRequested(status: 'A'));
+      bloc.add(const LocalListByStatusRequested(status: 'B'));
+      await pumpEventQueue();
+      expect(ids(bloc.state), [
+        'b1',
+      ], reason: 'la requête la plus récente gagne');
+
+      // A se résout APRÈS B : résultat périmé → écarté.
+      slowA.complete(Right([_item(enrollmentId: 'a1')]));
+      await pumpEventQueue();
+      expect(ids(bloc.state), [
+        'b1',
+      ], reason: 'le résultat périmé A est ignoré');
+
+      await bloc.close();
+    });
+  });
 }

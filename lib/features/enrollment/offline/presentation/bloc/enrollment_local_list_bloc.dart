@@ -38,6 +38,14 @@ class EnrollmentLocalListBloc
 
   List<EnrollmentSummary> _cache = const <EnrollmentSummary>[];
 
+  // Générations de chargement : le transformer par défaut du bloc étant
+  // `concurrent`, plusieurs `_load` peuvent voler en parallèle. Chaque `_load`
+  // capture le numéro courant ; seul le PLUS RÉCENT écrit `_cache` et émet son
+  // résultat (sémantique restartable, sans dépendance `bloc_concurrency`) — une
+  // recherche périmée résolue en dernier ne peut plus gagner la course et
+  // repeindre la liste sous une identité de requête plus fraîche.
+  int _loadGeneration = 0;
+
   EnrollmentLocalListBloc({
     required GetLocalEnrollmentsUseCase getEnrollments,
     required SearchLocalEnrollmentsUseCase search,
@@ -60,6 +68,7 @@ class EnrollmentLocalListBloc
     LocalListResetRequested event,
     Emitter<EnrollmentLocalListState> emit,
   ) {
+    _loadGeneration++; // invalide tout _load en vol (ne clobberera pas le reset)
     _cache = const <EnrollmentSummary>[];
     emit(const EnrollmentLocalListState.initial());
   }
@@ -79,6 +88,10 @@ class EnrollmentLocalListBloc
   ) {
     final last = state.lastSummariesQuery;
     if (last == null) return;
+    // Pagination seulement sur une liste settled : pendant un chargement en vol
+    // `_cache` peut encore appartenir à la requête précédente (on paginerait
+    // alors des données périmées sous la nouvelle identité de requête).
+    if (state.summariesStatus != EnrollmentLoadStatus.success) return;
 
     final totalPages = state.summariesTotalPages;
     // Repli 0 (et non event.page) quand il n'y a aucune page : `paginate`
@@ -188,6 +201,7 @@ class EnrollmentLocalListBloc
     Emitter<EnrollmentLocalListState> emit,
     EnrollmentSummariesQuery query,
   ) async {
+    final generation = ++_loadGeneration;
     emit(
       state.copyWith(
         summariesStatus: EnrollmentLoadStatus.loading,
@@ -235,15 +249,23 @@ class EnrollmentLocalListBloc
             ),
         };
 
+    // Une requête plus récente a pris la main pendant nos awaits : on abandonne
+    // ce résultat périmé (ni cache ni emit) — la génération courante gagnera.
+    if (generation != _loadGeneration) return;
+
     projectedResult.fold(
       (failure) {
-        // Purge le cache : l'identité de requête (lastSummariesQuery/queryType)
-        // a basculé sur la requête échouée ; laisser l'ancienne liste en cache
-        // permettrait à une pagination de ré-émettre des données périmées.
+        // Purge le cache ET la liste d'état : l'écran d'erreur partagé remplace
+        // la liste, donc l'état ne doit pas conserver l'ancienne liste (sinon
+        // une pagination ou un rebuild ressortirait des données périmées sous
+        // l'identité de la requête échouée).
         _cache = const <EnrollmentSummary>[];
         emit(
           state.copyWith(
             summariesStatus: EnrollmentLoadStatus.failure,
+            summaries: const <EnrollmentSummary>[],
+            summariesTotalElements: 0,
+            summariesTotalPages: 0,
             summariesErrorType: _mapFailureToErrorType(failure),
             errorMessage: failure.message,
           ),
