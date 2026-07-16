@@ -2,25 +2,38 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/enrollment_local_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ref_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_api.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
-import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/confirm_enrollment_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/finalize_draft_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_draft_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_pre_enrollment_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_reenrollment_candidate_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/probe_reenrollment_dossier_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_address_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_guardians_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_identity_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_previous_academic_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_target_academic_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/seed_draft_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/start_draft_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/sync_enrollment_pulls_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
@@ -41,8 +54,18 @@ import 'package:school_app_flutter/features/finance/offline/presentation/bloc/fi
 /// (ENROLLMENT, PAYMENT) sur le `SyncEngine` du socle.
 void registerEnrollmentFinanceOffline(GetIt getIt) {
   // ── DAO locaux (sqflite) ────────────────────────────────────────────────────
-  getIt.registerLazySingleton<EnrollmentLocalDao>(
-    () => EnrollmentLocalDao(getIt<Database>()),
+  // Inscription : DAO séparés par responsabilité (lecture / draft / ack / ref).
+  getIt.registerLazySingleton<EnrollmentReadDao>(
+    () => EnrollmentReadDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<EnrollmentDraftDao>(
+    () => EnrollmentDraftDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<EnrollmentAckDao>(
+    () => EnrollmentAckDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<EnrollmentRefDao>(
+    () => EnrollmentRefDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<FinanceLocalDao>(
     () => FinanceLocalDao(getIt<Database>(), getIt<IdGenerator>()),
@@ -52,6 +75,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentSyncApi>(
     () => EnrollmentSyncApi(getIt<Dio>()),
   );
+  getIt.registerLazySingleton<EnrollmentPullApi>(
+    () => EnrollmentPullApi(getIt<Dio>()),
+  );
   getIt.registerLazySingleton<FinanceSyncApi>(
     () => FinanceSyncApi(getIt<Dio>()),
   );
@@ -59,7 +85,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // ── Repositories offline-first ──────────────────────────────────────────────
   getIt.registerLazySingleton<EnrollmentOfflineRepository>(
     () => EnrollmentOfflineRepositoryImpl(
-      dao: getIt<EnrollmentLocalDao>(),
+      readDao: getIt<EnrollmentReadDao>(),
+      draftDao: getIt<EnrollmentDraftDao>(),
+      refDao: getIt<EnrollmentRefDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
     ),
@@ -71,11 +99,21 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       syncEngine: getIt<SyncEngine>(),
     ),
   );
+  // Pulls Inscription (référentiel / cohorte / préinscriptions / delta). La
+  // grille tarifaire du bundle référentiel est déléguée à la Facturation via
+  // un seam étroit (même précédent que le gate PAYMENT ci-dessous).
+  getIt.registerLazySingleton<EnrollmentPullRepository>(
+    () => EnrollmentPullRepositoryImpl(
+      api: getIt<EnrollmentPullApi>(),
+      refDao: getIt<EnrollmentRefDao>(),
+      replaceTariffs: (tariffs, academicYearIds) => getIt<FinanceLocalDao>()
+          .replaceTariffsForYears(tariffs, academicYearIds: academicYearIds),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
 
   // ── Usecases ────────────────────────────────────────────────────────────────
-  getIt.registerFactory<ConfirmEnrollmentUseCase>(
-    () => ConfirmEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
-  );
   getIt.registerFactory<GetLocalEnrollmentsUseCase>(
     () => GetLocalEnrollmentsUseCase(getIt<EnrollmentOfflineRepository>()),
   );
@@ -88,6 +126,22 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // Wizard offline-first : brouillon local persisté (M1).
   getIt.registerFactory<StartDraftUseCase>(
     () => StartDraftUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SeedDraftUseCase>(
+    () => SeedDraftUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  // Seed RE/PRE depuis le local (cohorte N-1 / préinscriptions).
+  getIt.registerFactory<GetReenrollmentCandidateUseCase>(
+    () => GetReenrollmentCandidateUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<ProbeReenrollmentDossierUseCase>(
+    () => ProbeReenrollmentDossierUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<GetPreEnrollmentUseCase>(
+    () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  getIt.registerFactory<SyncEnrollmentPullsUseCase>(
+    () => SyncEnrollmentPullsUseCase(getIt<EnrollmentPullRepository>()),
   );
   getIt.registerFactory<SaveDraftIdentityUseCase>(
     () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),
@@ -125,24 +179,33 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
 
   // ── BLoCs (registerFactory) ─────────────────────────────────────────────────
+  // Bloc offline UNIQUE du module Inscription (convergence lecture + brouillon
+  // par étape + finalisation + pull).
   getIt.registerFactory<EnrollmentOfflineBloc>(
     () => EnrollmentOfflineBloc(
-      getEnrollments: getIt<GetLocalEnrollmentsUseCase>(),
-      search: getIt<SearchLocalEnrollmentsUseCase>(),
       getDetail: getIt<GetLocalEnrollmentDetailUseCase>(),
-      confirm: getIt<ConfirmEnrollmentUseCase>(),
-    ),
-  );
-  getIt.registerFactory<EnrollmentDraftBloc>(
-    () => EnrollmentDraftBloc(
       startDraft: getIt<StartDraftUseCase>(),
+      seedDraft: getIt<SeedDraftUseCase>(),
+      getReenrollmentCandidate: getIt<GetReenrollmentCandidateUseCase>(),
+      probeReenrollment: getIt<ProbeReenrollmentDossierUseCase>(),
+      getPreEnrollment: getIt<GetPreEnrollmentUseCase>(),
       saveIdentity: getIt<SaveDraftIdentityUseCase>(),
       saveAddress: getIt<SaveDraftAddressUseCase>(),
       savePreviousAcademic: getIt<SaveDraftPreviousAcademicUseCase>(),
       saveTargetAcademic: getIt<SaveDraftTargetAcademicUseCase>(),
       saveGuardians: getIt<SaveDraftGuardiansUseCase>(),
-      getDetail: getIt<GetDraftDetailUseCase>(),
+      getDraftDetail: getIt<GetDraftDetailUseCase>(),
       finalize: getIt<FinalizeDraftUseCase>(),
+      syncPulls: getIt<SyncEnrollmentPullsUseCase>(),
+    ),
+  );
+  // Bloc DÉDIÉ du listing LOCAL (bascule dure 100 % local) — séparé du bloc
+  // convergé ci-dessus pour éviter toute collision d'état (détail/brouillon
+  // poussés) et ne pas le gonfler. Aucune lecture réseau.
+  getIt.registerFactory<EnrollmentLocalListBloc>(
+    () => EnrollmentLocalListBloc(
+      getEnrollments: getIt<GetLocalEnrollmentsUseCase>(),
+      search: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
   );
   getIt.registerFactory<FinanceOfflineBloc>(
@@ -158,7 +221,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt<SyncEngine>().registerHandler(
     EnrollmentOutboxHandler(
       api: getIt<EnrollmentSyncApi>(),
-      dao: getIt<EnrollmentLocalDao>(),
+      dao: getIt<EnrollmentAckDao>(),
       extras: extras,
     ),
   );
@@ -167,8 +230,23 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       api: getIt<FinanceSyncApi>(),
       dao: getIt<FinanceLocalDao>(),
       isStudentEnrollmentSynced: (studentId) =>
-          getIt<EnrollmentLocalDao>().isStudentEnrollmentSynced(studentId),
+          getIt<EnrollmentReadDao>().isStudentEnrollmentSynced(studentId),
       extras: extras,
     ),
   );
+
+  // ── Handlers de pull (routés par ressource sur le coordinateur) ────────────
+  // Le référentiel est enregistré en premier : c'est le socle (années/niveaux/
+  // tarifs) dont dépendent logiquement les autres caches. L'ordre est désormais
+  // PORTEUR pour la paire snapshots/delta : le pull HYDRATANT (snapshots) INSÈRE
+  // les lignes que le delta MAIGRE ne fait qu'UPDATE — snapshots DOIT donc
+  // précéder enrollmentDelta (le coordinateur exécute dans l'ordre
+  // d'enregistrement). Cf. la même liste dans SyncEnrollmentPullsUseCase.
+  final pullRepository = getIt<EnrollmentPullRepository>();
+  getIt<PullCoordinator>()
+    ..registerHandler(EnrollmentPullHandler.referential(pullRepository))
+    ..registerHandler(EnrollmentPullHandler.reenrollmentCohort(pullRepository))
+    ..registerHandler(EnrollmentPullHandler.preEnrollments(pullRepository))
+    ..registerHandler(EnrollmentPullHandler.enrollmentSnapshots(pullRepository))
+    ..registerHandler(EnrollmentPullHandler.enrollmentDelta(pullRepository));
 }

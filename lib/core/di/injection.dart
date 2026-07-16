@@ -81,7 +81,6 @@ import 'package:school_app_flutter/features/enrollment/data/repositories/enrollm
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_stats_use_case.dart';
@@ -90,7 +89,6 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
@@ -447,10 +445,6 @@ Future<void> configureDependencies({
     () => GetEnrollmentPreviewByStudentIdUseCase(getIt<EnrollmentRepository>()),
   );
 
-  getIt.registerFactory<CreateEnrollmentUseCase>(
-    () => CreateEnrollmentUseCase(getIt<EnrollmentRepository>()),
-  );
-
   getIt.registerFactory<
     SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   >(
@@ -482,10 +476,6 @@ Future<void> configureDependencies({
     ),
   );
 
-  getIt.registerFactory<UpdateEnrollmentStatusUseCase>(
-    () => UpdateEnrollmentStatusUseCase(getIt<EnrollmentRepository>()),
-  );
-
   getIt.registerFactory<GetEnrollmentStatsUseCase>(
     () => GetEnrollmentStatsUseCase(getIt<EnrollmentStatsRepository>()),
   );
@@ -497,7 +487,6 @@ Future<void> configureDependencies({
       getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
       getEnrollmentPreviewByStudentIdUseCase:
           getIt<GetEnrollmentPreviewByStudentIdUseCase>(),
-      createEnrollmentUseCase: getIt<CreateEnrollmentUseCase>(),
       searchByStudentNameUseCase:
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
@@ -512,7 +501,6 @@ Future<void> configureDependencies({
           >(),
       searchByAcademicInfoUseCase:
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
-      updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
     ),
   );
 
