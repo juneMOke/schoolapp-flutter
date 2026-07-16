@@ -15,10 +15,6 @@ class AppConstants {
   static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
 
   static const String enrollmentEndpoint = '/api/v1/enrollments';
-  static const String enrollmentStudentSummaryEndpoint =
-      '/api/v1/enrollments/student-summary';
-  static const String enrollmentStatusUpdateEndpoint =
-      '/api/v1/enrollments/{enrollmentId}/status';
 
   static const String studentPersonalInfoEndpoint =
       '/api/v1/students/{studentId}/personal-info';
@@ -136,7 +132,11 @@ class AppConstants {
 
   /// Version du schéma sqflite local. Bump = nouvelle étape de migration
   /// (onUpgrade dans AppDatabase). V1 = création greenfield.
-  static const int offlineDbSchemaVersion = 1;
+  // v2 (2026-07-08) : tables de référence Inscription (cohorte RE
+  // `ref_previous_year_students`, `ref_pre_enrollments`, socle référentiel).
+  // v3 (2026-07-08) : `enrollments.source_ref` (matricule RE / id préinscription
+  // PRE, contrat agrégat).
+  static const int offlineDbSchemaVersion = 3;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -151,21 +151,40 @@ class AppConstants {
   //    référentiel/cohorte/pré-inscriptions et les pulls finance ci-dessous.
   // Câblés côté client conformément aux SPEC_Frontend_*_Offline_V1.
 
-  // ── Offline sync — Inscription/Facturation ──
-  // ⏳ NON livrés côté back (V1.1) : câblage miroir en attente (Dio mocké en test).
-  /// Agrégat d'inscription : POST 1..N commandes, 1 ACK par item.
-  static const String syncEnrollmentsEndpoint = '/api/v1/sync/enrollments';
+  // ── Offline sync — Inscription (contrat openapi_enrollment_sync.yaml) ──
+  // Contrat que le back met en place. Convention app : préfixe /api/v1
+  // (le contrat OpenAPI l'abrège en /api).
+  //
+  // PUSH (commit agrégat) + PULL delta descendant partagent le chemin de la
+  // ressource de synchro `syncEnrollmentsEndpoint` (/api/v1/sync/enrollments) :
+  //  • POST → commit {enrollment, student, parents} (201/200 = OK, 422 = rejet).
+  //  • GET  → delta descendant (curseur updatedSince → 304).
+  // Le pull HYDRATANT (agrégats complets, tablette neuve) est servi à part par
+  // `syncEnrollmentSnapshotsEndpoint` (/api/v1/sync/enrollments/snapshots).
 
-  /// Pull delta du référentiel (cycles, niveaux, années…). Curseur updatedSince.
-  static const String syncReferentielEndpoint = '/api/v1/sync/referentiel';
+  /// Pull du socle référentiel (années, cycles, niveaux, tarifs) — bundle
+  /// conditionnel ETag/304. GET /api/v1/sync/referential.
+  static const String syncReferentialEndpoint = '/api/v1/sync/referential';
 
-  /// Cohorte N-1 (réinscription), statique sur la saison.
-  static const String syncReinscriptionCohortEndpoint =
-      '/api/v1/sync/reinscription-cohort';
+  /// Pull de la cohorte de réinscription N-1 (bornée/statique, ETag/304)
+  /// → `ref_previous_year_students`. GET /api/v1/sync/reenrollment-cohort.
+  static const String syncReenrollmentCohortEndpoint =
+      '/api/v1/sync/reenrollment-cohort';
 
-  /// Préinscriptions embarquées (delta opportuniste).
+  /// Pull des préinscriptions en ligne (delta `updatedSince`)
+  /// → `ref_pre_enrollments`. GET /api/v1/sync/pre-enrollments.
   static const String syncPreEnrollmentsEndpoint =
       '/api/v1/sync/pre-enrollments';
+
+  /// Pull des inscriptions en ligne (delta maigre `updatedSince`, réconciliation)
+  /// + PUSH agrégat idempotent. → `enrollments`. GET/POST /api/v1/sync/enrollments.
+  static const String syncEnrollmentsEndpoint = '/api/v1/sync/enrollments';
+
+  /// Pull HYDRATANT des inscriptions (agrégats complets = inscription + élève
+  /// canonique + tuteurs) pour reconstituer une tablette neuve (delta
+  /// `updatedSince`). GET /api/v1/sync/enrollments/snapshots.
+  static const String syncEnrollmentSnapshotsEndpoint =
+      '/api/v1/sync/enrollments/snapshots';
 
   /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
   static const String syncFinanceTariffsEndpoint =

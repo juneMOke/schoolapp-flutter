@@ -34,6 +34,12 @@ void main() {
         'parents',
         'student_parent',
         'enrollments',
+        // Inscription — tables de référence (pull, lecture seule)
+        'ref_academic_years',
+        'ref_school_level_groups',
+        'ref_school_levels',
+        'ref_previous_year_students',
+        'ref_pre_enrollments',
         'ref_fee_tariffs',
         'student_charges',
         'payments',
@@ -43,8 +49,8 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 9 tables', () {
-    expect(enrollmentFinanceOfflineTables, hasLength(9));
+  test('la liste exportée contient exactement 14 tables', () {
+    expect(enrollmentFinanceOfflineTables, hasLength(14));
   });
 
   test('index F2/FF1 présents (phone, sync_status, client_uuid…)', () async {
@@ -60,9 +66,43 @@ void main() {
         'idx_parents_phone',
         'idx_student_charges_student_fee',
         'idx_payments_client_uuid',
+        // Tables de référence Inscription (RE/PRE)
+        'idx_ref_previous_year_students_matricule',
+        'idx_ref_pre_enrollments_phone',
       ]),
     );
   });
+
+  test(
+    'cohorte RE : ref_previous_year_students round-trip (student_id + cents)',
+    () async {
+      await db.insert('ref_previous_year_students', {
+        'student_id': 'stu-N1',
+        'matriculation_number': 'ETL-2024-0042',
+        'first_name': 'Awa',
+        'last_name': 'Kone',
+        'surname': 'M',
+        'gender': 'FEMALE',
+        'date_of_birth': '2013-05-02',
+        'previous_school_level_id': 'lvl-6e',
+        'previous_balance_in_cents': 250000,
+        'currency': 'USD',
+        'synced_at': 0,
+      });
+      final rows = await db.query(
+        'ref_previous_year_students',
+        where: 'student_id = ?',
+        whereArgs: ['stu-N1'],
+      );
+      expect(rows, hasLength(1));
+      // student_id est la clé canonique réutilisée par le nouvel enrollment (RE).
+      expect(rows.first['student_id'], 'stu-N1');
+      expect(rows.first['matriculation_number'], 'ETL-2024-0042');
+      // Argent en INTEGER centimes (jamais de flottant).
+      expect(rows.first['previous_balance_in_cents'], isA<int>());
+      expect(rows.first['previous_balance_in_cents'], 250000);
+    },
+  );
 
   test('montants en INTEGER centimes : round-trip sans flottant', () async {
     await db.insert('ref_fee_tariffs', {

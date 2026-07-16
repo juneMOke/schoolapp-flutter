@@ -9,9 +9,12 @@ class SyncMetaDao {
 
   static const String table = 'sync_meta';
 
-  /// Curseur `updatedSince` d'une ressource (null si jamais synchronisée).
-  /// Jeton opaque du serveur — **ISO-8601** (`max(updated_at)` renvoyé), stocké
-  /// verbatim et re-renvoyé au prochain pull. Ne jamais l'interpréter en entier.
+  /// Curseur de pull d'une ressource (null si jamais synchronisée). Jeton
+  /// **opaque** du serveur, stocké verbatim et re-renvoyé au prochain pull —
+  /// jamais interprété. Sa forme dépend de la ressource : ISO-8601
+  /// (`max(updated_at)`) pour les deltas timestampés (classe/présence/finance),
+  /// **jeton keyset base64url** (`nextCursor`/`nextWatermark`) pour l'inscription
+  /// (ADR-008/009).
   Future<String?> getCursor(String resource) async {
     final rows = await _db.query(
       table,
@@ -37,8 +40,8 @@ class SyncMetaDao {
     return rows.first['synced_at'] as int?;
   }
 
-  /// Avance le curseur (ISO-8601, jeton serveur opaque) et l'horodatage de
-  /// fraîcheur locale (epoch ms) — upsert.
+  /// Avance le curseur (jeton serveur opaque, cf. [getCursor]) et l'horodatage
+  /// de fraîcheur locale (epoch ms) — upsert.
   Future<void> setCursor(
     String resource, {
     required String? cursor,

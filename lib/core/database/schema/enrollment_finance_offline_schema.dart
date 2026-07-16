@@ -90,6 +90,8 @@ const TableSchema studentParentTable = TableSchema(
 
 /// `enrollments` — dossiers d'inscription (uuid client). `enrollment_date` =
 /// date terrain honorée serveur. `enrollment_code` rempli à l'ACK.
+/// `source_ref` = référence d'origine du dossier (contrat agrégat) : matricule
+/// (RE_ENROLLMENT), id de préinscription (PRE_ENROLLMENT), NULL (NEW).
 const TableSchema enrollmentsTable = TableSchema(
   name: 'enrollments',
   createTableSql: '''
@@ -103,6 +105,7 @@ const TableSchema enrollmentsTable = TableSchema(
       school_level_group_id TEXT,
       enrollment_date TEXT NOT NULL,
       enrollment_code TEXT,
+      source_ref TEXT,
       previous_school_name TEXT,
       previous_academic_year TEXT,
       previous_school_level_group TEXT,
@@ -122,6 +125,132 @@ const TableSchema enrollmentsTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_enrollments_sync_status ON enrollments(sync_status)',
     'CREATE INDEX idx_enrollments_student ON enrollments(student_id)',
+  ],
+);
+
+// ── Inscription — tables de référence (pull, lecture seule) ──────────────────
+// Peuplées par les pulls delta (curseur `updatedSince` ISO via `sync_meta`) ;
+// jamais écrites par l'UI. Conventions locales conservées vs
+// `SCHEMA_sqflite_Inscription_V1` (écarts assumés et documentés) :
+// - dates « humaines » en TEXT ISO (comme `students`/`enrollments`), pas INTEGER ;
+// - horodatages machine (`synced_at`, `updated_at`) en INTEGER ;
+// - argent en INTEGER centimes (`*_in_cents`), jamais REAL (cf. règle argent).
+
+/// `ref_academic_years` — années scolaires pré-synchronisées (D1). `is_current`
+/// pré-sélectionne l'année active hors-ligne.
+const TableSchema refAcademicYearsTable = TableSchema(
+  name: 'ref_academic_years',
+  createTableSql: '''
+    CREATE TABLE ref_academic_years (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      start_date TEXT,
+      end_date TEXT,
+      is_current INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+);
+
+/// `ref_school_level_groups` — CYCLES (D1). `period_type` = pont vers l'Académique
+/// (trimestre/semestre).
+const TableSchema refSchoolLevelGroupsTable = TableSchema(
+  name: 'ref_school_level_groups',
+  createTableSql: '''
+    CREATE TABLE ref_school_level_groups (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      code TEXT NOT NULL,
+      period_type TEXT,
+      academic_year_id TEXT NOT NULL,
+      display_order INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_school_level_groups_year '
+        'ON ref_school_level_groups(academic_year_id)',
+  ],
+);
+
+/// `ref_school_levels` — NIVEAUX (D9 : l'élève s'inscrit dans un niveau, pas une
+/// classe). `split_into_classrooms` pilote la répartition (module Classe).
+const TableSchema refSchoolLevelsTable = TableSchema(
+  name: 'ref_school_levels',
+  createTableSql: '''
+    CREATE TABLE ref_school_levels (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      code TEXT NOT NULL,
+      display_order INTEGER NOT NULL DEFAULT 0,
+      level_group_id TEXT NOT NULL,
+      split_into_classrooms INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_school_levels_group '
+        'ON ref_school_levels(level_group_id)',
+  ],
+);
+
+/// `ref_previous_year_students` — **cohorte de réinscription** (D3) : élèves N-1,
+/// bornée/statique + snapshot arriérés. `student_id` = id CANONIQUE réutilisé par
+/// le nouvel `enrollment` (cas RE) → aucun doublon d'élève.
+/// `previous_balance_in_cents` remplace le REAL de la spec (règle argent).
+const TableSchema refPreviousYearStudentsTable = TableSchema(
+  name: 'ref_previous_year_students',
+  createTableSql: '''
+    CREATE TABLE ref_previous_year_students (
+      student_id TEXT PRIMARY KEY,
+      matriculation_number TEXT NOT NULL,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      surname TEXT,
+      gender TEXT NOT NULL,
+      date_of_birth TEXT NOT NULL,
+      birth_place TEXT,
+      previous_academic_year_id TEXT,
+      previous_school_level_id TEXT,
+      previous_classroom_id TEXT,
+      guardian_name TEXT,
+      guardian_phone TEXT,
+      previous_balance_in_cents INTEGER NOT NULL DEFAULT 0,
+      currency TEXT,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_previous_year_students_matricule '
+        'ON ref_previous_year_students(matriculation_number)',
+    'CREATE INDEX idx_ref_previous_year_students_name '
+        'ON ref_previous_year_students(last_name, surname)',
+  ],
+);
+
+/// `ref_pre_enrollments` — snapshot des préinscriptions en ligne (D4 : online-first,
+/// repli Pré→Première sans synchro). Delta opportuniste : `updated_at` = curseur.
+const TableSchema refPreEnrollmentsTable = TableSchema(
+  name: 'ref_pre_enrollments',
+  createTableSql: '''
+    CREATE TABLE ref_pre_enrollments (
+      id TEXT PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      surname TEXT,
+      gender TEXT,
+      date_of_birth TEXT,
+      birth_place TEXT,
+      desired_school_level_id TEXT,
+      guardian_name TEXT,
+      guardian_phone TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_pre_enrollments_phone '
+        'ON ref_pre_enrollments(guardian_phone)',
   ],
 );
 
@@ -279,6 +408,13 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   parentsTable,
   studentParentTable,
   enrollmentsTable,
+  // Inscription — tables de référence (pull, lecture seule)
+  refAcademicYearsTable,
+  refSchoolLevelGroupsTable,
+  refSchoolLevelsTable,
+  refPreviousYearStudentsTable,
+  refPreEnrollmentsTable,
+  // Facturation
   refFeeTariffsTable,
   studentChargesTable,
   paymentsTable,
