@@ -47,6 +47,19 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+// Facturation — redirection des lectures online → local-first (Stratégie C).
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/payments_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/datasources/student_charges_remote_data_source.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/payments_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/data/repositories/student_charges_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/data/repositories/payments_offline_first_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/data/repositories/student_charges_offline_first_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 
 /// DI de la branche offline A (Inscription + Facturation).
 ///
@@ -108,6 +121,49 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       dao: getIt<FinanceLocalDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+
+  // ── Facturation : redirection des LECTURES online → local-first (Strat. C) ──
+  // Les BLoCs/widgets online restent inchangés ; on REMPLACE la liaison des
+  // repositories consommés par leurs usecases (`StudentChargesRepository` /
+  // `PaymentsRepository`, enregistrés en amont dans injection.dart) par des
+  // impls offline-first : lecture du grand-livre LOCAL (reste composé, FRONT §5)
+  // + rafraîchissement ciblé best-effort (§6 step 2). Admin/create délégués à
+  // l'online. `unregister` sûr : lazy singletons pas encore résolus à ce stade.
+  getIt.registerLazySingleton<FinanceLedgerRefresher>(
+    () => FinanceLedgerRefresher(
+      api: getIt<FinanceSyncApi>(),
+      dao: getIt<FinanceLocalDao>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      connectivity: getIt<ConnectivityService>(),
+      extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  if (getIt.isRegistered<StudentChargesRepository>()) {
+    getIt.unregister<StudentChargesRepository>();
+  }
+  getIt.registerLazySingleton<StudentChargesRepository>(
+    () => StudentChargesOfflineFirstRepository(
+      dao: getIt<FinanceLocalDao>(),
+      refresh: getIt<FinanceLedgerRefresher>().refresh,
+      online: StudentChargesRepositoryImpl(
+        remoteDataSource: getIt<StudentChargesRemoteDataSource>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+      ),
+    ),
+  );
+  if (getIt.isRegistered<PaymentsRepository>()) {
+    getIt.unregister<PaymentsRepository>();
+  }
+  getIt.registerLazySingleton<PaymentsRepository>(
+    () => PaymentsOfflineFirstRepository(
+      dao: getIt<FinanceLocalDao>(),
+      refresh: getIt<FinanceLedgerRefresher>().refresh,
+      online: PaymentsRepositoryImpl(
+        remoteDataSource: getIt<PaymentsRemoteDataSource>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+      ),
     ),
   );
   // Pulls Inscription (référentiel / cohorte / préinscriptions / delta). La
@@ -190,6 +246,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<InitializeChargesUseCase>(
     () => InitializeChargesUseCase(getIt<FinanceOfflineRepository>()),
   );
+  getIt.registerFactory<GetLedgerFreshnessUseCase>(
+    () => GetLedgerFreshnessUseCase(getIt<FinanceLedgerRefresher>()),
+  );
 
   // ── BLoCs (registerFactory) ─────────────────────────────────────────────────
   // Bloc offline UNIQUE du module Inscription (convergence lecture + brouillon
@@ -227,6 +286,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       getPayments: getIt<GetLocalPaymentsUseCase>(),
       recordPayment: getIt<RecordPaymentUseCase>(),
     ),
+  );
+  getIt.registerFactory<LedgerFreshnessCubit>(
+    () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),
   );
 
   // ── Handlers d'outbox → SyncEngine ──────────────────────────────────────────

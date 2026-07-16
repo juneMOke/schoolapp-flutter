@@ -11,6 +11,10 @@ class Payment extends Equatable {
   final String? payerMiddleName;
   final DateTime paidAt;
 
+  /// Paiement de CE poste pas encore remonté au serveur (FRONT §3). Faux pour
+  /// les paiements synchronisés (ce poste ou l'autre poste, arrivés par pull).
+  final bool isPendingSync;
+
   const Payment({
     required this.id,
     required this.studentId,
@@ -21,6 +25,7 @@ class Payment extends Equatable {
     required this.payerLastName,
     this.payerMiddleName,
     required this.paidAt,
+    this.isPendingSync = false,
   });
 
   @override
@@ -34,5 +39,6 @@ class Payment extends Equatable {
     payerLastName,
     payerMiddleName,
     paidAt,
+    isPendingSync,
   ];
 }

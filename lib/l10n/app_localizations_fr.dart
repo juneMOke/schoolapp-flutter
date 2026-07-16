@@ -2354,6 +2354,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationBalanceUpToDatePill => 'À jour';
 
   @override
+  String get financePendingSyncBadge => 'En attente de synchro';
+
+  @override
+  String facturationFreshnessAt(String time) {
+    return 'Grand-livre à jour à $time';
+  }
+
+  @override
+  String get facturationFreshnessNever => 'Grand-livre non synchronisé';
+
+  @override
   String facturationChargeLineRemainingSuffix(String amount) {
     return '$amount restant';
   }

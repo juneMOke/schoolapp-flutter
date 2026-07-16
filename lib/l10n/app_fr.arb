@@ -1070,6 +1070,19 @@
     "placeholders": { "amount": { "type": "String" } }
   },
   "facturationBalanceUpToDatePill": "À jour",
+  "financePendingSyncBadge": "En attente de synchro",
+  "@financePendingSyncBadge": {
+    "description": "Badge sur une créance/un paiement dont l'encaissement local n'est pas encore remonté au serveur."
+  },
+  "facturationFreshnessAt": "Grand-livre à jour à {time}",
+  "@facturationFreshnessAt": {
+    "description": "Fraîcheur (ADR-002) : horodatage du dernier rafraîchissement du grand-livre.",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "facturationFreshnessNever": "Grand-livre non synchronisé",
+  "@facturationFreshnessNever": {
+    "description": "Fraîcheur : aucun rafraîchissement du grand-livre effectué (hors-ligne)."
+  },
   "facturationChargeLineRemainingSuffix": "{amount} restant",
   "@facturationChargeLineRemainingSuffix": {
     "description": "Pied de la ligne de frais : montant restant à payer.",

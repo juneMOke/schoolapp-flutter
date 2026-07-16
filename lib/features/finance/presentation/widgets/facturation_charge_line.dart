@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_pending_sync_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne de frais de l'élève (spec §11).
@@ -29,10 +30,12 @@ class FacturationChargeLine extends StatelessWidget {
   );
 
   double get _progress {
+    // Progression sur le total COMPOSÉ (miroir + encaissements de ce poste non
+    // remontés), FRONT §5 — pas sur le seul miroir serveur.
     if (charge.expectedAmountInCents <= 0) {
-      return charge.amountPaidInCents > 0 ? 1 : 0;
+      return charge.paidTotalInCents > 0 ? 1 : 0;
     }
-    return (charge.amountPaidInCents / charge.expectedAmountInCents).clamp(
+    return (charge.paidTotalInCents / charge.expectedAmountInCents).clamp(
       0.0,
       1.0,
     );
@@ -43,7 +46,8 @@ class FacturationChargeLine extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final status = charge.status;
     final visuals = status.visuals;
-    final remaining = charge.expectedAmountInCents - charge.amountPaidInCents;
+    // Reste COMPOSÉ (FRONT §5) : déjà borné à 0 par l'entité.
+    final remaining = charge.remainingInCents;
     final isSettled = remaining <= 0;
 
     return Material(
@@ -76,13 +80,21 @@ class FacturationChargeLine extends StatelessWidget {
                 expectedLabel: l10n.facturationDetailChargeExpectedAmountColumn,
                 paidLabel: l10n.facturationDetailChargePaidAmountColumn,
                 expected: _formatAmount(charge.expectedAmountInCents),
-                paid: _formatAmount(charge.amountPaidInCents),
+                paid: _formatAmount(charge.paidTotalInCents),
                 remainingText: isSettled
                     ? null
                     : l10n.facturationChargeLineRemainingSuffix(
                         _formatAmount(remaining),
                       ),
               ),
+              // Encaissement de ce poste non encore remonté (FRONT §5).
+              if (charge.amountPaidPendingInCents > 0) ...[
+                const SizedBox(height: AppDimensions.spacingS),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: FinancePendingSyncBadge(),
+                ),
+              ],
             ],
           ),
         ),

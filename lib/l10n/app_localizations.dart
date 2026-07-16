@@ -4058,6 +4058,24 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get facturationBalanceUpToDatePill;
 
+  /// Badge on a charge/payment whose local collection has not yet synced to the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending sync'**
+  String get financePendingSyncBadge;
+
+  /// Freshness (ADR-002): timestamp of the last ledger refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger up to date at {time}'**
+  String facturationFreshnessAt(String time);
+
+  /// Freshness: no ledger refresh performed (offline).
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger not synced'**
+  String get facturationFreshnessNever;
+
   /// Fee line footer: amount remaining to pay.
   ///
   /// In en, this message translates to:

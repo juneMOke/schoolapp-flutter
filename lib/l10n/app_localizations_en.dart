@@ -2338,6 +2338,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationBalanceUpToDatePill => 'Up to date';
 
   @override
+  String get financePendingSyncBadge => 'Pending sync';
+
+  @override
+  String facturationFreshnessAt(String time) {
+    return 'Ledger up to date at $time';
+  }
+
+  @override
+  String get facturationFreshnessNever => 'Ledger not synced';
+
+  @override
   String facturationChargeLineRemainingSuffix(String amount) {
     return '$amount remaining';
   }
