@@ -205,4 +205,45 @@ void main() {
       SyncState.pendingSync.dbValue,
     );
   });
+
+  // 4xx client-terminal (hors 401/408/429) : rejeu inutile → SYNC_ERROR immédiat
+  // au lieu de gaspiller maxAttempts avant un dead-letter générique.
+  for (final status in [400, 403, 404, 409]) {
+    test('$status (client-terminal) → failed + SYNC_ERROR immédiat', () async {
+      when(
+        () => api.submit(any(), any()),
+      ).thenThrow(_httpError(status, data: {'message': 'Refusé ($status)'}));
+
+      final result = await handler.dispatch(await pendingEntry());
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(result.error, 'Refusé ($status)');
+      expect(
+        (await db.query('enrollments')).first['sync_status'],
+        SyncState.syncError.dbValue,
+      );
+    });
+  }
+
+  test('4xx sans corps → SYNC_ERROR avec motif de repli', () async {
+    when(() => api.submit(any(), any())).thenThrow(_httpError(400));
+    final result = await handler.dispatch(await pendingEntry());
+    expect(result.outcome, OutboxDispatchOutcome.failed);
+    expect(result.error, 'Rejet serveur (400)');
+  });
+
+  // 401/408/429 restent transitoires (ré-auth / timeout / rate-limit).
+  for (final status in [401, 408, 429]) {
+    test(
+      '$status → retry (transitoire, dossier conservé PENDING_SYNC)',
+      () async {
+        when(() => api.submit(any(), any())).thenThrow(_httpError(status));
+        final result = await handler.dispatch(await pendingEntry());
+        expect(result.outcome, OutboxDispatchOutcome.retry);
+        expect(
+          (await db.query('enrollments')).first['sync_status'],
+          SyncState.pendingSync.dbValue,
+        );
+      },
+    );
+  }
 }

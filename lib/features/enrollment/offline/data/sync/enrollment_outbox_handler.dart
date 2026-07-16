@@ -14,8 +14,10 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 /// `/api/v1/sync/enrollments` (agrégat) → route la réponse par statut HTTP :
 ///  - 201/200 : applique le remap transactionnel (matricule/email, parent
 ///    provisoire→canonique, doc PROV→DEFINITIVE, SYNCED) → `acked` ;
-///  - 422 : rejet de validation → marque SYNC_ERROR local → `failed` (non rejoué) ;
-///  - réseau / 5xx / exception : `retry` (backoff, idempotent sur enrollment.id).
+///  - 4xx client-terminal (400/403/404/409/422…) : rejet définitif que rejouer
+///    ne corrigerait pas → marque SYNC_ERROR local → `failed` (non rejoué) ;
+///  - réseau / timeout / 5xx / 401 / 408 / 429 : transitoire → `retry` (backoff,
+///    idempotent sur enrollment.id).
 class EnrollmentOutboxHandler implements OutboxSyncHandler {
   final EnrollmentSyncApi _api;
   final EnrollmentAckDao _dao;
@@ -59,9 +61,20 @@ class EnrollmentOutboxHandler implements OutboxSyncHandler {
       );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
-      // 422 : rejet de validation → terminal (SYNC_ERROR, non rejoué).
-      if (e.response?.statusCode == 422) {
-        final message = _validationMessage(e) ?? 'Rejet de validation';
+      final status = e.response?.statusCode;
+      // 4xx client-terminal (validation 422, payload 400, permission 403,
+      // introuvable 404, conflit d'idempotence divergent 409…) : rejouer ne
+      // corrigerait rien et gaspillerait le backoff jusqu'au dead-letter
+      // générique → SYNC_ERROR immédiat (non rejoué), avec le motif serveur s'il
+      // est présent. Restent TRANSITOIRES (→ retry) : 401 (ré-auth), 408
+      // (timeout requête), 429 (rate-limit), plus tout 5xx / réseau / timeout.
+      if (status != null &&
+          status >= 400 &&
+          status < 500 &&
+          status != 401 &&
+          status != 408 &&
+          status != 429) {
+        final message = _validationMessage(e) ?? 'Rejet serveur ($status)';
         await _dao.markEnrollmentSyncError(
           entry.aggregateId,
           message,
@@ -69,7 +82,7 @@ class EnrollmentOutboxHandler implements OutboxSyncHandler {
         );
         return OutboxDispatchResult.failed(message);
       }
-      // Réseau / timeout / 5xx : transitoire → retry (idempotent).
+      // Réseau / timeout / 5xx / 401 / 408 / 429 : transitoire → retry (idempotent).
       return OutboxDispatchResult.retry(e.message ?? e.toString());
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());
