@@ -40,6 +40,18 @@ class EnrollmentDetailIntent extends Equatable {
          studentId: studentId,
        );
 
+  /// Reprise d'un brouillon LOCAL déjà en base : l'`enrollmentId` est l'id
+  /// client du dossier DRAFT ; `studentId` est indicatif (l'agrégat local le
+  /// porte déjà). Aucun `status` : la policy force l'édition.
+  const EnrollmentDetailIntent.localDraftResume({
+    required String enrollmentId,
+    String? studentId,
+  }) : this(
+         origin: EnrollmentDetailOrigin.localDraftResume,
+         enrollmentId: enrollmentId,
+         studentId: studentId,
+       );
+
   EnrollmentDetailIntent withEnrollmentId(String enrollmentId) {
     return EnrollmentDetailIntent(
       origin: origin,
@@ -108,6 +120,13 @@ class EnrollmentDetailIntent extends Equatable {
         studentId: studentId,
         status: status,
       ),
+      EnrollmentDetailOrigin.localDraftResume =>
+        EnrollmentDetailIntent.localDraftResume(
+          enrollmentId: enrollmentId,
+          studentId: (studentId != null && studentId.isNotEmpty)
+              ? studentId
+              : null,
+        ),
     };
   }
 

@@ -7,10 +7,11 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/re_registrations_page_helpers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -53,7 +54,13 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         bootstrapBuilder: _buildPreviousYearBootstrap,
         searchSectionBuilder: _buildAcademicSearchSection,
         onSearchCommand:
-            EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
+            EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
+        // Read-your-writes : au retour du détail, on rafraîchit le vivier — le
+        // candidat qu'on vient de commencer à réinscrire réapparaît alors comme
+        // son dossier (repris au tap), plus comme candidat frais.
+        onDetailReturned: () => context.read<EnrollmentLocalListBloc>().add(
+          const LocalListRefreshRequested(),
+        ),
         resultsSummaryBuilder: (context, state, screenCtx) {
           if (state.summariesQueryType !=
               EnrollmentSummaryQueryType.byAcademicInfo) {
@@ -69,10 +76,24 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             currentViewMode: _preferredViewMode,
           );
         },
-        detailIntentFactory: (summary) => EnrollmentDetailIntent.reRegistration(
-          enrollmentId: summary.enrollmentId,
-          studentId: summary.student.id,
-        ),
+        // Routage du tap (option b : éditable ⟺ brouillon DRAFT) :
+        //  - candidat brut (`enrollmentId` vide) → seed d'un brouillon RE depuis
+        //    la cohorte N-1 (origine reRegistration) ;
+        //  - dossier FINALISÉ → consultation local-first (origine
+        //    firstRegistration : lecture seule si non synchronisé / terminé).
+        // Le cas DRAFT (reprise éditable) est routé en amont par le scaffold sur
+        // `summary.isLocalDraft` → `localDraftResume`.
+        detailIntentFactory: (summary) => summary.enrollmentId.isEmpty
+            ? EnrollmentDetailIntent.reRegistration(
+                enrollmentId: summary.enrollmentId,
+                studentId: summary.student.id,
+              )
+            : EnrollmentDetailIntent(
+                origin: EnrollmentDetailOrigin.firstRegistration,
+                enrollmentId: summary.enrollmentId,
+                studentId: summary.student.id,
+                status: summary.status,
+              ),
         showEmptyBeforeSearchWhen: (state) =>
             state.summariesQueryType !=
             EnrollmentSummaryQueryType.byAcademicInfo,
@@ -111,7 +132,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
         }
 
         final isLoading = context.select(
-          (EnrollmentBloc bloc) =>
+          (EnrollmentLocalListBloc bloc) =>
               bloc.state.summariesStatus == EnrollmentLoadStatus.loading,
         );
 
@@ -163,8 +184,8 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
   }
 
   Future<void> _onResetSearch() async {
-    context.read<EnrollmentBloc>().add(
-      const EnrollmentSummariesRefreshRequested(),
+    context.read<EnrollmentLocalListBloc>().add(
+      const LocalListRefreshRequested(),
     );
   }
 

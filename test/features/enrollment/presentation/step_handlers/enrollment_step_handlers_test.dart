@@ -24,7 +24,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
@@ -52,15 +51,6 @@ class _FakeDetailPolicy extends EnrollmentDetailPolicy {
     EnrollmentBloc bloc,
     EnrollmentDetailIntent intent, {
     bool silent = false,
-  }) {}
-
-  @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
   }) {}
 }
 
@@ -186,7 +176,6 @@ void main() {
             const SaveLabelContext(
               savingNow: false,
               isEnrollmentAlreadyCompleted: false,
-              enrollmentState: EnrollmentState.initial(),
             ),
           ),
           spec.save,
@@ -197,7 +186,6 @@ void main() {
             const SaveLabelContext(
               savingNow: true,
               isEnrollmentAlreadyCompleted: false,
-              enrollmentState: EnrollmentState.initial(),
             ),
           ),
           spec.saving,
@@ -251,7 +239,6 @@ void main() {
           const SaveLabelContext(
             savingNow: false,
             isEnrollmentAlreadyCompleted: false,
-            enrollmentState: EnrollmentState.initial(),
           ),
         ),
         'validate-enrollment',
@@ -268,15 +255,8 @@ void main() {
       );
       expect(validation.valid, isTrue);
 
-      final blocked = await handler.submit(
-        buildSubmitContext(
-          enrollmentState: const EnrollmentState.initial().copyWith(
-            statusUpdateStatus: EnrollmentLoadStatus.loading,
-          ),
-        ),
-      );
-      expect(blocked.status, StepSubmitStatus.blocked);
-
+      // Le blocage anti double-envoi (écriture de brouillon en cours) est
+      // couvert par summary_step_handler_offline_gating_test (vrai Element).
       final dispatched = await handler.submit(
         buildSubmitContext(
           overrideDetail: _buildDetail(enrollmentId: 'enrollment-1'),

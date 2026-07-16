@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
@@ -14,7 +13,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TargetAcademicInfoStep extends StatefulWidget {
@@ -22,8 +20,6 @@ class TargetAcademicInfoStep extends StatefulWidget {
   final String studentId;
   final String enrollmentId;
 
-  /// Parcours NEW offline-first : l'étape met à jour le brouillon local.
-  final bool useOfflineDraft;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -35,7 +31,6 @@ class TargetAcademicInfoStep extends StatefulWidget {
     required this.studentDetail,
     required this.studentId,
     required this.enrollmentId,
-    this.useOfflineDraft = false,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.onRefreshRequested,
@@ -69,8 +64,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   StepFormState get _stepState =>
       StepFormState(dirty: _isDirty, valid: _isValid, saving: _isSaving);
 
-  late final StudentBloc _studentBloc;
-
   void submitForm() => _onSave();
 
   void _emitStepState() {
@@ -88,7 +81,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   @override
   void initState() {
     super.initState();
-    _studentBloc = getIt<StudentBloc>();
 
     _currYearController = TextEditingController();
     _targetOptionController = TextEditingController();
@@ -149,7 +141,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     widget.stepController?.unbind(submitForm);
     _currYearController.dispose();
     _targetOptionController.dispose();
-    _studentBloc.close();
     super.dispose();
   }
 
@@ -213,24 +204,13 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     }
     if (!_isDirty) return;
 
-    if (widget.useOfflineDraft) {
-      _dispatchDraftTargetAcademic();
-      return;
-    }
-
-    _studentBloc.add(
-      StudentAcademicInfoUpdateRequested(
-        studentId: widget.studentId,
-        schoolLevelId: _selectedSchoolLevelId,
-        schoolLevelGroupId: _selectedSchoolLevelGroupId,
-      ),
-    );
+    _dispatchDraftTargetAcademic();
   }
 
   void _dispatchDraftTargetAcademic() {
     _awaitingDraftSave = true;
     _onSavingChanged(true);
-    context.read<EnrollmentDraftBloc>().add(
+    context.read<EnrollmentOfflineBloc>().add(
       SaveDraftTargetAcademicRequested(
         enrollmentId: widget.enrollmentId,
         schoolLevelId: _selectedSchoolLevelId,
@@ -311,88 +291,48 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     final showValidation = _showValidationHints || (_isDirty && !_isValid);
 
     return EnrollmentDraftStepSaveListener(
-      enabled: widget.useOfflineDraft,
+      enabled: true,
       isAwaiting: () => _awaitingDraftSave,
       onSaved: _onDraftSaved,
       onError: _onDraftError,
-      child: BlocProvider<StudentBloc>.value(
-        value: _studentBloc,
-        child: BlocConsumer<StudentBloc, StudentState>(
-          listenWhen: (prev, curr) =>
-              prev.status != curr.status || prev.operation != curr.operation,
-          listener: (context, state) {
-            if (state.operation != StudentUpdateOperation.academicInfo) {
-              return;
-            }
+      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+        builder: (context, bootstrapState) {
+          final bootstrap = bootstrapState.bootstrap;
+          if (bootstrap != null) {
+            _applyBootstrapDefaults(bootstrap);
+          }
 
-            _onSavingChanged(state.status == StudentUpdateStatus.loading);
-
-            if (state.status == StudentUpdateStatus.success) {
-              _markCurrentAsSavedSnapshot();
+          return TargetAcademicInfoStepBody(
+            bootstrap: bootstrap,
+            currYearController: _currYearController,
+            targetOptionController: _targetOptionController,
+            selectedSchoolLevelGroupId: _selectedSchoolLevelGroupId,
+            selectedSchoolLevelId: _selectedSchoolLevelId,
+            showValidation: showValidation,
+            isLoading: _isSaving,
+            canSave: _canSave,
+            showInlineSaveButton: widget.showInlineSaveButton,
+            onSave: _onSave,
+            isEditable: widget.isEditable,
+            onGroupChanged: (groupId, firstLevelId) {
+              setState(() {
+                _selectedSchoolLevelGroupId = groupId;
+                _selectedSchoolLevelId = firstLevelId;
+              });
               _recomputeFormState();
-              _onSavingChanged(false);
-              if (_showValidationHints) {
-                setState(() => _showValidationHints = false);
-              }
-              widget.onRefreshRequested?.call();
-              AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
-            } else if (state.status == StudentUpdateStatus.failure) {
-              _onSavingChanged(false);
-              AppSnackBar.showError(
-                context,
-                l10n.academicInfoSaveError(state.errorMessage ?? ''),
-                onRetry: submitForm,
-                retryLabel: l10n.enrollmentErrorRetry,
-              );
-            }
-          },
-          builder: (context, state) {
-            final isLoading =
-                state.status == StudentUpdateStatus.loading &&
-                state.operation == StudentUpdateOperation.academicInfo;
-
-            return BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-              builder: (context, bootstrapState) {
-                final bootstrap = bootstrapState.bootstrap;
-                if (bootstrap != null) {
-                  _applyBootstrapDefaults(bootstrap);
-                }
-
-                return TargetAcademicInfoStepBody(
-                  bootstrap: bootstrap,
-                  currYearController: _currYearController,
-                  targetOptionController: _targetOptionController,
-                  selectedSchoolLevelGroupId: _selectedSchoolLevelGroupId,
-                  selectedSchoolLevelId: _selectedSchoolLevelId,
-                  showValidation: showValidation,
-                  isLoading: isLoading,
-                  canSave: _canSave,
-                  showInlineSaveButton: widget.showInlineSaveButton,
-                  onSave: _onSave,
-                  isEditable: widget.isEditable,
-                  onGroupChanged: (groupId, firstLevelId) {
-                    setState(() {
-                      _selectedSchoolLevelGroupId = groupId;
-                      _selectedSchoolLevelId = firstLevelId;
-                    });
-                    _recomputeFormState();
-                  },
-                  onLevelChanged: (levelId) {
-                    setState(() => _selectedSchoolLevelId = levelId);
-                    _recomputeFormState();
-                  },
-                  groupError:
-                      showValidation && _selectedSchoolLevelGroupId.isEmpty
-                      ? l10n.requiredFieldError(l10n.targetCycleLabel)
-                      : null,
-                  levelError: showValidation && _selectedSchoolLevelId.isEmpty
-                      ? l10n.requiredFieldError(l10n.targetLevelLabel)
-                      : null,
-                );
-              },
-            );
-          },
-        ),
+            },
+            onLevelChanged: (levelId) {
+              setState(() => _selectedSchoolLevelId = levelId);
+              _recomputeFormState();
+            },
+            groupError: showValidation && _selectedSchoolLevelGroupId.isEmpty
+                ? l10n.requiredFieldError(l10n.targetCycleLabel)
+                : null,
+            levelError: showValidation && _selectedSchoolLevelId.isEmpty
+                ? l10n.requiredFieldError(l10n.targetLevelLabel)
+                : null,
+          );
+        },
       ),
     );
   }

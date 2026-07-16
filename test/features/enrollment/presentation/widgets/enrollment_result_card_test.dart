@@ -54,6 +54,67 @@ void main() {
     expect(badge.style, StatusBadgeStyle.filled);
   });
 
+  testWidgets(
+    'dossier RE (statut PRE_REGISTERED) affiche « Réinscription », pas '
+    '« Pré-inscrit »',
+    (tester) async {
+      const reEnrollment = EnrollmentSummary(
+        enrollmentId: 'enr-re',
+        enrollmentCode: 'RE-001',
+        status: 'PRE_REGISTERED',
+        enrollmentType: 'RE_ENROLLMENT',
+        student: StudentSummary(
+          id: 'stu-2',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          EnrollmentResultCard(enrollment: reEnrollment, onTap: () {}),
+        ),
+      );
+
+      // La pastille est pilotée par le TYPE : « Réinscription » remplace le
+      // libellé de statut « Pré-inscrit ».
+      expect(find.text('Réinscription'), findsOneWidget);
+      expect(find.text('Pré-inscrit'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'candidat de réinscription (enrollmentId vide, PENDING) affiche « À '
+    'réinscrire », pas « En Attente »',
+    (tester) async {
+      const candidate = EnrollmentSummary(
+        enrollmentId: '',
+        enrollmentCode: 'KIN-2025-0001',
+        status: 'PENDING',
+        student: StudentSummary(
+          id: 'stu-3',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(EnrollmentResultCard(enrollment: candidate, onTap: () {})),
+      );
+
+      // Candidat non commencé : « À réinscrire » remplace le statut brut
+      // PENDING (« En Attente »).
+      expect(find.text('À réinscrire'), findsOneWidget);
+      expect(find.text('En Attente'), findsNothing);
+    },
+  );
+
   testWidgets('expose un libellé sémantique localisé et déclenche onTap', (
     tester,
   ) async {

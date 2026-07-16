@@ -63,7 +63,6 @@ class AddressStepHandler extends BaseEnrollmentStepHandler {
     return AddressStep(
       studentDetail: context.detail.studentDetail,
       enrollmentId: context.detail.enrollmentDetail.id,
-      useOfflineDraft: isNewOffline(context),
       showInlineSaveButton: false,
       flowStepIndex: step.index,
       onRefreshRequested: context.onRefreshRequested,

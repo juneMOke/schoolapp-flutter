@@ -206,6 +206,21 @@ class StatusBadge extends StatelessWidget {
     style: style,
   );
 
+  /// Brouillon local (wizard offline non finalisé, `sync_status = DRAFT`) : ton
+  /// neutre volontaire — un brouillon n'est ni un statut métier ni un état de
+  /// synchro « réel », juste une saisie en cours à reprendre.
+  factory StatusBadge.draft({
+    required String label,
+    StatusBadgeSize size = StatusBadgeSize.medium,
+    StatusBadgeStyle style = StatusBadgeStyle.soft,
+  }) => StatusBadge(
+    icon: Icons.edit_note,
+    label: label,
+    color: AppColors.textMuted,
+    size: size,
+    style: style,
+  );
+
   // ---------------------------------------------------------------------------
   // Factories — Inscription (EnrollmentStatus — 9 valeurs)
   // ---------------------------------------------------------------------------
@@ -314,6 +329,27 @@ class StatusBadge extends StatelessWidget {
     icon: Icons.hourglass_empty,
     label: label,
     color: AppColors.textMuted,
+    size: size,
+    style: style,
+  );
+
+  // ---------------------------------------------------------------------------
+  // Factories — Type d'inscription (EnrollmentType)
+  // ---------------------------------------------------------------------------
+
+  /// Pastille de **type** « Réinscription » (dossier `RE_ENROLLMENT`) : axe
+  /// distinct du statut métier. Affichée à la place du statut pour ne pas
+  /// confondre un dossier de réinscription (statut PRE_REGISTERED) avec une
+  /// vraie pré-inscription. Couleur alignée sur le module Statistiques
+  /// ([AppColors.enrollmentStatsRe]).
+  factory StatusBadge.enrollmentReEnrollment({
+    required String label,
+    StatusBadgeSize size = StatusBadgeSize.medium,
+    StatusBadgeStyle style = StatusBadgeStyle.soft,
+  }) => StatusBadge(
+    icon: Icons.autorenew,
+    label: label,
+    color: AppColors.enrollmentStatsRe,
     size: size,
     style: style,
   );

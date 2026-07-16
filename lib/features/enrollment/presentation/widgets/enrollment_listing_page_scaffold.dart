@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table_container.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
@@ -15,7 +16,14 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   final EnrollmentDetailIntentFactory detailIntentFactory;
   final EnrollmentEmptyStateBuilder? emptyBeforeSearchBuilder;
   final EnrollmentResultsSummaryBuilder? resultsSummaryBuilder;
-  final bool Function(EnrollmentState state)? showEmptyBeforeSearchWhen;
+  final bool Function(EnrollmentLocalListState state)?
+  showEmptyBeforeSearchWhen;
+
+  /// Rappel optionnel invoqué **au retour** du détail (pop). Utilisé par la
+  /// réinscription pour rafraîchir la liste (read-your-writes) : un candidat
+  /// qu'on vient de commencer à réinscrire réapparaît alors sous forme de son
+  /// dossier (repris au tap), jamais comme candidat frais.
+  final VoidCallback? onDetailReturned;
 
   /// Slot optionnel rendu sous le tableau, dans le flux scrollable de la page.
   /// Utilisé p. ex. par la première inscription pour poser l'action de création
@@ -37,6 +45,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
     this.emptyBeforeSearchBuilder,
     this.resultsSummaryBuilder,
     this.showEmptyBeforeSearchWhen,
+    this.onDetailReturned,
     this.resultsFooterBuilder,
     this.readyKey = 'enrollment-list-ready',
   });
@@ -79,7 +88,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   }
 
   Widget _buildSearchSection(EnrollmentScreenContext screenCtx) {
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       buildWhen: (previous, current) =>
           previous.summariesStatus != current.summariesStatus,
       builder: (context, state) {
@@ -95,6 +104,9 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
           onCreateEnrollmentRequested: screenCtx.onCreateEnrollmentRequested,
           onReconnectRequested: screenCtx.onReconnectRequested,
           onContactAdminRequested: screenCtx.onContactAdminRequested,
+          // Conservé pour que les recherches nom/DOB restent bornées au type de
+          // la page (ex. Pré-inscriptions → PRE_ENROLLMENT).
+          enrollmentType: screenCtx.enrollmentType,
         );
 
         return searchSectionBuilder(context, ctx, (command) {
@@ -105,7 +117,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   }
 
   Widget _buildResultsSection(EnrollmentScreenContext screenCtx) {
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       builder: (context, state) {
         final shouldShowEmpty = showEmptyBeforeSearchWhen?.call(state) ?? false;
         if (shouldShowEmpty && emptyBeforeSearchBuilder != null) {
@@ -115,15 +127,37 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
         return EnrollmentDataTableContainer(
           preferredViewMode: screenCtx.preferredViewMode,
           onViewRequested: (summary) {
-            final intent = detailIntentFactory(summary);
-            context.push(
-              Uri(
-                path:
-                    '${EnrollmentConstants.enrollmentDetailRoute}/${summary.enrollmentId}',
-                queryParameters: intent.toQueryParameters(),
-              ).toString(),
-              extra: intent,
-            );
+            // Brouillon local (DRAFT) → reprise du wizard, chargé depuis la base
+            // locale par id (aucun GET serveur). Sinon comportement d'origine
+            // (consultation / reprise serveur) fourni par la page-listing.
+            final intent = summary.isLocalDraft
+                ? EnrollmentDetailIntent.localDraftResume(
+                    enrollmentId: summary.enrollmentId,
+                    studentId: summary.student.id,
+                  )
+                : detailIntentFactory(summary);
+            // Un candidat de réinscription n'a pas encore de dossier
+            // (`enrollmentId` vide) : la route `:enrollmentId` exige un segment
+            // NON vide (sinon go_router normalise `/detail/` → `/detail`, aucune
+            // route → page d'erreur). Placeholder `new` (comme la primo-
+            // inscription) ; l'intent porté par `extra` garde l'id réel et le
+            // flux RE seede par `studentId`.
+            final routeSegment = summary.enrollmentId.isEmpty
+                ? 'new'
+                : summary.enrollmentId;
+            context
+                .push(
+                  Uri(
+                    path:
+                        '${EnrollmentConstants.enrollmentDetailRoute}/$routeSegment',
+                    queryParameters: intent.toQueryParameters(),
+                  ).toString(),
+                  extra: intent,
+                )
+                .then((_) {
+                  // Au retour du détail : rafraîchit la liste (read-your-writes).
+                  if (context.mounted) onDetailReturned?.call();
+                });
           },
           onRefresh: screenCtx.onRefreshRequested,
           onSortToggled: screenCtx.onSortToggled,
@@ -138,7 +172,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
   }
 
   Widget _buildResultsSummarySection(EnrollmentScreenContext screenCtx) {
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       builder: (context, state) {
         final builder = resultsSummaryBuilder;
         if (builder == null) {

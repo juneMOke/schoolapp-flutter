@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
-import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
@@ -10,7 +8,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/form
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/gender_segmented_field.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class PersonalInfoStepBody extends StatelessWidget {
@@ -37,9 +34,6 @@ class PersonalInfoStepBody extends StatelessWidget {
   final String? birthPlaceError;
   final String? nationalityError;
   final String? dateOfBirthError;
-  final ValueChanged<bool>? onSavingChanged;
-  final VoidCallback onSaveSuccess;
-  final VoidCallback? onRefreshRequested;
 
   const PersonalInfoStepBody({
     super.key,
@@ -66,182 +60,141 @@ class PersonalInfoStepBody extends StatelessWidget {
     this.birthPlaceError,
     this.nationalityError,
     this.dateOfBirthError,
-    required this.onSavingChanged,
-    required this.onSaveSuccess,
-    this.onRefreshRequested,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocConsumer<StudentBloc, StudentState>(
-      listenWhen: (prev, curr) => prev.status != curr.status,
-      listener: (context, state) {
-        onSavingChanged?.call(state.status == StudentUpdateStatus.loading);
-
-        if (state.status == StudentUpdateStatus.success) {
-          onRefreshRequested?.call();
-          onSaveSuccess();
-          AppSnackBar.showSuccess(context, l10n.personalInfoSaveSuccess);
-        } else if (state.status == StudentUpdateStatus.failure) {
-          AppSnackBar.showError(
-            context,
-            l10n.personalInfoSaveError(state.errorMessage ?? ''),
-          );
-        }
-      },
-      builder: (context, state) {
-        final isLoading = state.status == StudentUpdateStatus.loading;
-
-        return Padding(
-          padding: const EdgeInsets.all(AppTheme.defaultPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              WizardFieldsGrid(
-                fields: [
-                  WizardGridField(
-                    EteeloTextInput(
-                      label: l10n.firstName,
-                      controller: firstNameController,
-                      required: true,
-                      errorText: firstNameError,
-                      readOnly: !isEditable,
-                      inputFormatters: const [
-                        FirstLetterUppercaseTextInputFormatter(),
-                      ],
-                    ),
-                  ),
-                  WizardGridField(
-                    EteeloTextInput(
-                      label: l10n.lastName,
-                      controller: lastNameController,
-                      required: true,
-                      errorText: lastNameError,
-                      readOnly: !isEditable,
-                      inputFormatters: const [
-                        FirstLetterUppercaseTextInputFormatter(),
-                      ],
-                    ),
-                  ),
-                  WizardGridField(
-                    EteeloTextInput(
-                      label: l10n.surname,
-                      controller: surnameController,
-                      required: true,
-                      errorText: surnameError,
-                      readOnly: !isEditable,
-                      inputFormatters: const [
-                        FirstLetterUppercaseTextInputFormatter(),
-                      ],
-                    ),
-                  ),
-                  WizardGridField(
-                    EteeloDateInput(
-                      label: l10n.dateOfBirth,
-                      placeholder: l10n.dateHint,
-                      value: selectedDate,
-                      required: true,
-                      errorText: dateOfBirthError,
-                      enabled: isEditable,
-                      readOnly: !isEditable,
-                      lastDate: DateTime.now(),
-                      initialPickerDate: DateTime(DateTime.now().year - 10),
-                      locale: const Locale('fr'),
-                      helpText: l10n.selectDateOfBirthHelpText,
-                      cancelText: l10n.cancel,
-                      confirmText: l10n.confirm,
-                      onChanged: onDateChanged,
-                    ),
-                  ),
-                  WizardGridField(
-                    EteeloTextInput(
-                      label: l10n.birthPlace,
-                      controller: birthPlaceController,
-                      required: true,
-                      errorText: birthPlaceError,
-                      readOnly: !isEditable,
-                      inputFormatters: const [
-                        FirstLetterUppercaseTextInputFormatter(),
-                      ],
-                    ),
-                  ),
-                  WizardGridField(
-                    NationalityDropdownField(
-                      label: l10n.nationality,
-                      value: selectedNationality,
-                      options: nationalityOptions,
-                      onChanged: onNationalityChanged,
-                      requiredField: true,
-                      errorText: nationalityError,
-                      enabled: isEditable,
-                      readOnly: !isEditable,
-                    ),
-                  ),
-                  // Genre (contrôle segmenté M/F) — pleine largeur, comme
-                  // « Année validée » à l'étape 3.
-                  WizardGridField(
-                    GenderSegmentedField(
-                      width: double.infinity,
-                      label: l10n.gender,
-                      selectedGender: selectedGender,
-                      requiredField: true,
-                      helpMessage: l10n.genderHelp,
-                      onChanged: onGenderChanged,
-                      enabled: isEditable,
-                      readOnly: !isEditable,
-                    ),
-                    fullWidth: true,
-                  ),
-                ],
-              ),
-              if (showInlineSaveButton) ...[
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.icon(
-                    onPressed: (isLoading || !canSave)
-                        ? null
-                        : () => onSave(context),
-                    icon: isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.save_outlined),
-                    label: Text(
-                      isLoading
-                          ? l10n.savingPersonalInfo
-                          : l10n.savePersonalInfo,
-                    ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                      elevation: canSave ? 6 : 0,
-                      shadowColor: const Color(
-                        0xFF0EA5E9,
-                      ).withValues(alpha: 0.45),
-                    ),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.all(AppTheme.defaultPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          WizardFieldsGrid(
+            fields: [
+              WizardGridField(
+                EteeloTextInput(
+                  label: l10n.firstName,
+                  controller: firstNameController,
+                  required: true,
+                  errorText: firstNameError,
+                  readOnly: !isEditable,
+                  inputFormatters: const [
+                    FirstLetterUppercaseTextInputFormatter(),
+                  ],
                 ),
-              ],
+              ),
+              WizardGridField(
+                EteeloTextInput(
+                  label: l10n.lastName,
+                  controller: lastNameController,
+                  required: true,
+                  errorText: lastNameError,
+                  readOnly: !isEditable,
+                  inputFormatters: const [
+                    FirstLetterUppercaseTextInputFormatter(),
+                  ],
+                ),
+              ),
+              WizardGridField(
+                EteeloTextInput(
+                  label: l10n.surname,
+                  controller: surnameController,
+                  required: true,
+                  errorText: surnameError,
+                  readOnly: !isEditable,
+                  inputFormatters: const [
+                    FirstLetterUppercaseTextInputFormatter(),
+                  ],
+                ),
+              ),
+              WizardGridField(
+                EteeloDateInput(
+                  label: l10n.dateOfBirth,
+                  placeholder: l10n.dateHint,
+                  value: selectedDate,
+                  required: true,
+                  errorText: dateOfBirthError,
+                  enabled: isEditable,
+                  readOnly: !isEditable,
+                  lastDate: DateTime.now(),
+                  initialPickerDate: DateTime(DateTime.now().year - 10),
+                  locale: const Locale('fr'),
+                  helpText: l10n.selectDateOfBirthHelpText,
+                  cancelText: l10n.cancel,
+                  confirmText: l10n.confirm,
+                  onChanged: onDateChanged,
+                ),
+              ),
+              WizardGridField(
+                EteeloTextInput(
+                  label: l10n.birthPlace,
+                  controller: birthPlaceController,
+                  required: true,
+                  errorText: birthPlaceError,
+                  readOnly: !isEditable,
+                  inputFormatters: const [
+                    FirstLetterUppercaseTextInputFormatter(),
+                  ],
+                ),
+              ),
+              WizardGridField(
+                NationalityDropdownField(
+                  label: l10n.nationality,
+                  value: selectedNationality,
+                  options: nationalityOptions,
+                  onChanged: onNationalityChanged,
+                  requiredField: true,
+                  errorText: nationalityError,
+                  enabled: isEditable,
+                  readOnly: !isEditable,
+                ),
+              ),
+              // Genre (contrôle segmenté M/F) — pleine largeur, comme
+              // « Année validée » à l'étape 3.
+              WizardGridField(
+                GenderSegmentedField(
+                  width: double.infinity,
+                  label: l10n.gender,
+                  selectedGender: selectedGender,
+                  requiredField: true,
+                  helpMessage: l10n.genderHelp,
+                  onChanged: onGenderChanged,
+                  enabled: isEditable,
+                  readOnly: !isEditable,
+                ),
+                fullWidth: true,
+              ),
             ],
           ),
-        );
-      },
+          if (showInlineSaveButton) ...[
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: !canSave ? null : () => onSave(context),
+                icon: const Icon(Icons.save_outlined),
+                label: Text(l10n.savePersonalInfo),
+                style: FilledButton.styleFrom(
+                  backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  elevation: canSave ? 6 : 0,
+                  shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

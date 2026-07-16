@@ -65,7 +65,6 @@ class PersonalInfoStepHandler extends BaseEnrollmentStepHandler {
       studentDetail: context.detail.studentDetail,
       enrollmentId: context.detail.enrollmentDetail.id,
       academicYearId: context.detail.enrollmentDetail.academicYearId,
-      useOfflineDraft: isNewOffline(context),
       detailIntent: context.intent,
       detailPolicy: context.detailPolicy,
       showInlineSaveButton: false,

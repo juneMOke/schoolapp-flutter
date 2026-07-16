@@ -1,20 +1,16 @@
-import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 
-abstract class EnrollmentDraftState extends Equatable {
-  const EnrollmentDraftState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class EnrollmentDraftInitial extends EnrollmentDraftState {
-  const EnrollmentDraftInitial();
-}
+// États du **brouillon par étape** du wizard — membres de la famille unique
+// [EnrollmentOfflineState] (bloc Inscription offline fusionné), gardés dans
+// leur fichier pour la lisibilité (1 famille, 2 fichiers thématiques).
+// `EnrollmentDraftInitial` a disparu avec la fusion : l'état de repos est
+// [EnrollmentOfflineInitial].
 
 /// Brouillon démarré : ids client figés (aucune ligne écrite tant que l'étape 0
 /// n'a pas été enregistrée).
-class EnrollmentDraftStarted extends EnrollmentDraftState {
+class EnrollmentDraftStarted extends EnrollmentOfflineState {
   final String enrollmentId;
   final String studentId;
 
@@ -25,17 +21,17 @@ class EnrollmentDraftStarted extends EnrollmentDraftState {
 }
 
 /// Écriture d'une étape en cours.
-class EnrollmentDraftSaving extends EnrollmentDraftState {
+class EnrollmentDraftSaving extends EnrollmentOfflineState {
   const EnrollmentDraftSaving();
 }
 
 /// Étape enregistrée localement (avance le wizard).
-class EnrollmentDraftStepSaved extends EnrollmentDraftState {
+class EnrollmentDraftStepSaved extends EnrollmentOfflineState {
   const EnrollmentDraftStepSaved();
 }
 
 /// Détail du brouillon chargé.
-class EnrollmentDraftDetailLoaded extends EnrollmentDraftState {
+class EnrollmentDraftDetailLoaded extends EnrollmentOfflineState {
   final LocalEnrollmentDetail detail;
 
   const EnrollmentDraftDetailLoaded(this.detail);
@@ -45,7 +41,7 @@ class EnrollmentDraftDetailLoaded extends EnrollmentDraftState {
 }
 
 /// Brouillon confirmé localement : dossier en attente de synchro.
-class EnrollmentDraftFinalizedPendingSync extends EnrollmentDraftState {
+class EnrollmentDraftFinalizedPendingSync extends EnrollmentOfflineState {
   final String enrollmentId;
 
   const EnrollmentDraftFinalizedPendingSync(this.enrollmentId);
@@ -54,11 +50,24 @@ class EnrollmentDraftFinalizedPendingSync extends EnrollmentDraftState {
   List<Object?> get props => [enrollmentId];
 }
 
-class EnrollmentDraftError extends EnrollmentDraftState {
+class EnrollmentDraftError extends EnrollmentOfflineState {
   final String message;
 
   const EnrollmentDraftError(this.message);
 
   @override
   List<Object?> get props => [message];
+}
+
+/// Sonde au tap RE : un dossier local existe DÉJÀ pour cet élève cette année →
+/// la page l'ouvre au lieu de seeder un doublon. [syncState] pilote le mode
+/// (option b) : `DRAFT` → reprise éditable ; finalisé → lecture seule.
+class EnrollmentReenrollmentExisting extends EnrollmentOfflineState {
+  final String enrollmentId;
+  final SyncState syncState;
+
+  const EnrollmentReenrollmentExisting(this.enrollmentId, this.syncState);
+
+  @override
+  List<Object?> get props => [enrollmentId, syncState];
 }

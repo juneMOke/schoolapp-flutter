@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
@@ -58,6 +59,64 @@ void main() {
       dateOfBirth: '2012-05-20',
       gender: Gender.male,
     ),
+  );
+
+  testWidgets(
+    'ligne brouillon (DRAFT) : badge « Brouillon » à côté du statut, sans '
+    'débordement',
+    (tester) async {
+      const draft = EnrollmentSummary(
+        enrollmentId: 'draft-1',
+        enrollmentCode: '',
+        status: 'IN_PROGRESS',
+        student: StudentSummary(
+          id: 'stu-9',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+        syncState: SyncState.draft,
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[draft],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      // Aucune exception de layout (Row de badges bornés sous FittedBox).
+      expect(tester.takeException(), isNull);
+      // Statut métier conservé + badge « Brouillon ».
+      expect(find.byType(EnrollmentStatusBadge), findsOneWidget);
+      expect(find.text('Brouillon'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ligne non-brouillon (syncState null) : aucun badge « Brouillon »',
+    (tester) async {
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[enrollment],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Brouillon'), findsNothing);
+    },
   );
 
   testWidgets('Téléphone (<600px) : 2 colonnes, date en sous-texte du nom', (

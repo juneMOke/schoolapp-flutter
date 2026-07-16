@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/enrollment_academic_info_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
@@ -18,8 +16,6 @@ class PreviousAcademicInfoStep extends StatefulWidget {
   final EnrollmentSchoolDetail enrollmentDetail;
   final String enrollmentId;
 
-  /// Parcours NEW offline-first : l'étape met à jour le brouillon local.
-  final bool useOfflineDraft;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -30,7 +26,6 @@ class PreviousAcademicInfoStep extends StatefulWidget {
     super.key,
     required this.enrollmentDetail,
     required this.enrollmentId,
-    this.useOfflineDraft = false,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.onRefreshRequested,
@@ -55,8 +50,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   late bool _validatedPreviousYear;
 
-  String _academicYearId = '';
-
   String _initialPrevYear = '';
   String _initialPrevSchool = '';
   String _initialPrevCycle = '';
@@ -80,8 +73,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   StepFormState get _stepState =>
       StepFormState(dirty: _isDirty, valid: _isValid, saving: _isSaving);
-
-  late final EnrollmentAcademicInfoBloc _academicInfoBloc;
 
   // ---------------------------------------------------------------------------
   // Dropdown options
@@ -190,7 +181,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   @override
   void initState() {
     super.initState();
-    _academicInfoBloc = getIt<EnrollmentAcademicInfoBloc>();
 
     _prevSchoolController = TextEditingController();
     _prevRateController = TextEditingController();
@@ -270,7 +260,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
           : null;
       _prevRateController.text = _normalizeRateFromDouble(detail.previousRate);
       _prevRankController.text = _normalizeRankFromInt(detail.previousRank);
-      _academicYearId = detail.academicYearId;
       _validatedPreviousYear = detail.validatedPreviousYear;
     } finally {
       _isHydratingFromDetail = false;
@@ -331,7 +320,6 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     _prevSchoolController.dispose();
     _prevRateController.dispose();
     _prevRankController.dispose();
-    _academicInfoBloc.close();
     super.dispose();
   }
 
@@ -461,30 +449,13 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     }
     if (!_isDirty) return;
 
-    if (widget.useOfflineDraft) {
-      _dispatchDraftPreviousAcademic();
-      return;
-    }
-
-    _academicInfoBloc.add(
-      EnrollmentAcademicInfoUpdateRequested(
-        enrollmentId: widget.enrollmentId,
-        academicYearId: _academicYearId,
-        previousSchoolName: _prevSchoolController.text.trim(),
-        previousAcademicYear: _selectedYear ?? '',
-        previousSchoolLevelGroup: _selectedCycle ?? '',
-        previousSchoolLevel: _selectedLevel ?? '',
-        previousRate: double.tryParse(_prevRateController.text.trim()) ?? 0.0,
-        previousRank: int.tryParse(_prevRankController.text.trim()),
-        validatedPreviousYear: _validatedPreviousYear,
-      ),
-    );
+    _dispatchDraftPreviousAcademic();
   }
 
   void _dispatchDraftPreviousAcademic() {
     _awaitingDraftSave = true;
     _onSavingChanged(true);
-    context.read<EnrollmentDraftBloc>().add(
+    context.read<EnrollmentOfflineBloc>().add(
       SaveDraftPreviousAcademicRequested(
         enrollmentId: widget.enrollmentId,
         previousSchoolName: _prevSchoolController.text.trim(),
@@ -533,113 +504,66 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
     final level = _selectedLevel;
 
     return EnrollmentDraftStepSaveListener(
-      enabled: widget.useOfflineDraft,
+      enabled: true,
       isAwaiting: () => _awaitingDraftSave,
       onSaved: _onDraftSaved,
       onError: _onDraftError,
-      child: BlocProvider<EnrollmentAcademicInfoBloc>.value(
-        value: _academicInfoBloc,
-        child:
-            BlocConsumer<
-              EnrollmentAcademicInfoBloc,
-              EnrollmentAcademicInfoState
-            >(
-              listenWhen: (prev, curr) => prev.status != curr.status,
-              listener: (context, state) {
-                _onSavingChanged(
-                  state.status == EnrollmentAcademicInfoStatus.loading,
-                );
-
-                if (state.status == EnrollmentAcademicInfoStatus.success) {
-                  _markCurrentAsSavedSnapshot();
-                  _recomputeFormState();
-                  _onSavingChanged(false);
-                  if (_showValidationHints) {
-                    setState(() => _showValidationHints = false);
-                  }
-                  widget.onRefreshRequested?.call();
-                  AppSnackBar.showSuccess(
-                    context,
-                    l10n.academicInfoSaveSuccess,
-                  );
-                } else if (state.status ==
-                    EnrollmentAcademicInfoStatus.failure) {
-                  _onSavingChanged(false);
-                  AppSnackBar.showError(
-                    context,
-                    l10n.academicInfoSaveError(state.errorMessage ?? ''),
-                    onRetry: submitForm,
-                    retryLabel: l10n.enrollmentErrorRetry,
-                  );
-                }
-              },
-              builder: (context, state) {
-                final isLoading =
-                    state.status == EnrollmentAcademicInfoStatus.loading;
-                return PreviousAcademicInfoStepBody(
-                  yearOptions: _yearOptions,
-                  selectedYear: year,
-                  onYearChanged: _onYearChanged,
-                  prevSchoolController: _prevSchoolController,
-                  cycleOptions: _cycleOptions,
-                  levelOptions: _levelOptions,
-                  selectedCycle: cycle,
-                  selectedLevel: level,
-                  onCycleChanged: _onCycleChanged,
-                  onLevelChanged: _onLevelChanged,
-                  isCatalogLoading: _isCatalogLoading,
-                  prevRateController: _prevRateController,
-                  prevRankController: _prevRankController,
-                  validatedPreviousYear: _validatedPreviousYear,
-                  showValidation: showValidation,
-                  isLoading: isLoading,
-                  canSave: _canSave,
-                  showInlineSaveButton: widget.showInlineSaveButton,
-                  onSave: _onSave,
-                  isEditable: widget.isEditable,
-                  onValidatedChanged: (value) {
-                    setState(() => _validatedPreviousYear = value);
-                    _recomputeFormState();
-                  },
-                  prevYearError: showValidation && (year ?? '').isEmpty
-                      ? l10n.requiredFieldError(l10n.academicYearLabel)
-                      : null,
-                  prevSchoolError:
-                      showValidation &&
-                          _prevSchoolController.text.trim().isEmpty
-                      ? l10n.requiredFieldError(l10n.schoolLabel)
-                      : null,
-                  prevCycleError: showValidation && (cycle ?? '').isEmpty
-                      ? l10n.requiredFieldError(l10n.schoolCycle)
-                      : null,
-                  prevLevelError: showValidation && (level ?? '').isEmpty
-                      ? l10n.requiredFieldError(l10n.schoolLevelLabel)
-                      : null,
-                  prevRateError:
-                      showValidation &&
-                          (_prevRateController.text.trim().isEmpty ||
-                              double.tryParse(
-                                    _prevRateController.text.trim(),
-                                  ) ==
-                                  null)
-                      ? (_prevRateController.text.trim().isEmpty
-                            ? l10n.requiredFieldError(l10n.averageLabel)
-                            : l10n.invalidNumberFieldError(l10n.averageLabel))
-                      : null,
-                  prevRankError:
-                      showValidation &&
-                          (_prevRankController.text.trim().isEmpty ||
-                              int.tryParse(_prevRankController.text.trim()) ==
-                                  null)
-                      ? (_prevRankController.text.trim().isEmpty
-                            ? l10n.requiredFieldError(l10n.rankingLabel)
-                            : l10n.invalidNumberFieldError(l10n.rankingLabel))
-                      : null,
-                  validatedPreviousYearChanged:
-                      _validatedPreviousYear != _initialValidatedPreviousYear,
-                );
-              },
-            ),
+      child: PreviousAcademicInfoStepBody(
+        yearOptions: _yearOptions,
+        selectedYear: year,
+        onYearChanged: _onYearChanged,
+        prevSchoolController: _prevSchoolController,
+        cycleOptions: _cycleOptions,
+        levelOptions: _levelOptions,
+        selectedCycle: cycle,
+        selectedLevel: level,
+        onCycleChanged: _onCycleChanged,
+        onLevelChanged: _onLevelChanged,
+        isCatalogLoading: _isCatalogLoading,
+        prevRateController: _prevRateController,
+        prevRankController: _prevRankController,
+        validatedPreviousYear: _validatedPreviousYear,
+        showValidation: showValidation,
+        isLoading: _isSaving,
+        canSave: _canSave,
+        showInlineSaveButton: widget.showInlineSaveButton,
+        onSave: _onSave,
+        isEditable: widget.isEditable,
+        onValidatedChanged: (value) {
+          setState(() => _validatedPreviousYear = value);
+          _recomputeFormState();
+        },
+        prevYearError: showValidation && (year ?? '').isEmpty
+            ? l10n.requiredFieldError(l10n.academicYearLabel)
+            : null,
+        prevSchoolError:
+            showValidation && _prevSchoolController.text.trim().isEmpty
+            ? l10n.requiredFieldError(l10n.schoolLabel)
+            : null,
+        prevCycleError: showValidation && (cycle ?? '').isEmpty
+            ? l10n.requiredFieldError(l10n.schoolCycle)
+            : null,
+        prevLevelError: showValidation && (level ?? '').isEmpty
+            ? l10n.requiredFieldError(l10n.schoolLevelLabel)
+            : null,
+        prevRateError:
+            showValidation &&
+                (_prevRateController.text.trim().isEmpty ||
+                    double.tryParse(_prevRateController.text.trim()) == null)
+            ? (_prevRateController.text.trim().isEmpty
+                  ? l10n.requiredFieldError(l10n.averageLabel)
+                  : l10n.invalidNumberFieldError(l10n.averageLabel))
+            : null,
+        prevRankError:
+            showValidation &&
+                (_prevRankController.text.trim().isEmpty ||
+                    int.tryParse(_prevRankController.text.trim()) == null)
+            ? (_prevRankController.text.trim().isEmpty
+                  ? l10n.requiredFieldError(l10n.rankingLabel)
+                  : l10n.invalidNumberFieldError(l10n.rankingLabel))
+            : null,
+        validatedPreviousYearChanged:
+            _validatedPreviousYear != _initialValidatedPreviousYear,
       ),
     );
   }

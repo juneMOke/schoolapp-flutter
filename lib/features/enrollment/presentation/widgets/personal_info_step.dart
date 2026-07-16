@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/personal_info_step_body.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
@@ -27,9 +24,6 @@ class PersonalInfoStep extends StatefulWidget {
   /// Année scolaire courante (requise par l'écriture d'identité du brouillon NEW).
   final String academicYearId;
 
-  /// Parcours NEW offline-first : l'étape écrit un brouillon local au lieu de
-  /// créer le dossier côté serveur.
-  final bool useOfflineDraft;
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -43,7 +37,6 @@ class PersonalInfoStep extends StatefulWidget {
     required this.studentDetail,
     required this.enrollmentId,
     this.academicYearId = '',
-    this.useOfflineDraft = false,
     this.showInlineSaveButton = true,
     this.flowStepIndex,
     this.onRefreshRequested,
@@ -62,7 +55,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   late final TextEditingController _lastNameController;
   late final TextEditingController _surnameController;
   late final TextEditingController _birthPlaceController;
-  late final StudentBloc _studentBloc;
 
   String _initialFirstName = '';
   String _initialLastName = '';
@@ -106,7 +98,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
   @override
   void initState() {
     super.initState();
-    _studentBloc = getIt<StudentBloc>();
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
     _surnameController = TextEditingController();
@@ -255,7 +246,6 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _lastNameController.dispose();
     _surnameController.dispose();
     _birthPlaceController.dispose();
-    _studentBloc.close();
     super.dispose();
   }
 
@@ -344,34 +334,16 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     }
     if (!_isDirty) return;
 
-    // Parcours NEW : écrit l'étape Identité du brouillon local (crée les 2 lignes
-    // DRAFT) au lieu de dispatcher la création serveur.
-    if (widget.useOfflineDraft) {
-      _dispatchDraftIdentity();
-      return;
-    }
-
-    widget.detailPolicy.savePersonalInfo(
-      enrollmentBloc: context.read<EnrollmentBloc>(),
-      studentBloc: _studentBloc,
-      intent: widget.detailIntent,
-      currentStudent: widget.studentDetail,
-      payload: EnrollmentPersonalInfoPayload(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        surname: _surnameController.text.trim(),
-        dateOfBirth: _toIsoDate(_selectedDate),
-        gender: _selectedGender.name.toUpperCase(),
-        birthPlace: _birthPlaceController.text.trim(),
-        nationality: _selectedNationality.trim(),
-      ),
-    );
+    // Toute édition écrit l'étape Identité dans le brouillon local — le
+    // dispatch de création serveur a été retiré avec la convergence
+    // offline-first (l'agrégat part en un flush à la validation).
+    _dispatchDraftIdentity();
   }
 
   void _dispatchDraftIdentity() {
     _awaitingDraftSave = true;
     _onSavingChanged(true);
-    context.read<EnrollmentDraftBloc>().add(
+    context.read<EnrollmentOfflineBloc>().add(
       SaveDraftIdentityRequested(
         enrollmentId: widget.enrollmentId,
         studentId: widget.studentDetail.id,
@@ -382,9 +354,13 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         dateOfBirth: _toIsoDate(_selectedDate),
         birthPlace: _birthPlaceController.text.trim(),
         nationality: _selectedNationality.trim(),
+        // Matricule jamais porté par l'étape : null est ignoré par l'écriture
+        // préservante (le matricule seedé RE reste intact).
         matriculationNumber: null,
-        enrollmentType: 'NEW_ENROLLMENT',
-        status: 'IN_PROGRESS',
+        // Type/statut par ORIGINE (RE_ENROLLMENT/PRE_REGISTERED, etc.) : un
+        // re-save d'identité ne doit jamais requalifier un brouillon seedé.
+        enrollmentType: widget.detailPolicy.draftEnrollmentType,
+        status: widget.detailPolicy.draftStatus,
         academicYearId: widget.academicYearId,
         schoolLevelId: null,
         schoolLevelGroupId: null,
@@ -419,114 +395,69 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     final showValidation = _showValidationHints || (_isDirty && !_isValid);
 
     return EnrollmentDraftStepSaveListener(
-      enabled: widget.useOfflineDraft,
+      enabled: true,
       isAwaiting: () => _awaitingDraftSave,
       onSaved: _onDraftSaved,
       onError: _onDraftError,
-      child: BlocProvider<StudentBloc>.value(
-        value: _studentBloc,
-        child: BlocListener<EnrollmentBloc, EnrollmentState>(
-          listenWhen: (previous, current) =>
-              previous.createStatus != current.createStatus,
-          listener: (context, state) {
-            _onSavingChanged(
-              state.createStatus == EnrollmentLoadStatus.loading,
-            );
-
-            if (state.createStatus == EnrollmentLoadStatus.success) {
-              _markCurrentAsSavedSnapshot();
-              _recomputeFormState();
-              _onSavingChanged(false);
-              if (_showValidationHints) {
-                setState(() => _showValidationHints = false);
-              }
-              AppSnackBar.showSuccess(context, l10n.personalInfoSaveSuccess);
-              return;
-            }
-
-            if (state.createStatus == EnrollmentLoadStatus.failure) {
-              _onSavingChanged(false);
-              AppSnackBar.showError(
-                context,
-                l10n.personalInfoSaveError(state.errorMessage ?? ''),
-                onRetry: submitForm,
-                retryLabel: l10n.enrollmentErrorRetry,
-              );
-            }
-          },
-          child: PersonalInfoStepBody(
-            studentDetail: widget.studentDetail,
-            firstNameController: _firstNameController,
-            lastNameController: _lastNameController,
-            surnameController: _surnameController,
-            birthPlaceController: _birthPlaceController,
-            selectedNationality: _selectedNationality,
-            nationalityOptions: NationalityCatalog.withOptionalSelection(
-              _selectedNationality,
-            ),
-            selectedGender: _selectedGender,
-            selectedDate: _selectedDate,
-            onNationalityChanged: _onNationalityChanged,
-            onGenderChanged: (g) {
-              if (g != null) {
-                setState(() => _selectedGender = g);
-                _recomputeFormState();
-              }
-            },
-            onDateChanged: (date) {
-              setState(() => _selectedDate = date);
-              _recomputeFormState();
-              if (_showValidationHints && _isValid) {
-                setState(() => _showValidationHints = false);
-              }
-            },
-            onSave: _onSave,
-            enrollmentId: widget.enrollmentId,
-            showInlineSaveButton: widget.showInlineSaveButton,
-            canSave: canSubmit,
-            isEditable: widget.isEditable,
-            firstNameError: _fieldErrorFor(
-              _firstNameController.text,
-              l10n.firstName,
-              l10n,
-              showValidation,
-            ),
-            lastNameError: _fieldErrorFor(
-              _lastNameController.text,
-              l10n.lastName,
-              l10n,
-              showValidation,
-            ),
-            surnameError: _fieldErrorFor(
-              _surnameController.text,
-              l10n.surname,
-              l10n,
-              showValidation,
-            ),
-            birthPlaceError: _fieldErrorFor(
-              _birthPlaceController.text,
-              l10n.birthPlace,
-              l10n,
-              showValidation,
-            ),
-            nationalityError:
-                showValidation && _selectedNationality.trim().isEmpty
-                ? l10n.requiredFieldError(l10n.nationality)
-                : null,
-            dateOfBirthError: _dateErrorFor(l10n, showValidation),
-            onSavingChanged: _onSavingChanged,
-            onSaveSuccess: () {
-              _markCurrentAsSavedSnapshot();
-              _recomputeFormState();
-              _onSavingChanged(false);
-              widget.onRefreshRequested?.call();
-              if (_showValidationHints) {
-                setState(() => _showValidationHints = false);
-              }
-            },
-            onRefreshRequested: widget.onRefreshRequested,
-          ),
+      child: PersonalInfoStepBody(
+        studentDetail: widget.studentDetail,
+        firstNameController: _firstNameController,
+        lastNameController: _lastNameController,
+        surnameController: _surnameController,
+        birthPlaceController: _birthPlaceController,
+        selectedNationality: _selectedNationality,
+        nationalityOptions: NationalityCatalog.withOptionalSelection(
+          _selectedNationality,
         ),
+        selectedGender: _selectedGender,
+        selectedDate: _selectedDate,
+        onNationalityChanged: _onNationalityChanged,
+        onGenderChanged: (g) {
+          if (g != null) {
+            setState(() => _selectedGender = g);
+            _recomputeFormState();
+          }
+        },
+        onDateChanged: (date) {
+          setState(() => _selectedDate = date);
+          _recomputeFormState();
+          if (_showValidationHints && _isValid) {
+            setState(() => _showValidationHints = false);
+          }
+        },
+        onSave: _onSave,
+        enrollmentId: widget.enrollmentId,
+        showInlineSaveButton: widget.showInlineSaveButton,
+        canSave: canSubmit,
+        isEditable: widget.isEditable,
+        firstNameError: _fieldErrorFor(
+          _firstNameController.text,
+          l10n.firstName,
+          l10n,
+          showValidation,
+        ),
+        lastNameError: _fieldErrorFor(
+          _lastNameController.text,
+          l10n.lastName,
+          l10n,
+          showValidation,
+        ),
+        surnameError: _fieldErrorFor(
+          _surnameController.text,
+          l10n.surname,
+          l10n,
+          showValidation,
+        ),
+        birthPlaceError: _fieldErrorFor(
+          _birthPlaceController.text,
+          l10n.birthPlace,
+          l10n,
+          showValidation,
+        ),
+        nationalityError: showValidation && _selectedNationality.trim().isEmpty
+            ? l10n.requiredFieldError(l10n.nationality)
+            : null,
+        dateOfBirthError: _dateErrorFor(l10n, showValidation),
       ),
     );
   }

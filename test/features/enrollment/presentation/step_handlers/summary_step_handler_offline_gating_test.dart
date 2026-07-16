@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
@@ -9,11 +10,9 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
@@ -21,12 +20,10 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/summary_step_handler.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-class _MockDraftBloc extends Mock implements EnrollmentDraftBloc {}
 
 class _MockOfflineBloc extends Mock implements EnrollmentOfflineBloc {}
 
@@ -54,34 +51,18 @@ class _FakePolicy extends EnrollmentDetailPolicy {
     EnrollmentDetailIntent intent, {
     bool silent = false,
   }) {}
-
-  @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  }) {}
 }
 
 void main() {
   setUpAll(() {
     registerFallbackValue(const FinalizeDraftRequested('fallback'));
-    registerFallbackValue(const LoadLocalEnrollments());
   });
 
-  late _MockDraftBloc draftBloc;
   late _MockOfflineBloc offlineBloc;
 
   setUp(() {
-    draftBloc = _MockDraftBloc();
     offlineBloc = _MockOfflineBloc();
-    when(() => draftBloc.state).thenReturn(const EnrollmentDraftInitial());
     when(() => offlineBloc.state).thenReturn(const EnrollmentOfflineInitial());
-    when(
-      () => draftBloc.stream,
-    ).thenAnswer((_) => const Stream<EnrollmentDraftState>.empty());
     when(
       () => offlineBloc.stream,
     ).thenAnswer((_) => const Stream<EnrollmentOfflineState>.empty());
@@ -90,11 +71,8 @@ void main() {
   Future<BuildContext> pumpContext(WidgetTester tester) async {
     late BuildContext captured;
     await tester.pumpWidget(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider<EnrollmentDraftBloc>.value(value: draftBloc),
-          BlocProvider<EnrollmentOfflineBloc>.value(value: offlineBloc),
-        ],
+      BlocProvider<EnrollmentOfflineBloc>.value(
+        value: offlineBloc,
         child: Builder(
           builder: (context) {
             captured = context;
@@ -122,9 +100,7 @@ void main() {
     );
   }
 
-  testWidgets('NEW → finalise le brouillon local (pas de confirm offline)', (
-    tester,
-  ) async {
+  testWidgets('NEW → finalise le brouillon local', (tester) async {
     final context = await pumpContext(tester);
     final handler = SummaryStepHandler();
 
@@ -138,32 +114,110 @@ void main() {
     );
 
     expect(result.status, StepSubmitStatus.dispatched);
-    final captured = verify(() => draftBloc.add(captureAny())).captured;
+    final captured = verify(() => offlineBloc.add(captureAny())).captured;
     expect(captured.single, isA<FinalizeDraftRequested>());
     expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');
-    verifyNever(() => offlineBloc.add(any()));
   });
 
-  testWidgets('RE → confirmation offline inchangée (pas de finalize draft)', (
+  testWidgets(
+    'RE → MÊME chemin : finalise le brouillon local (seedé en amont)',
+    (tester) async {
+      final context = await pumpContext(tester);
+      final handler = SummaryStepHandler();
+
+      final result = await handler.submit(
+        buildSubmitContext(
+          context,
+          const EnrollmentDetailIntent.reRegistration(
+            enrollmentId: 'enr-2',
+            studentId: 'stu-2',
+          ),
+        ),
+      );
+
+      expect(result.status, StepSubmitStatus.dispatched);
+      final captured = verify(() => offlineBloc.add(captureAny())).captured;
+      expect(captured.single, isA<FinalizeDraftRequested>());
+      expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');
+    },
+  );
+
+  testWidgets('écriture de brouillon en cours → soumission bloquée', (
     tester,
   ) async {
+    when(() => offlineBloc.state).thenReturn(const EnrollmentDraftSaving());
     final context = await pumpContext(tester);
     final handler = SummaryStepHandler();
 
     final result = await handler.submit(
       buildSubmitContext(
         context,
-        const EnrollmentDetailIntent.reRegistration(
-          enrollmentId: 'enr-2',
-          studentId: 'stu-2',
+        const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
+          'enr-1',
         ),
       ),
     );
 
-    expect(result.status, StepSubmitStatus.dispatched);
-    final captured = verify(() => offlineBloc.add(captureAny())).captured;
-    expect(captured.single, isA<ConfirmLocalEnrollment>());
-    verifyNever(() => draftBloc.add(any()));
+    expect(result.status, StepSubmitStatus.blocked);
+    verifyNever(() => offlineBloc.add(any()));
+  });
+
+  testWidgets('consultation lecture seule (dossier LOCAL non synchronisé) → '
+      'retour/redirect, JAMAIS de finalisation', (tester) async {
+    // Garde read-only : un dossier ouvert en consultation
+    // (isReadOnlyConsultation == true, ici via LocalConsultationDetailPolicy)
+    // ne doit JAMAIS re-finaliser — sinon un PENDING_SYNC déjà en file de
+    // synchro serait re-poussé. On monte un GoRouter minimal (le redirect
+    // fait un goNamed) + un ScaffoldMessenger (le toast d'info) pour laisser
+    // la branche s'exécuter jusqu'au bout. Tue le mutant qui retirerait la
+    // disjonction `|| context.detailPolicy.isReadOnlyConsultation`.
+    final l10n = _MockL10n();
+    when(() => l10n.completedEnrollmentRedirecting).thenReturn('redirection…');
+
+    late BuildContext captured;
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          name: AppRoutesNames.home,
+          builder: (context, state) =>
+              BlocProvider<EnrollmentOfflineBloc>.value(
+                value: offlineBloc,
+                child: Builder(
+                  builder: (context) {
+                    captured = context;
+                    return const Scaffold(body: SizedBox.shrink());
+                  },
+                ),
+              ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    final handler = SummaryStepHandler();
+    final result = await handler.submit(
+      HandlerSubmitContext(
+        context: captured,
+        enrollmentBloc: _MockEnrollmentBloc(),
+        flowBloc: _MockFlowBloc(),
+        enrollmentState: const EnrollmentState.initial(),
+        detail: _buildDetail(),
+        intent: const EnrollmentDetailIntent.newFirstRegistration()
+            .withEnrollmentId('enr-1'),
+        detailPolicy: const LocalConsultationDetailPolicy(),
+        l10n: l10n,
+      ),
+    );
+
+    expect(result.status, StepSubmitStatus.completed);
+    verifyNever(() => offlineBloc.add(any()));
+
+    // Vide la frame de navigation + le timer d'auto-fermeture du SnackBar.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 6));
   });
 }
 

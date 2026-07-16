@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 
@@ -32,12 +32,12 @@ typedef EnrollmentDetailIntentFactory =
     EnrollmentDetailIntent Function(EnrollmentSummary summary);
 
 typedef EnrollmentEmptyStateBuilder =
-    Widget Function(BuildContext context, EnrollmentState state);
+    Widget Function(BuildContext context, EnrollmentLocalListState state);
 
 typedef EnrollmentResultsSummaryBuilder =
     Widget Function(
       BuildContext context,
-      EnrollmentState state,
+      EnrollmentLocalListState state,
       EnrollmentScreenContext screenCtx,
     );
 
@@ -54,6 +54,13 @@ class EnrollmentScreenContext {
   final VoidCallback? onReconnectRequested;
   final VoidCallback? onContactAdminRequested;
 
+  /// Filtre de **type d'inscription** propre à la page (ex. `PRE_ENROLLMENT`
+  /// pour Pré-inscriptions). Porté jusqu'aux événements de recherche pour que
+  /// TOUS les chemins de la page (listing par défaut ET recherches nom/DOB)
+  /// restent bornés au type — sans lui, un dossier de réinscription (même
+  /// statut PRE_REGISTERED) réapparaîtrait. Null = pas de filtre par type.
+  final String? enrollmentType;
+
   const EnrollmentScreenContext({
     required this.schoolId,
     required this.academicYearId,
@@ -66,6 +73,7 @@ class EnrollmentScreenContext {
     this.onCreateEnrollmentRequested,
     this.onReconnectRequested,
     this.onContactAdminRequested,
+    this.enrollmentType,
   });
 }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
@@ -12,12 +11,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SaveLabelContext {
   final bool savingNow;
   final bool isEnrollmentAlreadyCompleted;
-  final EnrollmentState enrollmentState;
 
   const SaveLabelContext({
     required this.savingNow,
     required this.isEnrollmentAlreadyCompleted,
-    required this.enrollmentState,
   });
 }
 
@@ -318,9 +315,4 @@ abstract class BaseEnrollmentStepHandler extends EnrollmentStepHandler {
 
     return context.detail.studentDetail.schoolLevel.id.trim();
   }
-
-  /// Parcours NEW (première inscription) : seul flux basculé offline-first
-  /// (écriture d'un brouillon local par étape). RE/PRE/édition restent online.
-  bool isNewOffline(HandlerBuildContext context) =>
-      context.intent.origin == EnrollmentDetailOrigin.newFirstRegistration;
 }

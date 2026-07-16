@@ -6,19 +6,26 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
 class EnrollmentCurrentYearBootstrapBuilder extends StatefulWidget {
   final String status;
+
+  /// Filtre de type propre à la page (ex. `PRE_ENROLLMENT` pour la page
+  /// Pré-inscriptions) : porté sur le chargement initial par statut pour ne pas
+  /// mélanger les dossiers de réinscription (même statut PRE_REGISTERED). Null
+  /// = pas de filtre par type.
+  final String? enrollmentType;
   final Widget Function(BuildContext context, EnrollmentScreenContext ctx)
   onReady;
 
   const EnrollmentCurrentYearBootstrapBuilder({
     super.key,
     required this.status,
+    this.enrollmentType,
     required this.onReady,
   });
 
@@ -46,7 +53,8 @@ class _EnrollmentCurrentYearBootstrapBuilderState
     covariant EnrollmentCurrentYearBootstrapBuilder oldWidget,
   ) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.status != widget.status) {
+    if (oldWidget.status != widget.status ||
+        oldWidget.enrollmentType != widget.enrollmentType) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _requestSummariesIfContextAvailable();
@@ -89,7 +97,7 @@ class _EnrollmentCurrentYearBootstrapBuilderState
           }
 
           final isLoading = context.select(
-            (EnrollmentBloc bloc) =>
+            (EnrollmentLocalListBloc bloc) =>
                 bloc.state.summariesStatus == EnrollmentLoadStatus.loading,
           );
 
@@ -120,10 +128,10 @@ class _EnrollmentCurrentYearBootstrapBuilderState
     final bootstrapState = context.read<BootstrapCurrentYearBloc>().state;
     final academicYearId = bootstrapState.bootstrap?.academicYear.id ?? '';
     final schoolId = context.read<AuthBloc>().state.user?.schoolId ?? '';
-    final enrollmentBloc = context.read<EnrollmentBloc>();
-    final lastSummariesQuery = enrollmentBloc.state.lastSummariesQuery;
+    final listBloc = context.read<EnrollmentLocalListBloc>();
+    final lastSummariesQuery = listBloc.state.lastSummariesQuery;
     final isSummariesLoading =
-        enrollmentBloc.state.summariesStatus == EnrollmentLoadStatus.loading;
+        listBloc.state.summariesStatus == EnrollmentLoadStatus.loading;
 
     if (bootstrapState.status != BootstrapContextLoadStatus.success ||
         academicYearId.isEmpty ||
@@ -135,15 +143,17 @@ class _EnrollmentCurrentYearBootstrapBuilderState
     _lastRefreshAt = now;
 
     if (lastSummariesQuery != null &&
-        lastSummariesQuery.status == widget.status) {
-      enrollmentBloc.add(const EnrollmentSummariesRefreshRequested());
+        lastSummariesQuery.status == widget.status &&
+        lastSummariesQuery.enrollmentType == widget.enrollmentType) {
+      listBloc.add(const LocalListRefreshRequested());
       return;
     }
 
-    enrollmentBloc.add(
-      EnrollmentSummariesRequested(
+    listBloc.add(
+      LocalListByStatusRequested(
         status: widget.status,
         academicYearId: academicYearId,
+        enrollmentType: widget.enrollmentType,
         page: 0,
       ),
     );

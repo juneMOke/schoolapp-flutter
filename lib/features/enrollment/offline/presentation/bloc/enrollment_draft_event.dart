@@ -1,15 +1,12 @@
-import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 
-abstract class EnrollmentDraftEvent extends Equatable {
-  const EnrollmentDraftEvent();
-
-  @override
-  List<Object?> get props => [];
-}
+// Événements du **brouillon par étape** du wizard — membres de la famille
+// unique [EnrollmentOfflineEvent] (bloc Inscription offline fusionné), gardés
+// dans leur fichier pour la lisibilité (1 famille, 2 fichiers thématiques).
 
 /// Démarre un brouillon : fige les ids client (studentId réutilisé en RE/PRE).
-class StartDraftRequested extends EnrollmentDraftEvent {
+class StartDraftRequested extends EnrollmentOfflineEvent {
   final String? existingStudentId;
 
   const StartDraftRequested({this.existingStudentId});
@@ -19,7 +16,7 @@ class StartDraftRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape 0 : crée les 2 lignes DRAFT (élève + inscription).
-class SaveDraftIdentityRequested extends EnrollmentDraftEvent {
+class SaveDraftIdentityRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
   final String studentId;
   final String firstName;
@@ -78,7 +75,7 @@ class SaveDraftIdentityRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape Adresse.
-class SaveDraftAddressRequested extends EnrollmentDraftEvent {
+class SaveDraftAddressRequested extends EnrollmentOfflineEvent {
   final String studentId;
   final String? city;
   final String? district;
@@ -110,7 +107,7 @@ class SaveDraftAddressRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape Antécédents scolaires.
-class SaveDraftPreviousAcademicRequested extends EnrollmentDraftEvent {
+class SaveDraftPreviousAcademicRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
   final String? previousSchoolName;
   final String? previousAcademicYear;
@@ -148,7 +145,7 @@ class SaveDraftPreviousAcademicRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape Affectation (niveau visé).
-class SaveDraftTargetAcademicRequested extends EnrollmentDraftEvent {
+class SaveDraftTargetAcademicRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
   final String? schoolLevelId;
   final String? schoolLevelGroupId;
@@ -164,7 +161,7 @@ class SaveDraftTargetAcademicRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape Tuteurs.
-class SaveDraftGuardiansRequested extends EnrollmentDraftEvent {
+class SaveDraftGuardiansRequested extends EnrollmentOfflineEvent {
   final String studentId;
   final List<ConfirmParentDraft> parents;
 
@@ -178,7 +175,7 @@ class SaveDraftGuardiansRequested extends EnrollmentDraftEvent {
 }
 
 /// Charge le détail du brouillon.
-class LoadDraftDetailRequested extends EnrollmentDraftEvent {
+class LoadDraftDetailRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
 
   const LoadDraftDetailRequested(this.enrollmentId);
@@ -188,7 +185,7 @@ class LoadDraftDetailRequested extends EnrollmentDraftEvent {
 }
 
 /// Étape Résumé : confirme le brouillon (DRAFT → PENDING_SYNC).
-class FinalizeDraftRequested extends EnrollmentDraftEvent {
+class FinalizeDraftRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
   final bool emitDocument;
 

@@ -1,30 +1,7 @@
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
-import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
-
-class EnrollmentPersonalInfoPayload {
-  final String firstName;
-  final String lastName;
-  final String surname;
-  final String dateOfBirth;
-  final String birthPlace;
-  final String nationality;
-  final String gender;
-
-  const EnrollmentPersonalInfoPayload({
-    required this.firstName,
-    required this.lastName,
-    required this.surname,
-    required this.dateOfBirth,
-    required this.birthPlace,
-    required this.nationality,
-    required this.gender,
-  });
-}
 
 // Ordre du parcours (PARCOURS 20) : Tuteurs AVANT Frais. L'ordre de
 // déclaration pilote step.index (natif), qui pilote à son tour order des
@@ -87,6 +64,41 @@ abstract class EnrollmentDetailPolicy {
   bool get isReadOnlyConsultation =>
       !isStepEditable(EnrollmentWizardStep.personalInfo);
 
+  // ── Parcours offline-first : brouillon local par étape ──────────────────────
+
+  /// Le parcours écrit dans le **brouillon local** par étape (puis 1 flush
+  /// agrégat à la validation). Vrai pour toute création/édition — NEW, RE, PRE,
+  /// reprise d'un dossier IN_PROGRESS — faux en consultation pure (aucune
+  /// écriture possible). Dérivé de [isStepEditable] → toujours cohérent.
+  bool get usesLocalDraft => !isReadOnlyConsultation;
+
+  /// Un dossier chargé du serveur doit être **photographié** en brouillon
+  /// local avant l'édition (RE/PRE/reprise). Faux pour NEW (brouillon vierge)
+  /// et pour la consultation.
+  bool get requiresDraftSeed => false;
+
+  /// La photo de départ du brouillon est lue **depuis le local** (cohorte N-1 /
+  /// préinscriptions) et non depuis un chargement serveur. Vrai pour RE/PRE : la
+  /// page dispatche l'événement de seed offline dès que l'année courante
+  /// (bootstrap) est disponible, `requestLoad` devient alors inerte.
+  bool get seedsFromLocalRef => false;
+
+  /// `enrollmentType` de l'agrégat porté par le brouillon (valeur API).
+  String get draftEnrollmentType => 'NEW_ENROLLMENT';
+
+  /// Statut métier initial du brouillon (valeur API).
+  String get draftStatus => 'IN_PROGRESS';
+
+  /// Id d'inscription à conserver au seed (id serveur connu : PRE, reprise) —
+  /// null → uuid client neuf (NEW, RE : nouveau dossier pour l'année N).
+  String? seedEnrollmentId(EnrollmentDetailIntent intent) => null;
+
+  /// Référence d'origine du dossier (contrat agrégat) : id de préinscription
+  /// (PRE). RE = matricule — indisponible sur le détail online (le `studentId`
+  /// canonique de l'agrégat suffit au serveur) : sera fourni par le seed
+  /// depuis la cohorte locale `ref_previous_year_students` (étape c).
+  String? seedSourceRef(EnrollmentDetailIntent intent) => null;
+
   bool canSaveStep(EnrollmentWizardStep step) {
     // Le step récapitulatif déclenche la validation du dossier :
     // il est toujours actionnable (l'enrollment ID est vérifié au dispatch).
@@ -94,24 +106,39 @@ abstract class EnrollmentDetailPolicy {
     return isStepEditable(step);
   }
 
-  EnrollmentDetailIntent resolveEffectiveIntent({
-    required EnrollmentDetailIntent baseIntent,
-    EnrollmentSummary? createdEnrollmentSummary,
-  }) {
-    return baseIntent;
-  }
-
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => false;
 
   bool requiresPreviousYearBootstrap(EnrollmentDetailIntent intent) => false;
+}
 
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  });
+/// Consultation **lecture seule d'un dossier LOCAL** (read-your-writes) : un
+/// dossier créé sur la tablette et pas encore synchronisé, ouvert depuis le
+/// listing. Toutes les étapes sont non-éditables (le dossier est déjà finalisé
+/// et en file de synchro — la ré-édition d'un PENDING_SYNC n'est pas supportée
+/// par le DAO draft) ; le détail est fourni directement par la page (mappé
+/// depuis le local), pas via l'état online → `detail`/`requestLoad` inertes.
+class LocalConsultationDetailPolicy extends EnrollmentDetailPolicy {
+  const LocalConsultationDetailPolicy();
+
+  @override
+  EnrollmentDetail? detail(EnrollmentState state) => null;
+
+  @override
+  EnrollmentLoadStatus loadStatus(EnrollmentState state) =>
+      EnrollmentLoadStatus.success;
+
+  @override
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {}
+
+  @override
+  bool isStepEditable(EnrollmentWizardStep step) => false;
+
+  @override
+  bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
 }
 
 class EnrollmentDetailPolicyResolver {
@@ -128,12 +155,21 @@ class EnrollmentDetailPolicyResolver {
       ),
       EnrollmentDetailOrigin.newFirstRegistration =>
         const NewFirstRegistrationDetailPolicy(),
+      EnrollmentDetailOrigin.localDraftResume =>
+        const LocalDraftResumeDetailPolicy(),
     };
   }
 }
 
-class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
-  const PreRegistrationDetailPolicy();
+/// Reprise d'un **brouillon LOCAL** (`sync_status = DRAFT`) déjà persisté en
+/// base, ouvert depuis le listing pour être finalisé. L'agrégat existe déjà
+/// localement : **aucun seed** (ni serveur ni cohorte) et **aucun GET online**
+/// (l'`enrollmentId` est un id client → 404). La page charge le brouillon par
+/// id (`LoadDraftDetailRequested`) puis l'édite par étape comme un NEW, jusqu'à
+/// la finalisation (`DRAFT → PENDING_SYNC`). Éditable partout sauf le
+/// récapitulatif (comme NEW) → `usesLocalDraft` vrai, `requiresDraftSeed` faux.
+class LocalDraftResumeDetailPolicy extends EnrollmentDetailPolicy {
+  const LocalDraftResumeDetailPolicy();
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.detail;
@@ -141,19 +177,14 @@ class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   @override
   EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
 
+  /// Inerte : le brouillon est déjà en base locale (chargé via
+  /// `LoadDraftDetailRequested`) — un GET serveur sur un id client échouerait.
   @override
   void requestLoad(
     EnrollmentBloc bloc,
     EnrollmentDetailIntent intent, {
     bool silent = false,
-  }) {
-    bloc.add(
-      EnrollmentDetailRequested(
-        enrollmentId: intent.enrollmentId,
-        silent: silent,
-      ),
-    );
-  }
+  }) {}
 
   @override
   bool isStepEditable(EnrollmentWizardStep step) =>
@@ -161,32 +192,71 @@ class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
+}
+
+class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
+  const PreRegistrationDetailPolicy();
 
   @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  }) {
-    studentBloc.add(
-      StudentPersonalInfoUpdateRequested(
-        studentId: currentStudent.id,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        surname: payload.surname,
-        dateOfBirth: payload.dateOfBirth,
-        gender: payload.gender,
-        birthPlace: payload.birthPlace,
-        nationality: payload.nationality,
-      ),
-    );
-  }
+  bool get requiresDraftSeed => true;
+
+  /// Seed lu depuis `ref_pre_enrollments` (local), plus depuis un GET serveur.
+  @override
+  bool get seedsFromLocalRef => true;
+
+  @override
+  String get draftEnrollmentType => 'PRE_ENROLLMENT';
+
+  @override
+  String get draftStatus => 'PRE_REGISTERED';
+
+  /// La préinscription EST un dossier serveur : l'id est conservé (idempotence
+  /// G2 au push) et sert de référence d'origine.
+  @override
+  String? seedEnrollmentId(EnrollmentDetailIntent intent) =>
+      intent.enrollmentId;
+
+  @override
+  String? seedSourceRef(EnrollmentDetailIntent intent) => intent.enrollmentId;
+
+  @override
+  EnrollmentDetail? detail(EnrollmentState state) => state.detail;
+
+  @override
+  EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.detailStatus;
+
+  /// Inerte : le seed PRE vient du local (voir [seedsFromLocalRef]).
+  @override
+  void requestLoad(
+    EnrollmentBloc bloc,
+    EnrollmentDetailIntent intent, {
+    bool silent = false,
+  }) {}
+
+  @override
+  bool isStepEditable(EnrollmentWizardStep step) =>
+      step != EnrollmentWizardStep.summary;
+
+  @override
+  bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
 }
 
 class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   const ReRegistrationDetailPolicy();
+
+  @override
+  bool get requiresDraftSeed => true;
+
+  /// Seed lu depuis `ref_previous_year_students` (cohorte N-1 locale), plus
+  /// depuis le preview serveur.
+  @override
+  bool get seedsFromLocalRef => true;
+
+  @override
+  String get draftEnrollmentType => 'RE_ENROLLMENT';
+
+  @override
+  String get draftStatus => 'PRE_REGISTERED';
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.preview;
@@ -194,29 +264,13 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   @override
   EnrollmentLoadStatus loadStatus(EnrollmentState state) => state.previewStatus;
 
+  /// Inerte : le seed RE vient de la cohorte locale (voir [seedsFromLocalRef]).
   @override
   void requestLoad(
     EnrollmentBloc bloc,
     EnrollmentDetailIntent intent, {
     bool silent = false,
-  }) {
-    final studentId = intent.studentId;
-    if (studentId == null || studentId.isEmpty) {
-      bloc.add(
-        EnrollmentDetailRequested(
-          enrollmentId: intent.enrollmentId,
-          silent: silent,
-        ),
-      );
-      return;
-    }
-    bloc.add(
-      EnrollmentPreviewByStudentIdRequested(
-        studentId: studentId,
-        silent: silent,
-      ),
-    );
-  }
+  }) {}
 
   @override
   bool isStepEditable(EnrollmentWizardStep step) {
@@ -230,34 +284,21 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool requiresPreviousYearBootstrap(EnrollmentDetailIntent intent) => true;
-
-  @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  }) {
-    studentBloc.add(
-      StudentPersonalInfoUpdateRequested(
-        studentId: currentStudent.id,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        surname: payload.surname,
-        dateOfBirth: payload.dateOfBirth,
-        gender: payload.gender,
-        birthPlace: payload.birthPlace,
-        nationality: payload.nationality,
-      ),
-    );
-  }
 }
 
 class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   final String? status;
 
   const FirstRegistrationDetailPolicy({this.status});
+
+  /// Reprise d'un dossier IN_PROGRESS : le dossier serveur est photographié en
+  /// brouillon local (id conservé — idempotence G2) puis édité par étape.
+  @override
+  bool get requiresDraftSeed => usesLocalDraft;
+
+  @override
+  String? seedEnrollmentId(EnrollmentDetailIntent intent) =>
+      intent.enrollmentId;
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.detail;
@@ -291,28 +332,6 @@ class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
 
   @override
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
-
-  @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  }) {
-    studentBloc.add(
-      StudentPersonalInfoUpdateRequested(
-        studentId: currentStudent.id,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        surname: payload.surname,
-        dateOfBirth: payload.dateOfBirth,
-        gender: payload.gender,
-        birthPlace: payload.birthPlace,
-        nationality: payload.nationality,
-      ),
-    );
-  }
 }
 
 class NewFirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
@@ -330,10 +349,9 @@ class NewFirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
     EnrollmentDetailIntent intent, {
     bool silent = false,
   }) {
+    // NEW : plus aucun chargement online — la page démarre directement le
+    // brouillon local vierge. Reste le cas défensif d'un id concret sur route.
     if (intent.enrollmentId == 'new') {
-      if (!silent) {
-        bloc.add(const EnrollmentNewDetailInitialized());
-      }
       return;
     }
 
@@ -346,42 +364,9 @@ class NewFirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   }
 
   @override
-  EnrollmentDetailIntent resolveEffectiveIntent({
-    required EnrollmentDetailIntent baseIntent,
-    EnrollmentSummary? createdEnrollmentSummary,
-  }) {
-    if (createdEnrollmentSummary == null) {
-      return baseIntent;
-    }
-
-    return baseIntent.withEnrollmentId(createdEnrollmentSummary.enrollmentId);
-  }
-
-  @override
   bool isStepEditable(EnrollmentWizardStep step) =>
       step != EnrollmentWizardStep.summary;
 
   @override
   bool requiresCurrentYearBootstrap(EnrollmentDetailIntent intent) => true;
-
-  @override
-  void savePersonalInfo({
-    required EnrollmentBloc enrollmentBloc,
-    required StudentBloc studentBloc,
-    required EnrollmentDetailIntent intent,
-    required StudentDetail currentStudent,
-    required EnrollmentPersonalInfoPayload payload,
-  }) {
-    enrollmentBloc.add(
-      EnrollmentCreateRequested(
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        surname: payload.surname,
-        dateOfBirth: payload.dateOfBirth,
-        birthPlace: payload.birthPlace,
-        nationality: payload.nationality,
-        gender: payload.gender,
-      ),
-    );
-  }
 }

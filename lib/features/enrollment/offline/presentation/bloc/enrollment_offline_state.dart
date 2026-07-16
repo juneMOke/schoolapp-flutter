@@ -16,15 +16,6 @@ class EnrollmentOfflineLoading extends EnrollmentOfflineState {
   const EnrollmentOfflineLoading();
 }
 
-class EnrollmentOfflineListLoaded extends EnrollmentOfflineState {
-  final List<LocalEnrollmentListItem> items;
-
-  const EnrollmentOfflineListLoaded(this.items);
-
-  @override
-  List<Object?> get props => [items];
-}
-
 class EnrollmentOfflineDetailLoaded extends EnrollmentOfflineState {
   final LocalEnrollmentDetail detail;
 
@@ -32,21 +23,6 @@ class EnrollmentOfflineDetailLoaded extends EnrollmentOfflineState {
 
   @override
   List<Object?> get props => [detail];
-}
-
-class EnrollmentOfflineConfirming extends EnrollmentOfflineState {
-  const EnrollmentOfflineConfirming();
-}
-
-/// Confirmé localement : dossier en attente de synchro (matricule « en cours »
-/// pour un NEW). C'est l'état pending-sync exposé à l'UI.
-class EnrollmentOfflineConfirmedPendingSync extends EnrollmentOfflineState {
-  final String enrollmentId;
-
-  const EnrollmentOfflineConfirmedPendingSync(this.enrollmentId);
-
-  @override
-  List<Object?> get props => [enrollmentId];
 }
 
 class EnrollmentOfflineError extends EnrollmentOfflineState {

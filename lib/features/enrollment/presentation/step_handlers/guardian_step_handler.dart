@@ -64,7 +64,6 @@ class GuardianStepHandler extends BaseEnrollmentStepHandler {
       studentId: resolveStudentId(context),
       flowStepIndex: step.index,
       enrollmentId: context.detail.enrollmentDetail.id,
-      useOfflineDraft: isNewOffline(context),
       showInlineSaveButton: false,
       onRefreshRequested: context.onRefreshRequested,
       isEditable: context.detailPolicy.isStepEditable(step),

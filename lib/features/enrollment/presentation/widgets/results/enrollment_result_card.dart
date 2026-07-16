@@ -26,14 +26,27 @@ class EnrollmentResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final status = EnrollmentStatus.fromString(enrollment.status);
+    final isReEnrollment = enrollment.isReEnrollment;
+    // Candidat du vivier N-1 pas encore réinscrit → « À réinscrire » plutôt que
+    // le statut brut PENDING (« En attente »), scopé à la page Réinscriptions.
+    final isReCandidate = enrollment.isReenrollmentCandidate;
     final fullName =
         '${enrollment.student.lastName} ${enrollment.student.firstName}';
-    final statusLabel = _statusLabel(status, l10n);
+    // Pastille : type « Réinscription » pour un dossier RE (axe distinct du
+    // statut), « À réinscrire » pour un candidat, sinon statut métier — évite
+    // qu'une réinscription (statut PRE_REGISTERED) s'affiche « Pré-inscrit ».
+    final pillLabel = isReEnrollment
+        ? l10n.enrollmentTypeReEnrollment
+        : isReCandidate
+        ? l10n.enrollmentReenrollmentCandidateBadge
+        : _statusLabel(status, l10n);
 
     return EteeloResultCard(
       onTap: onTap,
-      accentColor: _statusColor(status),
-      semanticLabel: l10n.enrollmentResultCardOpenLabel(fullName, statusLabel),
+      accentColor: isReEnrollment
+          ? AppColors.enrollmentStatsRe
+          : _statusColor(status),
+      semanticLabel: l10n.enrollmentResultCardOpenLabel(fullName, pillLabel),
       avatar: core_avatar.StudentAvatar(
         firstName: enrollment.student.firstName,
         lastName: enrollment.student.lastName,
@@ -61,11 +74,32 @@ class EnrollmentResultCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      statusPill: EnrollmentStatusBadge(
-        status: status,
-        style: StatusBadgeStyle.filled,
-      ),
+      statusPill: isReEnrollment
+          ? StatusBadge.enrollmentReEnrollment(
+              label: l10n.enrollmentTypeReEnrollment,
+              style: StatusBadgeStyle.filled,
+            )
+          : isReCandidate
+          ? StatusBadge.enrollmentPending(
+              label: l10n.enrollmentReenrollmentCandidateBadge,
+              style: StatusBadgeStyle.filled,
+            )
+          : EnrollmentStatusBadge(
+              status: status,
+              style: StatusBadgeStyle.filled,
+            ),
       chips: [
+        // Brouillon local repris depuis le listing : badge « Brouillon » borné
+        // (le Wrap des chips impose des contraintes non bornées → le `Flexible`
+        // interne du badge casserait sinon).
+        if (enrollment.isLocalDraft)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 140),
+            child: StatusBadge.draft(
+              label: l10n.enrollmentDraftBadge,
+              size: StatusBadgeSize.small,
+            ),
+          ),
         EteeloChip(
           icon: Icons.cake_outlined,
           label: _formatDate(enrollment.student.dateOfBirth),

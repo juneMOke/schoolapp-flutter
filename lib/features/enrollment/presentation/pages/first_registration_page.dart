@@ -9,7 +9,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
@@ -92,7 +92,7 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
           },
         ),
         onSearchCommand:
-            EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
+            EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
         resultsSummaryBuilder: (context, state, screenCtx) =>
             EnrollmentResultsBar(
               count: state.summariesTotalElements,
@@ -136,8 +136,8 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
   }
 
   void _onResetSearch() {
-    context.read<EnrollmentBloc>().add(
-      const EnrollmentSummariesRefreshRequested(),
+    context.read<EnrollmentLocalListBloc>().add(
+      const LocalListRefreshRequested(),
     );
   }
 

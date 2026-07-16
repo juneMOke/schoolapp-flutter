@@ -1,11 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 
 /// Écouteur partagé du parcours NEW offline-first : chaque étape du wizard
 /// l'enveloppe pour réagir au résultat de son écriture locale sur le
-/// [EnrollmentDraftBloc], sans dupliquer la plomberie BlocListener.
+/// [EnrollmentOfflineBloc], sans dupliquer la plomberie BlocListener.
 ///
 /// Seuls les états terminaux d'une écriture initiée PAR l'étape courante sont
 /// pris en compte ([isAwaiting]) :
@@ -37,7 +38,7 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
       return child;
     }
 
-    return BlocListener<EnrollmentDraftBloc, EnrollmentDraftState>(
+    return BlocListener<EnrollmentOfflineBloc, EnrollmentOfflineState>(
       listenWhen: (previous, current) =>
           previous != current &&
           (current is EnrollmentDraftStepSaved ||

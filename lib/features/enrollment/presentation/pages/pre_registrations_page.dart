@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_current_year_bootstrap_builder.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_scaffold.dart';
@@ -25,6 +26,10 @@ class PreRegistrationsPage extends StatefulWidget {
 class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
   EnrollmentListingViewMode _preferredViewMode = EnrollmentListingViewMode.auto;
   static const String _status = 'PRE_REGISTERED';
+  // Scope PAR TYPE : la page ne montre que les vraies pré-inscriptions. Sans ce
+  // filtre, un dossier de réinscription (type RE_ENROLLMENT, même statut
+  // PRE_REGISTERED) apparaîtrait ici à tort.
+  static const String _enrollmentType = 'PRE_ENROLLMENT';
   static const String _adminEmail = 'support@school.local';
 
   @override
@@ -36,6 +41,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
         bootstrapBuilder: (context, onReady) =>
             EnrollmentCurrentYearBootstrapBuilder(
               status: _status,
+              enrollmentType: _enrollmentType,
               onReady: (context, screenCtx) => onReady(
                 context,
                 EnrollmentScreenContext(
@@ -49,6 +55,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
                   onResetSearchRequested: _onResetSearch,
                   onReconnectRequested: _onReconnect,
                   onContactAdminRequested: _contactAdmin,
+                  enrollmentType: _enrollmentType,
                 ),
               ),
             ),
@@ -62,7 +69,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
           )!.searchFormSubtitlePreRegistration,
         ),
         onSearchCommand:
-            EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc,
+            EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
         resultsSummaryBuilder: (context, state, screenCtx) =>
             EnrollmentResultsBar(
               count: state.summariesTotalElements,
@@ -72,10 +79,25 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
               onViewModeChanged: _onViewModeChanged,
               currentViewMode: _preferredViewMode,
             ),
-        detailIntentFactory: (summary) =>
-            EnrollmentDetailIntent.preRegistration(
-              enrollmentId: summary.enrollmentId,
-            ),
+        // Consultation locale d'une pré-inscription (parallèle au fix #19 de la
+        // Première inscription). Le listing lit la table locale `enrollments` ;
+        // le dossier affiché est donc directement lisible par
+        // `LoadLocalEnrollmentDetail` (même table, même id). L'ancienne origine
+        // `preRegistration` seedait un brouillon depuis `ref_pre_enrollments`
+        // (snapshot du pull, DORMANT) → id non concordant → « Dossier introuvable
+        // en local ». On route donc, comme la Réinscription le fait pour ses
+        // dossiers finalisés (re_registrations_page), vers l'origine
+        // `firstRegistration` = consultation LECTURE SEULE 100 % locale générique.
+        // Le scaffold route en amont les brouillons DRAFT (`isLocalDraft`) vers
+        // `localDraftResume` (reprise éditable). La conversion « pré → première »
+        // reste différée jusqu'à l'activation du pull des préinscriptions
+        // (machinerie seed conservée dormante).
+        detailIntentFactory: (summary) => EnrollmentDetailIntent(
+          origin: EnrollmentDetailOrigin.firstRegistration,
+          enrollmentId: summary.enrollmentId,
+          studentId: summary.student.id,
+          status: summary.status,
+        ),
       ),
     );
   }
@@ -92,8 +114,8 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
   }
 
   void _onResetSearch() {
-    context.read<EnrollmentBloc>().add(
-      const EnrollmentSummariesRefreshRequested(),
+    context.read<EnrollmentLocalListBloc>().add(
+      const LocalListRefreshRequested(),
     );
   }
 
