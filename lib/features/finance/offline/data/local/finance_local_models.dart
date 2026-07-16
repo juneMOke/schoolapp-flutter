@@ -90,6 +90,9 @@ class StudentChargeLocalModel {
   final String label;
   final int expectedAmountInCents;
   final int amountPaidInCents;
+  // GELÉE (vestigiale) : le reste se compose désormais à la lecture (FRONT §5).
+  // Plus jamais incrémentée par le poste ; conservée pour compat de colonne, à
+  // retirer à un futur bump de schéma.
   final int optimisticPaidInCents;
   final String currency;
   final String status;
@@ -163,7 +166,10 @@ class StudentChargeLocalModel {
         updatedAt: (m['updated_at'] as int?) ?? 0,
       );
 
-  LocalStudentCharge toEntity() => LocalStudentCharge(
+  /// [paidPending] = Σ des allocations de ce poste non encore remontées,
+  /// **composée à la lecture** par le DAO (FRONT §5). Absente (0) → créance
+  /// sans encaissement local en attente (miroir serveur seul).
+  LocalStudentCharge toEntity({int paidPending = 0}) => LocalStudentCharge(
     id: id,
     studentId: studentId,
     academicYearId: academicYearId,
@@ -174,7 +180,7 @@ class StudentChargeLocalModel {
     label: label,
     expectedAmountInCents: expectedAmountInCents,
     amountPaidInCents: amountPaidInCents,
-    optimisticPaidInCents: optimisticPaidInCents,
+    amountPaidPendingInCents: paidPending,
     currency: currency,
     status: StudentChargeStatusX.fromApiValue(status),
     dueAt: dueAt,

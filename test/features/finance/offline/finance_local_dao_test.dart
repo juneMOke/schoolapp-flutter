@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 
 import '../../offline_full_db.dart';
@@ -99,8 +100,8 @@ void main() {
   });
 
   group('recordPayment (FF3)', () {
-    test('insère payment(PENDING) + allocations, met à jour l\'optimiste, RC '
-        'provisoire, outbox(PAYMENT)', () async {
+    test('insère payment(PENDING) + allocations (aucun UPDATE créance), RC '
+        'provisoire, outbox(PAYMENT) ; reste composé au read', () async {
       await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 0);
 
       await dao.recordPayment(
@@ -148,9 +149,19 @@ void main() {
       expect(charge['amount_paid_in_cents'], 0, reason: 'autoritaire intact');
       expect(
         charge['optimistic_paid_in_cents'],
-        30000,
-        reason: 'optimiste += ',
+        0,
+        reason: 'colonne gelée : plus jamais incrémentée (FRONT §8)',
       );
+
+      // Le reste se COMPOSE à la lecture : 100000 − 0(miroir) − 30000(pending).
+      final composed = (await dao.getChargesByStudent('s1')).single;
+      expect(composed.amountPaidInCents, 0, reason: 'miroir serveur');
+      expect(
+        composed.amountPaidPendingInCents,
+        30000,
+        reason: 'pending composé',
+      );
+      expect(composed.optimisticRemainingInCents, 70000);
 
       final rc = (await db.query('generated_documents')).first;
       expect(rc['doc_type'], 'RC');
@@ -189,6 +200,17 @@ void main() {
           isTrue,
         );
         expect(charges.every((c) => c.isProvisional), isTrue);
+        expect(
+          await db.query('outbox'),
+          isEmpty,
+          reason: 'créances provisoires JAMAIS poussées (FRONT §5.2)',
+        );
+        final stored = await db.query('student_charges');
+        expect(
+          stored.every((r) => r['sync_status'] == 'PROVISIONAL'),
+          isTrue,
+          reason: 'PROVISIONAL, distinct de PENDING_SYNC',
+        );
 
         final tuition = charges.firstWhere((c) => c.feeCode == 'TUITION');
         expect(tuition.expectedAmountInCents, 100000);
@@ -333,11 +355,103 @@ void main() {
     );
   });
 
-  group('lectures', () {
-    test('getChargesByStudent expose le solde optimiste + reste', () async {
+  group('lectures — reste composé au read (FRONT §5)', () {
+    test(
+      'getChargesByStudent expose le reste composé (miroir − pending)',
+      () async {
+        await insertCharge(
+          'c1',
+          's1',
+          'TUITION',
+          expected: 100000,
+          paid: 40000,
+        );
+        final charges = await dao.getChargesByStudent('s1');
+        expect(
+          charges.single.amountPaidInCents,
+          40000,
+          reason: 'miroir serveur',
+        );
+        expect(
+          charges.single.amountPaidPendingInCents,
+          0,
+          reason: 'rien en file',
+        );
+        expect(charges.single.optimisticRemainingInCents, 60000);
+      },
+    );
+
+    test('inclut les paiements SYNC_ERROR : le cash reçu ne réapparaît pas '
+        '« à payer » (bug money-grade dissous)', () async {
+      await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 0);
+      await dao.recordPayment(
+        payment: const PaymentLocalModel(
+          id: 'pay-err',
+          clientUuid: 'pay-err',
+          studentId: 's1',
+          amountInCents: 30000,
+          currency: 'USD',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'S',
+          payerLastName: 'M',
+        ),
+        allocations: const [
+          PaymentAllocationLocalModel(
+            id: 'a-err',
+            clientUuid: 'a-err',
+            paymentId: 'pay-err',
+            studentChargeId: 'c1',
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: 30000,
+            currency: 'USD',
+          ),
+        ],
+        outboxEntryId: 'ob-err',
+        nowMs: 1000,
+      );
+      // Échec technique de synchro — l'argent a pourtant été reçu au guichet.
+      await db.update(
+        'payments',
+        {'sync_status': 'SYNC_ERROR'},
+        where: 'id = ?',
+        whereArgs: ['pay-err'],
+      );
+
+      final charge = (await dao.getChargesByStudent('s1')).single;
+      expect(
+        charge.amountPaidPendingInCents,
+        30000,
+        reason: 'SYNC_ERROR <> SYNCED → toujours déduit',
+      );
+      expect(charge.optimisticRemainingInCents, 70000);
+    });
+
+    test('totaux par devise (jamais de mélange USD/CDF)', () async {
       await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 40000);
-      final charges = await dao.getChargesByStudent('s1');
-      expect(charges.single.optimisticRemainingInCents, 60000);
+      await db.insert('student_charges', {
+        'id': 'c2',
+        'student_id': 's1',
+        'fee_code': 'CANTEEN',
+        'label': 'Cantine',
+        'expected_amount_in_cents': 50000,
+        'amount_paid_in_cents': 0,
+        'optimistic_paid_in_cents': 0,
+        'currency': 'CDF',
+        'status': 'DUE',
+        'sync_status': 'SYNCED',
+      });
+
+      final totals = LocalStudentLedgerTotals.byCurrency(
+        await dao.getChargesByStudent('s1'),
+      );
+      expect(totals, hasLength(2));
+      final usd = totals.firstWhere((t) => t.currency == 'USD');
+      expect(usd.totalDueInCents, 100000);
+      expect(usd.totalPaidInCents, 40000);
+      expect(usd.totalRemainingInCents, 60000);
+      final cdf = totals.firstWhere((t) => t.currency == 'CDF');
+      expect(cdf.totalRemainingInCents, 50000);
     });
   });
 

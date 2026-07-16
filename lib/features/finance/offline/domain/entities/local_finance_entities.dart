@@ -45,7 +45,11 @@ class LocalFeeTariff extends Equatable {
 }
 
 /// Créance du grand-livre. `amountPaidInCents`/`status` sont AUTORITAIRES
-/// (pull/ACK) ; `optimisticPaidInCents` porte l'affichage local (encaissement).
+/// (miroir serveur, écrits UNIQUEMENT par le pull/ACK). Le solde optimiste NE
+/// SE STOCKE PAS : `amountPaidPendingInCents` est la somme des allocations des
+/// paiements de CE poste non encore remontés (`sync_status <> 'SYNCED'`),
+/// **composée à la lecture** (FRONT §5). On dérive, on n'incrémente jamais
+/// (FRONT §8) — `optimisticPaidInCents`/`optimisticRemainingInCents` en découlent.
 class LocalStudentCharge extends Equatable {
   final String id;
   final String studentId;
@@ -56,8 +60,9 @@ class LocalStudentCharge extends Equatable {
   final String feeCode;
   final String label;
   final int expectedAmountInCents;
-  final int amountPaidInCents; // autoritaire
-  final int optimisticPaidInCents; // affichage
+  final int amountPaidInCents; // autoritaire (miroir serveur)
+  final int
+  amountPaidPendingInCents; // composé au read (paiements non remontés)
   final String currency;
   final StudentChargeStatus status; // autoritaire
   final String? dueAt;
@@ -75,7 +80,7 @@ class LocalStudentCharge extends Equatable {
     required this.label,
     required this.expectedAmountInCents,
     required this.amountPaidInCents,
-    required this.optimisticPaidInCents,
+    this.amountPaidPendingInCents = 0,
     required this.currency,
     required this.status,
     this.dueAt,
@@ -83,7 +88,11 @@ class LocalStudentCharge extends Equatable {
     this.syncState = SyncState.synced,
   });
 
-  /// Reste optimiste (affichage) : `max(0, expected - optimiste)`.
+  /// Déjà payé TOTAL affiché : miroir serveur + encaissements de ce poste non
+  /// remontés (FRONT §5 « paid_total »). Dérivé, jamais stocké.
+  int get optimisticPaidInCents => amountPaidInCents + amountPaidPendingInCents;
+
+  /// Reste à payer composé : `max(0, expected - paid_total)` (FRONT §5).
   int get optimisticRemainingInCents {
     final remaining = expectedAmountInCents - optimisticPaidInCents;
     return remaining < 0 ? 0 : remaining;
@@ -93,7 +102,8 @@ class LocalStudentCharge extends Equatable {
   bool get isOptimisticallyOverpaid =>
       optimisticPaidInCents > expectedAmountInCents;
 
-  bool get isProvisional => syncState == SyncState.pendingSync;
+  /// Créance locale d'un nouvel élève, jamais poussée (FRONT §5.2).
+  bool get isProvisional => syncState == SyncState.provisional;
 
   @override
   List<Object?> get props => [
@@ -107,12 +117,62 @@ class LocalStudentCharge extends Equatable {
     label,
     expectedAmountInCents,
     amountPaidInCents,
-    optimisticPaidInCents,
+    amountPaidPendingInCents,
     currency,
     status,
     dueAt,
     version,
     syncState,
+  ];
+}
+
+/// Totaux d'un élève **par devise** (FRONT §5 — la conversion USD/CDF est hors
+/// V1, l'agrégation reste donc scopée par devise). `totalPaid` inclut les
+/// encaissements de ce poste non remontés (reste composé).
+class LocalStudentLedgerTotals extends Equatable {
+  final String currency;
+  final int totalDueInCents;
+  final int totalPaidInCents;
+  final int totalRemainingInCents;
+
+  const LocalStudentLedgerTotals({
+    required this.currency,
+    required this.totalDueInCents,
+    required this.totalPaidInCents,
+    required this.totalRemainingInCents,
+  });
+
+  /// Agrège une liste de créances composées en un total par devise (jamais de
+  /// mélange de devises : une entrée par `currency` rencontrée).
+  static List<LocalStudentLedgerTotals> byCurrency(
+    List<LocalStudentCharge> charges,
+  ) {
+    final due = <String, int>{};
+    final paid = <String, int>{};
+    final remaining = <String, int>{};
+    for (final c in charges) {
+      due[c.currency] = (due[c.currency] ?? 0) + c.expectedAmountInCents;
+      paid[c.currency] = (paid[c.currency] ?? 0) + c.optimisticPaidInCents;
+      remaining[c.currency] =
+          (remaining[c.currency] ?? 0) + c.optimisticRemainingInCents;
+    }
+    return [
+      for (final currency in due.keys)
+        LocalStudentLedgerTotals(
+          currency: currency,
+          totalDueInCents: due[currency]!,
+          totalPaidInCents: paid[currency]!,
+          totalRemainingInCents: remaining[currency]!,
+        ),
+    ];
+  }
+
+  @override
+  List<Object?> get props => [
+    currency,
+    totalDueInCents,
+    totalPaidInCents,
+    totalRemainingInCents,
   ];
 }
 

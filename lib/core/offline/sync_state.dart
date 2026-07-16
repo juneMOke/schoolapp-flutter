@@ -7,11 +7,19 @@
 ///
 /// `DRAFT → PENDING_SYNC → SYNCED` ;
 /// `PENDING_SYNC → SYNC_ERROR → PENDING_SYNC` (correction/re-push).
+///
+/// `PROVISIONAL` est un état **à part** (Facturation) : une créance locale d'un
+/// nouvel élève, générée depuis la grille tarifaire à la confirmation de
+/// l'inscription. Elle n'est **jamais poussée** (aucune entrée outbox) — elle
+/// attend d'être **remplacée** par la créance autoritaire du serveur au sync,
+/// pas d'être envoyée. À ne pas confondre avec `PENDING_SYNC` (qui, lui,
+/// signale « à synchroniser »). Cf. FRONT §5.2.
 enum SyncState {
   draft('DRAFT'),
   pendingSync('PENDING_SYNC'),
   synced('SYNCED'),
-  syncError('SYNC_ERROR');
+  syncError('SYNC_ERROR'),
+  provisional('PROVISIONAL');
 
   const SyncState(this.dbValue);
 
@@ -24,12 +32,14 @@ enum SyncState {
     'PENDING_SYNC' => SyncState.pendingSync,
     'SYNCED' => SyncState.synced,
     'SYNC_ERROR' => SyncState.syncError,
+    'PROVISIONAL' => SyncState.provisional,
     _ => SyncState.pendingSync,
   };
 
   bool get isPending => this == SyncState.pendingSync;
   bool get isSynced => this == SyncState.synced;
   bool get isError => this == SyncState.syncError;
+  bool get isProvisional => this == SyncState.provisional;
 }
 
 /// Statut technique d'une entrée d'outbox (file de push).

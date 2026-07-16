@@ -23,9 +23,9 @@ class FinanceLocalDao {
 
   // ── Encaissement local-first (FF3) ─────────────────────────────────────────
 
-  /// Insère un paiement + ses allocations, met à jour le solde OPTIMISTE
-  /// d'affichage (jamais l'autoritaire), émet un RC provisoire et enfile
-  /// l'outbox(PAYMENT). Retour immédiat.
+  /// Insère un paiement + ses allocations (append-only), émet un RC provisoire
+  /// et enfile l'outbox(PAYMENT). N'écrit RIEN dans `student_charges` : le reste
+  /// à payer se compose à la lecture (FRONT §6.2/§8). Retour immédiat.
   Future<void> recordPayment({
     required PaymentLocalModel payment,
     required List<PaymentAllocationLocalModel> allocations,
@@ -47,15 +47,11 @@ class FinanceLocalDao {
           alloc.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
-        // Solde OPTIMISTE (affichage) : jamais l'autoritaire.
-        if (alloc.studentChargeId != null) {
-          await txn.rawUpdate(
-            'UPDATE student_charges '
-            'SET optimistic_paid_in_cents = optimistic_paid_in_cents + ? '
-            'WHERE id = ?',
-            [alloc.amountInCents, alloc.studentChargeId],
-          );
-        }
+        // AUCUN UPDATE student_charges (FRONT §6.2/§8) : ni le miroir
+        // autoritaire, ni un compteur optimiste. Le reste se COMPOSE à la
+        // lecture (getChargesByStudent) depuis les allocations des paiements
+        // encore `sync_status <> 'SYNCED'` — auto-cicatrisant, on dérive, on
+        // n'incrémente jamais.
       }
 
       if (receipt != null) {
@@ -142,8 +138,11 @@ class FinanceLocalDao {
         }
       }
 
-      // Soldes AUTORITAIRES : on écrase amount_paid + status, on réaligne
-      // l'optimiste sur l'autoritaire + les allocations encore PENDING.
+      // Soldes AUTORITAIRES : on écrase amount_paid + status (miroir serveur).
+      // Le passage de témoin est atomique : le paiement passe SYNCED ci-dessus
+      // dans la MÊME transaction → il sort du `pending` à l'instant exact où le
+      // miroir intègre son montant. Aucun optimiste à recomposer (le reste se
+      // dérive à la lecture) → ni trou, ni double comptage (FRONT §5/§8).
       for (final ch in ack.updatedCharges) {
         await txn.update(
           'student_charges',
@@ -157,7 +156,6 @@ class FinanceLocalDao {
           where: 'id = ?',
           whereArgs: [ch.id],
         );
-        await _recomputeOptimistic(txn, ch.id);
       }
     });
   }
@@ -212,32 +210,6 @@ class FinanceLocalDao {
     }
   }
 
-  /// Optimiste = autoritaire + Σ(allocations des paiements ENCORE PENDING_SYNC).
-  Future<void> _recomputeOptimistic(
-    DatabaseExecutor txn,
-    String chargeId,
-  ) async {
-    final rows = await txn.rawQuery(
-      'SELECT sc.amount_paid_in_cents AS paid, '
-      'COALESCE(('
-      '  SELECT SUM(pa.amount_in_cents) FROM payment_allocations pa '
-      '  JOIN payments p ON p.id = pa.payment_id '
-      '  WHERE pa.student_charge_id = sc.id AND p.sync_status = ?'
-      '), 0) AS pending '
-      'FROM student_charges sc WHERE sc.id = ?',
-      [SyncState.pendingSync.dbValue, chargeId],
-    );
-    if (rows.isEmpty) return;
-    final paid = (rows.first['paid'] as int?) ?? 0;
-    final pending = (rows.first['pending'] as int?) ?? 0;
-    await txn.update(
-      'student_charges',
-      {'optimistic_paid_in_cents': paid + pending},
-      where: 'id = ?',
-      whereArgs: [chargeId],
-    );
-  }
-
   // ── Créances offline (FF5) ─────────────────────────────────────────────────
 
   /// Réplique `initialize-charges` : pour chaque tarif de `ref_fee_tariffs`
@@ -273,7 +245,9 @@ class FinanceLocalDao {
           currency: tariff.currency,
           status: 'DUE',
           dueAt: tariff.dueAt ?? dueFallback,
-          syncStatus: SyncState.pendingSync.dbValue,
+          // PROVISIONAL (≠ PENDING_SYNC) : jamais poussée, aucune entrée outbox
+          // (FRONT §5.2). Le serveur la régénère à l'ACK de l'inscription.
+          syncStatus: SyncState.provisional.dbValue,
           updatedAt: nowMs,
         );
         await txn.insert(
@@ -352,10 +326,9 @@ class FinanceLocalDao {
     List<PaymentAllocationLocalModel> allocations = const [],
   }) async {
     // Découpage en lots (verrou relâché entre les lots) — grand-livre
-    // potentiellement volumineux. Ordre PORTEUR : paiements + allocations
-    // D'ABORD, créances EN DERNIER, car `_recomputeOptimistic` somme les
-    // allocations des paiements PENDING (déjà committées par les lots
-    // précédents). Upserts REPLACE idempotents → apply partielle sûre.
+    // potentiellement volumineux. Upserts REPLACE idempotents → apply partielle
+    // sûre. L'ordre n'est plus porteur : le reste se compose à la lecture, aucun
+    // solde n'est recalculé ici (FRONT §5/§8).
     await applyInBatches(
       _db,
       payments,
@@ -392,7 +365,6 @@ class FinanceLocalDao {
             c.toMap(),
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
-          await _recomputeOptimistic(txn, c.id);
         }
       },
     );
@@ -400,15 +372,35 @@ class FinanceLocalDao {
 
   // ── Lectures ────────────────────────────────────────────────────────────────
 
+  /// Créances d'un élève avec le VRAI reste à payer, composé à la lecture
+  /// (FRONT §5) : miroir serveur (`amount_paid`) + Σ des allocations des
+  /// paiements de CE poste non encore remontés — `sync_status <> 'SYNCED'`, ce
+  /// qui couvre PENDING_SYNC **ET** SYNC_ERROR (le cash d'un paiement en échec
+  /// technique reste déduit → il ne réapparaît jamais « à payer »). Aucune
+  /// colonne de solde stockée n'est lue : on dérive, on n'incrémente pas (§8).
   Future<List<LocalStudentCharge>> getChargesByStudent(String studentId) async {
-    final rows = await _db.query(
-      'student_charges',
-      where: 'student_id = ?',
-      whereArgs: [studentId],
-      orderBy: 'fee_code ASC',
+    final rows = await _db.rawQuery(
+      '''
+      SELECT sc.*,
+             COALESCE((
+               SELECT SUM(pa.amount_in_cents)
+               FROM payment_allocations pa
+               JOIN payments p ON p.id = pa.payment_id
+               WHERE pa.student_charge_id = sc.id
+                 AND p.sync_status <> ?
+             ), 0) AS paid_pending
+      FROM student_charges sc
+      WHERE sc.student_id = ?
+      ORDER BY sc.fee_code ASC
+      ''',
+      [SyncState.synced.dbValue, studentId],
     );
     return rows
-        .map((r) => StudentChargeLocalModel.fromMap(r).toEntity())
+        .map(
+          (r) => StudentChargeLocalModel.fromMap(
+            r,
+          ).toEntity(paidPending: (r['paid_pending'] as int?) ?? 0),
+        )
         .toList();
   }
 
@@ -429,6 +421,21 @@ class FinanceLocalDao {
       'payment_allocations',
       where: 'payment_id = ?',
       whereArgs: [paymentId],
+    );
+    return rows
+        .map((r) => PaymentAllocationLocalModel.fromMap(r).toEntity())
+        .toList();
+  }
+
+  /// Imputations portant sur une créance (détail d'un frais, FRONT §4).
+  Future<List<LocalPaymentAllocation>> getAllocationsByCharge(
+    String chargeId,
+  ) async {
+    final rows = await _db.query(
+      'payment_allocations',
+      where: 'student_charge_id = ?',
+      whereArgs: [chargeId],
+      orderBy: 'fee_code ASC',
     );
     return rows
         .map((r) => PaymentAllocationLocalModel.fromMap(r).toEntity())
