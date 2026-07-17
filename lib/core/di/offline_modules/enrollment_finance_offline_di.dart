@@ -57,7 +57,12 @@ import 'package:school_app_flutter/features/finance/domain/repositories/payments
 import 'package:school_app_flutter/features/finance/domain/repositories/student_charges_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/payments_offline_first_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/student_charges_offline_first_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_pull_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync_finance_pulls_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 
@@ -105,6 +110,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<FinanceSyncApi>(
     () => FinanceSyncApi(getIt<Dio>()),
   );
+  getIt.registerLazySingleton<FinancePullApi>(
+    () => FinancePullApi(getIt<Dio>()),
+  );
 
   // ── Repositories offline-first ──────────────────────────────────────────────
   getIt.registerLazySingleton<EnrollmentOfflineRepository>(
@@ -133,11 +141,25 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // l'online. `unregister` sûr : lazy singletons pas encore résolus à ce stade.
   getIt.registerLazySingleton<FinanceLedgerRefresher>(
     () => FinanceLedgerRefresher(
-      api: getIt<FinanceSyncApi>(),
+      api: getIt<FinancePullApi>(),
       dao: getIt<FinanceLocalDao>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       connectivity: getIt<ConnectivityService>(),
       extras: getIt<Map<String, dynamic>>(),
+      // Le contrat n'a pas d'endpoint paiements scopé élève : la fraîcheur de
+      // l'historique (et donc du « total payé » affiché) passe par le cycle
+      // global. Résolu paresseusement — `FinancePullRepository` est enregistré
+      // juste après.
+      syncPayments: () async =>
+          (await getIt<FinancePullRepository>().syncPayments()).isRight(),
+    ),
+  );
+  getIt.registerLazySingleton<FinancePullRepository>(
+    () => FinancePullRepositoryImpl(
+      api: getIt<FinancePullApi>(),
+      dao: getIt<FinanceLocalDao>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
   if (getIt.isRegistered<StudentChargesRepository>()) {
@@ -211,6 +233,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<SyncEnrollmentPullsUseCase>(
     () => SyncEnrollmentPullsUseCase(getIt<EnrollmentPullRepository>()),
+  );
+  getIt.registerFactory<SyncFinancePullsUseCase>(
+    () => SyncFinancePullsUseCase(getIt<FinancePullRepository>()),
   );
   getIt.registerFactory<SaveDraftIdentityUseCase>(
     () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),
@@ -324,4 +349,26 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     ..registerHandler(EnrollmentPullHandler.preEnrollments(pullRepository))
     ..registerHandler(EnrollmentPullHandler.enrollmentSnapshots(pullRepository))
     ..registerHandler(EnrollmentPullHandler.enrollmentDelta(pullRepository));
+
+  // Pulls KEYSET du grand-livre Facturation (§2.1 créances, §2.2 paiements).
+  // Créances D'ABORD (la vérité du grand-livre : soldes/statuts autoritaires),
+  // paiements ENSUITE (les événements, y compris ceux de l'autre poste).
+  //
+  // ⚠️ CET ORDRE EST UN CHOIX MONEY-GRADE, NE PAS L'INVERSER. Les deux pulls ne
+  // sont pas atomiques entre eux ; le sens de la panne dépend de l'ordre :
+  //  - créances OK / paiements KO (ordre actuel) → le solde autoritaire compte
+  //    déjà un paiement local resté non-SYNCED, que `getChargesByStudent`
+  //    redéduit → créance affichée SUR-payée → le caissier REFUSE un
+  //    encaissement. Friction, aucun argent perdu. Se résorbe seul (rejeu
+  //    outbox, pull des paiements, ou le refresher qui enchaîne les deux).
+  //  - paiements OK / créances KO (ordre inverse) → le paiement passe SYNCED et
+  //    sort du `pending` alors que `amount_paid` est encore périmé → créance
+  //    affichée IMPAYÉE → le caissier RÉENCAISSE. Argent perdu.
+  // Le contrat n'expose aucun `serverSeenAt` sur le paiement : sans ce signal on
+  // ne peut pas rendre la lecture exacte pendant la fenêtre — on choisit donc le
+  // sens de panne conservateur.
+  final financePullRepository = getIt<FinancePullRepository>();
+  getIt<PullCoordinator>()
+    ..registerHandler(FinancePullHandler.studentCharges(financePullRepository))
+    ..registerHandler(FinancePullHandler.payments(financePullRepository));
 }

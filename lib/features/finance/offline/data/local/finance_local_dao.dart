@@ -12,6 +12,25 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
+/// Scope de résolution d'une créance : une clé métier `fee_code` n'est unique
+/// que DANS une année (TUITION existe chaque saison).
+class _PaymentScope {
+  final String studentId;
+  final String? academicYearId;
+
+  const _PaymentScope({required this.studentId, this.academicYearId});
+}
+
+/// Clé métier d'une créance : `(élève, année, poste)`. `fee_code` n'est unique
+/// que DANS une année.
+///
+/// Un **record**, pas une chaîne jointe : l'égalité est structurelle, donc
+/// aucun délimiteur à choisir (un `studentId` contenant le séparateur ne peut
+/// pas provoquer de collision) et `null` reste distinct de `''` — la même
+/// sémantique que le `academic_year_id IS ?` du SQL, alors qu'un
+/// `'$a|${year ?? ''}|$c'` les confondait.
+typedef _ChargeKey = (String studentId, String? academicYearId, String feeCode);
+
 /// DAO local du module Facturation (sqflite). Lectures du grand-livre, geste
 /// d'encaissement money-grade (FF3), remap à l'ACK (FF4), génération de
 /// créances offline (FF5), upserts autoritaires du pull (FF2).
@@ -41,7 +60,15 @@ class FinanceLocalDao {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      for (final alloc in allocations) {
+      // Re-résolues AVANT tout écrit : le local ET le payload d'outbox doivent
+      // porter le même lien — pousser un uuid de créance mort ferait diverger
+      // le diagnostic serveur du miroir local.
+      final linked = [
+        for (final alloc in allocations)
+          await _resolveChargeLink(txn, payment, alloc),
+      ];
+
+      for (final alloc in linked) {
         await txn.insert(
           'payment_allocations',
           alloc.toMap(),
@@ -62,7 +89,7 @@ class FinanceLocalDao {
         );
       }
 
-      final request = _paymentRequest(payment, allocations);
+      final request = _paymentRequest(payment, linked);
       final entry = OutboxEntry(
         id: outboxEntryId,
         aggregateType: 'PAYMENT',
@@ -76,20 +103,80 @@ class FinanceLocalDao {
     });
   }
 
+  /// Rattache l'imputation à une créance qui EXISTE encore, au moment de
+  /// l'écriture.
+  ///
+  /// L'UI peut détenir un uuid PROVISIONAL périmé : elle a chargé la liste des
+  /// frais, puis un pull a dissous la jumelle au profit de l'id canonique
+  /// pendant que le caissier remplissait le formulaire. Écrire cet uuid mort
+  /// sortirait l'imputation du `paid_pending` (`pa.student_charge_id = sc.id` ne
+  /// matche plus) : le reçu est imprimé mais la créance réaffiche le montant
+  /// entier — le parent peut payer deux fois.
+  ///
+  /// On re-résout donc par la clé MÉTIER `(élève, année, fee_code)`, stable là
+  /// où l'uuid ne l'est pas. Sans cible locale, on renvoie `null` plutôt qu'un
+  /// id mort : c'est la sémantique du contrat (« créance pas encore
+  /// matérialisée ») et le serveur remappera par `studentId + feeCode`.
+  Future<PaymentAllocationLocalModel> _resolveChargeLink(
+    DatabaseExecutor txn,
+    PaymentLocalModel payment,
+    PaymentAllocationLocalModel alloc,
+  ) async {
+    final target = alloc.studentChargeId;
+    if (target == null) return alloc;
+
+    final alive = await txn.query(
+      'student_charges',
+      columns: ['id'],
+      where: 'id = ?',
+      whereArgs: [target],
+      limit: 1,
+    );
+    if (alive.isNotEmpty) return alloc; // l'uuid tient toujours
+
+    final resolved = await txn.query(
+      'student_charges',
+      columns: ['id'],
+      where: 'student_id = ? AND fee_code = ? AND academic_year_id IS ?',
+      whereArgs: [payment.studentId, alloc.feeCode, payment.academicYearId],
+      limit: 1,
+    );
+    final relinked = resolved.isEmpty ? null : resolved.first['id'] as String;
+    return alloc.withStudentChargeId(relinked);
+  }
+
   // ── ACK / remap (FF4) ──────────────────────────────────────────────────────
 
-  /// Applique l'ACK : paiement SYNCED, remap studentChargeId provisoire→réel des
-  /// allocations, remap des créances provisoires par (student_id, fee_code),
-  /// puis ÉCRASE amount_paid/status locaux par la valeur autoritaire serveur.
+  /// Applique l'ACK (`openapi_billing_sync` §PaymentAggregateResponse) :
+  /// paiement SYNCED, remap des ids provisoires→canoniques (allocations ET
+  /// créances, par `studentId + feeCode`), UPSERT des créances autoritaires,
+  /// puis scellement du reçu définitif. `201` (création) et `200` (rejeu
+  /// idempotent) portent les mêmes valeurs canoniques → même traitement.
   Future<void> applyPaymentAck(
-    PaymentCommitAck ack, {
+    PaymentAggregateResponse ack, {
     required int nowMs,
   }) async {
     await _db.transaction((txn) async {
+      await _applyAllocationRemaps(txn, ack);
+      await _applyAuthoritativeCharges(txn, ack, nowMs);
+      await _sealDocuments(txn, ack);
+
+      // SYNCED **seulement si** le miroir autoritaire a été intégré. C'est le
+      // sens exact du drapeau : `paid_pending` (FRONT §5) déduit les allocations
+      // des paiements `sync_status <> 'SYNCED'`, donc passer SYNCED signifie
+      // « mon `student_charges.amount_paid` porte déjà ce montant ». Sur un ACK
+      // sans créance (violation du contrat — `charges` est `required`), le
+      // stamp ferait sortir le montant du pending SANS que rien ne l'ait
+      // intégré : la créance s'afficherait impayée et le caissier
+      // **réencaisserait**. On laisse alors le paiement pending — le montant
+      // reste déduit, sens de panne conservateur — et l'appelant réessaiera.
+      //
+      // Le passage de témoin est atomique : le stamp est dans la MÊME
+      // transaction que l'intégration → ni trou, ni double comptage (§5/§8).
+      if (ack.charges.isEmpty) return;
       await txn.update(
         'payments',
         {
-          if (ack.payment.status != null) 'status': ack.payment.status,
           'sync_status': SyncState.synced.dbValue,
           'synced_at': nowMs,
           'sync_error': null,
@@ -97,116 +184,197 @@ class FinanceLocalDao {
         where: 'id = ?',
         whereArgs: [ack.paymentId],
       );
-
-      final payRows = await txn.query(
-        'payments',
-        columns: ['student_id'],
-        where: 'id = ?',
-        whereArgs: [ack.paymentId],
-        limit: 1,
-      );
-      final studentId = payRows.isNotEmpty
-          ? payRows.first['student_id'] as String?
-          : null;
-
-      // Remap des allocations + des créances provisoires par (student, feeCode).
-      for (final alloc in ack.allocations) {
-        final realChargeId = alloc.studentChargeId;
-        final localRows = await txn.query(
-          'payment_allocations',
-          columns: ['fee_code'],
-          where: 'id = ?',
-          whereArgs: [alloc.id],
-          limit: 1,
-        );
-        if (localRows.isEmpty) continue;
-        final feeCode = localRows.first['fee_code'] as String;
-
-        if (realChargeId != null && studentId != null) {
-          await _remapProvisionalCharge(
-            txn,
-            studentId: studentId,
-            feeCode: feeCode,
-            realChargeId: realChargeId,
-          );
-          await txn.update(
-            'payment_allocations',
-            {'student_charge_id': realChargeId},
-            where: 'id = ?',
-            whereArgs: [alloc.id],
-          );
-        }
-      }
-
-      // Soldes AUTORITAIRES : on écrase amount_paid + status (miroir serveur).
-      // Le passage de témoin est atomique : le paiement passe SYNCED ci-dessus
-      // dans la MÊME transaction → il sort du `pending` à l'instant exact où le
-      // miroir intègre son montant. Aucun optimiste à recomposer (le reste se
-      // dérive à la lecture) → ni trou, ni double comptage (FRONT §5/§8).
-      for (final ch in ack.updatedCharges) {
-        await txn.update(
-          'student_charges',
-          {
-            'amount_paid_in_cents': ch.amountPaidInCents,
-            'status': ch.status,
-            'sync_status': SyncState.synced.dbValue,
-            'synced_at': nowMs,
-            'updated_at': nowMs,
-          },
-          where: 'id = ?',
-          whereArgs: [ch.id],
-        );
-      }
     });
   }
 
+  /// Remap des allocations : le `feeCode` est porté par la réponse (plus besoin
+  /// de le relire en local), et la créance canonique est garantie non nulle.
+  /// L'année de scope vient du paiement (une allocation n'en porte pas).
+  ///
+  /// Seul `student_charge_id` est réécrit : l'uuid d'allocation est honoré par
+  /// le serveur (spec §PaymentAllocationInput), et réécrire une clé primaire
+  /// lèverait une violation UNIQUE — donc un rollback de TOUT l'ACK — si la
+  /// ligne canonique a déjà été insérée par le pull des paiements (ACK perdu,
+  /// puis rejeu). Un `canonicalId` divergent est donc ignoré, jamais appliqué.
+  Future<void> _applyAllocationRemaps(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack,
+  ) async {
+    final scope = await _paymentScope(txn, ack.paymentId);
+    for (final remap in ack.allocations) {
+      // Créance canonique absente (le serveur n'a pas su lier l'allocation) :
+      // on saute CE remap sans toucher au lien local, et sans compromettre les
+      // autres — l'ACK doit aller au bout.
+      final canonicalChargeId = remap.canonicalStudentChargeId;
+      if (canonicalChargeId == null) continue;
+      if (scope != null) {
+        await _remapProvisionalCharge(
+          txn,
+          studentId: scope.studentId,
+          academicYearId: scope.academicYearId,
+          feeCode: remap.feeCode,
+          realChargeId: canonicalChargeId,
+        );
+      }
+      await txn.update(
+        'payment_allocations',
+        {'student_charge_id': canonicalChargeId},
+        where: 'id = ?',
+        whereArgs: [remap.providedId],
+      );
+    }
+  }
+
+  /// Créances **recalculées, autoritaires** (même schéma que le pull) : on
+  /// remplace le snapshot local (ADR-002).
+  ///
+  /// UPSERT et non UPDATE : le serveur peut renvoyer une créance que ce poste
+  /// n'a jamais vue. D'où le garde-fou money-grade — avant d'insérer, on dissout
+  /// l'éventuelle jumelle PROVISIONAL (même `student_id + fee_code`, uuid local
+  /// différent, générée offline à l'inscription). Sans lui, l'insert créerait un
+  /// doublon et l'élève semblerait devoir deux fois le même frais.
+  Future<void> _applyAuthoritativeCharges(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack,
+    int nowMs,
+  ) async {
+    for (final ch in ack.charges) {
+      await _remapProvisionalCharge(
+        txn,
+        studentId: ch.studentId,
+        academicYearId: ch.academicYearId,
+        feeCode: ch.feeCode,
+        realChargeId: ch.id,
+      );
+      await txn.insert(
+        'student_charges',
+        ch.toLocalModel(nowMs).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  /// Scellement du reçu définitif : le `documentNumber` serveur remplace le
+  /// `PROV-…` local. `documents` **vide** est un cas NORMAL (scellement
+  /// best-effort hors transaction serveur, décision G) : le reçu provisoire est
+  /// alors conservé tel quel — l'encaissement reste acquis.
+  Future<void> _sealDocuments(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack,
+  ) async {
+    for (final doc in ack.documents) {
+      await txn.update(
+        'generated_documents',
+        {'number': doc.documentNumber, 'status': doc.status},
+        where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
+        whereArgs: [ack.paymentId, 'PAYMENT', doc.localDocType],
+      );
+    }
+  }
+
+  /// (élève, année) du paiement — le scope de résolution des créances.
+  Future<_PaymentScope?> _paymentScope(
+    DatabaseExecutor txn,
+    String paymentId,
+  ) async {
+    final rows = await txn.query(
+      'payments',
+      columns: ['student_id', 'academic_year_id'],
+      where: 'id = ?',
+      whereArgs: [paymentId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final studentId = rows.first['student_id'] as String?;
+    if (studentId == null) return null;
+    return _PaymentScope(
+      studentId: studentId,
+      academicYearId: rows.first['academic_year_id'] as String?,
+    );
+  }
+
   /// Remap d'une créance provisoire (uuid local) vers l'id réel serveur, résolu
-  /// par (student_id, fee_code) — clé stable (back FB-4).
+  /// par (student_id, academic_year_id, fee_code) — clé stable (back FB-4).
+  ///
+  /// Deux garde-fous money-grade sur la résolution de la jumelle :
+  ///  - **scopée à l'année** : `fee_code` seul n'est PAS unique dans le temps
+  ///    (TUITION existe chaque année). La base offline survit au rollover : sans
+  ///    ce scope, l'ACK d'une créance 2025-26 renommerait la créance 2024-25 et
+  ///    ré-imputerait ses paiements sur la nouvelle année.
+  ///  - **jamais une créance SYNCED** : seule une jumelle non encore remontée
+  ///    (PROVISIONAL / PENDING_SYNC) peut être dissoute. Une ligne autoritaire
+  ///    ne doit jamais être détruite par une résolution approximative — au pire
+  ///    on laisse un doublon visible, jamais une perte de données.
+  ///
+  /// `academic_year_id` est comparé avec `IS` (null-safe). Une créance
+  /// canonique sans année ne dissout donc aucune jumelle *datée* : on préfère
+  /// un doublon à une destruction.
   Future<void> _remapProvisionalCharge(
     DatabaseExecutor txn, {
     required String studentId,
+    String? academicYearId,
     required String feeCode,
     required String realChargeId,
   }) async {
-    final prov = await txn.query(
+    // **Toutes** les jumelles, pas la première : `(student_id, année, fee_code)`
+    // n'a aucune contrainte d'unicité et `initializeChargesForStudent` peut
+    // avoir rejoué (crash, seconde passe de réinscription). Un `limit: 1` en
+    // dissoudrait une et laisserait l'autre vivre à côté de la canonique — le
+    // frais serait facturé deux fois. Même règle que `_pendingChargeIndex` côté
+    // pull de masse.
+    final twins = await txn.query(
       'student_charges',
       columns: ['id'],
-      where: 'student_id = ? AND fee_code = ? AND id != ?',
-      whereArgs: [studentId, feeCode, realChargeId],
-      limit: 1,
+      where:
+          'student_id = ? AND fee_code = ? AND id != ? '
+          'AND academic_year_id IS ? AND sync_status <> ?',
+      whereArgs: [
+        studentId,
+        feeCode,
+        realChargeId,
+        academicYearId,
+        SyncState.synced.dbValue,
+      ],
     );
-    if (prov.isEmpty) return;
-    final provId = prov.first['id'] as String;
+    if (twins.isEmpty) return;
 
-    final realExists = await txn.query(
+    var realExists = (await txn.query(
       'student_charges',
       columns: ['id'],
       where: 'id = ?',
       whereArgs: [realChargeId],
       limit: 1,
-    );
-    if (realExists.isNotEmpty) {
-      // Le réel existe déjà (pull antérieur) : on repointe puis on drop le prov.
+    )).isNotEmpty;
+
+    for (final row in twins) {
+      final provId = row['id'] as String;
+      // Les imputations suivent l'id serveur dans tous les cas.
       await txn.update(
         'payment_allocations',
         {'student_charge_id': realChargeId},
         where: 'student_charge_id = ?',
         whereArgs: [provId],
       );
-      await txn.delete('student_charges', where: 'id = ?', whereArgs: [provId]);
-    } else {
-      await txn.update(
-        'student_charges',
-        {'id': realChargeId, 'sync_status': SyncState.synced.dbValue},
-        where: 'id = ?',
-        whereArgs: [provId],
-      );
-      await txn.update(
-        'payment_allocations',
-        {'student_charge_id': realChargeId},
-        where: 'student_charge_id = ?',
-        whereArgs: [provId],
-      );
+      if (realExists) {
+        await txn.delete(
+          'student_charges',
+          where: 'id = ?',
+          whereArgs: [provId],
+        );
+      } else {
+        // La canonique n'existe pas encore : on renomme la PREMIÈRE jumelle
+        // pour préserver la ligne, les suivantes sont alors des doublons purs.
+        // On ne la marque PAS SYNCED — un remap déplace un id, il ne constate
+        // pas une autorité ; c'est l'UPSERT autoritaire qui apporte soldes ET
+        // état.
+        await txn.update(
+          'student_charges',
+          {'id': realChargeId},
+          where: 'id = ?',
+          whereArgs: [provId],
+        );
+        realExists = true;
+      }
     }
   }
 
@@ -320,25 +488,41 @@ class FinanceLocalDao {
     });
   }
 
+  /// Applique le miroir autoritaire du pull. Découpage en lots (verrou relâché
+  /// entre les lots) — grand-livre potentiellement volumineux ; upserts
+  /// idempotents → apply partielle sûre. L'ordre n'est pas porteur : le reste se
+  /// compose à la lecture, aucun solde n'est recalculé ici (FRONT §5/§8).
+  ///
+  /// Deux règles money-grade portées ici :
+  ///  - **patch, pas REPLACE**, sur les lignes déjà connues : le pull n'est
+  ///    autoritaire que sur les colonnes qu'il porte (cf. `toPullPatch`) — il ne
+  ///    doit jamais écraser le payeur ni le libellé saisis au guichet ;
+  ///  - **dissolution de la jumelle PROVISIONAL** avant d'insérer une créance
+  ///    canonique, sinon l'élève est facturé deux fois (cf.
+  ///    [_dissolveProvisionalTwins]).
   Future<void> upsertLedger({
     List<StudentChargeLocalModel> charges = const [],
     List<PaymentLocalModel> payments = const [],
     List<PaymentAllocationLocalModel> allocations = const [],
   }) async {
-    // Découpage en lots (verrou relâché entre les lots) — grand-livre
-    // potentiellement volumineux. Upserts REPLACE idempotents → apply partielle
-    // sûre. L'ordre n'est plus porteur : le reste se compose à la lecture, aucun
-    // solde n'est recalculé ici (FRONT §5/§8).
     await applyInBatches(
       _db,
       payments,
       apply: (txn, chunk) async {
         for (final p in chunk) {
-          await txn.insert(
+          final patched = await txn.update(
             'payments',
-            p.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
+            p.toPullPatch(),
+            where: 'id = ?',
+            whereArgs: [p.id],
           );
+          if (patched == 0) {
+            await txn.insert(
+              'payments',
+              p.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         }
       },
     );
@@ -347,19 +531,38 @@ class FinanceLocalDao {
       allocations,
       apply: (txn, chunk) async {
         for (final a in chunk) {
-          await txn.insert(
+          final patched = await txn.update(
             'payment_allocations',
-            a.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
+            a.toPullPatch(),
+            where: 'id = ?',
+            whereArgs: [a.id],
           );
+          if (patched == 0) {
+            await txn.insert(
+              'payment_allocations',
+              a.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         }
       },
     );
+
     await applyInBatches(
       _db,
       charges,
       apply: (txn, chunk) async {
+        // Index des jumelles candidates : une requête PAR LOT, dans la
+        // transaction du lot. Pas par créance (le pull en masse en porte des
+        // milliers, les jumelles se comptent sur les doigts), mais pas une fois
+        // pour tout le pull non plus : `applyInBatches` relâche volontairement
+        // le verrou entre les lots, et un élève peut être inscrit hors-ligne
+        // pendant ce temps. Un index pris avant la boucle ignorerait ses
+        // créances toutes fraîches, qui survivraient à côté de la canonique →
+        // frais facturé deux fois. On borne la péremption à un lot.
+        final twins = await _pendingChargeIndex(txn);
         for (final c in chunk) {
+          await _dissolveProvisionalTwins(txn, c, twins);
           await txn.insert(
             'student_charges',
             c.toMap(),
@@ -368,6 +571,73 @@ class FinanceLocalDao {
         }
       },
     );
+  }
+
+  /// (clé métier → **ids**) des créances encore NON remontées : les seules
+  /// qu'une créance canonique peut légitimement dissoudre. Une ligne SYNCED est
+  /// autoritaire et n'est jamais candidate.
+  ///
+  /// Une LISTE par clé, pas un id : rien ne garantit l'unicité de
+  /// `(student_id, academic_year_id, fee_code)` — la table n'a pas de
+  /// contrainte, et `initializeChargesForStudent` peut avoir tourné deux fois
+  /// (rejeu après crash, seconde passe de réinscription). Un
+  /// `Map<_ChargeKey, String>` écraserait silencieusement toutes les jumelles
+  /// sauf la dernière : une seule serait dissoute, l'autre survivrait à côté de
+  /// la canonique — le frais serait facturé deux fois.
+  Future<Map<_ChargeKey, List<String>>> _pendingChargeIndex(
+    DatabaseExecutor txn,
+  ) async {
+    final rows = await txn.query(
+      'student_charges',
+      columns: ['id', 'student_id', 'academic_year_id', 'fee_code'],
+      where: 'sync_status <> ?',
+      whereArgs: [SyncState.synced.dbValue],
+    );
+    final index = <_ChargeKey, List<String>>{};
+    for (final r in rows) {
+      final key = (
+        r['student_id'] as String,
+        r['academic_year_id'] as String?,
+        r['fee_code'] as String,
+      );
+      (index[key] ??= <String>[]).add(r['id'] as String);
+    }
+    return index;
+  }
+
+  /// Dissout la jumelle PROVISIONAL d'une créance canonique : ses imputations
+  /// sont repointées vers l'id serveur, puis la ligne locale disparaît.
+  ///
+  /// Sans cela, l'élève inscrit hors-ligne (créances à uuid local) puis re-tiré
+  /// du serveur (ids canoniques) porterait **deux lignes par frais** —
+  /// `student_charges` n'a aucune contrainte d'unicité sur
+  /// `(student_id, academic_year_id, fee_code)` et `getChargesByStudent` ne
+  /// filtre que sur l'élève : le parent semblerait devoir le double, KPI et
+  /// soldes compris. C'est le pendant, côté pull de masse, de ce que
+  /// `_remapProvisionalCharge` fait à l'ACK.
+  Future<void> _dissolveProvisionalTwins(
+    DatabaseExecutor txn,
+    StudentChargeLocalModel canonical,
+    Map<_ChargeKey, List<String>> twins,
+  ) async {
+    final key = (
+      canonical.studentId,
+      canonical.academicYearId,
+      canonical.feeCode,
+    );
+    final ids = twins[key];
+    if (ids == null) return;
+    for (final twinId in ids) {
+      if (twinId == canonical.id) continue;
+      await txn.update(
+        'payment_allocations',
+        {'student_charge_id': canonical.id},
+        where: 'student_charge_id = ?',
+        whereArgs: [twinId],
+      );
+      await txn.delete('student_charges', where: 'id = ?', whereArgs: [twinId]);
+    }
+    twins.remove(key); // dissoutes : ne pas les rejouer sur une page suivante
   }
 
   // ── Lectures ────────────────────────────────────────────────────────────────
@@ -428,17 +698,38 @@ class FinanceLocalDao {
   }
 
   /// Imputations portant sur une créance (détail d'un frais, FRONT §4).
+  ///
+  /// Joint le paiement porteur pour replier le **payeur** et la **date** sur
+  /// chaque ligne (détail d'un frais §16 : montant + payeur + date). Une
+  /// imputation référence toujours un paiement (`payment_id` NOT NULL) → le JOIN
+  /// n'écarte aucune ligne. Colonnes du paiement préfixées `p_` pour ne pas
+  /// masquer celles de `pa.*` lues par `fromMap`.
   Future<List<LocalPaymentAllocation>> getAllocationsByCharge(
     String chargeId,
   ) async {
-    final rows = await _db.query(
-      'payment_allocations',
-      where: 'student_charge_id = ?',
-      whereArgs: [chargeId],
-      orderBy: 'fee_code ASC',
+    final rows = await _db.rawQuery(
+      '''
+      SELECT pa.*,
+             p.paid_at           AS p_paid_at,
+             p.payer_first_name  AS p_payer_first_name,
+             p.payer_last_name   AS p_payer_last_name,
+             p.payer_middle_name AS p_payer_middle_name
+      FROM payment_allocations pa
+      JOIN payments p ON p.id = pa.payment_id
+      WHERE pa.student_charge_id = ?
+      ORDER BY p.paid_at DESC, pa.fee_code ASC
+      ''',
+      [chargeId],
     );
     return rows
-        .map((r) => PaymentAllocationLocalModel.fromMap(r).toEntity())
+        .map(
+          (r) => PaymentAllocationLocalModel.fromMap(r).toEntity(
+            payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
+            payerLastName: (r['p_payer_last_name'] as String?) ?? '',
+            payerMiddleName: r['p_payer_middle_name'] as String?,
+            paidAt: r['p_paid_at'] as String?,
+          ),
+        )
         .toList();
   }
 
@@ -453,23 +744,25 @@ class FinanceLocalDao {
 
   // ── Helper payload ───────────────────────────────────────────────────────────
 
-  CreatePaymentRequest _paymentRequest(
+  PaymentAggregateRequest _paymentRequest(
     PaymentLocalModel payment,
     List<PaymentAllocationLocalModel> allocations,
-  ) => CreatePaymentRequest(
-    id: payment.id,
-    studentId: payment.studentId,
-    academicYearId: payment.academicYearId ?? '',
-    amountInCents: payment.amountInCents,
-    currency: payment.currency,
-    method: payment.method,
-    paidAt: payment.paidAt,
-    payerFirstName: payment.payerFirstName,
-    payerLastName: payment.payerLastName,
-    payerMiddleName: payment.payerMiddleName,
+  ) => PaymentAggregateRequest(
+    payment: PaymentInput(
+      id: payment.id,
+      studentId: payment.studentId,
+      academicYearId: payment.academicYearId,
+      amountInCents: payment.amountInCents,
+      currency: payment.currency,
+      method: payment.method,
+      paidAt: payment.paidAt,
+      payerFirstName: payment.payerFirstName,
+      payerLastName: payment.payerLastName,
+      payerMiddleName: payment.payerMiddleName,
+    ),
     allocations: allocations
         .map(
-          (a) => PaymentAllocationRequest(
+          (a) => PaymentAllocationInput(
             id: a.id,
             studentChargeId: a.studentChargeId,
             feeCode: a.feeCode,

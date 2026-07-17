@@ -10,6 +10,8 @@ import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
+    show StudentChargeDto;
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_outbox_handler.dart';
@@ -32,15 +34,14 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(
-      const CreatePaymentRequest(
-        id: 'x',
-        studentId: 'x',
-        academicYearId: 'x',
-        amountInCents: 0,
-        currency: 'USD',
-        paidAt: 'x',
-        payerFirstName: 'x',
-        payerLastName: 'x',
+      const PaymentAggregateRequest(
+        payment: PaymentInput(
+          id: 'x',
+          studentId: 'x',
+          amountInCents: 0,
+          currency: 'USD',
+          paidAt: 'x',
+        ),
         allocations: [],
       ),
     );
@@ -124,12 +125,27 @@ void main() {
     'inscription SYNCED → POST → acked + soldes autoritaires écrasés',
     () async {
       when(() => api.commitPayment(any(), any())).thenAnswer(
-        (_) async => const PaymentCommitAck(
-          paymentId: 'pay1',
-          payment: AckPayment(id: 'pay1', status: 'CONFIRMED'),
-          allocations: [AckAllocation(id: 'a1', studentChargeId: 'c1')],
-          updatedCharges: [
-            AckCharge(id: 'c1', amountPaidInCents: 30000, status: 'PARTIAL'),
+        (_) async => const PaymentAggregateResponse(
+          payment: AckPaymentRef(id: 'pay1'),
+          allocations: [
+            AllocationRemap(
+              providedId: 'a1',
+              canonicalId: 'a1',
+              canonicalStudentChargeId: 'c1',
+              feeCode: 'TUITION',
+            ),
+          ],
+          charges: [
+            StudentChargeDto(
+              id: 'c1',
+              studentId: 's1',
+              feeCode: 'TUITION',
+              label: 'Scolarité',
+              expectedAmountInCents: 100000,
+              amountPaidInCents: 30000,
+              currency: 'USD',
+              status: 'PARTIAL',
+            ),
           ],
         ),
       );
@@ -145,6 +161,27 @@ void main() {
         (await db.query('payments')).first['sync_status'],
         SyncState.synced.dbValue,
       );
+    },
+  );
+
+  test(
+    'l\'agrégat POSTé est bien la forme imbriquée du contrat, relue depuis le '
+    'payload outbox (uuid client honoré = clé d\'idempotence)',
+    () async {
+      when(() => api.commitPayment(any(), any())).thenAnswer(
+        (_) async =>
+            const PaymentAggregateResponse(payment: AckPaymentRef(id: 'pay1')),
+      );
+
+      await handlerWithGate(true).dispatch(await pendingEntry());
+
+      final sent =
+          verify(() => api.commitPayment(any(), captureAny())).captured.single
+              as PaymentAggregateRequest;
+      expect(sent.payment.id, 'pay1');
+      expect(sent.payment.studentId, 's1');
+      expect(sent.payment.amountInCents, 30000);
+      expect(sent.allocations.single.feeCode, 'TUITION');
     },
   );
 

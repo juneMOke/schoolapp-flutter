@@ -190,8 +190,19 @@ class AppConstants {
   static const String syncFinanceTariffsEndpoint =
       '/api/v1/sync/finance/tariffs';
 
-  /// Pull delta du grand-livre (créances autoritaires + paiements + allocations).
-  static const String syncFinanceLedgerEndpoint = '/api/v1/sync/finance/ledger';
+  /// Pull KEYSET des créances élèves (le plus gros volume ; paginé, résumable,
+  /// jeton `cursor` opaque base64url, 304 applicatif). Contrat openapi_billing_sync.
+  static const String syncStudentChargesEndpoint =
+      '/api/v1/sync/student-charges';
+
+  /// Agrégat paiement offline (contrat openapi_billing_sync) :
+  ///  - **POST** = push idempotent de l'encaissement (uuid client honoré) ;
+  ///  - **GET** = pull KEYSET des paiements, y compris ceux de l'autre poste de
+  ///    perception (anti-divergence de snapshot) — même enveloppe keyset.
+  ///
+  /// À ne pas confondre avec [createPaymentEndpoint], le POST **en ligne** du
+  /// module Facturation (forme à plat), qui reste en service hors offline.
+  static const String syncPaymentsEndpoint = '/api/v1/sync/payments';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// GET delta des classes + rosters (CB-2). Renvoie les `ref_classrooms` +

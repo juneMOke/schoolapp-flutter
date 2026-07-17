@@ -18,9 +18,9 @@ typedef EnrollmentSyncGate = Future<bool> Function(String studentId);
 /// **Garde FIFO** : si le paiement référence un élève dont l'inscription locale
 /// n'est pas encore SYNCED, on renvoie `blocked` — attente PROPRE, pas un `retry`
 /// (l'agrégat ENROLLMENT doit partir avant — l'uuid honoré garantit alors
-/// `payment.student_id` = id serveur). Sinon POST →
-/// ACK : remap payment/allocations + créances provisoires + ÉCRASE les soldes
-/// autoritaires → `acked`. Idempotent sur `payment.id`.
+/// `payment.student_id` = id serveur). Sinon `POST /api/v1/sync/payments` →
+/// ACK : remap des allocations + créances provisoires, UPSERT des créances
+/// autoritaires, scellement du reçu → `acked`. Idempotent sur `payment.id`.
 class PaymentOutboxHandler implements OutboxSyncHandler {
   final FinanceSyncApi _api;
   final FinanceLocalDao _dao;
@@ -45,10 +45,10 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
-    final CreatePaymentRequest request;
+    final PaymentAggregateRequest request;
     try {
       final map = jsonDecode(entry.payload) as Map<String, dynamic>;
-      request = CreatePaymentRequest.fromJson(map);
+      request = PaymentAggregateRequest.fromJson(map);
     } catch (e) {
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
@@ -57,7 +57,7 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
     // une attente PROPRE (`blocked`) — ni attempts++, ni backoff, ni faux
     // SYNC_ERROR : l'argent reçu ne doit jamais être surfacé comme un conflit de
     // synchro (FRONT §6.3). Le lien se lève automatiquement à l'ACK.
-    final ready = await _isStudentEnrollmentSynced(request.studentId);
+    final ready = await _isStudentEnrollmentSynced(request.payment.studentId);
     if (!ready) {
       return const OutboxDispatchResult.blocked(
         'Inscription de l\'élève non synchronisée (dépendance)',
@@ -66,6 +66,17 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
 
     try {
       final ack = await _api.commitPayment(_extras, request);
+      // `charges` est `required` au contrat : un ACK sans créance autoritaire
+      // est une panne SERVEUR, pas un encaissement acquitté. On ne l'applique
+      // pas — sans miroir à intégrer, acquitter le paiement le sortirait du
+      // `paid_pending` et rendrait la créance « impayée » → réencaissement.
+      // `retry` : le POST est idempotent, le rejeu renverra un 200 canonique
+      // dès que le serveur va bien, et l'outbox rend la panne visible.
+      if (ack.charges.isEmpty) {
+        return const OutboxDispatchResult.retry(
+          'ACK sans créance autoritaire (contrat : `charges` requis)',
+        );
+      }
       await _dao.applyPaymentAck(ack, nowMs: _now());
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {

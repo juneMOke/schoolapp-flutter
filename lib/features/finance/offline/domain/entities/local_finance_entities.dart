@@ -236,6 +236,14 @@ class LocalPaymentAllocation extends Equatable {
   final int amountInCents;
   final String currency;
 
+  /// Identité du payeur et date (ISO-8601 local) du paiement joint. Renseignés
+  /// par les lectures qui joignent la table `payments` (détail d'un frais) ;
+  /// vides / nulls sinon (l'imputation seule ne les porte pas).
+  final String payerFirstName;
+  final String payerLastName;
+  final String? payerMiddleName;
+  final String? paidAt;
+
   const LocalPaymentAllocation({
     required this.id,
     required this.paymentId,
@@ -244,6 +252,10 @@ class LocalPaymentAllocation extends Equatable {
     required this.studentChargeLabel,
     required this.amountInCents,
     required this.currency,
+    this.payerFirstName = '',
+    this.payerLastName = '',
+    this.payerMiddleName,
+    this.paidAt,
   });
 
   @override
@@ -255,5 +267,9 @@ class LocalPaymentAllocation extends Equatable {
     studentChargeLabel,
     amountInCents,
     currency,
+    payerFirstName,
+    payerLastName,
+    payerMiddleName,
+    paidAt,
   ];
 }

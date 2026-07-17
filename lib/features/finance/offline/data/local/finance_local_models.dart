@@ -246,6 +246,38 @@ class PaymentLocalModel {
     'updated_at': updatedAt,
   };
 
+  /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
+  /// §PaymentDelta). Sert au patch d'une ligne DÉJÀ connue ; une ligne inconnue
+  /// (paiement de l'autre poste) s'insère via [toMap].
+  ///
+  /// **Exclut l'identité du payeur et `client_uuid`** : le contrat ne les porte
+  /// pas. Les réécrire depuis un DTO de pull les remplacerait par le repli `''`
+  /// — perte définitive du nom saisi au guichet.
+  ///
+  /// **Exclut surtout l'état de synchro** (`sync_status`, `sync_error`,
+  /// `synced_at`) : il appartient à l'ACK et à l'outbox, JAMAIS au pull. Le pull
+  /// dit « le serveur connaît ce paiement », pas « ton miroir de créances a
+  /// intégré son montant » — or c'est ce second fait que `sync_status` encode
+  /// pour la lecture composée. Le passer à SYNCED ici sortirait le paiement du
+  /// `paid_pending` (FRONT §5) alors que `student_charges.amount_paid` peut
+  /// encore être périmé : la créance s'afficherait IMPAYÉE et le caissier
+  /// **réencaisserait**. Seul `applyPaymentAck` bascule SYNCED — et il le fait
+  /// dans la MÊME transaction que l'intégration des créances autoritaires.
+  /// **Exclut `status` et `method`** : `PaymentDelta` ne porte pas `status` du
+  /// tout (le DTO le laisse donc toujours `null` → le patch viderait la colonne
+  /// locale), et `method` y est `nullable` alors que `PaymentDto.toLocalModel`
+  /// replie sur `'CASH'` — patcher écraserait un `BANK_TRANSFER` saisi au
+  /// guichet par un `CASH` inventé. Ces deux colonnes restent celles du poste
+  /// qui a encaissé.
+  Map<String, Object?> toPullPatch() => {
+    'student_id': studentId,
+    'academic_year_id': academicYearId,
+    'amount_in_cents': amountInCents,
+    'currency': currency,
+    'paid_at': paidAt,
+    'updated_at': updatedAt,
+  };
+
   factory PaymentLocalModel.fromMap(Map<String, Object?> m) =>
       PaymentLocalModel(
         id: m['id'] as String,
@@ -316,6 +348,43 @@ class PaymentAllocationLocalModel {
     'currency': currency,
   };
 
+  /// Même imputation, rattachée à une autre créance (re-résolution d'un uuid
+  /// périmé au moment de l'écriture — cf. `FinanceLocalDao._resolveChargeLink`).
+  PaymentAllocationLocalModel withStudentChargeId(String? id) =>
+      PaymentAllocationLocalModel(
+        id: this.id,
+        clientUuid: clientUuid,
+        paymentId: paymentId,
+        studentChargeId: id,
+        feeCode: feeCode,
+        studentChargeLabel: studentChargeLabel,
+        amountInCents: amountInCents,
+        currency: currency,
+      );
+
+  /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
+  /// §PaymentDelta.allocations : `id, studentChargeId?, feeCode,
+  /// amountInCents`).
+  ///
+  /// **Exclut `student_charge_label` et `client_uuid`** : le contrat ne porte
+  /// pas le libellé, le DTO le replie donc sur le `fee_code` — le réécrire
+  /// remplacerait « Minerval Trimestre 1 » par « TUITION » sur le reçu
+  /// réimprimé. Le libellé est FIGÉ au versement, il n'est jamais retiré.
+  ///
+  /// **`student_charge_id` n'est écrit que s'il est RÉSOLU** : le contrat le
+  /// déclare `nullable` (créance pas encore matérialisée côté serveur). Un
+  /// `null` du pull est une absence d'information, pas une rétractation — le
+  /// propager effacerait le lien établi au versement ou par le remap de l'ACK.
+  /// L'imputation disparaîtrait alors du détail du frais et, paiement encore
+  /// pending, du `paid_pending` : le montant redeviendrait dû (FRONT §5).
+  Map<String, Object?> toPullPatch() => {
+    'payment_id': paymentId,
+    if (studentChargeId != null) 'student_charge_id': studentChargeId,
+    'fee_code': feeCode,
+    'amount_in_cents': amountInCents,
+    'currency': currency,
+  };
+
   factory PaymentAllocationLocalModel.fromMap(Map<String, Object?> m) =>
       PaymentAllocationLocalModel(
         id: m['id'] as String,
@@ -328,7 +397,15 @@ class PaymentAllocationLocalModel {
         currency: m['currency'] as String,
       );
 
-  LocalPaymentAllocation toEntity() => LocalPaymentAllocation(
+  /// Le payeur et la date sont repliés depuis le paiement JOINT par l'appelant
+  /// (ils ne sont pas des colonnes de `payment_allocations`) ; absents, l'entité
+  /// les laisse vides / nuls.
+  LocalPaymentAllocation toEntity({
+    String payerFirstName = '',
+    String payerLastName = '',
+    String? payerMiddleName,
+    String? paidAt,
+  }) => LocalPaymentAllocation(
     id: id,
     paymentId: paymentId,
     studentChargeId: studentChargeId,
@@ -336,5 +413,9 @@ class PaymentAllocationLocalModel {
     studentChargeLabel: studentChargeLabel,
     amountInCents: amountInCents,
     currency: currency,
+    payerFirstName: payerFirstName,
+    payerLastName: payerLastName,
+    payerMiddleName: payerMiddleName,
+    paidAt: paidAt,
   );
 }

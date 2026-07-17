@@ -1,7 +1,29 @@
 // DTOs de pull delta (FF-Lot 2). Grille tarifaire + grand-livre autoritaire.
 // Réponses serveur (fromJson) → converties en modèles locaux au upsert.
 
+import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+
+/// Mappe une liste serveur en **tolérant les lignes malformées** : une ligne
+/// dont le `fromJson` lève est ignorée au lieu de faire échouer toute la page.
+///
+/// Money-grade — sans ça, un seul enregistrement fautif (champ requis à `null`,
+/// montant absent) fige le curseur de la ressource : le cycle re-tire la même
+/// page indéfiniment et le miroir local reste gelé, invisible pour le caissier.
+/// La ligne écartée réapparaîtra au prochain delta une fois le serveur corrigé.
+/// (Pour un paiement, l'échec d'une allocation nested écarte le paiement ENTIER
+/// via ce même filet au niveau de la page — jamais une application partielle.)
+List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
+  final out = <T>[];
+  for (final e in (raw as List<dynamic>? ?? const [])) {
+    try {
+      out.add(parse(e as Map<String, dynamic>));
+    } catch (_) {
+      // Ligne écartée : le curseur avance, la ressource ne fige pas.
+    }
+  }
+  return out;
+}
 
 class FeeTariffDto {
   final String id;
@@ -121,7 +143,10 @@ class StudentChargeDto {
     amountPaidInCents: amountPaidInCents,
     optimisticPaidInCents: amountPaidInCents,
     currency: currency,
-    status: status,
+    // Le contrat de pull émet UNPAID ; le local (créances offline) émet DUE —
+    // sémantiquement identiques (rien payé). On normalise pour ne pas mélanger
+    // les deux vocabulaires dans la colonne `status`.
+    status: status == 'UNPAID' ? 'DUE' : status,
     dueAt: dueAt,
     version: version,
     syncStatus: 'SYNCED',
@@ -190,48 +215,6 @@ class PaymentDto {
   );
 }
 
-class PaymentAllocationDto {
-  final String id;
-  final String paymentId;
-  final String? studentChargeId;
-  final String feeCode;
-  final String studentChargeLabel;
-  final int amountInCents;
-  final String currency;
-
-  const PaymentAllocationDto({
-    required this.id,
-    required this.paymentId,
-    this.studentChargeId,
-    required this.feeCode,
-    required this.studentChargeLabel,
-    required this.amountInCents,
-    required this.currency,
-  });
-
-  factory PaymentAllocationDto.fromJson(Map<String, dynamic> j) =>
-      PaymentAllocationDto(
-        id: j['id'] as String,
-        paymentId: j['paymentId'] as String,
-        studentChargeId: j['studentChargeId'] as String?,
-        feeCode: j['feeCode'] as String,
-        studentChargeLabel: (j['studentChargeLabel'] as String?) ?? '',
-        amountInCents: (j['amountInCents'] as num).toInt(),
-        currency: j['currency'] as String,
-      );
-
-  PaymentAllocationLocalModel toLocalModel() => PaymentAllocationLocalModel(
-    id: id,
-    clientUuid: id,
-    paymentId: paymentId,
-    studentChargeId: studentChargeId,
-    feeCode: feeCode,
-    studentChargeLabel: studentChargeLabel,
-    amountInCents: amountInCents,
-    currency: currency,
-  );
-}
-
 /// Delta de grille tarifaire.
 class FeeTariffDelta {
   final List<FeeTariffDto> tariffs;
@@ -240,37 +223,107 @@ class FeeTariffDelta {
   const FeeTariffDelta({this.tariffs = const [], this.serverCursor});
 
   factory FeeTariffDelta.fromJson(Map<String, dynamic> j) => FeeTariffDelta(
-    tariffs: (j['tariffs'] as List<dynamic>? ?? const [])
-        .map((e) => FeeTariffDto.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    tariffs: _lenientList(j['tariffs'], FeeTariffDto.fromJson),
     serverCursor: (j['serverCursor'] as num?)?.toInt(),
   );
 }
 
-/// Delta du grand-livre : créances autoritaires + paiements + allocations.
-class LedgerDelta {
-  final List<StudentChargeDto> charges;
-  final List<PaymentDto> payments;
-  final List<PaymentAllocationDto> allocations;
-  final int? serverCursor;
+// ── Pull KEYSET (contrat openapi_billing_sync, ADR-008/009) ──────────────────
+// Enveloppe de pagination opaque partagée avec l'Inscription (KeysetPageEnvelope
+// / KeysetPageDto) : `nextCursor`/`nextWatermark` base64url renvoyés VERBATIM
+// sur l'unique paramètre `cursor`, jamais décodés ni recalculés.
 
-  const LedgerDelta({
-    this.charges = const [],
-    this.payments = const [],
-    this.allocations = const [],
-    this.serverCursor,
+/// Page keyset des créances élèves (`GET /api/v1/sync/student-charges`).
+class StudentChargePageDto implements KeysetPageDto<StudentChargeDto> {
+  @override
+  final List<StudentChargeDto> items;
+  @override
+  final KeysetPageEnvelope page;
+
+  const StudentChargePageDto({required this.items, required this.page});
+
+  factory StudentChargePageDto.fromJson(Map<String, dynamic> j) =>
+      StudentChargePageDto(
+        items: _lenientList(j['items'], StudentChargeDto.fromJson),
+        page: KeysetPageEnvelope.fromJson(j),
+      );
+}
+
+/// Allocation NESTED du pull paiements (schéma minimal `PaymentDelta.allocations`
+/// : `id, studentChargeId?, feeCode, amountInCents`) — ni `paymentId` (parent),
+/// ni `studentChargeLabel`, ni `currency` (repris du paiement parent).
+class PaymentPullAllocationDto {
+  final String id;
+  final String? studentChargeId;
+  final String feeCode;
+  final int amountInCents;
+
+  const PaymentPullAllocationDto({
+    required this.id,
+    this.studentChargeId,
+    required this.feeCode,
+    required this.amountInCents,
   });
 
-  factory LedgerDelta.fromJson(Map<String, dynamic> j) => LedgerDelta(
-    charges: (j['charges'] as List<dynamic>? ?? const [])
-        .map((e) => StudentChargeDto.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    payments: (j['payments'] as List<dynamic>? ?? const [])
-        .map((e) => PaymentDto.fromJson(e as Map<String, dynamic>))
-        .toList(),
+  factory PaymentPullAllocationDto.fromJson(Map<String, dynamic> j) =>
+      PaymentPullAllocationDto(
+        id: j['id'] as String,
+        studentChargeId: j['studentChargeId'] as String?,
+        feeCode: j['feeCode'] as String,
+        amountInCents: (j['amountInCents'] as num).toInt(),
+      );
+
+  PaymentAllocationLocalModel toLocalModel({
+    required String paymentId,
+    required String currency,
+  }) => PaymentAllocationLocalModel(
+    id: id,
+    clientUuid: id,
+    paymentId: paymentId,
+    studentChargeId: studentChargeId,
+    feeCode: feeCode,
+    // Le pull ne porte pas le libellé de la créance → repli sur le fee_code.
+    studentChargeLabel: feeCode,
+    amountInCents: amountInCents,
+    currency: currency,
+  );
+}
+
+/// Item du pull paiements : un paiement (autoritaire, SYNCED) + ses allocations.
+class PaymentDeltaDto {
+  final PaymentDto payment;
+  final List<PaymentPullAllocationDto> allocations;
+
+  const PaymentDeltaDto({required this.payment, required this.allocations});
+
+  factory PaymentDeltaDto.fromJson(Map<String, dynamic> j) => PaymentDeltaDto(
+    payment: PaymentDto.fromJson(j),
     allocations: (j['allocations'] as List<dynamic>? ?? const [])
-        .map((e) => PaymentAllocationDto.fromJson(e as Map<String, dynamic>))
+        .map(
+          (e) => PaymentPullAllocationDto.fromJson(e as Map<String, dynamic>),
+        )
         .toList(),
-    serverCursor: (j['serverCursor'] as num?)?.toInt(),
+  );
+
+  List<PaymentAllocationLocalModel> allocationModels() => allocations
+      .map(
+        (a) =>
+            a.toLocalModel(paymentId: payment.id, currency: payment.currency),
+      )
+      .toList();
+}
+
+/// Page keyset des paiements (`GET /api/v1/sync/payments`).
+class PaymentPageDto implements KeysetPageDto<PaymentDeltaDto> {
+  @override
+  final List<PaymentDeltaDto> items;
+  @override
+  final KeysetPageEnvelope page;
+
+  const PaymentPageDto({required this.items, required this.page});
+
+  factory PaymentPageDto.fromJson(Map<String, dynamic> j) => PaymentPageDto(
+    items: _lenientList(j['items'], PaymentDeltaDto.fromJson),
+    page: KeysetPageEnvelope.fromJson(j),
   );
 }

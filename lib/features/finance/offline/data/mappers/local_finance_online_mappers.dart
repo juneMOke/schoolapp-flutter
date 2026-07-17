@@ -55,5 +55,11 @@ extension LocalPaymentAllocationToOnline on LocalPaymentAllocation {
     studentChargeLabel: studentChargeLabel,
     amountInCents: amountInCents,
     currency: currency,
+    payerFirstName: payerFirstName,
+    payerLastName: payerLastName,
+    payerMiddleName: payerMiddleName,
+    // `paidAt` local = ISO-8601 (heure métier). Parse tolérant : une date
+    // malformée ou absente laisse `paidAt` nul (l'UI affiche « inconnu »).
+    paidAt: paidAt == null ? null : DateTime.tryParse(paidAt!),
   );
 }
