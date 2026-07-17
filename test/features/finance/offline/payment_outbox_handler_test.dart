@@ -185,15 +185,61 @@ void main() {
     },
   );
 
-  test('erreur réseau → retry (jamais rejeté métier)', () async {
-    when(() => api.commitPayment(any(), any())).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(path: '/x'),
-        error: 'net',
-      ),
-    );
-    final handler = handlerWithGate(true);
-    final result = await handler.dispatch(await pendingEntry());
+  DioException dioWithStatus(int status) => DioException(
+    requestOptions: RequestOptions(path: '/x'),
+    response: Response(
+      requestOptions: RequestOptions(path: '/x'),
+      statusCode: status,
+    ),
+  );
+
+  test(
+    'erreur réseau (pas de réponse HTTP) → retry (transport transitoire)',
+    () async {
+      when(() => api.commitPayment(any(), any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/x'),
+          error: 'net',
+        ),
+      );
+      final result = await handlerWithGate(true).dispatch(await pendingEntry());
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+    },
+  );
+
+  test('5xx → retry (panne serveur temporaire)', () async {
+    when(() => api.commitPayment(any(), any())).thenThrow(dioWithStatus(503));
+    final result = await handlerWithGate(true).dispatch(await pendingEntry());
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
+
+  for (final status in [401, 408, 409, 429]) {
+    test(
+      '$status → retry (transitoire : jeton/timeout/conflit/débit)',
+      () async {
+        when(
+          () => api.commitPayment(any(), any()),
+        ).thenThrow(dioWithStatus(status));
+        final result = await handlerWithGate(
+          true,
+        ).dispatch(await pendingEntry());
+        expect(result.outcome, OutboxDispatchOutcome.retry);
+      },
+    );
+  }
+
+  for (final status in [400, 403, 413, 415, 422]) {
+    test(
+      '$status → failed (4xx déterministe surfacé, pas de retry-jusqu\'au-poison)',
+      () async {
+        when(
+          () => api.commitPayment(any(), any()),
+        ).thenThrow(dioWithStatus(status));
+        final result = await handlerWithGate(
+          true,
+        ).dispatch(await pendingEntry());
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+      },
+    );
+  }
 }

@@ -21,6 +21,13 @@ typedef EnrollmentSyncGate = Future<bool> Function(String studentId);
 /// `payment.student_id` = id serveur). Sinon `POST /api/v1/sync/payments` →
 /// ACK : remap des allocations + créances provisoires, UPSERT des créances
 /// autoritaires, scellement du reçu → `acked`. Idempotent sur `payment.id`.
+///
+/// **Classification des échecs HTTP** (cf. [_classifyDioError]) : transitoire
+/// (`retry`, rejoué avec backoff) pour le transport, les 5xx et 401/408/409/429 ;
+/// déterministe (`failed`, basculé SYNC_ERROR et surfacé au guichet) pour les
+/// autres 4xx — le POST étant idempotent, un 4xx signifie que le serveur n'a
+/// rien encaissé, donc rejouer jusqu'au poison ne ferait que retarder le même
+/// SYNC_ERROR.
 class PaymentOutboxHandler implements OutboxSyncHandler {
   final FinanceSyncApi _api;
   final FinanceLocalDao _dao;
@@ -80,10 +87,49 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
       await _dao.applyPaymentAck(ack, nowMs: _now());
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
-      // Un paiement n'est jamais rejeté métier (back FB-2) : tout est transitoire.
-      return OutboxDispatchResult.retry(e.message ?? e.toString());
+      return _classifyDioError(e);
     } catch (e) {
+      // Échec LOCAL (ex. `applyPaymentAck`) après un POST possiblement acquitté :
+      // impossible de distinguer un verrou SQLite transitoire d'un bug d'apply
+      // déterministe. Retry-biaisé, sens de panne sûr pour l'argent — le POST
+      // est idempotent (rejeu = 200 canonique) et, au pire, le poison finit par
+      // surfacer un SYNC_ERROR. Le montant reste déduit en local entre-temps.
       return OutboxDispatchResult.retry(e.toString());
     }
+  }
+
+  /// Statuts HTTP **transitoires** hormis les 5xx : jeton expiré (401,
+  /// l'intercepteur ré-authentifie → le rejeu passe), timeout de requête (408),
+  /// conflit à rejouer après refetch (409, cf. [OutboxDispatchOutcome.retry]),
+  /// débordement de débit (429).
+  static const Set<int> _transientStatuses = {401, 408, 409, 429};
+
+  /// Classe un échec HTTP du POST paiement en **transitoire** (`retry`) ou
+  /// **déterministe** (`failed`).
+  ///
+  /// Le POST est idempotent sur `payment.id` : un paiement réellement encaissé
+  /// renverrait 200 au rejeu, jamais un 4xx — donc un 4xx client signifie que le
+  /// serveur n'a RIEN encaissé. Le rejouer jusqu'au poison ne ferait que
+  /// retarder le même SYNC_ERROR en gaspillant des tentatives ; on surface
+  /// directement pour correction au guichet. Le montant reste déduit en local
+  /// (`getChargesByStudent` compose sur `sync_status <> SYNCED`, SYNC_ERROR
+  /// inclus) → le cash reçu n'est jamais « reperdu ».
+  ///
+  /// Restent transitoires : la couche transport (pas de réponse HTTP), tous les
+  /// 5xx, et les [_transientStatuses].
+  OutboxDispatchResult _classifyDioError(DioException e) {
+    final status = e.response?.statusCode;
+    if (status == null ||
+        status >= 500 ||
+        _transientStatuses.contains(status)) {
+      return OutboxDispatchResult.retry(_dioReason(e, status));
+    }
+    return OutboxDispatchResult.failed(_dioReason(e, status));
+  }
+
+  String _dioReason(DioException e, int? status) {
+    final where = status != null ? 'HTTP $status' : 'réseau';
+    final detail = e.message ?? e.error?.toString();
+    return detail == null || detail.isEmpty ? where : '$where — $detail';
   }
 }
