@@ -1345,6 +1345,47 @@ void main() {
       final cdf = totals.firstWhere((t) => t.currency == 'CDF');
       expect(cdf.totalRemainingInCents, 50000);
     });
+
+    test('getAllocationsByPayment replie payeur + date (cohérent avec '
+        'getAllocationsByCharge)', () async {
+      await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 0);
+      await dao.recordPayment(
+        payment: const PaymentLocalModel(
+          id: 'pay1',
+          clientUuid: 'pay1',
+          studentId: 's1',
+          amountInCents: 30000,
+          currency: 'USD',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'Ada',
+          payerLastName: 'Lovelace',
+          payerMiddleName: 'B',
+        ),
+        allocations: const [
+          PaymentAllocationLocalModel(
+            id: 'a1',
+            clientUuid: 'a1',
+            paymentId: 'pay1',
+            studentChargeId: 'c1',
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: 30000,
+            currency: 'USD',
+          ),
+        ],
+        outboxEntryId: 'ob-pay',
+        nowMs: 1000,
+      );
+
+      final byPayment = (await dao.getAllocationsByPayment('pay1')).single;
+      final byCharge = (await dao.getAllocationsByCharge('c1')).single;
+      for (final a in [byPayment, byCharge]) {
+        expect(a.payerFirstName, 'Ada');
+        expect(a.payerLastName, 'Lovelace');
+        expect(a.payerMiddleName, 'B');
+        expect(a.paidAt, '2026-07-06T10:00:00Z');
+      }
+    });
   });
 
   group('replaceTariffsForYears (FF2 pull scopé)', () {

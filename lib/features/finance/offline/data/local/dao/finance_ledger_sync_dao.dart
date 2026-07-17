@@ -84,9 +84,14 @@ class FinanceLedgerSyncDao {
   /// compose à la lecture, aucun solde n'est recalculé ici (FRONT §5/§8).
   ///
   /// Deux règles money-grade portées ici :
-  ///  - **patch, pas REPLACE**, sur les lignes déjà connues : le pull n'est
-  ///    autoritaire que sur les colonnes qu'il porte (cf. `toPullPatch`) — il ne
-  ///    doit jamais écraser le payeur ni le libellé saisis au guichet ;
+  ///  - **paiements & allocations : patch, pas REPLACE** sur les lignes déjà
+  ///    connues (`toPullPatch`) — le pull n'est autoritaire que sur les colonnes
+  ///    qu'il porte, il ne doit jamais écraser le payeur ni le libellé saisis au
+  ///    guichet. Les **créances**, elles, sont REPLACE'd (`toMap` complet) : le
+  ///    pull EST la vérité du grand-livre et une créance ne porte aucune colonne
+  ///    locale à préserver (`optimistic_paid_in_cents` est gelée/vestigiale, le
+  ///    reste se compose à la lecture) — d'où l'insert `ConflictAlgorithm.replace`
+  ///    ci-dessous, pas un patch ;
   ///  - **dissolution de la jumelle PROVISIONAL** avant d'insérer une créance
   ///    canonique, sinon l'élève est facturé deux fois (cf.
   ///    [_dissolveProvisionalTwins]).

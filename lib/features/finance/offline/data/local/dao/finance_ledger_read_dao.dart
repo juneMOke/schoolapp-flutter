@@ -53,16 +53,38 @@ class FinanceLedgerReadDao {
     return rows.map((r) => PaymentLocalModel.fromMap(r).toEntity()).toList();
   }
 
+  /// Imputations d'un paiement. Joint le paiement porteur pour replier **payeur**
+  /// et **date** sur chaque ligne, exactement comme [getAllocationsByCharge] :
+  /// les deux vues des imputations restent cohérentes (sinon cette voie
+  /// afficherait « payeur inconnu / pas de date »). `payment_id` NOT NULL → le
+  /// JOIN n'écarte aucune ligne ; colonnes du paiement préfixées `p_` pour ne
+  /// pas masquer celles de `pa.*` lues par `fromMap`.
   Future<List<LocalPaymentAllocation>> getAllocationsByPayment(
     String paymentId,
   ) async {
-    final rows = await _db.query(
-      'payment_allocations',
-      where: 'payment_id = ?',
-      whereArgs: [paymentId],
+    final rows = await _db.rawQuery(
+      '''
+      SELECT pa.*,
+             p.paid_at           AS p_paid_at,
+             p.payer_first_name  AS p_payer_first_name,
+             p.payer_last_name   AS p_payer_last_name,
+             p.payer_middle_name AS p_payer_middle_name
+      FROM payment_allocations pa
+      JOIN payments p ON p.id = pa.payment_id
+      WHERE pa.payment_id = ?
+      ORDER BY pa.fee_code ASC
+      ''',
+      [paymentId],
     );
     return rows
-        .map((r) => PaymentAllocationLocalModel.fromMap(r).toEntity())
+        .map(
+          (r) => PaymentAllocationLocalModel.fromMap(r).toEntity(
+            payerFirstName: (r['p_payer_first_name'] as String?) ?? '',
+            payerLastName: (r['p_payer_last_name'] as String?) ?? '',
+            payerMiddleName: r['p_payer_middle_name'] as String?,
+            paidAt: r['p_paid_at'] as String?,
+          ),
+        )
         .toList();
   }
 
