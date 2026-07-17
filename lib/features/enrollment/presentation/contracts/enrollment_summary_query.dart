@@ -9,6 +9,18 @@ enum EnrollmentSummaryQueryType {
   byAcademicInfo,
 }
 
+/// Source d'une recherche [EnrollmentSummaryQueryType.byAcademicInfo] côté
+/// listing LOCAL. Discriminateur **interne au bloc local** : il ne change ni le
+/// type de requête (les widgets continuent de tester `byAcademicInfo`) ni le
+/// bloc online (qui l'ignore).
+///
+/// - [reenrollmentCohort] (défaut) : vivier N-1 (cohorte) ∪ dossiers locaux de
+///   l'année courante — la recherche de **réinscription**.
+/// - [currentYearEnrolled] : uniquement les élèves **réellement inscrits** cette
+///   année (dossiers finalisés, `sync_status` SYNCED, PENDING_SYNC ou
+///   SYNC_ERROR) — la recherche de la **Facturation** (élèves facturables).
+enum AcademicInfoSource { reenrollmentCohort, currentYearEnrolled }
+
 /// Photo immuable de la dernière requête de liste jouée — sert à la rejouer
 /// (refresh / pagination) et à reconstituer les chips de critères. Partagée par
 /// le bloc online (`EnrollmentBloc`) et le bloc de listing LOCAL
@@ -32,6 +44,11 @@ class EnrollmentSummariesQuery extends Equatable {
   /// filtre par type (Première inscription, Réinscriptions).
   final String? enrollmentType;
 
+  /// Source d'une recherche `byAcademicInfo` (listing local) — voir
+  /// [AcademicInfoSource]. Ignoré par les autres types de requête et par le
+  /// bloc online.
+  final AcademicInfoSource academicInfoSource;
+
   const EnrollmentSummariesQuery({
     required this.type,
     required this.status,
@@ -45,6 +62,7 @@ class EnrollmentSummariesQuery extends Equatable {
     this.schoolLevelGroupId,
     this.schoolLevelId,
     this.enrollmentType,
+    this.academicInfoSource = AcademicInfoSource.reenrollmentCohort,
   });
 
   /// Réplique la requête en changeant uniquement la page — utilisé par la
@@ -63,6 +81,7 @@ class EnrollmentSummariesQuery extends Equatable {
     schoolLevelGroupId: schoolLevelGroupId,
     schoolLevelId: schoolLevelId,
     enrollmentType: enrollmentType,
+    academicInfoSource: academicInfoSource,
   );
 
   @override
@@ -79,5 +98,6 @@ class EnrollmentSummariesQuery extends Equatable {
     schoolLevelGroupId,
     schoolLevelId,
     enrollmentType,
+    academicInfoSource,
   ];
 }

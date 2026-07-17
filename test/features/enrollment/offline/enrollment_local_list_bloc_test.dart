@@ -293,6 +293,95 @@ void main() {
   );
 
   blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+    'byEnrolledAcademicInfo (Facturation) : appelle currentYearEnrolled, '
+    'jamais byCohort ni getEnrollments',
+    setUp: () {
+      when(
+        () => search.currentYearEnrolled(
+          academicYearId: any(named: 'academicYearId'),
+          schoolLevelId: any(named: 'schoolLevelId'),
+          schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+        ),
+      ).thenAnswer(
+        (_) async => Right([
+          _item(enrollmentId: 'e1', firstName: 'Awa', lastName: 'Ndiaye'),
+          _item(enrollmentId: 'e2', firstName: 'Bob', lastName: 'Diop'),
+        ]),
+      );
+    },
+    build: build,
+    act: (bloc) => bloc.add(
+      const LocalListByEnrolledAcademicInfoRequested(
+        academicYearId: 'ay-2026',
+        firstName: '',
+        lastName: '',
+        surname: '',
+        schoolLevelGroupId: 'grp-1',
+        schoolLevelId: 'lvl-2',
+      ),
+    ),
+    expect: () => [
+      isA<EnrollmentLocalListState>(),
+      isA<EnrollmentLocalListState>()
+          .having(ids, 'ids', ['e1', 'e2'])
+          .having(
+            (s) => s.summariesQueryType,
+            'type',
+            EnrollmentSummaryQueryType.byAcademicInfo,
+          ),
+    ],
+    verify: (_) {
+      verify(
+        () => search.currentYearEnrolled(
+          academicYearId: 'ay-2026',
+          schoolLevelGroupId: 'grp-1',
+          schoolLevelId: 'lvl-2',
+        ),
+      ).called(1);
+      verifyNever(
+        () => search.byCohort(
+          schoolLevelId: any(named: 'schoolLevelId'),
+          schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+        ),
+      );
+      verifyNever(() => getLocal(status: any(named: 'status')));
+    },
+  );
+
+  blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+    'byEnrolledAcademicInfo : raffinement nom client-side sur la base facturable',
+    setUp: () {
+      when(
+        () => search.currentYearEnrolled(
+          academicYearId: any(named: 'academicYearId'),
+          schoolLevelId: any(named: 'schoolLevelId'),
+          schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+        ),
+      ).thenAnswer(
+        (_) async => Right([
+          _item(enrollmentId: 'e1', firstName: 'Awa', lastName: 'Ndiaye'),
+          _item(enrollmentId: 'e2', firstName: 'Bob', lastName: 'Diop'),
+        ]),
+      );
+    },
+    build: build,
+    act: (bloc) => bloc.add(
+      const LocalListByEnrolledAcademicInfoRequested(
+        academicYearId: 'ay-2026',
+        firstName: 'Awa',
+        lastName: '',
+        surname: '',
+        schoolLevelGroupId: '',
+        schoolLevelId: '',
+      ),
+    ),
+    skip: 1,
+    expect: () => [
+      isA<EnrollmentLocalListState>().having(ids, 'ids', ['e1']),
+    ],
+  );
+
+  blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
     'pagination client-side : LocalListPageRequested change de page sans re-lire la base',
     setUp: () {
       when(() => getLocal(status: any(named: 'status'))).thenAnswer(

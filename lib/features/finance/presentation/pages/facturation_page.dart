@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_page_helpers.dart';
@@ -72,7 +72,7 @@ class _FacturationPageState extends State<FacturationPage> {
               key: const ValueKey('facturation-content'),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BlocBuilder<EnrollmentBloc, EnrollmentState>(
+                BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
                   buildWhen: (prev, curr) =>
                       prev.summariesStatus != curr.summariesStatus,
                   builder: (context, enrollmentState) {
@@ -81,15 +81,23 @@ class _FacturationPageState extends State<FacturationPage> {
                       isLoading:
                           enrollmentState.summariesStatus ==
                           EnrollmentLoadStatus.loading,
-                      onSearch: (request) => context.read<EnrollmentBloc>().add(
-                        EnrollmentSummariesByAcademicInfoRequested(
-                          firstName: request.firstName,
-                          lastName: request.lastName,
-                          surname: request.surname,
-                          schoolLevelGroupId: request.schoolLevelGroupId,
-                          schoolLevelId: request.schoolLevelId,
-                        ),
-                      ),
+                      // Recherche 100 % locale des élèves FACTURABLES : ceux dont
+                      // l'inscription de l'année courante est finalisée
+                      // (SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
+                      // réinscription.
+                      onSearch: (request) =>
+                          context.read<EnrollmentLocalListBloc>().add(
+                            LocalListByEnrolledAcademicInfoRequested(
+                              academicYearId:
+                                  bootstrapState.bootstrap?.academicYear.id ??
+                                  '',
+                              firstName: request.firstName,
+                              lastName: request.lastName,
+                              surname: request.surname,
+                              schoolLevelGroupId: request.schoolLevelGroupId,
+                              schoolLevelId: request.schoolLevelId,
+                            ),
+                          ),
                     );
                   },
                 ),

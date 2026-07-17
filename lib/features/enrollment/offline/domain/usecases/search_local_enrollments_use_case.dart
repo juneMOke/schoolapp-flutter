@@ -20,4 +20,17 @@ class SearchLocalEnrollmentsUseCase {
     schoolLevelId: schoolLevelId,
     schoolLevelGroupId: schoolLevelGroupId,
   );
+
+  /// Recherche **Facturation** : les élèves réellement inscrits l'année courante
+  /// (dossiers finalisés SYNCED|PENDING_SYNC|SYNC_ERROR), optionnellement bornés
+  /// au niveau / groupe. Le raffinement nom/surnom est fait côté présentation.
+  Future<Either<Failure, List<LocalEnrollmentListItem>>> currentYearEnrolled({
+    String? academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _repository.searchCurrentYearEnrolledByAcademicInfo(
+    academicYearId: academicYearId,
+    schoolLevelId: schoolLevelId,
+    schoolLevelGroupId: schoolLevelGroupId,
+  );
 }

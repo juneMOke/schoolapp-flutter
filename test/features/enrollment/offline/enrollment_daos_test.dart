@@ -306,6 +306,79 @@ void main() {
     });
   });
 
+  group('searchEnrolledByAcademicInfo (Facturation : élèves facturables)', () {
+    // Force le `sync_status` d'un dossier existant (dossier remonté / en échec).
+    Future<void> setSyncStatus(String enrollmentId, SyncState state) =>
+        db.update(
+          'enrollments',
+          {'sync_status': state.dbValue},
+          where: 'id = ?',
+          whereArgs: [enrollmentId],
+        );
+
+    setUp(() async {
+      // s1/e1 : dossier finalisé PENDING_SYNC (ay-2026, lvl-1).
+      await seedPendingEnrollment(
+        withStudent: student(id: 's1', phone: '+243900'),
+        withEnrollment: enrollment(id: 'e1', studentId: 's1'),
+      );
+      // s3/e3 : dossier SYNCED (ay-2026, lvl-1).
+      await draftDao.insertDraftStudent(student(id: 's3', phone: '+243903'));
+      await draftDao.insertDraftEnrollment(
+        enrollment(id: 'e3', studentId: 's3'),
+      );
+      await setSyncStatus('e3', SyncState.synced);
+      // s4/e4 : dossier finalisé mais push en échec technique (SYNC_ERROR) —
+      // reste facturable (repassera PENDING_SYNC au prochain envoi).
+      await draftDao.insertDraftStudent(student(id: 's4', phone: '+243904'));
+      await draftDao.insertDraftEnrollment(
+        enrollment(id: 'e4', studentId: 's4'),
+      );
+      await setSyncStatus('e4', SyncState.syncError);
+      // s2/e2 : brouillon DRAFT (ay-2026, lvl-1) — inscription NON finalisée.
+      await draftDao.insertDraftStudent(student(id: 's2', phone: '+243902'));
+      await draftDao.insertDraftEnrollment(
+        enrollment(id: 'e2', studentId: 's2'),
+      );
+    });
+
+    test('remonte les dossiers finalisés (SYNCED|PENDING_SYNC|SYNC_ERROR), '
+        'exclut les DRAFT', () async {
+      final rows = await readDao.searchEnrolledByAcademicInfo(
+        academicYearId: 'ay-2026',
+      );
+      expect(
+        rows.map((r) => r.studentId).toSet(),
+        {'s1', 's3', 's4'},
+        reason: 'SYNC_ERROR inclus (s4) ; brouillon DRAFT s2 exclu',
+      );
+    });
+
+    test('scopé à l\'année demandée', () async {
+      expect(
+        await readDao.searchEnrolledByAcademicInfo(academicYearId: 'ay-1999'),
+        isEmpty,
+      );
+    });
+
+    test('borné au niveau quand fourni', () async {
+      expect(
+        await readDao.searchEnrolledByAcademicInfo(
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'lvl-1',
+        ),
+        hasLength(3),
+      );
+      expect(
+        await readDao.searchEnrolledByAcademicInfo(
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'other',
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   group('getEnrollments — filtre par type (anti-confusion pré-inscription / '
       'réinscription)', () {
     setUp(() async {

@@ -189,3 +189,44 @@ class LocalListByAcademicInfoRequested extends EnrollmentLocalListEvent {
     size,
   ];
 }
+
+/// Recherche **Facturation** : les élèves réellement inscrits l'année courante
+/// (dossiers finalisés SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
+/// réinscription N-1. Base = table `enrollments` scopée année + niveaux ;
+/// raffinement nom client-side. Réutilise le type de requête `byAcademicInfo`
+/// (les widgets de résultats restent inchangés), la source étant portée par
+/// [AcademicInfoSource.currentYearEnrolled].
+class LocalListByEnrolledAcademicInfoRequested
+    extends EnrollmentLocalListEvent {
+  final String academicYearId;
+  final String firstName;
+  final String lastName;
+  final String surname;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
+  final int page;
+  final int size;
+
+  const LocalListByEnrolledAcademicInfoRequested({
+    required this.academicYearId,
+    required this.firstName,
+    required this.lastName,
+    required this.surname,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
+  });
+
+  @override
+  List<Object?> get props => [
+    academicYearId,
+    firstName,
+    lastName,
+    surname,
+    schoolLevelGroupId,
+    schoolLevelId,
+    page,
+    size,
+  ];
+}

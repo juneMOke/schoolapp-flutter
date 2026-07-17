@@ -213,6 +213,18 @@ abstract class EnrollmentOfflineRepository {
     String? schoolLevelGroupId,
   });
 
+  /// Recherche **Facturation** : les élèves réellement inscrits l'année courante
+  /// (dossiers finalisés `sync_status` SYNCED|PENDING_SYNC|SYNC_ERROR),
+  /// optionnellement bornés au groupe de niveau / niveau. [academicYearId] non
+  /// fourni → résolu via l'année courante locale (`is_current`) ; non résolue →
+  /// liste vide.
+  Future<Either<Failure, List<LocalEnrollmentListItem>>>
+  searchCurrentYearEnrolledByAcademicInfo({
+    String? academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  });
+
   /// Recherche de **réinscription** : le vivier N-1 (cohorte locale filtrée par
   /// niveau) + les dossiers locaux de l'année **courante** (résolue via
   /// `is_current`) pour la superposition read-your-writes. Le scope année

@@ -62,6 +62,7 @@ class EnrollmentLocalListBloc
     );
     on<LocalListByDateOfBirthRequested>(_onByDateOfBirth);
     on<LocalListByAcademicInfoRequested>(_onByAcademicInfo);
+    on<LocalListByEnrolledAcademicInfoRequested>(_onByEnrolledAcademicInfo);
   }
 
   void _onReset(
@@ -195,6 +196,26 @@ class EnrollmentLocalListBloc
     ),
   );
 
+  Future<void> _onByEnrolledAcademicInfo(
+    LocalListByEnrolledAcademicInfoRequested event,
+    Emitter<EnrollmentLocalListState> emit,
+  ) => _load(
+    emit,
+    EnrollmentSummariesQuery(
+      type: EnrollmentSummaryQueryType.byAcademicInfo,
+      academicInfoSource: AcademicInfoSource.currentYearEnrolled,
+      status: '',
+      academicYearId: event.academicYearId,
+      page: event.page,
+      size: event.size,
+      firstName: event.firstName,
+      lastName: event.lastName,
+      surname: event.surname,
+      schoolLevelGroupId: event.schoolLevelGroupId,
+      schoolLevelId: event.schoolLevelId,
+    ),
+  );
+
   /// Lit la base locale adaptée au type de requête, raffine/pagine côté client,
   /// met en cache la liste filtrée complète et émet la page demandée.
   Future<void> _load(
@@ -214,40 +235,64 @@ class EnrollmentLocalListBloc
 
     // Chaque branche produit directement la liste de résumés PROJETÉE (raffinée
     // nom/DOB), pour un `fold` uniforme malgré des sources différentes :
-    //  - byAcademicInfo (RÉINSCRIPTION) : vivier N-1 (cohorte) ∪ dossiers locaux
+    //  - byAcademicInfo / réinscription : vivier N-1 (cohorte) ∪ dossiers locaux
     //    de l'année courante, superposés/dédupliqués par `studentId` ;
+    //  - byAcademicInfo / Facturation : élèves réellement inscrits l'année
+    //    courante (dossiers finalisés SYNCED|PENDING_SYNC|SYNC_ERROR) ;
     //  - autres : liste `enrollments` scopée statut + année (parité online).
-    final Either<Failure, List<EnrollmentSummary>> projectedResult =
-        switch (query.type) {
-          EnrollmentSummaryQueryType.byAcademicInfo =>
-            (await _search.byCohort(
-              schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
-              schoolLevelId: _nullIfEmpty(query.schoolLevelId),
-            )).map(
-              (r) => EnrollmentLocalListProjector.projectReenrollment(
-                candidates: r.candidates,
-                localDossiers: r.localDossiers,
-                firstName: query.firstName,
-                lastName: query.lastName,
-                surname: query.surname,
-                dateOfBirth: query.dateOfBirth,
-              ),
-            ),
-          _ =>
-            (await _getEnrollments(
-              status: _nullIfEmpty(query.status),
-              academicYearId: _nullIfEmpty(query.academicYearId),
-              enrollmentType: query.enrollmentType,
-            )).map(
-              (items) => EnrollmentLocalListProjector.project(
-                items,
-                firstName: query.firstName,
-                lastName: query.lastName,
-                surname: query.surname,
-                dateOfBirth: query.dateOfBirth,
-              ),
-            ),
-        };
+    final Either<Failure, List<EnrollmentSummary>> projectedResult = switch ((
+      query.type,
+      query.academicInfoSource,
+    )) {
+      (
+        EnrollmentSummaryQueryType.byAcademicInfo,
+        AcademicInfoSource.reenrollmentCohort,
+      ) =>
+        (await _search.byCohort(
+          schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
+          schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+        )).map(
+          (r) => EnrollmentLocalListProjector.projectReenrollment(
+            candidates: r.candidates,
+            localDossiers: r.localDossiers,
+            firstName: query.firstName,
+            lastName: query.lastName,
+            surname: query.surname,
+            dateOfBirth: query.dateOfBirth,
+          ),
+        ),
+      (
+        EnrollmentSummaryQueryType.byAcademicInfo,
+        AcademicInfoSource.currentYearEnrolled,
+      ) =>
+        (await _search.currentYearEnrolled(
+          academicYearId: _nullIfEmpty(query.academicYearId),
+          schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
+          schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+        )).map(
+          (items) => EnrollmentLocalListProjector.project(
+            items,
+            firstName: query.firstName,
+            lastName: query.lastName,
+            surname: query.surname,
+            dateOfBirth: query.dateOfBirth,
+          ),
+        ),
+      _ =>
+        (await _getEnrollments(
+          status: _nullIfEmpty(query.status),
+          academicYearId: _nullIfEmpty(query.academicYearId),
+          enrollmentType: query.enrollmentType,
+        )).map(
+          (items) => EnrollmentLocalListProjector.project(
+            items,
+            firstName: query.firstName,
+            lastName: query.lastName,
+            surname: query.surname,
+            dateOfBirth: query.dateOfBirth,
+          ),
+        ),
+    };
 
     // Une requête plus récente a pris la main pendant nos awaits : on abandonne
     // ce résultat périmé (ni cache ni emit) — la génération courante gagnera.

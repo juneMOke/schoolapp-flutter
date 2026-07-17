@@ -113,6 +113,45 @@ class EnrollmentReadDao {
     return rows.map(_listItem).toList();
   }
 
+  /// Recherche des élèves **réellement inscrits** l'année [academicYearId]
+  /// (Facturation) : dossiers **finalisés** — `sync_status` ∈ {SYNCED,
+  /// PENDING_SYNC, SYNC_ERROR} — donc l'inscription est terminée (les DRAFT du
+  /// wizard et les créances PROVISIONAL sont exclus). `SYNC_ERROR` est inclus :
+  /// c'est un dossier finalisé dont le push a échoué techniquement (il repassera
+  /// PENDING_SYNC au prochain envoi) — l'élève reste facturable entre-temps.
+  /// Optionnellement bornée au groupe de niveau / niveau. Le raffinement
+  /// nom/surnom reste client-side (projector).
+  Future<List<LocalEnrollmentListItem>> searchEnrolledByAcademicInfo({
+    required String academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) async {
+    final clauses = <String>[
+      'e.academic_year_id = ?',
+      'e.sync_status IN (?, ?, ?)',
+    ];
+    final args = <Object?>[
+      academicYearId,
+      SyncState.synced.dbValue,
+      SyncState.pendingSync.dbValue,
+      SyncState.syncError.dbValue,
+    ];
+    if (schoolLevelId != null) {
+      clauses.add('e.school_level_id = ?');
+      args.add(schoolLevelId);
+    }
+    if (schoolLevelGroupId != null) {
+      clauses.add('e.school_level_group_id = ?');
+      args.add(schoolLevelGroupId);
+    }
+    final where = 'WHERE ${clauses.join(' AND ')}';
+    final rows = await _db.rawQuery(
+      '$_listSelect $where ORDER BY e.updated_at DESC',
+      args,
+    );
+    return rows.map(_listItem).toList();
+  }
+
   /// Référence (`id` + axe synchro) d'un dossier local **déjà existant** pour un
   /// élève sur une année donnée. `null` si aucun. Sert à la fois à la garde anti
   /// double-réinscription (présence) et à la **sonde au tap** RE (le `syncState`

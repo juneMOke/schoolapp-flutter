@@ -362,6 +362,25 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   );
 
   @override
+  Future<Either<Failure, List<LocalEnrollmentListItem>>>
+  searchCurrentYearEnrolledByAcademicInfo({
+    String? academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _guardList(() async {
+    // Année passée par l'appelant (bootstrap Facturation) sinon année courante
+    // locale. Non résolue (référentiel non pullé) → aucun résultat : la
+    // recherche est intrinsèquement scopée à une année.
+    final yearId = academicYearId ?? await _seedDao.findCurrentAcademicYearId();
+    if (yearId == null) return const <LocalEnrollmentListItem>[];
+    return _readDao.searchEnrolledByAcademicInfo(
+      academicYearId: yearId,
+      schoolLevelId: schoolLevelId,
+      schoolLevelGroupId: schoolLevelGroupId,
+    );
+  });
+
+  @override
   Future<Either<Failure, LocalDossierRef?>> probeLocalReenrollmentDossier({
     required String studentId,
     required String academicYearId,
