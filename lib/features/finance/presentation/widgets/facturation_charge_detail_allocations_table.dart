@@ -4,12 +4,12 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Table des paiements affectés à un frais : une ligne par allocation
-/// (libellé à gauche · montant imputé à l'extrême droite) + total alloué.
+/// (payeur + date du versement à gauche · montant imputé à l'extrême droite) +
+/// total alloué.
 ///
 /// Épouse la largeur disponible (pas de défilement horizontal) → la colonne
 /// montant reste toujours visible, y compris dans une popin étroite.
@@ -73,24 +73,68 @@ class _AllocationRow extends StatelessWidget {
     required this.l10n,
   });
 
+  /// Nom complet du payeur (Nom · Post-nom · Prénom — une personne, pas
+  /// l'élève), même convention que la ligne de versement.
+  String _payerFullName() {
+    final fullName = [
+      allocation.payerLastName,
+      allocation.payerMiddleName ?? '',
+      allocation.payerFirstName,
+    ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
+    return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final paidAt = allocation.paidAt;
+    final date = paidAt == null
+        ? l10n.facturationDetailUnknownValue
+        : MaterialLocalizations.of(context).formatShortDate(paidAt);
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingM,
         vertical: AppDimensions.spacingS + 2,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(
-              allocation.feeCode.localizedFeeLabel(l10n),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _payerFullName(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 13,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: AppDimensions.spacingXS),
+                    Flexible(
+                      child: Text(
+                        date,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppDimensions.spacingM),
