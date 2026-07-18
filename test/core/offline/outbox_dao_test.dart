@@ -90,6 +90,22 @@ void main() {
     expect(await dao.pendingCount(), 0);
   });
 
+  test('markAcked gardé par created_at : n\'acquitte PAS une entrée ré-enfilée '
+      'en vol (anti-TOCTOU)', () async {
+    // Dispatch en cours sur l'entrée created_at=1000.
+    await dao.enqueue(entry(id: 'agg', createdAt: 1000));
+    // Pendant le dispatch, une nouvelle écriture ré-enfile le MÊME id
+    // (ConflictAlgorithm.replace) avec un nouveau created_at → PENDING.
+    await dao.enqueue(entry(id: 'agg', createdAt: 2000));
+    // L'ACK du dispatch en vol tente d'acquitter l'ancienne version.
+    await dao.markAcked('agg', expectedCreatedAt: 1000);
+    // La garde protège l'entrée fraîche : elle reste PENDING (re-poussable).
+    final pending = await dao.pendingReady(5000);
+    expect(pending, hasLength(1));
+    expect(pending.first.createdAt, 2000);
+    expect(await dao.pendingCount(), 1);
+  });
+
   test('markSyncError passe l\'entrée en SYNC_ERROR avec message', () async {
     await dao.enqueue(entry(id: 'e1'));
     await dao.markSyncError('e1', 'champ requis manquant');

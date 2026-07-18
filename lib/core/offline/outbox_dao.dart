@@ -53,12 +53,19 @@ class OutboxDao {
   }
 
   /// Marque une entrée comme acquittée (ACK serveur reçu).
-  Future<void> markAcked(String id) async {
+  ///
+  /// [expectedCreatedAt] : garde anti-TOCTOU. Si fourni, on n'acquitte QUE si
+  /// l'entrée porte toujours ce `created_at`. Une entrée **ré-enfilée** pendant
+  /// le dispatch en vol (même id, `ConflictAlgorithm.replace`, nouveau
+  /// `created_at`) ne doit PAS être acquittée : elle porte un nouvel état encore
+  /// à pousser. Sans cette garde, `markAcked` puis `deleteAcked` purgeraient
+  /// silencieusement une écriture non synchronisée (perte de données).
+  Future<void> markAcked(String id, {int? expectedCreatedAt}) async {
     await _db.update(
       table,
       {'status': OutboxStatus.acked.dbValue, 'last_error': null},
-      where: 'id = ?',
-      whereArgs: [id],
+      where: expectedCreatedAt == null ? 'id = ?' : 'id = ? AND created_at = ?',
+      whereArgs: expectedCreatedAt == null ? [id] : [id, expectedCreatedAt],
     );
   }
 

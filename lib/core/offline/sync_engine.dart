@@ -117,7 +117,12 @@ class SyncEngine {
           final result = await handler.dispatch(entry);
           switch (result.outcome) {
             case OutboxDispatchOutcome.acked:
-              await _outbox.markAcked(entry.id);
+              // Garde anti-TOCTOU : n'acquitte que si l'entrée n'a pas été
+              // ré-enfilée (nouveau `created_at`) pendant le dispatch en vol.
+              await _outbox.markAcked(
+                entry.id,
+                expectedCreatedAt: entry.createdAt,
+              );
               acked++;
             case OutboxDispatchOutcome.retry:
               if (await _reschedule(entry, result.error)) {
