@@ -6,11 +6,11 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create_dialog.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_tab.dart';
@@ -59,8 +59,8 @@ class _DisciplinaryStudentDetailPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _fadeController.forward();
-      context.read<DisciplinaryCaseBloc>().add(
-        DisciplinaryCaseListRequested(
+      context.read<DisciplinaryCaseOfflineBloc>().add(
+        LoadOfflineDisciplinaryCases(
           studentId: widget.intent.studentId,
           academicYearId: widget.intent.academicYearId,
         ),
@@ -98,16 +98,22 @@ class _DisciplinaryStudentDetailPageState
             children: [
               _buildBreadcrumb(context, l10n),
               const SizedBox(height: AppDimensions.spacingS),
-              BlocBuilder<DisciplinaryCaseBloc, DisciplinaryCaseState>(
+              BlocBuilder<
+                DisciplinaryCaseOfflineBloc,
+                DisciplinaryCaseOfflineState
+              >(
+                // Ne reconstruit que sur les états d'affichage : un état
+                // transitoire d'écriture laisse le dernier compte à l'écran.
                 buildWhen: (prev, curr) =>
-                    prev.listStatus != curr.listStatus ||
-                    prev.cases != curr.cases,
+                    curr is DisciplinaryOfflineInitial ||
+                    curr is DisciplinaryOfflineLoading ||
+                    curr is DisciplinaryOfflineCasesLoaded ||
+                    curr is DisciplinaryOfflineError,
                 builder: (context, state) {
                   // Compte connu seulement une fois la liste chargée (sinon le
                   // chip afficherait « Aucun cas ouvert » pendant le chargement).
-                  final int? openCount =
-                      state.listStatus == DisciplinaryCaseStatusState.success
-                      ? _openCasesCount(state)
+                  final int? openCount = state is DisciplinaryOfflineCasesLoaded
+                      ? _openCasesCount(state.cases)
                       : null;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,11 +161,11 @@ class _DisciplinaryStudentDetailPageState
     );
   }
 
-  int _openCasesCount(DisciplinaryCaseState state) => state.cases
+  int _openCasesCount(List<OfflineDisciplinaryCase> cases) => cases
       .where(
         (c) =>
-            c.status == DisciplinaryCaseStatus.open ||
-            c.status == DisciplinaryCaseStatus.inProgress,
+            c.status == DisciplinaryStatus.open ||
+            c.status == DisciplinaryStatus.pending,
       )
       .length;
 
@@ -239,10 +245,9 @@ class _DisciplinaryStudentDetailPageState
   }
 
   void _showCreateDialog(BuildContext context) {
-    final disciplinaryCaseBloc = context.read<DisciplinaryCaseBloc>();
-    // Écriture offline-first : le dialog dispatche désormais sur le BLoC
-    // offline (scopé par AttendanceFeatureScope). showDialog monte sous le
-    // Navigator racine, hors du scope : on relaie donc le BLoC via .value.
+    // Écriture offline-first : le dialog dispatche sur le BLoC offline (scopé
+    // par AttendanceFeatureScope). showDialog monte sous le Navigator racine,
+    // hors du scope : on relaie donc le BLoC via .value.
     final disciplinaryCaseOfflineBloc = context
         .read<DisciplinaryCaseOfflineBloc>();
     final studentId = widget.intent.studentId;
@@ -263,8 +268,10 @@ class _DisciplinaryStudentDetailPageState
       ),
     ).then((_) {
       if (!mounted) return;
-      disciplinaryCaseBloc.add(
-        DisciplinaryCaseListRequested(
+      // La liste locale se recharge (le dialog a enfilé une création → l'onglet
+      // recharge sur CasePendingSync ; on force aussi ici pour l'en-tête).
+      disciplinaryCaseOfflineBloc.add(
+        LoadOfflineDisciplinaryCases(
           studentId: studentId,
           academicYearId: academicYearId,
         ),

@@ -1695,7 +1695,23 @@
   },
   "disciplinaryAdvanceTakeCharge": "Take charge",
   "disciplinaryAdvanceClose": "Close",
+  "disciplinaryStatusOfflinePending": "In progress",
+  "disciplinaryStatusOfflineResolved": "Resolved",
+  "disciplinaryStatusOfflineDismissed": "Dismissed",
+  "disciplinaryAdvanceResolve": "Resolve",
+  "disciplinaryAdvanceDismiss": "Dismiss",
+  "disciplinaryCaseResolvedLabel": "Case resolved",
+  "disciplinaryCaseDismissedLabel": "Dismissed",
   "disciplinaryCaseClosedLabel": "Case closed",
+  "disciplinaryCommentsCountBadge": "{count, plural, =1{1 comment} other{{count} comments}}",
+  "@disciplinaryCommentsCountBadge": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCommentsDialogTitle": "Comments",
+  "disciplinaryCommentsEmpty": "No comments yet.",
+  "disciplinaryCommentAddHint": "Add a comment…",
+  "disciplinaryCommentAddAction": "Add",
+  "disciplinaryCommentsCloseAction": "Close",
   "disciplinaryCasesCountPill": "{count, plural, =1{1 case} other{{count} cases}}",
   "@disciplinaryCasesCountPill": {
     "placeholders": { "count": { "type": "int" } }

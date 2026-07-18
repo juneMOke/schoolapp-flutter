@@ -6636,11 +6636,89 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get disciplinaryAdvanceClose;
 
+  /// No description provided for @disciplinaryStatusOfflinePending.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get disciplinaryStatusOfflinePending;
+
+  /// No description provided for @disciplinaryStatusOfflineResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get disciplinaryStatusOfflineResolved;
+
+  /// No description provided for @disciplinaryStatusOfflineDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get disciplinaryStatusOfflineDismissed;
+
+  /// No description provided for @disciplinaryAdvanceResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get disciplinaryAdvanceResolve;
+
+  /// No description provided for @disciplinaryAdvanceDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get disciplinaryAdvanceDismiss;
+
+  /// No description provided for @disciplinaryCaseResolvedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Case resolved'**
+  String get disciplinaryCaseResolvedLabel;
+
+  /// No description provided for @disciplinaryCaseDismissedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get disciplinaryCaseDismissedLabel;
+
   /// No description provided for @disciplinaryCaseClosedLabel.
   ///
   /// In en, this message translates to:
   /// **'Case closed'**
   String get disciplinaryCaseClosedLabel;
+
+  /// No description provided for @disciplinaryCommentsCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 comment} other{{count} comments}}'**
+  String disciplinaryCommentsCountBadge(int count);
+
+  /// No description provided for @disciplinaryCommentsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get disciplinaryCommentsDialogTitle;
+
+  /// No description provided for @disciplinaryCommentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get disciplinaryCommentsEmpty;
+
+  /// No description provided for @disciplinaryCommentAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get disciplinaryCommentAddHint;
+
+  /// No description provided for @disciplinaryCommentAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get disciplinaryCommentAddAction;
+
+  /// No description provided for @disciplinaryCommentsCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get disciplinaryCommentsCloseAction;
 
   /// No description provided for @disciplinaryCasesCountPill.
   ///

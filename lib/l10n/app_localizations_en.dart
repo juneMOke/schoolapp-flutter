@@ -3859,7 +3859,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryAdvanceClose => 'Close';
 
   @override
+  String get disciplinaryStatusOfflinePending => 'In progress';
+
+  @override
+  String get disciplinaryStatusOfflineResolved => 'Resolved';
+
+  @override
+  String get disciplinaryStatusOfflineDismissed => 'Dismissed';
+
+  @override
+  String get disciplinaryAdvanceResolve => 'Resolve';
+
+  @override
+  String get disciplinaryAdvanceDismiss => 'Dismiss';
+
+  @override
+  String get disciplinaryCaseResolvedLabel => 'Case resolved';
+
+  @override
+  String get disciplinaryCaseDismissedLabel => 'Dismissed';
+
+  @override
   String get disciplinaryCaseClosedLabel => 'Case closed';
+
+  @override
+  String disciplinaryCommentsCountBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '1 comment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get disciplinaryCommentsDialogTitle => 'Comments';
+
+  @override
+  String get disciplinaryCommentsEmpty => 'No comments yet.';
+
+  @override
+  String get disciplinaryCommentAddHint => 'Add a comment…';
+
+  @override
+  String get disciplinaryCommentAddAction => 'Add';
+
+  @override
+  String get disciplinaryCommentsCloseAction => 'Close';
 
   @override
   String disciplinaryCasesCountPill(int count) {

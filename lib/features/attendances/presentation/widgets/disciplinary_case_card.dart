@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
+import 'package:school_app_flutter/features/attendances/presentation/helpers/disciplinary_status_ui.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_status_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Carte d'un cas disciplinaire : liséré de gravité, en-tête (gravité, date,
-/// titre, catégorie, statut), contenu, chip de sanction, frise de statut et
-/// bouton d'avancement.
+/// Carte d'un cas disciplinaire (local) : liséré de gravité, en-tête (gravité,
+/// date, titre, catégorie, statut), contenu, chip de sanction, badge de
+/// commentaires, frise de statut et actions (avancer / classer sans suite).
 class DisciplinaryCaseCard extends StatelessWidget {
-  final DisciplinaryCaseSummary caseData;
+  final OfflineDisciplinaryCase caseData;
 
-  /// Pousse le cas au statut suivant. Dormant pour l'instant (pas d'endpoint
-  /// backend) ; le bouton reste présent et prêt à être câblé.
+  /// Nombre de commentaires (badge). `content` détaillé chargé au détail seul.
+  final int commentCount;
+
+  /// Avance le cas au statut suivant (Ouvert→Pris en charge→Résolu).
   final VoidCallback? onAdvance;
+
+  /// Classe le cas sans suite (DISMISSED). Disponible si non terminal.
+  final VoidCallback? onDismiss;
+
+  /// Ouvre le fil de commentaires du cas (lecture + ajout).
+  final VoidCallback? onOpenComments;
 
   const DisciplinaryCaseCard({
     super.key,
     required this.caseData,
+    this.commentCount = 0,
     this.onAdvance,
+    this.onDismiss,
+    this.onOpenComments,
   });
 
   @override
@@ -76,8 +87,10 @@ class DisciplinaryCaseCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: AppDimensions.spacingM),
-                _SanctionChip(sanction: caseData.sanction),
+                if (caseData.sanction != null) ...[
+                  const SizedBox(height: AppDimensions.spacingM),
+                  _SanctionChip(sanction: caseData.sanction!),
+                ],
                 const SizedBox(height: AppDimensions.spacingM),
                 const Divider(height: 1, color: AppColors.border),
                 const SizedBox(height: AppDimensions.spacingM),
@@ -101,8 +114,8 @@ class DisciplinaryCaseCard extends StatelessWidget {
           runSpacing: AppDimensions.spacingXS,
           children: [
             _SeverityChip(severity: caseData.severity),
-            if (caseData.createdAt != null)
-              _DateLabel(date: caseData.createdAt!),
+            _DateLabel(date: caseData.disciplinaryCaseDate),
+            if (commentCount > 0) _CommentBadge(count: commentCount),
           ],
         ),
         const SizedBox(height: AppDimensions.spacingXS),
@@ -131,33 +144,34 @@ class DisciplinaryCaseCard extends StatelessWidget {
   }
 
   Widget _footer(BuildContext context, AppLocalizations l10n) {
-    final stepper = DisciplinaryCaseStatusStepper(status: caseData.status);
-    final action = _AdvanceAction(
-      status: caseData.status,
-      onAdvance: onAdvance,
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth <
-            AppBreakpoints.disciplinaryCardFooterStackMax) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              stepper,
-              const SizedBox(height: AppDimensions.spacingM),
-              Align(alignment: Alignment.centerLeft, child: action),
-            ],
-          );
-        }
-        return Row(
+    // Frise au-dessus, actions dessous : l'avancement peut porter 2 boutons
+    // (avancer + classer sans suite) → empilement pour éviter tout débordement.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DisciplinaryCaseStatusStepper(status: caseData.status),
+        const SizedBox(height: AppDimensions.spacingM),
+        Row(
           children: [
-            Expanded(child: stepper),
-            const SizedBox(width: AppDimensions.spacingM),
-            action,
+            Expanded(
+              child: _AdvanceAction(
+                status: caseData.status,
+                onAdvance: onAdvance,
+                onDismiss: onDismiss,
+              ),
+            ),
+            if (onOpenComments != null)
+              TextButton.icon(
+                onPressed: onOpenComments,
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
+                label: Text(l10n.disciplinaryCommentsDialogTitle),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.bleuArdoise,
+                ),
+              ),
           ],
-        );
-      },
+        ),
+      ],
     );
   }
 }
@@ -224,8 +238,34 @@ class _DateLabel extends StatelessWidget {
   }
 }
 
+class _CommentBadge extends StatelessWidget {
+  final int count;
+
+  const _CommentBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.chat_bubble_outline_rounded,
+          size: AppDimensions.disciplinaryChipIconSize,
+          color: AppColors.textMuted,
+        ),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Text(
+          l10n.disciplinaryCommentsCountBadge(count),
+          style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
+        ),
+      ],
+    );
+  }
+}
+
 class _StatusPill extends StatelessWidget {
-  final DisciplinaryCaseStatus status;
+  final DisciplinaryStatus status;
 
   const _StatusPill({required this.status});
 
@@ -305,41 +345,64 @@ class _SanctionChip extends StatelessWidget {
 }
 
 class _AdvanceAction extends StatelessWidget {
-  final DisciplinaryCaseStatus status;
+  final DisciplinaryStatus status;
   final VoidCallback? onAdvance;
+  final VoidCallback? onDismiss;
 
-  const _AdvanceAction({required this.status, required this.onAdvance});
+  const _AdvanceAction({
+    required this.status,
+    required this.onAdvance,
+    required this.onDismiss,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final next = status.nextStatus;
     final label = status.advanceActionLabel(l10n);
+    final target = status.advanceTarget;
 
-    if (next == null || label == null) {
-      // Statut terminal : pas d'action, on rappelle la clôture.
+    if (label == null || target == null) {
+      // Statut terminal : pas d'action, on rappelle l'issue du dossier.
+      final terminal = status.terminalLabel(l10n);
+      if (terminal == null) return const SizedBox.shrink();
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.check_circle_outline_rounded,
+          Icon(
+            status.getIcon(),
             size: AppDimensions.detailMiniIconSize,
-            color: AppColors.vertSavane,
+            color: status.getColor(),
           ),
           const SizedBox(width: AppDimensions.spacingXS),
           Text(
-            l10n.disciplinaryCaseClosedLabel,
-            style: AppTextStyles.action.copyWith(color: AppColors.vertSavane),
+            terminal,
+            style: AppTextStyles.action.copyWith(color: status.getColor()),
           ),
         ],
       );
     }
 
-    return PrimaryButton(
-      label: label,
-      icon: next.getIcon(),
-      fullWidth: false,
-      onPressed: onAdvance,
+    return Wrap(
+      spacing: AppDimensions.spacingS,
+      runSpacing: AppDimensions.spacingXS,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        PrimaryButton(
+          label: label,
+          icon: target.getIcon(),
+          fullWidth: false,
+          onPressed: onAdvance,
+        ),
+        if (status.canDismiss && onDismiss != null)
+          TextButton.icon(
+            onPressed: onDismiss,
+            icon: const Icon(Icons.block_rounded, size: 16),
+            label: Text(l10n.disciplinaryAdvanceDismiss),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+          ),
+      ],
     );
   }
 }

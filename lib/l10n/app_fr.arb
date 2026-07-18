@@ -1705,11 +1705,27 @@
   },
   "disciplinaryAdvanceTakeCharge": "Prendre en charge",
   "disciplinaryAdvanceClose": "Clôturer",
+  "disciplinaryStatusOfflinePending": "Pris en charge",
+  "disciplinaryStatusOfflineResolved": "Résolu",
+  "disciplinaryStatusOfflineDismissed": "Classé sans suite",
+  "disciplinaryAdvanceResolve": "Résoudre",
+  "disciplinaryAdvanceDismiss": "Classer sans suite",
+  "disciplinaryCaseResolvedLabel": "Dossier résolu",
+  "disciplinaryCaseDismissedLabel": "Classé sans suite",
   "disciplinaryCaseClosedLabel": "Dossier clôturé",
   "disciplinaryCasesCountPill": "{count, plural, =1{1 cas} other{{count} cas}}",
   "@disciplinaryCasesCountPill": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "disciplinaryCommentsCountBadge": "{count, plural, =1{1 commentaire} other{{count} commentaires}}",
+  "@disciplinaryCommentsCountBadge": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "disciplinaryCommentsDialogTitle": "Commentaires",
+  "disciplinaryCommentsEmpty": "Aucun commentaire pour l'instant.",
+  "disciplinaryCommentAddHint": "Ajouter un commentaire…",
+  "disciplinaryCommentAddAction": "Ajouter",
+  "disciplinaryCommentsCloseAction": "Fermer",
   "disciplinaryCasesOpenPill": "{count, plural, =1{1 ouvert} other{{count} ouverts}}",
   "@disciplinaryCasesOpenPill": {
     "placeholders": { "count": { "type": "int" } }
