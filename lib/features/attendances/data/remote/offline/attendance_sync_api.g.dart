@@ -20,27 +20,35 @@ class _AttendanceSyncApi implements AttendanceSyncApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<void> pushDailyAttendance(
+  Future<AttendanceAggregateResponseModel> submitAttendance(
     Map<String, dynamic> extras,
-    OfflineDailyAttendanceCommandModel command,
+    AttendanceAggregateRequestModel aggregate,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(command.toJson());
-    final _options = _setStreamType<void>(
+    _data.addAll(aggregate.toJson());
+    final _options = _setStreamType<AttendanceAggregateResponseModel>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/attendances',
+            '/api/v1/sync/attendance',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    await _dio.fetch<void>(_options);
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late AttendanceAggregateResponseModel _value;
+    try {
+      _value = AttendanceAggregateResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

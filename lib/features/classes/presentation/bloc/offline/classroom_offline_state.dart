@@ -7,15 +7,14 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 /// État unique offline-first du module Classe (CF2/CF3/CF4).
 ///
 /// Calqué sur [ClassroomState] (online) : un seul état porteur, muté par
-/// `copyWith`, exposant en parallèle les classes, le roster et la réassignation
-/// — car l'écran d'organisation affiche ces trois zones simultanément.
+/// `copyWith`, exposant en parallèle les classes, le roster, le transfert
+/// (offline) et l'affectation d'un non-réparti (online).
 ///
-/// La réassignation (CF4 Option A) est ONLINE : PAS d'état pending-sync. Ses
-/// trois issues sont distinguées via [reassignStatus] + [reassignRePullFailed] :
-///  - `failure`               → déplacement serveur KO (Left) ;
-///  - `success` + `false`     → déplacement + re-pull local OK (Right(true)) ;
-///  - `success` + `true`      → déplacement OK mais re-pull local KO, à retenter
-///                              plus tard (Right(false), succès partiel).
+/// Deux gestes d'écriture, deux régimes :
+///  - **Transfert** (CF4, ADR-004 amendé) : OFFLINE, événement + outbox →
+///    [transferStatus] + [transferPendingSync] (succès = « en attente de synchro »).
+///  - **Affectation d'un non-réparti** (distribution, ADR-004) : ONLINE, PUT +
+///    re-pull → [reassignStatus] + [reassignRePullFailed].
 class ClassroomOfflineState extends Equatable {
   // ── Classes (CF3) ──
   final ClassroomStatus classroomsStatus;
@@ -34,13 +33,31 @@ class ClassroomOfflineState extends Equatable {
   /// `syncedAt` du bilan de pull.
   final int? freshness;
 
-  // ── Réassignation ONLINE (CF4) ──
+  // ── Rosters composés du niveau (CF4, affichage optimiste) ──
+  final ClassroomStatus levelRostersStatus;
+
+  /// Roster composé (miroir ± transferts pending) par `classroomId`. Vide tant
+  /// qu'aucun niveau n'a été chargé.
+  final Map<String, List<ClassroomMember>> levelRosters;
+
+  // ── Transfert OFFLINE (CF4) ──
+  final ClassroomStatus transferStatus;
+  final ClassroomErrorType transferErrorType;
+
+  /// Élève dont le transfert est en cours (anti-double-envoi UI).
+  final String transferringStudentId;
+
+  /// `true` après un transfert enregistré localement (événement enfilé) : le
+  /// geste est acquis en local et « en attente de synchro ».
+  final bool transferPendingSync;
+
+  // ── Affectation d'un non-réparti ONLINE (distribution) ──
   final ClassroomStatus reassignStatus;
   final ClassroomErrorType reassignErrorType;
   final String reassigningMemberId;
 
-  /// `true` uniquement après un succès partiel (Right(false)) : le déplacement
-  /// serveur est acquis mais le re-pull local a échoué (à retenter).
+  /// `true` uniquement après un succès partiel (Right(false)) : l'affectation
+  /// serveur est acquise mais le re-pull local a échoué (à retenter).
   final bool reassignRePullFailed;
 
   const ClassroomOfflineState({
@@ -52,6 +69,12 @@ class ClassroomOfflineState extends Equatable {
     this.rosterErrorType = ClassroomErrorType.none,
     this.syncStatus = ClassroomStatus.initial,
     this.freshness,
+    this.levelRostersStatus = ClassroomStatus.initial,
+    this.levelRosters = const {},
+    this.transferStatus = ClassroomStatus.initial,
+    this.transferErrorType = ClassroomErrorType.none,
+    this.transferringStudentId = '',
+    this.transferPendingSync = false,
     this.reassignStatus = ClassroomStatus.initial,
     this.reassignErrorType = ClassroomErrorType.none,
     this.reassigningMemberId = '',
@@ -67,6 +90,12 @@ class ClassroomOfflineState extends Equatable {
     ClassroomErrorType? rosterErrorType,
     ClassroomStatus? syncStatus,
     Object? freshness = _undefined,
+    ClassroomStatus? levelRostersStatus,
+    Map<String, List<ClassroomMember>>? levelRosters,
+    ClassroomStatus? transferStatus,
+    ClassroomErrorType? transferErrorType,
+    String? transferringStudentId,
+    bool? transferPendingSync,
     ClassroomStatus? reassignStatus,
     ClassroomErrorType? reassignErrorType,
     String? reassigningMemberId,
@@ -82,6 +111,12 @@ class ClassroomOfflineState extends Equatable {
     freshness: identical(freshness, _undefined)
         ? this.freshness
         : freshness as int?,
+    levelRostersStatus: levelRostersStatus ?? this.levelRostersStatus,
+    levelRosters: levelRosters ?? this.levelRosters,
+    transferStatus: transferStatus ?? this.transferStatus,
+    transferErrorType: transferErrorType ?? this.transferErrorType,
+    transferringStudentId: transferringStudentId ?? this.transferringStudentId,
+    transferPendingSync: transferPendingSync ?? this.transferPendingSync,
     reassignStatus: reassignStatus ?? this.reassignStatus,
     reassignErrorType: reassignErrorType ?? this.reassignErrorType,
     reassigningMemberId: reassigningMemberId ?? this.reassigningMemberId,
@@ -98,6 +133,12 @@ class ClassroomOfflineState extends Equatable {
     rosterErrorType,
     syncStatus,
     freshness,
+    levelRostersStatus,
+    levelRosters,
+    transferStatus,
+    transferErrorType,
+    transferringStudentId,
+    transferPendingSync,
     reassignStatus,
     reassignErrorType,
     reassigningMemberId,

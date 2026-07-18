@@ -13,6 +13,9 @@ import 'package:school_app_flutter/features/classes/domain/entities/level_distri
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_results_section.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_unassigned_members_section.dart';
@@ -24,8 +27,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class MockClassroomBloc extends MockBloc<ClassroomEvent, ClassroomState>
     implements ClassroomBloc {}
 
+class MockClassroomOfflineBloc
+    extends MockBloc<ClassroomOfflineEvent, ClassroomOfflineState>
+    implements ClassroomOfflineBloc {}
+
 void main() {
   late MockClassroomBloc classroomBloc;
+  late MockClassroomOfflineBloc offlineBloc;
 
   const cycle = ClassesOrganisationCycleOption(
     id: 'cycle-1',
@@ -130,6 +138,13 @@ void main() {
       const Stream<ClassroomState>.empty(),
       initialState: const ClassroomState(),
     );
+    offlineBloc = MockClassroomOfflineBloc();
+    when(() => offlineBloc.state).thenReturn(const ClassroomOfflineState());
+    whenListen(
+      offlineBloc,
+      const Stream<ClassroomOfflineState>.empty(),
+      initialState: const ClassroomOfflineState(),
+    );
   });
 
   Future<void> pumpSection(
@@ -156,8 +171,11 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<ClassroomBloc>.value(
-          value: classroomBloc,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<ClassroomBloc>.value(value: classroomBloc),
+            BlocProvider<ClassroomOfflineBloc>.value(value: offlineBloc),
+          ],
           child: Scaffold(
             body: SingleChildScrollView(
               child: ClassesOrganisationResultsSection(

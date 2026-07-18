@@ -239,6 +239,8 @@
   "classesOrganisationTransferAction": "Transfer",
   "classesOrganisationTransferInProgress": "Transfer in progress...",
   "classesOrganisationTransferSuccess": "Transfer completed successfully.",
+  "classesOrganisationTransferQueued": "Transfer saved — pending synchronization.",
+  "classesOrganisationTransferPendingBadge": "Pending",
   "classesOrganisationTransferNoTarget": "No destination classroom is available.",
   "classesOrganisationSelectCycleAndLevelTitle": "Select a cycle and a level",
   "classesOrganisationSelectCycleAndLevelSubtitle": "Start by selecting a cycle, then a level to display class composition.",
@@ -1526,6 +1528,14 @@
   "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
   "attendanceMarkAllPresentAction": "All present",
+  "attendanceCallNotTakenTitle": "Attendance not taken",
+  "@attendanceCallNotTakenTitle": {
+    "description": "Banner: no attendance session exists yet for this day (3rd state)."
+  },
+  "attendanceCallNotTakenMessage": "No attendance has been recorded for this day yet. Save to record it.",
+  "@attendanceCallNotTakenMessage": {
+    "description": "Not-taken banner subtitle: roster shown by default but nothing is validated."
+  },
   "attendanceSaveOverlayEyebrow": "Attendance",
   "attendanceSaveProcessingTitle": "Saving attendance…",
   "attendanceSaveSuccessTitle": "Attendance saved!",

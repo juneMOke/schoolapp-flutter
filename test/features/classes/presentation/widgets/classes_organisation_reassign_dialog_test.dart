@@ -111,6 +111,7 @@ void main() {
                     context: context,
                     intent: intent,
                     options: options,
+                    schoolLevelId: 'level-1',
                   ),
                   child: const Text('open'),
                 ),
@@ -153,11 +154,14 @@ void main() {
     await tester.tap(actionFinder);
     await tester.pumpAndSettle();
 
+    // Origine non nulle (c1) → TRANSFERT offline (événement), pas l'affectation.
     verify(
       () => bloc.add(
-        const MemberReassignRequested(
-          classroomMemberId: 'm1',
-          targetClassroomId: 'c2',
+        const MemberTransferRequested(
+          studentId: 's1',
+          fromClassroomId: 'c1',
+          toClassroomId: 'c2',
+          schoolLevelId: 'level-1',
           academicYearId: '',
         ),
       ),

@@ -60,7 +60,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           saveErrorType: AttendanceErrorType.none,
         ),
       ),
-      (records) {
+      (daily) {
+        final records = daily.records;
         final draftRows = records
             .map(AttendanceEditableRow.fromRecord)
             .toList(growable: false);
@@ -70,6 +71,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
             fetchStatus: AttendanceStatus.success,
             records: records,
             draftRows: draftRows,
+            callTaken: daily.taken,
             fetchErrorType: AttendanceErrorType.none,
             saveStatus: AttendanceStatus.initial,
             saveErrorType: AttendanceErrorType.none,

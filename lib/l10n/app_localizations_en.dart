@@ -426,6 +426,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Transfer completed successfully.';
 
   @override
+  String get classesOrganisationTransferQueued =>
+      'Transfer saved — pending synchronization.';
+
+  @override
+  String get classesOrganisationTransferPendingBadge => 'Pending';
+
+  @override
   String get classesOrganisationTransferNoTarget =>
       'No destination classroom is available.';
 
@@ -3423,6 +3430,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendanceMarkAllPresentAction => 'All present';
+
+  @override
+  String get attendanceCallNotTakenTitle => 'Attendance not taken';
+
+  @override
+  String get attendanceCallNotTakenMessage =>
+      'No attendance has been recorded for this day yet. Save to record it.';
 
   @override
   String get attendanceSaveOverlayEyebrow => 'Attendance';

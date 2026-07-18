@@ -3,12 +3,14 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
 
-/// Contrat de consultation offline-first du module Classe (CF2/CF3/CF4).
+/// Contrat offline-first du module Classe (CF2/CF3/CF4).
 ///
 /// Profil read-heavy : le pull alimente `ref_classrooms` + `ref_classroom_members`,
-/// les lectures servent le local sans réseau. Le seul geste d'écriture
-/// (déplacement) reste **online** (CF4 Option A) : cf. re-pull après succès.
+/// les lectures servent le local (roster **composé** miroir ± transferts pending).
+/// Le seul geste d'écriture — le transfert — est **offline** (ADR-004 amendé) :
+/// événement append-only local + outbox, flush opportuniste.
 abstract class ClassroomOfflineRepository {
   /// Pull delta (CF2) : alimente le local, avance le curseur, honore 304.
   Future<Either<Failure, ClassroomSyncOutcome>> syncClassrooms({
@@ -36,6 +38,24 @@ abstract class ClassroomOfflineRepository {
     required String classroomId,
     required String query,
   });
+
+  /// Rosters **composés** de toutes les classes d'un niveau (CF4), indexés par
+  /// `classroomId`. Sert l'affichage optimiste de l'écran d'organisation : un
+  /// transfert local non synchronisé apparaît aussitôt dans la destination
+  /// (`hasPendingTransfer`) et disparaît de l'origine, sans re-pull serveur.
+  Future<Either<Failure, Map<String, List<ClassroomMember>>>>
+  getComposedRosters({
+    required String academicYearId,
+    required String schoolLevelId,
+  });
+
+  /// Enregistre un **transfert d'élève** (CF4, offline) : événement append-only
+  /// local + outbox, flush opportuniste. Retourne l'`id` du transfert créé (uuid
+  /// client honoré). Le miroir n'est pas muté — la composition à la lecture
+  /// reflète immédiatement le déplacement.
+  Future<Either<Failure, String>> recordTransfer(
+    RecordClassroomTransferDraft draft,
+  );
 
   /// Horodatage epoch ms de dernière synchro des classes (fraîcheur ADR-002).
   Future<int?> getFreshness();

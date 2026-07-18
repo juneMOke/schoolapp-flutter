@@ -38,6 +38,10 @@ class ClassroomMemberDto extends Equatable {
   final int? version;
   final int? updatedAt;
 
+  /// Flag COMPOSÉ à la lecture (colonne `has_pending_transfer`, hors miroir) :
+  /// l'élève est ici via un transfert local non synchronisé. Jamais persisté.
+  final bool hasPendingTransfer;
+
   const ClassroomMemberDto({
     required this.id,
     required this.studentId,
@@ -50,6 +54,7 @@ class ClassroomMemberDto extends Equatable {
     this.status = 'ACTIVE',
     this.version,
     this.updatedAt,
+    this.hasPendingTransfer = false,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -87,6 +92,8 @@ class ClassroomMemberDto extends Equatable {
         status: (map['status'] as String?) ?? 'ACTIVE',
         version: _asIntOrNull(map['version']),
         updatedAt: _asIntOrNull(map['updated_at']),
+        hasPendingTransfer:
+            (_asIntOrNull(map['has_pending_transfer']) ?? 0) != 0,
       );
 
   Map<String, Object?> toMap({int? syncedAt}) => <String, Object?>{
@@ -113,6 +120,7 @@ class ClassroomMemberDto extends Equatable {
     studentLastName: studentLastName,
     studentMiddleName: studentMiddleName,
     studentGender: ClassroomMemberGender.fromApiValue(studentGender),
+    hasPendingTransfer: hasPendingTransfer,
   );
 
   @override
@@ -128,5 +136,6 @@ class ClassroomMemberDto extends Equatable {
     status,
     version,
     updatedAt,
+    hasPendingTransfer,
   ];
 }

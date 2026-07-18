@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_local_attendance_rate_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_student_attendance_stats_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';
@@ -13,18 +14,22 @@ class AttendanceOfflineBloc
   final LoadDailyAttendanceUseCase _loadDaily;
   final RecordDailyAttendanceOfflineUseCase _recordDaily;
   final GetLocalAttendanceRateUseCase _getRate;
+  final GetStudentAttendanceStatsUseCase _getStudentStats;
 
   AttendanceOfflineBloc({
     required LoadDailyAttendanceUseCase loadDaily,
     required RecordDailyAttendanceOfflineUseCase recordDaily,
     required GetLocalAttendanceRateUseCase getRate,
+    required GetStudentAttendanceStatsUseCase getStudentStats,
   }) : _loadDaily = loadDaily,
        _recordDaily = recordDaily,
        _getRate = getRate,
+       _getStudentStats = getStudentStats,
        super(const AttendanceOfflineInitial()) {
     on<LoadDailyAttendanceRequested>(_onLoadDaily);
     on<RecordDailyAttendanceRequested>(_onRecordDaily);
     on<LoadLocalRateRequested>(_onLoadRate);
+    on<LoadStudentStatsRequested>(_onLoadStudentStats);
   }
 
   Future<void> _onLoadDaily(
@@ -40,7 +45,7 @@ class AttendanceOfflineBloc
     emit(
       result.fold(
         (f) => AttendanceOfflineError(_map(f)),
-        (records) => AttendanceOfflineLoaded(records),
+        (daily) => AttendanceOfflineLoaded(daily),
       ),
     );
   }
@@ -79,6 +84,26 @@ class AttendanceOfflineBloc
       result.fold(
         (f) => AttendanceOfflineError(_map(f)),
         (rate) => AttendanceOfflineRateLoaded(rate),
+      ),
+    );
+  }
+
+  Future<void> _onLoadStudentStats(
+    LoadStudentStatsRequested event,
+    Emitter<AttendanceOfflineState> emit,
+  ) async {
+    emit(const AttendanceOfflineLoading());
+    final result = await _getStudentStats(
+      studentId: event.studentId,
+      classroomId: event.classroomId,
+      academicYearId: event.academicYearId,
+      period: event.period,
+      reference: event.reference,
+    );
+    emit(
+      result.fold(
+        (f) => AttendanceOfflineError(_map(f)),
+        (stats) => AttendanceOfflineStatsLoaded(stats),
       ),
     );
   }

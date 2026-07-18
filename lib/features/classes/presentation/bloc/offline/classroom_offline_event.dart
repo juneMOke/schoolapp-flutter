@@ -43,7 +43,54 @@ class OfflineRosterRequested extends ClassroomOfflineEvent {
   List<Object?> get props => [classroomId, query];
 }
 
-/// Déplacement d'élève ONLINE (CF4 Option A) : PUT serveur + re-pull local.
+/// Rosters composés de toutes les classes d'un niveau (CF4) : affichage
+/// optimiste de l'écran d'organisation (transferts pending reflétés en place).
+class OfflineLevelRostersRequested extends ClassroomOfflineEvent {
+  final String academicYearId;
+  final String schoolLevelId;
+
+  const OfflineLevelRostersRequested({
+    required this.academicYearId,
+    required this.schoolLevelId,
+  });
+
+  @override
+  List<Object?> get props => [academicYearId, schoolLevelId];
+}
+
+/// Transfert d'élève OFFLINE (CF4, ADR-004 amendé) : événement local + outbox,
+/// flush opportuniste. Composition à la lecture (aucune écriture du miroir).
+class MemberTransferRequested extends ClassroomOfflineEvent {
+  final String studentId;
+  final String fromClassroomId;
+  final String toClassroomId;
+  final String schoolLevelId;
+  final String academicYearId;
+  final String? reason;
+
+  const MemberTransferRequested({
+    required this.studentId,
+    required this.fromClassroomId,
+    required this.toClassroomId,
+    required this.schoolLevelId,
+    required this.academicYearId,
+    this.reason,
+  });
+
+  @override
+  List<Object?> get props => [
+    studentId,
+    fromClassroomId,
+    toClassroomId,
+    schoolLevelId,
+    academicYearId,
+    reason,
+  ];
+}
+
+/// Affectation d'un élève **non réparti** ONLINE (distribution, ADR-004) : un
+/// non-réparti n'existe pas dans le miroir offline → ce geste ne peut pas être
+/// un événement de transfert. Il passe par le PUT serveur + re-pull local.
 class MemberReassignRequested extends ClassroomOfflineEvent {
   final String classroomMemberId;
   final String targetClassroomId;

@@ -152,6 +152,12 @@ class AttendanceResultsSection extends StatelessWidget {
           child = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 3e état (invariant #1) : pas de session ⇒ appel non fait. On le
+              // signale explicitement (le roster affiché n'est PAS un appel validé).
+              if (!state.callTaken) ...[
+                const _AppelNonFaitBar(),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
               _AttendanceActionBar(
                 isSaving: state.saveStatus == AttendanceStatus.loading,
                 canSave: state.canSave && missingReasonsCount == 0,
@@ -209,7 +215,7 @@ class AttendanceResultsSection extends StatelessWidget {
           switchOutCurve: AppMotion.inCurve,
           child: KeyedSubtree(
             key: ValueKey(
-              '${state.fetchStatus}-${state.draftRows.length}-${state.fetchErrorType}-${state.saveStatus}-${state.hasUnsavedChanges}-${state.hasValidationErrors}',
+              '${state.fetchStatus}-${state.draftRows.length}-${state.fetchErrorType}-${state.saveStatus}-${state.hasUnsavedChanges}-${state.hasValidationErrors}-${state.callTaken}',
             ),
             child: child,
           ),
@@ -252,6 +258,62 @@ class _AttendanceActionBar extends StatelessWidget {
           fullWidth: false,
         ),
       ],
+    );
+  }
+}
+
+/// Bandeau du 3e état (invariant #1) : aucune session pour ce jour → l'appel
+/// n'a pas été fait. Le roster est affiché pour la saisie mais rien n'est validé.
+class _AppelNonFaitBar extends StatelessWidget {
+  const _AppelNonFaitBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.event_busy_outlined,
+              size: 16,
+              color: AppColors.info,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.attendanceCallNotTakenTitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.info,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    l10n.attendanceCallNotTakenMessage,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

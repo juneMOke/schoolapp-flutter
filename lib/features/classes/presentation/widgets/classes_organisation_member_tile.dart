@@ -142,6 +142,16 @@ class _ClassesOrganisationMemberTileState
                           color: AppColors.textSecondary,
                         ),
                       ),
+                    // Transfert local non synchronisé : composition à la lecture.
+                    if (widget.member.hasPendingTransfer) ...[
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      ClassesOrganisationGenderPill(
+                        label: AppLocalizations.of(
+                          context,
+                        )!.classesOrganisationTransferPendingBadge,
+                        color: AppColors.warning,
+                      ),
+                    ],
                   ],
                 ),
               ),

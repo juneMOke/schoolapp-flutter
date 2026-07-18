@@ -10,7 +10,9 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// Tables :
 /// - `ref_classrooms`         — référence des classes (compteurs pré-agrégés serveur).
 /// - `ref_classroom_members`  — roster nominatif dénormalisé (partagé avec Présence).
-/// - `attendance_records`     — appels locaux, stockage par exception (LWW).
+/// - `classroom_transfers`    — événement append-only de transfert d'élève (régime A).
+/// - `attendance_sessions`    — racine d'agrégat de l'appel (un appel = une classe/jour).
+/// - `attendance_records`     — exceptions locales de l'appel, par exception (LWW).
 /// - `disciplinary_cases`     — cas disciplinaires locaux (fait insert-only + traitement LWW).
 ///
 /// Conventions :
@@ -79,15 +81,87 @@ const TableSchema refClassroomMembersTable = TableSchema(
   ],
 );
 
-/// `attendance_records` — appels locaux (AF-1). Stockage par exception :
-/// seuls les absents (ou les retards corrigés) portent une ligne ; un élève
-/// sans ligne pour la date = présent. `updated_at` arbitre le last-write-wins.
-/// Clé naturelle `(student_id, attendance_date, academic_year_id)`.
+/// `classroom_transfers` — événement de transfert d'élève entre classes d'un
+/// même niveau (volet transfert, contrat openapi_classroom_sync 1.1.0). **Régime
+/// A** : `id` = uuid client honoré (idempotence, `ON CONFLICT DO NOTHING`
+/// serveur), append-only, jamais réécrit. **Le miroir `ref_classroom_members`
+/// n'est JAMAIS muté en optimiste** — la classe courante se COMPOSE à la lecture
+/// (miroir ± transferts `sync_status <> 'SYNCED'`). L'ACK repositionne le miroir
+/// + passe le transfert SYNCED en une transaction (passage de témoin atomique).
+/// `transferred_at` = heure MÉTIER (epoch ms) qui borne les intervalles
+/// d'appartenance du dénominateur d'assiduité (ADR-004). `from_classroom_id` =
+/// audit seul (non opposé à l'état courant). `server_updated_at` reçu à
+/// l'ACK/au pull (info) ; le curseur de pagination reste opaque dans `sync_meta`.
+const TableSchema classroomTransfersTable = TableSchema(
+  name: 'classroom_transfers',
+  createTableSql: '''
+    CREATE TABLE classroom_transfers (
+      id TEXT PRIMARY KEY,
+      student_id TEXT NOT NULL,
+      from_classroom_id TEXT NOT NULL,
+      to_classroom_id TEXT NOT NULL,
+      school_level_id TEXT NOT NULL,
+      academic_year_id TEXT NOT NULL,
+      transferred_at INTEGER NOT NULL,
+      transferred_by TEXT,
+      reason TEXT,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+      server_updated_at INTEGER,
+      synced_at INTEGER
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_transfers_student_year '
+        'ON classroom_transfers(student_id, academic_year_id, transferred_at)',
+    'CREATE INDEX idx_transfers_status '
+        'ON classroom_transfers(sync_status)',
+  ],
+);
+
+/// `attendance_sessions` — racine d'agrégat de l'appel (contrat 1.2.0). Une
+/// ligne = « cette classe a été appelée ce jour ». **Sa seule existence lève
+/// l'ambiguïté des 3 états** : pas de session ⇒ appel non fait ; session sans
+/// exception ⇒ tous présents ; session + exception ⇒ absent. Clé naturelle
+/// `(classroom_id, attendance_date, academic_year_id)` = idempotence (régime C).
+/// `updated_at` (horloge client, epoch ms) arbitre le LWW et **doit être bumpé
+/// à chaque modification de l'agrégat, même si seule une absence change** (sinon
+/// le pull, paginé sur la session, passe à côté). `expected_count` = snapshot
+/// serveur du roster ACTIF (dénominateur des taux agrégés back-office ;
+/// informatif côté tablette). `server_updated_at` = visibilité serveur (ISO),
+/// reçue au pull ; le curseur de pagination reste opaque dans `sync_meta`.
+const TableSchema attendanceSessionsTable = TableSchema(
+  name: 'attendance_sessions',
+  createTableSql: '''
+    CREATE TABLE attendance_sessions (
+      id TEXT PRIMARY KEY,
+      classroom_id TEXT NOT NULL,
+      attendance_date TEXT NOT NULL,
+      academic_year_id TEXT NOT NULL,
+      expected_count INTEGER,
+      taken_at INTEGER,
+      taken_by TEXT,
+      updated_at INTEGER NOT NULL,
+      server_updated_at TEXT,
+      version INTEGER,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+      synced_at INTEGER,
+      UNIQUE (classroom_id, attendance_date, academic_year_id)
+    )
+  ''',
+);
+
+/// `attendance_records` — exceptions locales de l'appel (AF-1). Stockage par
+/// exception : seuls les absents (ou les retards corrigés) portent une ligne ;
+/// un élève sans ligne sous une session = présent. `updated_at` arbitre le LWW.
+/// Clé naturelle `(student_id, attendance_date, academic_year_id)`. `session_id`
+/// = lien logique vers la racine d'agrégat (pas de FK physique : le backfill de
+/// migration et la réconciliation par différence l'écriraient avant la session).
 const TableSchema attendanceRecordsTable = TableSchema(
   name: 'attendance_records',
   createTableSql: '''
     CREATE TABLE attendance_records (
       id TEXT PRIMARY KEY,
+      session_id TEXT,
       student_id TEXT NOT NULL,
       student_first_name TEXT NOT NULL,
       student_last_name TEXT NOT NULL,
@@ -109,6 +183,8 @@ const TableSchema attendanceRecordsTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_attendance_class_date '
         'ON attendance_records(classroom_id, attendance_date, academic_year_id)',
+    'CREATE INDEX idx_attendance_session '
+        'ON attendance_records(session_id)',
   ],
 );
 
@@ -150,6 +226,8 @@ const TableSchema disciplinaryCasesTable = TableSchema(
 const List<TableSchema> classroomAttendanceOfflineTables = [
   refClassroomsTable,
   refClassroomMembersTable,
+  classroomTransfersTable,
+  attendanceSessionsTable,
   attendanceRecordsTable,
   disciplinaryCasesTable,
 ];

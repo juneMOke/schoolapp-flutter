@@ -4,19 +4,20 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
-import 'package:school_app_flutter/features/attendances/data/models/offline/offline_daily_attendance_command_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_aggregate_request_model.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_offline_repository_impl.dart'
     show kAttendanceAggregateType;
 
-/// Pousse un appel (full-write) au serveur (AF-2). Clé d'idempotence =
-/// `(classroom, date, année)` + upsert clé naturelle + LWW `updatedAt`.
+/// Pousse un agrégat d'appel `{session, absences[]}` (AF-2) vers
+/// `POST /sync/attendance`. Idempotence serveur = **clé naturelle** + LWW.
 ///
-/// - succès → marque le jour SYNCED (réconciliation minimale : le contrat back
-///   ne renvoie pas encore les lignes enrichies — AG-3 différé).
-/// - 409 (verrou périmé, improbable en LWW) / réseau / 5xx → retry (backoff).
-/// - rejet métier (validation) → failed (à corriger côté présentation).
+/// - succès → marque le jour SYNCED et rapatrie `serverUpdatedAt` +
+///   `expectedCount` de la réponse (AG-3). `SUPERSEDED` est traité comme un
+///   succès (mono-tablette : le local est déjà l'état gagnant ; filet du régime C).
+/// - rejet métier (validation / hors roster / date hors année) → failed.
+/// - réseau / 5xx / timeout → retry (backoff).
 class AttendanceOutboxHandler implements OutboxSyncHandler {
   final AttendanceSyncApi syncApi;
   final AttendanceLocalDataSource localDataSource;
@@ -35,23 +36,24 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
-    late final OfflineDailyAttendanceCommandModel command;
+    late final AttendanceAggregateRequestModel aggregate;
     try {
-      command = OfflineDailyAttendanceCommandModel.fromJsonString(
-        entry.payload,
-      );
+      aggregate = AttendanceAggregateRequestModel.fromJsonString(entry.payload);
     } catch (_) {
       // Payload corrompu : rejet définitif (ne se rejouera jamais avec succès).
       return const OutboxDispatchResult.failed('Invalid attendance payload');
     }
 
     try {
-      await syncApi.pushDailyAttendance(requiredAuth, command);
+      final response = await syncApi.submitAttendance(requiredAuth, aggregate);
+      final session = aggregate.session;
       await localDataSource.markDaySynced(
-        classroomId: command.classroomId,
-        dateStr: command.date,
-        academicYearId: command.academicYearId,
+        classroomId: session.classroomId,
+        dateStr: session.attendanceDate,
+        academicYearId: session.academicYearId,
         syncedAt: now(),
+        serverUpdatedAt: response.serverUpdatedAt,
+        expectedCount: response.expectedCount,
       );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
@@ -61,7 +63,7 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
           failure is Failure ? failure.message : 'Rejected',
         );
       }
-      // Conflit (409) / réseau / 5xx / timeout → transitoire.
+      // Réseau / 5xx / timeout → transitoire.
       return OutboxDispatchResult.retry(
         failure is Failure ? failure.message : e.message,
       );

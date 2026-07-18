@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
@@ -53,7 +54,9 @@ void main() {
             date: tDate,
             academicYearId: 'year-1',
           ),
-        ).thenAnswer((_) async => Right([tRecord]));
+        ).thenAnswer(
+          (_) async => Right(DailyAttendance(taken: true, records: [tRecord])),
+        );
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -69,6 +72,7 @@ void main() {
           fetchStatus: AttendanceStatus.success,
           records: [tRecord],
           draftRows: [tDraft],
+          callTaken: true,
           activeClassroomId: 'class-1',
           activeAcademicYearId: 'year-1',
           activeDate: tDate,

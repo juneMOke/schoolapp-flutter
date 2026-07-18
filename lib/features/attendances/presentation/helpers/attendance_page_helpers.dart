@@ -58,6 +58,7 @@ class AttendancePageHelpers {
         previous.fetchErrorType != current.fetchErrorType ||
         previous.records != current.records ||
         previous.draftRows != current.draftRows ||
+        previous.callTaken != current.callTaken ||
         previous.saveStatus != current.saveStatus ||
         previous.saveErrorType != current.saveErrorType ||
         previous.hasUnsavedChanges != current.hasUnsavedChanges ||

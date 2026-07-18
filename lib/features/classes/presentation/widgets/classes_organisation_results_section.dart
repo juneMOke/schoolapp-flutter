@@ -5,6 +5,8 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_pending_distribution_card.dart';
@@ -83,20 +85,28 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           );
         }
 
-        return ClassesOrganisationSplitResults(
-          overviewStatus: classroomState.distributionOverviewStatus,
-          overviewErrorType: classroomState.distributionOverviewErrorType,
-          overview: classroomState.distributionOverview,
-          isReassigning:
-              classroomState.reassignStatus == ClassroomStatus.loading,
-          reassigningMemberId: classroomState.reassigningMemberId,
-          errorMessage:
-              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                l10n,
-                classroomState.distributionOverviewErrorType,
-              ),
-          onTransferTap: onTransferTap,
-          onRetry: () => _retryOverview(context, selectedLevel!),
+        // Surcouche offline : les rosters composés (miroir ± transferts pending)
+        // remplacent les membres de l'aperçu online par classe → le transfert
+        // local apparaît en place, sans re-pull serveur.
+        return BlocBuilder<ClassroomOfflineBloc, ClassroomOfflineState>(
+          buildWhen: (previous, current) =>
+              previous.levelRosters != current.levelRosters,
+          builder: (context, offlineState) => ClassesOrganisationSplitResults(
+            overviewStatus: classroomState.distributionOverviewStatus,
+            overviewErrorType: classroomState.distributionOverviewErrorType,
+            overview: classroomState.distributionOverview,
+            composedRosters: offlineState.levelRosters,
+            isReassigning:
+                classroomState.reassignStatus == ClassroomStatus.loading,
+            reassigningMemberId: classroomState.reassigningMemberId,
+            errorMessage:
+                ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                  l10n,
+                  classroomState.distributionOverviewErrorType,
+                ),
+            onTransferTap: onTransferTap,
+            onRetry: () => _retryOverview(context, selectedLevel!),
+          ),
         );
       },
     );

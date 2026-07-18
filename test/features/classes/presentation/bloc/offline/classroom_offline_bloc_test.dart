@@ -7,8 +7,11 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_me
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
@@ -23,8 +26,17 @@ class MockGetOfflineClassroomsUseCase extends Mock
 class MockGetOfflineRosterUseCase extends Mock
     implements GetOfflineRosterUseCase {}
 
+class MockGetComposedRostersUseCase extends Mock
+    implements GetComposedRostersUseCase {}
+
 class MockReassignMemberOnlineUseCase extends Mock
     implements ReassignMemberOnlineUseCase {}
+
+class MockRecordClassroomTransferUseCase extends Mock
+    implements RecordClassroomTransferUseCase {}
+
+class FakeRecordClassroomTransferDraft extends Fake
+    implements RecordClassroomTransferDraft {}
 
 const tAcademicYearId = 'year-1';
 const tSchoolLevelId = 'level-1';
@@ -65,19 +77,36 @@ void main() {
   late MockSyncClassroomsUseCase mockSyncClassrooms;
   late MockGetOfflineClassroomsUseCase mockGetClassrooms;
   late MockGetOfflineRosterUseCase mockGetRoster;
+  late MockGetComposedRostersUseCase mockGetComposedRosters;
+  late MockRecordClassroomTransferUseCase mockRecordTransfer;
   late MockReassignMemberOnlineUseCase mockReassignMember;
+
+  setUpAll(() {
+    registerFallbackValue(FakeRecordClassroomTransferDraft());
+  });
 
   setUp(() {
     mockSyncClassrooms = MockSyncClassroomsUseCase();
     mockGetClassrooms = MockGetOfflineClassroomsUseCase();
     mockGetRoster = MockGetOfflineRosterUseCase();
+    mockGetComposedRosters = MockGetComposedRostersUseCase();
+    mockRecordTransfer = MockRecordClassroomTransferUseCase();
     mockReassignMember = MockReassignMemberOnlineUseCase();
+    // Par défaut, le rechargement des rosters composés post-transfert renvoie {}.
+    when(
+      () => mockGetComposedRosters(
+        academicYearId: any(named: 'academicYearId'),
+        schoolLevelId: any(named: 'schoolLevelId'),
+      ),
+    ).thenAnswer((_) async => const Right({}));
   });
 
   ClassroomOfflineBloc buildBloc() => ClassroomOfflineBloc(
     syncClassrooms: mockSyncClassrooms,
     getClassrooms: mockGetClassrooms,
     getRoster: mockGetRoster,
+    getComposedRosters: mockGetComposedRosters,
+    recordTransfer: mockRecordTransfer,
     reassignMember: mockReassignMember,
   );
 
@@ -207,6 +236,72 @@ void main() {
         ClassroomOfflineState(
           rosterStatus: ClassroomStatus.failure,
           rosterErrorType: ClassroomErrorType.notFound,
+        ),
+      ],
+    );
+  });
+
+  group('MemberTransferRequested (offline)', () {
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'succès → [loading, pending-sync] (événement enfilé)',
+      setUp: () {
+        when(
+          () => mockRecordTransfer(any()),
+        ).thenAnswer((_) async => const Right('transfer-1'));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const MemberTransferRequested(
+          studentId: 'student-1',
+          fromClassroomId: tClassroomId,
+          toClassroomId: tTargetClassroomId,
+          schoolLevelId: tSchoolLevelId,
+          academicYearId: tAcademicYearId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(
+          transferStatus: ClassroomStatus.loading,
+          transferringStudentId: 'student-1',
+        ),
+        ClassroomOfflineState(
+          transferStatus: ClassroomStatus.success,
+          transferPendingSync: true,
+        ),
+        // Rechargement optimiste des rosters composés du niveau.
+        ClassroomOfflineState(
+          transferStatus: ClassroomStatus.success,
+          transferPendingSync: true,
+          levelRostersStatus: ClassroomStatus.success,
+        ),
+      ],
+    );
+
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'échec local → [loading, failure] avec storage errorType',
+      setUp: () {
+        when(
+          () => mockRecordTransfer(any()),
+        ).thenAnswer((_) async => const Left(StorageFailure('db')));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const MemberTransferRequested(
+          studentId: 'student-1',
+          fromClassroomId: tClassroomId,
+          toClassroomId: tTargetClassroomId,
+          schoolLevelId: tSchoolLevelId,
+          academicYearId: tAcademicYearId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(
+          transferStatus: ClassroomStatus.loading,
+          transferringStudentId: 'student-1',
+        ),
+        ClassroomOfflineState(
+          transferStatus: ClassroomStatus.failure,
+          transferErrorType: ClassroomErrorType.storage,
         ),
       ],
     );

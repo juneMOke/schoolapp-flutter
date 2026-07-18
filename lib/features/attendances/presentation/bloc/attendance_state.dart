@@ -26,6 +26,11 @@ class AttendanceState extends Equatable {
   final List<AttendanceEditableRow> draftRows;
   final AttendanceErrorType fetchErrorType;
 
+  /// L'appel du jour a-t-il été fait (une session existe) ? `false` = **appel
+  /// non fait** : le roster est présenté « présent par défaut » pour la saisie,
+  /// mais l'UI ne doit PAS le donner pour validé (invariant #1, piège B4).
+  final bool callTaken;
+
   final AttendanceStatus saveStatus;
   final AttendanceErrorType saveErrorType;
   final String? activeClassroomId;
@@ -40,6 +45,7 @@ class AttendanceState extends Equatable {
     this.records = const [],
     this.draftRows = const [],
     this.fetchErrorType = AttendanceErrorType.none,
+    this.callTaken = false,
     this.saveStatus = AttendanceStatus.initial,
     this.saveErrorType = AttendanceErrorType.none,
     this.activeClassroomId,
@@ -55,6 +61,7 @@ class AttendanceState extends Equatable {
     List<AttendanceRecord>? records,
     List<AttendanceEditableRow>? draftRows,
     AttendanceErrorType? fetchErrorType,
+    bool? callTaken,
     AttendanceStatus? saveStatus,
     AttendanceErrorType? saveErrorType,
     Object? activeClassroomId = _undefined,
@@ -68,6 +75,7 @@ class AttendanceState extends Equatable {
     records: records ?? this.records,
     draftRows: draftRows ?? this.draftRows,
     fetchErrorType: fetchErrorType ?? this.fetchErrorType,
+    callTaken: callTaken ?? this.callTaken,
     saveStatus: saveStatus ?? this.saveStatus,
     saveErrorType: saveErrorType ?? this.saveErrorType,
     activeClassroomId: identical(activeClassroomId, _undefined)
@@ -98,6 +106,7 @@ class AttendanceState extends Equatable {
     records,
     draftRows,
     fetchErrorType,
+    callTaken,
     saveStatus,
     saveErrorType,
     activeClassroomId,

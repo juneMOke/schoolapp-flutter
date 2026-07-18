@@ -35,6 +35,7 @@ void main() {
               overviewStatus: status,
               overviewErrorType: errorType,
               overview: overview,
+              composedRosters: const {},
               isReassigning: false,
               reassigningMemberId: '',
               errorMessage: errorMessage,

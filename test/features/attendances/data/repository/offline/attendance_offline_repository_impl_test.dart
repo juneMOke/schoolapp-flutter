@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/atte
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
@@ -84,16 +85,22 @@ void main() {
 
   tearDown(() async => db.close());
 
-  test('loadDailyAttendance : tout le roster présent par défaut', () async {
-    final result = await repo.loadDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-    );
-    final records = result.getOrElse(() => []);
-    expect(records, hasLength(3));
-    expect(records.every((r) => r.present), isTrue);
-  });
+  const emptyDaily = DailyAttendance(taken: false, records: []);
+
+  test(
+    'loadDailyAttendance : pas de session ⇒ appel non fait, roster présent',
+    () async {
+      final daily = (await repo.loadDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+      )).getOrElse(() => emptyDaily);
+      // Invariant #1 : aucune session ⇒ appel non fait (jamais « tous présents »).
+      expect(daily.taken, isFalse);
+      expect(daily.records, hasLength(3));
+      expect(daily.records.every((r) => r.present), isTrue);
+    },
+  );
 
   test(
     'recordDailyAttendance : seul l\'absent est matérialisé (par exception)',
@@ -139,39 +146,55 @@ void main() {
       ],
     );
 
-    final records = (await repo.loadDailyAttendance(
+    final daily = (await repo.loadDailyAttendance(
       classroomId: classroomId,
       date: date,
       academicYearId: yearId,
-    )).getOrElse(() => []);
-    final s1 = records.firstWhere((r) => r.studentId == 's1');
+    )).getOrElse(() => emptyDaily);
+    // Session créée ⇒ appel fait.
+    expect(daily.taken, isTrue);
+    final s1 = daily.records.firstWhere((r) => r.studentId == 's1');
     expect(s1.present, isFalse);
-    expect(records.where((r) => r.present).length, 2);
+    expect(daily.records.where((r) => r.present).length, 2);
   });
 
-  test('correction (retard) : LWW re-bascule present=1', () async {
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [update('s1', present: false)],
-    );
-    clock = 6000; // horloge plus récente
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [update('s1', present: true)],
-    );
+  test(
+    'correction (retard) : l\'élève sort des exceptions (présent = non-ligne)',
+    () async {
+      await repo.recordDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+        updates: [update('s1', present: false)],
+      );
+      clock = 6000; // horloge plus récente
+      // Réconciliation par différence : s1 redevenu présent sort de la liste.
+      await repo.recordDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+        updates: [update('s1', present: true)],
+      );
 
-    final rows = await local.getDayRecords(
-      classroomId: classroomId,
-      dateStr: '2026-06-15',
-      academicYearId: yearId,
-    );
-    expect(rows.first.present, isTrue);
-    expect(rows.first.updatedAt, 6000);
-  });
+      final rows = await local.getDayRecords(
+        classroomId: classroomId,
+        dateStr: '2026-06-15',
+        academicYearId: yearId,
+      );
+      expect(rows, isEmpty);
+
+      final daily = (await repo.loadDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+      )).getOrElse(() => emptyDaily);
+      expect(daily.taken, isTrue);
+      expect(
+        daily.records.firstWhere((r) => r.studentId == 's1').present,
+        isTrue,
+      );
+    },
+  );
 
   test('outbox coalescé : ré-appel du même jour = 1 seule entrée', () async {
     await repo.recordDailyAttendance(

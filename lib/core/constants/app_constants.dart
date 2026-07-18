@@ -136,7 +136,9 @@ class AppConstants {
   // `ref_previous_year_students`, `ref_pre_enrollments`, socle référentiel).
   // v3 (2026-07-08) : `enrollments.source_ref` (matricule RE / id préinscription
   // PRE, contrat agrégat).
-  static const int offlineDbSchemaVersion = 3;
+  // v4 (2026-07-16) : Présence — modèle session-agrégat (`attendance_sessions`).
+  // v5 (2026-07-18) : Classe — événement `classroom_transfers` (transfert offline).
+  static const int offlineDbSchemaVersion = 5;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -205,10 +207,30 @@ class AppConstants {
   static const String syncPaymentsEndpoint = '/api/v1/sync/payments';
 
   // ── Offline sync — Classe/Présence/Discipline ──
+  /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
+  ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé
+  ///    naturelle + LWW `updatedAt` ; réponse `lwwOutcome` + `expectedCount`) ;
+  ///  - **GET** = pull KEYSET des sessions (absences imbriquées), cadré année,
+  ///    jeton `cursor` opaque, 304 applicatif.
+  ///
+  /// Remplace l'ancien push record-level [attendanceEndpoint] côté offline
+  /// (celui-ci reste en service pour les lectures online hors offline).
+  static const String syncAttendanceEndpoint = '/api/v1/sync/attendance';
+
   /// GET delta des classes + rosters (CB-2). Renvoie les `ref_classrooms` +
   /// `ref_classroom_members` modifiés depuis `updatedSince` (ISO-8601), plus un
   /// `serverCursor` (ISO). Query : `academicYearId`, `updatedSince`.
   /// 304 Not Modified honoré (delta minimal).
   /// ✅ LIVRÉ V1.0 côté back (2026-07-07) — roster ACTIVE+INACTIVE.
   static const String syncClassroomsEndpoint = '/api/v1/sync/classrooms';
+
+  /// Volet transfert du module Classe (contrat openapi_classroom_sync 1.1.0) :
+  ///  - **POST** = push de l'événement de transfert (régime A, idempotent sur
+  ///    `transfer.id` ; réponse = appartenance canonique + compteurs des 2
+  ///    classes recalculés). 201 créé ≡ 200 rejeu, les deux succès ;
+  ///  - **GET** = pull KEYSET des transferts de l'année (dont ceux faits online
+  ///    par le conseil pédagogique), cadré année, jeton `cursor` opaque, 304
+  ///    applicatif. Indispensable au dénominateur d'assiduité par intervalles.
+  static const String syncClassroomTransfersEndpoint =
+      '/api/v1/sync/classroom-transfers';
 }

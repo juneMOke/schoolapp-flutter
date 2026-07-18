@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_distribution_result_dialog.dart';
@@ -55,14 +56,36 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
 
     return AppPageBackground(
       child: BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
-        // La réassignation passe désormais par le BLoC offline (PUT serveur +
-        // re-pull local best-effort). Les lectures (aperçu, roster) restent sur
-        // ClassroomBloc online. Action online → PAS d'état pending-sync ici.
+        // Deux gestes distincts sur le BLoC offline :
+        //  - TRANSFERT (A→B) : OFFLINE, événement + outbox → toast « en attente
+        //    de synchro » (acquis en local, la synchro suivra) ;
+        //  - AFFECTATION d'un non-réparti : ONLINE (distribution) → PUT + re-pull.
+        // Les lectures (aperçu) restent sur ClassroomBloc online.
         listenWhen: (previous, current) =>
-            previous.reassignStatus != current.reassignStatus,
+            previous.reassignStatus != current.reassignStatus ||
+            previous.transferStatus != current.transferStatus,
         listener: (context, state) {
+          if (state.transferStatus == ClassroomStatus.success) {
+            AppSnackBar.showSuccess(
+              context,
+              l10n.classesOrganisationTransferQueued,
+            );
+            final selectedLevel = _selectedLevel;
+            if (selectedLevel != null) {
+              _loadOverviewIfNeeded(selectedLevel);
+            }
+          }
+          if (state.transferStatus == ClassroomStatus.failure) {
+            AppSnackBar.showError(
+              context,
+              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                l10n,
+                state.transferErrorType,
+              ),
+            );
+          }
           if (state.reassignStatus == ClassroomStatus.success) {
-            // Succès partiel (Right(false)) : déplacement serveur acquis mais
+            // Succès partiel (Right(false)) : affectation serveur acquise mais
             // re-pull local KO → message nuancé. Les lectures étant online, on
             // recharge quand même l'aperçu qui reflète l'état serveur à jour.
             AppSnackBar.showSuccess(
@@ -133,12 +156,10 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
 
   Future<void> _handleReassignTap(ClassroomMemberReassignIntent intent) async {
     final l10n = AppLocalizations.of(context)!;
-    // Anti-double-envoi : la réassignation en cours vit sur le BLoC offline.
-    final offlineReassignStatus = context
-        .read<ClassroomOfflineBloc>()
-        .state
-        .reassignStatus;
-    if (offlineReassignStatus == ClassroomStatus.loading) {
+    // Anti-double-envoi : transfert (offline) ou affectation (online) en cours.
+    final offlineState = context.read<ClassroomOfflineBloc>().state;
+    if (offlineState.transferStatus == ClassroomStatus.loading ||
+        offlineState.reassignStatus == ClassroomStatus.loading) {
       AppSnackBar.showInfo(context, l10n.classesOrganisationTransferInProgress);
       return;
     }
@@ -198,6 +219,7 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       context: context,
       intent: intent,
       options: options,
+      schoolLevelId: selectedLevel.schoolLevelId,
     );
   }
 
@@ -235,6 +257,16 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
 
     context.read<ClassroomBloc>().add(
       ClassroomDistributionOverviewRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
+
+    // Rosters composés offline du niveau : servent l'affichage optimiste (un
+    // transfert local non synchronisé apparaît en place) en surcouche de
+    // l'aperçu online, sans re-pull serveur.
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelRostersRequested(
         academicYearId: academicYearId,
         schoolLevelId: level.schoolLevelId,
       ),

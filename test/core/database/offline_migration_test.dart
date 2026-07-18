@@ -114,4 +114,60 @@ void main() {
     // v3 : source_ref ajoutée sur l'enrollments legacy conservée.
     expect(await _hasColumn(db, 'enrollments', 'source_ref'), isTrue);
   });
+
+  test(
+    'v4→v5 : crée classroom_transfers (table neuve, aucun backfill)',
+    () async {
+      final db = await _openLegacyDb();
+      addTearDown(db.close);
+
+      // Une base v4 n'a pas encore la table d'événement de transfert.
+      expect(
+        await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND "
+          "name='classroom_transfers'",
+        ),
+        isEmpty,
+      );
+
+      await migrateOfflineDatabase(db, 4, buildOfflineSchema());
+
+      // Table créée, écrivable, et ses index posés.
+      await db.insert('classroom_transfers', {
+        'id': 't1',
+        'student_id': 's1',
+        'from_classroom_id': 'a',
+        'to_classroom_id': 'b',
+        'school_level_id': 'lvl-1',
+        'academic_year_id': 'ay-1',
+        'transferred_at': 1000,
+        'sync_status': 'PENDING_SYNC',
+      });
+      expect((await db.query('classroom_transfers')).single['id'], 't1');
+      expect(
+        await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='index' AND "
+          "name='idx_transfers_student_year'",
+        ),
+        isNotEmpty,
+      );
+    },
+  );
+
+  test('v4→v5 : migration idempotente (rejouable sans erreur)', () async {
+    final db = await _openLegacyDb();
+    addTearDown(db.close);
+
+    await migrateOfflineDatabase(db, 4, buildOfflineSchema());
+    // Un second passage (ex. reprise après coupure) ne doit pas jeter.
+    await migrateOfflineDatabase(db, 4, buildOfflineSchema());
+
+    expect(
+      await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND "
+        "name='classroom_transfers'",
+      ),
+      isNotEmpty,
+    );
+  });
 }

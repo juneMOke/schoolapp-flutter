@@ -1,22 +1,36 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_sync_api.dart';
+import 'package:school_app_flutter/features/classes/data/models/offline/classroom_transfer_row.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
 
-/// Implémentation offline-first (CF2/CF3). Pull delta → upsert local → curseur ;
-/// lectures 100 % locales (compteurs, roster, recherche). 304 honoré.
+/// Type d'agrégat outbox du transfert d'élève (routage du handler de push).
+const String kClassroomTransferAggregateType = 'CLASSROOM_TRANSFER';
+
+/// Implémentation offline-first (CF2/CF3/CF4). Pull delta → upsert local →
+/// curseur ; lectures locales composées ; transfert = événement local + outbox
+/// (flush opportuniste). 304 honoré.
 class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
   final ClassroomSyncApi syncApi;
   final ClassroomLocalDataSource localDataSource;
   final SyncMetaDao syncMetaDao;
+  final IdGenerator idGenerator;
+  final SyncEngine syncEngine;
   final Map<String, dynamic> requiredAuth;
   final Clock now;
 
@@ -27,6 +41,8 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
     required this.syncApi,
     required this.localDataSource,
     required this.syncMetaDao,
+    required this.idGenerator,
+    required this.syncEngine,
     required this.requiredAuth,
     this.now = systemClock,
   });
@@ -154,6 +170,68 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
       return Right(rows.map((r) => r.toEntity()).toList(growable: false));
     } catch (_) {
       return const Left(StorageFailure('Local roster search failed'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, List<ClassroomMember>>>>
+  getComposedRosters({
+    required String academicYearId,
+    required String schoolLevelId,
+  }) async {
+    try {
+      final classes = await localDataSource.getClassrooms(
+        academicYearId: academicYearId,
+        schoolLevelId: schoolLevelId,
+      );
+      final rosters = <String, List<ClassroomMember>>{};
+      for (final c in classes) {
+        final rows = await localDataSource.getRoster(c.id);
+        rosters[c.id] = rows.map((r) => r.toEntity()).toList(growable: false);
+      }
+      return Right(rosters);
+    } catch (_) {
+      return const Left(StorageFailure('Local rosters read failed'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> recordTransfer(
+    RecordClassroomTransferDraft draft,
+  ) async {
+    try {
+      final nowMs = now();
+      final transferId = idGenerator.newId();
+      final row = ClassroomTransferRow(
+        id: transferId,
+        studentId: draft.studentId,
+        fromClassroomId: draft.fromClassroomId,
+        toClassroomId: draft.toClassroomId,
+        schoolLevelId: draft.schoolLevelId,
+        academicYearId: draft.academicYearId,
+        transferredAt: nowMs,
+        transferredBy: draft.transferredBy,
+        reason: draft.reason,
+        syncStatus: SyncState.pendingSync.dbValue,
+      );
+      final entry = OutboxEntry(
+        id: idGenerator.newId(),
+        aggregateType: kClassroomTransferAggregateType,
+        aggregateId: transferId,
+        operation: OutboxOperation.create,
+        payload: jsonEncode(row.toRequestJson()),
+        createdAt: nowMs,
+      );
+      await localDataSource.recordTransferWithOutbox(
+        row: row,
+        outboxEntry: entry,
+      );
+      // Flush opportuniste : si connecté, le transfert part tout de suite ;
+      // sinon l'outbox le rejouera au retour online.
+      unawaited(syncEngine.flush());
+      return Right(transferId);
+    } catch (_) {
+      return const Left(StorageFailure('Local transfer write failed'));
     }
   }
 

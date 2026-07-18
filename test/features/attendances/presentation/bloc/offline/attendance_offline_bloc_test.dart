@@ -6,9 +6,11 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/local_attendance_rate.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_local_attendance_rate_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_student_attendance_stats_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
@@ -23,6 +25,9 @@ class MockRecordDailyAttendanceOfflineUseCase extends Mock
 
 class MockGetLocalAttendanceRateUseCase extends Mock
     implements GetLocalAttendanceRateUseCase {}
+
+class MockGetStudentAttendanceStatsUseCase extends Mock
+    implements GetStudentAttendanceStatsUseCase {}
 
 const tClassroomId = 'classroom-1';
 const tAcademicYearId = 'year-1';
@@ -54,17 +59,20 @@ void main() {
   late MockLoadDailyAttendanceUseCase mockLoadDaily;
   late MockRecordDailyAttendanceOfflineUseCase mockRecordDaily;
   late MockGetLocalAttendanceRateUseCase mockGetRate;
+  late MockGetStudentAttendanceStatsUseCase mockGetStudentStats;
 
   setUp(() {
     mockLoadDaily = MockLoadDailyAttendanceUseCase();
     mockRecordDaily = MockRecordDailyAttendanceOfflineUseCase();
     mockGetRate = MockGetLocalAttendanceRateUseCase();
+    mockGetStudentStats = MockGetStudentAttendanceStatsUseCase();
   });
 
   AttendanceOfflineBloc buildBloc() => AttendanceOfflineBloc(
     loadDaily: mockLoadDaily,
     recordDaily: mockRecordDaily,
     getRate: mockGetRate,
+    getStudentStats: mockGetStudentStats,
   );
 
   test('l\'état initial est AttendanceOfflineInitial', () {
@@ -81,7 +89,9 @@ void main() {
             date: tDate,
             academicYearId: tAcademicYearId,
           ),
-        ).thenAnswer((_) async => Right([tRecord]));
+        ).thenAnswer(
+          (_) async => Right(DailyAttendance(taken: true, records: [tRecord])),
+        );
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -93,7 +103,9 @@ void main() {
       ),
       expect: () => [
         const AttendanceOfflineLoading(),
-        AttendanceOfflineLoaded([tRecord]),
+        AttendanceOfflineLoaded(
+          DailyAttendance(taken: true, records: [tRecord]),
+        ),
       ],
     );
 

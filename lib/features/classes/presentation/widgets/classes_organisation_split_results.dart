@@ -22,6 +22,12 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
   final ClassroomStatus overviewStatus;
   final ClassroomErrorType overviewErrorType;
   final LevelDistributionOverview? overview;
+
+  /// Roster composé offline (miroir ± transferts pending) par `classroomId`.
+  /// Quand une classe y figure, ses membres remplacent ceux de l'aperçu online
+  /// (affichage optimiste). Sinon (classe pas encore synchronisée en local), on
+  /// garde les membres online.
+  final Map<String, List<ClassroomMember>> composedRosters;
   final bool isReassigning;
   final String reassigningMemberId;
   final String? errorMessage;
@@ -33,6 +39,7 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
     required this.overviewStatus,
     required this.overviewErrorType,
     required this.overview,
+    required this.composedRosters,
     required this.isReassigning,
     required this.reassigningMemberId,
     required this.errorMessage,
@@ -71,7 +78,17 @@ class _ClassesOrganisationSplitResultsState
       return const ClassesOrganisationSplitEmptyState();
     }
 
-    final classrooms = data.classrooms;
+    // Surcouche offline : pour chaque classe connue localement, on substitue le
+    // roster composé (transferts pending inclus) aux membres de l'aperçu online.
+    final classrooms = [
+      for (final bucket in data.classrooms)
+        widget.composedRosters.containsKey(bucket.classroom.id)
+            ? ClassroomWithMembers(
+                classroom: bucket.classroom,
+                members: widget.composedRosters[bucket.classroom.id]!,
+              )
+            : bucket,
+    ];
 
     final distributedCount = classrooms.fold<int>(
       0,

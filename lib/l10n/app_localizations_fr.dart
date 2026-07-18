@@ -429,6 +429,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Transfert effectué avec succès.';
 
   @override
+  String get classesOrganisationTransferQueued =>
+      'Transfert enregistré — en attente de synchronisation.';
+
+  @override
+  String get classesOrganisationTransferPendingBadge => 'En attente';
+
+  @override
   String get classesOrganisationTransferNoTarget =>
       'Aucune sous-classe de destination disponible.';
 
@@ -3457,6 +3464,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get attendanceMarkAllPresentAction => 'Tout présent';
+
+  @override
+  String get attendanceCallNotTakenTitle => 'Appel non fait';
+
+  @override
+  String get attendanceCallNotTakenMessage =>
+      'Aucun appel n\'a encore été enregistré pour ce jour. Validez pour l\'enregistrer.';
 
   @override
   String get attendanceSaveOverlayEyebrow => 'Appel';

@@ -854,6 +854,18 @@ abstract class AppLocalizations {
   /// **'Transfer completed successfully.'**
   String get classesOrganisationTransferSuccess;
 
+  /// No description provided for @classesOrganisationTransferQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer saved — pending synchronization.'**
+  String get classesOrganisationTransferQueued;
+
+  /// No description provided for @classesOrganisationTransferPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get classesOrganisationTransferPendingBadge;
+
   /// No description provided for @classesOrganisationTransferNoTarget.
   ///
   /// In en, this message translates to:
@@ -5885,6 +5897,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All present'**
   String get attendanceMarkAllPresentAction;
+
+  /// Banner: no attendance session exists yet for this day (3rd state).
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance not taken'**
+  String get attendanceCallNotTakenTitle;
+
+  /// Not-taken banner subtitle: roster shown by default but nothing is validated.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance has been recorded for this day yet. Save to record it.'**
+  String get attendanceCallNotTakenMessage;
 
   /// No description provided for @attendanceSaveOverlayEyebrow.
   ///

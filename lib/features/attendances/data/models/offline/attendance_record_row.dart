@@ -10,6 +10,10 @@ import 'package:school_app_flutter/features/attendances/domain/entities/student_
 /// `updatedAt` (epoch ms, horloge client) arbitre le last-write-wins.
 class AttendanceRecordRow extends Equatable {
   final String id;
+
+  /// Lien logique vers la racine d'agrégat `attendance_sessions` (nullable pour
+  /// les lignes legacy pré-1.2.0 backfillées par la migration v4).
+  final String? sessionId;
   final String studentId;
   final String studentFirstName;
   final String studentLastName;
@@ -30,6 +34,7 @@ class AttendanceRecordRow extends Equatable {
 
   const AttendanceRecordRow({
     required this.id,
+    this.sessionId,
     required this.studentId,
     required this.studentFirstName,
     required this.studentLastName,
@@ -57,6 +62,7 @@ class AttendanceRecordRow extends Equatable {
   factory AttendanceRecordRow.fromMap(Map<String, Object?> map) =>
       AttendanceRecordRow(
         id: map['id'] as String,
+        sessionId: map['session_id'] as String?,
         studentId: map['student_id'] as String,
         studentFirstName: map['student_first_name'] as String,
         studentLastName: map['student_last_name'] as String,
@@ -76,6 +82,7 @@ class AttendanceRecordRow extends Equatable {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'id': id,
+    'session_id': sessionId,
     'student_id': studentId,
     'student_first_name': studentFirstName,
     'student_last_name': studentLastName,
@@ -110,9 +117,32 @@ class AttendanceRecordRow extends Equatable {
 
   bool get isSynced => SyncState.fromDbValue(syncStatus).isSynced;
 
+  /// Rattache la ligne à sa session (id de racine d'agrégat).
+  AttendanceRecordRow copyWithSessionId(String sessionId) =>
+      AttendanceRecordRow(
+        id: id,
+        sessionId: sessionId,
+        studentId: studentId,
+        studentFirstName: studentFirstName,
+        studentLastName: studentLastName,
+        studentMiddleName: studentMiddleName,
+        studentGender: studentGender,
+        classroomId: classroomId,
+        attendanceDate: attendanceDate,
+        academicYearId: academicYearId,
+        present: present,
+        absenceReason: absenceReason,
+        absenceReasonNote: absenceReasonNote,
+        version: version,
+        updatedAt: updatedAt,
+        syncStatus: syncStatus,
+        syncedAt: syncedAt,
+      );
+
   @override
   List<Object?> get props => [
     id,
+    sessionId,
     studentId,
     studentFirstName,
     studentLastName,

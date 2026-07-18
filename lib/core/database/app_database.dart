@@ -69,6 +69,118 @@ Future<void> migrateOfflineDatabase(
     // Les bases v1/v2 ont déjà la table → ALTER.
     await db.execute('ALTER TABLE enrollments ADD COLUMN source_ref TEXT');
   }
+  if (oldVersion < 4) {
+    // v4 — Présence : passage au modèle SESSION-agrégat (contrat 1.2.0). La
+    // racine d'agrégat `attendance_sessions` lève l'ambiguïté des 3 états, et
+    // `attendance_records` gagne un lien logique `session_id`.
+    await migrateAttendanceToSessionModel(db, schema);
+  }
+  if (oldVersion < 5) {
+    // v5 — Classe : événement de transfert d'élève offline (régime A). Table
+    // neuve, aucun backfill (aucun transfert passé n'était tracé — l'ancien
+    // reassign online écrasait le miroir sans historique).
+    final transfersTable = schema.firstWhere(
+      (t) => t.name == 'classroom_transfers',
+    );
+    await db.execute(_asIfNotExists(transfersTable.createTableSql));
+    for (final indexSql in transfersTable.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
+}
+
+/// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,
+/// puis **backfille une session rétroactive** par appel legacy déjà en base.
+///
+/// Sans ce backfill, les `attendance_records` créés en v1..v3 deviendraient des
+/// exceptions orphelines, invisibles au modèle des 3 états (« pas de session »
+/// serait lu « appel non fait » alors qu'un appel a bien eu lieu). Les sessions
+/// backfillées sont marquées `SYNCED` (l'appel a déjà eu lieu, la resync le
+/// réalignera par clé naturelle) et leur `id` est un uuid v4 **généré en SQL**
+/// (aucune dépendance Dart → migration exerçable en ffi hors SQLCipher).
+///
+/// Enfin, les entrées d'outbox `ATTENDANCE` au format full-write obsolète sont
+/// purgées : leur payload n'est plus décodable par le handler agrégat (A3), les
+/// laisser en ferait des poison-entries. La donnée reste dans `attendance_records`.
+Future<void> migrateAttendanceToSessionModel(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  // Base antérieure à la Présence (aucun appel local) : rien à migrer. Les
+  // tables seront matérialisées par `onCreate` / le rejeu de schéma `<2`.
+  if (!await _hasTable(db, 'attendance_records')) return;
+
+  final sessionsTable = schema.firstWhere(
+    (t) => t.name == 'attendance_sessions',
+  );
+  await db.execute(_asIfNotExists(sessionsTable.createTableSql));
+  for (final indexSql in sessionsTable.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
+
+  // `attendance_records` existe déjà (v1) → ajout de la colonne + son index.
+  if (!await _hasColumn(db, 'attendance_records', 'session_id')) {
+    await db.execute(
+      'ALTER TABLE attendance_records ADD COLUMN session_id TEXT',
+    );
+  }
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_attendance_session '
+    'ON attendance_records(session_id)',
+  );
+
+  // Backfill : une session SYNCED par (classe, date, année) distinct des records.
+  // uuid v4 forgé en SQL pur (RFC 4122 : version 4, variant 8/9/a/b).
+  await db.execute('''
+    INSERT INTO attendance_sessions
+      (id, classroom_id, attendance_date, academic_year_id,
+       updated_at, sync_status, synced_at)
+    SELECT
+      lower(
+        hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-4' ||
+        substr(hex(randomblob(2)), 2) || '-' ||
+        substr('89ab', abs(random()) % 4 + 1, 1) ||
+        substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))
+      ),
+      classroom_id, attendance_date, academic_year_id,
+      MAX(updated_at), 'SYNCED', MAX(updated_at)
+    FROM attendance_records
+    WHERE session_id IS NULL
+    GROUP BY classroom_id, attendance_date, academic_year_id
+  ''');
+  await db.execute('''
+    UPDATE attendance_records
+    SET session_id = (
+      SELECT s.id FROM attendance_sessions s
+      WHERE s.classroom_id = attendance_records.classroom_id
+        AND s.attendance_date = attendance_records.attendance_date
+        AND s.academic_year_id = attendance_records.academic_year_id
+    )
+    WHERE session_id IS NULL
+  ''');
+
+  // Purge des poison-entries d'outbox au format full-write (pré-1.2.0).
+  await db.delete('outbox', where: "aggregate_type = 'ATTENDANCE'");
+}
+
+/// Vrai si [column] existe déjà sur [table] (via `PRAGMA table_info`). Rend le
+/// `ALTER … ADD COLUMN` idempotent (SQLite le refuse si la colonne est présente).
+Future<bool> _hasColumn(
+  DatabaseExecutor db,
+  String table,
+  String column,
+) async {
+  final info = await db.rawQuery('PRAGMA table_info($table)');
+  return info.any((row) => row['name'] == column);
+}
+
+/// Vrai si [table] existe dans la base (via `sqlite_master`).
+Future<bool> _hasTable(DatabaseExecutor db, String table) async {
+  final rows = await db.rawQuery(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+    [table],
+  );
+  return rows.isNotEmpty;
 }
 
 /// Rend un `CREATE TABLE …` idempotent (`IF NOT EXISTS`) pour les migrations.

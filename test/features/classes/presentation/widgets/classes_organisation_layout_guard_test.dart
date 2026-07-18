@@ -174,6 +174,7 @@ void main() {
         overviewStatus: ClassroomStatus.success,
         overviewErrorType: ClassroomErrorType.none,
         overview: overview,
+        composedRosters: const {},
         isReassigning: false,
         reassigningMemberId: '',
         errorMessage: null,

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/local_attendance_rate.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/student_attendance_stats.dart';
 
 abstract class AttendanceOfflineState extends Equatable {
   const AttendanceOfflineState();
@@ -17,14 +18,14 @@ class AttendanceOfflineLoading extends AttendanceOfflineState {
   const AttendanceOfflineLoading();
 }
 
-/// Liste d'appel du jour chargée depuis la base locale (AF-1).
+/// Appel du jour chargé depuis la base locale (AF-1), avec les 3 états.
 class AttendanceOfflineLoaded extends AttendanceOfflineState {
-  final List<AttendanceRecord> records;
+  final DailyAttendance daily;
 
-  const AttendanceOfflineLoaded(this.records);
+  const AttendanceOfflineLoaded(this.daily);
 
   @override
-  List<Object?> get props => [records];
+  List<Object?> get props => [daily];
 }
 
 class AttendanceOfflineRecording extends AttendanceOfflineState {
@@ -45,6 +46,17 @@ class AttendanceOfflineRateLoaded extends AttendanceOfflineState {
 
   @override
   List<Object?> get props => [rate];
+}
+
+/// Statistiques d'assiduité d'un élève sur une période (AF-3, §5). L'UI ne doit
+/// afficher les chiffres que si `stats.available` (bootstrapComplete).
+class AttendanceOfflineStatsLoaded extends AttendanceOfflineState {
+  final StudentAttendanceStats stats;
+
+  const AttendanceOfflineStatsLoaded(this.stats);
+
+  @override
+  List<Object?> get props => [stats];
 }
 
 class AttendanceOfflineError extends AttendanceOfflineState {

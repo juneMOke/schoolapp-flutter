@@ -220,6 +220,8 @@
   "classesOrganisationTransferAction": "Transférer",
   "classesOrganisationTransferInProgress": "Transfert en cours...",
   "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
+  "classesOrganisationTransferQueued": "Transfert enregistré — en attente de synchronisation.",
+  "classesOrganisationTransferPendingBadge": "En attente",
   "classesOrganisationTransferNoTarget": "Aucune sous-classe de destination disponible.",
   "classesOrganisationSelectCycleAndLevelTitle": "Sélectionnez un cycle et un niveau",
   "classesOrganisationSelectCycleAndLevelSubtitle": "Commencez par choisir un cycle, puis un niveau pour afficher la composition des classes.",
@@ -1538,6 +1540,14 @@
   "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
   "attendanceMarkAllPresentAction": "Tout présent",
+  "attendanceCallNotTakenTitle": "Appel non fait",
+  "@attendanceCallNotTakenTitle": {
+    "description": "Bandeau : aucune session d'appel n'existe encore pour ce jour (3e état)."
+  },
+  "attendanceCallNotTakenMessage": "Aucun appel n'a encore été enregistré pour ce jour. Validez pour l'enregistrer.",
+  "@attendanceCallNotTakenMessage": {
+    "description": "Sous-texte du bandeau appel non fait : le roster est présenté par défaut mais rien n'est validé."
+  },
   "attendanceSaveOverlayEyebrow": "Appel",
   "attendanceSaveProcessingTitle": "Enregistrement en cours…",
   "attendanceSaveSuccessTitle": "Appel enregistré !",

@@ -26,6 +26,7 @@ Future<void> showClassesOrganisationReassignDialog({
   required BuildContext context,
   required ClassroomMemberReassignIntent intent,
   required List<ClassroomReassignOption> options,
+  required String schoolLevelId,
 }) async {
   final selectedTargetId = await showDialog<String>(
     context: context,
@@ -39,9 +40,6 @@ Future<void> showClassesOrganisationReassignDialog({
     return;
   }
 
-  // Réassignation ONLINE via le BLoC offline (PUT serveur + re-pull local
-  // best-effort) : PAS d'outbox ici. L'année scolaire courante, requise par le
-  // use-case, est lue sur le BootstrapCurrentYearBloc porté par le scope.
   final academicYearId =
       context
           .read<BootstrapCurrentYearBloc>()
@@ -51,13 +49,31 @@ Future<void> showClassesOrganisationReassignDialog({
           .id ??
       '';
 
-  context.read<ClassroomOfflineBloc>().add(
-    MemberReassignRequested(
-      classroomMemberId: intent.classroomMemberId,
-      targetClassroomId: selectedTargetId,
-      academicYearId: academicYearId,
-    ),
-  );
+  final bloc = context.read<ClassroomOfflineBloc>();
+  final fromClassroomId = intent.classroomId;
+  if (fromClassroomId != null) {
+    // TRANSFERT (A→B, même niveau) : OFFLINE — événement + outbox, composition à
+    // la lecture. Le miroir n'est jamais muté ici.
+    bloc.add(
+      MemberTransferRequested(
+        studentId: intent.studentId,
+        fromClassroomId: fromClassroomId,
+        toClassroomId: selectedTargetId,
+        schoolLevelId: schoolLevelId,
+        academicYearId: academicYearId,
+      ),
+    );
+  } else {
+    // AFFECTATION d'un non-réparti : ONLINE (distribution, ADR-004) — un
+    // non-réparti n'existe pas dans le miroir offline, donc pas d'événement.
+    bloc.add(
+      MemberReassignRequested(
+        classroomMemberId: intent.classroomMemberId,
+        targetClassroomId: selectedTargetId,
+        academicYearId: academicYearId,
+      ),
+    );
+  }
 }
 
 class _ReassignDialog extends StatefulWidget {

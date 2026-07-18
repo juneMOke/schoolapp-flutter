@@ -1,40 +1,51 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 
 /// BLoC offline-first du module Classe : pull delta (CF2), lecture locale des
-/// classes + roster (CF3) et déplacement d'élève ONLINE (CF4 Option A).
+/// classes + roster composé (CF3), **transfert d'élève OFFLINE** (CF4, événement
+/// + outbox) et affectation d'un non-réparti ONLINE (distribution, ADR-004).
 ///
 /// État unique porteur (calque de [ClassroomBloc]) : les zones classes / roster
-/// / réassignation coexistent à l'écran. La réassignation N'A PAS d'état
-/// pending-sync (elle exige la connexion). La fraîcheur est dérivée du
-/// `syncedAt` du bilan de pull.
+/// / transfert / affectation coexistent à l'écran. Le transfert émet un état
+/// **pending-sync** (acquis en local) ; l'affectation exige la connexion.
 class ClassroomOfflineBloc
     extends Bloc<ClassroomOfflineEvent, ClassroomOfflineState> {
   final SyncClassroomsUseCase _syncClassrooms;
   final GetOfflineClassroomsUseCase _getClassrooms;
   final GetOfflineRosterUseCase _getRoster;
+  final GetComposedRostersUseCase _getComposedRosters;
+  final RecordClassroomTransferUseCase _recordTransfer;
   final ReassignMemberOnlineUseCase _reassignMember;
 
   ClassroomOfflineBloc({
     required SyncClassroomsUseCase syncClassrooms,
     required GetOfflineClassroomsUseCase getClassrooms,
     required GetOfflineRosterUseCase getRoster,
+    required GetComposedRostersUseCase getComposedRosters,
+    required RecordClassroomTransferUseCase recordTransfer,
     required ReassignMemberOnlineUseCase reassignMember,
   }) : _syncClassrooms = syncClassrooms,
        _getClassrooms = getClassrooms,
        _getRoster = getRoster,
+       _getComposedRosters = getComposedRosters,
+       _recordTransfer = recordTransfer,
        _reassignMember = reassignMember,
        super(const ClassroomOfflineState()) {
     on<ClassroomsSyncRequested>(_onSyncRequested);
     on<OfflineClassroomsRequested>(_onClassroomsRequested);
     on<OfflineRosterRequested>(_onRosterRequested);
+    on<OfflineLevelRostersRequested>(_onLevelRostersRequested);
+    on<MemberTransferRequested>(_onTransferRequested);
     on<MemberReassignRequested>(_onReassignRequested);
   }
 
@@ -120,6 +131,89 @@ class ClassroomOfflineBloc
           rosterErrorType: ClassroomErrorType.none,
         ),
       ),
+    );
+  }
+
+  Future<void> _onLevelRostersRequested(
+    OfflineLevelRostersRequested event,
+    Emitter<ClassroomOfflineState> emit,
+  ) async {
+    emit(state.copyWith(levelRostersStatus: ClassroomStatus.loading));
+
+    final result = await _getComposedRosters(
+      academicYearId: event.academicYearId,
+      schoolLevelId: event.schoolLevelId,
+    );
+
+    result.fold(
+      (_) => emit(state.copyWith(levelRostersStatus: ClassroomStatus.failure)),
+      (rosters) => emit(
+        state.copyWith(
+          levelRostersStatus: ClassroomStatus.success,
+          levelRosters: rosters,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onTransferRequested(
+    MemberTransferRequested event,
+    Emitter<ClassroomOfflineState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        transferStatus: ClassroomStatus.loading,
+        transferErrorType: ClassroomErrorType.none,
+        transferringStudentId: event.studentId,
+        transferPendingSync: false,
+      ),
+    );
+
+    final result = await _recordTransfer(
+      RecordClassroomTransferDraft(
+        studentId: event.studentId,
+        fromClassroomId: event.fromClassroomId,
+        toClassroomId: event.toClassroomId,
+        schoolLevelId: event.schoolLevelId,
+        academicYearId: event.academicYearId,
+        reason: event.reason,
+      ),
+    );
+
+    await result.fold(
+      (failure) async => emit(
+        state.copyWith(
+          transferStatus: ClassroomStatus.failure,
+          transferErrorType: _mapFailureToErrorType(failure),
+          transferringStudentId: '',
+        ),
+      ),
+      // Événement enfilé (flush opportuniste déclenché par le repository) : le
+      // transfert est acquis en local, « en attente de synchro ». On recharge
+      // aussitôt les rosters composés du niveau → affichage optimiste en place.
+      (_) async {
+        emit(
+          state.copyWith(
+            transferStatus: ClassroomStatus.success,
+            transferErrorType: ClassroomErrorType.none,
+            transferringStudentId: '',
+            transferPendingSync: true,
+          ),
+        );
+        final rosters = await _getComposedRosters(
+          academicYearId: event.academicYearId,
+          schoolLevelId: event.schoolLevelId,
+        );
+        rosters.fold(
+          (_) {},
+          (map) => emit(
+            state.copyWith(
+              levelRostersStatus: ClassroomStatus.success,
+              levelRosters: map,
+            ),
+          ),
+        );
+      },
     );
   }
 
