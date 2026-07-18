@@ -6,10 +6,14 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/add_disciplinary_comment_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/create_disciplinary_case_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comment_counts_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comments_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_offline_disciplinary_cases_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/update_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
@@ -25,10 +29,22 @@ class MockUpdateDisciplinaryCaseOfflineUseCase extends Mock
 class MockGetOfflineDisciplinaryCasesUseCase extends Mock
     implements GetOfflineDisciplinaryCasesUseCase {}
 
+class MockGetCommentCounts extends Mock
+    implements GetDisciplinaryCommentCountsOfflineUseCase {}
+
+class MockGetComments extends Mock
+    implements GetDisciplinaryCommentsOfflineUseCase {}
+
+class MockAddComment extends Mock
+    implements AddDisciplinaryCommentOfflineUseCase {}
+
 void main() {
   late MockCreateDisciplinaryCaseOfflineUseCase mockCreate;
   late MockUpdateDisciplinaryCaseOfflineUseCase mockUpdate;
   late MockGetOfflineDisciplinaryCasesUseCase mockGet;
+  late MockGetCommentCounts mockCounts;
+  late MockGetComments mockGetComments;
+  late MockAddComment mockAddComment;
 
   final tCase = OfflineDisciplinaryCase(
     id: 'case-1',
@@ -59,12 +75,32 @@ void main() {
     mockCreate = MockCreateDisciplinaryCaseOfflineUseCase();
     mockUpdate = MockUpdateDisciplinaryCaseOfflineUseCase();
     mockGet = MockGetOfflineDisciplinaryCasesUseCase();
+    mockCounts = MockGetCommentCounts();
+    mockGetComments = MockGetComments();
+    mockAddComment = MockAddComment();
   });
 
   DisciplinaryCaseOfflineBloc buildBloc() => DisciplinaryCaseOfflineBloc(
     createCase: mockCreate,
     updateCase: mockUpdate,
     getCases: mockGet,
+  );
+
+  DisciplinaryCaseOfflineBloc buildBlocWithComments() =>
+      DisciplinaryCaseOfflineBloc(
+        createCase: mockCreate,
+        updateCase: mockUpdate,
+        getCases: mockGet,
+        getCommentCounts: mockCounts,
+        getComments: mockGetComments,
+        addComment: mockAddComment,
+      );
+
+  const tComment = DisciplinaryComment(
+    id: 'cm-1',
+    disciplinaryCaseId: 'case-1',
+    content: 'Convocation envoyée',
+    createdAt: 1710000000000,
   );
 
   void stubGet(Either<Failure, List<OfflineDisciplinaryCase>> answer) {
@@ -201,6 +237,72 @@ void main() {
         const DisciplinaryOfflineError(
           'Version périmée : ce cas a été modifié ailleurs.',
         ),
+      ],
+    );
+  });
+
+  group('commentaires', () {
+    blocTest<DisciplinaryCaseOfflineBloc, DisciplinaryCaseOfflineState>(
+      'chargement : casesLoaded porte le nombre de commentaires',
+      setUp: () {
+        stubGet(Right([tCase]));
+        when(() => mockCounts(caseIds: any(named: 'caseIds'))).thenAnswer(
+          (_) async => const Right<Failure, Map<String, int>>({'case-1': 2}),
+        );
+      },
+      build: buildBlocWithComments,
+      act: (bloc) => bloc.add(loadEvent),
+      expect: () => [
+        const DisciplinaryOfflineLoading(),
+        DisciplinaryOfflineCasesLoaded(
+          [tCase],
+          commentCounts: const {'case-1': 2},
+        ),
+      ],
+    );
+
+    blocTest<DisciplinaryCaseOfflineBloc, DisciplinaryCaseOfflineState>(
+      'LoadComments → [loading, commentsLoaded]',
+      setUp: () =>
+          when(() => mockGetComments(caseId: any(named: 'caseId'))).thenAnswer(
+            (_) async =>
+                const Right<Failure, List<DisciplinaryComment>>([tComment]),
+          ),
+      build: buildBlocWithComments,
+      act: (bloc) => bloc.add(const LoadOfflineDisciplinaryComments('case-1')),
+      expect: () => [
+        const DisciplinaryOfflineLoading(),
+        const DisciplinaryOfflineCommentsLoaded('case-1', [tComment]),
+      ],
+    );
+
+    blocTest<DisciplinaryCaseOfflineBloc, DisciplinaryCaseOfflineState>(
+      'AddComment → [saving, commentsLoaded] (recharge le fil)',
+      setUp: () {
+        when(
+          () => mockAddComment(
+            caseId: any(named: 'caseId'),
+            content: any(named: 'content'),
+            authorName: any(named: 'authorName'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, DisciplinaryComment>(tComment),
+        );
+        when(() => mockGetComments(caseId: any(named: 'caseId'))).thenAnswer(
+          (_) async =>
+              const Right<Failure, List<DisciplinaryComment>>([tComment]),
+        );
+      },
+      build: buildBlocWithComments,
+      act: (bloc) => bloc.add(
+        const AddOfflineDisciplinaryComment(
+          caseId: 'case-1',
+          content: 'Convocation envoyée',
+        ),
+      ),
+      expect: () => [
+        const DisciplinaryOfflineSaving(),
+        const DisciplinaryOfflineCommentsLoaded('case-1', [tComment]),
       ],
     );
   });

@@ -93,3 +93,29 @@ class UpdateOfflineDisciplinaryCase extends DisciplinaryCaseOfflineEvent {
   @override
   List<Object?> get props => [caseId, status, sanction, expectedVersion];
 }
+
+/// Charge les commentaires d'un cas (fil du détail, DF-B).
+class LoadOfflineDisciplinaryComments extends DisciplinaryCaseOfflineEvent {
+  final String caseId;
+
+  const LoadOfflineDisciplinaryComments(this.caseId);
+
+  @override
+  List<Object?> get props => [caseId];
+}
+
+/// Ajoute un commentaire append-only (DF-B) puis recharge le fil.
+class AddOfflineDisciplinaryComment extends DisciplinaryCaseOfflineEvent {
+  final String caseId;
+  final String content;
+  final String? authorName;
+
+  const AddOfflineDisciplinaryComment({
+    required this.caseId,
+    required this.content,
+    this.authorName,
+  });
+
+  @override
+  List<Object?> get props => [caseId, content, authorName];
+}

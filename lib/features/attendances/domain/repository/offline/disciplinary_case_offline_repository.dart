@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
@@ -36,6 +37,14 @@ abstract class DisciplinaryCaseOfflineRepository {
     int? expectedVersion,
   });
 
+  /// Ajoute un commentaire (append-only) + bumpe `case.updated_at` (DF-F) et
+  /// enfile l'agrégat re-figé. Renvoie le commentaire créé.
+  Future<Either<Failure, DisciplinaryComment>> addComment({
+    required String caseId,
+    required String content,
+    String? authorName,
+  });
+
   /// Cas locaux d'un élève sur une année.
   Future<Either<Failure, List<OfflineDisciplinaryCase>>> getCasesForStudent({
     required String studentId,
@@ -45,5 +54,15 @@ abstract class DisciplinaryCaseOfflineRepository {
   /// Un cas local par id.
   Future<Either<Failure, OfflineDisciplinaryCase>> getCase({
     required String caseId,
+  });
+
+  /// Commentaires d'un cas (fil chronologique). `content` chargé ici seulement.
+  Future<Either<Failure, List<DisciplinaryComment>>> getCommentsForCase({
+    required String caseId,
+  });
+
+  /// Nombre de commentaires par cas (pour la liste, sans charger `content`).
+  Future<Either<Failure, Map<String, int>>> commentCounts({
+    required List<String> caseIds,
   });
 }

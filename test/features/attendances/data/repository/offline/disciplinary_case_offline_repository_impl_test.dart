@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -89,7 +90,7 @@ void main() {
   });
 
   test(
-    'updateCase : traitement LWW + outbox UPDATE avec sanction courante',
+    'updateCase : traitement LWW + agrégat UPSERT unique (coalescing)',
     () async {
       await createSample();
       clock = 4000;
@@ -105,34 +106,86 @@ void main() {
       expect(row.sanction, 'PARENTS_SUMMONED');
       expect(row.updatedAt, 4000);
 
-      // CREATE + UPDATE = 2 entrées distinctes (create part avant update en FIFO).
-      expect(await outbox.pendingCount(), 2);
-      final entries = await outbox.pendingReady(clock + 1);
-      final updateEntry = entries.firstWhere(
-        (e) => e.operation.dbValue == 'UPDATE',
-      );
-      expect(updateEntry.aggregateId, 'case-1');
-      expect(updateEntry.payload, contains('"sanction":"PARENTS_SUMMONED"'));
+      // CREATE puis UPDATE se coalescent sur le MÊME id d'outbox → 1 entrée UPSERT.
+      expect(await outbox.pendingCount(), 1);
+      final entry = (await outbox.pendingReady(clock + 1)).single;
+      expect(entry.operation.dbValue, 'UPSERT');
+      expect(entry.aggregateId, 'case-1');
+      expect(entry.payload, contains('"sanction":"PARENTS_SUMMONED"'));
+      expect(entry.payload, contains('"status":"RESOLVED"'));
     },
   );
 
+  test('updateCase renvoie toujours la sanction (garde-fou effacement)', () async {
+    await createSample();
+    // Mise à jour SANS re-préciser la sanction courante → payload sanction=null.
+    await repo.updateCase(caseId: 'case-1', status: DisciplinaryStatus.pending);
+    final entry = (await outbox.pendingReady(clock + 1)).single;
+    // La clé 'sanction' est TOUJOURS présente (même à null) — jamais omise (DG-4).
+    expect(entry.payload, contains('"sanction":null'));
+  });
+
   test(
-    'updateCase renvoie toujours la sanction (garde-fou effacement)',
+    'addComment : append-only + bump case.updated_at + agrégat re-figé',
     () async {
       await createSample();
-      // Mise à jour SANS re-préciser la sanction courante → payload sanction=null.
-      await repo.updateCase(
+      clock = 5000;
+      when(() => idGen.newId()).thenReturn('cm-1');
+
+      final result = await repo.addComment(
         caseId: 'case-1',
-        status: DisciplinaryStatus.pending,
+        content: 'Convocation envoyée',
+        authorName: 'Préfet',
       );
-      final entries = await outbox.pendingReady(clock + 1);
-      final updateEntry = entries.firstWhere(
-        (e) => e.operation.dbValue == 'UPDATE',
-      );
-      // La clé 'sanction' est TOUJOURS présente (même à null) — jamais omise.
-      expect(updateEntry.payload, contains('"sanction":null'));
+      expect(result.isRight(), isTrue);
+
+      // Le commentaire est persisté (append-only).
+      final comments = await local.getCommentsForCase('case-1');
+      expect(comments, hasLength(1));
+      expect(comments.first.content, 'Convocation envoyée');
+      expect(comments.first.createdAt, 5000);
+
+      // La racine est bumpée (DF-F) et repasse PENDING_SYNC.
+      final row = await local.getCase('case-1');
+      expect(row!.updatedAt, 5000);
+      expect(row.syncStatus, SyncState.pendingSync.dbValue);
+
+      // Agrégat UPSERT unique re-figé, portant le commentaire.
+      expect(await outbox.pendingCount(), 1);
+      final entry = (await outbox.pendingReady(clock + 1)).single;
+      expect(entry.operation.dbValue, 'UPSERT');
+      expect(entry.payload, contains('"id":"cm-1"'));
+      expect(entry.payload, contains('Convocation envoyée'));
     },
   );
+
+  test('updateCase horloge monotone : édition non perdue quand la ligne a un '
+      'updated_at serveur devant l\'horloge device', () async {
+    await createSample(); // updated_at = 3000
+    // Simule une ligne seedée par un pull au temps SERVEUR (>> horloge device).
+    await db.update(
+      'disciplinary_cases',
+      {'updated_at': 9000000000000, 'sync_status': 'SYNCED'},
+      where: 'id = ?',
+      whereArgs: ['case-1'],
+    );
+    clock = 4000; // horloge device EN RETARD sur le temps serveur
+
+    await repo.updateCase(
+      caseId: 'case-1',
+      status: DisciplinaryStatus.resolved,
+      sanction: DisciplinarySanction.detention,
+    );
+
+    final row = await local.getCase('case-1');
+    // La mutation a bien eu lieu (garde LWW non sautée grâce à la monotonie).
+    expect(row!.status, 'RESOLVED');
+    expect(row.updatedAt, 9000000000001); // local + 1 (monotone)
+    // Le payload d'outbox porte le MÊME clientUpdatedAt (ISO du row.updatedAt)
+    // → markAggregateSynced matchera (pas d'échouage orphelin).
+    final entry = (await outbox.pendingReady(9000000000002)).single;
+    expect(entry.payload, contains(EpochIsoHelper.toIso(9000000000001)));
+  });
 
   test('getCasesForStudent renvoie les cas locaux', () async {
     await createSample();

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 
 abstract class DisciplinaryCaseOfflineState extends Equatable {
@@ -19,10 +20,27 @@ class DisciplinaryOfflineLoading extends DisciplinaryCaseOfflineState {
 class DisciplinaryOfflineCasesLoaded extends DisciplinaryCaseOfflineState {
   final List<OfflineDisciplinaryCase> cases;
 
-  const DisciplinaryOfflineCasesLoaded(this.cases);
+  /// Nombre de commentaires par id de cas (badge de liste). Vide si non calculé.
+  final Map<String, int> commentCounts;
+
+  const DisciplinaryOfflineCasesLoaded(
+    this.cases, {
+    this.commentCounts = const {},
+  });
 
   @override
-  List<Object?> get props => [cases];
+  List<Object?> get props => [cases, commentCounts];
+}
+
+/// Commentaires d'un cas chargés (fil du détail). `content` SENSIBLE chargé ici.
+class DisciplinaryOfflineCommentsLoaded extends DisciplinaryCaseOfflineState {
+  final String caseId;
+  final List<DisciplinaryComment> comments;
+
+  const DisciplinaryOfflineCommentsLoaded(this.caseId, this.comments);
+
+  @override
+  List<Object?> get props => [caseId, comments];
 }
 
 /// Écriture (création ou traitement) en cours.

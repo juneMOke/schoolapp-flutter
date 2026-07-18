@@ -42,14 +42,22 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
 // ── Discipline (offline) ──
-import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_case_outbox_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_pull_api.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_pull_handler.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_sync_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_case_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/disciplinary_case_repository.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/disciplinary_case_offline_repository.dart';
+import 'package:school_app_flutter/features/attendances/domain/repository/offline/disciplinary_pull_repository.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/add_disciplinary_comment_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/create_disciplinary_case_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comment_counts_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comments_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_offline_disciplinary_cases_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_disciplinary_pull_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/update_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/update_disciplinary_case_status_usecase.dart';
 // ── BLoCs de présentation offline ──
@@ -88,6 +96,12 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<AttendanceLocalDataSource>(
     () => AttendanceLocalDataSource(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<DisciplinarySyncApi>(
+    () => DisciplinarySyncApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<DisciplinaryPullApi>(
+    () => DisciplinaryPullApi(getIt<Dio>()),
   );
   getIt.registerLazySingleton<DisciplinaryLocalDataSource>(
     () => DisciplinaryLocalDataSource(getIt<Database>()),
@@ -132,6 +146,14 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     () => DisciplinaryCaseOfflineRepositoryImpl(
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
+    ),
+  );
+  getIt.registerLazySingleton<DisciplinaryPullRepository>(
+    () => DisciplinaryPullRepositoryImpl(
+      api: getIt<DisciplinaryPullApi>(),
+      localDataSource: getIt<DisciplinaryLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: requiredAuth,
     ),
   );
 
@@ -195,6 +217,24 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       getIt<DisciplinaryCaseOfflineRepository>(),
     ),
   );
+  getIt.registerFactory<AddDisciplinaryCommentOfflineUseCase>(
+    () => AddDisciplinaryCommentOfflineUseCase(
+      getIt<DisciplinaryCaseOfflineRepository>(),
+    ),
+  );
+  getIt.registerFactory<GetDisciplinaryCommentsOfflineUseCase>(
+    () => GetDisciplinaryCommentsOfflineUseCase(
+      getIt<DisciplinaryCaseOfflineRepository>(),
+    ),
+  );
+  getIt.registerFactory<GetDisciplinaryCommentCountsOfflineUseCase>(
+    () => GetDisciplinaryCommentCountsOfflineUseCase(
+      getIt<DisciplinaryCaseOfflineRepository>(),
+    ),
+  );
+  getIt.registerFactory<SyncDisciplinaryPullUseCase>(
+    () => SyncDisciplinaryPullUseCase(getIt<DisciplinaryPullRepository>()),
+  );
   getIt.registerFactory<UpdateDisciplinaryCaseStatusUseCase>(
     () => UpdateDisciplinaryCaseStatusUseCase(
       getIt<DisciplinaryCaseRepository>(),
@@ -225,6 +265,9 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       createCase: getIt<CreateDisciplinaryCaseOfflineUseCase>(),
       updateCase: getIt<UpdateDisciplinaryCaseOfflineUseCase>(),
       getCases: getIt<GetOfflineDisciplinaryCasesUseCase>(),
+      getCommentCounts: getIt<GetDisciplinaryCommentCountsOfflineUseCase>(),
+      getComments: getIt<GetDisciplinaryCommentsOfflineUseCase>(),
+      addComment: getIt<AddDisciplinaryCommentOfflineUseCase>(),
     ),
   );
 
@@ -245,7 +288,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt<SyncEngine>().registerHandler(
     DisciplinaryCaseOutboxHandler(
-      remoteDataSource: getIt<DisciplinaryCaseRemoteDataSource>(),
+      syncApi: getIt<DisciplinarySyncApi>(),
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
       requiredAuth: requiredAuth,
     ),
@@ -263,5 +306,8 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt<PullCoordinator>().registerHandler(
     AttendancePullHandler(getIt<AttendancePullRepository>()),
+  );
+  getIt<PullCoordinator>().registerHandler(
+    DisciplinaryPullHandler(getIt<DisciplinaryPullRepository>()),
   );
 }

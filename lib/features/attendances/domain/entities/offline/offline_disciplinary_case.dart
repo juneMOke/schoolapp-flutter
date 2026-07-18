@@ -52,6 +52,10 @@ class OfflineDisciplinaryCase extends Equatable {
     this.syncedAt,
   });
 
+  // `content` SENSIBLE (mineur) : jamais rendu par toString() (fuite debug).
+  @override
+  bool? get stringify => false;
+
   @override
   List<Object?> get props => [
     id,

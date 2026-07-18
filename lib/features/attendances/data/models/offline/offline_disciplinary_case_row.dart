@@ -28,6 +28,10 @@ class OfflineDisciplinaryCaseRow extends Equatable {
   final String? sanction;
   final int? version;
   final int updatedAt;
+
+  /// Temps de visibilité serveur (epoch ms). Nul tant que non synchronisé ;
+  /// posé au pull / à l'ACK. Non-curseur (le curseur vit dans `sync_meta`).
+  final int? serverUpdatedAt;
   final String syncStatus;
   final int? syncedAt;
 
@@ -48,6 +52,7 @@ class OfflineDisciplinaryCaseRow extends Equatable {
     this.sanction,
     this.version,
     required this.updatedAt,
+    this.serverUpdatedAt,
     this.syncStatus = 'PENDING_SYNC',
     this.syncedAt,
   });
@@ -77,6 +82,7 @@ class OfflineDisciplinaryCaseRow extends Equatable {
         sanction: map['sanction'] as String?,
         version: _asIntOrNull(map['version']),
         updatedAt: _asIntOrNull(map['updated_at']) ?? 0,
+        serverUpdatedAt: _asIntOrNull(map['server_updated_at']),
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         syncedAt: _asIntOrNull(map['synced_at']),
       );
@@ -98,9 +104,14 @@ class OfflineDisciplinaryCaseRow extends Equatable {
     'sanction': sanction,
     'version': version,
     'updated_at': updatedAt,
+    'server_updated_at': serverUpdatedAt,
     'sync_status': syncStatus,
     'synced_at': syncedAt,
   };
+
+  // `content` SENSIBLE (mineur) : jamais rendu par toString() (fuite debug).
+  @override
+  bool? get stringify => false;
 
   OfflineDisciplinaryCase toEntity() => OfflineDisciplinaryCase(
     id: id,
@@ -143,6 +154,7 @@ class OfflineDisciplinaryCaseRow extends Equatable {
     sanction,
     version,
     updatedAt,
+    serverUpdatedAt,
     syncStatus,
     syncedAt,
   ];

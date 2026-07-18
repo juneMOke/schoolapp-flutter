@@ -2,26 +2,27 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/attendances/data/models/offline/create_disciplinary_case_offline_request_model.dart';
-import 'package:school_app_flutter/features/attendances/data/models/offline/update_disciplinary_case_request_model.dart';
-import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_case_aggregate_request_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_case_aggregate_response_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_case_input_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_comment_input_model.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_case_outbox_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_sync_api.dart';
 
-class MockRemote extends Mock implements DisciplinaryCaseRemoteDataSource {}
+class MockSyncApi extends Mock implements DisciplinarySyncApi {}
 
 class MockLocal extends Mock implements DisciplinaryLocalDataSource {}
 
-class FakeCreate extends Fake
-    implements CreateDisciplinaryCaseOfflineRequestModel {}
-
-class FakeUpdate extends Fake implements UpdateDisciplinaryCaseRequestModel {}
+class FakeAggregate extends Fake
+    implements DisciplinaryCaseAggregateRequestModel {}
 
 void main() {
-  late MockRemote remote;
+  late MockSyncApi syncApi;
   late MockLocal local;
   late DisciplinaryCaseOutboxHandler handler;
 
@@ -29,141 +30,139 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(<String, dynamic>{});
-    registerFallbackValue(FakeCreate());
-    registerFallbackValue(FakeUpdate());
+    registerFallbackValue(FakeAggregate());
   });
 
   setUp(() {
-    remote = MockRemote();
+    syncApi = MockSyncApi();
     local = MockLocal();
     handler = DisciplinaryCaseOutboxHandler(
-      remoteDataSource: remote,
+      syncApi: syncApi,
       localDataSource: local,
       requiredAuth: auth,
       now: () => 7000,
     );
     when(
-      () => local.markCaseSynced(
-        any(),
-        version: any(named: 'version'),
+      () => local.markAggregateSynced(
+        caseId: any(named: 'caseId'),
+        commentIds: any(named: 'commentIds'),
+        updatedAtGuard: any(named: 'updatedAtGuard'),
+        serverUpdatedAt: any(named: 'serverUpdatedAt'),
         syncedAt: any(named: 'syncedAt'),
       ),
     ).thenAnswer((_) async {});
   });
 
-  final createPayload = const CreateDisciplinaryCaseOfflineRequestModel(
-    id: 'case-1',
-    studentId: 's1',
-    studentFirstName: 'A',
-    studentLastName: 'B',
-    studentGender: 'MALE',
-    disciplinaryCaseDate: '2026-06-10',
-    academicYearId: 'year-1',
-    title: 'T',
-    content: 'C',
-    category: 'FIGHTING',
-    severity: 'SERIOUS',
-    sanction: 'DETENTION',
+  // Agrégat {case, comments[]} : clientUpdatedAt = 3000 ms (ISO), un commentaire.
+  final aggregatePayload = DisciplinaryCaseAggregateRequestModel(
+    caseInput: DisciplinaryCaseInputModel(
+      id: 'case-1',
+      studentId: 's1',
+      academicYearId: 'year-1',
+      category: 'FIGHTING',
+      severity: 'SERIOUS',
+      title: 'T',
+      content: 'C',
+      disciplinaryCaseDate: '2026-06-10',
+      status: 'RESOLVED',
+      sanction: 'DETENTION',
+      clientUpdatedAt: EpochIsoHelper.toIso(3000),
+    ),
+    comments: [
+      DisciplinaryCommentInputModel(
+        id: 'cm-1',
+        content: 'note',
+        createdAt: EpochIsoHelper.toIso(2500),
+      ),
+    ],
   ).toJsonString();
 
-  final updatePayload = const UpdateDisciplinaryCaseRequestModel(
-    status: 'RESOLVED',
-    sanction: 'DETENTION',
-  ).toJsonString();
-
-  OutboxEntry createEntry() => OutboxEntry(
-    id: 'DISCIPLINARY_CASE:CREATE:case-1',
+  OutboxEntry entry() => OutboxEntry(
+    id: 'DISCIPLINARY_CASE:case-1',
     aggregateType: 'DISCIPLINARY_CASE',
     aggregateId: 'case-1',
-    operation: OutboxOperation.create,
-    payload: createPayload,
+    operation: OutboxOperation.upsert,
+    payload: aggregatePayload,
     createdAt: 1,
   );
 
-  OutboxEntry updateEntry() => OutboxEntry(
-    id: 'DISCIPLINARY_CASE:UPDATE:case-1',
-    aggregateType: 'DISCIPLINARY_CASE',
-    aggregateId: 'case-1',
-    operation: OutboxOperation.update,
-    payload: updatePayload,
-    createdAt: 2,
-  );
-
   DioException dio(Object? error) => DioException(
-    requestOptions: RequestOptions(path: '/disciplinary-cases'),
+    requestOptions: RequestOptions(path: '/sync/disciplinary-cases'),
     error: error,
   );
+
+  DisciplinaryCaseAggregateResponseModel response(String outcome) =>
+      DisciplinaryCaseAggregateResponseModel(
+        caseId: 'case-1',
+        status: 'RESOLVED',
+        sanction: 'DETENTION',
+        serverUpdatedAt: EpochIsoHelper.toIso(9000),
+        lwwOutcome: outcome,
+      );
 
   test('type d\'agrégat = DISCIPLINARY_CASE', () {
     expect(handler.aggregateType, 'DISCIPLINARY_CASE');
   });
 
-  test('CREATE OK (régime A, id client) → acked + synced', () async {
+  test(
+    'APPLIED → acked + markAggregateSynced (garde LWW + serverUpdatedAt)',
+    () async {
+      when(
+        () => syncApi.submitDisciplinaryCase(any(), any()),
+      ).thenAnswer((_) async => response('APPLIED'));
+
+      final result = await handler.dispatch(entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      verify(
+        () => local.markAggregateSynced(
+          caseId: 'case-1',
+          commentIds: ['cm-1'],
+          updatedAtGuard: 3000,
+          serverUpdatedAt: 9000,
+          syncedAt: 7000,
+        ),
+      ).called(1);
+    },
+  );
+
+  test('SUPERSEDED est un succès (mono-préfet) → acked', () async {
     when(
-      () => remote.createCaseWithClientId(any(), any()),
-    ).thenAnswer((_) async {});
+      () => syncApi.submitDisciplinaryCase(any(), any()),
+    ).thenAnswer((_) async => response('SUPERSEDED'));
 
-    final result = await handler.dispatch(createEntry());
-
+    final result = await handler.dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.acked);
-    verify(() => local.markCaseSynced('case-1', syncedAt: 7000)).called(1);
   });
 
-  test('UPDATE OK (régime C) → acked + synced', () async {
+  test('rejet métier 422 (ValidationFailure) → failed', () async {
     when(
-      () => remote.updateDisciplinaryCase(any(), any(), any()),
-    ).thenAnswer((_) async {});
-
-    final result = await handler.dispatch(updateEntry());
-
-    expect(result.outcome, OutboxDispatchOutcome.acked);
-    verify(
-      () => remote.updateDisciplinaryCase(auth, 'case-1', any()),
-    ).called(1);
-  });
-
-  test('UPDATE 409 (ConflictFailure) → refetch + retry', () async {
-    when(
-      () => remote.updateDisciplinaryCase(any(), any(), any()),
-    ).thenThrow(dio(const ConflictFailure()));
-    when(
-      () => remote.getCaseById(any(), any()),
-    ).thenThrow(Exception('offline'));
-
-    final result = await handler.dispatch(updateEntry());
-
-    expect(result.outcome, OutboxDispatchOutcome.retry);
-    verify(() => remote.getCaseById(auth, 'case-1')).called(1);
-  });
-
-  test('CREATE rejet métier (ValidationFailure) → failed', () async {
-    when(
-      () => remote.createCaseWithClientId(any(), any()),
+      () => syncApi.submitDisciplinaryCase(any(), any()),
     ).thenThrow(dio(const ValidationFailure('bad')));
 
-    final result = await handler.dispatch(createEntry());
+    final result = await handler.dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.failed);
   });
 
-  test('CREATE réseau → retry', () async {
+  test('réseau → retry', () async {
     when(
-      () => remote.createCaseWithClientId(any(), any()),
+      () => syncApi.submitDisciplinaryCase(any(), any()),
     ).thenThrow(dio(const NetworkFailure()));
 
-    final result = await handler.dispatch(createEntry());
+    final result = await handler.dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
 
-  test('payload corrompu → failed', () async {
-    const entry = OutboxEntry(
+  test('payload corrompu / ancien format → failed', () async {
+    const badEntry = OutboxEntry(
       id: 'x',
       aggregateType: 'DISCIPLINARY_CASE',
       aggregateId: 'case-1',
-      operation: OutboxOperation.create,
+      operation: OutboxOperation.upsert,
       payload: 'not-json',
       createdAt: 1,
     );
-    final result = await handler.dispatch(entry);
+    final result = await handler.dispatch(badEntry);
     expect(result.outcome, OutboxDispatchOutcome.failed);
   });
 }
