@@ -212,6 +212,7 @@ const TableSchema disciplinaryCasesTable = TableSchema(
       sanction TEXT,
       version INTEGER,
       updated_at INTEGER NOT NULL,
+      server_updated_at INTEGER,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       synced_at INTEGER
     )
@@ -219,6 +220,30 @@ const TableSchema disciplinaryCasesTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_disc_student_year '
         'ON disciplinary_cases(student_id, academic_year_id)',
+  ],
+);
+
+/// `disciplinary_case_comments` — commentaires d'un cas (DF-B). **Append-only**
+/// (régime A, uuid client honoré) : on ajoute, on ne modifie ni ne supprime.
+/// `content` SENSIBLE (base entièrement chiffrée SQLCipher), chargé au détail
+/// seulement. Tout ajout bumpe `disciplinary_cases.updated_at` (DF-F) — sinon la
+/// racine ne bouge pas et le cas n'est jamais re-pullé (piège §4.4 du guide).
+const TableSchema disciplinaryCaseCommentsTable = TableSchema(
+  name: 'disciplinary_case_comments',
+  createTableSql: '''
+    CREATE TABLE disciplinary_case_comments (
+      id TEXT PRIMARY KEY,
+      disciplinary_case_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      author_name TEXT,
+      created_at INTEGER NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
+      synced_at INTEGER
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_disc_comment_case '
+        'ON disciplinary_case_comments(disciplinary_case_id, created_at)',
   ],
 );
 
@@ -230,4 +255,5 @@ const List<TableSchema> classroomAttendanceOfflineTables = [
   attendanceSessionsTable,
   attendanceRecordsTable,
   disciplinaryCasesTable,
+  disciplinaryCaseCommentsTable,
 ];

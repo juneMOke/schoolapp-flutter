@@ -138,7 +138,10 @@ class AppConstants {
   // PRE, contrat agrégat).
   // v4 (2026-07-16) : Présence — modèle session-agrégat (`attendance_sessions`).
   // v5 (2026-07-18) : Classe — événement `classroom_transfers` (transfert offline).
-  static const int offlineDbSchemaVersion = 5;
+  // v6 (2026-07-18) : Discipline — agrégat {case, comments[]} : table
+  // `disciplinary_case_comments` (append-only) + `disciplinary_cases.server_updated_at`
+  // (visibilité serveur, base du pull keyset). Table neuve → aucun backfill.
+  static const int offlineDbSchemaVersion = 6;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -233,4 +236,17 @@ class AppConstants {
   ///    applicatif. Indispensable au dénominateur d'assiduité par intervalles.
   static const String syncClassroomTransfersEndpoint =
       '/api/v1/sync/classroom-transfers';
+
+  /// Volet Discipline offline (contrat openapi_discipline_sync 1.1.0) :
+  ///  - **POST** = push de l'agrégat `{case, comments[]}` (upsert 200) : le FAIT
+  ///    insert-only (régime A, uuid honoré), le TRAITEMENT `status`/`sanction`
+  ///    gardé par LWW `clientUpdatedAt`, les commentaires append-only ; la réponse
+  ///    porte `lwwOutcome` (APPLIED/SUPERSEDED) + l'état canonique ;
+  ///  - **GET** = pull KEYSET des cas de l'année (commentaires imbriqués), cadré
+  ///    année, jeton `cursor` opaque, 304 applicatif.
+  ///
+  /// Remplace côté offline l'ancien couple [disciplinaryCasesEndpoint] (POST) +
+  /// [disciplinaryCaseByIdEndpoint] (PUT) : chemin unique upsert, sémantique LWW.
+  static const String syncDisciplinaryCasesEndpoint =
+      '/api/v1/sync/disciplinary-cases';
 }

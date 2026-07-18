@@ -87,6 +87,26 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
+  if (oldVersion < 6) {
+    // v6 — Discipline : agrégat {case, comments[]} (contrat 1.1.0). Table
+    // `disciplinary_case_comments` append-only (régime A, uuid honoré) — table
+    // neuve, aucun backfill (aucun commentaire passé n'était tracé). Colonne
+    // `server_updated_at` sur `disciplinary_cases` : temps de visibilité serveur
+    // (base du pull keyset, ADR-008) ; nullable, posée au pull/ACK.
+    final commentsTable = schema.firstWhere(
+      (t) => t.name == 'disciplinary_case_comments',
+    );
+    await db.execute(_asIfNotExists(commentsTable.createTableSql));
+    for (final indexSql in commentsTable.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+    if (await _hasTable(db, 'disciplinary_cases') &&
+        !await _hasColumn(db, 'disciplinary_cases', 'server_updated_at')) {
+      await db.execute(
+        'ALTER TABLE disciplinary_cases ADD COLUMN server_updated_at INTEGER',
+      );
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,
