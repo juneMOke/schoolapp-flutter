@@ -1,4 +1,5 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -230,5 +231,89 @@ class AcademicsLocalDataSource {
         );
       }
     });
+  }
+
+  // ── Application du pull métier (skip PENDING_SYNC : jamais de clobber) ───────
+
+  /// Applique un lot d'évaluations pullées (régime A). Money-grade : une
+  /// évaluation locale non synchronisée (`PENDING_SYNC`/`SYNC_ERROR` — créée
+  /// offline, pas encore acquittée) est **plus récente** que ce que porte le
+  /// serveur → **sautée** (elle sera poussée puis réalignée par uuid). Une
+  /// évaluation absente est matérialisée SYNCED ; une déjà SYNCED est rafraîchie
+  /// (le fait est immuable : REPLACE sans risque). Renvoie le nombre appliqué.
+  Future<int> applyPulledEvaluations(List<EvaluationRow> rows) async {
+    var applied = 0;
+    await applyInBatches<EvaluationRow>(
+      _db,
+      rows,
+      apply: (txn, chunk) async {
+        for (final row in chunk) {
+          final existing = await txn.query(
+            evaluationTable,
+            columns: ['sync_status'],
+            where: 'id = ?',
+            whereArgs: [row.id],
+            limit: 1,
+          );
+          if (existing.isNotEmpty &&
+              existing.first['sync_status'] != SyncState.synced.dbValue) {
+            continue; // écriture locale non synchronisée = gagnante.
+          }
+          await txn.insert(
+            evaluationTable,
+            row.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          applied++;
+        }
+      },
+    );
+    return applied;
+  }
+
+  /// Applique un lot de notes pullées (régime C, clé naturelle). Même garde :
+  /// une note locale non synchronisée est **sautée** (jamais clobber). Une note
+  /// absente est insérée SYNCED (id serveur) ; une déjà SYNCED est rafraîchie
+  /// **en conservant l'id de transport local** (jamais de réécriture de PK).
+  Future<int> applyPulledNotes(List<NoteEvaluationRow> rows) async {
+    var applied = 0;
+    await applyInBatches<NoteEvaluationRow>(
+      _db,
+      rows,
+      apply: (txn, chunk) async {
+        for (final row in chunk) {
+          final existing = await txn.query(
+            noteTable,
+            columns: ['id', 'sync_status'],
+            where: 'evaluation_id = ? AND student_id = ?',
+            whereArgs: [row.evaluationId, row.studentId],
+            limit: 1,
+          );
+          if (existing.isEmpty) {
+            await txn.insert(noteTable, row.toMap());
+            applied++;
+            continue;
+          }
+          if (existing.first['sync_status'] != SyncState.synced.dbValue) {
+            continue; // écriture locale non synchronisée = gagnante.
+          }
+          await txn.update(
+            noteTable,
+            {
+              'points_obtenus': row.pointsObtenus,
+              'statut': row.statut,
+              'updated_at': row.updatedAt,
+              'server_updated_at': row.serverUpdatedAt,
+              'sync_status': SyncState.synced.dbValue,
+              'synced_at': row.syncedAt,
+            },
+            where: 'id = ?',
+            whereArgs: [existing.first['id']],
+          );
+          applied++;
+        }
+      },
+    );
+    return applied;
   }
 }
