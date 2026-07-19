@@ -76,4 +76,11 @@ class ScheduleRefLocalDataSource {
     );
     return rows.map(RefRecurringSessionRow.fromMap).toList(growable: false);
   }
+
+  /// Toutes les séances récurrentes en base (source de « Mes cours » : les cours
+  /// de l'enseignant se dérivent des séances, filtrées par `teacher_id`).
+  Future<List<RefRecurringSessionRow>> getAllSessions() async {
+    final rows = await _db.query(sessionsTable);
+    return rows.map(RefRecurringSessionRow.fromMap).toList(growable: false);
+  }
 }

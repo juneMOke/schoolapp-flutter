@@ -29,6 +29,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/discip
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/notation_repository.dart';
@@ -948,11 +949,18 @@ Future<void> configureDependencies({
     () => CourseRemoteDataSource(getIt<Dio>()),
   );
 
-  getIt.registerLazySingleton<CourseRepository>(
+  // Online concret (conservé pour la délégation détail/création par l'impl
+  // offline tant que NF-7b (c)/(d) ne sont pas faits).
+  getIt.registerLazySingleton<CourseRepositoryImpl>(
     () => CourseRepositoryImpl(
       remoteDataSource: getIt<CourseRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
+  );
+  // OFFLINE-FIRST (NF-7b a) : getMyCourses lu en LOCAL ; détail/création encore
+  // délégués online. Impl offline enregistrée dans registerAcademicsOffline.
+  getIt.registerLazySingleton<CourseRepository>(
+    () => getIt<CourseOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetMyCoursesUseCase>(

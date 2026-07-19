@@ -19,7 +19,9 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_outbox_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/notation_ref_pull_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/notes_batch_outbox_handler.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_ref_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
@@ -108,6 +110,16 @@ void registerAcademicsOffline(GetIt getIt) {
     () => NotesOfflineRepositoryImpl(
       localDataSource: getIt<AcademicsLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  // Impl offline-first de CourseRepository (getMyCourses local ; détail/création
+  // délégués à l'online concret CourseRepositoryImpl). Rebindée dans injection.dart.
+  getIt.registerLazySingleton<CourseOfflineRepositoryImpl>(
+    () => CourseOfflineRepositoryImpl(
+      online: getIt<CourseRepositoryImpl>(),
+      scheduleRefLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
+      classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
