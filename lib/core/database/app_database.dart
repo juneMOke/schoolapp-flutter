@@ -120,6 +120,26 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
+  if (oldVersion < 8) {
+    // v8 — Notes / Cours (academics + schedule, ADR-006) : tables de référence
+    // (`ref_time_slots`, `ref_recurring_sessions`, `ref_cours`) + écriture
+    // offline `evaluation` (régime A) et `note_evaluation` (régime C). Tables
+    // neuves → aucun backfill. Rejeu `IF NOT EXISTS` des contributions de
+    // `academicsOfflineTables`.
+    for (final name in const [
+      'ref_time_slots',
+      'ref_recurring_sessions',
+      'ref_cours',
+      'evaluation',
+      'note_evaluation',
+    ]) {
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(_asIfNotExists(table.createTableSql));
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

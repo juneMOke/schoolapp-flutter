@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/auth_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/classroom_attendance_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
@@ -54,4 +55,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...authOfflineTables, // session offline (ADR-010 : user/verifier/session/clock)
   ...enrollmentFinanceOfflineTables, // branche A (Inscription + Facturation)
   ...classroomAttendanceOfflineTables, // branche B (Classe + Présence/Discipline)
+  ...academicsOfflineTables, // Notes / Cours (academics + schedule, ADR-006)
 ];

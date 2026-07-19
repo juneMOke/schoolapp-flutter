@@ -213,7 +213,10 @@ class AppConstants {
   // (visibilité serveur, base du pull keyset). Table neuve → aucun backfill.
   // v7 (2026-07-19) : Auth/session offline (ADR-010) — tables `auth_local_user`,
   // `auth_local_session`, `auth_clock_guard`. Tables neuves → aucun backfill.
-  static const int offlineDbSchemaVersion = 7;
+  // v8 (2026-07-19) : Notes / Cours (academics + schedule, ADR-006) — réf
+  // `ref_time_slots`/`ref_recurring_sessions`/`ref_cours` + écriture `evaluation`
+  // (régime A) et `note_evaluation` (régime C). Tables neuves → aucun backfill.
+  static const int offlineDbSchemaVersion = 8;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -330,4 +333,44 @@ class AppConstants {
   /// [disciplinaryCaseByIdEndpoint] (PUT) : chemin unique upsert, sémantique LWW.
   static const String syncDisciplinaryCasesEndpoint =
       '/api/v1/sync/disciplinary-cases';
+
+  // ── Offline sync — Notes / Cours (contrat PLAN_notes_cours_offline) ──
+  // Frontière ADR-006 : seules la SAISIE (évaluation régime A, note régime C)
+  // et sa RÉFÉRENCE (cours, emploi du temps) transitent ; bulletin, rang et
+  // résultats « live » restent serveur. 5 pulls keyset (lecture seule) + 2
+  // ingest. Jeton `cursor` opaque, `KeysetPage`, 304 applicatif sur cycle vide.
+
+  /// Pull KEYSET des cours d'une classe (réf, lecture seule). Query :
+  /// `classroomId`, `cursor`, `limit`. → `ref_cours`.
+  static const String syncAcademicsCoursEndpoint =
+      '/api/v1/sync/academics/cours';
+
+  /// Pull KEYSET **et** ingest des évaluations (régime A, insert-only) :
+  ///  - **GET** = delta keyset des évaluations d'un cours (`coursId`, `cursor`,
+  ///    `limit`) → `evaluation` ;
+  ///  - **POST** = push idempotent d'une évaluation (uuid client honoré) :
+  ///    200 rejeu / 201 créée.
+  static const String syncAcademicsEvaluationsEndpoint =
+      '/api/v1/sync/academics/evaluations';
+
+  /// Pull KEYSET **et** ingest des notes (régime C, upsert clé naturelle + LWW) :
+  ///  - **GET** = delta keyset des notes d'un cours (`coursId`, `cursor`,
+  ///    `limit`) → `note_evaluation` (curseur INDÉPENDANT de celui des
+  ///    évaluations — split assumé) ;
+  ///  - **POST** = push d'un lot de notes d'une évaluation ; réponse = **outcome
+  ///    par ligne** (APPLIED / SUPERSEDED / REJECTED:PERIODE_CLOSE|INVALID) +
+  ///    l'état serveur. Toujours 200.
+  static const String syncAcademicsNotesEndpoint =
+      '/api/v1/sync/academics/notes';
+
+  /// Pull KEYSET de la trame horaire de l'école (réf, lecture seule). Scope
+  /// école résolu par le JWT. Query : `cursor`, `limit`. → `ref_time_slots`.
+  static const String syncScheduleTimeSlotsEndpoint =
+      '/api/v1/sync/schedule/time-slots';
+
+  /// Pull KEYSET des séances récurrentes de l'année (réf, lecture seule ; labels
+  /// dénormalisés). Query : `academicYearId`, `cursor`, `limit`.
+  /// → `ref_recurring_sessions`.
+  static const String syncScheduleSessionsEndpoint =
+      '/api/v1/sync/schedule/sessions';
 }
