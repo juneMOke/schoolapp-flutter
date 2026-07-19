@@ -64,8 +64,9 @@ class EvaluationInputModel extends Equatable {
     };
     if (poids != 0) json['poids'] = poids;
     if (sousPeriodeId != null) json['sousPeriodeId'] = sousPeriodeId;
-    if (periodeScolaireId != null)
+    if (periodeScolaireId != null) {
       json['periodeScolaireId'] = periodeScolaireId;
+    }
     return json;
   }
 

@@ -242,10 +242,6 @@ void main() {
             op: OutboxOperation.upsert,
           ),
         );
-        final byStudent = {
-          for (final n in await local.getNotesForEvaluation('ev-1'))
-            n.studentId: n,
-        };
 
         // s2 est ré-éditée pendant le dispatch (nouvel updated_at).
         await local.upsertNotesWithOutbox(
@@ -261,10 +257,8 @@ void main() {
 
         // L'ACK réaligne s1 et s2 aux updated_at POUSSÉS (1000).
         await local.markNotesSynced(
-          idToPushedUpdatedAt: {
-            byStudent['s1']!.id: 1000,
-            byStudent['s2']!.id: 1000,
-          },
+          evaluationId: 'ev-1',
+          studentIdToPushedUpdatedAt: {'s1': 1000, 's2': 1000},
           serverUpdatedAt: 8000,
           syncedAt: 9000,
         );
@@ -293,9 +287,10 @@ void main() {
             op: OutboxOperation.upsert,
           ),
         );
-        final n1 = (await local.getNotesForEvaluation('ev-1')).single;
-
-        await local.markNotesSyncError(idToPushedUpdatedAt: {n1.id: 1000});
+        await local.markNotesSyncError(
+          evaluationId: 'ev-1',
+          studentIdToPushedUpdatedAt: {'s1': 1000},
+        );
 
         expect(
           (await local.getNotesForEvaluation('ev-1')).single.syncState,

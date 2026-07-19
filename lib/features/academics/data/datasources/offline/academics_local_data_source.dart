@@ -167,18 +167,21 @@ class AcademicsLocalDataSource {
   }
 
   /// Marque SYNCED les notes effectivement appliquées côté serveur (outcome
-  /// `APPLIED`/`SUPERSEDED`), **note par note**, avec garde LWW : on ne marque
-  /// SYNCED que si la note est toujours `PENDING_SYNC` **et** que son `updated_at`
-  /// est resté celui qui a été poussé ([idToPushedUpdatedAt]). Une note ré-éditée
-  /// pendant le dispatch garde son `PENDING_SYNC` et sera re-poussée.
+  /// `APPLIED`/`SUPERSEDED`), **note par note**, résolues par la **clé naturelle**
+  /// `(evaluationId, studentId)` (la forme de la réponse serveur), avec garde
+  /// LWW : on ne marque SYNCED que si la note est toujours `PENDING_SYNC` **et**
+  /// que son `updated_at` est resté celui qui a été poussé
+  /// ([studentIdToPushedUpdatedAt]). Une note ré-éditée pendant le dispatch garde
+  /// son `PENDING_SYNC` et sera re-poussée.
   Future<void> markNotesSynced({
-    required Map<String, int> idToPushedUpdatedAt,
+    required String evaluationId,
+    required Map<String, int> studentIdToPushedUpdatedAt,
     int? serverUpdatedAt,
     required int syncedAt,
   }) async {
-    if (idToPushedUpdatedAt.isEmpty) return;
+    if (studentIdToPushedUpdatedAt.isEmpty) return;
     await _db.transaction((txn) async {
-      for (final entry in idToPushedUpdatedAt.entries) {
+      for (final entry in studentIdToPushedUpdatedAt.entries) {
         await txn.update(
           noteTable,
           {
@@ -186,28 +189,44 @@ class AcademicsLocalDataSource {
             'synced_at': syncedAt,
             'server_updated_at': ?serverUpdatedAt,
           },
-          where: 'id = ? AND updated_at = ? AND sync_status = ?',
-          whereArgs: [entry.key, entry.value, SyncState.pendingSync.dbValue],
+          where:
+              'evaluation_id = ? AND student_id = ? AND updated_at = ? '
+              'AND sync_status = ?',
+          whereArgs: [
+            evaluationId,
+            entry.key,
+            entry.value,
+            SyncState.pendingSync.dbValue,
+          ],
         );
       }
     });
   }
 
   /// Marque en erreur (rejet métier terminal, outcome `REJECTED`) les notes
-  /// données, avec la même garde LWW que [markNotesSynced] (ne touche pas une
-  /// note ré-éditée depuis le push). Le motif de rejet est porté par l'UI, pas
-  /// stocké sur la ligne (la table `note_evaluation` n'a pas de colonne d'erreur).
+  /// données, résolues par la clé naturelle `(evaluationId, studentId)`, avec la
+  /// même garde LWW que [markNotesSynced] (ne touche pas une note ré-éditée depuis
+  /// le push). Le motif de rejet est porté par l'UI, pas stocké sur la ligne (la
+  /// table `note_evaluation` n'a pas de colonne d'erreur).
   Future<void> markNotesSyncError({
-    required Map<String, int> idToPushedUpdatedAt,
+    required String evaluationId,
+    required Map<String, int> studentIdToPushedUpdatedAt,
   }) async {
-    if (idToPushedUpdatedAt.isEmpty) return;
+    if (studentIdToPushedUpdatedAt.isEmpty) return;
     await _db.transaction((txn) async {
-      for (final entry in idToPushedUpdatedAt.entries) {
+      for (final entry in studentIdToPushedUpdatedAt.entries) {
         await txn.update(
           noteTable,
           {'sync_status': SyncState.syncError.dbValue},
-          where: 'id = ? AND updated_at = ? AND sync_status = ?',
-          whereArgs: [entry.key, entry.value, SyncState.pendingSync.dbValue],
+          where:
+              'evaluation_id = ? AND student_id = ? AND updated_at = ? '
+              'AND sync_status = ?',
+          whereArgs: [
+            evaluationId,
+            entry.key,
+            entry.value,
+            SyncState.pendingSync.dbValue,
+          ],
         );
       }
     });
