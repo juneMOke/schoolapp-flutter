@@ -41,6 +41,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 // ── Discipline (offline) ──
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_case_outbox_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_local_data_source.dart';
@@ -297,6 +298,11 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     DisciplinaryCaseOutboxHandler(
       syncApi: getIt<DisciplinarySyncApi>(),
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
+      // Garde de dépendance ENROLLMENT→DISCIPLINARY_CASE : même sonde que le
+      // paiement (EnrollmentReadDao, lazy singleton branche A enregistré avant
+      // cette branche B → résolution garantie).
+      dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
+          .studentEnrollmentDependency(studentId, academicYearId),
       requiredAuth: requiredAuth,
     ),
   );

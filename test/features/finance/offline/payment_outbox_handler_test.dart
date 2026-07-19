@@ -5,6 +5,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -101,17 +102,18 @@ void main() {
   Future<OutboxEntry> pendingEntry() async =>
       (await OutboxDao(db).pendingReady(9999)).single;
 
-  PaymentOutboxHandler handlerWithGate(bool ready) => PaymentOutboxHandler(
-    api: api,
-    dao: dao,
-    isStudentEnrollmentSynced: (_) async => ready,
-    extras: const {},
-    now: () => 9000,
-  );
+  PaymentOutboxHandler handlerWithGate(OutboxDependencyState dep) =>
+      PaymentOutboxHandler(
+        api: api,
+        dao: dao,
+        dependency: (_, _) async => dep,
+        extras: const {},
+        now: () => 9000,
+      );
 
-  test('garde FIFO : inscription non synchronisée → blocked (attente propre, '
+  test('gate waiting : inscription en vol → blocked (attente propre, '
       'jamais retry/SYNC_ERROR), aucun POST', () async {
-    final handler = handlerWithGate(false);
+    final handler = handlerWithGate(OutboxDependencyState.waiting);
     final result = await handler.dispatch(await pendingEntry());
     expect(result.outcome, OutboxDispatchOutcome.blocked);
     verifyNever(() => api.commitPayment(any(), any()));
@@ -119,6 +121,42 @@ void main() {
       (await db.query('payments')).first['sync_status'],
       SyncState.pendingSync.dbValue,
     );
+  });
+
+  test('gate parentFailed : inscription en échec → blocked (AUTO-CICATRISANT, '
+      'pas de SYNC_ERROR terminal irrécupérable), aucun POST', () async {
+    final handler = handlerWithGate(OutboxDependencyState.parentFailed);
+    final result = await handler.dispatch(await pendingEntry());
+    expect(result.outcome, OutboxDispatchOutcome.blocked);
+    // Message distinct du `waiting` (discrimine sur « corrigez »).
+    expect(result.error, contains('corrigez'));
+    verifyNever(() => api.commitPayment(any(), any()));
+    // Le paiement reste PENDING_SYNC (montant déduit en local), repartira dès
+    // l'inscription corrigée.
+    expect(
+      (await db.query('payments')).first['sync_status'],
+      SyncState.pendingSync.dbValue,
+    );
+  });
+
+  test('la sonde est interrogée avec le studentId ET l\'année du paiement '
+      '(le bon champ est passé, pas payerId/paymentId)', () async {
+    String? seenStudent;
+    String? seenYear;
+    final handler = PaymentOutboxHandler(
+      api: api,
+      dao: dao,
+      dependency: (studentId, academicYearId) async {
+        seenStudent = studentId;
+        seenYear = academicYearId;
+        return OutboxDependencyState.waiting; // court-circuite le POST
+      },
+      extras: const {},
+      now: () => 9000,
+    );
+    await handler.dispatch(await pendingEntry());
+    expect(seenStudent, 's1');
+    expect(seenYear, 'ay-1');
   });
 
   test(
@@ -150,7 +188,7 @@ void main() {
         ),
       );
 
-      final handler = handlerWithGate(true);
+      final handler = handlerWithGate(OutboxDependencyState.ready);
       final result = await handler.dispatch(await pendingEntry());
       expect(result.outcome, OutboxDispatchOutcome.acked);
 
@@ -173,7 +211,9 @@ void main() {
             const PaymentAggregateResponse(payment: AckPaymentRef(id: 'pay1')),
       );
 
-      await handlerWithGate(true).dispatch(await pendingEntry());
+      await handlerWithGate(
+        OutboxDependencyState.ready,
+      ).dispatch(await pendingEntry());
 
       final sent =
           verify(() => api.commitPayment(any(), captureAny())).captured.single
@@ -202,14 +242,18 @@ void main() {
           error: 'net',
         ),
       );
-      final result = await handlerWithGate(true).dispatch(await pendingEntry());
+      final result = await handlerWithGate(
+        OutboxDependencyState.ready,
+      ).dispatch(await pendingEntry());
       expect(result.outcome, OutboxDispatchOutcome.retry);
     },
   );
 
   test('5xx → retry (panne serveur temporaire)', () async {
     when(() => api.commitPayment(any(), any())).thenThrow(dioWithStatus(503));
-    final result = await handlerWithGate(true).dispatch(await pendingEntry());
+    final result = await handlerWithGate(
+      OutboxDependencyState.ready,
+    ).dispatch(await pendingEntry());
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
 
@@ -221,7 +265,7 @@ void main() {
           () => api.commitPayment(any(), any()),
         ).thenThrow(dioWithStatus(status));
         final result = await handlerWithGate(
-          true,
+          OutboxDependencyState.ready,
         ).dispatch(await pendingEntry());
         expect(result.outcome, OutboxDispatchOutcome.retry);
       },
@@ -236,7 +280,7 @@ void main() {
           () => api.commitPayment(any(), any()),
         ).thenThrow(dioWithStatus(status));
         final result = await handlerWithGate(
-          true,
+          OutboxDependencyState.ready,
         ).dispatch(await pendingEntry());
         expect(result.outcome, OutboxDispatchOutcome.failed);
       },

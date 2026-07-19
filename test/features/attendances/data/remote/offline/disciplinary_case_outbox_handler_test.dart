@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -25,6 +26,9 @@ void main() {
   late MockSyncApi syncApi;
   late MockLocal local;
   late DisciplinaryCaseOutboxHandler handler;
+  // État de la dépendance renvoyé par la sonde ; `ready` par défaut (les tests
+  // de push nominal), surchargé par les tests de garde.
+  late OutboxDependencyState dependencyState;
 
   const auth = <String, dynamic>{'requiresAuth': true};
 
@@ -36,9 +40,11 @@ void main() {
   setUp(() {
     syncApi = MockSyncApi();
     local = MockLocal();
+    dependencyState = OutboxDependencyState.ready;
     handler = DisciplinaryCaseOutboxHandler(
       syncApi: syncApi,
       localDataSource: local,
+      dependency: (_, _) async => dependencyState,
       requiredAuth: auth,
       now: () => 7000,
     );
@@ -106,6 +112,48 @@ void main() {
   test('type d\'agrégat = DISCIPLINARY_CASE', () {
     expect(handler.aggregateType, 'DISCIPLINARY_CASE');
   });
+
+  test(
+    'gate waiting : inscription de l\'élève en vol → blocked (attente '
+    'propre, pas de faux SYNC_ERROR « élève inconnu »), aucun POST',
+    () async {
+      dependencyState = OutboxDependencyState.waiting;
+      final result = await handler.dispatch(entry());
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => syncApi.submitDisciplinaryCase(any(), any()));
+    },
+  );
+
+  test('gate parentFailed : inscription en échec → blocked (auto-cicatrisant, '
+      'pas de SYNC_ERROR terminal), aucun POST', () async {
+    dependencyState = OutboxDependencyState.parentFailed;
+    final result = await handler.dispatch(entry());
+    expect(result.outcome, OutboxDispatchOutcome.blocked);
+    expect(result.error, contains('corrigez'));
+    verifyNever(() => syncApi.submitDisciplinaryCase(any(), any()));
+  });
+
+  test(
+    'la sonde est interrogée avec le studentId ET l\'année du cas',
+    () async {
+      String? seenStudent;
+      String? seenYear;
+      final capturing = DisciplinaryCaseOutboxHandler(
+        syncApi: syncApi,
+        localDataSource: local,
+        dependency: (studentId, academicYearId) async {
+          seenStudent = studentId;
+          seenYear = academicYearId;
+          return OutboxDependencyState.waiting; // court-circuite le POST
+        },
+        requiredAuth: auth,
+        now: () => 7000,
+      );
+      await capturing.dispatch(entry());
+      expect(seenStudent, 's1');
+      expect(seenYear, 'year-1');
+    },
+  );
 
   test(
     'APPLIED → acked + markAggregateSynced (garde LWW + serverUpdatedAt)',

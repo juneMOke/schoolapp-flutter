@@ -1,11 +1,13 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 
 /// Lectures locales du module Inscription (F3 : servies depuis sqflite) :
-/// listes / recherches / détail, plus le garde-fou FIFO `isStudentEnrollmentSynced`.
+/// listes / recherches / détail, plus la sonde de dépendance de push
+/// `studentEnrollmentDependency` (garde ENROLLMENT→paiement/discipline).
 /// Les brouillons (`DRAFT`) du wizard offline **sont listés** (avec leur statut
 /// métier, ex. `IN_PROGRESS`) pour être repris depuis le listing ; ils restent
 /// exclus du PUSH tant qu'ils ne sont pas finalisés (`DRAFT → PENDING_SYNC`).
@@ -237,15 +239,46 @@ class EnrollmentReadDao {
     );
   }
 
-  /// Vrai si l'élève n'a AUCUNE inscription locale non-synchronisée : soit
-  /// aucune inscription locale (élève préexistant), soit toutes SYNCED. Sert de
-  /// garde-fou FIFO au handler PAYMENT (dépendance ENROLLMENT→PAYMENT).
-  Future<bool> isStudentEnrollmentSynced(String studentId) async {
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM enrollments '
-      'WHERE student_id = ? AND sync_status != ?',
-      [studentId, SyncState.synced.dbValue],
-    );
-    return ((rows.first['c'] as int?) ?? 0) == 0;
+  /// État de la dépendance ENROLLMENT→(paiement | cas disciplinaire) pour cet
+  /// élève **sur l'année [academicYearId]**, à partir de l'état **local** de ses
+  /// inscriptions. Garde de push générique 3-états (cf. [OutboxDependencyState]) :
+  ///
+  /// - `ready` : aucune inscription locale sur ce scope (élève préexistant du
+  ///   roster) **ou** toutes `SYNCED` → le dépendant peut partir ;
+  /// - `parentFailed` : au moins une inscription en `SYNC_ERROR` (et aucune
+  ///   `SYNCED`) → échec du prérequis ;
+  /// - `waiting` : au moins une inscription encore en vol (`DRAFT` /
+  ///   `PENDING_SYNC`), aucune en échec → attente.
+  ///
+  /// **Scope par année impératif** : sans lui, une inscription d'une AUTRE année
+  /// en `SYNC_ERROR`/`DRAFT` contaminerait un geste de l'année courante (faux
+  /// blocage d'un paiement valide, ou attente non bornée sur un brouillon N+1).
+  /// [academicYearId] `null` (paiement au champ optionnel) → repli niveau-élève,
+  /// moins précis mais défensif.
+  Future<OutboxDependencyState> studentEnrollmentDependency(
+    String studentId,
+    String? academicYearId,
+  ) async {
+    final rows = academicYearId == null
+        ? await _db.rawQuery(
+            'SELECT sync_status FROM enrollments WHERE student_id = ?',
+            [studentId],
+          )
+        : await _db.rawQuery(
+            'SELECT sync_status FROM enrollments '
+            'WHERE student_id = ? AND academic_year_id = ?',
+            [studentId, academicYearId],
+          );
+    if (rows.isEmpty) return OutboxDependencyState.ready;
+    final states = rows
+        .map((r) => SyncState.fromDbValue(r['sync_status'] as String?))
+        .toList(growable: false);
+    if (states.every((s) => s == SyncState.synced)) {
+      return OutboxDependencyState.ready;
+    }
+    if (states.any((s) => s == SyncState.syncError)) {
+      return OutboxDependencyState.parentFailed;
+    }
+    return OutboxDependencyState.waiting;
   }
 }

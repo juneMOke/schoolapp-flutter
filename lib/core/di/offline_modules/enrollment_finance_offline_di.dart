@@ -329,8 +329,8 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     PaymentOutboxHandler(
       api: getIt<FinanceSyncApi>(),
       dao: getIt<FinanceLocalDao>(),
-      isStudentEnrollmentSynced: (studentId) =>
-          getIt<EnrollmentReadDao>().isStudentEnrollmentSynced(studentId),
+      dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
+          .studentEnrollmentDependency(studentId, academicYearId),
       extras: extras,
     ),
   );

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -8,19 +9,17 @@ import 'package:school_app_flutter/features/finance/offline/data/local/finance_l
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 
-/// Garde-fou FIFO : vrai si l'inscription locale de l'élève est SYNCED (ou s'il
-/// n'y a pas d'inscription locale = élève préexistant). Câblé sur le DAO
-/// Inscription en DI, stubbable en test.
-typedef EnrollmentSyncGate = Future<bool> Function(String studentId);
-
 /// Handler d'outbox de l'agrégat PAYMENT (FF-Lot 4).
 ///
-/// **Garde FIFO** : si le paiement référence un élève dont l'inscription locale
-/// n'est pas encore SYNCED, on renvoie `blocked` — attente PROPRE, pas un `retry`
-/// (l'agrégat ENROLLMENT doit partir avant — l'uuid honoré garantit alors
-/// `payment.student_id` = id serveur). Sinon `POST /api/v1/sync/payments` →
-/// ACK : remap des allocations + créances provisoires, UPSERT des créances
-/// autoritaires, scellement du reçu → `acked`. Idempotent sur `payment.id`.
+/// **Garde de dépendance ENROLLMENT→PAYMENT**, scopée à l'année du paiement (cf.
+/// [OutboxDependencyState]) : selon l'état local de l'inscription de l'élève sur
+/// cette année — `waiting` **et** `parentFailed` → `blocked` (attente PROPRE,
+/// pas un `retry` : l'agrégat ENROLLMENT doit partir avant — l'uuid honoré
+/// garantit alors `payment.student_id` = id serveur ; se lève dès que
+/// l'inscription passe `SYNCED`, y compris après correction d'un `SYNC_ERROR`) ;
+/// `ready` → `POST /api/v1/sync/payments` → ACK : remap des allocations +
+/// créances provisoires, UPSERT des créances autoritaires, scellement du reçu →
+/// `acked`. Idempotent sur `payment.id`.
 ///
 /// **Classification des échecs HTTP** (cf. [_classifyDioError]) : transitoire
 /// (`retry`, rejoué avec backoff) pour le transport, les 5xx et 401/408/409/429 ;
@@ -31,19 +30,19 @@ typedef EnrollmentSyncGate = Future<bool> Function(String studentId);
 class PaymentOutboxHandler implements OutboxSyncHandler {
   final FinanceSyncApi _api;
   final FinanceLocalDao _dao;
-  final EnrollmentSyncGate _isStudentEnrollmentSynced;
+  final OutboxDependencyGate _dependency;
   final Map<String, dynamic> _extras;
   final Clock _now;
 
   const PaymentOutboxHandler({
     required FinanceSyncApi api,
     required FinanceLocalDao dao,
-    required EnrollmentSyncGate isStudentEnrollmentSynced,
+    required OutboxDependencyGate dependency,
     required Map<String, dynamic> extras,
     Clock now = systemClock,
   }) : _api = api,
        _dao = dao,
-       _isStudentEnrollmentSynced = isStudentEnrollmentSynced,
+       _dependency = dependency,
        _extras = extras,
        _now = now;
 
@@ -60,15 +59,31 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
 
-    // Garde FIFO : le paiement ATTEND l'ACK de l'inscription de l'élève. C'est
-    // une attente PROPRE (`blocked`) — ni attempts++, ni backoff, ni faux
-    // SYNC_ERROR : l'argent reçu ne doit jamais être surfacé comme un conflit de
-    // synchro (FRONT §6.3). Le lien se lève automatiquement à l'ACK.
-    final ready = await _isStudentEnrollmentSynced(request.payment.studentId);
-    if (!ready) {
-      return const OutboxDispatchResult.blocked(
-        'Inscription de l\'élève non synchronisée (dépendance)',
-      );
+    // Garde de dépendance ENROLLMENT→PAYMENT, scopée à l'année du paiement.
+    // `waiting` ET `parentFailed` → `blocked` : attente PROPRE (ni attempts++,
+    // ni backoff, ni faux SYNC_ERROR) — l'argent reçu ne doit jamais être
+    // surfacé comme un conflit de synchro (FRONT §6.3). On NE bascule PAS un
+    // paiement en SYNC_ERROR sur `parentFailed` : ce serait un cul-de-sac (aucun
+    // chemin de re-push d'une entrée SYNC_ERROR), alors que `blocked` reste
+    // AUTO-CICATRISANT — l'erreur d'inscription est déjà surfacée de son côté,
+    // et dès qu'elle est corrigée → SYNCED, le paiement repart seul au flush
+    // suivant. Le montant reste déduit en local (compose sur `sync_status <>
+    // SYNCED`) entre-temps.
+    switch (await _dependency(
+      request.payment.studentId,
+      request.payment.academicYearId,
+    )) {
+      case OutboxDependencyState.waiting:
+        return const OutboxDispatchResult.blocked(
+          'Inscription de l\'élève non synchronisée (dépendance)',
+        );
+      case OutboxDependencyState.parentFailed:
+        return const OutboxDispatchResult.blocked(
+          'Inscription de l\'élève en échec de synchro — corrigez '
+          'l\'inscription, le paiement repartira ensuite',
+        );
+      case OutboxDependencyState.ready:
+        break;
     }
 
     try {

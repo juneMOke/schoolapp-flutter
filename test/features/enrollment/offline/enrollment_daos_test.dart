@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
@@ -439,12 +440,52 @@ void main() {
     });
   });
 
-  group('isStudentEnrollmentSynced (FIFO gate)', () {
-    test('faux tant que PENDING, vrai une fois SYNCED, vrai si aucune '
-        'inscription locale', () async {
-      await seedPendingEnrollment(parents: [parent()]);
-      expect(await readDao.isStudentEnrollmentSynced('s1'), isFalse);
+  group('studentEnrollmentDependency (gate 3-états, scopé année)', () {
+    // ay-2026 = année par défaut du helper enrollment().
+    const year = 'ay-2026';
 
+    Future<void> setSyncStatus(String enrollmentId, SyncState state) =>
+        db.update(
+          'enrollments',
+          {'sync_status': state.dbValue},
+          where: 'id = ?',
+          whereArgs: [enrollmentId],
+        );
+
+    Future<void> setYear(String enrollmentId, String academicYearId) =>
+        db.update(
+          'enrollments',
+          {'academic_year_id': academicYearId},
+          where: 'id = ?',
+          whereArgs: [enrollmentId],
+        );
+
+    test('aucune inscription locale sur l\'année → ready', () async {
+      expect(
+        await readDao.studentEnrollmentDependency('unknown', year),
+        OutboxDependencyState.ready,
+      );
+    });
+
+    test('inscription PENDING_SYNC → waiting (attente propre)', () async {
+      await seedPendingEnrollment(parents: [parent()]); // e1/s1 PENDING_SYNC
+      expect(
+        await readDao.studentEnrollmentDependency('s1', year),
+        OutboxDependencyState.waiting,
+      );
+    });
+
+    test('inscription DRAFT (wizard non finalisé) → waiting', () async {
+      await draftDao.insertDraftStudent(student());
+      await draftDao.insertDraftEnrollment(enrollment()); // reste DRAFT
+      expect(
+        await readDao.studentEnrollmentDependency('s1', year),
+        OutboxDependencyState.waiting,
+      );
+    });
+
+    test('inscription SYNCED → ready', () async {
+      await seedPendingEnrollment(parents: [parent()]);
       await ackDao.applyEnrollmentAck(
         const EnrollmentAggregateResponse(
           enrollment: ResponseEnrollment(id: 'e1'),
@@ -453,9 +494,47 @@ void main() {
         enrollmentId: 'e1',
         nowMs: 2000,
       );
-      expect(await readDao.isStudentEnrollmentSynced('s1'), isTrue);
-      // Élève préexistant (aucune inscription locale).
-      expect(await readDao.isStudentEnrollmentSynced('unknown'), isTrue);
+      expect(
+        await readDao.studentEnrollmentDependency('s1', year),
+        OutboxDependencyState.ready,
+      );
+    });
+
+    test('inscription SYNC_ERROR (même année) → parentFailed', () async {
+      await seedPendingEnrollment(parents: [parent()]);
+      await setSyncStatus('e1', SyncState.syncError);
+      expect(
+        await readDao.studentEnrollmentDependency('s1', year),
+        OutboxDependencyState.parentFailed,
+      );
+    });
+
+    test('SCOPE ANNÉE : une inscription d\'une AUTRE année en échec ne '
+        'contamine pas l\'année courante', () async {
+      // e1 ay-2026 SYNCED ; e2 ay-2027 SYNC_ERROR — même élève s1.
+      await seedPendingEnrollment(parents: [parent()]);
+      await setSyncStatus('e1', SyncState.synced);
+      await draftDao.insertDraftEnrollment(
+        enrollment(id: 'e2', studentId: 's1'),
+      );
+      await setYear('e2', 'ay-2027');
+      await setSyncStatus('e2', SyncState.syncError);
+
+      // Année courante isolée : le paiement 2026 part.
+      expect(
+        await readDao.studentEnrollmentDependency('s1', 'ay-2026'),
+        OutboxDependencyState.ready,
+      );
+      // L'année réellement en échec, elle, bloque.
+      expect(
+        await readDao.studentEnrollmentDependency('s1', 'ay-2027'),
+        OutboxDependencyState.parentFailed,
+      );
+      // Repli année nulle = niveau-élève (non scopé) : voit l'échec N+1.
+      expect(
+        await readDao.studentEnrollmentDependency('s1', null),
+        OutboxDependencyState.parentFailed,
+      );
     });
   });
 

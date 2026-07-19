@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -16,6 +17,13 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 /// FAIT (insert-only), garde le TRAITEMENT par LWW `clientUpdatedAt`, dédup les
 /// commentaires par id.
 ///
+/// **Garde de dépendance ENROLLMENT→DISCIPLINARY_CASE**, scopée à l'année du cas
+/// (cf. [OutboxDependencyState]) : un cas ouvert sur un élève inscrit offline le
+/// même jour attend l'ACK de l'inscription (`waiting`/`parentFailed` →
+/// `blocked`) au lieu de partir prématurément et de récolter un faux
+/// `SYNC_ERROR` « élève inconnu ». L'attente est auto-cicatrisante (repart dès
+/// que l'inscription passe `SYNCED`).
+///
 /// - succès → marque l'agrégat SYNCED (cas + commentaires poussés) et rapatrie
 ///   `serverUpdatedAt`. `SUPERSEDED` est un **succès** (mono-préfet : le local est
 ///   déjà l'état gagnant ; filet du régime C).
@@ -25,12 +33,14 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
   final DisciplinarySyncApi syncApi;
   final DisciplinaryLocalDataSource localDataSource;
+  final OutboxDependencyGate dependency;
   final Map<String, dynamic> requiredAuth;
   final Clock now;
 
   const DisciplinaryCaseOutboxHandler({
     required this.syncApi,
     required this.localDataSource,
+    required this.dependency,
     required this.requiredAuth,
     this.now = systemClock,
   });
@@ -48,6 +58,28 @@ class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
     } catch (_) {
       // Payload corrompu / ancien format : rejet définitif (poison évité).
       return const OutboxDispatchResult.failed('Invalid disciplinary payload');
+    }
+
+    // Garde de dépendance, scopée à l'année du cas. `waiting` ET `parentFailed`
+    // → `blocked` : attente PROPRE (ni attempts++ ni backoff), auto-cicatrisante
+    // dès que l'inscription passe SYNCED. On NE bascule PAS en SYNC_ERROR sur
+    // `parentFailed` (cul-de-sac : aucun re-push d'une entrée SYNC_ERROR) —
+    // l'erreur d'inscription est déjà surfacée de son côté.
+    switch (await dependency(
+      aggregate.caseInput.studentId,
+      aggregate.caseInput.academicYearId,
+    )) {
+      case OutboxDependencyState.waiting:
+        return const OutboxDispatchResult.blocked(
+          'Inscription de l\'élève non synchronisée (dépendance)',
+        );
+      case OutboxDependencyState.parentFailed:
+        return const OutboxDispatchResult.blocked(
+          'Inscription de l\'élève en échec de synchro — corrigez '
+          'l\'inscription, le cas repartira ensuite',
+        );
+      case OutboxDependencyState.ready:
+        break;
     }
 
     try {
