@@ -48,6 +48,9 @@ void main() {
         commentIds: any(named: 'commentIds'),
         updatedAtGuard: any(named: 'updatedAtGuard'),
         serverUpdatedAt: any(named: 'serverUpdatedAt'),
+        winningStatus: any(named: 'winningStatus'),
+        winningSanction: any(named: 'winningSanction'),
+        applyWinningTreatment: any(named: 'applyWinningTreatment'),
         syncedAt: any(named: 'syncedAt'),
       ),
     ).thenAnswer((_) async {});
@@ -120,20 +123,47 @@ void main() {
           commentIds: ['cm-1'],
           updatedAtGuard: 3000,
           serverUpdatedAt: 9000,
+          applyWinningTreatment: false,
+          winningStatus: null,
+          winningSanction: null,
           syncedAt: 7000,
         ),
       ).called(1);
     },
   );
 
-  test('SUPERSEDED est un succès (mono-préfet) → acked', () async {
+  test('SUPERSEDED → acked + adopte le traitement gagnant serveur', () async {
     when(
       () => syncApi.submitDisciplinaryCase(any(), any()),
     ).thenAnswer((_) async => response('SUPERSEDED'));
 
     final result = await handler.dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.acked);
+    verify(
+      () => local.markAggregateSynced(
+        caseId: 'case-1',
+        commentIds: ['cm-1'],
+        updatedAtGuard: 3000,
+        serverUpdatedAt: 9000,
+        applyWinningTreatment: true,
+        winningStatus: 'RESOLVED',
+        winningSanction: 'DETENTION',
+        syncedAt: 7000,
+      ),
+    ).called(1);
   });
+
+  test(
+    '403 (UnauthorizedFailure) permanent → failed (pas 50 retries)',
+    () async {
+      when(
+        () => syncApi.submitDisciplinaryCase(any(), any()),
+      ).thenThrow(dio(const UnauthorizedFailure('Access forbidden')));
+
+      final result = await handler.dispatch(entry());
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+    },
+  );
 
   test('rejet métier 422 (ValidationFailure) → failed', () async {
     when(

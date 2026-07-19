@@ -154,11 +154,18 @@ class DisciplinaryLocalDataSource {
   /// (garde LWW `updated_at = [updatedAtGuard]`), et marque SYNCED les
   /// commentaires effectivement poussés (par id). Un commentaire ajouté après le
   /// dispatch reste PENDING_SYNC et sera re-poussé.
+  ///
+  /// [winningStatus]/[winningSanction] : sur un ACK `SUPERSEDED` (un état serveur
+  /// plus récent existait), on adopte le traitement gagnant renvoyé — sinon le
+  /// local resterait sur l'état perdant jusqu'au prochain pull.
   Future<void> markAggregateSynced({
     required String caseId,
     required List<String> commentIds,
     required int? updatedAtGuard,
     int? serverUpdatedAt,
+    String? winningStatus,
+    String? winningSanction,
+    bool applyWinningTreatment = false,
     required int syncedAt,
   }) async {
     await _db.transaction((txn) async {
@@ -166,6 +173,8 @@ class DisciplinaryLocalDataSource {
         'sync_status': SyncState.synced.dbValue,
         'synced_at': syncedAt,
         'server_updated_at': ?serverUpdatedAt,
+        if (applyWinningTreatment) 'status': winningStatus,
+        if (applyWinningTreatment) 'sanction': winningSanction,
       };
       if (updatedAtGuard == null) {
         await txn.update(

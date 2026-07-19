@@ -23,8 +23,27 @@ List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   return out;
 }
 
-int? _isoToMs(String? iso) =>
-    iso == null ? null : DateTime.tryParse(iso)?.millisecondsSinceEpoch;
+int? _isoToMs(String? iso) {
+  if (iso == null) return null;
+  final parsed = DateTime.tryParse(iso);
+  if (parsed == null) return null;
+  // Le wire est UTC (contrat). Un ISO **naïf** (sans `Z` ni offset) est
+  // interprété en heure LOCALE par `tryParse` → l'instant serait décalé du
+  // fuseau de l'appareil. On ré-ancre les composantes en UTC.
+  final utc = parsed.isUtc
+      ? parsed
+      : DateTime.utc(
+          parsed.year,
+          parsed.month,
+          parsed.day,
+          parsed.hour,
+          parsed.minute,
+          parsed.second,
+          parsed.millisecond,
+          parsed.microsecond,
+        );
+  return utc.millisecondsSinceEpoch;
+}
 
 /// Agrégat local prêt à appliquer : le cas + ses commentaires (déjà résolus en
 /// lignes locales SYNCED). L'id du cas est l'uuid honoré (idempotence).

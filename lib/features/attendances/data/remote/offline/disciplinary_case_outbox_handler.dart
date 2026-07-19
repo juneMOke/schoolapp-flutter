@@ -55,22 +55,34 @@ class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
         requiredAuth,
         aggregate,
       );
+      // SUPERSEDED : adopter le traitement gagnant renvoyé (mono-préfet : ne se
+      // produit pas, mais le local ne doit pas rester sur l'état perdant).
+      final superseded = response.isSuperseded && response.status != null;
       await localDataSource.markAggregateSynced(
         caseId: aggregate.caseInput.id,
         commentIds: aggregate.comments.map((c) => c.id).toList(growable: false),
         updatedAtGuard: aggregate.caseInput.clientUpdatedAtMs,
         serverUpdatedAt: EpochIsoHelper.tryToEpochMs(response.serverUpdatedAt),
+        applyWinningTreatment: superseded,
+        winningStatus: superseded ? response.status : null,
+        winningSanction: superseded ? response.sanction : null,
         syncedAt: now(),
       );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
       final failure = e.error;
-      if (failure is ValidationFailure || failure is NotFoundFailure) {
+      // Rejets terminaux : validation (400/422), ressource absente (404),
+      // accès interdit (403 → UnauthorizedFailure, permanent pour ce rôle/jeton).
+      // 401 (InvalidCredentialsFailure) reste transitoire : réussira après
+      // ré-auth. Ne pas gaspiller 50 tentatives sur un 403 permanent.
+      if (failure is ValidationFailure ||
+          failure is NotFoundFailure ||
+          failure is UnauthorizedFailure) {
         return OutboxDispatchResult.failed(
           failure is Failure ? failure.message : 'Rejected',
         );
       }
-      // Réseau / 5xx / timeout → transitoire.
+      // Réseau / 5xx / timeout / 401 → transitoire.
       return OutboxDispatchResult.retry(
         failure is Failure ? failure.message : e.message,
       );
