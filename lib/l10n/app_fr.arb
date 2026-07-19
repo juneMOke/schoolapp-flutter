@@ -40,6 +40,18 @@
   "splashTagline": "Simplifier la gestion de votre école",
   "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
   "bootstrapOfflineBanner": "Mode hors-ligne — données en cache",
+  "sessionOfflineBanner": "Session hors-ligne — vérifiée localement",
+  "@sessionOfflineBanner": {
+    "description": "Bandeau : session ouverte hors ligne (ADR-010)"
+  },
+  "sessionWarningBanner": "Session à rafraîchir — reconnectez-vous bientôt",
+  "@sessionWarningBanner": {
+    "description": "Bandeau WARNING : session offline dégradée (J7–J21)"
+  },
+  "sessionReadOnlyBanner": "Lecture seule — reconnexion en ligne requise",
+  "@sessionReadOnlyBanner": {
+    "description": "Bandeau READ_ONLY : session offline expirée (J21+)"
+  },
   "splashErrorTitle": "Connexion impossible",
   "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
   "splashErrorRetry": "Réessayer",

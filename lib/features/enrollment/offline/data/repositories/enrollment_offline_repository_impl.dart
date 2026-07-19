@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_dao_support.dart';
@@ -21,6 +22,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   final EnrollmentSeedDao _seedDao;
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
+  final CurrentUserContext? _currentUser;
   final int Function() _now;
 
   EnrollmentOfflineRepositoryImpl({
@@ -29,12 +31,14 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     required EnrollmentSeedDao seedDao,
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
+    CurrentUserContext? currentUser,
     int Function()? now,
   }) : _readDao = readDao,
        _draftDao = draftDao,
        _seedDao = seedDao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
+       _currentUser = currentUser,
        _now = now ?? systemClock;
 
   // ── Wizard offline-first : brouillon local persisté (M1) ────────────────────
@@ -307,6 +311,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         enrollmentId,
         document: document,
         emitDocument: emitDocument,
+        authorId: _currentUser?.uid, // estampillage authorId (ADR-010 D-05)
         nowMs: now,
       );
       if (!ok) {

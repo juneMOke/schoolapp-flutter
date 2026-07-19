@@ -308,6 +308,24 @@ abstract class AppLocalizations {
   /// **'Offline mode — cached data'**
   String get bootstrapOfflineBanner;
 
+  /// Banner: session opened offline (ADR-010)
+  ///
+  /// In en, this message translates to:
+  /// **'Offline session — verified locally'**
+  String get sessionOfflineBanner;
+
+  /// WARNING banner: degraded offline session (D7–D21)
+  ///
+  /// In en, this message translates to:
+  /// **'Session needs refresh — reconnect soon'**
+  String get sessionWarningBanner;
+
+  /// READ_ONLY banner: expired offline session (D21+)
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only — online reconnection required'**
+  String get sessionReadOnlyBanner;
+
   /// No description provided for @splashErrorTitle.
   ///
   /// In en, this message translates to:

@@ -13,6 +13,8 @@ class EnrollmentAggregateRequest {
     final s = command.student;
     final e = command.enrollment;
     return <String, dynamic>{
+      // authorId au top-level (ADR-010 D-05) : recopié depuis la commande figée.
+      if (command.authorId != null) 'authorId': command.authorId,
       'enrollment': <String, dynamic>{
         'id': e.id,
         'studentId': s.id,

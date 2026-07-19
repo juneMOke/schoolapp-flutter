@@ -15,14 +15,20 @@ class AttendanceAggregateRequestModel extends Equatable {
   final AttendanceSessionInputModel session;
   final List<AttendanceAbsenceInputModel> absences;
 
+  /// Uid de l'auteur (ADR-010 D-05), figé à la saisie. Le serveur (garde A3)
+  /// rejette 403 si `authorId ≠ uid` du JWT. `null` = session héritée sans uid.
+  final String? authorId;
+
   const AttendanceAggregateRequestModel({
     required this.session,
     required this.absences,
+    this.authorId,
   });
 
   factory AttendanceAggregateRequestModel.fromJson(Map<String, dynamic> json) {
     final raw = (json['absences'] as List<dynamic>?) ?? const [];
     return AttendanceAggregateRequestModel(
+      authorId: json['authorId'] as String?,
       session: AttendanceSessionInputModel.fromJson(
         json['session'] as Map<String, dynamic>,
       ),
@@ -36,6 +42,7 @@ class AttendanceAggregateRequestModel extends Equatable {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    if (authorId != null) 'authorId': authorId,
     'session': session.toJson(),
     'absences': absences.map((a) => a.toJson()).toList(),
   };
@@ -49,5 +56,5 @@ class AttendanceAggregateRequestModel extends Equatable {
       );
 
   @override
-  List<Object?> get props => [session, absences];
+  List<Object?> get props => [session, absences, authorId];
 }

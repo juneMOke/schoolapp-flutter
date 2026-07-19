@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -118,6 +119,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<ClassroomTransferPullRepository>(
@@ -134,6 +136,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       rosterDataSource: getIt<ClassroomLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       idGenerator: getIt<IdGenerator>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<AttendancePullRepository>(
@@ -148,6 +151,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     () => DisciplinaryCaseOfflineRepositoryImpl(
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<DisciplinaryPullRepository>(

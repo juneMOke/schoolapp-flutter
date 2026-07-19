@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -36,13 +37,15 @@ class DisciplinaryCaseOfflineRepositoryImpl
     implements DisciplinaryCaseOfflineRepository {
   final DisciplinaryLocalDataSource localDataSource;
   final IdGenerator idGenerator;
+  final CurrentUserContext? _currentUser;
   final Clock now;
 
   const DisciplinaryCaseOfflineRepositoryImpl({
     required this.localDataSource,
     required this.idGenerator,
+    CurrentUserContext? currentUser,
     this.now = systemClock,
-  });
+  }) : _currentUser = currentUser;
 
   /// Id d'outbox déterministe **unique par cas** (coalescing des re-pushes).
   static String aggregateOutboxId(String caseId) =>
@@ -87,6 +90,7 @@ class DisciplinaryCaseOfflineRepositoryImpl
     aggregateId: caseId,
     operation: OutboxOperation.upsert,
     payload: DisciplinaryCaseAggregateRequestModel(
+      authorId: _currentUser?.uid, // estampillage authorId (ADR-010 D-05)
       caseInput: caseInput,
       comments: comments
           .map(DisciplinaryCommentInputModel.fromRow)

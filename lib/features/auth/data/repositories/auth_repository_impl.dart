@@ -1,22 +1,25 @@
-import 'dart:convert';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
+import 'package:school_app_flutter/features/auth/data/jwt_claims.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_request_model.dart';
 import 'package:school_app_flutter/features/auth/data/models/reset_password_request_model.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/auth_session_snapshot.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
+  final AuthSessionManager sessionManager;
 
   const AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.sessionManager,
   });
 
   @override
@@ -28,8 +31,15 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await remoteDataSource.login(
         LoginRequestModel(email: email, password: password),
       );
-      final session = response.toAuthSession();
+      final session = response.toAuthSession(
+        nowMs: DateTime.now().millisecondsSinceEpoch,
+      );
       await localDataSource.saveSession(session);
+      // Ancre la session offline (vérificateur Argon2id + auth_local). Best-effort :
+      // un échec ici n'invalide pas un login online réussi.
+      try {
+        await sessionManager.persistOnlineLogin(session, password);
+      } catch (_) {}
       return Right(session);
     } on DioException catch (e) {
       if (e.error is Failure) {
@@ -42,6 +52,17 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }
+
+  @override
+  Future<Either<Failure, AuthSessionSnapshot>> loginOffline({
+    required String email,
+    required String password,
+  }) {
+    return sessionManager.loginOffline(email: email, password: password);
+  }
+
+  @override
+  Future<bool> hasLocalUser(String email) => sessionManager.hasLocalUser(email);
 
   @override
   Future<Either<Failure, bool>> isAuthenticated() async {
@@ -70,6 +91,9 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
+      // Wipe complet : jetons + `auth_local_session`. L'outbox et
+      // `auth_local_user` (invariant « vu sur ce device ») restent intacts.
+      await sessionManager.wipeSession();
       await localDataSource.clearSession();
       return const Right<Failure, void>(null);
     } catch (_) {
@@ -99,17 +123,5 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  bool isTokenValid(String token) {
-    final parts = token.split('.');
-    if (parts.length != 3) return false;
-
-    final payload = jsonDecode(
-      utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
-    );
-
-    final exp = payload['exp'];
-    final now = DateTime.now().millisecondsSinceEpoch / 1000;
-
-    return exp != null && exp > now;
-  }
+  bool isTokenValid(String token) => JwtClaims.isNotExpired(token);
 }

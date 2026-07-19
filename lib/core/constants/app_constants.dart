@@ -10,6 +10,7 @@ class AppConstants {
   static const String defaultAppEnvironment = 'dev';
 
   static const String loginEndpoint = '/api/v1/auth/login';
+  static const String refreshEndpoint = '/api/v1/auth/refresh';
   static const String generateOtpEndpoint = '/api/v1/auth/otp/generate';
   static const String validateOtpEndpoint = '/api/v1/auth/otp/validate';
   static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
@@ -94,6 +95,10 @@ class AppConstants {
   static const String accessTokenKey = 'access_token';
   static const String tokenTypeKey = 'token_type';
   static const String expiresInKey = 'expires_in';
+  // ADR-010 — secrets de session offline (jamais en base : survivent au wipe).
+  static const String refreshTokenKey = 'refresh_token';
+  static const String accessExpiresAtKey = 'access_expires_at';
+  static const String refreshExpiresAtKey = 'refresh_expires_at';
   static const String userIdKey = 'user_id';
   static const String userEmailKey = 'user_email';
   static const String userFirstNameKey = 'user_first_name';
@@ -141,11 +146,22 @@ class AppConstants {
   // v6 (2026-07-18) : Discipline — agrégat {case, comments[]} : table
   // `disciplinary_case_comments` (append-only) + `disciplinary_cases.server_updated_at`
   // (visibilité serveur, base du pull keyset). Table neuve → aucun backfill.
-  static const int offlineDbSchemaVersion = 6;
+  // v7 (2026-07-19) : Auth/session offline (ADR-010) — tables `auth_local_user`,
+  // `auth_local_session`, `auth_clock_guard`. Tables neuves → aucun backfill.
+  static const int offlineDbSchemaVersion = 7;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
   static const String sqlCipherKeyStorageKey = 'sqlcipher_db_key';
+
+  // ─── Auth/session offline — dégradation graduée (ADR-010 D-08) ────────────────
+  /// Seuil J7 : au-delà de `now − last_server_seen_at`, la session passe en
+  /// WARNING (saisie OK, bandeau permanent, scellement de documents bloqué).
+  static const Duration sessionWarningThreshold = Duration(days: 7);
+
+  /// Seuil J21 : au-delà, la session passe en READ_ONLY (lecture seule,
+  /// reconnexion online exigée).
+  static const Duration sessionReadOnlyThreshold = Duration(days: 21);
 
   // ─── Offline sync — contrats miroir backend ──────────────────────────────────
   // État au 2026-07-07 (cf. ETAT_IMPLEMENTATION_Backend_V1.md, OFFLINE_GAP_ANALYSIS.md) :

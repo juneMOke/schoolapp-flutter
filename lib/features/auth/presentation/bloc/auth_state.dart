@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
 
@@ -27,11 +28,23 @@ class AuthState extends Equatable {
   final String? errorMessage;
   final AuthErrorKind? errorKind;
 
+  /// Axe **orthogonal** au statut (ADR-010 §6) : la dégradation de la session
+  /// offline. Ne vaut que quand [status] == [AuthStatus.authenticated].
+  /// READ_ONLY **reste** authenticated (le router ne bascule pas) — seule une
+  /// révocation / expiration du refresh renvoie à `unauthenticated`.
+  final SessionMode sessionMode;
+
+  /// Vrai si la session courante a été ouverte **hors ligne** (vérificateur
+  /// local, sans contact serveur). Diagnostic UX (bandeau).
+  final bool isOffline;
+
   const AuthState({
     required this.status,
     this.user,
     this.errorMessage,
     this.errorKind,
+    this.sessionMode = SessionMode.normal,
+    this.isOffline = false,
   });
 
   factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
@@ -45,6 +58,8 @@ class AuthState extends Equatable {
     Object? user = _undefined,
     Object? errorMessage = _undefined,
     Object? errorKind = _undefined,
+    SessionMode? sessionMode,
+    bool? isOffline,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -57,9 +72,18 @@ class AuthState extends Equatable {
       errorKind: identical(errorKind, _undefined)
           ? this.errorKind
           : errorKind as AuthErrorKind?,
+      sessionMode: sessionMode ?? this.sessionMode,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 
   @override
-  List<Object?> get props => [status, user, errorMessage, errorKind];
+  List<Object?> get props => [
+    status,
+    user,
+    errorMessage,
+    errorKind,
+    sessionMode,
+    isOffline,
+  ];
 }

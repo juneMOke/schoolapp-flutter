@@ -40,6 +40,18 @@
   "splashTagline": "Simplify your school management",
   "splashSemanticsLabel": "ETEELO CONNECT — splash screen",
   "bootstrapOfflineBanner": "Offline mode — cached data",
+  "sessionOfflineBanner": "Offline session — verified locally",
+  "@sessionOfflineBanner": {
+    "description": "Banner: session opened offline (ADR-010)"
+  },
+  "sessionWarningBanner": "Session needs refresh — reconnect soon",
+  "@sessionWarningBanner": {
+    "description": "WARNING banner: degraded offline session (D7–D21)"
+  },
+  "sessionReadOnlyBanner": "Read-only — online reconnection required",
+  "@sessionReadOnlyBanner": {
+    "description": "READ_ONLY banner: expired offline session (D21+)"
+  },
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",

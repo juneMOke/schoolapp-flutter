@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -40,6 +41,7 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
   final ClassroomLocalDataSource rosterDataSource;
   final SyncMetaDao syncMetaDao;
   final IdGenerator idGenerator;
+  final CurrentUserContext? _currentUser;
   final Clock now;
 
   const AttendanceOfflineRepositoryImpl({
@@ -47,8 +49,9 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
     required this.rosterDataSource,
     required this.syncMetaDao,
     required this.idGenerator,
+    CurrentUserContext? currentUser,
     this.now = systemClock,
-  });
+  }) : _currentUser = currentUser;
 
   /// Clé d'idempotence / id déterministe d'outbox pour un appel.
   static String outboxKey(
@@ -177,6 +180,7 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
 
       // Payload d'outbox = agrégat exhaustif `{session, absences[]}` (contrat 1.2.0).
       final aggregate = AttendanceAggregateRequestModel(
+        authorId: _currentUser?.uid, // estampillage authorId (ADR-010 D-05)
         session: AttendanceSessionInputModel(
           id: sessionId,
           classroomId: classroomId,

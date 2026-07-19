@@ -119,6 +119,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bootstrapOfflineBanner => 'Offline mode — cached data';
 
   @override
+  String get sessionOfflineBanner => 'Offline session — verified locally';
+
+  @override
+  String get sessionWarningBanner => 'Session needs refresh — reconnect soon';
+
+  @override
+  String get sessionReadOnlyBanner =>
+      'Read-only — online reconnection required';
+
+  @override
   String get splashErrorTitle => 'Connection failed';
 
   @override

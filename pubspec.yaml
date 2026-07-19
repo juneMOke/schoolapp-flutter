@@ -61,6 +61,9 @@ dependencies:
   path: ^1.9.0
   uuid: ^4.5.1
   connectivity_plus: ^6.1.0
+  # Vérificateur de mot de passe offline (ADR-010 D-02) : Argon2id local calculé
+  # en isolate. Ne chiffre rien — valide seulement « ce mot de passe est-il correct ? ».
+  cryptography: ^2.7.0
 
 
 dev_dependencies:

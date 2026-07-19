@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_stat
 import 'package:school_app_flutter/features/auth/domain/usecases/login_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_use_case.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -21,6 +23,10 @@ class MockCheckAuthStatusUseCase extends Mock
 class MockLogoutUseCase extends Mock implements LogoutUseCase {}
 
 class MockResetPasswordUseCase extends Mock implements ResetPasswordUseCase {}
+
+class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockAuthSessionManager extends Mock implements AuthSessionManager {}
 
 const tUser = AuthenticatedUser(
   email: 'test@example.com',
@@ -42,12 +48,22 @@ void main() {
   late MockCheckAuthStatusUseCase mockCheckAuthStatusUseCase;
   late MockLogoutUseCase mockLogoutUseCase;
   late MockResetPasswordUseCase mockResetPasswordUseCase;
+  late MockAuthRepository mockRepository;
+  late MockAuthSessionManager mockSessionManager;
 
   setUp(() {
     mockLoginUseCase = MockLoginUseCase();
     mockCheckAuthStatusUseCase = MockCheckAuthStatusUseCase();
     mockLogoutUseCase = MockLogoutUseCase();
     mockResetPasswordUseCase = MockResetPasswordUseCase();
+    mockRepository = MockAuthRepository();
+    mockSessionManager = MockAuthSessionManager();
+    // Par défaut : aucune session locale à évaluer (mode NORMAL implicite).
+    when(
+      () => mockSessionManager.evaluateFreshness(),
+    ).thenAnswer((_) async => null);
+    when(() => mockSessionManager.wipeSession()).thenAnswer((_) async {});
+    when(() => mockSessionManager.primeCurrentUser(any())).thenReturn(null);
   });
 
   AuthBloc buildBloc() => AuthBloc(
@@ -55,6 +71,8 @@ void main() {
     checkAuthStatusUseCase: mockCheckAuthStatusUseCase,
     logoutUseCase: mockLogoutUseCase,
     resetPasswordUseCase: mockResetPasswordUseCase,
+    repository: mockRepository,
+    sessionManager: mockSessionManager,
   );
 
   group('AuthCheckRequested', () {

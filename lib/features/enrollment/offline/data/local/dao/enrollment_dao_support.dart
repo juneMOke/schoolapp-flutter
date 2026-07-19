@@ -115,12 +115,14 @@ Future<void> enqueueEnrollmentAggregate(
   required String outboxEntryId,
   required int nowMs,
   String? schoolId,
+  String? authorId,
 }) async {
   final command = EnrollmentCommand(
     enrollment: enrollmentPayloadOf(enrollment),
     student: studentPayloadOf(student),
     parents: parents,
     emitDocument: emitDocument,
+    authorId: authorId,
   );
   final entry = OutboxEntry(
     id: outboxEntryId,

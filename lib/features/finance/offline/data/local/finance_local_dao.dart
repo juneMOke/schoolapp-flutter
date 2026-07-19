@@ -46,6 +46,7 @@ class FinanceLocalDao {
     GeneratedDocumentLocalModel? receipt,
     required String outboxEntryId,
     String? schoolId,
+    String? authorId,
     required int nowMs,
   }) => _write.recordPayment(
     payment: payment,
@@ -53,6 +54,7 @@ class FinanceLocalDao {
     receipt: receipt,
     outboxEntryId: outboxEntryId,
     schoolId: schoolId,
+    authorId: authorId,
     nowMs: nowMs,
   );
 

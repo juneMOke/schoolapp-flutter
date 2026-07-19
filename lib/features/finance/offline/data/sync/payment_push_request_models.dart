@@ -134,12 +134,18 @@ class PaymentAggregateRequest {
   /// Répartition du versement (au moins une ligne — `minItems: 1`).
   final List<PaymentAllocationInput> allocations;
 
+  /// Uid de l'auteur (ADR-010 D-05), figé à la saisie. Le serveur (garde A3)
+  /// rejette 403 si `authorId ≠ uid` du JWT. `null` = session héritée sans uid.
+  final String? authorId;
+
   const PaymentAggregateRequest({
     required this.payment,
     required this.allocations,
+    this.authorId,
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    if (authorId != null) 'authorId': authorId,
     'payment': payment.toJson(),
     'allocations': allocations.map((a) => a.toJson()).toList(),
   };
@@ -159,6 +165,7 @@ class PaymentAggregateRequest {
     final nested = j['payment'];
     final source = nested is Map<String, dynamic> ? nested : j;
     return PaymentAggregateRequest(
+      authorId: j['authorId'] as String?,
       payment: PaymentInput.fromJson(source),
       allocations: (j['allocations'] as List<dynamic>? ?? const [])
           .map(

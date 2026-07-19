@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 /// Cubit global d'état de synchronisation : source de vérité de la
@@ -35,6 +36,7 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
   final ConnectivityService _connectivity;
   final SyncEngine _syncEngine;
   final PullCoordinator? _pullCoordinator;
+  final RevocationEvaluator? _revocationEvaluator;
 
   StreamSubscription<bool>? _connectivitySub;
 
@@ -43,10 +45,12 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     required ConnectivityService connectivity,
     required SyncEngine syncEngine,
     PullCoordinator? pullCoordinator,
+    RevocationEvaluator? revocationEvaluator,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
        _pullCoordinator = pullCoordinator,
+       _revocationEvaluator = revocationEvaluator,
        super(SyncStatus.synced) {
     _listenConnectivity();
     unawaited(refresh());
@@ -72,10 +76,17 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     await _syncOnReconnect();
   }
 
-  /// Au retour *online* : on POUSSE (vidage outbox) puis on TIRE (pull delta des
-  /// ressources de référence) pour rafraîchir le cache local, puis on recalcule
-  /// la pastille. Le pull est silencieux (304 fréquent) et **n'altère pas**
-  /// l'état de synchro, qui ne reflète que la file de push.
+  /// Au retour *online* : ordre **`flush → evaluate → pull`** (ADR-010 D-11).
+  ///
+  /// 1. **POUSSE** l'outbox (le travail légitime saisi offline est drainé
+  ///    d'abord — un `userVersion++` ne détruit jamais un paiement en file) ;
+  /// 2. **ÉVALUE** la révocation (`userVersion` observé vs local) : en cas de
+  ///    divergence, la session est wipée (jamais l'outbox) et on **saute le
+  ///    pull** (on repasse `unauthenticated`) ;
+  /// 3. sinon **TIRE** (pull delta) pour rafraîchir le cache local.
+  ///
+  /// Le pull est silencieux (304 fréquent) et **n'altère pas** l'état de synchro,
+  /// qui ne reflète que la file de push.
   Future<void> _syncOnReconnect() async {
     _safeEmit(SyncStatus.syncing);
     try {
@@ -83,10 +94,18 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     } catch (_) {
       // flush() encapsule déjà ses erreurs ; garde-fou par prudence.
     }
+    bool revoked = false;
     try {
-      await _pullCoordinator?.pullAll();
+      revoked = await _revocationEvaluator?.evaluateRevocation() ?? false;
     } catch (_) {
-      // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.
+      // evaluateRevocation ne lève pas (contrat) ; garde-fou par prudence.
+    }
+    if (!revoked) {
+      try {
+        await _pullCoordinator?.pullAll();
+      } catch (_) {
+        // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.
+      }
     }
     await refresh();
   }

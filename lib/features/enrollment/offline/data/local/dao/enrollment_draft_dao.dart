@@ -229,6 +229,7 @@ class EnrollmentDraftDao {
     GeneratedDocumentLocalModel? document,
     bool emitDocument = true,
     String? schoolId,
+    String? authorId,
     required int nowMs,
   }) async {
     return _db.transaction<bool>((txn) async {
@@ -329,6 +330,7 @@ class EnrollmentDraftDao {
         emitDocument: emitDocument,
         outboxEntryId: 'outbox-enr-$enrollmentId',
         schoolId: schoolId,
+        authorId: authorId,
         nowMs: nowMs,
       );
       return true;

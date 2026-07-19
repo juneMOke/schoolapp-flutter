@@ -107,6 +107,19 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (oldVersion < 7) {
+    // v7 — Auth/session offline (ADR-010) : tables `auth_local_user` et
+    // `auth_local_session`. Tables neuves, aucun backfill (aucune session
+    // offline n'existait avant V1). Rejeu `IF NOT EXISTS` des contributions de
+    // `authOfflineTables`.
+    for (final name in const ['auth_local_user', 'auth_local_session']) {
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(_asIfNotExists(table.createTableSql));
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

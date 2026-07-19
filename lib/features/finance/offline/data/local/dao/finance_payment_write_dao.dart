@@ -26,6 +26,7 @@ class FinancePaymentWriteDao {
     GeneratedDocumentLocalModel? receipt,
     required String outboxEntryId,
     String? schoolId,
+    String? authorId,
     required int nowMs,
   }) async {
     await _db.transaction((txn) async {
@@ -64,7 +65,7 @@ class FinancePaymentWriteDao {
         );
       }
 
-      final request = _paymentRequest(payment, linked);
+      final request = _paymentRequest(payment, linked, authorId);
       final entry = OutboxEntry(
         id: outboxEntryId,
         aggregateType: 'PAYMENT',
@@ -123,7 +124,9 @@ class FinancePaymentWriteDao {
   PaymentAggregateRequest _paymentRequest(
     PaymentLocalModel payment,
     List<PaymentAllocationLocalModel> allocations,
+    String? authorId,
   ) => PaymentAggregateRequest(
+    authorId: authorId,
     payment: PaymentInput(
       id: payment.id,
       studentId: payment.studentId,

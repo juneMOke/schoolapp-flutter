@@ -38,6 +38,14 @@ import 'package:school_app_flutter/features/auth/data/datasources/forgot_passwor
 import 'package:school_app_flutter/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/auth/data/interceptors/server_contact_interceptor.dart';
+import 'package:school_app_flutter/features/auth/data/interceptors/auth_refresh_interceptor.dart';
+import 'package:school_app_flutter/features/auth/data/services/token_refresher.dart';
+import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/forgot_password_repository.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
@@ -157,6 +165,16 @@ Future<void> configureDependencies({
     final envConfig = getIt<EnvConfig>();
     final dio = createDioClient(envConfig);
 
+    // Dio **nu** (aucun intercepteur d'auth/refresh) : sert au refresh token et
+    // au rejeu de la requête d'origine, sans ré-entrance (ADR-010 §7.2).
+    final bareDio = createDioClient(envConfig);
+    final refresher = TokenRefresher(
+      bareDio: bareDio,
+      tokenStorage: getIt<TokenStorageService>(),
+      sessionManager: getIt<AuthSessionManager>(),
+      revocationBus: getIt<SessionRevocationBus>(),
+    );
+
     if (envConfig.enableVerboseNetworkLogging) {
       dio.interceptors.add(
         LogInterceptor(
@@ -169,6 +187,12 @@ Future<void> configureDependencies({
         ),
       );
     }
+
+    // Refresh transparent AVANT le mapping d'erreurs : sur 401 authentifié,
+    // refresh + rejeu ; sinon laisse le 401 suivre vers le mapping ci-dessous.
+    dio.interceptors.add(
+      AuthRefreshInterceptor(refresher: refresher, retryDio: bareDio),
+    );
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -247,6 +271,11 @@ Future<void> configureDependencies({
       ),
     );
 
+    // Observateur de contact serveur (ADR-010 §7.3) : capte `X-User-Version` +
+    // header `Date` sur chaque réponse authentifiée pour alimenter l'ancre
+    // temporelle et la révocation offline. Ne wipe ni ne rejette jamais.
+    dio.interceptors.add(ServerContactInterceptor(getIt<AuthSessionManager>()));
+
     return dio;
   });
 
@@ -256,6 +285,24 @@ Future<void> configureDependencies({
 
   getIt.registerLazySingleton<TokenStorageService>(
     () => TokenStorageService(getIt<FlutterSecureStorage>()),
+  );
+
+  // Session offline (ADR-010) : vérificateur Argon2id + manager central
+  // (auth_local + secure storage + fraîcheur/révocation/wipe) + bus de révocation.
+  getIt.registerLazySingleton<PasswordVerifierService>(
+    () => const PasswordVerifierService(),
+  );
+  getIt.registerLazySingleton<SessionRevocationBus>(
+    () => SessionRevocationBus(),
+  );
+  getIt.registerLazySingleton<AuthSessionManager>(
+    () => AuthSessionManager(
+      tokenStorage: getIt<TokenStorageService>(),
+      authLocalDao: getIt<AuthLocalDao>(),
+      verifier: getIt<PasswordVerifierService>(),
+      revocationBus: getIt<SessionRevocationBus>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -274,6 +321,7 @@ Future<void> configureDependencies({
     () => AuthRepositoryImpl(
       remoteDataSource: getIt<AuthRemoteDataSource>(),
       localDataSource: getIt<AuthLocalDataSource>(),
+      sessionManager: getIt<AuthSessionManager>(),
     ),
   );
 
@@ -313,6 +361,9 @@ Future<void> configureDependencies({
       checkAuthStatusUseCase: getIt<CheckAuthStatusUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
       resetPasswordUseCase: getIt<ResetPasswordUseCase>(),
+      repository: getIt<AuthRepository>(),
+      sessionManager: getIt<AuthSessionManager>(),
+      revocationBus: getIt<SessionRevocationBus>(),
     ),
   );
 

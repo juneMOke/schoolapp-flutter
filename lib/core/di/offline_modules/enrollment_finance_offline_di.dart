@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -122,6 +123,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       seedDao: getIt<EnrollmentSeedDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<FinanceOfflineRepository>(
@@ -129,6 +131,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       dao: getIt<FinanceLocalDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 

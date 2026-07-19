@@ -83,7 +83,11 @@ class ClassroomTransferRow extends Equatable {
 
   /// Corps de la requête POST `/sync/classroom-transfers` (figé dans l'outbox).
   /// `transferredAt` en ISO-8601 UTC (heure métier ; le serveur la clampe).
-  Map<String, dynamic> toRequestJson() => <String, dynamic>{
+  ///
+  /// [authorId] = uid de l'auteur (ADR-010 D-05), au top-level : le serveur
+  /// (garde A3) rejette 403 si `authorId ≠ uid` du JWT. `null` = session héritée.
+  Map<String, dynamic> toRequestJson({String? authorId}) => <String, dynamic>{
+    'authorId': ?authorId,
     'transfer': <String, dynamic>{
       'id': id,
       'studentId': studentId,

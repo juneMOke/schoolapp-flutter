@@ -7,11 +7,14 @@ import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
 import 'package:uuid/uuid.dart';
 
@@ -43,6 +46,13 @@ Future<void> registerOfflineCore(GetIt getIt) async {
   getIt.registerLazySingleton<SyncMetaDao>(
     () => SyncMetaDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<AuthLocalDao>(
+    () => AuthLocalDao(getIt<Database>()),
+  );
+
+  // Uid courant (ADR-010 D-05) : alimenté par l'auth, lu au write-time par les
+  // chemins offline pour estampiller `authorId` sur les payloads `/sync`.
+  getIt.registerLazySingleton<CurrentUserContext>(() => CurrentUserContext());
 
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<ConnectivityService>(
@@ -72,6 +82,8 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       connectivity: getIt<ConnectivityService>(),
       syncEngine: getIt<SyncEngine>(),
       pullCoordinator: getIt<PullCoordinator>(),
+      // Guardian de révocation (ADR-010 D-11) : évalué APRÈS le flush.
+      revocationEvaluator: getIt<AuthSessionManager>(),
     ),
   );
 }

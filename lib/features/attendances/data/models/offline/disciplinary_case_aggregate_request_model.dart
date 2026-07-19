@@ -15,9 +15,14 @@ class DisciplinaryCaseAggregateRequestModel extends Equatable {
   final DisciplinaryCaseInputModel caseInput;
   final List<DisciplinaryCommentInputModel> comments;
 
+  /// Uid de l'auteur (ADR-010 D-05), figé à la saisie. Le serveur (garde A3)
+  /// rejette 403 si `authorId ≠ uid` du JWT. `null` = session héritée sans uid.
+  final String? authorId;
+
   const DisciplinaryCaseAggregateRequestModel({
     required this.caseInput,
     this.comments = const [],
+    this.authorId,
   });
 
   factory DisciplinaryCaseAggregateRequestModel.fromJson(
@@ -25,6 +30,7 @@ class DisciplinaryCaseAggregateRequestModel extends Equatable {
   ) {
     final raw = (json['comments'] as List<dynamic>?) ?? const [];
     return DisciplinaryCaseAggregateRequestModel(
+      authorId: json['authorId'] as String?,
       caseInput: DisciplinaryCaseInputModel.fromJson(
         json['case'] as Map<String, dynamic>,
       ),
@@ -39,6 +45,7 @@ class DisciplinaryCaseAggregateRequestModel extends Equatable {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    if (authorId != null) 'authorId': authorId,
     'case': caseInput.toJson(),
     'comments': comments.map((c) => c.toJson()).toList(),
   };
@@ -52,5 +59,5 @@ class DisciplinaryCaseAggregateRequestModel extends Equatable {
   );
 
   @override
-  List<Object?> get props => [caseInput, comments];
+  List<Object?> get props => [caseInput, comments, authorId];
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -32,6 +33,7 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
   final IdGenerator idGenerator;
   final SyncEngine syncEngine;
   final Map<String, dynamic> requiredAuth;
+  final CurrentUserContext? _currentUser;
   final Clock now;
 
   /// Clé de curseur/fraîcheur dans `sync_meta`.
@@ -44,8 +46,9 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
     required this.idGenerator,
     required this.syncEngine,
     required this.requiredAuth,
+    CurrentUserContext? currentUser,
     this.now = systemClock,
-  });
+  }) : _currentUser = currentUser;
 
   @override
   Future<Either<Failure, ClassroomSyncOutcome>> syncClassrooms({
@@ -219,7 +222,7 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
         aggregateType: kClassroomTransferAggregateType,
         aggregateId: transferId,
         operation: OutboxOperation.create,
-        payload: jsonEncode(row.toRequestJson()),
+        payload: jsonEncode(row.toRequestJson(authorId: _currentUser?.uid)),
         createdAt: nowMs,
       );
       await localDataSource.recordTransferWithOutbox(

@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/widgets/bootstrap_offline_banner.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_degradation_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_router.dart';
 
@@ -94,6 +95,11 @@ class _MyAppState extends State<MyApp> {
                 previous.status != current.status,
             listener: (context, state) {
               if (state.status == AuthStatus.authenticated) {
+                // Login OFFLINE (ADR-010 D-01/D-02) : pas de réseau → ne pas
+                // déclencher le bootstrap distant (il échouerait et bloquerait
+                // la navigation). On s'appuie sur le bootstrap local déjà chargé
+                // au démarrage.
+                if (state.isOffline) return;
                 _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());
                 _bootstrapBloc.add(
                   const BootstrapRemotePreviousYearRequested(),
@@ -130,9 +136,13 @@ class _MyAppState extends State<MyApp> {
           title: 'ETEELO CONNECT',
           theme: AppTheme.light,
           routerConfig: _router,
-          // Bandeau hors-ligne global au-dessus de toutes les routes.
-          builder: (context, child) =>
-              BootstrapOfflineBanner(child: child ?? const SizedBox.shrink()),
+          // Bandeaux globaux au-dessus de toutes les routes : dégradation de
+          // session offline (ADR-010 D-08) puis « données en cache ».
+          builder: (context, child) => SessionDegradationBanner(
+            child: BootstrapOfflineBanner(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
       ),
     );

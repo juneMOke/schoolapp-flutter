@@ -120,6 +120,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bootstrapOfflineBanner => 'Mode hors-ligne — données en cache';
 
   @override
+  String get sessionOfflineBanner => 'Session hors-ligne — vérifiée localement';
+
+  @override
+  String get sessionWarningBanner =>
+      'Session à rafraîchir — reconnectez-vous bientôt';
+
+  @override
+  String get sessionReadOnlyBanner =>
+      'Lecture seule — reconnexion en ligne requise';
+
+  @override
   String get splashErrorTitle => 'Connexion impossible';
 
   @override

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
@@ -17,16 +18,19 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   final FinanceLocalDao _dao;
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
+  final CurrentUserContext? _currentUser;
   final int Function() _now;
 
   FinanceOfflineRepositoryImpl({
     required FinanceLocalDao dao,
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
+    CurrentUserContext? currentUser,
     int Function()? now,
   }) : _dao = dao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
+       _currentUser = currentUser,
        _now = now ?? systemClock;
 
   @override
@@ -98,6 +102,7 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         allocations: allocations,
         receipt: receipt,
         outboxEntryId: _idGenerator.newId(),
+        authorId: _currentUser?.uid,
         nowMs: now,
       );
 

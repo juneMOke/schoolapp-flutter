@@ -200,14 +200,21 @@ class EnrollmentCommand {
   final List<ParentPayload> parents;
   final bool emitDocument;
 
+  /// Uid de l'auteur (ADR-010 D-05), figé à la saisie. Transporté dans le
+  /// payload d'outbox puis recopié au top-level de la requête réseau
+  /// ([EnrollmentAggregateRequest]). `null` = session héritée sans uid.
+  final String? authorId;
+
   const EnrollmentCommand({
     required this.enrollment,
     required this.student,
     required this.parents,
     this.emitDocument = true,
+    this.authorId,
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    if (authorId != null) 'authorId': authorId,
     'enrollment': enrollment.toJson(),
     'student': student.toJson(),
     'parents': parents.map((p) => p.toJson()).toList(),
@@ -224,5 +231,6 @@ class EnrollmentCommand {
             .map((e) => ParentPayload.fromJson(e as Map<String, dynamic>))
             .toList(),
         emitDocument: (j['emitDocument'] as bool?) ?? true,
+        authorId: j['authorId'] as String?,
       );
 }
