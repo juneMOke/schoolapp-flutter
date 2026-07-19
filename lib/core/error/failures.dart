@@ -26,12 +26,6 @@ class ValidationFailure extends Failure {
   const ValidationFailure([super.message = 'Invalid request data']);
 }
 
-/// HTTP 409 : conflit d'état côté serveur (ex. double-booking d'un créneau
-/// d'emploi du temps pour un enseignant ou une classe).
-class ConflictFailure extends Failure {
-  const ConflictFailure([super.message = 'Conflict']);
-}
-
 class ServerFailure extends Failure {
   const ServerFailure([super.message = 'Server error occurred']);
 }
@@ -48,10 +42,10 @@ class AuthFailure extends Failure {
   const AuthFailure([super.message = 'Authentication error']);
 }
 
-/// 409 Conflict — verrou optimiste périmé au flush de l'outbox
-/// (version/last-write-wins). Le moteur de synchro déclenche un refetch + rejeu.
+/// HTTP 409 — conflit d'état côté serveur. Deux usages :
+/// - verrou optimiste périmé au flush de l'outbox (version/last-write-wins) → le
+///   moteur de synchro déclenche un refetch + rejeu ;
+/// - double-booking d'un créneau d'emploi du temps (enseignant ou classe).
 class ConflictFailure extends Failure {
-  const ConflictFailure([
-    super.message = 'Conflict — resource version is stale',
-  ]);
+  const ConflictFailure([super.message = 'Conflict']);
 }

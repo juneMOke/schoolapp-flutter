@@ -68,8 +68,9 @@ class AuthSessionManager implements RevocationEvaluator {
   /// `uid` (backend hérité) on ne peut pas ancrer la session offline → on saute.
   Future<void> persistOnlineLogin(AuthSession session, String password) async {
     final uid = session.user.id;
-    if (uid.isEmpty)
+    if (uid.isEmpty) {
       return; // pas d'uid ⇒ pas de login offline possible (D-05).
+    }
 
     final nowMs = _now();
     final salt = _verifier.generateSalt();
