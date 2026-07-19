@@ -1,5 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/db_batching.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/ref_cours_notation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/ref_cours_row.dart';
 
 /// Accès sqflite à la table de **référence** `ref_cours` (read-only côté métier :
@@ -17,6 +18,7 @@ class AcademicsRefLocalDataSource {
 
   static const String coursTable = 'ref_cours';
   static const String classroomsTable = 'ref_classrooms';
+  static const String coursNotationTable = 'ref_cours_notation';
 
   /// Ids des classes d'une année (source d'itération du pull cours). Lit
   /// `ref_classrooms` peuplée par le module Classe ; liste vide si le pull
@@ -65,5 +67,28 @@ class AcademicsRefLocalDataSource {
   Future<List<RefCoursRow>> getAllCours() async {
     final rows = await _db.query(coursTable);
     return rows.map(RefCoursRow.fromMap).toList(growable: false);
+  }
+
+  // ── Squelette de notation (cache réf du détail cours) ───────────────────────
+
+  /// Met en cache (upsert par `cours_id`) le squelette de notation d'un cours.
+  Future<void> upsertCoursNotation(RefCoursNotationRow row) async {
+    await _db.insert(
+      coursNotationTable,
+      row.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Squelette de notation caché d'un cours (null si jamais pullé).
+  Future<RefCoursNotationRow?> getCoursNotation(String coursId) async {
+    final rows = await _db.query(
+      coursNotationTable,
+      where: 'cours_id = ?',
+      whereArgs: [coursId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return RefCoursNotationRow.fromMap(rows.first);
   }
 }

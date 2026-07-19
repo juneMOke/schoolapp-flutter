@@ -163,6 +163,29 @@ const TableSchema noteEvaluationTable = TableSchema(
   ],
 );
 
+/// `ref_cours_notation` — **squelette du détail de notation d'un cours** mis en
+/// cache (réf, lecture seule) : l'arbre période → sous-période avec leur **statut
+/// d'ouverture** (OUVERTE/CLOTUREE), l'effectif et la branche. Nécessaire hors
+/// ligne au détail cours ET à la garde de création (période clôturée). Les
+/// **évaluations** ne sont PAS stockées ici — elles restent composées depuis la
+/// table locale `evaluation` (pour fusionner le local non synchronisé). L'arbre
+/// est stocké en JSON (`periodes_json`) : structure lentement variable, pas de
+/// requête relationnelle dessus.
+const TableSchema refCoursNotationTable = TableSchema(
+  name: 'ref_cours_notation',
+  createTableSql: '''
+    CREATE TABLE ref_cours_notation (
+      cours_id TEXT PRIMARY KEY,
+      classroom_id TEXT,
+      branche_nom TEXT,
+      effectif INTEGER NOT NULL DEFAULT 0,
+      periodes_json TEXT NOT NULL,
+      server_updated_at INTEGER,
+      synced_at INTEGER NOT NULL
+    )
+  ''',
+);
+
 /// Contribution de schéma de la branche Notes / Cours, insérée dans
 /// `buildOfflineSchema()`.
 const List<TableSchema> academicsOfflineTables = [
@@ -171,4 +194,5 @@ const List<TableSchema> academicsOfflineTables = [
   refCoursTable,
   evaluationTable,
   noteEvaluationTable,
+  refCoursNotationTable,
 ];

@@ -216,7 +216,9 @@ class AppConstants {
   // v8 (2026-07-19) : Notes / Cours (academics + schedule, ADR-006) — réf
   // `ref_time_slots`/`ref_recurring_sessions`/`ref_cours` + écriture `evaluation`
   // (régime A) et `note_evaluation` (régime C). Tables neuves → aucun backfill.
-  static const int offlineDbSchemaVersion = 8;
+  // v9 (2026-07-19) : Notes / Cours — cache `ref_cours_notation` (squelette
+  // période/sous-période + statut + effectif). Table neuve → aucun backfill.
+  static const int offlineDbSchemaVersion = 9;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

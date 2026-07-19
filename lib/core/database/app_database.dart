@@ -140,6 +140,17 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
+  if (oldVersion < 9) {
+    // v9 — Notes / Cours : cache du squelette de notation par cours
+    // (`ref_cours_notation`) : arbre période/sous-période + statut d'ouverture +
+    // effectif, requis hors ligne au détail cours et à la garde de création.
+    // Table neuve → aucun backfill.
+    final table = schema.firstWhere((t) => t.name == 'ref_cours_notation');
+    await db.execute(_asIfNotExists(table.createTableSql));
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,
