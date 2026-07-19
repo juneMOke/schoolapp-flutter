@@ -53,6 +53,18 @@ class AcademicsRefLocalDataSource {
     return applied;
   }
 
+  /// Un cours par son id (résolution cours → classe pour le roster de notation).
+  Future<RefCoursRow?> getCours(String coursId) async {
+    final rows = await _db.query(
+      coursTable,
+      where: 'id = ?',
+      whereArgs: [coursId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return RefCoursRow.fromMap(rows.first);
+  }
+
   /// Cours d'une classe (résolution roster/barème).
   Future<List<RefCoursRow>> getCoursForClassroom(String classroomId) async {
     final rows = await _db.query(

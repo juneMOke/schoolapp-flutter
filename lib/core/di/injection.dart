@@ -29,7 +29,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/discip
 import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/notation_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/notation_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/create_evaluation_usecase.dart';
@@ -983,13 +983,13 @@ Future<void> configureDependencies({
     ),
   );
 
-  // ── Academics — Notation : saisie des notes (grille + PUT par élève) ────────
-  // Réutilise le CourseRemoteDataSource déjà enregistré ci-dessus.
+  // ── Academics — Notation : saisie des notes (grille + saisie par élève) ─────
+  // OFFLINE-FIRST (NF-7b) : la grille se lit en LOCAL (notes locales + roster) et
+  // la saisie passe par l'outbox (régime C). L'impl offline est enregistrée dans
+  // `registerAcademicsOffline` ; résolue en lazy → dispo au 1er accès. L'impl
+  // online `NotationRepositoryImpl` reste en code (dormante, non enregistrée).
   getIt.registerLazySingleton<NotationRepository>(
-    () => NotationRepositoryImpl(
-      remoteDataSource: getIt<CourseRemoteDataSource>(),
-      requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
+    () => getIt<NotationOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetNotesElevesUseCase>(

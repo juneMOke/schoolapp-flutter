@@ -23,7 +23,9 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_ref_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_handler.dart';
@@ -107,6 +109,17 @@ void registerAcademicsOffline(GetIt getIt) {
       localDataSource: getIt<AcademicsLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  // Impl offline-first de NotationRepository (lecture composée notes+roster,
+  // écriture → NotesOfflineRepositoryImpl). Rebindée sur NotationRepository dans
+  // injection.dart.
+  getIt.registerLazySingleton<NotationOfflineRepositoryImpl>(
+    () => NotationOfflineRepositoryImpl(
+      localDataSource: getIt<AcademicsLocalDataSource>(),
+      refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
+      rosterDataSource: getIt<ClassroomLocalDataSource>(),
+      notesRepository: getIt<NotesOfflineRepositoryImpl>(),
     ),
   );
   // Réutilise le DataSource ONLINE (CourseRemoteDataSource) pour peupler le
