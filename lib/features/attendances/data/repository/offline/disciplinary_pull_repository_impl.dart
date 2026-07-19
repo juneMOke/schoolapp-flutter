@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_pull_api.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_freshness.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_pull_outcome.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/disciplinary_pull_repository.dart';
 
@@ -193,6 +194,18 @@ class DisciplinaryPullRepositoryImpl implements DisciplinaryPullRepository {
             syncedAt: syncedAt,
             cursor: cursor,
           );
+  }
+
+  @override
+  Future<DisciplinaryFreshness> freshness() async {
+    try {
+      return DisciplinaryFreshness(
+        bootstrapComplete: await _isBootstrapComplete(),
+        syncedAt: await _syncMetaDao.getSyncedAt(resource),
+      );
+    } catch (_) {
+      return DisciplinaryFreshness.localOnly;
+    }
   }
 
   Future<bool> _isBootstrapComplete() async =>

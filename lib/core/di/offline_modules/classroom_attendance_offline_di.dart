@@ -56,6 +56,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/create_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comment_counts_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comments_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_freshness_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_offline_disciplinary_cases_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_disciplinary_pull_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/update_disciplinary_case_offline_usecase.dart';
@@ -235,6 +236,11 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt.registerFactory<SyncDisciplinaryPullUseCase>(
     () => SyncDisciplinaryPullUseCase(getIt<DisciplinaryPullRepository>()),
   );
+  getIt.registerFactory<GetDisciplinaryFreshnessOfflineUseCase>(
+    () => GetDisciplinaryFreshnessOfflineUseCase(
+      getIt<DisciplinaryPullRepository>(),
+    ),
+  );
   getIt.registerFactory<UpdateDisciplinaryCaseStatusUseCase>(
     () => UpdateDisciplinaryCaseStatusUseCase(
       getIt<DisciplinaryCaseRepository>(),
@@ -268,6 +274,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       getCommentCounts: getIt<GetDisciplinaryCommentCountsOfflineUseCase>(),
       getComments: getIt<GetDisciplinaryCommentsOfflineUseCase>(),
       addComment: getIt<AddDisciplinaryCommentOfflineUseCase>(),
+      getFreshness: getIt<GetDisciplinaryFreshnessOfflineUseCase>(),
     ),
   );
 

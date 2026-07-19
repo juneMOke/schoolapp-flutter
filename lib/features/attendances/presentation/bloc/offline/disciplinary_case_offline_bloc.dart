@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/create_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comment_counts_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_comments_offline_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_disciplinary_freshness_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_offline_disciplinary_cases_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/update_disciplinary_case_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
@@ -23,6 +24,7 @@ class DisciplinaryCaseOfflineBloc
   final GetDisciplinaryCommentCountsOfflineUseCase? _getCommentCounts;
   final GetDisciplinaryCommentsOfflineUseCase? _getComments;
   final AddDisciplinaryCommentOfflineUseCase? _addComment;
+  final GetDisciplinaryFreshnessOfflineUseCase? _getFreshness;
 
   DisciplinaryCaseOfflineBloc({
     required CreateDisciplinaryCaseOfflineUseCase createCase,
@@ -31,12 +33,14 @@ class DisciplinaryCaseOfflineBloc
     GetDisciplinaryCommentCountsOfflineUseCase? getCommentCounts,
     GetDisciplinaryCommentsOfflineUseCase? getComments,
     AddDisciplinaryCommentOfflineUseCase? addComment,
+    GetDisciplinaryFreshnessOfflineUseCase? getFreshness,
   }) : _createCase = createCase,
        _updateCase = updateCase,
        _getCases = getCases,
        _getCommentCounts = getCommentCounts,
        _getComments = getComments,
        _addComment = addComment,
+       _getFreshness = getFreshness,
        super(const DisciplinaryOfflineInitial()) {
     on<LoadOfflineDisciplinaryCases>(_onLoad);
     // Les mutations sont **sérialisées** (`sequential`) : deux écritures
@@ -71,7 +75,14 @@ class DisciplinaryCaseOfflineBloc
       cases,
     ) async {
       final counts = await _loadCounts(cases.map((c) => c.id).toList());
-      emit(DisciplinaryOfflineCasesLoaded(cases, commentCounts: counts));
+      final freshness = await _getFreshness?.call();
+      emit(
+        DisciplinaryOfflineCasesLoaded(
+          cases,
+          commentCounts: counts,
+          freshness: freshness,
+        ),
+      );
     });
   }
 

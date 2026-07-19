@@ -1726,6 +1726,8 @@
   "disciplinaryCommentAddHint": "Ajouter un commentaire…",
   "disciplinaryCommentAddAction": "Ajouter",
   "disciplinaryCommentsCloseAction": "Fermer",
+  "disciplinaryFreshnessSynced": "À jour",
+  "disciplinaryFreshnessLocal": "Poste local",
   "disciplinaryCasesOpenPill": "{count, plural, =1{1 ouvert} other{{count} ouverts}}",
   "@disciplinaryCasesOpenPill": {
     "placeholders": { "count": { "type": "int" } }

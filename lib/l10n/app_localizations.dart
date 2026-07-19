@@ -6720,6 +6720,18 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get disciplinaryCommentsCloseAction;
 
+  /// No description provided for @disciplinaryFreshnessSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get disciplinaryFreshnessSynced;
+
+  /// No description provided for @disciplinaryFreshnessLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'This device only'**
+  String get disciplinaryFreshnessLocal;
+
   /// No description provided for @disciplinaryCasesCountPill.
   ///
   /// In en, this message translates to:

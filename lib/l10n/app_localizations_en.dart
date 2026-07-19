@@ -3909,6 +3909,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryCommentsCloseAction => 'Close';
 
   @override
+  String get disciplinaryFreshnessSynced => 'Up to date';
+
+  @override
+  String get disciplinaryFreshnessLocal => 'This device only';
+
+  @override
   String disciplinaryCasesCountPill(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_freshness.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/disciplinary_status_ui.dart';
@@ -95,6 +96,9 @@ class DisciplinaryCasesTab extends StatelessWidget {
                 total: total,
                 open: open,
                 grave: grave,
+                freshness: state is DisciplinaryOfflineCasesLoaded
+                    ? state.freshness
+                    : null,
                 onCreateCase: onCreateCase,
               ),
               const SizedBox(height: AppDimensions.spacingM),
@@ -179,18 +183,23 @@ class _DisciplinaryCasesHeader extends StatelessWidget {
   final int total;
   final int open;
   final int grave;
+  final DisciplinaryFreshness? freshness;
   final VoidCallback? onCreateCase;
 
   const _DisciplinaryCasesHeader({
     required this.total,
     required this.open,
     required this.grave,
+    required this.freshness,
     required this.onCreateCase,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Fraîcheur (ADR-002) : « À jour » si le pull a ramené toute l'année, sinon
+    // « Poste local » (seules les écritures du poste sont visibles).
+    final synced = freshness?.bootstrapComplete ?? false;
 
     final summary = Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -220,6 +229,19 @@ class _DisciplinaryCasesHeader extends StatelessWidget {
             background: AppColors.error.withValues(alpha: 0.10),
             foreground: AppColors.error,
             icon: Icons.warning_amber_rounded,
+          ),
+        if (freshness != null)
+          _Pill(
+            label: synced
+                ? l10n.disciplinaryFreshnessSynced
+                : l10n.disciplinaryFreshnessLocal,
+            background: synced
+                ? AppColors.vertSavane.withValues(alpha: 0.10)
+                : AppColors.surfaceAlt,
+            foreground: synced ? AppColors.vertSavane : AppColors.textMuted,
+            icon: synced
+                ? Icons.cloud_done_outlined
+                : Icons.smartphone_outlined,
           ),
       ],
     );

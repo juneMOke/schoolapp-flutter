@@ -1712,6 +1712,8 @@
   "disciplinaryCommentAddHint": "Add a comment…",
   "disciplinaryCommentAddAction": "Add",
   "disciplinaryCommentsCloseAction": "Close",
+  "disciplinaryFreshnessSynced": "Up to date",
+  "disciplinaryFreshnessLocal": "This device only",
   "disciplinaryCasesCountPill": "{count, plural, =1{1 case} other{{count} cases}}",
   "@disciplinaryCasesCountPill": {
     "placeholders": { "count": { "type": "int" } }

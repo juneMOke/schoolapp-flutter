@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -8,6 +9,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_disciplinary_pull_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
@@ -59,13 +61,23 @@ class _DisciplinaryStudentDetailPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _fadeController.forward();
-      context.read<DisciplinaryCaseOfflineBloc>().add(
-        LoadOfflineDisciplinaryCases(
-          studentId: widget.intent.studentId,
-          academicYearId: widget.intent.academicYearId,
-        ),
-      );
+      context.read<DisciplinaryCaseOfflineBloc>().add(_loadEvent());
+      // 2ᵉ signal d'hydratation (le 1er = PullCoordinator au retour online) :
+      // une tablette démarrée déjà connectée doit tirer les cas serveur au
+      // montage. Best-effort ; au retour, on recharge (fraîcheur + nouveaux cas).
+      _hydrateFromServer();
     });
+  }
+
+  LoadOfflineDisciplinaryCases _loadEvent() => LoadOfflineDisciplinaryCases(
+    studentId: widget.intent.studentId,
+    academicYearId: widget.intent.academicYearId,
+  );
+
+  Future<void> _hydrateFromServer() async {
+    await GetIt.I<SyncDisciplinaryPullUseCase>().call();
+    if (!mounted) return;
+    context.read<DisciplinaryCaseOfflineBloc>().add(_loadEvent());
   }
 
   @override

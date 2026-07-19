@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_comment.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_freshness.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 
 abstract class DisciplinaryCaseOfflineState extends Equatable {
@@ -23,13 +24,17 @@ class DisciplinaryOfflineCasesLoaded extends DisciplinaryCaseOfflineState {
   /// Nombre de commentaires par id de cas (badge de liste). Vide si non calculé.
   final Map<String, int> commentCounts;
 
+  /// Fraîcheur locale (ADR-002) ; `null` si non lue.
+  final DisciplinaryFreshness? freshness;
+
   const DisciplinaryOfflineCasesLoaded(
     this.cases, {
     this.commentCounts = const {},
+    this.freshness,
   });
 
   @override
-  List<Object?> get props => [cases, commentCounts];
+  List<Object?> get props => [cases, commentCounts, freshness];
 }
 
 /// Commentaires d'un cas chargés (fil du détail). `content` SENSIBLE chargé ici.

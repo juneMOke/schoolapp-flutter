@@ -141,6 +141,24 @@ void main() {
     },
   );
 
+  test('freshness : localOnly avant pull, à jour après bootstrap', () async {
+    // Avant toute synchro : poste local (pas de bootstrap).
+    final before = await repo.freshness();
+    expect(before.bootstrapComplete, isFalse);
+    expect(before.syncedAt, isNull);
+
+    when(
+      () => api.pullDisciplinaryCases(any(), any(), any(), any(), any()),
+    ).thenAnswer(
+      (_) async => httpOk(page([caseDelta('case-1')], nextWatermark: 'w1')),
+    );
+    await repo.syncDisciplinaryCases();
+
+    final after = await repo.freshness();
+    expect(after.bootstrapComplete, isTrue);
+    expect(after.syncedAt, 10000); // horloge injectée
+  });
+
   test('304 → notModified, curseur conservé', () async {
     await syncMeta.setCursor(resource, cursor: 'c-kept', syncedAt: 1);
     when(
