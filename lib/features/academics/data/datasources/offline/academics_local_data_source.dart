@@ -138,22 +138,27 @@ class AcademicsLocalDataSource {
           await txn.insert(noteTable, note.toMap());
           continue;
         }
-        final localUpdatedAt = existing.first['updated_at'] as int?;
-        if (localUpdatedAt == null || note.updatedAt >= localUpdatedAt) {
-          await txn.update(
-            noteTable,
-            {
-              'points_obtenus': note.pointsObtenus,
-              'statut': note.statut,
-              'updated_at': note.updatedAt,
-              'sync_status': SyncState.pendingSync.dbValue,
-              'synced_at': null,
-            },
-            where: 'id = ?',
-            whereArgs: [existing.first['id']],
-          );
-        }
-        // else : note stale (le local est plus récent) → ignorée (LWW).
+        // Saisie UTILISATEUR : gagne toujours (geste explicite, jamais un
+        // replay). Horloge **monotone** — l'`updated_at` avance au-delà du local
+        // (`local + 1` si l'horloge device est en retard) : une correction
+        // survit à un skew serveur / une horloge qui recule (le local peut
+        // porter l'horloge serveur après un pull) ET bat le LWW serveur au push.
+        final localUpdatedAt = (existing.first['updated_at'] as int?) ?? 0;
+        final effectiveUpdatedAt = note.updatedAt > localUpdatedAt
+            ? note.updatedAt
+            : localUpdatedAt + 1;
+        await txn.update(
+          noteTable,
+          {
+            'points_obtenus': note.pointsObtenus,
+            'statut': note.statut,
+            'updated_at': effectiveUpdatedAt,
+            'sync_status': SyncState.pendingSync.dbValue,
+            'synced_at': null,
+          },
+          where: 'id = ?',
+          whereArgs: [existing.first['id']],
+        );
       }
       final pendingMaps = await txn.query(
         noteTable,
@@ -317,7 +322,13 @@ class AcademicsLocalDataSource {
             limit: 1,
           );
           if (existing.isEmpty) {
-            await txn.insert(noteTable, row.toMap());
+            // `replace` défensif : une collision de PK `id` inattendue (payload
+            // serveur pathologique) ne doit pas lever et figer le curseur.
+            await txn.insert(
+              noteTable,
+              row.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
             applied++;
             continue;
           }

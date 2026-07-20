@@ -4,6 +4,21 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 
+/// Parse une liste JSON **élément par élément** : une entrée malformée est
+/// écartée sans faire échouer les autres (une seule période/sous-période
+/// illisible ne doit pas annuler tout l'arbre — la garde de clôture en dépend).
+List<T> _lenient<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
+  final out = <T>[];
+  for (final e in (raw as List<dynamic>? ?? const [])) {
+    try {
+      out.add(parse(e as Map<String, dynamic>));
+    } catch (_) {
+      // entrée écartée
+    }
+  }
+  return List<T>.unmodifiable(out);
+}
+
 /// Squelette d'une sous-période mise en cache : id + ordre + statut d'ouverture
 /// (valeur wire OUVERTE/CLOTUREE/UNKNOWN). Pas de libellé (dérivé client-side).
 class NotationSousPeriodeSkeleton extends Equatable {
@@ -53,13 +68,10 @@ class NotationPeriodeSkeleton extends Equatable {
         periodeScolaireId: j['periodeScolaireId'] as String,
         ordre: (j['ordre'] as num?)?.toInt() ?? 0,
         statut: (j['statut'] as String?) ?? 'UNKNOWN',
-        sousPeriodes: ((j['sousPeriodes'] as List<dynamic>?) ?? const [])
-            .map(
-              (e) => NotationSousPeriodeSkeleton.fromJson(
-                e as Map<String, dynamic>,
-              ),
-            )
-            .toList(growable: false),
+        sousPeriodes: _lenient(
+          j['sousPeriodes'],
+          NotationSousPeriodeSkeleton.fromJson,
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -160,18 +172,17 @@ class RefCoursNotationRow extends Equatable {
     'synced_at': syncedAt,
   };
 
-  /// L'arbre période désérialisé. Tolérant : JSON illisible → liste vide.
+  /// L'arbre période désérialisé. Tolérant **par élément** : un JSON global
+  /// illisible → liste vide ; une période/sous-période malformée est écartée
+  /// sans annuler les autres.
   List<NotationPeriodeSkeleton> get periodes {
+    final dynamic decoded;
     try {
-      final raw = jsonDecode(periodesJson) as List<dynamic>;
-      return raw
-          .map(
-            (e) => NotationPeriodeSkeleton.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(growable: false);
+      decoded = jsonDecode(periodesJson);
     } catch (_) {
       return const [];
     }
+    return _lenient(decoded, NotationPeriodeSkeleton.fromJson);
   }
 
   @override

@@ -53,84 +53,92 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
       return const OutboxDispatchResult.failed('Invalid notes payload');
     }
 
-    // Garde de dépendance ÉVALUATION→NOTE (scopée à l'évaluation locale).
-    final evaluation = await localDataSource.getEvaluation(
-      request.evaluationId,
-    );
-    if (evaluation != null) {
-      if (evaluation.syncState == SyncState.pendingSync) {
-        return const OutboxDispatchResult.blocked(
-          'Évaluation non synchronisée (dépendance) — les notes partiront '
-          'après elle',
-        );
-      }
-      if (evaluation.syncState == SyncState.syncError) {
-        return const OutboxDispatchResult.failed(
-          'Évaluation en échec de synchro — corrigez-la, les notes suivront',
-        );
-      }
-    }
-
-    final NotesBatchResponseModel response;
+    // Toute erreur DB (gate, réconciliation) → retry : le contrat
+    // `OutboxSyncHandler` interdit de lever ; le re-push est idempotent.
     try {
-      response = await syncApi.submitNotes(requiredAuth, request);
-    } on DioException catch (e) {
-      final failure = e.error;
-      // 403 (authorId ≠ JWT) / validation d'enveloppe → terminal ; 401/5xx/
-      // réseau → transitoire.
-      if (failure is ValidationFailure ||
-          failure is NotFoundFailure ||
-          failure is UnauthorizedFailure) {
-        return OutboxDispatchResult.failed(
-          failure is Failure ? failure.message : 'Rejected',
+      // Garde de dépendance ÉVALUATION→NOTE (scopée à l'évaluation locale).
+      final evaluation = await localDataSource.getEvaluation(
+        request.evaluationId,
+      );
+      if (evaluation != null) {
+        if (evaluation.syncState == SyncState.pendingSync) {
+          return const OutboxDispatchResult.blocked(
+            'Évaluation non synchronisée (dépendance) — les notes partiront '
+            'après elle',
+          );
+        }
+        if (evaluation.syncState == SyncState.syncError) {
+          return const OutboxDispatchResult.failed(
+            'Évaluation en échec de synchro — corrigez-la, les notes suivront',
+          );
+        }
+      }
+
+      final NotesBatchResponseModel response;
+      try {
+        response = await syncApi.submitNotes(requiredAuth, request);
+      } on DioException catch (e) {
+        final failure = e.error;
+        // 403 (authorId ≠ JWT) / validation d'enveloppe → terminal ; 401/5xx/
+        // réseau → transitoire.
+        if (failure is ValidationFailure ||
+            failure is NotFoundFailure ||
+            failure is UnauthorizedFailure) {
+          return OutboxDispatchResult.failed(
+            failure is Failure ? failure.message : 'Rejected',
+          );
+        }
+        return OutboxDispatchResult.retry(
+          failure is Failure ? failure.message : e.message,
         );
       }
-      return OutboxDispatchResult.retry(
-        failure is Failure ? failure.message : e.message,
+
+      // Réconciliation par ligne, résolue par la clé naturelle `(evaluationId,
+      // studentId)`. On ne réconcilie QUE les studentIds effectivement poussés.
+      final pushedUpdatedAt = <String, int>{
+        for (final n in request.notes)
+          if (n.updatedAtMs != null) n.studentId: n.updatedAtMs!,
+      };
+      final applied = <String, int>{};
+      final rejected = <String, int>{};
+      for (final o in response.outcomes) {
+        final pushed = pushedUpdatedAt[o.studentId];
+        if (pushed == null) continue; // outcome hors du lot poussé : ignoré.
+        if (o.isApplied) {
+          applied[o.studentId] = pushed;
+        } else if (o.isRejected && !applied.containsKey(o.studentId)) {
+          // Un studentId à la fois APPLIED et REJECTED (réponse serveur
+          // contradictoire) : APPLIED gagne, on ne le compte pas deux fois.
+          rejected[o.studentId] = pushed;
+        }
+      }
+
+      final syncedAt = now();
+      await localDataSource.markNotesSynced(
+        evaluationId: request.evaluationId,
+        studentIdToPushedUpdatedAt: applied,
+        serverUpdatedAt: EpochIsoHelper.tryToEpochMs(response.serverUpdatedAt),
+        syncedAt: syncedAt,
       );
+      await localDataSource.markNotesSyncError(
+        evaluationId: request.evaluationId,
+        studentIdToPushedUpdatedAt: rejected,
+      );
+
+      // Acquittement seulement si CHAQUE note poussée a un outcome terminal.
+      // On compte les studentIds DISTINCTS résolus (un studentId renvoyé en
+      // double par le serveur ne doit pas gonfler le compteur et masquer une
+      // autre note sans outcome → sinon note orpheline). Sinon → retry (re-push
+      // idempotent, aucune note laissée orpheline).
+      final resolved = <String>{...applied.keys, ...rejected.keys}.length;
+      if (resolved < pushedUpdatedAt.length) {
+        return const OutboxDispatchResult.retry(
+          'Réponse serveur incomplète (outcomes manquants) — re-push',
+        );
+      }
+      return const OutboxDispatchResult.acked();
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());
     }
-
-    // Réconciliation par ligne, résolue par la clé naturelle `(evaluationId,
-    // studentId)`. On ne réconcilie QUE les studentIds effectivement poussés.
-    final pushedUpdatedAt = <String, int>{
-      for (final n in request.notes)
-        if (n.updatedAtMs != null) n.studentId: n.updatedAtMs!,
-    };
-    final applied = <String, int>{};
-    final rejected = <String, int>{};
-    for (final o in response.outcomes) {
-      final pushed = pushedUpdatedAt[o.studentId];
-      if (pushed == null) continue; // outcome hors du lot poussé : ignoré.
-      if (o.isApplied) {
-        applied[o.studentId] = pushed;
-      } else if (o.isRejected) {
-        rejected[o.studentId] = pushed;
-      }
-    }
-
-    final syncedAt = now();
-    await localDataSource.markNotesSynced(
-      evaluationId: request.evaluationId,
-      studentIdToPushedUpdatedAt: applied,
-      serverUpdatedAt: EpochIsoHelper.tryToEpochMs(response.serverUpdatedAt),
-      syncedAt: syncedAt,
-    );
-    await localDataSource.markNotesSyncError(
-      evaluationId: request.evaluationId,
-      studentIdToPushedUpdatedAt: rejected,
-    );
-
-    // Acquittement seulement si CHAQUE note poussée a un outcome terminal.
-    // Sinon (réponse serveur incomplète), on re-tente : le re-push est
-    // idempotent (upsert LWW), aucune note n'est laissée orpheline.
-    final resolved = applied.length + rejected.length;
-    if (resolved < pushedUpdatedAt.length) {
-      return const OutboxDispatchResult.retry(
-        'Réponse serveur incomplète (outcomes manquants) — re-push',
-      );
-    }
-    return const OutboxDispatchResult.acked();
   }
 }

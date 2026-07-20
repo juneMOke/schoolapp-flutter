@@ -73,6 +73,8 @@ class ScheduleRefLocalDataSource {
       sessionsTable,
       where: 'academic_year_id = ?',
       whereArgs: [academicYearId],
+      orderBy:
+          'id ASC', // ordre déterministe (résolution de collision de cellule)
     );
     return rows.map(RefRecurringSessionRow.fromMap).toList(growable: false);
   }
@@ -80,7 +82,7 @@ class ScheduleRefLocalDataSource {
   /// Toutes les séances récurrentes en base (source de « Mes cours » : les cours
   /// de l'enseignant se dérivent des séances, filtrées par `teacher_id`).
   Future<List<RefRecurringSessionRow>> getAllSessions() async {
-    final rows = await _db.query(sessionsTable);
+    final rows = await _db.query(sessionsTable, orderBy: 'id ASC');
     return rows.map(RefRecurringSessionRow.fromMap).toList(growable: false);
   }
 }

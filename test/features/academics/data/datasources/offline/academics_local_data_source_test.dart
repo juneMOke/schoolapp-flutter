@@ -160,19 +160,20 @@ void main() {
     );
 
     test(
-      'LWW : une correction plus récente écrase, une note stale est ignorée',
+      'saisie utilisateur gagne TOUJOURS + horloge monotone (survit au skew)',
       () async {
         await save([note('s1', id: 'n1', points: 10, updatedAt: 1000)]);
-
-        // Correction plus récente → appliquée.
         await save([note('s1', id: 'n1b', points: 18, updatedAt: 2000)]);
         var stored = await local.getNotesForEvaluation('ev-1');
         expect(stored.single.pointsObtenus, 18);
 
-        // Note stale (updatedAt plus ancien) → ignorée.
+        // Horloge device EN RETARD (skew serveur / recul) : la correction
+        // s'applique quand même (geste utilisateur), et `updated_at` avance
+        // au-delà du local (2000 → 2001) pour battre le LWW serveur au push.
         await save([note('s1', id: 'n1c', points: 5, updatedAt: 1500)]);
         stored = await local.getNotesForEvaluation('ev-1');
-        expect(stored.single.pointsObtenus, 18, reason: 'stale ignorée');
+        expect(stored.single.pointsObtenus, 5, reason: 'la correction gagne');
+        expect(stored.single.updatedAt, 2001, reason: 'monotone (local+1)');
         // Toujours une seule ligne (upsert clé naturelle, pas de doublon).
         expect(stored.length, 1);
       },

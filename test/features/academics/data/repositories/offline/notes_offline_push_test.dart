@@ -196,6 +196,35 @@ void main() {
       },
     );
 
+    test('outcome contradictoire (APPLIED+REJECTED même élève) ne masque pas '
+        'une note sans outcome → retry (anti-orphelin)', () async {
+      await insertEval('SYNCED');
+      final entry = await saveSample(); // s1 + s2 poussés
+      when(() => syncApi.submitNotes(any(), any())).thenAnswer(
+        (_) async => NotesBatchResponseModel(
+          // s1 en double (APPLIED puis REJECTED) ; RIEN pour s2.
+          outcomes: [
+            outcome('s1', 'APPLIED'),
+            outcome('s1', 'REJECTED', reason: 'PERIODE_CLOSE'),
+          ],
+        ),
+      );
+
+      final result = await handler.dispatch(entry);
+
+      // Sans le comptage DISTINCT, resolved=2==pushed → ACK et s2 orpheline.
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      final byStudent = {
+        for (final n in await local.getNotesForEvaluation('ev-1'))
+          n.studentId: n,
+      };
+      expect(
+        byStudent['s2']!.syncState,
+        SyncState.pendingSync,
+        reason: 's2 jamais orpheline',
+      );
+    });
+
     test('payload corrompu → failed', () async {
       const entry = OutboxEntry(
         id: 'x',

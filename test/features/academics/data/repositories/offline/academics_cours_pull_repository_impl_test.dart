@@ -171,7 +171,7 @@ void main() {
   );
 
   test(
-    'échec réseau sur une classe → Left (le coordinateur re-tentera)',
+    'TOUTES les classes en échec → Left (le coordinateur re-tentera)',
     () async {
       await insertClassroom('c1');
       when(() => api.pullCours(auth, 'c1', null, 100)).thenThrow(status(503));
@@ -179,6 +179,25 @@ void main() {
       final result = await repo.syncCours(academicYearId: year);
 
       expect(result.isLeft(), isTrue);
+    },
+  );
+
+  test(
+    'best-effort : une classe en échec est sautée, les autres passent',
+    () async {
+      await insertClassroom('c1');
+      await insertClassroom('c2');
+      // c1 échoue durablement (500) ; c2 réussit — c2 ne doit PAS être gelée.
+      when(() => api.pullCours(auth, 'c1', null, 100)).thenThrow(status(500));
+      when(() => api.pullCours(auth, 'c2', null, 100)).thenAnswer(
+        (_) async => httpOk(page([cours('co2', 'c2')], nextWatermark: 'wm-c2')),
+      );
+
+      final outcome = right(await repo.syncCours(academicYearId: year));
+
+      expect(outcome.upserted, 1);
+      expect(await syncMeta.getCursor('academics_cours:c2'), 'wm-c2');
+      expect((await local.getCoursForClassroom('c2')).length, 1);
     },
   );
 }

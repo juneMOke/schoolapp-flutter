@@ -147,9 +147,14 @@ class AcademicsMetierPullRepositoryImpl {
       );
     }
 
+    // Best-effort : un cours en échec est SAUTÉ (les autres continuent) — sinon
+    // un cours cassé gèlerait la synchro des évaluations/notes de tous les cours
+    // suivants. `Left` seulement si TOUS échouent.
     var totalUpserted = 0;
     var allNotModified = true;
     var allBootstrapComplete = true;
+    var anySucceeded = false;
+    Failure? lastFailure;
     for (final coursId in coursIds) {
       final cycle = await _pullCours<I>(
         resourcePrefix,
@@ -161,12 +166,19 @@ class AcademicsMetierPullRepositoryImpl {
       Failure? failure;
       _CourseCycle? applied;
       cycle.fold((f) => failure = f, (c) => applied = c);
-      if (failure != null) return Left(failure!);
+      if (failure != null) {
+        lastFailure = failure;
+        allBootstrapComplete = false;
+        allNotModified = false;
+        continue;
+      }
+      anySucceeded = true;
       totalUpserted += applied!.upserted;
       allNotModified = allNotModified && applied!.notModified;
       allBootstrapComplete = allBootstrapComplete && applied!.bootstrapComplete;
     }
 
+    if (!anySucceeded && lastFailure != null) return Left(lastFailure);
     return Right(
       AcademicsDeltaPullOutcome(
         upserted: totalUpserted,

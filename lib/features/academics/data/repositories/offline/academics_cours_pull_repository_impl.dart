@@ -114,20 +114,33 @@ class AcademicsCoursPullRepositoryImpl {
       );
     }
 
+    // Best-effort : une classe en échec est SAUTÉE (rafraîchie au prochain
+    // cycle), les autres continuent — sinon une classe cassée (500 persistant)
+    // gèlerait indéfiniment la synchro de toutes les classes suivantes (les ids
+    // triés rendraient la privation stable). `Left` seulement si TOUT échoue.
     var totalUpserted = 0;
     var allNotModified = true;
     var allBootstrapComplete = true;
+    var anySucceeded = false;
+    Failure? lastFailure;
     for (final classroomId in classroomIds) {
       final cycle = await _pullClassroom(classroomId, syncedAt);
       Failure? failure;
       _ClassroomCycle? applied;
       cycle.fold((f) => failure = f, (c) => applied = c);
-      if (failure != null) return Left(failure!);
+      if (failure != null) {
+        lastFailure = failure;
+        allBootstrapComplete = false;
+        allNotModified = false;
+        continue;
+      }
+      anySucceeded = true;
       totalUpserted += applied!.upserted;
       allNotModified = allNotModified && applied!.notModified;
       allBootstrapComplete = allBootstrapComplete && applied!.bootstrapComplete;
     }
 
+    if (!anySucceeded && lastFailure != null) return Left(lastFailure);
     return Right(
       CoursPullOutcome(
         upserted: totalUpserted,
