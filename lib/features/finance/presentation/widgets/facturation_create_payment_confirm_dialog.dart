@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Issue de la sur-couche d'encaissement (confirmation → résultat).
 enum FacturationCollectOutcome { edited, cancelled, succeeded }
@@ -233,15 +234,22 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
         return Column(
           children: [
             const Divider(height: 1, color: AppColors.border),
-            FinanceModalFooter(
-              secondaryLabel: l10n.facturationCollectEditAction,
-              secondaryIcon: Icons.edit_outlined,
-              onSecondary: () =>
-                  Navigator.of(context).pop(FacturationCollectOutcome.edited),
-              primaryLabel: l10n.facturationCreatePaymentConfirmValidate,
-              primaryIcon: Icons.check_circle_outline_rounded,
-              onPrimary: _confirm,
-              stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+            // Gel READ_ONLY (ADR-010) : `_confirm` déclenche l'écriture du
+            // paiement — le tick de fraîcheur peut basculer le mode pendant
+            // que la modale est ouverte (argent). Seule l'action PRIMAIRE est
+            // gelée : « Modifier » (navigation) reste libre, sinon
+            // l'utilisateur serait piégé dans la modale.
+            SessionWriteGate.builder(
+              builder: (context, blocksWrites) => FinanceModalFooter(
+                secondaryLabel: l10n.facturationCollectEditAction,
+                secondaryIcon: Icons.edit_outlined,
+                onSecondary: () =>
+                    Navigator.of(context).pop(FacturationCollectOutcome.edited),
+                primaryLabel: l10n.facturationCreatePaymentConfirmValidate,
+                primaryIcon: Icons.check_circle_outline_rounded,
+                onPrimary: blocksWrites ? null : _confirm,
+                stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              ),
             ),
           ],
         );
@@ -266,16 +274,20 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
         return Column(
           children: [
             const Divider(height: 1, color: AppColors.border),
-            FinanceModalFooter(
-              secondaryLabel: l10n.facturationCreatePaymentConfirmCancel,
-              secondaryIcon: Icons.close_rounded,
-              onSecondary: () => Navigator.of(
-                context,
-              ).pop(FacturationCollectOutcome.cancelled),
-              primaryLabel: l10n.facturationCollectRetryAction,
-              primaryIcon: Icons.refresh_rounded,
-              onPrimary: _confirm,
-              stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+            // Même gel que la phase confirm : « Réessayer » relance `_confirm`.
+            // « Annuler » (navigation) reste libre.
+            SessionWriteGate.builder(
+              builder: (context, blocksWrites) => FinanceModalFooter(
+                secondaryLabel: l10n.facturationCreatePaymentConfirmCancel,
+                secondaryIcon: Icons.close_rounded,
+                onSecondary: () => Navigator.of(
+                  context,
+                ).pop(FacturationCollectOutcome.cancelled),
+                primaryLabel: l10n.facturationCollectRetryAction,
+                primaryIcon: Icons.refresh_rounded,
+                onPrimary: blocksWrites ? null : _confirm,
+                stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              ),
             ),
           ],
         );

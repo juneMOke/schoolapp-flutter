@@ -217,7 +217,10 @@ class FinanceModalFooter extends StatelessWidget {
   final VoidCallback onSecondary;
   final String primaryLabel;
   final IconData primaryIcon;
-  final VoidCallback onPrimary;
+
+  /// Nullable : `null` rend l'action primaire désactivée (ex. gel READ_ONLY
+  /// ADR-010) tout en laissant la secondaire (navigation) libre.
+  final VoidCallback? onPrimary;
   final double stackBelowWidth;
 
   const FinanceModalFooter({

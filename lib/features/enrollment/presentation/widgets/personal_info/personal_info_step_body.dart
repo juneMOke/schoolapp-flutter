@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/pers
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/nationality_dropdown_field.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class PersonalInfoStepBody extends StatelessWidget {
   final StudentDetail studentDetail;
@@ -172,23 +173,27 @@ class PersonalInfoStepBody extends StatelessWidget {
             const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerRight,
-              child: FilledButton.icon(
-                onPressed: !canSave ? null : () => onSave(context),
-                icon: const Icon(Icons.save_outlined),
-                label: Text(l10n.savePersonalInfo),
-                style: FilledButton.styleFrom(
-                  backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
+              child: SessionWriteGate(
+                child: FilledButton.icon(
+                  onPressed: !canSave ? null : () => onSave(context),
+                  icon: const Icon(Icons.save_outlined),
+                  label: Text(l10n.savePersonalInfo),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: canSave ? const Color(0xFF0EA5E9) : null,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                    elevation: canSave ? 6 : 0,
+                    shadowColor: const Color(
+                      0xFF0EA5E9,
+                    ).withValues(alpha: 0.45),
                   ),
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                  elevation: canSave ? 6 : 0,
-                  shadowColor: const Color(0xFF0EA5E9).withValues(alpha: 0.45),
                 ),
               ),
             ),

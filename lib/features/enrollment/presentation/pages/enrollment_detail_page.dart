@@ -25,6 +25,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/deta
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class EnrollmentDetailPage extends StatefulWidget {
   final EnrollmentDetailIntent intent;
@@ -209,6 +210,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   void _maybeSeedFromLocalRef(Bootstrap? bootstrap) {
     if (!mounted || !_policy.seedsFromLocalRef) return;
     if (_seededIntent == _effectiveIntent) return;
+    // Gel READ_ONLY (ADR-010) : le seed CRÉE des lignes brouillon en base
+    // locale — un tap « pour voir » sur un candidat RE en session lecture
+    // seule laisserait des dossiers DRAFT fantômes. On ne seed pas ; la page
+    // retombe sur son état vide/erreur, et le bouton Réessayer du seed est
+    // lui aussi neutralisé par ce même garde au rejeu.
+    if (SessionWriteGate.blocksWritesOf(context)) return;
     final yearId = bootstrap?.academicYear.id;
     if (yearId == null || yearId.trim().isEmpty) return;
     _seededIntent = _effectiveIntent;

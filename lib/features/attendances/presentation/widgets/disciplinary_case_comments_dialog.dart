@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/offlin
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Fil de commentaires d'un cas (DF-B) : lecture (`content` SENSIBLE chargé ici)
 /// + ajout append-only. Requiert un [DisciplinaryCaseOfflineBloc] **dédié**
@@ -188,28 +189,32 @@ class _AddField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            minLines: 1,
-            maxLines: 3,
-            textInputAction: TextInputAction.send,
-            onSubmitted: (_) => onSubmit(),
-            decoration: InputDecoration(
-              hintText: l10n.disciplinaryCommentAddHint,
-              isDense: true,
+    // Gel READ_ONLY (ADR-010) : tout le champ d'ajout (la saisie soumet aussi
+    // via onSubmitted) — la CONSULTATION des commentaires reste ouverte.
+    return SessionWriteGate(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              minLines: 1,
+              maxLines: 3,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSubmit(),
+              decoration: InputDecoration(
+                hintText: l10n.disciplinaryCommentAddHint,
+                isDense: true,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        FilledButton(
-          onPressed: onSubmit,
-          child: Text(l10n.disciplinaryCommentAddAction),
-        ),
-      ],
+          const SizedBox(width: AppDimensions.spacingS),
+          FilledButton(
+            onPressed: onSubmit,
+            child: Text(l10n.disciplinaryCommentAddAction),
+          ),
+        ],
+      ),
     );
   }
 }

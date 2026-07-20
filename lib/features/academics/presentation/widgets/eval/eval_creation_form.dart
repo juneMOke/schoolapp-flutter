@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/cours
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_type_cards.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Formulaire de création d'une évaluation (spec §2–§5). Gère l'état local du
 /// formulaire, applique les défauts du type, câble la cascade période →
@@ -337,14 +338,19 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: EteeloButton.primary(
-            label: l10n.evalCreateSubmit,
-            icon: Icons.check_rounded,
-            isLoading: state.isInProgress,
-            size: EteeloButtonSize.regular,
-            onPressed: (_isValid && !_isTargetClosed && !state.isInProgress)
-                ? _submit
-                : null,
+          // Gel READ_ONLY (ADR-010) : la modale peut être ouverte au moment où
+          // le tick de fraîcheur bascule le mode — le submit doit être gaté
+          // comme le FAB d'entrée.
+          child: SessionWriteGate(
+            child: EteeloButton.primary(
+              label: l10n.evalCreateSubmit,
+              icon: Icons.check_rounded,
+              isLoading: state.isInProgress,
+              size: EteeloButtonSize.regular,
+              onPressed: (_isValid && !_isTargetClosed && !state.isInProgress)
+                  ? _submit
+                  : null,
+            ),
           ),
         ),
       ],

@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/offlin
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_dialog_shell.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class DisciplinaryCaseCreateDialog extends StatefulWidget {
   final String studentId;
@@ -393,58 +394,63 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                 ),
               ),
-              Semantics(
-                label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                button: true,
-                enabled: !isLoading,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.disciplinaryDetailAccent,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimensions.spacingM,
-                      vertical: AppDimensions.spacingS,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.spacingM,
+              // Gel READ_ONLY (ADR-010) : le dialog peut être ouvert au moment
+              // où le tick de fraîcheur bascule le mode — le submit doit être
+              // gaté comme le CTA d'entrée.
+              SessionWriteGate(
+                child: Semantics(
+                  label: l10n.disciplinaryCaseCreateDialogSubmitAction,
+                  button: true,
+                  enabled: !isLoading,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.disciplinaryDetailAccent,
+                      foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.spacingM,
+                        vertical: AppDimensions.spacingS,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.spacingM,
+                        ),
                       ),
                     ),
-                  ),
-                  onPressed: isLoading ? null : () => _submit(context),
-                  icon: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                    switchInCurve: AppMotion.outCurve,
-                    switchOutCurve: AppMotion.inCurve,
-                    child: isLoading
-                        ? const SizedBox(
-                            key: ValueKey('loading-icon'),
-                            width: AppDimensions
-                                .disciplinaryCreateSubmitSpinnerSize,
-                            height: AppDimensions
-                                .disciplinaryCreateSubmitSpinnerSize,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.surface,
+                    onPressed: isLoading ? null : () => _submit(context),
+                    icon: AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                      switchInCurve: AppMotion.outCurve,
+                      switchOutCurve: AppMotion.inCurve,
+                      child: isLoading
+                          ? const SizedBox(
+                              key: ValueKey('loading-icon'),
+                              width: AppDimensions
+                                  .disciplinaryCreateSubmitSpinnerSize,
+                              height: AppDimensions
+                                  .disciplinaryCreateSubmitSpinnerSize,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.surface,
+                                ),
                               ),
+                            )
+                          : const Icon(
+                              Icons.add_task_outlined,
+                              key: ValueKey('submit-icon'),
                             ),
-                          )
-                        : const Icon(
-                            Icons.add_task_outlined,
-                            key: ValueKey('submit-icon'),
-                          ),
-                  ),
-                  label: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                    switchInCurve: AppMotion.outCurve,
-                    switchOutCurve: AppMotion.inCurve,
-                    child: Text(
-                      isLoading
-                          ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                          : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                      key: ValueKey(isLoading),
-                      style: AppTextStyles.action,
+                    ),
+                    label: AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                      switchInCurve: AppMotion.outCurve,
+                      switchOutCurve: AppMotion.inCurve,
+                      child: Text(
+                        isLoading
+                            ? l10n.disciplinaryCaseCreateDialogCreatingMessage
+                            : l10n.disciplinaryCaseCreateDialogSubmitAction,
+                        key: ValueKey(isLoading),
+                        style: AppTextStyles.action,
+                      ),
                     ),
                   ),
                 ),

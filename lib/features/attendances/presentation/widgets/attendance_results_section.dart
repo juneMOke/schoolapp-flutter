@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class AttendanceResultsSection extends StatelessWidget {
   final AttendanceSearchRequest? lastRequest;
@@ -242,22 +243,25 @@ class _AttendanceActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        EteeloButton.secondary(
-          label: l10n.attendanceMarkAllPresentAction,
-          onPressed: isSaving ? null : onMarkAllPresent,
-          fullWidth: false,
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        EteeloButton.primary(
-          label: l10n.attendanceSaveCallAction,
-          isLoading: isSaving,
-          onPressed: canSave ? onSaveCall : null,
-          fullWidth: false,
-        ),
-      ],
+    // Gel READ_ONLY (ADR-010) : l'appel est une écriture métier.
+    return SessionWriteGate(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          EteeloButton.secondary(
+            label: l10n.attendanceMarkAllPresentAction,
+            onPressed: isSaving ? null : onMarkAllPresent,
+            fullWidth: false,
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          EteeloButton.primary(
+            label: l10n.attendanceSaveCallAction,
+            isLoading: isSaving,
+            onPressed: canSave ? onSaveCall : null,
+            fullWidth: false,
+          ),
+        ],
+      ),
     );
   }
 }

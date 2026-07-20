@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Pied fixe du stepper d'inscription (PARCOURS 21) : fine bande sur une seule
 /// ligne — navigation à gauche, indicateur d'état au centre, actions à droite.
@@ -93,23 +94,27 @@ class EnrollmentStepperControls extends StatelessWidget {
           // Au dernier step, « Enregistrer » porte l'action Valider l'inscription :
           // bouton PRIMAIRE + icône check (proéminent). Sur les étapes
           // intermédiaires, save reste secondaire (disquette).
-          (_) => isLast
-              ? EteeloButton.primary(
-                  label: saveLabel,
-                  icon: Icons.check_circle_outline,
-                  onPressed: canSave ? onSave : null,
-                  isLoading: savingNow,
-                  size: EteeloButtonSize.compact,
-                  fullWidth: false,
-                )
-              : EteeloButton.secondary(
-                  label: saveLabel,
-                  icon: Icons.save_outlined,
-                  onPressed: canSave ? onSave : null,
-                  isLoading: savingNow,
-                  size: EteeloButtonSize.compact,
-                  fullWidth: false,
-                ),
+          // Gel READ_ONLY (ADR-010) : seul Save/Valider écrit — la navigation
+          // entre étapes reste libre (consultation du brouillon).
+          (_) => SessionWriteGate(
+            child: isLast
+                ? EteeloButton.primary(
+                    label: saveLabel,
+                    icon: Icons.check_circle_outline,
+                    onPressed: canSave ? onSave : null,
+                    isLoading: savingNow,
+                    size: EteeloButtonSize.compact,
+                    fullWidth: false,
+                  )
+                : EteeloButton.secondary(
+                    label: saveLabel,
+                    icon: Icons.save_outlined,
+                    onPressed: canSave ? onSave : null,
+                    isLoading: savingNow,
+                    size: EteeloButtonSize.compact,
+                    fullWidth: false,
+                  ),
+          ),
         // Au dernier step, le bouton Valider (Save) remplace « Terminer » — on
         // ne l'affiche donc pas en doublon.
         if (!(isLast && showSaveAction))
@@ -137,15 +142,18 @@ class EnrollmentStepperControls extends StatelessWidget {
           onPressed: onPrevious,
         ),
       if (showSaveAction)
-        _StepperNavButton(
-          // Au dernier step, « Enregistrer » porte l'action Valider l'inscription :
-          // icône check PRIMAIRE (terre cuite plein) pour la rendre proéminente.
-          // Sur les étapes intermédiaires, save reste secondaire (disquette).
-          icon: isLast ? Icons.check_circle_outline : Icons.save_outlined,
-          tooltip: saveLabel,
-          onPressed: canSave ? onSave : null,
-          isLoading: savingNow,
-          primary: isLast,
+        // Gel READ_ONLY (ADR-010) — même règle que la barre large.
+        SessionWriteGate(
+          child: _StepperNavButton(
+            // Au dernier step, « Enregistrer » porte l'action Valider l'inscription :
+            // icône check PRIMAIRE (terre cuite plein) pour la rendre proéminente.
+            // Sur les étapes intermédiaires, save reste secondaire (disquette).
+            icon: isLast ? Icons.check_circle_outline : Icons.save_outlined,
+            tooltip: saveLabel,
+            onPressed: canSave ? onSave : null,
+            isLoading: savingNow,
+            primary: isLast,
+          ),
         ),
       if (!(isLast && showSaveAction))
         _StepperNavButton(

@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/dis
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Onglet « Cas disciplinaires » — **lecture 100 % locale** (DF-3) sur le BLoC
 /// offline. Création, avancement (Ouvert→Pris en charge→Résolu) et classement
@@ -246,11 +247,14 @@ class _DisciplinaryCasesHeader extends StatelessWidget {
       ],
     );
 
-    final button = PrimaryButton(
-      label: l10n.disciplinaryCaseCreateAction,
-      icon: Icons.add_rounded,
-      fullWidth: false,
-      onPressed: onCreateCase,
+    // Gel READ_ONLY (ADR-010) : la création de cas est une écriture métier.
+    final button = SessionWriteGate(
+      child: PrimaryButton(
+        label: l10n.disciplinaryCaseCreateAction,
+        icon: Icons.add_rounded,
+        fullWidth: false,
+        onPressed: onCreateCase,
+      ),
     );
 
     return LayoutBuilder(

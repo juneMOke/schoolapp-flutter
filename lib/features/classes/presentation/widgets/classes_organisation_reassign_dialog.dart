@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/offline/cl
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// PARCOURS 9 — Popin de choix de classe.
 ///
@@ -236,18 +237,23 @@ class _ReassignDialogState extends State<_ReassignDialog> {
       onPressed: () => Navigator.of(context).pop(),
       child: Text(l10n.cancel),
     );
-    final action = FilledButton.icon(
-      onPressed: _selectedId == null
-          ? null
-          : () => Navigator.of(context).pop(_selectedId),
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.bleuArdoise,
-        foregroundColor: AppColors.blancCasse,
-        minimumSize: const Size(0, AppDimensions.minTouchTarget),
-        shape: const StadiumBorder(),
+    // Gel READ_ONLY (ADR-010) : valider la réaffectation déclenche l'écriture
+    // chez l'appelant — le tick de fraîcheur peut basculer le mode pendant que
+    // le dialog est ouvert. « Annuler » (navigation) reste libre.
+    final action = SessionWriteGate(
+      child: FilledButton.icon(
+        onPressed: _selectedId == null
+            ? null
+            : () => Navigator.of(context).pop(_selectedId),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.bleuArdoise,
+          foregroundColor: AppColors.blancCasse,
+          minimumSize: const Size(0, AppDimensions.minTouchTarget),
+          shape: const StadiumBorder(),
+        ),
+        icon: Icon(_isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
+        label: Text(actionLabel),
       ),
-      icon: Icon(_isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
-      label: Text(actionLabel),
     );
 
     return Padding(

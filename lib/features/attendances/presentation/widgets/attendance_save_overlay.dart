@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/offlin
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 Future<void> showAttendanceSaveOverlay({
   required BuildContext context,
@@ -481,10 +482,15 @@ class _ErrorBody extends StatelessWidget {
       // Échec de l'écriture locale offline (base/outbox).
       message: l10n.offlineWriteError,
       incidentCodeLabel: incidentCode,
-      primaryAction: EteeloButton.primary(
-        label: l10n.attendanceSaveRetryAction,
-        onPressed: onRetry,
-        fullWidth: false,
+      // Gel READ_ONLY (ADR-010) : « Réessayer » relance l'écriture de l'appel
+      // — le mode peut avoir basculé pendant que l'overlay est ouvert.
+      // « Fermer » (navigation) reste libre.
+      primaryAction: SessionWriteGate(
+        child: EteeloButton.primary(
+          label: l10n.attendanceSaveRetryAction,
+          onPressed: onRetry,
+          fullWidth: false,
+        ),
       ),
       secondaryAction: EteeloButton.ghost(
         label: l10n.attendanceSaveCloseAction,

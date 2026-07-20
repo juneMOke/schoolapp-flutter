@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/attendances/presentation/bloc/discip
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_card.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 enum DisciplinaryCasesBodyStatus { loading, empty, error, success }
 
@@ -86,10 +87,12 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
       description: l10n.disciplinaryCasesEmptyDescription,
       secondaryAction: onCreateCase == null
           ? null
-          : OutlinedButton.icon(
-              onPressed: onCreateCase,
-              icon: const Icon(Icons.add_rounded, size: 16),
-              label: Text(l10n.disciplinaryCaseCreateAction),
+          : SessionWriteGate(
+              child: OutlinedButton.icon(
+                onPressed: onCreateCase,
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: Text(l10n.disciplinaryCaseCreateAction),
+              ),
             ),
       fullWidthCard: true,
       minHeight: 280,

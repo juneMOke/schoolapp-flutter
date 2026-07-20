@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class AddressFormContent extends StatelessWidget {
   final String? cityValue;
@@ -163,34 +164,36 @@ class AddressFormContent extends StatelessWidget {
           const SizedBox(height: 22),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: (isLoading || !canSave) ? null : onSave,
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.textOnDark,
-                      ),
-                    )
-                  : const Icon(Icons.save_outlined),
-              label: Text(isLoading ? l10n.savingAddress : l10n.saveAddress),
-              style: FilledButton.styleFrom(
-                backgroundColor: canSave ? AppColors.terreCuite : null,
-                foregroundColor: AppColors.textOnDark,
-                elevation: 0,
-                minimumSize: const Size(164, 44),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: AppRadius.brMd,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+            child: SessionWriteGate(
+              child: FilledButton.icon(
+                onPressed: (isLoading || !canSave) ? null : onSave,
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textOnDark,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(isLoading ? l10n.savingAddress : l10n.saveAddress),
+                style: FilledButton.styleFrom(
+                  backgroundColor: canSave ? AppColors.terreCuite : null,
+                  foregroundColor: AppColors.textOnDark,
+                  elevation: 0,
+                  minimumSize: const Size(164, 44),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: AppRadius.brMd,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

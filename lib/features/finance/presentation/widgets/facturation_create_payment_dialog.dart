@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Ouvre la modale d'encaissement (spec MODALE-12).
 ///
@@ -318,13 +319,19 @@ class _FacturationCreatePaymentDialogViewState
                   padding: const EdgeInsets.all(AppDimensions.spacingM),
                   child: SizedBox(
                     width: double.infinity,
-                    child: EteeloButton.primary(
-                      label: l10n.facturationCreatePaymentCollectAmountAction(
-                        _formatWithCurrency(total, currency),
+                    // Gel READ_ONLY (ADR-010) : le CTA d'entrée est gaté, mais
+                    // le tick de fraîcheur (5 min) peut basculer le mode
+                    // PENDANT que ce dialog est ouvert — le submit doit l'être
+                    // aussi (argent).
+                    child: SessionWriteGate(
+                      child: EteeloButton.primary(
+                        label: l10n.facturationCreatePaymentCollectAmountAction(
+                          _formatWithCurrency(total, currency),
+                        ),
+                        icon: Icons.account_balance_wallet_outlined,
+                        isLoading: isLoading,
+                        onPressed: canCollect ? () => _onCollect(l10n) : null,
                       ),
-                      icon: Icons.account_balance_wallet_outlined,
-                      isLoading: isLoading,
-                      onPressed: canCollect ? () => _onCollect(l10n) : null,
                     ),
                   ),
                 ),

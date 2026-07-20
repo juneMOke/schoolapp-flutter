@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/guar
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/guardian_info/parent_item.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class GuardianInfoStepBody extends StatelessWidget {
   final List<ParentSummary> parentDetails;
@@ -114,28 +115,30 @@ class GuardianInfoStepBody extends StatelessWidget {
             if (showInlineSaveButton)
               Padding(
                 padding: const EdgeInsets.only(top: 16),
-                child: FilledButton.icon(
-                  onPressed: canSave && !isLoading ? onSave : null,
-                  icon: isLoading
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textOnDark,
-                          ),
-                        )
-                      : const Icon(Icons.save_outlined, size: 18),
-                  label: Text(l10n.guardianSaveAction),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                    backgroundColor: AppColors.terreCuite,
-                    foregroundColor: AppColors.textOnDark,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: AppRadius.brMd,
+                child: SessionWriteGate(
+                  child: FilledButton.icon(
+                    onPressed: canSave && !isLoading ? onSave : null,
+                    icon: isLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.textOnDark,
+                            ),
+                          )
+                        : const Icon(Icons.save_outlined, size: 18),
+                    label: Text(l10n.guardianSaveAction),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                      backgroundColor: AppColors.terreCuite,
+                      foregroundColor: AppColors.textOnDark,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: AppRadius.brMd,
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
                   ),
                 ),
               ),

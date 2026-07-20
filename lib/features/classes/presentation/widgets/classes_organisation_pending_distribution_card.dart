@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// État « Niveau non réparti » (PARCOURS 3).
 ///
@@ -95,41 +96,44 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: (isDistributing || isLoadingOverview)
-                  ? null
-                  : onDistributionRequested,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.terreCuite,
-                foregroundColor: AppColors.blancCasse,
-                minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.spacingM,
-                ),
-                shape: const StadiumBorder(),
-              ),
-              // Bouton pleine largeur + libellé flexible : sur très petit écran
-              // le texte passe sur 2 lignes plutôt que de déborder.
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isDistributing)
-                    const SizedBox(
-                      width: AppDimensions.detailMiniIconSize,
-                      height: AppDimensions.detailMiniIconSize,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else
-                    const Icon(Icons.auto_awesome_outlined),
-                  const SizedBox(width: AppDimensions.spacingS),
-                  Flexible(
-                    child: Text(
-                      l10n.classesOrganisationDistributeByGenderAction,
-                      textAlign: TextAlign.center,
-                    ),
+            // Gel READ_ONLY (ADR-010) : la distribution affecte les élèves.
+            child: SessionWriteGate(
+              child: FilledButton(
+                onPressed: (isDistributing || isLoadingOverview)
+                    ? null
+                    : onDistributionRequested,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.terreCuite,
+                  foregroundColor: AppColors.blancCasse,
+                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.spacingM,
                   ),
-                ],
+                  shape: const StadiumBorder(),
+                ),
+                // Bouton pleine largeur + libellé flexible : sur très petit
+                // écran le texte passe sur 2 lignes plutôt que de déborder.
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isDistributing)
+                      const SizedBox(
+                        width: AppDimensions.detailMiniIconSize,
+                        height: AppDimensions.detailMiniIconSize,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      const Icon(Icons.auto_awesome_outlined),
+                    const SizedBox(width: AppDimensions.spacingS),
+                    Flexible(
+                      child: Text(
+                        l10n.classesOrganisationDistributeByGenderAction,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/offline/
 import 'package:school_app_flutter/features/attendances/presentation/helpers/disciplinary_status_ui.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_status_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Carte d'un cas disciplinaire (local) : liséré de gravité, en-tête (gravité,
 /// date, titre, catégorie, statut), contenu, chip de sanction, badge de
@@ -382,27 +383,30 @@ class _AdvanceAction extends StatelessWidget {
       );
     }
 
-    return Wrap(
-      spacing: AppDimensions.spacingS,
-      runSpacing: AppDimensions.spacingXS,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        PrimaryButton(
-          label: label,
-          icon: target.getIcon(),
-          fullWidth: false,
-          onPressed: onAdvance,
-        ),
-        if (status.canDismiss && onDismiss != null)
-          TextButton.icon(
-            onPressed: onDismiss,
-            icon: const Icon(Icons.block_rounded, size: 16),
-            label: Text(l10n.disciplinaryAdvanceDismiss),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-            ),
+    // Gel READ_ONLY (ADR-010) : avancer/classer un cas est une écriture métier.
+    return SessionWriteGate(
+      child: Wrap(
+        spacing: AppDimensions.spacingS,
+        runSpacing: AppDimensions.spacingXS,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          PrimaryButton(
+            label: label,
+            icon: target.getIcon(),
+            fullWidth: false,
+            onPressed: onAdvance,
           ),
-      ],
+          if (status.canDismiss && onDismiss != null)
+            TextButton.icon(
+              onPressed: onDismiss,
+              icon: const Icon(Icons.block_rounded, size: 16),
+              label: Text(l10n.disciplinaryAdvanceDismiss),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
