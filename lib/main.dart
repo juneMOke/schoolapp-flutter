@@ -97,9 +97,19 @@ class _MyAppState extends State<MyApp> {
               if (state.status == AuthStatus.authenticated) {
                 // Login OFFLINE (ADR-010 D-01/D-02) : pas de réseau → ne pas
                 // déclencher le bootstrap distant (il échouerait et bloquerait
-                // la navigation). On s'appuie sur le bootstrap local déjà chargé
-                // au démarrage.
-                if (state.isOffline) return;
+                // la navigation). Mais il faut RECHARGER le cache local : après
+                // un logout, BootstrapResetRequested a remis l'état à initial
+                // (bootstrap == null) et personne d'autre ne le repeuple →
+                // `blocksNavigation` resterait vrai → splash (spinner) infini.
+                // Le cache Hive, lui, survit au logout (piège #2 bootstrap).
+                if (state.isOffline) {
+                  _bootstrapBloc.add(
+                    const BootstrapLocalRequested(
+                      key: AppConstants.bootstrapPayloadKey,
+                    ),
+                  );
+                  return;
+                }
                 _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());
                 _bootstrapBloc.add(
                   const BootstrapRemotePreviousYearRequested(),
