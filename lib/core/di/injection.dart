@@ -56,6 +56,7 @@ import 'package:school_app_flutter/features/resultats/presentation/bloc/resultat
 import 'package:school_app_flutter/features/resultats/presentation/bloc/resultats_classe_bloc.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/create_session_usecase.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/create_time_slot_usecase.dart';
@@ -1029,11 +1030,18 @@ Future<void> configureDependencies({
     () => ScheduleRemoteDataSource(getIt<Dio>()),
   );
 
-  getIt.registerLazySingleton<ScheduleRepository>(
+  // Online concret (conservé pour la délégation grille/écritures admin par
+  // l'impl offline).
+  getIt.registerLazySingleton<ScheduleRepositoryImpl>(
     () => ScheduleRepositoryImpl(
       remoteDataSource: getIt<ScheduleRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
+  );
+  // OFFLINE-FIRST (NF-7b b) : getMyTimetable composé en LOCAL ; grille admin +
+  // écritures encore online. Impl offline dans registerAcademicsOffline.
+  getIt.registerLazySingleton<ScheduleRepository>(
+    () => getIt<ScheduleOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetMyTimetableUseCase>(

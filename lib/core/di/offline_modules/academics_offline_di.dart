@@ -32,6 +32,8 @@ import 'package:school_app_flutter/features/classes/data/datasources/offline/cla
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
 
 /// Registrar de la branche offline **Notes / Cours** (academics + schedule,
@@ -110,6 +112,15 @@ void registerAcademicsOffline(GetIt getIt) {
     () => NotesOfflineRepositoryImpl(
       localDataSource: getIt<AcademicsLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  // Impl offline-first de ScheduleRepository (getMyTimetable local ; grille +
+  // écritures admin déléguées à l'online concret). Rebindée dans injection.dart.
+  getIt.registerLazySingleton<ScheduleOfflineRepositoryImpl>(
+    () => ScheduleOfflineRepositoryImpl(
+      online: getIt<ScheduleRepositoryImpl>(),
+      refLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
