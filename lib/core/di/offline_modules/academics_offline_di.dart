@@ -129,8 +129,11 @@ void registerAcademicsOffline(GetIt getIt) {
   getIt.registerLazySingleton<CourseOfflineRepositoryImpl>(
     () => CourseOfflineRepositoryImpl(
       online: getIt<CourseRepositoryImpl>(),
+      academicsLocalDataSource: getIt<AcademicsLocalDataSource>(),
+      academicsRefLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
       scheduleRefLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
+      evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );

@@ -31,6 +31,33 @@ class AcademicsLocalDataSource {
     return EvaluationRow.fromMap(rows.first);
   }
 
+  /// Évaluations d'un cours (composition du détail cours), triées par date.
+  Future<List<EvaluationRow>> getEvaluationsForCours(String coursId) async {
+    final rows = await _db.query(
+      evaluationTable,
+      where: 'cours_id = ?',
+      whereArgs: [coursId],
+      orderBy: 'eval_date ASC',
+    );
+    return rows.map(EvaluationRow.fromMap).toList(growable: false);
+  }
+
+  /// Nombre de notes SAISIES par évaluation (statut NOTEE) pour une liste
+  /// d'évaluations — alimente le taux de saisie du détail. Absent = 0.
+  Future<Map<String, int>> notedCountByEvaluation(
+    List<String> evaluationIds,
+  ) async {
+    if (evaluationIds.isEmpty) return const {};
+    final placeholders = List.filled(evaluationIds.length, '?').join(',');
+    final rows = await _db.rawQuery(
+      'SELECT evaluation_id AS eid, COUNT(*) AS n FROM $noteTable '
+      "WHERE evaluation_id IN ($placeholders) AND statut = 'NOTEE' "
+      'GROUP BY evaluation_id',
+      evaluationIds,
+    );
+    return {for (final r in rows) r['eid'] as String: (r['n'] as num).toInt()};
+  }
+
   /// Toutes les notes d'une évaluation (clé de résolution de la grille de
   /// saisie), triées par élève pour un affichage stable.
   Future<List<NoteEvaluationRow>> getNotesForEvaluation(
