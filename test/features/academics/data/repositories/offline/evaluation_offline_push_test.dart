@@ -69,6 +69,7 @@ void main() {
       syncApi: syncApi,
       localDataSource: local,
       requiredAuth: auth,
+      currentUser: currentUser,
       now: () => 9000,
     );
   });

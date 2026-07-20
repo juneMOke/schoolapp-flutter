@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 
@@ -26,6 +29,9 @@ class _ScheduleFeatureScopeState extends State<ScheduleFeatureScope> {
     super.initState();
     _timetableBloc = GetIt.instance<TimetableBloc>();
     _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
+    // Hydratation best-effort des caches emploi du temps / cours (le
+    // PullCoordinator ne se déclenche qu'au retour online).
+    unawaited(GetIt.instance<SyncAcademicsPullsUseCase>()());
   }
 
   @override

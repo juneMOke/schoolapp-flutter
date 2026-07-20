@@ -44,6 +44,9 @@ class AcademicsLocalDataSource {
 
   /// Nombre de notes SAISIES par évaluation (statut NOTEE) pour une liste
   /// d'évaluations — alimente le taux de saisie du détail. Absent = 0.
+  /// Les notes `SYNC_ERROR` (rejetées terminalement par le serveur) sont
+  /// EXCLUES : elles ne doivent pas gonfler le taux et faire croire « saisie
+  /// complète » alors que le serveur les a refusées.
   Future<Map<String, int>> notedCountByEvaluation(
     List<String> evaluationIds,
   ) async {
@@ -52,6 +55,7 @@ class AcademicsLocalDataSource {
     final rows = await _db.rawQuery(
       'SELECT evaluation_id AS eid, COUNT(*) AS n FROM $noteTable '
       "WHERE evaluation_id IN ($placeholders) AND statut = 'NOTEE' "
+      "AND sync_status != '${SyncState.syncError.dbValue}' "
       'GROUP BY evaluation_id',
       evaluationIds,
     );
@@ -268,11 +272,14 @@ class AcademicsLocalDataSource {
   // ── Application du pull métier (skip PENDING_SYNC : jamais de clobber) ───────
 
   /// Applique un lot d'évaluations pullées (régime A). Money-grade : une
-  /// évaluation locale non synchronisée (`PENDING_SYNC`/`SYNC_ERROR` — créée
-  /// offline, pas encore acquittée) est **plus récente** que ce que porte le
-  /// serveur → **sautée** (elle sera poussée puis réalignée par uuid). Une
-  /// évaluation absente est matérialisée SYNCED ; une déjà SYNCED est rafraîchie
-  /// (le fait est immuable : REPLACE sans risque). Renvoie le nombre appliqué.
+  /// évaluation locale `PENDING_SYNC` (créée offline, pas encore poussée) est
+  /// **sautée** (elle sera poussée puis réalignée par uuid). Une ligne
+  /// `SYNC_ERROR` (rejetée TERMINALEMENT par le serveur) est en revanche
+  /// **réconciliée** : la vérité serveur remplace un état que le serveur a
+  /// refusé — sinon la ligne rejetée survivrait à jamais comme si elle était
+  /// valide. Une évaluation absente est matérialisée SYNCED ; une déjà SYNCED
+  /// est rafraîchie (fait immuable : REPLACE sans risque). Renvoie le nombre
+  /// appliqué.
   Future<int> applyPulledEvaluations(List<EvaluationRow> rows) async {
     var applied = 0;
     await applyInBatches<EvaluationRow>(
@@ -288,8 +295,8 @@ class AcademicsLocalDataSource {
             limit: 1,
           );
           if (existing.isNotEmpty &&
-              existing.first['sync_status'] != SyncState.synced.dbValue) {
-            continue; // écriture locale non synchronisée = gagnante.
+              existing.first['sync_status'] == SyncState.pendingSync.dbValue) {
+            continue; // écriture locale en attente de push = gagnante.
           }
           await txn.insert(
             evaluationTable,
@@ -304,9 +311,12 @@ class AcademicsLocalDataSource {
   }
 
   /// Applique un lot de notes pullées (régime C, clé naturelle). Même garde :
-  /// une note locale non synchronisée est **sautée** (jamais clobber). Une note
-  /// absente est insérée SYNCED (id serveur) ; une déjà SYNCED est rafraîchie
-  /// **en conservant l'id de transport local** (jamais de réécriture de PK).
+  /// une note locale `PENDING_SYNC` est **sautée** (jamais clobber d'une
+  /// écriture en attente de push) ; une `SYNC_ERROR` (rejet terminal) est
+  /// **réconciliée** par la vérité serveur (arbitrage période close, etc.).
+  /// Une note absente est insérée SYNCED (id serveur) ; une existante est
+  /// rafraîchie **en conservant l'id de transport local** (pas de réécriture
+  /// de PK).
   Future<int> applyPulledNotes(List<NoteEvaluationRow> rows) async {
     var applied = 0;
     await applyInBatches<NoteEvaluationRow>(
@@ -332,8 +342,8 @@ class AcademicsLocalDataSource {
             applied++;
             continue;
           }
-          if (existing.first['sync_status'] != SyncState.synced.dbValue) {
-            continue; // écriture locale non synchronisée = gagnante.
+          if (existing.first['sync_status'] == SyncState.pendingSync.dbValue) {
+            continue; // écriture locale en attente de push = gagnante.
           }
           await txn.update(
             noteTable,

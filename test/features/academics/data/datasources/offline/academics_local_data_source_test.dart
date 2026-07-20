@@ -191,6 +191,33 @@ void main() {
     });
   });
 
+  group('notedCountByEvaluation', () {
+    test(
+      'exclut les notes SYNC_ERROR (rejetées serveur) du taux de saisie',
+      () async {
+        for (final n in [
+          ('n1', 's1', 'SYNCED'),
+          ('n2', 's2', 'PENDING_SYNC'),
+          ('n3', 's3', 'SYNC_ERROR'), // rejetée → ne compte pas
+        ]) {
+          await db.insert('note_evaluation', {
+            'id': n.$1,
+            'evaluation_id': 'ev-1',
+            'student_id': n.$2,
+            'points_obtenus': 10.0,
+            'statut': 'NOTEE',
+            'updated_at': 1,
+            'sync_status': n.$3,
+          });
+        }
+
+        final counts = await local.notedCountByEvaluation(['ev-1']);
+
+        expect(counts['ev-1'], 2, reason: 'SYNC_ERROR exclue du compte');
+      },
+    );
+  });
+
   group('réalignement post-ACK', () {
     test('markEvaluationSynced passe SYNCED sous garde updated_at', () async {
       await local.createEvaluationWithOutbox(

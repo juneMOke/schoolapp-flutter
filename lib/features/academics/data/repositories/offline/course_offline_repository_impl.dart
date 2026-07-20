@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart' hide Evaluation;
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
@@ -47,6 +49,8 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   final ClassroomLocalDataSource _classroomLocal;
   final EvaluationOfflineRepositoryImpl _evaluationRepo;
   final CurrentUserContext? _currentUser;
+  final BootstrapLocalRepository? _bootstrapRepository;
+  final String _bootstrapKey;
 
   const CourseOfflineRepositoryImpl({
     required CourseRepository online,
@@ -56,13 +60,17 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     required ClassroomLocalDataSource classroomLocalDataSource,
     required EvaluationOfflineRepositoryImpl evaluationRepository,
     CurrentUserContext? currentUser,
+    BootstrapLocalRepository? bootstrapRepository,
+    String bootstrapKey = AppConstants.bootstrapPayloadKey,
   }) : _online = online,
        _academicsLocal = academicsLocalDataSource,
        _academicsRefLocal = academicsRefLocalDataSource,
        _scheduleRefLocal = scheduleRefLocalDataSource,
        _classroomLocal = classroomLocalDataSource,
        _evaluationRepo = evaluationRepository,
-       _currentUser = currentUser;
+       _currentUser = currentUser,
+       _bootstrapRepository = bootstrapRepository,
+       _bootstrapKey = bootstrapKey;
 
   // ── Mes cours (composé depuis l'emploi du temps) ────────────────────────────
 
@@ -71,9 +79,19 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     try {
       final uid = _currentUser?.uid;
       final sessions = await _scheduleRefLocal.getAllSessions();
+      // Scope ANNÉE COURANTE (bootstrap local) : après un rollover, les séances
+      // d'années révolues accumulées en base ne doivent pas réapparaître dans
+      // « Mes cours ». Année irrésolvable → repli sans filtre (premier
+      // démarrage, bootstrap pas encore chargé).
+      final academicYearId = await _resolveCurrentYear();
       final mine = uid == null
           ? const <RefRecurringSessionRow>[]
-          : sessions.where((s) => s.teacherId == uid);
+          : sessions.where(
+              (s) =>
+                  s.teacherId == uid &&
+                  (academicYearId == null ||
+                      s.academicYearId == academicYearId),
+            );
 
       final byClassroom = <String, Map<String, String>>{};
       final classroomLabel = <String, String>{};
@@ -282,8 +300,22 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     return StatutSaisieEvaluation.enAttente;
   }
 
-  /// Nom dérivé (les évaluations locales ne portent pas de libellé serveur) :
-  /// type + date `jj/MM`. Dégradé hors ligne, remplacé au pull par le nom serveur.
+  /// Résout l'année scolaire courante depuis le bootstrap local ; null si le
+  /// bootstrap n'est pas disponible (jamais d'erreur).
+  Future<String?> _resolveCurrentYear() async {
+    final repo = _bootstrapRepository;
+    if (repo == null) return null;
+    try {
+      final bootstrap = await repo.getStoredBootstrap(_bootstrapKey);
+      final id = bootstrap.fold((_) => null, (b) => b.academicYear.id);
+      return (id == null || id.isEmpty) ? null : id;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Nom dérivé (la table locale `evaluation` ne stocke aucun libellé — le nom
+  /// est TOUJOURS dérivé, avant comme après pull) : type + date `jj/MM`.
   String _derivedNom(EvaluationRow row) {
     final d = DateTime.fromMillisecondsSinceEpoch(row.evalDate, isUtc: true);
     final jj = d.day.toString().padLeft(2, '0');

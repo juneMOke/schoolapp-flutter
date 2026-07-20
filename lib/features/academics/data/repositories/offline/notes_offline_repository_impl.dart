@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
@@ -35,16 +37,19 @@ class NotesOfflineRepositoryImpl {
   final AcademicsLocalDataSource _local;
   final IdGenerator _idGenerator;
   final CurrentUserContext? _currentUser;
+  final SyncEngine? _syncEngine;
   final Clock _now;
 
   const NotesOfflineRepositoryImpl({
     required AcademicsLocalDataSource localDataSource,
     required IdGenerator idGenerator,
     CurrentUserContext? currentUser,
+    SyncEngine? syncEngine,
     Clock now = systemClock,
   }) : _local = localDataSource,
        _idGenerator = idGenerator,
        _currentUser = currentUser,
+       _syncEngine = syncEngine,
        _now = now;
 
   /// Id d'outbox déterministe **unique par évaluation** (coalescing du lot).
@@ -90,6 +95,11 @@ class NotesOfflineRepositoryImpl {
           createdAt: nowMs,
         ),
       );
+      // Flush opportuniste : si connecté, le lot part tout de suite ; sinon
+      // l'outbox le rejouera au retour online. Sans lui, une saisie faite EN
+      // LIGNE attendrait un déclencheur fortuit (reconnexion) pour partir.
+      final engine = _syncEngine;
+      if (engine != null) unawaited(engine.flush());
       return Right(pending);
     } catch (e) {
       return Left(StorageFailure(e.toString()));

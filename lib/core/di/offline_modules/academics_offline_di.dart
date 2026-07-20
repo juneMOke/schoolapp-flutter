@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
@@ -106,6 +107,7 @@ void registerAcademicsOffline(GetIt getIt) {
       localDataSource: getIt<AcademicsLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
   getIt.registerLazySingleton<NotesOfflineRepositoryImpl>(
@@ -113,6 +115,7 @@ void registerAcademicsOffline(GetIt getIt) {
       localDataSource: getIt<AcademicsLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
   // Impl offline-first de ScheduleRepository (getMyTimetable local ; grille +
@@ -135,6 +138,7 @@ void registerAcademicsOffline(GetIt getIt) {
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
       currentUser: getIt<CurrentUserContext>(),
+      bootstrapRepository: getIt<BootstrapLocalRepository>(),
     ),
   );
   // Impl offline-first de NotationRepository (lecture composée notes+roster,
@@ -158,12 +162,27 @@ void registerAcademicsOffline(GetIt getIt) {
     ),
   );
 
+  // ── UseCases ──
+  // Hydratation au montage des scopes academics/schedule (le PullCoordinator ne
+  // se déclenche qu'au retour online — une tablette démarrée connectée ne
+  // tirerait jamais sans lui).
+  getIt.registerFactory<SyncAcademicsPullsUseCase>(
+    () => SyncAcademicsPullsUseCase(
+      schedulePullRepository: getIt<SchedulePullRepositoryImpl>(),
+      coursPullRepository: getIt<AcademicsCoursPullRepositoryImpl>(),
+      metierPullRepository: getIt<AcademicsMetierPullRepositoryImpl>(),
+      notationRefPullRepository: getIt<NotationRefPullRepositoryImpl>(),
+      bootstrapRepository: getIt<BootstrapLocalRepository>(),
+    ),
+  );
+
   // ── Handlers d'outbox (push, routés par aggregateType) ──
   getIt<SyncEngine>().registerHandler(
     EvaluationOutboxHandler(
       syncApi: getIt<AcademicsEvaluationSyncApi>(),
       localDataSource: getIt<AcademicsLocalDataSource>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt<SyncEngine>().registerHandler(
@@ -171,6 +190,7 @@ void registerAcademicsOffline(GetIt getIt) {
       syncApi: getIt<AcademicsNotesSyncApi>(),
       localDataSource: getIt<AcademicsLocalDataSource>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 

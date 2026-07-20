@@ -116,6 +116,42 @@ void main() {
     );
   });
 
+  group('applyPulledNotes : réconciliation SYNC_ERROR', () {
+    test('une note locale SYNC_ERROR (rejet terminal) est RÉCONCILIÉE par la '
+        'vérité serveur', () async {
+      // Note rejetée terminalement (ex. période close) : le serveur a refusé,
+      // sa version arbitrée doit remplacer la ligne locale — sinon la note
+      // rejetée survivrait à jamais comme si elle était valide.
+      await db.insert('note_evaluation', {
+        'id': 'n-local',
+        'evaluation_id': 'ev-1',
+        'student_id': 's1',
+        'points_obtenus': 18.0,
+        'statut': 'NOTEE',
+        'updated_at': 2000,
+        'sync_status': 'SYNC_ERROR',
+      });
+
+      final n = await local.applyPulledNotes([
+        const NoteEvaluationRow(
+          id: 'n-server',
+          evaluationId: 'ev-1',
+          studentId: 's1',
+          pointsObtenus: 12,
+          statut: 'NOTEE',
+          updatedAt: 9000,
+          syncStatus: 'SYNCED',
+        ),
+      ]);
+
+      expect(n, 1);
+      final row = (await local.getNotesForEvaluation('ev-1')).single;
+      expect(row.syncState, SyncState.synced, reason: 'réconciliée');
+      expect(row.pointsObtenus, 12, reason: 'vérité serveur');
+      expect(row.id, 'n-local', reason: 'PK de transport conservée');
+    });
+  });
+
   group('applyPulledNotes : skip PENDING (jamais de clobber)', () {
     test('saute une note locale PENDING sur la clé naturelle', () async {
       await local.upsertNotesWithOutbox(

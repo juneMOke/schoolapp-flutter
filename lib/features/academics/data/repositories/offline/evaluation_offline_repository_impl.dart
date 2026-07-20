@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_input_model.dart';
@@ -22,16 +24,19 @@ class EvaluationOfflineRepositoryImpl {
   final AcademicsLocalDataSource _local;
   final IdGenerator _idGenerator;
   final CurrentUserContext? _currentUser;
+  final SyncEngine? _syncEngine;
   final Clock _now;
 
   const EvaluationOfflineRepositoryImpl({
     required AcademicsLocalDataSource localDataSource,
     required IdGenerator idGenerator,
     CurrentUserContext? currentUser,
+    SyncEngine? syncEngine,
     Clock now = systemClock,
   }) : _local = localDataSource,
        _idGenerator = idGenerator,
        _currentUser = currentUser,
+       _syncEngine = syncEngine,
        _now = now;
 
   /// Id d'outbox déterministe **unique par évaluation** (idempotence du push).
@@ -85,6 +90,9 @@ class EvaluationOfflineRepositoryImpl {
       );
 
       await _local.createEvaluationWithOutbox(row: row, outboxEntry: entry);
+      // Flush opportuniste : si connecté, l'évaluation part tout de suite.
+      final engine = _syncEngine;
+      if (engine != null) unawaited(engine.flush());
       return Right(row);
     } catch (e) {
       return Left(StorageFailure(e.toString()));

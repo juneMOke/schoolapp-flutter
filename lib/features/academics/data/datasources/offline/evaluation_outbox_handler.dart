@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -25,12 +26,14 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
   final AcademicsEvaluationSyncApi syncApi;
   final AcademicsLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
+  final CurrentUserContext? currentUser;
   final Clock now;
 
   const EvaluationOutboxHandler({
     required this.syncApi,
     required this.localDataSource,
     required this.requiredAuth,
+    this.currentUser,
     this.now = systemClock,
   });
 
@@ -44,6 +47,15 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
       request = EvaluationPushRequestModel.fromJsonString(entry.payload);
     } catch (_) {
       return const OutboxDispatchResult.failed('Invalid evaluation payload');
+    }
+
+    // Garde d'ATTRIBUTION (tablette partagée) : une évaluation créée par un
+    // AUTRE utilisateur ne part pas sous ce JWT (403 terminal sinon) —
+    // `blocked`, repartira à la reconnexion de l'auteur.
+    if (request.authorId != null && request.authorId != currentUser?.uid) {
+      return const OutboxDispatchResult.blocked(
+        'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
+      );
     }
 
     try {

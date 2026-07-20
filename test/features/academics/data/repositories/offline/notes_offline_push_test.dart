@@ -56,6 +56,7 @@ void main() {
       syncApi: syncApi,
       localDataSource: local,
       requiredAuth: auth,
+      currentUser: CurrentUserContext()..set('teacher-uid'),
       now: () => 9000,
     );
   });
@@ -111,6 +112,32 @@ void main() {
       expect(payload.evaluationId, 'ev-1');
       expect(payload.notes.single.studentId, 's1');
     });
+  });
+
+  group('garde d\'attribution (tablette partagée)', () {
+    test(
+      'entrée d\'un AUTRE utilisateur → blocked (jamais 403 terminal)',
+      () async {
+        await insertEval('SYNCED');
+        final entry = await saveSample(); // authorId = teacher-uid
+        final handlerAsOther = NotesBatchOutboxHandler(
+          syncApi: syncApi,
+          localDataSource: local,
+          requiredAuth: auth,
+          currentUser: CurrentUserContext()..set('autre-uid'),
+          now: () => 9000,
+        );
+
+        final result = await handlerAsOther.dispatch(entry);
+
+        expect(
+          result.outcome,
+          OutboxDispatchOutcome.blocked,
+          reason: 'attend la reconnexion de l\'auteur, ne brûle pas la saisie',
+        );
+        verifyNever(() => syncApi.submitNotes(any(), any()));
+      },
+    );
   });
 
   group('garde de dépendance ÉVALUATION→NOTE', () {

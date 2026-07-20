@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -32,12 +33,14 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
   final AcademicsNotesSyncApi syncApi;
   final AcademicsLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
+  final CurrentUserContext? currentUser;
   final Clock now;
 
   const NotesBatchOutboxHandler({
     required this.syncApi,
     required this.localDataSource,
     required this.requiredAuth,
+    this.currentUser,
     this.now = systemClock,
   });
 
@@ -51,6 +54,18 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
       request = NotesBatchPushRequestModel.fromJsonString(entry.payload);
     } catch (_) {
       return const OutboxDispatchResult.failed('Invalid notes payload');
+    }
+
+    // Garde d'ATTRIBUTION (tablette partagée) : une entrée saisie par un AUTRE
+    // utilisateur (authorId ≠ uid courant) ne doit PAS partir sous ce JWT — le
+    // serveur (SyncAttributionGuard) la rejetterait en 403 TERMINAL et la
+    // saisie serait brûlée. `blocked` = attente propre, auto-cicatrisante à la
+    // reconnexion de l'auteur.
+    final uid = currentUser?.uid;
+    if (request.authorId != null && request.authorId != uid) {
+      return const OutboxDispatchResult.blocked(
+        'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
+      );
     }
 
     // Toute erreur DB (gate, réconciliation) → retry : le contrat
