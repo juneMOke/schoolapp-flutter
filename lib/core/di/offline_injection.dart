@@ -85,6 +85,9 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       pullCoordinator: getIt<PullCoordinator>(),
       // Guardian de révocation (ADR-010 D-11) : évalué APRÈS le flush.
       revocationEvaluator: getIt<AuthSessionManager>(),
+      // Sonde de crédentiels (V1.1) : sans jetons utilisables, la boucle ne
+      // flushe pas (zéro 401/attempt) et surface « Reconnexion requise ».
+      credentialsProbe: getIt<AuthSessionManager>(),
     ),
   );
 }

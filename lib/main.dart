@@ -108,12 +108,20 @@ class _MyAppState extends State<MyApp> {
                       key: AppConstants.bootstrapPayloadKey,
                     ),
                   );
+                  // Recalcule la pastille : consigne déconsignée → cycle normal
+                  // au prochain retour réseau ; sans jetons → « Reconnexion
+                  // requise » si des écritures attendent (V1.1).
+                  _syncStatusCubit.refresh();
                   return;
                 }
                 _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());
                 _bootstrapBloc.add(
                   const BootstrapRemotePreviousYearRequested(),
                 );
+                // Jetons frais : dissipe une éventuelle pastille « Reconnexion
+                // requise » et pousse immédiatement l'outbox en attente (le
+                // travail saisi offline part sous le JWT de son auteur, D-05).
+                _syncStatusCubit.notifyLocalWrite();
                 return;
               }
 

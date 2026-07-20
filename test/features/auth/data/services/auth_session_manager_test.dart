@@ -65,6 +65,16 @@ void main() {
     tokenStorage = MockTokenStorageService();
     when(() => tokenStorage.clearAuthSession()).thenAnswer((_) async {});
     when(() => tokenStorage.readAuthSession()).thenAnswer((_) async => null);
+    when(() => tokenStorage.readRefreshToken()).thenAnswer((_) async => null);
+    when(() => tokenStorage.readParkedRefresh()).thenAnswer((_) async => null);
+    when(
+      () => tokenStorage.parkRefreshToken(
+        uid: any(named: 'uid'),
+        refreshToken: any(named: 'refreshToken'),
+      ),
+    ).thenAnswer((_) async {});
+    when(() => tokenStorage.clearParkedRefresh()).thenAnswer((_) async {});
+    when(() => tokenStorage.saveAuthSession(any())).thenAnswer((_) async {});
   });
 
   tearDown(() => db.close());
@@ -240,6 +250,168 @@ void main() {
       verify(() => tokenStorage.clearAuthSession()).called(1);
     },
   );
+
+  group('consigne du refresh token (V1.1)', () {
+    test('le logout consigne le refresh sous l\'uid de session', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      when(
+        () => tokenStorage.readRefreshToken(),
+      ).thenAnswer((_) async => 'refresh-A');
+
+      await manager.wipeSession(); // logout ordinaire
+
+      verify(
+        () =>
+            tokenStorage.parkRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+      ).called(1);
+      verify(() => tokenStorage.clearAuthSession()).called(1);
+    });
+
+    test('login offline du même compte déconsigne : snapshot complet réécrit '
+        '(profil + refresh) → resync silencieuse possible', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      await manager.wipeSession(); // logout
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+      );
+
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasse123',
+      );
+
+      expect(res.isRight(), isTrue);
+      res.fold((_) {}, (snap) {
+        expect(snap.session.refreshToken, 'refresh-A');
+        expect(snap.session.accessToken, isEmpty);
+        expect(snap.session.user.id, 'u1');
+      });
+      final saved =
+          verify(
+                () => tokenStorage.saveAuthSession(captureAny()),
+              ).captured.single
+              as AuthSession;
+      expect(saved.refreshToken, 'refresh-A');
+      expect(saved.user.id, 'u1'); // estampille authUid restaurée
+      verify(() => tokenStorage.clearParkedRefresh()).called(1);
+    });
+
+    test('la consigne d\'un AUTRE compte n\'est pas déconsignée', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      await manager.wipeSession();
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'uB', refreshToken: 'refresh-B'),
+      );
+
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasse123',
+      );
+
+      expect(res.isRight(), isTrue);
+      res.fold((_) {}, (snap) => expect(snap.session.refreshToken, isNull));
+      verifyNever(() => tokenStorage.saveAuthSession(any()));
+      // Elle attend son propriétaire : jamais détruite par le login d'un autre.
+      verifyNever(() => tokenStorage.clearParkedRefresh());
+    });
+
+    test('la révocation (D-09) brûle la consigne du compte', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', userVersion: 1, refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+      );
+      await manager.recordServerContact(
+        observedUserVersion: 2,
+        serverTimeMs: clock,
+        observedUid: 'u1',
+      );
+
+      expect(await manager.evaluateRevocation(), isTrue);
+      verify(() => tokenStorage.clearParkedRefresh()).called(1);
+    });
+
+    test(
+      'identité croisée : les jetons actifs de B sont consignés sous SON uid',
+      () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(uid: 'uA', refreshExpiresAt: clock + 1000000),
+          'MotDePasseA',
+        );
+        // Jetons résiduels de B dans le token store.
+        when(() => tokenStorage.readAuthSession()).thenAnswer(
+          (_) async => _session(uid: 'uB', refreshExpiresAt: clock + 1000000),
+        );
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasseA',
+        );
+
+        expect(res.isRight(), isTrue);
+        verify(
+          () =>
+              tokenStorage.parkRefreshToken(uid: 'uB', refreshToken: 'refresh'),
+        ).called(1);
+        verify(() => tokenStorage.clearAuthSession()).called(1);
+      },
+    );
+
+    test('un login online purge SA propre consigne (jetons frais)', () async {
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-old'),
+      );
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      verify(() => tokenStorage.clearParkedRefresh()).called(1);
+    });
+  });
+
+  group('canAuthenticate (sonde de la boucle de synchro, V1.1)', () {
+    test('sans access ni refresh → false', () async {
+      expect(await build().canAuthenticate(), isFalse);
+    });
+
+    test(
+      'refresh actif présent → true (le refresh mintera un access)',
+      () async {
+        when(
+          () => tokenStorage.readRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-A');
+        expect(await build().canAuthenticate(), isTrue);
+      },
+    );
+
+    test('access non vide → true', () async {
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => _session(uid: 'u1'));
+      expect(await build().canAuthenticate(), isTrue);
+    });
+  });
 
   test('applyRefresh ré-ancre la borne offline par utilisateur (m4)', () async {
     final manager = build();

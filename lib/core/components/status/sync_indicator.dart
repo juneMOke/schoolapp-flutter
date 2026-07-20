@@ -4,7 +4,19 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// État de synchronisation globale de l'application.
-enum SyncStatus { synced, syncing, offline, pendingUpload, syncConflict }
+///
+/// [authRequired] (V1.1) : le réseau est là mais la session ne peut pas
+/// authentifier ses appels (session ouverte offline sans jetons ni consigne) —
+/// la boucle ne flushe PAS (zéro 401, zéro tentative consommée) tant qu'un
+/// login online n'a pas eu lieu.
+enum SyncStatus {
+  synced,
+  syncing,
+  offline,
+  pendingUpload,
+  syncConflict,
+  authRequired,
+}
 
 /// Pastille de synchronisation pour l'AppBar.
 ///
@@ -87,6 +99,11 @@ class SyncIndicator extends StatelessWidget {
         icon: Icons.sync_problem,
         label: l10n.statusSyncConflict,
         color: AppColors.error,
+      ),
+      SyncStatus.authRequired => _SyncAppearance(
+        icon: Icons.lock_person_outlined,
+        label: l10n.statusAuthRequired,
+        color: AppColors.warning,
       ),
     };
   }

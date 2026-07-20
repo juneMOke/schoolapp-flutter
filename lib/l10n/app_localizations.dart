@@ -6936,6 +6936,12 @@ abstract class AppLocalizations {
   /// **'Conflict'**
   String get statusSyncConflict;
 
+  /// Sync pill: network is back but the session has no tokens (offline login) — an online sign-in is required to synchronize
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get statusAuthRequired;
+
   /// No description provided for @offlineQueuedGeneric.
   ///
   /// In en, this message translates to:

@@ -97,6 +97,13 @@ class AppConstants {
   static const String expiresInKey = 'expires_in';
   // ADR-010 — secrets de session offline (jamais en base : survivent au wipe).
   static const String refreshTokenKey = 'refresh_token';
+  // Consigne du refresh token (V1.1) : au logout ORDINAIRE, le refresh token
+  // n'est pas détruit mais consigné avec l'uid de son propriétaire ; il n'est
+  // ressorti QUE par un login offline du même compte (preuve par mot de passe,
+  // vérificateur Argon2id) → resynchronisation silencieuse au retour réseau.
+  // Slot unique (dernier consigné gagne) ; brûlé sur révocation du compte.
+  static const String parkedRefreshTokenKey = 'parked_refresh_token';
+  static const String parkedRefreshUidKey = 'parked_refresh_uid';
   static const String accessExpiresAtKey = 'access_expires_at';
   static const String refreshExpiresAtKey = 'refresh_expires_at';
   static const String userIdKey = 'user_id';

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 /// Cubit global d'état de synchronisation : source de vérité de la
@@ -37,6 +38,7 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
   final SyncEngine _syncEngine;
   final PullCoordinator? _pullCoordinator;
   final RevocationEvaluator? _revocationEvaluator;
+  final SessionCredentialsProbe? _credentialsProbe;
 
   StreamSubscription<bool>? _connectivitySub;
 
@@ -46,11 +48,13 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     required SyncEngine syncEngine,
     PullCoordinator? pullCoordinator,
     RevocationEvaluator? revocationEvaluator,
+    SessionCredentialsProbe? credentialsProbe,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
        _pullCoordinator = pullCoordinator,
        _revocationEvaluator = revocationEvaluator,
+       _credentialsProbe = credentialsProbe,
        super(SyncStatus.synced) {
     _listenConnectivity();
     unawaited(refresh());
@@ -88,6 +92,16 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
   /// Le pull est silencieux (304 fréquent) et **n'altère pas** l'état de synchro,
   /// qui ne reflète que la file de push.
   Future<void> _syncOnReconnect() async {
+    // Gate crédentiels (V1.1) : une session ouverte OFFLINE peut être sans
+    // jetons (logout sans consigne, purge d'identité croisée, consigne brûlée).
+    // Flusher quand même = 401 systématique sur CHAQUE entrée → `attempts++`
+    // jusqu'au poison SYNC_ERROR, sans qu'aucune écriture n'ait pu partir.
+    // On ne tente donc RIEN (ni flush, ni pull — tous deux authentifiés) et
+    // `refresh()` surfacera « Reconnexion requise » à la place.
+    if (!await _canAuthenticate()) {
+      await refresh();
+      return;
+    }
     _safeEmit(SyncStatus.syncing);
     try {
       await _syncEngine.flush();
@@ -126,9 +140,27 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
         return;
       }
       final pending = await _outbox.pendingCount();
+      // Des écritures attendent mais la session ne peut pas s'authentifier :
+      // « À envoyer » serait un mensonge (rien ne partira) — surfacer la
+      // vraie condition de déblocage : un login online.
+      if (pending > 0 && !await _canAuthenticate()) {
+        _safeEmit(SyncStatus.authRequired);
+        return;
+      }
       _safeEmit(pending > 0 ? SyncStatus.pendingUpload : SyncStatus.synced);
     } catch (_) {
       // Base/plugin indisponible : on n'écrase pas le dernier état connu.
+    }
+  }
+
+  /// Sans sonde branchée (tests, plateformes partielles) : pas de gate.
+  Future<bool> _canAuthenticate() async {
+    final probe = _credentialsProbe;
+    if (probe == null) return true;
+    try {
+      return await probe.canAuthenticate();
+    } catch (_) {
+      return true; // sonde défaillante : ne pas bloquer la synchro
     }
   }
 
@@ -140,6 +172,12 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
   }
 
   Future<void> _flushAndRefresh() async {
+    // Même gate que le reconnect : sans crédentiels, le push opportuniste
+    // post-écriture ne ferait que consommer des tentatives en 401.
+    if (!await _canAuthenticate()) {
+      await refresh();
+      return;
+    }
     _safeEmit(SyncStatus.syncing);
     try {
       await _syncEngine.flush();

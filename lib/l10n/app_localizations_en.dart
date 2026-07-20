@@ -4045,6 +4045,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSyncConflict => 'Conflict';
 
   @override
+  String get statusAuthRequired => 'Sign-in required';
+
+  @override
   String get offlineQueuedGeneric => 'Saved — pending synchronization';
 
   @override

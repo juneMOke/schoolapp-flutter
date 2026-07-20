@@ -85,6 +85,40 @@ class TokenStorageService {
   Future<String?> readRefreshToken() =>
       _storage.read(key: AppConstants.refreshTokenKey);
 
+  // ── Consigne du refresh token (V1.1) ────────────────────────────────────────
+  // Slot UNIQUE, hors du périmètre de [clearAuthSession] : la consigne survit
+  // au wipe de session ordinaire. Sa clé de sortie est le mot de passe du
+  // compte (vérificateur local) — jamais une simple présence sur la tablette.
+
+  Future<void> parkRefreshToken({
+    required String uid,
+    required String refreshToken,
+  }) async {
+    await Future.wait(<Future<void>>[
+      _storage.write(
+        key: AppConstants.parkedRefreshTokenKey,
+        value: refreshToken,
+      ),
+      _storage.write(key: AppConstants.parkedRefreshUidKey, value: uid),
+    ]);
+  }
+
+  Future<ParkedRefreshToken?> readParkedRefresh() async {
+    final token = await _storage.read(key: AppConstants.parkedRefreshTokenKey);
+    final uid = await _storage.read(key: AppConstants.parkedRefreshUidKey);
+    if (token == null || token.isEmpty || uid == null || uid.isEmpty) {
+      return null;
+    }
+    return ParkedRefreshToken(uid: uid, refreshToken: token);
+  }
+
+  Future<void> clearParkedRefresh() async {
+    await Future.wait(<Future<void>>[
+      _storage.delete(key: AppConstants.parkedRefreshTokenKey),
+      _storage.delete(key: AppConstants.parkedRefreshUidKey),
+    ]);
+  }
+
   Future<AuthSession?> readAuthSession() async {
     final accessToken = await _storage.read(key: AppConstants.accessTokenKey);
     if (accessToken == null) return null;
@@ -158,4 +192,12 @@ class TokenStorageService {
     if (value == null || value.isEmpty) return Future<void>.value();
     return _storage.write(key: key, value: value);
   }
+}
+
+/// Refresh token consigné : le jeton + l'uid de son propriétaire.
+class ParkedRefreshToken {
+  final String uid;
+  final String refreshToken;
+
+  const ParkedRefreshToken({required this.uid, required this.refreshToken});
 }

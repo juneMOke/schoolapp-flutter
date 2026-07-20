@@ -1776,6 +1776,10 @@
     "statusOffline": "Offline",
     "statusPendingUpload": "Pending upload",
     "statusSyncConflict": "Conflict",
+    "statusAuthRequired": "Sign-in required",
+    "@statusAuthRequired": {
+      "description": "Sync pill: network is back but the session has no tokens (offline login) — an online sign-in is required to synchronize"
+    },
 
     "offlineQueuedGeneric": "Saved — pending synchronization",
     "offlinePaymentQueued": "Payment saved — pending synchronization",

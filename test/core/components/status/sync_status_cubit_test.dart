@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 class MockOutboxDao extends Mock implements OutboxDao {}
@@ -16,6 +17,8 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 class MockSyncEngine extends Mock implements SyncEngine {}
 
 class MockPullCoordinator extends Mock implements PullCoordinator {}
+
+class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
 
 void main() {
   late MockOutboxDao outbox;
@@ -178,5 +181,98 @@ void main() {
     verify(() => syncEngine.flush()).called(1);
     verifyNever(() => pull.pullAll());
     await cubit.close();
+  });
+
+  group('gate crédentiels (V1.1 — session offline sans jetons)', () {
+    late MockCredentialsProbe probe;
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+    });
+
+    SyncStatusCubit buildGated({MockPullCoordinator? pull}) => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      pullCoordinator: pull,
+      credentialsProbe: probe,
+    );
+
+    test(
+      'sans jetons + écritures en attente → authRequired, AUCUN flush ni pull',
+      () async {
+        when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+        when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+        final pull = MockPullCoordinator();
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport());
+
+        final cubit = buildGated(pull: pull);
+        await pumpEventQueue();
+        statusController.add(true); // retour réseau
+        await pumpEventQueue();
+
+        expect(cubit.state, SyncStatus.authRequired);
+        // Zéro 401, zéro `attempt` consommé : rien n'est tenté.
+        verifyNever(() => syncEngine.flush());
+        verifyNever(() => pull.pullAll());
+        await cubit.close();
+      },
+    );
+
+    test(
+      'sans jetons + notifyLocalWrite → authRequired, AUCUN flush',
+      () async {
+        when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+        when(() => outbox.pendingCount()).thenAnswer((_) async => 1);
+
+        final cubit = buildGated();
+        await pumpEventQueue();
+        await cubit.notifyLocalWrite();
+        await pumpEventQueue();
+
+        expect(cubit.state, SyncStatus.authRequired);
+        verifyNever(() => syncEngine.flush());
+        await cubit.close();
+      },
+    );
+
+    test(
+      'sans jetons mais outbox vide → synced (pas de faux signal)',
+      () async {
+        when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+        final cubit = buildGated();
+        await pumpEventQueue();
+        expect(cubit.state, SyncStatus.synced);
+        await cubit.close();
+      },
+    );
+
+    test('jetons présents → cycle normal (flush au reconnect)', () async {
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+
+      final cubit = buildGated();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      await cubit.close();
+    });
+
+    test('sonde défaillante → ne bloque pas la synchro', () async {
+      when(() => probe.canAuthenticate()).thenThrow(Exception('storage'));
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 1);
+
+      final cubit = buildGated();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      await cubit.close();
+    });
   });
 }

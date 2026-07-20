@@ -1782,6 +1782,10 @@
   "statusOffline": "Hors ligne",
   "statusPendingUpload": "À envoyer",
   "statusSyncConflict": "Conflit",
+  "statusAuthRequired": "Reconnexion requise",
+  "@statusAuthRequired": {
+    "description": "Pastille synchro : réseau présent mais session sans jetons (login offline) — un login online est requis pour synchroniser"
+  },
 
   "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",
   "offlinePaymentQueued": "Paiement enregistré — en attente de synchronisation",

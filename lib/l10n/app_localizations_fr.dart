@@ -4088,6 +4088,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusSyncConflict => 'Conflit';
 
   @override
+  String get statusAuthRequired => 'Reconnexion requise';
+
+  @override
   String get offlineQueuedGeneric =>
       'Enregistré — en attente de synchronisation';
 

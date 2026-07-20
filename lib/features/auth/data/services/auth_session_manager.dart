@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_models.dart';
@@ -28,7 +29,8 @@ int _systemWallClock() => DateTime.now().millisecondsSinceEpoch;
 ///   (interceptor) — la dégradation se mesure `deviceNow − ancre`, ancre et
 ///   `now` sur la **même** horloge (device) pour éviter un faux « saut horloge » ;
 /// - seul un contact serveur peut *améliorer* le mode (D-08).
-class AuthSessionManager implements RevocationEvaluator {
+class AuthSessionManager
+    implements RevocationEvaluator, SessionCredentialsProbe {
   final TokenStorageService _tokenStorage;
   final AuthLocalDao _authLocalDao;
   final PasswordVerifierService _verifier;
@@ -115,6 +117,15 @@ class AuthSessionManager implements RevocationEvaluator {
     _observedUserVersion = session.userVersion;
     _clockTampered = false;
     _currentUser?.set(uid); // estampillage authorId au write-time (D-05)
+
+    // Des jetons frais rendent la consigne de CE compte obsolète. Celle d'un
+    // AUTRE compte survit (slot partagé : elle attend son propriétaire).
+    try {
+      final parked = await _tokenStorage.readParkedRefresh();
+      if (parked?.uid == uid) await _tokenStorage.clearParkedRefresh();
+    } catch (_) {
+      // Best-effort : une consigne périmée sera écrasée au prochain logout.
+    }
   }
 
   /// Amorce l'uid courant depuis une session restaurée (token store), au
@@ -197,24 +208,58 @@ class AuthSessionManager implements RevocationEvaluator {
 
     // Identité : la session du token store n'est réutilisée QUE si elle
     // appartient à CE compte. Sinon (tablette partagée : les jetons résiduels
-    // sont ceux d'un autre utilisateur), on repart du profil local ET on purge
-    // ces jetons — l'interceptor Authorization ne doit jamais émettre sous
-    // l'identité d'autrui (D-05 : flush sous le JWT d'un autre → 403 terminal).
+    // sont ceux d'un autre utilisateur), ils sont CONSIGNÉS sous LEUR uid
+    // (leur propriétaire pourra resynchroniser à son prochain login) puis
+    // purgés de l'actif — l'interceptor Authorization ne doit jamais émettre
+    // sous l'identité d'autrui (D-05 : flush sous le JWT d'un autre → 403).
     final stored = await _tokenStorage.readAuthSession();
     final AuthSession session;
     if (stored != null && stored.user.id == user.userId) {
       session = stored.copyWith(userVersion: user.userVersion);
     } else {
       if (stored != null) {
+        final foreignRefresh = stored.refreshToken;
+        final foreignUid = stored.user.id;
+        if (foreignRefresh != null &&
+            foreignRefresh.isNotEmpty &&
+            foreignUid.isNotEmpty) {
+          await _tokenStorage.parkRefreshToken(
+            uid: foreignUid,
+            refreshToken: foreignRefresh,
+          );
+        }
         await _tokenStorage.clearAuthSession();
       }
-      session = AuthSession(
-        accessToken: '',
-        tokenType: 'Bearer',
-        expiresIn: 0,
-        userVersion: user.userVersion,
-        user: _userFromRecord(user),
-      );
+
+      // Consigne de CE compte (posée à son logout) ? Le mot de passe vient
+      // d'être vérifié (Argon2id) → déconsigner : snapshot COMPLET réécrit en
+      // storage (profil + refresh, access vide — le refresh interceptor
+      // mintera au premier 401) → resynchronisation silencieuse au retour
+      // réseau. Le profil est indispensable : sans `userId` en storage,
+      // l'estampille `authUid` resterait vide et le filtre d'identité
+      // ignorerait tous les contacts serveur de cette session.
+      final parked = await _tokenStorage.readParkedRefresh();
+      if (parked != null && parked.uid == user.userId) {
+        session = AuthSession(
+          accessToken: '',
+          tokenType: 'Bearer',
+          expiresIn: 0,
+          refreshToken: parked.refreshToken,
+          refreshExpiresAt: bound,
+          userVersion: user.userVersion,
+          user: _userFromRecord(user),
+        );
+        await _tokenStorage.saveAuthSession(session);
+        await _tokenStorage.clearParkedRefresh();
+      } else {
+        session = AuthSession(
+          accessToken: '',
+          tokenType: 'Bearer',
+          expiresIn: 0,
+          userVersion: user.userVersion,
+          user: _userFromRecord(user),
+        );
+      }
     }
 
     _currentUser?.set(
@@ -372,12 +417,41 @@ class AuthSessionManager implements RevocationEvaluator {
   ///
   /// [revokeOfflineWindow] distingue les deux régimes (amendement m4) :
   /// - `false` (logout ordinaire) : la borne offline du compte survit — l'agent
-  ///   pourra se reconnecter offline dans sa fenêtre (ADR §6, D-01 seul gate) ;
+  ///   pourra se reconnecter offline dans sa fenêtre (ADR §6, D-01 seul gate).
+  ///   Le refresh token n'est pas détruit mais **consigné** sous l'uid de son
+  ///   propriétaire (V1.1) : ressorti uniquement par un login offline du même
+  ///   compte → resynchronisation silencieuse au retour réseau ;
   /// - `true` (révocation D-09 / refresh rejeté définitivement) : la fenêtre
-  ///   est brûlée — le prochain login de ce compte devra être online.
+  ///   est brûlée ET la consigne du compte détruite — le prochain login de ce
+  ///   compte devra être online.
   Future<void> wipeSession({bool revokeOfflineWindow = false}) async {
     _wipeGeneration++; // invalide tout applyRefresh en vol (anti-résurrection)
     final user = await _authLocalDao.getSessionUser();
+    // L'uid du propriétaire des jetons actifs : session DB, sinon le profil du
+    // token store (cold-start sans ligne de session — montée de version).
+    final storedUid =
+        user?.userId ?? (await _tokenStorage.readAuthSession())?.user.id;
+
+    if (revokeOfflineWindow) {
+      // Révocation : rien ne survit pour CE compte — ni l'actif, ni sa
+      // consigne. La consigne d'un AUTRE compte n'est pas concernée.
+      final parked = await _tokenStorage.readParkedRefresh();
+      if (storedUid != null && parked?.uid == storedUid) {
+        await _tokenStorage.clearParkedRefresh();
+      }
+    } else {
+      final refresh = await _tokenStorage.readRefreshToken();
+      if (refresh != null &&
+          refresh.isNotEmpty &&
+          storedUid != null &&
+          storedUid.isNotEmpty) {
+        await _tokenStorage.parkRefreshToken(
+          uid: storedUid,
+          refreshToken: refresh,
+        );
+      }
+    }
+
     await _tokenStorage.clearAuthSession();
     if (user != null) {
       if (revokeOfflineWindow) {
@@ -390,6 +464,23 @@ class AuthSessionManager implements RevocationEvaluator {
     }
     _observedUserVersion = null;
     _currentUser?.clear();
+  }
+
+  // ── Sonde de crédentiels (boucle de synchro, V1.1) ──────────────────────────
+
+  /// Vrai si la session peut authentifier des appels API (access non vide OU
+  /// refresh actif). La consigne ne compte pas (verrouillée par mot de passe).
+  /// Défensif : storage indisponible → `false` (ne pas marteler le serveur).
+  @override
+  Future<bool> canAuthenticate() async {
+    try {
+      final stored = await _tokenStorage.readAuthSession();
+      if (stored != null && stored.accessToken.isNotEmpty) return true;
+      final refresh = await _tokenStorage.readRefreshToken();
+      return refresh != null && refresh.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
   }
 
   AuthenticatedUser _userFromRecord(AuthLocalUserRecord r) => AuthenticatedUser(
