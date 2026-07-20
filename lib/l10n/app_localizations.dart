@@ -260,6 +260,18 @@ abstract class AppLocalizations {
   /// **'Contact the administrator'**
   String get loginContactAdmin;
 
+  /// Banner: offline login impossible, account never seen online on this device (ADR-010 D-01)
+  ///
+  /// In en, this message translates to:
+  /// **'No connection, and this account has never signed in on this tablet. A first online sign-in is required.'**
+  String get loginErrorOfflineFirstLogin;
+
+  /// Banner: offline window closed (refresh bound passed or revoked) — online sign-in required (ADR-010 D-07/D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Offline work period expired. Sign in online as soon as the network is back.'**
+  String get loginErrorOfflineWindowExpired;
+
   /// No description provided for @showPassword.
   ///
   /// In en, this message translates to:

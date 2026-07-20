@@ -95,6 +95,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginContactAdmin => 'Contact the administrator';
 
   @override
+  String get loginErrorOfflineFirstLogin =>
+      'No connection, and this account has never signed in on this tablet. A first online sign-in is required.';
+
+  @override
+  String get loginErrorOfflineWindowExpired =>
+      'Offline work period expired. Sign in online as soon as the network is back.';
+
+  @override
   String get showPassword => 'Show';
 
   @override

@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/auth_session_snapshot.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/login_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/logout_use_case.dart';
@@ -171,6 +173,157 @@ void main() {
         AuthState(
           status: AuthStatus.failure,
           errorMessage: 'Invalid credentials',
+          errorKind: AuthErrorKind.invalidCredentials,
+        ),
+      ],
+    );
+  });
+
+  group('AuthLoginRequested — repli offline (ADR-010)', () {
+    const tNetworkFailure = NetworkFailure('Network error occurred');
+
+    void stubOnlineLoginNetworkFailure() {
+      when(
+        () => mockLoginUseCase(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => const Left(tNetworkFailure));
+    }
+
+    blocTest<AuthBloc, AuthState>(
+      'échec réseau + compte vu → authenticated offline (mode du snapshot)',
+      setUp: () {
+        stubOnlineLoginNetworkFailure();
+        when(
+          () => mockRepository.hasLocalUser('test@example.com'),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockRepository.loginOffline(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async => const Right(
+            AuthSessionSnapshot(
+              session: tSession,
+              mode: SessionMode.warning,
+              isOffline: true,
+            ),
+          ),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          sessionMode: SessionMode.warning,
+          isOffline: true,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'échec réseau + compte jamais vu → offlineFirstLoginRequired (D-01)',
+      setUp: () {
+        stubOnlineLoginNetworkFailure();
+        when(
+          () => mockRepository.hasLocalUser('test@example.com'),
+        ).thenAnswer((_) async => false);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.failure,
+          errorMessage: 'Network error occurred',
+          errorKind: AuthErrorKind.offlineFirstLoginRequired,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'fenêtre offline close (AuthFailure) → offlineWindowExpired',
+      setUp: () {
+        stubOnlineLoginNetworkFailure();
+        when(
+          () => mockRepository.hasLocalUser('test@example.com'),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockRepository.loginOffline(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async => const Left(
+            AuthFailure('Reconnexion en ligne requise sur ce compte'),
+          ),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.failure,
+          errorMessage: 'Reconnexion en ligne requise sur ce compte',
+          errorKind: AuthErrorKind.offlineWindowExpired,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'mot de passe incorrect offline → invalidCredentials (même bandeau qu\'online)',
+      setUp: () {
+        stubOnlineLoginNetworkFailure();
+        when(
+          () => mockRepository.hasLocalUser('test@example.com'),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockRepository.loginOffline(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const Left(InvalidCredentialsFailure('Mot de passe incorrect')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.failure,
+          errorMessage: 'Mot de passe incorrect',
           errorKind: AuthErrorKind.invalidCredentials,
         ),
       ],

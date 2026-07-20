@@ -96,6 +96,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loginContactAdmin => 'Contacter l\'administrateur';
 
   @override
+  String get loginErrorOfflineFirstLogin =>
+      'Pas de connexion, et ce compte ne s\'est jamais connecté sur cette tablette. Une première connexion en ligne est nécessaire.';
+
+  @override
+  String get loginErrorOfflineWindowExpired =>
+      'Période de travail hors-ligne expirée. Reconnectez-vous en ligne dès que le réseau revient.';
+
+  @override
   String get showPassword => 'Afficher';
 
   @override

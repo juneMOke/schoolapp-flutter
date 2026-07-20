@@ -32,6 +32,14 @@
     }
   },
   "loginContactAdmin": "Contact the administrator",
+  "loginErrorOfflineFirstLogin": "No connection, and this account has never signed in on this tablet. A first online sign-in is required.",
+  "@loginErrorOfflineFirstLogin": {
+    "description": "Banner: offline login impossible, account never seen online on this device (ADR-010 D-01)"
+  },
+  "loginErrorOfflineWindowExpired": "Offline work period expired. Sign in online as soon as the network is back.",
+  "@loginErrorOfflineWindowExpired": {
+    "description": "Banner: offline window closed (refresh bound passed or revoked) — online sign-in required (ADR-010 D-07/D-09)"
+  },
   "showPassword": "Show",
   "hidePassword": "Hide",
   "schoolApp": "ETEELO CONNECT",

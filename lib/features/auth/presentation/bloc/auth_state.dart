@@ -17,6 +17,14 @@ enum AuthErrorKind {
   rateLimited,
   server,
   generic,
+
+  /// Hors ligne ET compte jamais vu online sur ce device (ADR-010 D-01) : le
+  /// login offline est impossible — une première connexion en ligne est requise.
+  offlineFirstLoginRequired,
+
+  /// Hors ligne ET fenêtre de travail offline close (borne refresh dépassée ou
+  /// brûlée par une révocation) : reconnexion en ligne exigée (ADR-010 D-07/D-09).
+  offlineWindowExpired,
 }
 
 // Sentinel object used to distinguish "not provided" from explicit null in copyWith.

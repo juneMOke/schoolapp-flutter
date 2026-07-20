@@ -151,11 +151,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final seen = await _repository.hasLocalUser(event.email);
     if (!seen) {
       // Jamais connecté online ici → le login offline est impossible (D-01).
+      // Le bandeau doit l'expliquer (≠ simple panne réseau) : sinon l'agent
+      // retente en boucle un login qui ne peut pas aboutir sans réseau.
       emit(
         AuthState(
           status: AuthStatus.failure,
           errorMessage: failure.message,
-          errorKind: AuthErrorKind.network,
+          errorKind: AuthErrorKind.offlineFirstLoginRequired,
         ),
       );
       return;
@@ -170,7 +172,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthState(
           status: AuthStatus.failure,
           errorMessage: offFailure.message,
-          errorKind: _mapFailureToKind(offFailure),
+          errorKind: _mapOfflineFailureToKind(offFailure),
         ),
       ),
       (snapshot) {
@@ -194,6 +196,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (failure is NetworkFailure) return AuthErrorKind.network;
     if (failure is ServerFailure) return AuthErrorKind.server;
     return AuthErrorKind.generic;
+  }
+
+  /// Mapping des refus du **login offline** (`AuthSessionManager.loginOffline`) :
+  /// un `AuthFailure` sur ce chemin signifie fenêtre offline close (borne
+  /// dépassée, ou brûlée par une révocation D-09) → reconnexion online exigée.
+  /// Le mot de passe incorrect reste `invalidCredentials` (même bandeau
+  /// qu'online — l'agent n'a pas à savoir qui a vérifié).
+  AuthErrorKind _mapOfflineFailureToKind(Failure failure) {
+    if (failure is AuthFailure) return AuthErrorKind.offlineWindowExpired;
+    return _mapFailureToKind(failure);
   }
 
   Future<void> _onAuthLogoutRequested(

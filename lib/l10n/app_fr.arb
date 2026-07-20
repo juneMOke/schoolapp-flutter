@@ -32,6 +32,14 @@
     }
   },
   "loginContactAdmin": "Contacter l'administrateur",
+  "loginErrorOfflineFirstLogin": "Pas de connexion, et ce compte ne s'est jamais connecté sur cette tablette. Une première connexion en ligne est nécessaire.",
+  "@loginErrorOfflineFirstLogin": {
+    "description": "Bandeau : login offline impossible, compte jamais vu online sur ce device (ADR-010 D-01)"
+  },
+  "loginErrorOfflineWindowExpired": "Période de travail hors-ligne expirée. Reconnectez-vous en ligne dès que le réseau revient.",
+  "@loginErrorOfflineWindowExpired": {
+    "description": "Bandeau : fenêtre offline close (borne refresh dépassée ou révoquée) — reconnexion online exigée (ADR-010 D-07/D-09)"
+  },
   "showPassword": "Afficher",
   "hidePassword": "Masquer",
   "schoolApp": "ETEELO CONNECT",
