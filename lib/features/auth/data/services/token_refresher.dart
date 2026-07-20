@@ -68,7 +68,14 @@ class TokenRefresher {
       // sinon un simple blip réseau éjecterait un utilisateur au refresh valide.
       final status = e.response?.statusCode;
       if (status == 401 || status == 403) {
-        await _sessionManager.wipeSession();
+        // Refus définitif du refresh → wipe. La fenêtre offline (m4) n'est
+        // brûlée QUE si le rejet vient bien de NOTRE API (corps d'erreur JSON
+        // structuré) : un portail captif / proxy Wi-Fi sans backhaul répond
+        // souvent 401/403 en HTML — brûler là-dessus enverrait l'agent en zone
+        // blanche (login offline refusé) sur un simple incident réseau, soit
+        // exactement ce que l'amendement m4 doit empêcher.
+        final apiShaped = e.response?.data is Map;
+        await _sessionManager.wipeSession(revokeOfflineWindow: apiShaped);
         _revocationBus?.notifyRevoked();
       }
       return null;

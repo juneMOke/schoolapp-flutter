@@ -242,6 +242,13 @@ Future<void> configureDependencies({
             if (session != null && session.accessToken.isNotEmpty) {
               options.headers['Authorization'] =
                   'Bearer ${session.accessToken}';
+              // Trace l'identité du JWT attaché : le ServerContactInterceptor
+              // ne doit créditer un contact serveur qu'à l'utilisateur sous le
+              // JWT duquel la requête est réellement partie (ADR-010, filtre
+              // d'identité — une réponse tardive d'un autre compte ne doit ni
+              // ré-ancrer la fraîcheur ni alimenter la révocation).
+              options.extra[ServerContactInterceptor.authUidExtra] =
+                  session.user.id;
             }
           }
           return handler.next(options);

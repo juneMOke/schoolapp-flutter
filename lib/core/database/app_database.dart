@@ -151,6 +151,28 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
+  if (oldVersion < 10) {
+    // v10 — Auth (ADR-010, amendement m4) : borne offline PAR UTILISATEUR
+    // `auth_local_user.refresh_expires_at` (nullable). Elle mémorise la borne
+    // refresh du dernier contact online de chaque compte, pour autoriser le
+    // login offline APRÈS un logout (qui ferme la session sans brûler la
+    // fenêtre). Backfill : la borne de la session active (singleton id=1) est
+    // recopiée sur son propriétaire ; les autres comptes restent NULL
+    // (= reconnexion online exigée, comportement d'avant la migration).
+    if (await _hasTable(db, 'auth_local_user') &&
+        !await _hasColumn(db, 'auth_local_user', 'refresh_expires_at')) {
+      await db.execute(
+        'ALTER TABLE auth_local_user ADD COLUMN refresh_expires_at INTEGER',
+      );
+      await db.execute('''
+        UPDATE auth_local_user
+        SET refresh_expires_at = (
+          SELECT s.refresh_expires_at FROM auth_local_session s
+          WHERE s.id = 1 AND s.user_id = auth_local_user.user_id
+        )
+      ''');
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

@@ -34,7 +34,13 @@ const TableSchema authLocalUserTable = TableSchema(
       user_version          INTEGER NOT NULL,
       first_online_login_at INTEGER NOT NULL,
       last_server_seen_at   INTEGER NOT NULL,
-      session_started_at    INTEGER
+      session_started_at    INTEGER,
+      -- Borne offline PAR UTILISATEUR (amendement m4) : borne refresh posée au
+      -- dernier contact online de CE compte. Elle survit au logout (fermer la
+      -- session ne brûle pas la fenêtre de travail offline) et n'est effacée
+      -- que sur révocation (D-09) — NULL = reconnexion online exigée. Jamais
+      -- avancée offline : le temps ne peut que dégrader (règle d'or D-08).
+      refresh_expires_at    INTEGER
     )
   ''',
   createIndexSql: [

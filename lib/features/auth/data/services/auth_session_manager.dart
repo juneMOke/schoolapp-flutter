@@ -43,6 +43,11 @@ class AuthSessionManager implements RevocationEvaluator {
   /// Triche horloge détectée (D-10) : force READ_ONLY jusqu'au prochain contact.
   bool _clockTampered = false;
 
+  /// Incrémenté à chaque [wipeSession] : permet à [applyRefresh] de détecter
+  /// qu'un wipe est survenu pendant que le refresh était en vol et d'annuler
+  /// la réécriture des jetons (anti-résurrection, revue adversariale).
+  int _wipeGeneration = 0;
+
   AuthSessionManager({
     required TokenStorageService tokenStorage,
     required AuthLocalDao authLocalDao,
@@ -79,6 +84,8 @@ class AuthSessionManager implements RevocationEvaluator {
       saltBase64: salt,
     );
 
+    final refreshExpiresAt =
+        session.refreshExpiresAt ?? nowMs + _defaultRefreshTtlMs;
     final existing = await _authLocalDao.getUser(uid);
     await _authLocalDao.upsertUser(
       AuthLocalUserRecord(
@@ -94,14 +101,14 @@ class AuthSessionManager implements RevocationEvaluator {
         firstOnlineLoginAt: existing?.firstOnlineLoginAt ?? nowMs,
         lastServerSeenAt: nowMs,
         sessionStartedAt: nowMs,
+        refreshExpiresAt: refreshExpiresAt,
       ),
     );
     await _authLocalDao.upsertSession(
       AuthLocalSessionRecord(
         userId: uid,
         degradedMode: SessionMode.normal,
-        refreshExpiresAt:
-            session.refreshExpiresAt ?? nowMs + _defaultRefreshTtlMs,
+        refreshExpiresAt: refreshExpiresAt,
         lastEvaluatedAt: nowMs,
       ),
     );
@@ -147,13 +154,19 @@ class AuthSessionManager implements RevocationEvaluator {
       return const Left(InvalidCredentialsFailure('Mot de passe incorrect'));
     }
 
-    final sessionRow = await _authLocalDao.getSession();
-    // Pas de session active (ex. après un logout explicite qui a wipé la ligne
-    // de session et le refresh token) → on **refuse** le login offline plutôt
-    // que de fabriquer une nouvelle fenêtre de 90 j sans aucun contact serveur
-    // (sinon logout+login offline en boucle ré-armerait le TTL — le temps ne
-    // doit pouvoir que dégrader, D-08). Reconnexion online requise.
-    if (sessionRow == null) {
+    // Borne offline PAR UTILISATEUR (amendement m4) : posée au dernier contact
+    // online de CE compte, elle survit au logout — fermer la session ne brûle
+    // pas la fenêtre de travail offline. C'est la SEULE source de vérité : les
+    // trois écrivains (login online, refresh, migration v10) posent toujours
+    // borne user et borne session ensemble — un repli sur la ligne de session
+    // serait du code mort en régime nominal, et un trou de révocation en crash
+    // partiel (revue adversariale). Aucune borne (compte jamais migré sans
+    // session active, ou fenêtre brûlée par une révocation D-09) → reconnexion
+    // online exigée. Rien n'est ré-armé ici : ni la borne ni
+    // `last_server_seen_at` ne sont avancées offline — le temps ne peut que
+    // dégrader (règle d'or D-08).
+    final bound = user.refreshExpiresAt;
+    if (bound == null) {
       return const Left(
         AuthFailure('Reconnexion en ligne requise sur ce compte'),
       );
@@ -162,7 +175,7 @@ class AuthSessionManager implements RevocationEvaluator {
     final nowMs = _now();
     final eval = SessionFreshness.evaluate(
       lastServerSeenAt: user.lastServerSeenAt,
-      refreshExpiresAt: sessionRow.refreshExpiresAt,
+      refreshExpiresAt: bound,
       nowMs: nowMs,
     );
     if (eval.refreshExpired) {
@@ -177,21 +190,32 @@ class AuthSessionManager implements RevocationEvaluator {
       AuthLocalSessionRecord(
         userId: user.userId,
         degradedMode: mode,
-        refreshExpiresAt: sessionRow.refreshExpiresAt,
+        refreshExpiresAt: bound,
         lastEvaluatedAt: nowMs,
       ),
     );
 
+    // Identité : la session du token store n'est réutilisée QUE si elle
+    // appartient à CE compte. Sinon (tablette partagée : les jetons résiduels
+    // sont ceux d'un autre utilisateur), on repart du profil local ET on purge
+    // ces jetons — l'interceptor Authorization ne doit jamais émettre sous
+    // l'identité d'autrui (D-05 : flush sous le JWT d'un autre → 403 terminal).
     final stored = await _tokenStorage.readAuthSession();
-    final session =
-        stored?.copyWith(userVersion: user.userVersion) ??
-        AuthSession(
-          accessToken: '',
-          tokenType: 'Bearer',
-          expiresIn: 0,
-          userVersion: user.userVersion,
-          user: _userFromRecord(user),
-        );
+    final AuthSession session;
+    if (stored != null && stored.user.id == user.userId) {
+      session = stored.copyWith(userVersion: user.userVersion);
+    } else {
+      if (stored != null) {
+        await _tokenStorage.clearAuthSession();
+      }
+      session = AuthSession(
+        accessToken: '',
+        tokenType: 'Bearer',
+        expiresIn: 0,
+        userVersion: user.userVersion,
+        user: _userFromRecord(user),
+      );
+    }
 
     _currentUser?.set(
       user.userId,
@@ -244,9 +268,21 @@ class AuthSessionManager implements RevocationEvaluator {
   /// révocation matérialisée via le chemin refresh serait silencieusement
   /// blanchie (contournement de révocation).
   Future<void> applyRefresh(AuthSession session) async {
-    await _tokenStorage.updateTokens(session);
+    // Garde anti-résurrection (revue adversariale) : si la session a été wipée
+    // pendant que le refresh était en vol (révocation D-09, logout), ne RIEN
+    // réécrire — sinon des jetons frais réapparaissent en secure storage après
+    // le wipe : au prochain démarrage le révoqué serait `authenticated`, et la
+    // ligne de session ayant disparu, le guardian serait désarmé
+    // (`getSessionUser() == null` court-circuite `evaluateRevocation`).
+    final generation = _wipeGeneration;
     final user = await _authLocalDao.getSessionUser();
     if (user == null) return;
+    await _tokenStorage.updateTokens(session);
+    if (generation != _wipeGeneration) {
+      // Wipe survenu entre la lecture et l'écriture (TOCTOU) : on annule.
+      await _tokenStorage.clearAuthSession();
+      return;
+    }
     final nowMs = _now();
     await _authLocalDao.updateLastServerSeen(user.userId, nowMs);
     _observedUserVersion = session.userVersion;
@@ -260,6 +296,12 @@ class AuthSessionManager implements RevocationEvaluator {
           refreshExpiresAt: session.refreshExpiresAt!,
           lastEvaluatedAt: nowMs,
         ),
+      );
+      // La borne par utilisateur suit (amendement m4) : un refresh réussi est
+      // un contact online — la fenêtre offline de CE compte est ré-ancrée.
+      await _authLocalDao.updateRefreshExpiresAt(
+        user.userId,
+        session.refreshExpiresAt!,
       );
     }
   }
@@ -277,12 +319,22 @@ class AuthSessionManager implements RevocationEvaluator {
   /// serveur, même en ligne). Anchor device ⇒ mesure cohérente ; l'ancre n'étant
   /// avancée QUE sur un contact réel, le device ne peut pas se ré-autoriser seul
   /// (D-08). `serverTimeMs` reste capté (diagnostic / détection de dérive future).
+  ///
+  /// [observedUid] = uid sous le JWT duquel la requête est partie (posé par
+  /// l'interceptor d'auth au moment où il attache l'Authorization). Les
+  /// compteurs `userVersion` sont PAR utilisateur : une réponse tardive émise
+  /// sous le JWT d'un autre compte (tablette partagée, déconnexion/reconnexion
+  /// rapide) ne doit ni ré-ancrer la fraîcheur ni alimenter la révocation —
+  /// sinon la version de A, comparée au baseline de B, éjecte B et brûle sa
+  /// fenêtre (revue adversariale).
   Future<void> recordServerContact({
     required int? observedUserVersion,
     required int? serverTimeMs,
+    required String? observedUid,
   }) async {
     final user = await _authLocalDao.getSessionUser();
     if (user == null) return;
+    if (observedUid == null || observedUid != user.userId) return;
     // Un contact serveur authentique a eu lieu → réancre + lève le verrou de
     // triche (seul un contact serveur peut améliorer le mode, D-08).
     await _authLocalDao.updateLastServerSeen(user.userId, _now());
@@ -306,7 +358,7 @@ class AuthSessionManager implements RevocationEvaluator {
     // révocation. Comparer avec `>` (et non `!=`) neutralise une réponse en vol
     // périmée (version antérieure) arrivant après un re-login — sinon faux wipe.
     if (observed > user.userVersion) {
-      await wipeSession();
+      await wipeSession(revokeOfflineWindow: true);
       _revocationBus?.notifyRevoked();
       return true;
     }
@@ -317,10 +369,23 @@ class AuthSessionManager implements RevocationEvaluator {
 
   /// Wipe de session : jetons (secure storage) + `auth_local_session` +
   /// `session_started_at`. **Jamais** l'outbox, **jamais** `auth_local_user`.
-  Future<void> wipeSession() async {
+  ///
+  /// [revokeOfflineWindow] distingue les deux régimes (amendement m4) :
+  /// - `false` (logout ordinaire) : la borne offline du compte survit — l'agent
+  ///   pourra se reconnecter offline dans sa fenêtre (ADR §6, D-01 seul gate) ;
+  /// - `true` (révocation D-09 / refresh rejeté définitivement) : la fenêtre
+  ///   est brûlée — le prochain login de ce compte devra être online.
+  Future<void> wipeSession({bool revokeOfflineWindow = false}) async {
+    _wipeGeneration++; // invalide tout applyRefresh en vol (anti-résurrection)
     final user = await _authLocalDao.getSessionUser();
     await _tokenStorage.clearAuthSession();
     if (user != null) {
+      if (revokeOfflineWindow) {
+        // Brûler AVANT de fermer la session : un crash entre les deux laisse
+        // alors la borne déjà nulle → login offline refusé (l'ordre inverse
+        // laisserait une fenêtre vivante après révocation).
+        await _authLocalDao.clearRefreshExpiresAt(user.userId);
+      }
       await _authLocalDao.wipeSession(user.userId);
     }
     _observedUserVersion = null;

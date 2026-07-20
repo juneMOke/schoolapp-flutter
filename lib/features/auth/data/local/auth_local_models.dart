@@ -23,6 +23,11 @@ class AuthLocalUserRecord {
   final int lastServerSeenAt;
   final int? sessionStartedAt;
 
+  /// Borne offline par utilisateur (amendement m4) : borne refresh du dernier
+  /// contact online de CE compte. Survit au logout, brûlée sur révocation
+  /// (D-09). `null` = pas de fenêtre → reconnexion online exigée.
+  final int? refreshExpiresAt;
+
   const AuthLocalUserRecord({
     required this.userId,
     required this.email,
@@ -36,6 +41,7 @@ class AuthLocalUserRecord {
     required this.firstOnlineLoginAt,
     required this.lastServerSeenAt,
     this.sessionStartedAt,
+    this.refreshExpiresAt,
   });
 
   factory AuthLocalUserRecord.fromMap(Map<String, Object?> map) {
@@ -52,6 +58,7 @@ class AuthLocalUserRecord {
       firstOnlineLoginAt: map['first_online_login_at'] as int,
       lastServerSeenAt: map['last_server_seen_at'] as int,
       sessionStartedAt: map['session_started_at'] as int?,
+      refreshExpiresAt: map['refresh_expires_at'] as int?,
     );
   }
 
@@ -68,6 +75,7 @@ class AuthLocalUserRecord {
     'first_online_login_at': firstOnlineLoginAt,
     'last_server_seen_at': lastServerSeenAt,
     'session_started_at': sessionStartedAt,
+    'refresh_expires_at': refreshExpiresAt,
   };
 }
 

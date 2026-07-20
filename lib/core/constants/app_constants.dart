@@ -218,7 +218,10 @@ class AppConstants {
   // (régime A) et `note_evaluation` (régime C). Tables neuves → aucun backfill.
   // v9 (2026-07-19) : Notes / Cours — cache `ref_cours_notation` (squelette
   // période/sous-période + statut + effectif). Table neuve → aucun backfill.
-  static const int offlineDbSchemaVersion = 9;
+  // v10 (2026-07-20) : Auth (ADR-010, amendement m4) — borne offline par
+  // utilisateur `auth_local_user.refresh_expires_at` (survit au logout, brûlée
+  // sur révocation). Backfill depuis la session active vers son propriétaire.
+  static const int offlineDbSchemaVersion = 10;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

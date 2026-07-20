@@ -1,3 +1,5 @@
+import 'dart:io' show SocketException;
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -45,7 +47,14 @@ class AuthRepositoryImpl implements AuthRepository {
       if (e.error is Failure) {
         return Left(e.error as Failure);
       }
-      return const Left(NetworkFailure('Network error occurred'));
+      // Le `NetworkFailure` est le DÉCLENCHEUR du repli login offline (bloc) :
+      // ne le produire que pour une vraie absence de réseau. Un statut HTTP non
+      // mappé par l'interceptor (ex. 429 rate-limit, 3xx inattendu) signifie
+      // que le serveur a répondu — basculer offline là-dessus contournerait le
+      // rate-limit et afficherait des bandeaux mensongers.
+      return _isNetworkError(e)
+          ? const Left(NetworkFailure('Network error occurred'))
+          : const Left(ServerFailure('Unexpected error occurred'));
     } on StorageFailure catch (e) {
       return Left(e);
     } catch (_) {
@@ -53,16 +62,42 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  static bool _isNetworkError(DioException e) =>
+      e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.sendTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.connectionError ||
+      (e.type == DioExceptionType.unknown && e.error is SocketException);
+
   @override
   Future<Either<Failure, AuthSessionSnapshot>> loginOffline({
     required String email,
     required String password,
-  }) {
-    return sessionManager.loginOffline(email: email, password: password);
+  }) async {
+    // Filet d'exception (revue adversariale) : le chemin offline traverse
+    // sqflite, un isolate Argon2 et le secure storage — un throw non attrapé
+    // (ex. PlatformException BAD_DECRYPT après restauration de backup)
+    // remonterait dans le handler du bloc sans emit → spinner infini.
+    try {
+      return await sessionManager.loginOffline(
+        email: email,
+        password: password,
+      );
+    } catch (_) {
+      return const Left(StorageFailure('Offline login failed'));
+    }
   }
 
   @override
-  Future<bool> hasLocalUser(String email) => sessionManager.hasLocalUser(email);
+  Future<bool> hasLocalUser(String email) async {
+    try {
+      return await sessionManager.hasLocalUser(email);
+    } catch (_) {
+      // Base illisible = pas de profil local exploitable → le bloc affichera
+      // l'erreur réseau du login online, sans tenter le repli.
+      return false;
+    }
+  }
 
   @override
   Future<Either<Failure, bool>> isAuthenticated() async {

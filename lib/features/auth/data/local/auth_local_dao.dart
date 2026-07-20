@@ -80,6 +80,29 @@ class AuthLocalDao {
     );
   }
 
+  /// Avance la borne offline par utilisateur (amendement m4) : posée à chaque
+  /// contact online porteur d'une borne refresh (login online, refresh rotatif).
+  /// Jamais appelée offline — le temps ne peut que dégrader (D-08).
+  Future<void> updateRefreshExpiresAt(String userId, int ms) async {
+    await _db.update(
+      userTable,
+      {'refresh_expires_at': ms},
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  /// Brûle la fenêtre offline du compte (révocation D-09 / refresh rejeté
+  /// définitivement) : le prochain login de ce compte devra être online.
+  Future<void> clearRefreshExpiresAt(String userId) async {
+    await _db.update(
+      userTable,
+      {'refresh_expires_at': null},
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
   // ── auth_local_session (singleton id = 1) ────────────────────────────────────
 
   Future<void> upsertSession(AuthLocalSessionRecord session) async {

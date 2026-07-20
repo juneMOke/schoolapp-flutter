@@ -51,6 +51,7 @@ Future<Database> _openDb() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() => registerFallbackValue(_session(uid: 'fallback')));
 
   late Database db;
   late AuthLocalDao dao;
@@ -58,6 +59,7 @@ void main() {
   var clock = 1000;
 
   setUp(() async {
+    clock = 1000;
     db = await _openDb();
     dao = AuthLocalDao(db);
     tokenStorage = MockTokenStorageService();
@@ -127,15 +129,41 @@ void main() {
   );
 
   test(
-    'loginOffline refusé après wipe de session (m4 : pas de re-armement TTL)',
+    'loginOffline autorisé après un logout, dans la fenêtre (amendement m4)',
     () async {
       final manager = build();
       await manager.persistOnlineLogin(
         _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
         'MotDePasse123',
       );
-      await manager.wipeSession(); // simule un logout explicite
+      await manager.wipeSession(); // logout ordinaire : la fenêtre survit
+      expect(await dao.getSession(), isNull);
 
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasse123',
+      );
+      expect(res.isRight(), isTrue);
+      res.fold((_) {}, (snap) {
+        expect(snap.isOffline, isTrue);
+        expect(snap.session.user.id, 'u1');
+      });
+      // La session locale est rouverte pour ce compte.
+      expect((await dao.getSession())?.userId, 'u1');
+    },
+  );
+
+  test(
+    'loginOffline refusé après logout si la fenêtre est dépassée (D-07/D-08)',
+    () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000),
+        'MotDePasse123',
+      );
+      await manager.wipeSession();
+
+      clock += 2000; // au-delà de la borne refresh du dernier contact online
       final res = await manager.loginOffline(
         email: 'prof@ecole.cd',
         password: 'MotDePasse123',
@@ -143,6 +171,89 @@ void main() {
       expect(res.isLeft(), isTrue);
     },
   );
+
+  test(
+    'la révocation (D-09) brûle la fenêtre : loginOffline refusé ensuite',
+    () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', userVersion: 1, refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      await manager.recordServerContact(
+        observedUserVersion: 2,
+        serverTimeMs: clock,
+        observedUid: 'u1',
+      );
+      expect(await manager.evaluateRevocation(), isTrue);
+
+      // Le compte reste « vu sur ce device » (D-01) mais sans fenêtre offline.
+      expect((await dao.getUser('u1'))?.refreshExpiresAt, isNull);
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasse123',
+      );
+      expect(res.isLeft(), isTrue);
+    },
+  );
+
+  test(
+    'loginOffline ne réutilise jamais les jetons d\'un autre compte (D-05)',
+    () async {
+      final manager = build();
+      // A puis B se connectent online — la session/jetons résiduels sont à B.
+      await manager.persistOnlineLogin(
+        _session(uid: 'uA', refreshExpiresAt: clock + 1000000),
+        'MotDePasseA',
+      );
+      final sessionB = AuthSession(
+        accessToken: 'jwt-B',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+        refreshToken: 'refresh-B',
+        refreshExpiresAt: clock + 1000000,
+        userVersion: 0,
+        user: const AuthenticatedUser(
+          id: 'uB',
+          email: 'dir@ecole.cd',
+          firstName: 'Blaise',
+          lastName: 'Mwamba',
+          role: 'DIRECTOR',
+          schoolId: 'sch-1',
+        ),
+      );
+      await manager.persistOnlineLogin(sessionB, 'MotDePasseB');
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => sessionB);
+
+      // A se reconnecte offline : snapshot sous SON identité, jetons de B purgés.
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasseA',
+      );
+      expect(res.isRight(), isTrue);
+      res.fold((_) {}, (snap) {
+        expect(snap.session.user.id, 'uA');
+        expect(snap.session.accessToken, isEmpty);
+      });
+      verify(() => tokenStorage.clearAuthSession()).called(1);
+    },
+  );
+
+  test('applyRefresh ré-ancre la borne offline par utilisateur (m4)', () async {
+    final manager = build();
+    await manager.persistOnlineLogin(
+      _session(uid: 'u1', refreshExpiresAt: clock + 1000),
+      'MotDePasse123',
+    );
+    when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+    await manager.applyRefresh(
+      _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+    );
+    expect((await dao.getUser('u1'))?.refreshExpiresAt, clock + 555555);
+  });
 
   test(
     'evaluateRevocation wipe sur userVersion divergent, épargne le user',
@@ -157,6 +268,7 @@ void main() {
       await manager.recordServerContact(
         observedUserVersion: 2,
         serverTimeMs: clock,
+        observedUid: 'u1',
       );
       final revoked = await manager.evaluateRevocation();
       expect(revoked, isTrue);
@@ -168,6 +280,47 @@ void main() {
     },
   );
 
+  test('recordServerContact ignore une réponse partie sous le JWT d\'un autre '
+      'compte (filtre d\'identité, revue adversariale)', () async {
+    final manager = build();
+    await manager.persistOnlineLogin(
+      _session(uid: 'uB', userVersion: 2, refreshExpiresAt: clock + 1000000),
+      'MotDePasseB',
+    );
+    final before = (await dao.getUser('uB'))!.lastServerSeenAt;
+
+    clock += 5000;
+    // Réponse tardive de l'utilisateur A (version 8 > baseline 2 de B) : ne
+    // doit ni ré-ancrer la fraîcheur de B, ni déclencher sa révocation.
+    await manager.recordServerContact(
+      observedUserVersion: 8,
+      serverTimeMs: clock,
+      observedUid: 'uA',
+    );
+    expect((await dao.getUser('uB'))!.lastServerSeenAt, before);
+    expect(await manager.evaluateRevocation(), isFalse);
+    expect(await dao.getSession(), isNotNull);
+  });
+
+  test('applyRefresh ne ressuscite pas les jetons après un wipe '
+      '(anti-résurrection, revue adversariale)', () async {
+    final manager = build();
+    await manager.persistOnlineLogin(
+      _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+      'MotDePasse123',
+    );
+    await manager.wipeSession(revokeOfflineWindow: true); // révocation D-09
+
+    // Le refresh était en vol pendant le wipe : sa réponse tardive ne doit
+    // RIEN réécrire (sinon le révoqué redémarre `authenticated` avec le
+    // guardian désarmé).
+    await manager.applyRefresh(
+      _session(uid: 'u1', refreshExpiresAt: clock + 2000000),
+    );
+    verifyNever(() => tokenStorage.updateTokens(any()));
+    expect((await dao.getUser('u1'))?.refreshExpiresAt, isNull);
+  });
+
   test('evaluateRevocation ne wipe pas si userVersion identique', () async {
     final manager = build();
     await manager.persistOnlineLogin(
@@ -177,6 +330,7 @@ void main() {
     await manager.recordServerContact(
       observedUserVersion: 3,
       serverTimeMs: clock,
+      observedUid: 'u1',
     );
     expect(await manager.evaluateRevocation(), isFalse);
     expect(await dao.getSession(), isNotNull);
