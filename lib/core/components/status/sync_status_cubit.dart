@@ -135,16 +135,17 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
         _safeEmit(SyncStatus.syncing);
         return;
       }
-      if (await _outbox.errorCount() > 0) {
-        _safeEmit(SyncStatus.syncConflict);
-        return;
-      }
       final pending = await _outbox.pendingCount();
       // Des écritures attendent mais la session ne peut pas s'authentifier :
-      // « À envoyer » serait un mensonge (rien ne partira) — surfacer la
-      // vraie condition de déblocage : un login online.
+      // ni « À envoyer » ni « Conflit » ne diraient la vraie condition de
+      // déblocage (un login online) — l'auth est la cause racine qui gèle
+      // TOUT le reste, elle prime donc sur le conflit (revue adversariale).
       if (pending > 0 && !await _canAuthenticate()) {
         _safeEmit(SyncStatus.authRequired);
+        return;
+      }
+      if (await _outbox.errorCount() > 0) {
+        _safeEmit(SyncStatus.syncConflict);
         return;
       }
       _safeEmit(pending > 0 ? SyncStatus.pendingUpload : SyncStatus.synced);

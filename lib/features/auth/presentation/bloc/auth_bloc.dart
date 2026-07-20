@@ -77,6 +77,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
       (session) async {
         if (session == null) {
+          // Invariant « unauthenticated ⇒ zéro jeton vivant » (revue I3) : un
+          // refresh ACTIF résiduel (session offline tuée par un restart —
+          // access vide → session nulle ici) serait sinon minté en arrière-
+          // plan par la boucle de synchro pendant que l'écran de login est
+          // affiché, puis rouvrirait la session SANS mot de passe au prochain
+          // démarrage. Le wipe ordinaire re-consigne ce refresh sous son uid :
+          // la resync silencieuse reste disponible au prochain login offline.
+          try {
+            await _sessionManager.wipeSession();
+          } catch (_) {
+            // Best-effort : storage indisponible → la sonde de crédentiels
+            // (défensive) bloquera de toute façon la boucle.
+          }
           emit(const AuthState(status: AuthStatus.unauthenticated));
           return;
         }
@@ -262,8 +275,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       add(const AuthRefreshExpired());
       return;
     }
-    if (eval.mode != state.sessionMode) {
-      emit(state.copyWith(sessionMode: eval.mode));
+    // Une session ouverte OFFLINE qui a eu un contact serveur réel depuis
+    // (resynchronisation silencieuse post-déconsignation, V1.1) n'est plus
+    // « hors ligne » : le bandeau tombe. Seul un contact réel l'éteint (D-08).
+    final clearOffline = state.isOffline && eval.hadServerContact;
+    if (eval.mode != state.sessionMode || clearOffline) {
+      emit(
+        state.copyWith(
+          sessionMode: eval.mode,
+          isOffline: clearOffline ? false : null,
+        ),
+      );
     }
   }
 

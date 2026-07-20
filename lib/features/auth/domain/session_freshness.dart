@@ -13,10 +13,17 @@ class SessionEvaluation {
   /// Mode de dégradation courant (non significatif si [refreshExpired]).
   final SessionMode mode;
 
+  /// Un contact serveur authentifié a eu lieu depuis l'ouverture de la session
+  /// courante (`lastServerSeenAt >= sessionStartedAt`). Sert à dissiper
+  /// l'indicateur « session hors-ligne » après une resynchronisation
+  /// silencieuse (V1.1) — seul un contact réel peut l'éteindre (D-08).
+  final bool hadServerContact;
+
   const SessionEvaluation({
     required this.refreshExpired,
     required this.mode,
     this.clockTampered = false,
+    this.hadServerContact = false,
   });
 }
 

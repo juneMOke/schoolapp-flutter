@@ -64,6 +64,11 @@ Future<void> registerOfflineCore(GetIt getIt) async {
     () => SyncEngine(
       outbox: getIt<OutboxDao>(),
       connectivity: getIt<ConnectivityService>(),
+      // Gate crédentiels AU MOTEUR (V1.1, revue adversariale) : les repos
+      // offline flushent en direct (hors cubit) — le goulot doit être ici.
+      // Lazy : AuthSessionManager est enregistré plus tard dans
+      // `configureDependencies()`, résolu au premier flush.
+      credentialsProbe: getIt<AuthSessionManager>(),
     ),
   );
 

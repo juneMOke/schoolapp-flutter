@@ -252,12 +252,16 @@ void main() {
   );
 
   group('consigne du refresh token (V1.1)', () {
-    test('le logout consigne le refresh sous l\'uid de session', () async {
+    test('le logout consigne le refresh sous l\'uid du PROFIL token store '
+        '(le vrai propriétaire du jeton)', () async {
       final manager = build();
       await manager.persistOnlineLogin(
         _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
         'MotDePasse123',
       );
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => _session(uid: 'u1'));
       when(
         () => tokenStorage.readRefreshToken(),
       ).thenAnswer((_) async => 'refresh-A');
@@ -269,6 +273,118 @@ void main() {
             tokenStorage.parkRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
       ).called(1);
       verify(() => tokenStorage.clearAuthSession()).called(1);
+    });
+
+    test('mismatch profil token store ≠ session DB → PAS de parcage (F1 : '
+        'jamais transférer un crédentiel entre comptes)', () async {
+      final manager = build();
+      // Session DB = u1 ; jetons actifs = profil de uX (état de crash).
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => _session(uid: 'uX'));
+      when(
+        () => tokenStorage.readRefreshToken(),
+      ).thenAnswer((_) async => 'refresh-X');
+
+      await manager.wipeSession();
+
+      verifyNever(
+        () => tokenStorage.parkRefreshToken(
+          uid: any(named: 'uid'),
+          refreshToken: any(named: 'refreshToken'),
+        ),
+      );
+    });
+
+    test('borne offline du propriétaire expirée → PAS de parcage (F3 : un '
+        'jeton mort n\'écrase pas une consigne valide)', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000),
+        'MotDePasse123',
+      );
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => _session(uid: 'u1'));
+      when(
+        () => tokenStorage.readRefreshToken(),
+      ).thenAnswer((_) async => 'refresh-mort');
+
+      clock += 2000; // borne dépassée (chemin AuthRefreshExpired → wipe)
+      await manager.wipeSession();
+
+      verifyNever(
+        () => tokenStorage.parkRefreshToken(
+          uid: any(named: 'uid'),
+          refreshToken: any(named: 'refreshToken'),
+        ),
+      );
+    });
+
+    test('révocation : consigne brûlée même si la session DB diverge du '
+        'profil token store (F2)', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', userVersion: 1, refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      // Jetons actifs du compte uX ; sa consigne existe aussi.
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => _session(uid: 'uX'));
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'uX', refreshToken: 'refresh-X'),
+      );
+      await manager.recordServerContact(
+        observedUserVersion: 2,
+        serverTimeMs: clock,
+        observedUid: 'u1',
+      );
+
+      expect(await manager.evaluateRevocation(), isTrue);
+      verify(() => tokenStorage.clearParkedRefresh()).called(1);
+    });
+
+    test('branche réuse : refresh actif absent + consigne du même compte → '
+        'réinjection (F4 : gate et consigne ne peuvent pas échouer '
+        'ensemble)', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+      // État partiel post-crash : access présent, refresh ABSENT.
+      final partial = AuthSession(
+        accessToken: 'jwt-partiel',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+        userVersion: 0,
+        user: _session(uid: 'u1').user,
+      );
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => partial);
+      when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+        (_) async =>
+            const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+      );
+
+      final res = await manager.loginOffline(
+        email: 'prof@ecole.cd',
+        password: 'MotDePasse123',
+      );
+
+      expect(res.isRight(), isTrue);
+      res.fold((_) {}, (snap) {
+        expect(snap.session.refreshToken, 'refresh-A');
+        expect(snap.session.accessToken, 'jwt-partiel');
+      });
+      verify(() => tokenStorage.clearParkedRefresh()).called(1);
     });
 
     test('login offline du même compte déconsigne : snapshot complet réécrit '
@@ -410,6 +526,35 @@ void main() {
         () => tokenStorage.readAuthSession(),
       ).thenAnswer((_) async => _session(uid: 'u1'));
       expect(await build().canAuthenticate(), isTrue);
+    });
+
+    test('access EXPIRÉ sans refresh → false (revue F7)', () async {
+      final expired = AuthSession(
+        accessToken: 'jwt-vieux',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+        accessExpiresAt: clock - 1000,
+        userVersion: 0,
+        user: _session(uid: 'u1').user,
+      );
+      when(
+        () => tokenStorage.readAuthSession(),
+      ).thenAnswer((_) async => expired);
+      expect(await build().canAuthenticate(), isFalse);
+    });
+
+    test('refresh présent mais borne EXPIRÉE → false (revue F7)', () async {
+      final stale = AuthSession(
+        accessToken: '',
+        tokenType: 'Bearer',
+        expiresIn: 0,
+        refreshToken: 'refresh-mort',
+        refreshExpiresAt: clock - 1000,
+        userVersion: 0,
+        user: _session(uid: 'u1').user,
+      );
+      when(() => tokenStorage.readAuthSession()).thenAnswer((_) async => stale);
+      expect(await build().canAuthenticate(), isFalse);
     });
   });
 

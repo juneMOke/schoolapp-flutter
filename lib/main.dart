@@ -108,10 +108,13 @@ class _MyAppState extends State<MyApp> {
                       key: AppConstants.bootstrapPayloadKey,
                     ),
                   );
-                  // Recalcule la pastille : consigne déconsignée → cycle normal
-                  // au prochain retour réseau ; sans jetons → « Reconnexion
-                  // requise » si des écritures attendent (V1.1).
-                  _syncStatusCubit.refresh();
+                  // Push opportuniste + recalcul de pastille (revue G2/I2) : le
+                  // repli offline arrive souvent avec le réseau « up » (serveur
+                  // down, timeout 6 s, portail captif) → AUCUNE transition de
+                  // connectivité ne viendra jamais déclencher la resync de la
+                  // consigne. `notifyLocalWrite` est inoffensif hors-ligne réel
+                  // (flush re-checke isOnline) et gaté sans jetons (moteur).
+                  _syncStatusCubit.notifyLocalWrite();
                   return;
                 }
                 _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());

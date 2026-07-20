@@ -238,7 +238,20 @@ Future<void> configureDependencies({
           final requiresAuth = options.extra['requiresAuth'] ?? false;
           if (requiresAuth) {
             final tokenStorage = getIt<TokenStorageService>();
-            final session = await tokenStorage.readAuthSession();
+            var session = await tokenStorage.readAuthSession();
+            if (session == null || session.accessToken.isEmpty) {
+              // Mint PROACTIF (V1.1, revue adversariale) : après une
+              // déconsignation, l'access est vide. Ne pas compter sur un 401
+              // « header absent » du serveur — certaines configs Spring
+              // répondent 403, que les handlers d'outbox classent TERMINAL
+              // (SYNC_ERROR immédiat, argent compris). Single-flight : les
+              // rafales d'un flush ne mintent qu'une fois ; sans refresh
+              // token, `refresh()` retourne null sans effet.
+              final minted = await refresher.refresh();
+              if (minted != null) {
+                session = await tokenStorage.readAuthSession();
+              }
+            }
             if (session != null && session.accessToken.isNotEmpty) {
               options.headers['Authorization'] =
                   'Bearer ${session.accessToken}';

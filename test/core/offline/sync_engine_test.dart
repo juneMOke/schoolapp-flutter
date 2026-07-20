@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 
@@ -27,6 +28,19 @@ class RecordingHandler implements OutboxSyncHandler {
     log.add(entry.id);
     return _result;
   }
+}
+
+class _StubProbe implements SessionCredentialsProbe {
+  _StubProbe(this.value);
+  final bool value;
+
+  @override
+  Future<bool> canAuthenticate() async => value;
+}
+
+class _ThrowingProbe implements SessionCredentialsProbe {
+  @override
+  Future<bool> canAuthenticate() => throw StateError('storage down');
 }
 
 /// Handler qui lève, pour vérifier la conversion en retry.
@@ -91,6 +105,57 @@ void main() {
 
   tearDown(() async {
     await db.close();
+  });
+
+  test('gate crédentiels : sans jetons, ne dispatch RIEN et ne consomme aucune '
+      'tentative (V1.1 — couvre les flush directs des repositories)', () async {
+    goOnline();
+    await dao.enqueue(entry(id: 'e1'));
+    final log = <String>[];
+    final engine =
+        SyncEngine(
+          outbox: dao,
+          connectivity: connectivityService,
+          credentialsProbe: _StubProbe(false),
+          now: () => fixedNow,
+        )..registerHandler(
+          RecordingHandler(
+            'ENROLLMENT',
+            const OutboxDispatchResult.acked(),
+            log,
+          ),
+        );
+
+    final report = await engine.flush();
+
+    expect(report.authBlocked, isTrue);
+    expect(log, isEmpty); // aucun appel réseau tenté
+    final rows = await dao.pendingReady(fixedNow);
+    expect(rows.single.attempts, 0); // zéro tentative consommée
+  });
+
+  test('gate crédentiels : sonde défaillante → flush normal', () async {
+    goOnline();
+    await dao.enqueue(entry(id: 'e1'));
+    final log = <String>[];
+    final engine =
+        SyncEngine(
+          outbox: dao,
+          connectivity: connectivityService,
+          credentialsProbe: _ThrowingProbe(),
+          now: () => fixedNow,
+        )..registerHandler(
+          RecordingHandler(
+            'ENROLLMENT',
+            const OutboxDispatchResult.acked(),
+            log,
+          ),
+        );
+
+    final report = await engine.flush();
+
+    expect(report.authBlocked, isFalse);
+    expect(log, ['e1']);
   });
 
   test('hors ligne : ne dispatch rien', () async {

@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 
 /// Horloge injectable (epoch ms) — permet un backoff déterministe en test.
 typedef Clock = int Function();
@@ -12,6 +13,10 @@ int systemClock() => DateTime.now().millisecondsSinceEpoch;
 class SyncFlushReport {
   final bool skipped;
   final bool offline;
+
+  /// La session ne peut pas authentifier ses appels (V1.1) : flush sauté sans
+  /// consommer aucune tentative — reconnexion online requise.
+  final bool authBlocked;
   final int acked;
   final int retried;
   final int failed;
@@ -25,6 +30,7 @@ class SyncFlushReport {
   const SyncFlushReport({
     this.skipped = false,
     this.offline = false,
+    this.authBlocked = false,
     this.acked = 0,
     this.retried = 0,
     this.failed = 0,
@@ -35,6 +41,7 @@ class SyncFlushReport {
 
   const SyncFlushReport.skipped() : this(skipped: true);
   const SyncFlushReport.offline() : this(offline: true);
+  const SyncFlushReport.authBlocked() : this(authBlocked: true);
 
   int get processed =>
       acked + retried + failed + noHandler + poisoned + blocked;
@@ -49,6 +56,7 @@ class SyncFlushReport {
 class SyncEngine {
   final OutboxDao _outbox;
   final ConnectivityService _connectivity;
+  final SessionCredentialsProbe? _credentialsProbe;
   final Clock _now;
   final int _maxAttempts;
   final Map<String, OutboxSyncHandler> _handlers = {};
@@ -77,16 +85,30 @@ class SyncEngine {
   SyncEngine({
     required OutboxDao outbox,
     required ConnectivityService connectivity,
+    SessionCredentialsProbe? credentialsProbe,
     Clock now = systemClock,
     int maxAttempts = _defaultMaxAttempts,
   }) : _outbox = outbox,
        _connectivity = connectivity,
+       _credentialsProbe = credentialsProbe,
        _now = now,
        _maxAttempts = maxAttempts;
 
   /// Enregistre le handler d'un type d'agrégat (appelé par la DI des branches).
   void registerHandler(OutboxSyncHandler handler) {
     _handlers[handler.aggregateType] = handler;
+  }
+
+  /// Sans sonde branchée (tests, plateformes partielles) ou sonde défaillante :
+  /// pas de gate — ne jamais bloquer la synchro sur un doute.
+  Future<bool> _canAuthenticate() async {
+    final probe = _credentialsProbe;
+    if (probe == null) return true;
+    try {
+      return await probe.canAuthenticate();
+    } catch (_) {
+      return true;
+    }
   }
 
   bool get isFlushing => _flushing;
@@ -98,6 +120,16 @@ class SyncEngine {
     try {
       if (!await _connectivity.isOnline()) {
         return const SyncFlushReport.offline();
+      }
+
+      // Gate crédentiels AU NIVEAU MOTEUR (V1.1, revue adversariale) : le
+      // cubit n'est PAS le seul appelant — les repositories offline flushent
+      // en direct après chaque écriture locale. Sans jetons utilisables,
+      // chaque entrée partirait sans Authorization → 401/403 → `attempts++`
+      // (voire terminal) sur des écritures qui n'ont aucune chance de partir.
+      // Goulot unique : couvre tous les sites d'appel, actuels et futurs.
+      if (!await _canAuthenticate()) {
+        return const SyncFlushReport.authBlocked();
       }
 
       final entries = await _outbox.pendingReady(_now(), limit: batchLimit);

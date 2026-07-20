@@ -106,6 +106,12 @@ void main() {
         AuthState(status: AuthStatus.loading),
         AuthState(status: AuthStatus.unauthenticated),
       ],
+      // Invariant « unauthenticated ⇒ zéro jeton vivant » (revue I3) : un
+      // refresh actif résiduel doit être re-consigné, jamais laissé mintable
+      // en arrière-plan pendant que l'écran de login est affiché.
+      verify: (_) {
+        verify(() => mockSessionManager.wipeSession()).called(1);
+      },
     );
 
     blocTest<AuthBloc, AuthState>(

@@ -215,7 +215,22 @@ class AuthSessionManager
     final stored = await _tokenStorage.readAuthSession();
     final AuthSession session;
     if (stored != null && stored.user.id == user.userId) {
-      session = stored.copyWith(userVersion: user.userVersion);
+      var reused = stored.copyWith(userVersion: user.userVersion);
+      // État partiel (crash du `clearAuthSession` au logout, deletes non
+      // ordonnés) : access présent mais refresh ABSENT alors que la consigne
+      // du compte existe. Sans réinjection, le premier 401 n'aurait aucun
+      // refresh à présenter → retour du poison d'outbox (revue F4). Le mot de
+      // passe vient d'être vérifié : mêmes garanties que la déconsignation.
+      final storedRefresh = stored.refreshToken;
+      if (storedRefresh == null || storedRefresh.isEmpty) {
+        final parked = await _tokenStorage.readParkedRefresh();
+        if (parked != null && parked.uid == user.userId) {
+          reused = reused.copyWith(refreshToken: parked.refreshToken);
+          await _tokenStorage.saveAuthSession(reused);
+          await _tokenStorage.clearParkedRefresh();
+        }
+      }
+      session = reused;
     } else {
       if (stored != null) {
         final foreignRefresh = stored.refreshToken;
@@ -292,10 +307,17 @@ class AuthSessionManager
     if (eval.clockTampered) _clockTampered = true;
     final mode = _clockTampered ? SessionMode.readOnly : eval.mode;
     await _authLocalDao.updateDegradedMode(mode, at: nowMs);
+    // Un contact serveur DEPUIS l'ouverture de la session courante : une
+    // session ouverte offline qui a resynchronisé en silence (déconsignation →
+    // refresh → flush) n'est plus « hors ligne » — le bandeau peut tomber.
+    final sessionStart = user.sessionStartedAt;
+    final hadServerContact =
+        sessionStart != null && user.lastServerSeenAt >= sessionStart;
     return SessionEvaluation(
       refreshExpired: eval.refreshExpired,
       clockTampered: _clockTampered,
       mode: mode,
+      hadServerContact: hadServerContact,
     );
   }
 
@@ -427,28 +449,48 @@ class AuthSessionManager
   Future<void> wipeSession({bool revokeOfflineWindow = false}) async {
     _wipeGeneration++; // invalide tout applyRefresh en vol (anti-résurrection)
     final user = await _authLocalDao.getSessionUser();
-    // L'uid du propriétaire des jetons actifs : session DB, sinon le profil du
-    // token store (cold-start sans ligne de session — montée de version).
-    final storedUid =
-        user?.userId ?? (await _tokenStorage.readAuthSession())?.user.id;
+    // Le propriétaire RÉEL des jetons actifs est le profil du TOKEN STORE (les
+    // jetons et le profil y sont toujours écrits ensemble). La session DB peut
+    // diverger (crash entre l'upsert de session et la réconciliation des
+    // jetons au login offline) : étiqueter la consigne avec l'uid DB
+    // transférerait le crédentiel d'un compte à un autre (revue F1).
+    final ownerUid = (await _tokenStorage.readAuthSession())?.user.id;
+    final dbUid = user?.userId;
 
     if (revokeOfflineWindow) {
-      // Révocation : rien ne survit pour CE compte — ni l'actif, ni sa
-      // consigne. La consigne d'un AUTRE compte n'est pas concernée.
+      // Révocation : rien ne survit pour le compte concerné — ni l'actif, ni
+      // sa consigne. Par prudence (revue F2) : brûler si la consigne
+      // correspond à L'UN OU L'AUTRE uid connu, et brûler inconditionnellement
+      // si aucun uid n'est connaissable (slot unique, contexte = révocation).
       final parked = await _tokenStorage.readParkedRefresh();
-      if (storedUid != null && parked?.uid == storedUid) {
-        await _tokenStorage.clearParkedRefresh();
+      if (parked != null) {
+        final matches = parked.uid == dbUid || parked.uid == ownerUid;
+        final unknowable =
+            dbUid == null && (ownerUid == null || ownerUid.isEmpty);
+        if (matches || unknowable) {
+          await _tokenStorage.clearParkedRefresh();
+        }
       }
     } else {
       final refresh = await _tokenStorage.readRefreshToken();
+      // Parquer SEULEMENT si : jeton présent · propriétaire connu (profil du
+      // token store) · cohérent avec la session DB si elle existe (mismatch →
+      // détruire, F1) · fenêtre offline du propriétaire encore vivante — les
+      // chemins refresh-expiré passent aussi par ce wipe, et parquer un jeton
+      // MORT certain écraserait la consigne valide d'un autre compte (F3).
       if (refresh != null &&
           refresh.isNotEmpty &&
-          storedUid != null &&
-          storedUid.isNotEmpty) {
-        await _tokenStorage.parkRefreshToken(
-          uid: storedUid,
-          refreshToken: refresh,
-        );
+          ownerUid != null &&
+          ownerUid.isNotEmpty &&
+          (dbUid == null || dbUid == ownerUid)) {
+        final owner = await _authLocalDao.getUser(ownerUid);
+        final bound = owner?.refreshExpiresAt;
+        if (bound != null && _now() < bound) {
+          await _tokenStorage.parkRefreshToken(
+            uid: ownerUid,
+            refreshToken: refresh,
+          );
+        }
       }
     }
 
@@ -468,16 +510,26 @@ class AuthSessionManager
 
   // ── Sonde de crédentiels (boucle de synchro, V1.1) ──────────────────────────
 
-  /// Vrai si la session peut authentifier des appels API (access non vide OU
-  /// refresh actif). La consigne ne compte pas (verrouillée par mot de passe).
+  /// Vrai si la session peut authentifier des appels API : access non vide et
+  /// NON EXPIRÉ, ou refresh actif non expiré (l'interceptor mintera). La
+  /// consigne ne compte pas (verrouillée par mot de passe). Les bornes
+  /// manquantes valent « valide » (backend qui ne les fournit pas).
   /// Défensif : storage indisponible → `false` (ne pas marteler le serveur).
   @override
   Future<bool> canAuthenticate() async {
     try {
+      final nowMs = _now();
       final stored = await _tokenStorage.readAuthSession();
-      if (stored != null && stored.accessToken.isNotEmpty) return true;
-      final refresh = await _tokenStorage.readRefreshToken();
-      return refresh != null && refresh.isNotEmpty;
+      if (stored != null && stored.accessToken.isNotEmpty) {
+        final accessExp = stored.accessExpiresAt;
+        if (accessExp == null || nowMs < accessExp) return true;
+        // Access périmé : utilisable seulement si un refresh peut minter.
+      }
+      final refresh =
+          stored?.refreshToken ?? await _tokenStorage.readRefreshToken();
+      if (refresh == null || refresh.isEmpty) return false;
+      final refreshExp = stored?.refreshExpiresAt;
+      return refreshExp == null || nowMs < refreshExp;
     } catch (_) {
       return false;
     }

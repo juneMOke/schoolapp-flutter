@@ -262,6 +262,20 @@ void main() {
       await cubit.close();
     });
 
+    test(
+      'authRequired PRIME sur syncConflict (l\'auth est la cause racine)',
+      () async {
+        when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+        when(() => outbox.pendingCount()).thenAnswer((_) async => 3);
+        when(() => outbox.errorCount()).thenAnswer((_) async => 1);
+
+        final cubit = buildGated();
+        await pumpEventQueue();
+        expect(cubit.state, SyncStatus.authRequired);
+        await cubit.close();
+      },
+    );
+
     test('sonde défaillante → ne bloque pas la synchro', () async {
       when(() => probe.canAuthenticate()).thenThrow(Exception('storage'));
       when(() => outbox.pendingCount()).thenAnswer((_) async => 1);
