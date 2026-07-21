@@ -120,21 +120,15 @@ class _ClassesListPageState extends State<ClassesListPage> {
             },
           ),
           // Consultation offline-first : le pull des classes/rosters est
-          // découplé de la lecture. On surface son ÉCHEC (parité avec l'ancienne
-          // lecture online qui remontait l'erreur réseau, sinon le roster
-          // s'afficherait « vide » en silence) et on RELIT le roster affiché une
-          // fois le cache peuplé.
+          // découplé de la lecture, best-effort (comme les autres modules
+          // offline — attendance/finance). Son échec (pas de réseau) N'EST PAS
+          // surfacé : le roster affiché reste celui déjà en cache local, et un
+          // retour online relancera le pull via le PullCoordinator. On ne relit
+          // le roster que si le pull a abouti.
           BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
             listenWhen: (previous, current) =>
                 previous.syncStatus != current.syncStatus,
             listener: (context, state) {
-              if (state.syncStatus == ClassroomStatus.failure) {
-                AppSnackBar.showError(
-                  context,
-                  l10n.classesOrganisationErrorUnknown,
-                );
-                return;
-              }
               if (state.syncStatus != ClassroomStatus.success) {
                 return;
               }
