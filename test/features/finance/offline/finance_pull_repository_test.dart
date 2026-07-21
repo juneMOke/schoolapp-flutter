@@ -164,6 +164,11 @@ void main() {
         expect(outcome.notModified, isFalse);
         expect(outcome.upserted, 2);
         expect(outcome.syncedAt, clock);
+        // Horloge SERVEUR (page.serverTime), pas l'horloge locale (`clock`).
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-16T10:00:01Z').millisecondsSinceEpoch,
+        );
         expect(outcome.cursor, 'WM1'); // jeton rendu = jeton mémorisé
         final sent = verify(
           () => api.pullStudentCharges(auth, captureAny(), limit, null, null),
@@ -295,6 +300,7 @@ void main() {
 
         expect(outcome.notModified, isTrue);
         expect(outcome.cursor, 'WM0'); // jeton conservé
+        expect(outcome.serverTimeMs, isNull); // 304 sans corps
         expect(await syncMeta.getCursor(chargesResource), 'WM0');
         expect(await syncMeta.getSyncedAt(chargesResource), clock);
       },
@@ -434,6 +440,10 @@ void main() {
 
         expect(outcome.notModified, isFalse);
         expect(outcome.upserted, 1);
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-16T10:00:01Z').millisecondsSinceEpoch,
+        );
 
         final payments = await db.query('payments');
         expect(payments.single['sync_status'], 'SYNCED');

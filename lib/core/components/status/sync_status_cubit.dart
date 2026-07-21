@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 
 /// Cubit global d'état de synchronisation : source de vérité de la
 /// [SyncIndicator] montée dans la barre supérieure.
@@ -32,13 +34,23 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 /// exception dans l'arbre de widgets — les tests ne mockent pas
 /// `connectivity_plus`, et la base peut être indisponible. En cas d'échec on
 /// conserve le dernier état connu.
-class SyncStatusCubit extends Cubit<SyncStatus> {
+class SyncStatusCubit extends Cubit<SyncStatusState> {
   final OutboxDao _outbox;
   final ConnectivityService _connectivity;
   final SyncEngine _syncEngine;
   final PullCoordinator? _pullCoordinator;
   final RevocationEvaluator? _revocationEvaluator;
   final SessionCredentialsProbe? _credentialsProbe;
+  final SyncMetaDao _syncMetaDao;
+
+  /// Clé `sync_meta` sentinelle (ne correspond à aucune ressource métier) où
+  /// est persistée la date de dernière synchro globale (badge top bar).
+  static const String _kGlobalLastSyncResource = '__global_last_sync__';
+
+  /// Epoch ms **heure serveur** de la dernière synchro connue — hydraté au
+  /// démarrage depuis `sync_meta`, avancé uniquement par un pull réussi avec
+  /// données (jamais régressé par un simple changement de [SyncStatus]).
+  int? _lastSyncAtMs;
 
   StreamSubscription<bool>? _connectivitySub;
 
@@ -46,18 +58,38 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     required OutboxDao outbox,
     required ConnectivityService connectivity,
     required SyncEngine syncEngine,
+    required SyncMetaDao syncMetaDao,
     PullCoordinator? pullCoordinator,
     RevocationEvaluator? revocationEvaluator,
     SessionCredentialsProbe? credentialsProbe,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
+       _syncMetaDao = syncMetaDao,
        _pullCoordinator = pullCoordinator,
        _revocationEvaluator = revocationEvaluator,
        _credentialsProbe = credentialsProbe,
-       super(SyncStatus.synced) {
+       super(const SyncStatusState(status: SyncStatus.synced)) {
     _listenConnectivity();
-    unawaited(refresh());
+    unawaited(_hydrateThenRefresh());
+  }
+
+  /// Restaure la date de dernière synchro persistée (survit au redémarrage)
+  /// avant le premier calcul de statut — défensif : une base indisponible
+  /// (tests, plateforme partielle) laisse simplement `_lastSyncAtMs` à `null`.
+  ///
+  /// Passe par [_advanceLastSync] (pas une affectation directe) : si un cycle
+  /// de reconnexion réel a déjà avancé `_lastSyncAtMs` pendant que cette
+  /// lecture était en vol, la valeur hydratée (plus ancienne) ne doit pas
+  /// écraser la plus récente déjà connue.
+  Future<void> _hydrateThenRefresh() async {
+    try {
+      final hydrated = await _syncMetaDao.getSyncedAt(_kGlobalLastSyncResource);
+      if (hydrated != null) await _advanceLastSync(hydrated);
+    } catch (_) {
+      // Base indisponible : pas de date affichée plutôt qu'une exception.
+    }
+    await refresh();
   }
 
   void _listenConnectivity() {
@@ -116,12 +148,32 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
     }
     if (!revoked) {
       try {
-        await _pullCoordinator?.pullAll();
+        final report = await _pullCoordinator?.pullAll();
+        final observed = report?.latestServerTimeMs;
+        if (observed != null) await _advanceLastSync(observed);
       } catch (_) {
         // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.
       }
     }
     await refresh();
+  }
+
+  /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
+  /// est plus récent que celle connue, et la persiste — `sync_meta` réutilisé
+  /// via sa clé sentinelle, aucune migration de schéma. Best-effort : un échec
+  /// d'écriture n'empêche pas la valeur en mémoire de refléter ce cycle.
+  Future<void> _advanceLastSync(int serverTimeMs) async {
+    if (_lastSyncAtMs != null && serverTimeMs <= _lastSyncAtMs!) return;
+    _lastSyncAtMs = serverTimeMs;
+    try {
+      await _syncMetaDao.setCursor(
+        _kGlobalLastSyncResource,
+        cursor: null,
+        syncedAt: serverTimeMs,
+      );
+    } catch (_) {
+      // Persistance best-effort (cf. docstring).
+    }
   }
 
   /// Recalcule le statut depuis l'état courant du réseau et de l'outbox.
@@ -190,7 +242,8 @@ class SyncStatusCubit extends Cubit<SyncStatus> {
 
   void _safeEmit(SyncStatus status) {
     if (isClosed) return;
-    if (state != status) emit(status);
+    final next = SyncStatusState(status: status, lastSyncAtMs: _lastSyncAtMs);
+    if (state != next) emit(next);
   }
 
   @override

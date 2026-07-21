@@ -127,6 +127,56 @@ void main() {
     expect(report.notModified, 1);
   });
 
+  group('latestServerTimeMs (date de dernière synchro, badge)', () {
+    test('agrège le MAX des serverTimeMs non-null observés', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler(
+            'a',
+            const PullOutcome.updated(upserted: 1, serverTimeMs: 1000),
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'b',
+            const PullOutcome.updated(upserted: 1, serverTimeMs: 5000),
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler('c', const PullOutcome.notModified()),
+        );
+      final report = await coord.pullAll();
+      expect(report.latestServerTimeMs, 5000);
+    });
+
+    test('null si aucun handler ne rapporte de serverTimeMs', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(FakePullHandler('a', const PullOutcome.notModified()))
+        ..registerHandler(FakePullHandler('b', const PullOutcome.error('KO')));
+      final report = await coord.pullAll();
+      expect(report.latestServerTimeMs, isNull);
+    });
+
+    test(
+      'un handler en échec n\'empêche pas l\'agrégation des autres',
+      () async {
+        goOnline();
+        final coord = build()
+          ..registerHandler(ThrowingPullHandler())
+          ..registerHandler(
+            FakePullHandler(
+              'ok',
+              const PullOutcome.updated(upserted: 1, serverTimeMs: 42),
+            ),
+          );
+        final report = await coord.pullAll();
+        expect(report.latestServerTimeMs, 42);
+      },
+    );
+  });
+
   test(
     'verrou : un second pullAll pendant un pull en cours est skipped',
     () async {

@@ -95,6 +95,11 @@ void main() {
         expect(outcome.upserted, 2);
         expect(outcome.notModified, isFalse);
         expect(outcome.bootstrapComplete, isTrue);
+        // Horloge SERVEUR (page.serverTime), pas l'horloge locale injectée.
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-19T10:00:00Z').millisecondsSinceEpoch,
+        );
         expect(await syncMeta.getCursor(kScheduleTimeSlotsResource), 'wm-1');
         expect((await local.getTimeSlots()).length, 2);
       },
@@ -134,6 +139,7 @@ void main() {
 
       expect(outcome.notModified, isTrue);
       expect(await syncMeta.getCursor(kScheduleTimeSlotsResource), 'wm-prev');
+      expect(outcome.serverTimeMs, isNull);
     });
 
     test('400 → curseur illisible : rebootstrap depuis null', () async {

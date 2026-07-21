@@ -912,6 +912,12 @@
   "journeyModeEdit": "Modification",
   "journeyModeView": "Consultation",
   "journeyCloseAction": "Fermer",
+  "wizardExitConfirmTitle": "Quitter l'inscription ?",
+  "wizardExitConfirmMessage": "Une inscription est en cours. Les modifications non enregistrées de l'étape actuelle seront perdues ; les étapes déjà enregistrées restent disponibles en brouillon.",
+  "wizardExitConfirmAction": "Quitter",
+  "wizardExitStayAction": "Continuer la saisie",
+  "enrollmentFinalizeConfirmTitle": "Valider l'inscription ?",
+  "enrollmentFinalizeConfirmMessage": "Cette action confirme le dossier et le place en file de synchronisation. Vérifiez le récapitulatif avant de valider.",
   "stepSaveStateIdle": "Aucune saisie",
   "stepSaveStateIncomplete": "Champs incomplets",
   "stepSaveStatePending": "Modifications non enregistrées",
@@ -1785,6 +1791,20 @@
   "statusAuthRequired": "Reconnexion requise",
   "@statusAuthRequired": {
     "description": "Pastille synchro : réseau présent mais session sans jetons (login offline) — un login online est requis pour synchroniser"
+  },
+
+  "syncLastSyncJustNow": "À l'instant",
+  "syncLastSyncMinutesAgo": "{count, plural, =1{Il y a 1 min} other{Il y a {count} min}}",
+  "@syncLastSyncMinutesAgo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "syncLastSyncHoursAgo": "{count, plural, =1{Il y a 1 h} other{Il y a {count} h}}",
+  "@syncLastSyncHoursAgo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "syncLastSyncDaysAgo": "{count, plural, =1{Il y a 1 jour} other{Il y a {count} jours}}",
+  "@syncLastSyncDaysAgo": {
+    "placeholders": { "count": { "type": "int" } }
   },
 
   "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",

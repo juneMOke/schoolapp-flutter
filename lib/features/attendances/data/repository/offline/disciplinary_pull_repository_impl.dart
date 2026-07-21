@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -143,6 +144,7 @@ class DisciplinaryPullRepositoryImpl implements DisciplinaryPullRepository {
     var cursor = from;
     var upserted = 0;
     var reachedEnd = false;
+    String? lastServerTime;
     while (true) {
       final sent = cursor;
       final response = await _api.pullDisciplinaryCases(
@@ -153,6 +155,7 @@ class DisciplinaryPullRepositoryImpl implements DisciplinaryPullRepository {
         null, // studentId : pull de masse
       );
       final data = response.data;
+      lastServerTime = data.page.serverTime;
       upserted += await _localDataSource.applyPulledCases(
         data.items.map((d) => d.toPulled(syncedAt)).toList(),
         syncedAt,
@@ -193,6 +196,7 @@ class DisciplinaryPullRepositoryImpl implements DisciplinaryPullRepository {
             bootstrapComplete: bootstrapComplete,
             syncedAt: syncedAt,
             cursor: cursor,
+            serverTimeMs: EpochIsoHelper.tryToEpochMs(lastServerTime),
           );
   }
 

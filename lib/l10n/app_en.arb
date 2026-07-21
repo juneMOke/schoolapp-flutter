@@ -899,6 +899,12 @@
   "journeyModeEdit": "Edit",
   "journeyModeView": "View",
   "journeyCloseAction": "Close",
+  "wizardExitConfirmTitle": "Leave the enrollment?",
+  "wizardExitConfirmMessage": "An enrollment is in progress. Unsaved changes on the current step will be lost; steps already saved remain available as a draft.",
+  "wizardExitConfirmAction": "Leave",
+  "wizardExitStayAction": "Keep editing",
+  "enrollmentFinalizeConfirmTitle": "Validate the enrollment?",
+  "enrollmentFinalizeConfirmMessage": "This action confirms the file and queues it for synchronization. Review the summary before validating.",
   "stepSaveStateIdle": "No input yet",
   "stepSaveStateIncomplete": "Incomplete fields",
   "stepSaveStatePending": "Unsaved changes",
@@ -1779,6 +1785,20 @@
     "statusAuthRequired": "Sign-in required",
     "@statusAuthRequired": {
       "description": "Sync pill: network is back but the session has no tokens (offline login) — an online sign-in is required to synchronize"
+    },
+
+    "syncLastSyncJustNow": "Just now",
+    "syncLastSyncMinutesAgo": "{count, plural, =1{1 min ago} other{{count} min ago}}",
+    "@syncLastSyncMinutesAgo": {
+      "placeholders": { "count": { "type": "int" } }
+    },
+    "syncLastSyncHoursAgo": "{count, plural, =1{1 h ago} other{{count} h ago}}",
+    "@syncLastSyncHoursAgo": {
+      "placeholders": { "count": { "type": "int" } }
+    },
+    "syncLastSyncDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+    "@syncLastSyncDaysAgo": {
+      "placeholders": { "count": { "type": "int" } }
     },
 
     "offlineQueuedGeneric": "Saved — pending synchronization",

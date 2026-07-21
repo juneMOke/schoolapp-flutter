@@ -19,7 +19,10 @@ class TimeSlotsPullHandler implements PullHandler {
       (failure) => PullOutcome.error(failure.toString()),
       (outcome) => outcome.notModified
           ? const PullOutcome.notModified()
-          : PullOutcome.updated(upserted: outcome.upserted),
+          : PullOutcome.updated(
+              upserted: outcome.upserted,
+              serverTimeMs: outcome.serverTimeMs,
+            ),
     );
   }
 }
@@ -40,7 +43,10 @@ class SessionsPullHandler implements PullHandler {
       (failure) => PullOutcome.error(failure.toString()),
       (outcome) => outcome.notModified
           ? const PullOutcome.notModified()
-          : PullOutcome.updated(upserted: outcome.upserted),
+          : PullOutcome.updated(
+              upserted: outcome.upserted,
+              serverTimeMs: outcome.serverTimeMs,
+            ),
     );
   }
 }

@@ -9,12 +9,20 @@ class PullRunReport {
   final int notModified;
   final int failed;
 
+  /// Horloge **serveur** (epoch ms) la plus récente observée ce cycle, tous
+  /// handlers confondus (max des [PullOutcome.serverTimeMs] non-null) — sert
+  /// de date de "dernière synchro" (badge). `null` si aucun handler n'a
+  /// ramené de donnée avec `serverTime` (rien de neuf partout, ou ressources
+  /// dont le contrat n'expose pas encore ce champ).
+  final int? latestServerTimeMs;
+
   const PullRunReport({
     this.skipped = false,
     this.offline = false,
     this.updated = 0,
     this.notModified = 0,
     this.failed = 0,
+    this.latestServerTimeMs,
   });
 
   const PullRunReport.skipped() : this(skipped: true);
@@ -65,6 +73,7 @@ class PullCoordinator {
       }
 
       var updated = 0, notModified = 0, failed = 0;
+      int? latestServerTimeMs;
       for (final handler in _handlers.values) {
         try {
           final outcome = await handler.pull();
@@ -76,6 +85,11 @@ class PullCoordinator {
             case PullResult.error:
               failed++;
           }
+          final observed = outcome.serverTimeMs;
+          if (observed != null &&
+              (latestServerTimeMs == null || observed > latestServerTimeMs)) {
+            latestServerTimeMs = observed;
+          }
         } catch (_) {
           // Un handler qui lève (malgré son contrat) est isolé en échec.
           failed++;
@@ -86,6 +100,7 @@ class PullCoordinator {
         updated: updated,
         notModified: notModified,
         failed: failed,
+        latestServerTimeMs: latestServerTimeMs,
       );
     } finally {
       _pulling = false;

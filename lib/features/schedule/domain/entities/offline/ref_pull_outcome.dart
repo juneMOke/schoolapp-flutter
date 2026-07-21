@@ -12,12 +12,17 @@ class RefPullOutcome extends Equatable {
   final int syncedAt;
   final String? cursor;
 
+  /// Horloge **serveur** (epoch ms, `page.serverTime`) de la dernière page
+  /// appliquée — `null` sur un cycle `notModified` (pas de corps à parser).
+  final int? serverTimeMs;
+
   const RefPullOutcome({
     required this.upserted,
     required this.notModified,
     required this.bootstrapComplete,
     required this.syncedAt,
     required this.cursor,
+    this.serverTimeMs,
   });
 
   factory RefPullOutcome.notModifiedAt(
@@ -39,5 +44,6 @@ class RefPullOutcome extends Equatable {
     bootstrapComplete,
     syncedAt,
     cursor,
+    serverTimeMs,
   ];
 }

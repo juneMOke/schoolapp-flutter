@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
@@ -280,10 +281,12 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
   }) async {
     var cursor = from;
     var upserted = 0;
+    String? lastServerTime;
     while (true) {
       final sent = cursor;
       final response = await request(sent);
       final env = response.data.page;
+      lastServerTime = env.serverTime;
       upserted += await apply(response.data, syncedAt);
 
       // `nextCursor` (progression) tant que `hasMore`, sinon `nextWatermark`
@@ -314,6 +317,7 @@ class FinancePullRepositoryImpl implements FinancePullRepository {
             notModified: false,
             syncedAt: syncedAt,
             cursor: cursor,
+            serverTimeMs: EpochIsoHelper.tryToEpochMs(lastServerTime),
           );
   }
 }

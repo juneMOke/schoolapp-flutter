@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -29,10 +30,12 @@ class _ClassroomCycle {
   final int upserted;
   final bool notModified;
   final bool bootstrapComplete;
+  final int? serverTimeMs;
   const _ClassroomCycle({
     required this.upserted,
     required this.notModified,
     required this.bootstrapComplete,
+    this.serverTimeMs,
   });
 }
 
@@ -122,6 +125,7 @@ class AcademicsCoursPullRepositoryImpl {
     var allNotModified = true;
     var allBootstrapComplete = true;
     var anySucceeded = false;
+    int? latestServerTimeMs;
     Failure? lastFailure;
     for (final classroomId in classroomIds) {
       final cycle = await _pullClassroom(classroomId, syncedAt);
@@ -138,6 +142,11 @@ class AcademicsCoursPullRepositoryImpl {
       totalUpserted += applied!.upserted;
       allNotModified = allNotModified && applied!.notModified;
       allBootstrapComplete = allBootstrapComplete && applied!.bootstrapComplete;
+      final observed = applied!.serverTimeMs;
+      if (observed != null &&
+          (latestServerTimeMs == null || observed > latestServerTimeMs)) {
+        latestServerTimeMs = observed;
+      }
     }
 
     if (!anySucceeded && lastFailure != null) return Left(lastFailure);
@@ -147,6 +156,7 @@ class AcademicsCoursPullRepositoryImpl {
         notModified: allNotModified,
         bootstrapComplete: allBootstrapComplete,
         syncedAt: syncedAt,
+        serverTimeMs: latestServerTimeMs,
       ),
     );
   }
@@ -225,6 +235,7 @@ class AcademicsCoursPullRepositoryImpl {
     var cursor = from;
     var upserted = 0;
     var reachedEnd = false;
+    String? lastServerTime;
     while (true) {
       final sent = cursor;
       final page = (await _api.pullCours(
@@ -233,6 +244,7 @@ class AcademicsCoursPullRepositoryImpl {
         sent,
         pageLimit,
       )).data;
+      lastServerTime = page.page.serverTime;
       upserted += await _local.applyPulledCours(
         page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
       );
@@ -265,6 +277,9 @@ class AcademicsCoursPullRepositoryImpl {
       upserted: upserted,
       notModified: upserted == 0,
       bootstrapComplete: await _isBootstrapComplete(bootstrapResource),
+      serverTimeMs: upserted == 0
+          ? null
+          : EpochIsoHelper.tryToEpochMs(lastServerTime),
     );
   }
 

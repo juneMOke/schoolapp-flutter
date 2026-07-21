@@ -17,11 +17,16 @@ class EnrollmentPullOutcome {
   /// keyset (`nextWatermark` en fin de cycle, ou `nextCursor` si interrompu).
   final String? cursor;
 
+  /// Horloge **serveur** (epoch ms, `serverTime`) de la dernière page
+  /// appliquée — `null` sur un cycle `notModified`.
+  final int? serverTimeMs;
+
   const EnrollmentPullOutcome({
     required this.upserted,
     required this.notModified,
     required this.syncedAt,
     this.cursor,
+    this.serverTimeMs,
   });
 
   const EnrollmentPullOutcome.notModifiedAt(int syncedAt, String? cursor)

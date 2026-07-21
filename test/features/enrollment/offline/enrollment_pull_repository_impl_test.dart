@@ -223,6 +223,11 @@ void main() {
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.notModified, isFalse);
         expect(outcome.upserted, 2); // 1 année + 1 tarif
+        // Horloge SERVEUR (serverTime du bundle), pas l'horloge locale.
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-08T10:00:00Z').millisecondsSinceEpoch,
+        );
         expect(await db.query('ref_academic_years'), hasLength(1));
         expect(capturedTariffs, hasLength(1));
         expect(capturedTariffs.single.label, 'INSCRIPTION'); // repli fee_code
@@ -339,6 +344,10 @@ void main() {
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.upserted, 1);
         expect(await db.query('ref_previous_year_students'), hasLength(1));
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-08T10:00:00Z').millisecondsSinceEpoch,
+        );
         expect(
           await syncMeta.getCursor(EnrollmentPullRepositoryImpl.cohortResource),
           '2026-07-08T10:00:00Z',
@@ -624,6 +633,11 @@ void main() {
 
       final outcome = result.getOrElse(() => throw StateError('left'));
       expect(outcome.upserted, 1);
+      // Horloge SERVEUR (page.serverTime), pas l'horloge locale.
+      expect(
+        outcome.serverTimeMs,
+        DateTime.parse('2026-07-08T10:00:01Z').millisecondsSinceEpoch,
+      );
       // Curseur mémorisé renvoyé verbatim en `cursor`.
       verify(() => api.pullPreEnrollments(auth, 'CUR-PREV', limit)).called(1);
       expect(
@@ -713,6 +727,7 @@ void main() {
 
       final outcome = result.getOrElse(() => throw StateError('left'));
       expect(outcome.notModified, isTrue);
+      expect(outcome.serverTimeMs, isNull);
       expect(
         await syncMeta.getCursor(
           EnrollmentPullRepositoryImpl.preEnrollmentsResource,
@@ -754,6 +769,10 @@ void main() {
 
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.upserted, 1);
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-08T10:00:01Z').millisecondsSinceEpoch,
+        );
         final row = (await db.query('enrollments')).single;
         expect(row['status'], 'ACTIVE');
         expect(
@@ -837,6 +856,10 @@ void main() {
 
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.upserted, 1);
+        expect(
+          outcome.serverTimeMs,
+          DateTime.parse('2026-07-08T10:00:01Z').millisecondsSinceEpoch,
+        );
         final e = (await db.query('enrollments')).single;
         expect(e['id'], 'e-snap-1');
         expect(e['sync_status'], 'SYNCED');
@@ -1070,6 +1093,7 @@ void main() {
 
       final outcome = result.getOrElse(() => throw StateError('left'));
       expect(outcome.notModified, isTrue);
+      expect(outcome.serverTimeMs, isNull);
       expect(
         await syncMeta.getCursor(
           EnrollmentPullRepositoryImpl.snapshotsResource,

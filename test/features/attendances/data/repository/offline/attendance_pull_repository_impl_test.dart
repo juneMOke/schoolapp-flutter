@@ -119,6 +119,12 @@ void main() {
       final outcome = right(await repo.syncAttendance());
       expect(outcome.upserted, 1);
       expect(outcome.bootstrapComplete, isTrue);
+      // Horloge SERVEUR (page.serverTime), pas l'horloge locale injectée
+      // (`now: () => 10000`) — c'est tout l'objet du changement.
+      expect(
+        outcome.serverTimeMs,
+        DateTime.parse('2026-07-18T10:00:00Z').millisecondsSinceEpoch,
+      );
 
       // Session + absence en base.
       final s = await local.getSession(
@@ -167,6 +173,9 @@ void main() {
 
     final outcome = right(await repo.syncAttendance());
     expect(outcome.notModified, isTrue);
+    // Pas de corps sur un 304 → pas de serverTime à parser : la date de
+    // dernière synchro globale n'avance pas sur ce cycle (décision produit).
+    expect(outcome.serverTimeMs, isNull);
   });
 
   test(

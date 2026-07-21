@@ -3308,6 +3308,42 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get journeyCloseAction;
 
+  /// No description provided for @wizardExitConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the enrollment?'**
+  String get wizardExitConfirmTitle;
+
+  /// No description provided for @wizardExitConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An enrollment is in progress. Unsaved changes on the current step will be lost; steps already saved remain available as a draft.'**
+  String get wizardExitConfirmMessage;
+
+  /// No description provided for @wizardExitConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get wizardExitConfirmAction;
+
+  /// No description provided for @wizardExitStayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get wizardExitStayAction;
+
+  /// No description provided for @enrollmentFinalizeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate the enrollment?'**
+  String get enrollmentFinalizeConfirmTitle;
+
+  /// No description provided for @enrollmentFinalizeConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action confirms the file and queues it for synchronization. Review the summary before validating.'**
+  String get enrollmentFinalizeConfirmMessage;
+
   /// No description provided for @stepSaveStateIdle.
   ///
   /// In en, this message translates to:
@@ -6941,6 +6977,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign-in required'**
   String get statusAuthRequired;
+
+  /// No description provided for @syncLastSyncJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get syncLastSyncJustNow;
+
+  /// No description provided for @syncLastSyncMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 min ago} other{{count} min ago}}'**
+  String syncLastSyncMinutesAgo(int count);
+
+  /// No description provided for @syncLastSyncHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 h ago} other{{count} h ago}}'**
+  String syncLastSyncHoursAgo(int count);
+
+  /// No description provided for @syncLastSyncDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String syncLastSyncDaysAgo(int count);
 
   /// No description provided for @offlineQueuedGeneric.
   ///

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 
 class MockOutboxDao extends Mock implements OutboxDao {}
 
@@ -20,20 +21,24 @@ class MockPullCoordinator extends Mock implements PullCoordinator {}
 
 class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
 
+class MockSyncMetaDao extends Mock implements SyncMetaDao {}
+
 void main() {
   late MockOutboxDao outbox;
   late MockConnectivityService connectivity;
   late MockSyncEngine syncEngine;
+  late MockSyncMetaDao syncMetaDao;
   late StreamController<bool> statusController;
 
   setUp(() {
     outbox = MockOutboxDao();
     connectivity = MockConnectivityService();
     syncEngine = MockSyncEngine();
+    syncMetaDao = MockSyncMetaDao();
     statusController = StreamController<bool>.broadcast();
 
-    // Valeurs « nominales » (online, outbox vide, pas de flush) surchargées
-    // au besoin dans chaque test.
+    // Valeurs « nominales » (online, outbox vide, pas de flush, jamais
+    // synchronisé) surchargées au besoin dans chaque test.
     when(
       () => connectivity.onStatusChange,
     ).thenAnswer((_) => statusController.stream);
@@ -44,6 +49,14 @@ void main() {
     when(
       () => syncEngine.flush(),
     ).thenAnswer((_) async => const SyncFlushReport());
+    when(() => syncMetaDao.getSyncedAt(any())).thenAnswer((_) async => null);
+    when(
+      () => syncMetaDao.setCursor(
+        any(),
+        cursor: any(named: 'cursor'),
+        syncedAt: any(named: 'syncedAt'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   tearDown(() async {
@@ -54,12 +67,13 @@ void main() {
     outbox: outbox,
     connectivity: connectivity,
     syncEngine: syncEngine,
+    syncMetaDao: syncMetaDao,
   );
 
   test('online + outbox vide → synced', () async {
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.synced);
+    expect(cubit.state.status, SyncStatus.synced);
     await cubit.close();
   });
 
@@ -67,7 +81,7 @@ void main() {
     when(() => connectivity.isOnline()).thenAnswer((_) async => false);
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.offline);
+    expect(cubit.state.status, SyncStatus.offline);
     await cubit.close();
   });
 
@@ -75,7 +89,7 @@ void main() {
     when(() => outbox.pendingCount()).thenAnswer((_) async => 3);
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.pendingUpload);
+    expect(cubit.state.status, SyncStatus.pendingUpload);
     await cubit.close();
   });
 
@@ -86,7 +100,7 @@ void main() {
       when(() => outbox.pendingCount()).thenAnswer((_) async => 5);
       final cubit = build();
       await pumpEventQueue();
-      expect(cubit.state, SyncStatus.syncConflict);
+      expect(cubit.state.status, SyncStatus.syncConflict);
       await cubit.close();
     },
   );
@@ -96,7 +110,7 @@ void main() {
     when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.syncing);
+    expect(cubit.state.status, SyncStatus.syncing);
     await cubit.close();
   });
 
@@ -114,7 +128,7 @@ void main() {
     await pumpEventQueue();
     statusController.add(false);
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.offline);
+    expect(cubit.state.status, SyncStatus.offline);
     verifyNever(() => syncEngine.flush());
     await cubit.close();
   });
@@ -123,11 +137,11 @@ void main() {
     when(() => outbox.pendingCount()).thenAnswer((_) async => 1);
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.pendingUpload);
+    expect(cubit.state.status, SyncStatus.pendingUpload);
     await cubit.notifyLocalWrite();
     await pumpEventQueue();
     verify(() => syncEngine.flush()).called(1);
-    expect(cubit.state, SyncStatus.pendingUpload);
+    expect(cubit.state.status, SyncStatus.pendingUpload);
     await cubit.close();
   });
 
@@ -135,7 +149,7 @@ void main() {
     when(() => connectivity.isOnline()).thenThrow(Exception('no plugin'));
     final cubit = build();
     await pumpEventQueue();
-    expect(cubit.state, SyncStatus.synced);
+    expect(cubit.state.status, SyncStatus.synced);
     await cubit.close();
   });
 
@@ -145,7 +159,7 @@ void main() {
     statusController.addError(Exception('boom'));
     await pumpEventQueue();
     // Ne lève pas ; l'état reste cohérent.
-    expect(cubit.state, SyncStatus.synced);
+    expect(cubit.state.status, SyncStatus.synced);
     await cubit.close();
   });
 
@@ -156,6 +170,7 @@ void main() {
       outbox: outbox,
       connectivity: connectivity,
       syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
       pullCoordinator: pull,
     );
     await pumpEventQueue();
@@ -173,6 +188,7 @@ void main() {
       outbox: outbox,
       connectivity: connectivity,
       syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
       pullCoordinator: pull,
     );
     await pumpEventQueue();
@@ -181,6 +197,90 @@ void main() {
     verify(() => syncEngine.flush()).called(1);
     verifyNever(() => pull.pullAll());
     await cubit.close();
+  });
+
+  group('dernière synchro (heure serveur)', () {
+    test('hydrate lastSyncAtMs persisté au démarrage', () async {
+      when(
+        () => syncMetaDao.getSyncedAt('__global_last_sync__'),
+      ).thenAnswer((_) async => 1000);
+      final cubit = build();
+      await pumpEventQueue();
+      expect(cubit.state.lastSyncAtMs, 1000);
+      await cubit.close();
+    });
+
+    test('un pull avec serverTime avance et persiste lastSyncAtMs', () async {
+      final pull = MockPullCoordinator();
+      when(() => pull.pullAll()).thenAnswer(
+        (_) async => const PullRunReport(updated: 1, latestServerTimeMs: 5000),
+      );
+      final cubit = SyncStatusCubit(
+        outbox: outbox,
+        connectivity: connectivity,
+        syncEngine: syncEngine,
+        syncMetaDao: syncMetaDao,
+        pullCoordinator: pull,
+      );
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      expect(cubit.state.lastSyncAtMs, 5000);
+      verify(
+        () => syncMetaDao.setCursor(
+          '__global_last_sync__',
+          cursor: null,
+          syncedAt: 5000,
+        ),
+      ).called(1);
+      await cubit.close();
+    });
+
+    test(
+      'un pull notModified (latestServerTimeMs null) ne régresse pas la date connue',
+      () async {
+        when(
+          () => syncMetaDao.getSyncedAt('__global_last_sync__'),
+        ).thenAnswer((_) async => 5000);
+        final pull = MockPullCoordinator();
+        when(
+          () => pull.pullAll(),
+        ).thenAnswer((_) async => const PullRunReport(notModified: 1));
+        final cubit = SyncStatusCubit(
+          outbox: outbox,
+          connectivity: connectivity,
+          syncEngine: syncEngine,
+          syncMetaDao: syncMetaDao,
+          pullCoordinator: pull,
+        );
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+
+        expect(cubit.state.lastSyncAtMs, 5000);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'un simple changement de statut ne régresse pas lastSyncAtMs connu',
+      () async {
+        when(
+          () => syncMetaDao.getSyncedAt('__global_last_sync__'),
+        ).thenAnswer((_) async => 5000);
+        final cubit = build();
+        await pumpEventQueue();
+        expect(cubit.state.lastSyncAtMs, 5000);
+
+        statusController.add(false); // offline
+        await pumpEventQueue();
+
+        expect(cubit.state.status, SyncStatus.offline);
+        expect(cubit.state.lastSyncAtMs, 5000);
+        await cubit.close();
+      },
+    );
   });
 
   group('gate crédentiels (V1.1 — session offline sans jetons)', () {
@@ -194,6 +294,7 @@ void main() {
       outbox: outbox,
       connectivity: connectivity,
       syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
       pullCoordinator: pull,
       credentialsProbe: probe,
     );
@@ -213,7 +314,7 @@ void main() {
         statusController.add(true); // retour réseau
         await pumpEventQueue();
 
-        expect(cubit.state, SyncStatus.authRequired);
+        expect(cubit.state.status, SyncStatus.authRequired);
         // Zéro 401, zéro `attempt` consommé : rien n'est tenté.
         verifyNever(() => syncEngine.flush());
         verifyNever(() => pull.pullAll());
@@ -232,7 +333,7 @@ void main() {
         await cubit.notifyLocalWrite();
         await pumpEventQueue();
 
-        expect(cubit.state, SyncStatus.authRequired);
+        expect(cubit.state.status, SyncStatus.authRequired);
         verifyNever(() => syncEngine.flush());
         await cubit.close();
       },
@@ -244,7 +345,7 @@ void main() {
         when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
         final cubit = buildGated();
         await pumpEventQueue();
-        expect(cubit.state, SyncStatus.synced);
+        expect(cubit.state.status, SyncStatus.synced);
         await cubit.close();
       },
     );
@@ -271,7 +372,7 @@ void main() {
 
         final cubit = buildGated();
         await pumpEventQueue();
-        expect(cubit.state, SyncStatus.authRequired);
+        expect(cubit.state.status, SyncStatus.authRequired);
         await cubit.close();
       },
     );

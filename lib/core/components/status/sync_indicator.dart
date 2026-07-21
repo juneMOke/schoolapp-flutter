@@ -23,21 +23,35 @@ enum SyncStatus {
 /// - Stateless : l'état vient du parent.
 /// - Les labels sont résolus via [AppLocalizations] dans [build].
 /// - [onTap] est optionnel (bottom sheet détail, Spec 5/6).
+/// - [lastSyncAtMs] (epoch ms, heure **serveur**) affiche un texte relatif
+///   après le libellé de statut (" · il y a N min") quand connu — absent tant
+///   qu'aucune synchro n'a encore ramené de données.
 class SyncIndicator extends StatelessWidget {
   final SyncStatus status;
+  final int? lastSyncAtMs;
   final VoidCallback? onTap;
 
-  const SyncIndicator({super.key, required this.status, this.onTap});
+  const SyncIndicator({
+    super.key,
+    required this.status,
+    this.lastSyncAtMs,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final _SyncAppearance appearance = _appearanceFor(status, l10n);
     final isNeutral = appearance.color == AppColors.textMuted;
+    final relative = _relativeLastSync(l10n);
 
     final bgColor = isNeutral
         ? AppColors.surfaceAlt
         : appearance.color.withValues(alpha: 0.12);
+
+    final label = relative == null
+        ? appearance.label
+        : '${appearance.label} · $relative';
 
     final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -47,7 +61,7 @@ class SyncIndicator extends StatelessWidget {
           Icon(appearance.icon, size: 16, color: appearance.color),
           const SizedBox(width: 4),
           Text(
-            appearance.label,
+            label,
             style: AppTypography.labelSmall.copyWith(color: appearance.color),
           ),
         ],
@@ -71,6 +85,32 @@ class SyncIndicator extends StatelessWidget {
     }
 
     return pill;
+  }
+
+  /// Texte relatif ("à l'instant" / "il y a N min/h/j") depuis [lastSyncAtMs]
+  /// (heure serveur) jusqu'à maintenant (horloge device — sert uniquement à
+  /// mesurer un écoulé, jamais à dater un évènement, donc pas de mélange
+  /// d'horloges problématique). `null` si aucune synchro connue.
+  String? _relativeLastSync(AppLocalizations l10n) {
+    final lastSync = lastSyncAtMs;
+    if (lastSync == null) return null;
+    // Clampé à 0 : l'horloge serveur peut être en avance sur une horloge
+    // device dérivée (tablette hors-ligne) — un écoulé négatif ne doit pas se
+    // lire comme "à l'instant" indéfiniment.
+    final rawElapsed = DateTime.now().millisecondsSinceEpoch - lastSync;
+    final elapsed = rawElapsed < 0 ? 0 : rawElapsed;
+    if (elapsed < Duration.millisecondsPerMinute) {
+      return l10n.syncLastSyncJustNow;
+    }
+    if (elapsed < Duration.millisecondsPerHour) {
+      return l10n.syncLastSyncMinutesAgo(
+        elapsed ~/ Duration.millisecondsPerMinute,
+      );
+    }
+    if (elapsed < Duration.millisecondsPerDay) {
+      return l10n.syncLastSyncHoursAgo(elapsed ~/ Duration.millisecondsPerHour);
+    }
+    return l10n.syncLastSyncDaysAgo(elapsed ~/ Duration.millisecondsPerDay);
   }
 
   _SyncAppearance _appearanceFor(SyncStatus status, AppLocalizations l10n) {

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -81,7 +82,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         cursor: cursor,
         syncedAt: syncedAt,
       );
-      return Right(_outcome(applied, syncedAt, cursor));
+      return Right(_outcome(applied, syncedAt, cursor, serverTime: cursor));
     } on DioException catch (e) {
       return _mapDioError(e);
     } on FormatException catch (_) {
@@ -154,7 +155,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         cursor: serverTime,
         syncedAt: syncedAt,
       );
-      return Right(_outcome(upserted, syncedAt, serverTime));
+      return Right(
+        _outcome(upserted, syncedAt, serverTime, serverTime: serverTime),
+      );
     } on DioException catch (e) {
       return _mapDioError(e);
     } on FormatException catch (_) {
@@ -212,6 +215,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     try {
       var cursor = await syncMetaDao.getCursor(resource); // null = bootstrap
       var upserted = 0;
+      String? lastServerTime;
       while (true) {
         final sent = cursor;
         final response = await request(sent);
@@ -220,6 +224,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           upserted += await apply(body.items, syncedAt);
         }
         final env = body.page;
+        lastServerTime = env.serverTime;
         // `nextCursor` (progression) tant que `hasMore`, sinon `nextWatermark`
         // (fin de cycle). `null` (page vide de fin) → curseur conservé.
         final nextToken = env.cursorToPersist;
@@ -236,7 +241,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         // sqflite).
         if (env.nextCursor == null || env.nextCursor == sent) break;
       }
-      return Right(_outcome(upserted, syncedAt, cursor));
+      return Right(
+        _outcome(upserted, syncedAt, cursor, serverTime: lastServerTime),
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 304) {
         final previous = await syncMetaDao.getCursor(resource);
@@ -296,15 +303,24 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   }
 
   /// Bilan d'un pull : `notModified` si aucune ligne locale écrite (curseur tout
-  /// de même mémorisé — delta vide, ADR-008), `updated` sinon.
-  EnrollmentPullOutcome _outcome(int applied, int syncedAt, String? cursor) =>
-      applied == 0
+  /// de même mémorisé — delta vide, ADR-008), `updated` sinon. [serverTime]
+  /// (ISO-8601) alimente [EnrollmentPullOutcome.serverTimeMs] sur la branche
+  /// `updated` uniquement.
+  EnrollmentPullOutcome _outcome(
+    int applied,
+    int syncedAt,
+    String? cursor, {
+    String? serverTime,
+  }) => applied == 0
       ? EnrollmentPullOutcome.notModifiedAt(syncedAt, cursor)
       : EnrollmentPullOutcome(
           upserted: applied,
           notModified: false,
           syncedAt: syncedAt,
           cursor: cursor,
+          serverTimeMs: serverTime == null
+              ? null
+              : EpochIsoHelper.tryToEpochMs(serverTime),
         );
 
   Either<Failure, EnrollmentPullOutcome> _mapDioError(DioException e) {

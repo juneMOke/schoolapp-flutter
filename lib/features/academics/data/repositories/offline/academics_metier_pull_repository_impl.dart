@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -25,10 +26,12 @@ class _CourseCycle {
   final int upserted;
   final bool notModified;
   final bool bootstrapComplete;
+  final int? serverTimeMs;
   const _CourseCycle({
     required this.upserted,
     required this.notModified,
     required this.bootstrapComplete,
+    this.serverTimeMs,
   });
 }
 
@@ -154,6 +157,7 @@ class AcademicsMetierPullRepositoryImpl {
     var allNotModified = true;
     var allBootstrapComplete = true;
     var anySucceeded = false;
+    int? latestServerTimeMs;
     Failure? lastFailure;
     for (final coursId in coursIds) {
       final cycle = await _pullCours<I>(
@@ -176,6 +180,11 @@ class AcademicsMetierPullRepositoryImpl {
       totalUpserted += applied!.upserted;
       allNotModified = allNotModified && applied!.notModified;
       allBootstrapComplete = allBootstrapComplete && applied!.bootstrapComplete;
+      final observed = applied!.serverTimeMs;
+      if (observed != null &&
+          (latestServerTimeMs == null || observed > latestServerTimeMs)) {
+        latestServerTimeMs = observed;
+      }
     }
 
     if (!anySucceeded && lastFailure != null) return Left(lastFailure);
@@ -185,6 +194,7 @@ class AcademicsMetierPullRepositoryImpl {
         notModified: allNotModified,
         bootstrapComplete: allBootstrapComplete,
         syncedAt: syncedAt,
+        serverTimeMs: latestServerTimeMs,
       ),
     );
   }
@@ -296,9 +306,11 @@ class AcademicsMetierPullRepositoryImpl {
     var cursor = from;
     var upserted = 0;
     var reachedEnd = false;
+    String? lastServerTime;
     while (true) {
       final sent = cursor;
       final page = await fetchPage(coursId, sent);
+      lastServerTime = page.page.serverTime;
       upserted += await apply(page, syncedAt);
 
       final nextToken = page.page.cursorToPersist;
@@ -329,6 +341,9 @@ class AcademicsMetierPullRepositoryImpl {
       upserted: upserted,
       notModified: upserted == 0,
       bootstrapComplete: await _isBootstrapComplete(bootstrapResource),
+      serverTimeMs: upserted == 0
+          ? null
+          : EpochIsoHelper.tryToEpochMs(lastServerTime),
     );
   }
 

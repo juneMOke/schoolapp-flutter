@@ -87,6 +87,7 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       outbox: getIt<OutboxDao>(),
       connectivity: getIt<ConnectivityService>(),
       syncEngine: getIt<SyncEngine>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
       pullCoordinator: getIt<PullCoordinator>(),
       // Guardian de révocation (ADR-010 D-11) : évalué APRÈS le flush.
       revocationEvaluator: getIt<AuthSessionManager>(),

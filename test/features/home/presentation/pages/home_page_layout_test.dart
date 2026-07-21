@@ -4,10 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class _MockSyncStatusCubit extends MockCubit<SyncStatus>
+class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
 
 void main() {
@@ -18,8 +19,8 @@ void main() {
     final syncStatusCubit = _MockSyncStatusCubit();
     whenListen(
       syncStatusCubit,
-      const Stream<SyncStatus>.empty(),
-      initialState: SyncStatus.synced,
+      const Stream<SyncStatusState>.empty(),
+      initialState: const SyncStatusState(status: SyncStatus.synced),
     );
     return MaterialApp(
       locale: const Locale('fr'),

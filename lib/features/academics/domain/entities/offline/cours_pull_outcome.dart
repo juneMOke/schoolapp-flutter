@@ -9,11 +9,17 @@ class CoursPullOutcome extends Equatable {
   final bool bootstrapComplete;
   final int syncedAt;
 
+  /// Horloge **serveur** (epoch ms) la plus récente parmi les classes
+  /// itérées — `null` si aucune n'a rapporté de `serverTime` (tout
+  /// `notModified`, ou aucune classe locale à itérer).
+  final int? serverTimeMs;
+
   const CoursPullOutcome({
     required this.upserted,
     required this.notModified,
     required this.bootstrapComplete,
     required this.syncedAt,
+    this.serverTimeMs,
   });
 
   @override
@@ -22,5 +28,6 @@ class CoursPullOutcome extends Equatable {
     notModified,
     bootstrapComplete,
     syncedAt,
+    serverTimeMs,
   ];
 }

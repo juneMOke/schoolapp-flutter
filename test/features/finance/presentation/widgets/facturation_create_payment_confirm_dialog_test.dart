@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
@@ -23,7 +24,7 @@ class _MockFinanceOfflineBloc
     extends MockBloc<FinanceOfflineEvent, FinanceOfflineState>
     implements FinanceOfflineBloc {}
 
-class _MockSyncStatusCubit extends MockCubit<SyncStatus>
+class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
 
 const _request = PaymentsCreateRequested(
@@ -64,8 +65,8 @@ void main() {
     syncCubit = _MockSyncStatusCubit();
     whenListen(
       syncCubit,
-      const Stream<SyncStatus>.empty(),
-      initialState: SyncStatus.synced,
+      const Stream<SyncStatusState>.empty(),
+      initialState: const SyncStatusState(status: SyncStatus.synced),
     );
     when(() => syncCubit.notifyLocalWrite()).thenAnswer((_) async {});
   });

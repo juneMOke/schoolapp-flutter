@@ -1932,6 +1932,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get journeyCloseAction => 'Fermer';
 
   @override
+  String get wizardExitConfirmTitle => 'Quitter l\'inscription ?';
+
+  @override
+  String get wizardExitConfirmMessage =>
+      'Une inscription est en cours. Les modifications non enregistrées de l\'étape actuelle seront perdues ; les étapes déjà enregistrées restent disponibles en brouillon.';
+
+  @override
+  String get wizardExitConfirmAction => 'Quitter';
+
+  @override
+  String get wizardExitStayAction => 'Continuer la saisie';
+
+  @override
+  String get enrollmentFinalizeConfirmTitle => 'Valider l\'inscription ?';
+
+  @override
+  String get enrollmentFinalizeConfirmMessage =>
+      'Cette action confirme le dossier et le place en file de synchronisation. Vérifiez le récapitulatif avant de valider.';
+
+  @override
   String get stepSaveStateIdle => 'Aucune saisie';
 
   @override
@@ -4089,6 +4109,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get statusAuthRequired => 'Reconnexion requise';
+
+  @override
+  String get syncLastSyncJustNow => 'À l\'instant';
+
+  @override
+  String syncLastSyncMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count min',
+      one: 'Il y a 1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncLastSyncHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count h',
+      one: 'Il y a 1 h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncLastSyncDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count jours',
+      one: 'Il y a 1 jour',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get offlineQueuedGeneric =>

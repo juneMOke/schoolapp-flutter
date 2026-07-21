@@ -111,6 +111,11 @@ void main() {
 
       expect(outcome.upserted, 1);
       expect(outcome.bootstrapComplete, isTrue);
+      // Horloge SERVEUR (page.serverTime), pas l'horloge locale injectée.
+      expect(
+        outcome.serverTimeMs,
+        DateTime.parse('2026-07-18T10:00:00Z').millisecondsSinceEpoch,
+      );
       // Ligne appliquée SYNCED, school_level_id résolu depuis ref_classrooms(c2).
       final row = (await db.query('classroom_transfers')).single;
       expect(row['id'], 't1');
@@ -149,6 +154,7 @@ void main() {
 
     expect(outcome.notModified, isTrue);
     expect(await syncMeta.getCursor(resource), 'keep');
+    expect(outcome.serverTimeMs, isNull);
   });
 
   test('400 curseur forgé → purge + rebootstrap depuis le début', () async {

@@ -124,6 +124,11 @@ void main() {
       final outcome = right(await repo.syncDisciplinaryCases());
       expect(outcome.upserted, 1);
       expect(outcome.bootstrapComplete, isTrue);
+      // Horloge SERVEUR (page.serverTime), pas l'horloge locale injectée.
+      expect(
+        outcome.serverTimeMs,
+        DateTime.parse('2026-07-18T10:00:00Z').millisecondsSinceEpoch,
+      );
 
       final row = await local.getCase('case-1');
       expect(row, isNotNull);
@@ -168,6 +173,8 @@ void main() {
     final outcome = right(await repo.syncDisciplinaryCases());
     expect(outcome.notModified, isTrue);
     expect(await syncMeta.getCursor(resource), 'c-kept');
+    // Pas de corps sur un 304 : rien à offrir à la date de synchro globale.
+    expect(outcome.serverTimeMs, isNull);
   });
 
   test('400 curseur forgé → purge + rebootstrap depuis null', () async {

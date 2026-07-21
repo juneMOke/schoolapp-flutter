@@ -22,10 +22,25 @@ class PullOutcome {
   /// Message d'échec ([PullResult.error] uniquement).
   final String? error;
 
-  const PullOutcome._(this.result, {this.upserted = 0, this.error});
+  /// Horloge **serveur** (epoch ms) de la page ayant produit ce résultat —
+  /// portée par l'enveloppe keyset (`serverTime`), jamais l'horloge device.
+  /// `null` si la ressource n'a rien retourné (304 sans corps) ou n'a pas
+  /// encore de `serverTime` dans son contrat (cf. `PullCoordinator`).
+  final int? serverTimeMs;
 
-  const PullOutcome.updated({int upserted = 0})
-    : this._(PullResult.updated, upserted: upserted);
+  const PullOutcome._(
+    this.result, {
+    this.upserted = 0,
+    this.error,
+    this.serverTimeMs,
+  });
+
+  const PullOutcome.updated({int upserted = 0, int? serverTimeMs})
+    : this._(
+        PullResult.updated,
+        upserted: upserted,
+        serverTimeMs: serverTimeMs,
+      );
 
   const PullOutcome.notModified() : this._(PullResult.notModified);
 

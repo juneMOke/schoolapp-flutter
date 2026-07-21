@@ -94,6 +94,7 @@ void main() {
 
       expect(outcome.notModified, isTrue);
       expect(outcome.upserted, 0);
+      expect(outcome.serverTimeMs, isNull);
       verifyNever(() => api.pullCours(any(), any(), any(), any()));
     },
   );
@@ -119,6 +120,12 @@ void main() {
 
       expect(outcome.upserted, 3);
       expect(outcome.bootstrapComplete, isTrue);
+      // Horloge SERVEUR agrégée (MAX sur les classes itérées), pas l'horloge
+      // locale injectée.
+      expect(
+        outcome.serverTimeMs,
+        DateTime.parse('2026-07-19T10:00:00Z').millisecondsSinceEpoch,
+      );
       // Curseurs indépendants par classe.
       expect(await syncMeta.getCursor('academics_cours:c1'), 'wm-c1');
       expect(await syncMeta.getCursor('academics_cours:c2'), 'wm-c2');
@@ -143,6 +150,7 @@ void main() {
 
       expect(outcome.notModified, isTrue);
       expect(await syncMeta.getCursor('academics_cours:c1'), 'wm-prev');
+      expect(outcome.serverTimeMs, isNull);
     },
   );
 

@@ -16,11 +16,16 @@ class FinancePullOutcome {
   /// là), `w…` = watermark de fin de cycle (départ du prochain, Δ appliqué).
   final String? cursor;
 
+  /// Horloge **serveur** (epoch ms, `serverTime`) de la dernière page
+  /// appliquée — `null` sur un cycle `notModified`.
+  final int? serverTimeMs;
+
   const FinancePullOutcome({
     required this.upserted,
     required this.notModified,
     required this.syncedAt,
     this.cursor,
+    this.serverTimeMs,
   });
 
   const FinancePullOutcome.notModifiedAt(int syncedAt, String? cursor)
