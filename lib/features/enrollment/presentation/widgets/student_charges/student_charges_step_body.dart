@@ -38,17 +38,21 @@ class StudentChargesStepBody extends StatelessWidget {
     this.unavailableMessage,
   });
 
-  double _draftAmountFor(StudentCharge charge) {
+  // Le champ affiche/édite des unités monétaires ; on revient en cents (même
+  // conversion que StudentChargesStep._parseAmount) pour sommer comme l'entité.
+  double _draftAmountInCentsFor(StudentCharge charge) {
     final parsed = parseMonetaryAmount(
       amountControllers[charge.id]?.text ?? '',
     );
-    return parsed ?? charge.expectedAmountInCents;
+    return parsed == null
+        ? charge.expectedAmountInCents
+        : (parsed * 100).roundToDouble();
   }
 
-  double _computeTotalAmount() {
+  double _computeTotalAmountInCents() {
     return studentCharges.fold<double>(
       0,
-      (sum, charge) => sum + _draftAmountFor(charge),
+      (sum, charge) => sum + _draftAmountInCentsFor(charge),
     );
   }
 
@@ -103,7 +107,7 @@ class StudentChargesStepBody extends StatelessWidget {
                         ),
                         Text(
                           formatMonetaryAmountWithCurrency(
-                            amount: _computeTotalAmount(),
+                            amount: _computeTotalAmountInCents() / 100,
                             currency: _displayCurrency(),
                           ),
                           style: AppTextStyles.totalAmountLora.copyWith(

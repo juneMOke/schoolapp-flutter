@@ -21,6 +21,13 @@ class StudentChargesStep extends StatefulWidget {
   final bool isEditable;
   final EnrollmentStepSubmitController? stepController;
 
+  /// Flux BROUILLON du wizard : génère les créances provisoires depuis la
+  /// grille locale (FF5) avant lecture. Requiert [academicYearId] non vide,
+  /// sinon dégrade en simple lecture.
+  final bool initializeDraftCharges;
+  final String academicYearId;
+  final String? schoolLevelGroupId;
+
   const StudentChargesStep({
     super.key,
     required this.studentId,
@@ -30,6 +37,9 @@ class StudentChargesStep extends StatefulWidget {
     this.flowStepIndex,
     this.isEditable = true,
     this.stepController,
+    this.initializeDraftCharges = false,
+    this.academicYearId = '',
+    this.schoolLevelGroupId,
   });
 
   @override
@@ -80,7 +90,8 @@ class StudentChargesStepState extends State<StudentChargesStep> {
 
     final identifiersChanged =
         oldWidget.studentId != widget.studentId ||
-        oldWidget.levelId != widget.levelId;
+        oldWidget.levelId != widget.levelId ||
+        oldWidget.academicYearId != widget.academicYearId;
 
     if (identifiersChanged) {
       _controller.resetDraftState();
@@ -104,6 +115,18 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   }
 
   void _requestCharges() {
+    if (widget.initializeDraftCharges &&
+        widget.academicYearId.trim().isNotEmpty) {
+      _studentChargesBloc.add(
+        DraftStudentChargesRequested(
+          studentId: widget.studentId,
+          levelId: widget.levelId,
+          academicYearId: widget.academicYearId,
+          schoolLevelGroupId: widget.schoolLevelGroupId,
+        ),
+      );
+      return;
+    }
     _studentChargesBloc.add(
       StudentChargesRequested(
         studentId: widget.studentId,
@@ -130,9 +153,16 @@ class StudentChargesStepState extends State<StudentChargesStep> {
     _emitStepState();
   }
 
-  String _formatAmount(double amount) => formatMonetaryAmount(amount);
+  // Le champ édite un montant en unités monétaires ; l'entité (comme dans
+  // Finance) stocke `expectedAmountInCents` en cents — même conversion que
+  // FacturationChargeLine (cents / 100) et parseAmountToCents (unités * 100).
+  String _formatAmount(double amountInCents) =>
+      formatMonetaryAmount(amountInCents / 100);
 
-  double? _parseAmount(String rawValue) => parseMonetaryAmount(rawValue);
+  double? _parseAmount(String rawValue) {
+    final parsed = parseMonetaryAmount(rawValue);
+    return parsed == null ? null : (parsed * 100).roundToDouble();
+  }
 
   Map<String, String?> _buildAmountErrors(AppLocalizations l10n) {
     return _controller.buildAmountErrors(

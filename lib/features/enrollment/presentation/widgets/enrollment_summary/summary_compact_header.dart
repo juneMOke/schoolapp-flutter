@@ -28,6 +28,7 @@ class SummaryCompactHeader extends StatelessWidget {
           prev.studentCharges != curr.studentCharges,
       builder: (context, state) {
         final charges = state.studentCharges;
+        // Somme en cents (comme FacturationChargeLine), converti au format.
         final total = charges.fold<double>(
           0,
           (sum, charge) => sum + charge.expectedAmountInCents,
@@ -97,7 +98,7 @@ class SummaryCompactHeader extends StatelessWidget {
                   const SizedBox(height: AppDimensions.spacingXS),
                   Text(
                     formatMonetaryAmountWithCurrency(
-                      amount: total,
+                      amount: total / 100,
                       currency: currency,
                     ),
                     style: AppTextStyles.totalAmountLora.copyWith(

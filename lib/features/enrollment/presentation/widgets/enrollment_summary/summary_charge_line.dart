@@ -35,7 +35,7 @@ class SummaryChargeLine extends StatelessWidget {
           ),
           Text(
             formatMonetaryAmountWithCurrency(
-              amount: charge.expectedAmountInCents,
+              amount: charge.expectedAmountInCents / 100,
               currency: charge.currency,
             ),
             textAlign: TextAlign.right,
