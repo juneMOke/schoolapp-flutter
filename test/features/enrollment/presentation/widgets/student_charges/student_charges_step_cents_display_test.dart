@@ -82,4 +82,34 @@ void main() {
       expect(find.textContaining('1 500 CDF'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'plus de 2 décimales saisies → rejeté (invalide), pas arrondi en silence',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
+          home: Scaffold(
+            body: StudentChargesStep(
+              studentId: 'stu-1',
+              levelId: 'lvl-1',
+              enrollmentStatus: EnrollmentStatus.inProgress,
+              showInlineSaveButton: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '1500.567');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Le champ Montant doit contenir un nombre valide.'),
+        findsOneWidget,
+      );
+    },
+  );
 }

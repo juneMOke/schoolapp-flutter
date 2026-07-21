@@ -161,7 +161,14 @@ class StudentChargesStepState extends State<StudentChargesStep> {
 
   double? _parseAmount(String rawValue) {
     final parsed = parseMonetaryAmount(rawValue);
-    return parsed == null ? null : (parsed * 100).roundToDouble();
+    if (parsed == null) return null;
+    final cents = parsed * 100;
+    final rounded = cents.roundToDouble();
+    // Plus de 2 décimales saisies (ex. "1500.567") : rejeté comme invalide
+    // plutôt qu'arrondi silencieusement au centime — l'utilisateur doit voir
+    // l'erreur au lieu de faire persister un montant différent de celui tapé.
+    if ((cents - rounded).abs() > 1e-6) return null;
+    return rounded;
   }
 
   Map<String, String?> _buildAmountErrors(AppLocalizations l10n) {
