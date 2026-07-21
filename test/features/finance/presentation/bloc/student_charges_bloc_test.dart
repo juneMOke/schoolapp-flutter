@@ -7,10 +7,15 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 
 class MockGetStudentChargesUseCase extends Mock
     implements GetStudentChargesUseCase {}
+
+class MockInitializeChargesUseCase extends Mock
+    implements InitializeChargesUseCase {}
 
 class MockUpdateStudentChargeExpectedAmountUseCase extends Mock
     implements UpdateStudentChargeExpectedAmountUseCase {}
@@ -288,6 +293,169 @@ void main() {
           studentCharges: [tCharge],
           errorType: StudentChargesErrorType.notFound,
           updatingChargeId: 'charge-1',
+        ),
+      ],
+    );
+  });
+
+  group('DraftStudentChargesRequested (wizard brouillon, FF5)', () {
+    late MockInitializeChargesUseCase mockInitializeChargesUseCase;
+
+    setUp(() {
+      mockInitializeChargesUseCase = MockInitializeChargesUseCase();
+    });
+
+    StudentChargesBloc buildDraftBloc() => StudentChargesBloc(
+      getStudentChargesUseCase: mockGetStudentChargesUseCase,
+      getStudentChargesByAcademicYearUseCase:
+          mockGetStudentChargesByAcademicYearUseCase,
+      getPaymentAllocationsFromStudentChargesUseCase:
+          mockGetPaymentAllocationsFromStudentChargesUseCase,
+      updateStudentChargeExpectedAmountUseCase:
+          mockUpdateStudentChargeExpectedAmountUseCase,
+      initializeChargesUseCase: mockInitializeChargesUseCase,
+    );
+
+    const tDraftEvent = DraftStudentChargesRequested(
+      studentId: tStudentId,
+      levelId: tLevelId,
+      academicYearId: 'year-1',
+      schoolLevelGroupId: 'group-1',
+    );
+
+    void stubInitialize(Either<Failure, List<LocalStudentCharge>> answer) {
+      when(
+        () => mockInitializeChargesUseCase(
+          studentId: tStudentId,
+          academicYearId: 'year-1',
+          schoolLevelId: tLevelId,
+          schoolLevelGroupId: 'group-1',
+        ),
+      ).thenAnswer((_) async => answer);
+    }
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'génère les créances locales PUIS lit le grand-livre → [loading, success]',
+      setUp: () {
+        stubInitialize(const Right(<LocalStudentCharge>[]));
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge]));
+      },
+      build: buildDraftBloc,
+      act: (bloc) => bloc.add(tDraftEvent),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge],
+        ),
+      ],
+      verify: (_) {
+        verify(
+          () => mockInitializeChargesUseCase(
+            studentId: tStudentId,
+            academicYearId: 'year-1',
+            schoolLevelId: tLevelId,
+            schoolLevelGroupId: 'group-1',
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'échec de génération → failure storage, pas de lecture faussement vide',
+      setUp: () {
+        stubInitialize(const Left(StorageFailure('boom')));
+      },
+      build: buildDraftBloc,
+      act: (bloc) => bloc.add(tDraftEvent),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.failure,
+          errorType: StudentChargesErrorType.storage,
+        ),
+      ],
+      verify: (_) {
+        verifyNever(() => mockGetStudentChargesUseCase(tParams));
+      },
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'lecture scopée sur l\'année du dossier : les créances N-1 sont '
+      'filtrées, celles à année vide restent rattachées',
+      setUp: () {
+        stubInitialize(const Right(<LocalStudentCharge>[]));
+        when(() => mockGetStudentChargesUseCase(tParams)).thenAnswer(
+          (_) async => Right([
+            tCharge,
+            tCharge.copyWith(id: 'charge-n1', academicYearId: 'year-0'),
+            tCharge.copyWith(id: 'charge-legacy', academicYearId: ''),
+          ]),
+        );
+      },
+      build: buildDraftBloc,
+      act: (bloc) => bloc.add(tDraftEvent),
+      expect: () => [
+        const StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [
+            tCharge,
+            tCharge.copyWith(id: 'charge-legacy', academicYearId: ''),
+          ],
+        ),
+      ],
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'academicYearId vide-mais-non-null (pas null) → traité comme "pas de '
+      'scope", ne wipe pas les créances réelles',
+      setUp: () {
+        stubInitialize(const Right(<LocalStudentCharge>[]));
+        when(() => mockGetStudentChargesUseCase(tParams)).thenAnswer(
+          (_) async => Right([
+            tCharge,
+            tCharge.copyWith(id: 'charge-n1', academicYearId: 'year-0'),
+          ]),
+        );
+      },
+      build: buildDraftBloc,
+      act: (bloc) => bloc.add(
+        const DraftStudentChargesRequested(
+          studentId: tStudentId,
+          levelId: tLevelId,
+          academicYearId: '', // vide-mais-non-null
+          schoolLevelGroupId: 'group-1',
+        ),
+      ),
+      expect: () => [
+        const StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [
+            tCharge,
+            tCharge.copyWith(id: 'charge-n1', academicYearId: 'year-0'),
+          ],
+        ),
+      ],
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'usecase FF5 absent (bloc hors wizard) → dégrade en simple lecture',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(tDraftEvent),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge],
         ),
       ],
     );

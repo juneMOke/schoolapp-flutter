@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 
 part 'student_charges_event.dart';
 part 'student_charges_state.dart';
@@ -20,6 +21,11 @@ class StudentChargesBloc
   final UpdateStudentChargeExpectedAmountUseCase
   _updateStudentChargeExpectedAmountUseCase;
 
+  /// Génération FF5 des créances provisoires (flux brouillon du wizard).
+  /// Optionnel : absent, [DraftStudentChargesRequested] dégrade en simple
+  /// lecture (parité avec [StudentChargesRequested]).
+  final InitializeChargesUseCase? _initializeChargesUseCase;
+
   StudentChargesBloc({
     required GetStudentChargesUseCase getStudentChargesUseCase,
     required GetStudentChargesByAcademicYearUseCase
@@ -28,6 +34,7 @@ class StudentChargesBloc
     getPaymentAllocationsFromStudentChargesUseCase,
     required UpdateStudentChargeExpectedAmountUseCase
     updateStudentChargeExpectedAmountUseCase,
+    InitializeChargesUseCase? initializeChargesUseCase,
   }) : _getStudentChargesUseCase = getStudentChargesUseCase,
        _getStudentChargesByAcademicYearUseCase =
            getStudentChargesByAcademicYearUseCase,
@@ -35,8 +42,10 @@ class StudentChargesBloc
            getPaymentAllocationsFromStudentChargesUseCase,
        _updateStudentChargeExpectedAmountUseCase =
            updateStudentChargeExpectedAmountUseCase,
+       _initializeChargesUseCase = initializeChargesUseCase,
        super(const StudentChargesState()) {
     on<StudentChargesRequested>(_onStudentChargesRequested);
+    on<DraftStudentChargesRequested>(_onDraftStudentChargesRequested);
     on<StudentChargesByAcademicYearRequested>(
       _onStudentChargesByAcademicYearRequested,
     );
@@ -61,11 +70,71 @@ class StudentChargesBloc
       ),
     );
 
-    final result = await _getStudentChargesUseCase(
-      GetStudentChargesParams(
-        studentId: event.studentId,
-        levelId: event.levelId,
+    await _readCharges(
+      studentId: event.studentId,
+      levelId: event.levelId,
+      emit: emit,
+    );
+  }
+
+  /// Flux BROUILLON du wizard : génère les créances provisoires depuis la
+  /// grille locale (FF5, idempotent), puis lit le grand-livre **scopé sur
+  /// l'année du dossier** (année vide/NULL rattachée, comme la lecture ledger
+  /// par année — sans quoi un RE additionnerait ses créances N-1). L'échec de
+  /// la génération remonte en erreur (les frais affichés seraient sinon
+  /// faussement vides) ; usecase absent → simple lecture.
+  Future<void> _onDraftStudentChargesRequested(
+    DraftStudentChargesRequested event,
+    Emitter<StudentChargesState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        status: StudentChargesStatus.loading,
+        errorType: StudentChargesErrorType.none,
+        updatingChargeId: null,
       ),
+    );
+
+    final initialize = _initializeChargesUseCase;
+    if (initialize != null && event.academicYearId.trim().isNotEmpty) {
+      final initialized = await initialize(
+        studentId: event.studentId,
+        academicYearId: event.academicYearId,
+        schoolLevelId: event.levelId,
+        schoolLevelGroupId: event.schoolLevelGroupId,
+      );
+      final failure = initialized.fold((f) => f, (_) => null);
+      if (failure != null) {
+        emit(
+          state.copyWith(
+            status: StudentChargesStatus.failure,
+            errorType: _mapFailureToErrorType(failure),
+            updatingChargeId: null,
+          ),
+        );
+        return;
+      }
+    }
+
+    await _readCharges(
+      studentId: event.studentId,
+      levelId: event.levelId,
+      scopedAcademicYearId: event.academicYearId,
+      emit: emit,
+    );
+  }
+
+  /// Lecture partagée (grand-livre local via le repo offline-first) — suppose
+  /// l'état `loading` déjà émis par l'appelant. [scopedAcademicYearId] filtre
+  /// le résultat sur une année (les créances à année vide restent rattachées).
+  Future<void> _readCharges({
+    required String studentId,
+    required String levelId,
+    String? scopedAcademicYearId,
+    required Emitter<StudentChargesState> emit,
+  }) async {
+    final result = await _getStudentChargesUseCase(
+      GetStudentChargesParams(studentId: studentId, levelId: levelId),
     );
 
     result.fold(
@@ -76,14 +145,29 @@ class StudentChargesBloc
           updatingChargeId: null,
         ),
       ),
-      (studentCharges) => emit(
-        state.copyWith(
-          status: StudentChargesStatus.success,
-          studentCharges: studentCharges,
-          errorType: StudentChargesErrorType.none,
-          updatingChargeId: null,
-        ),
-      ),
+      (studentCharges) {
+        // Vide-mais-non-null = "pas de scope" (comme null) : sinon le filtre
+        // collapse en `c.academicYearId.isEmpty || c.academicYearId == ''`,
+        // qui exclut TOUTE créance réelle (jamais vide en pratique).
+        final scoped =
+            (scopedAcademicYearId == null || scopedAcademicYearId.isEmpty)
+            ? studentCharges
+            : studentCharges
+                  .where(
+                    (c) =>
+                        c.academicYearId.isEmpty ||
+                        c.academicYearId == scopedAcademicYearId,
+                  )
+                  .toList(growable: false);
+        emit(
+          state.copyWith(
+            status: StudentChargesStatus.success,
+            studentCharges: scoped,
+            errorType: StudentChargesErrorType.none,
+            updatingChargeId: null,
+          ),
+        );
+      },
     );
   }
 
