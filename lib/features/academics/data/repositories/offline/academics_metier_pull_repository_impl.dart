@@ -42,10 +42,17 @@ class _CycleAttempt {
 }
 
 /// Pull KEYSET métier (évaluations, notes), **itéré par cours** (les cours sont
-/// lus dans `ref_cours`, peuplée par le pull cours NF-3b). Chaque cours a un
-/// **curseur keyset propre** par ressource. Résumable, 304, 400→rebootstrap,
-/// anti-boucle, **ne lève jamais**. L'application saute les lignes locales
-/// `PENDING_SYNC` (jamais de clobber d'écriture non synchronisée).
+/// lus dans `ref_cours`, peuplée par le pull cours scopé enseignant — DF-K).
+/// Chaque cours a un **curseur keyset propre** par ressource. Résumable, 304,
+/// 400→rebootstrap, anti-boucle, **ne lève jamais**. L'application saute les
+/// lignes locales `PENDING_SYNC` (jamais de clobber d'écriture non
+/// synchronisée).
+///
+/// **`403` = garde d'ownership serveur (DF-L point 2)** : le cours a été
+/// réaffecté à un autre prof entre le pull `cours` (qui l'a laissé en local) et
+/// ce pull métier. Non fatal : le cours est évincé localement (référence +
+/// évaluations/notes) et le cycle continue sur les cours suivants — distinct du
+/// `400` (curseur à rebootstrapper) et des erreurs réseau/5xx (retry).
 class AcademicsMetierPullRepositoryImpl {
   final AcademicsMetierPullApi _api;
   final AcademicsLocalDataSource _local;
@@ -269,6 +276,34 @@ class AcademicsMetierPullRepositoryImpl {
               upserted: 0,
               notModified: true,
               bootstrapComplete: await _isBootstrapComplete(bootstrapResource),
+            ),
+          ),
+        );
+      }
+      if (status == 403) {
+        // Cours perdu (réaffectation) : éviction non fatale, cycle réputé à
+        // jour pour ce cours — les autres cours du batch continuent.
+        await _refLocal.evictCours(coursId);
+        await _local.evictCoursData(coursId);
+        // Purge les curseurs des DEUX ressources (pas seulement celle qui a
+        // 403), pas seulement la sienne : le cours disparaît de `ref_cours`
+        // ici, donc l'autre pull (évaluations si on vient des notes, ou
+        // l'inverse) ne le reverra plus jamais dans `getAllCours()` — son
+        // curseur resterait orphelin et périmé sinon (une réaffectation en
+        // retour reprendrait au lieu de rebootstraper → perte silencieuse).
+        for (final prefix in const [
+          kAcademicsEvaluationsResourcePrefix,
+          kAcademicsNotesResourcePrefix,
+        ]) {
+          await _syncMetaDao.deleteCursor('$prefix:$coursId');
+          await _syncMetaDao.deleteCursor('${prefix}_bootstrap:$coursId');
+        }
+        return const _CycleAttempt(
+          Right(
+            _CourseCycle(
+              upserted: 0,
+              notModified: true,
+              bootstrapComplete: true,
             ),
           ),
         );

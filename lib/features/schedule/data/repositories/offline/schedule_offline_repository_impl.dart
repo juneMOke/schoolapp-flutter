@@ -16,9 +16,11 @@ import 'package:school_app_flutter/features/schedule/domain/repositories/schedul
 /// Implémentation **offline-first** de [ScheduleRepository].
 ///
 /// - [getMyTimetable] : composé EN LOCAL depuis `ref_time_slots` +
-///   `ref_recurring_sessions`, filtré sur les séances de l'enseignant connecté
-///   (`teacher_id == uid`, même hypothèse que « Mes cours »). Chaque créneau ×
-///   jour porte au plus une séance (cellule dénormalisée).
+///   `ref_recurring_sessions`. **Aucun filtre d'identité côté client** : le
+///   pull sessions est scopé enseignant côté serveur (dérivé du token, commit
+///   back `1ec6be3` — DF-K), donc tout ce qui est en local appartient déjà au
+///   prof connecté. Chaque créneau × jour porte au plus une séance (cellule
+///   dénormalisée).
 /// - [getClassroomGrid] et les écritures (planning admin) : **délégués à
 ///   l'online** (surface conseil pédagogique / admin, hors périmètre offline).
 class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
@@ -41,10 +43,7 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
     try {
       final uid = _currentUser?.uid;
       final slots = await _refLocal.getTimeSlots(); // triés par slot_order
-      final all = await _refLocal.getSessionsForYear(academicYearId);
-      final mine = uid == null
-          ? const <RefRecurringSessionRow>[]
-          : all.where((s) => s.teacherId == uid).toList(growable: false);
+      final mine = await _refLocal.getSessionsForYear(academicYearId);
 
       // Jours présents dans mes séances, ordonnés selon Weekday.values.
       final present = mine.map((s) => WeekdayX.fromWire(s.dayOfWeek)).toSet();

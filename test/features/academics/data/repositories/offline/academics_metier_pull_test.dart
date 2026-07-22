@@ -55,6 +55,14 @@ void main() {
     Response(requestOptions: RequestOptions(path: '/'), statusCode: 200),
   );
 
+  DioException status(int code) => DioException(
+    requestOptions: RequestOptions(path: '/'),
+    response: Response(
+      requestOptions: RequestOptions(path: '/'),
+      statusCode: code,
+    ),
+  );
+
   Future<void> insertCours(String id) => db.insert('ref_cours', {
     'id': id,
     'classroom_id': 'class-1',
@@ -261,4 +269,114 @@ void main() {
       expect((await local.getEvaluation('ev-1'))!.syncState, SyncState.synced);
     });
   });
+
+  group(
+    '403 : garde d\'ownership serveur (cours réaffecté — DF-L point 2)',
+    () {
+      AcademicsDeltaPullOutcome right(
+        Either<Failure, AcademicsDeltaPullOutcome> e,
+      ) => e.fold((f) => fail('Attendu Right, reçu Left($f)'), (o) => o);
+
+      test(
+        'cours réaffecté (403) : évincé localement (référence + évaluations + '
+        'notes), non fatal, les autres cours du cycle continuent',
+        () async {
+          await insertCours('co-lost');
+          await insertCours('co-ok');
+          await db.insert('evaluation', {
+            'id': 'ev-lost',
+            'cours_id': 'co-lost',
+            'type': 'INTERRO',
+            'eval_date': 1,
+            'max_points': 20.0,
+            'poids': 1,
+            'updated_at': 1,
+            'sync_status': 'SYNCED',
+          });
+          await db.insert('note_evaluation', {
+            'id': 'n-lost',
+            'evaluation_id': 'ev-lost',
+            'student_id': 's1',
+            'points_obtenus': 12.0,
+            'statut': 'NOTEE',
+            'updated_at': 1,
+            'sync_status': 'SYNCED',
+          });
+
+          when(
+            () => api.pullEvaluations(auth, 'co-lost', null, 100),
+          ).thenThrow(status(403));
+          when(() => api.pullEvaluations(auth, 'co-ok', null, 100)).thenAnswer(
+            (_) async => httpOk(
+              const EvaluationPageDto(
+                items: [
+                  EvaluationDeltaDto(
+                    id: 'ev-ok',
+                    coursId: 'co-ok',
+                    type: 'INTERRO',
+                    date: '2026-06-10',
+                    maxPoints: 20,
+                    poids: 1,
+                    serverUpdatedAt: '2026-06-10T08:00:00Z',
+                  ),
+                ],
+                page: KeysetPageEnvelope(
+                  nextWatermark: 'wm-ok',
+                  hasMore: false,
+                  serverTime: '2026-06-10T10:00:00Z',
+                ),
+              ),
+            ),
+          );
+
+          final outcome = right(await repo.syncEvaluations());
+
+          // Non fatal : le cours OK a bien été appliqué.
+          expect(outcome.upserted, 1);
+          expect(
+            await refLocal.getCours('co-lost'),
+            isNull,
+            reason: 'référence évincée',
+          );
+          expect(
+            await local.getEvaluation('ev-lost'),
+            isNull,
+            reason: 'évaluation évincée en cascade',
+          );
+          expect(
+            await local.getNotesForEvaluation('ev-lost'),
+            isEmpty,
+            reason: 'notes évincées en cascade',
+          );
+          expect(await refLocal.getCours('co-ok'), isNotNull);
+          // Curseur des DEUX ressources purgé pour 'co-lost' (pas seulement
+          // 'evaluations' qui a 403) — sinon 'notes:co-lost' resterait un
+          // curseur orphelin périmé si le cours est réaffecté en retour.
+          expect(
+            await syncMeta.getCursor('academics_evaluations:co-lost'),
+            isNull,
+          );
+          expect(await syncMeta.getCursor('academics_notes:co-lost'), isNull);
+        },
+      );
+
+      test(
+        'cours 403 SEUL dans le cycle : outcome Right notModified, jamais Left '
+        '(l\'éviction non fatale ne doit pas être comptée comme un échec)',
+        () async {
+          await insertCours('co-lost');
+
+          when(
+            () => api.pullEvaluations(auth, 'co-lost', null, 100),
+          ).thenThrow(status(403));
+
+          final result = await repo.syncEvaluations();
+
+          final outcome = right(result);
+          expect(outcome.notModified, isTrue);
+          expect(await refLocal.getCours('co-lost'), isNull);
+        },
+      );
+    },
+  );
 }

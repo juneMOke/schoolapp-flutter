@@ -352,8 +352,10 @@ class AppConstants {
   // résultats « live » restent serveur. 5 pulls keyset (lecture seule) + 2
   // ingest. Jeton `cursor` opaque, `KeysetPage`, 304 applicatif sur cycle vide.
 
-  /// Pull KEYSET des cours d'une classe (réf, lecture seule). Query :
-  /// `classroomId`, `cursor`, `limit`. → `ref_cours`.
+  /// Pull KEYSET des cours du prof connecté (réf, lecture seule). Scope
+  /// **enseignant dérivé du token** (email, insensible à la casse — commit back
+  /// `1ec6be3`), jamais de `classroomId` côté client. Query : `cursor`, `limit`.
+  /// `404` = compte non lié à un enseignant. → `ref_cours`.
   static const String syncAcademicsCoursEndpoint =
       '/api/v1/sync/academics/cours';
 
@@ -381,8 +383,9 @@ class AppConstants {
       '/api/v1/sync/schedule/time-slots';
 
   /// Pull KEYSET des séances récurrentes de l'année (réf, lecture seule ; labels
-  /// dénormalisés). Query : `academicYearId`, `cursor`, `limit`.
-  /// → `ref_recurring_sessions`.
+  /// dénormalisés). Scope **enseignant dérivé du token** + année (commit back
+  /// `1ec6be3`). Query : `academicYearId`, `cursor`, `limit`. `404` = compte non
+  /// lié à un enseignant. → `ref_recurring_sessions`.
   static const String syncScheduleSessionsEndpoint =
       '/api/v1/sync/schedule/sessions';
 }

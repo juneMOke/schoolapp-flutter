@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart' hide Evaluation;
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
@@ -24,13 +23,14 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/t
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
-import 'package:school_app_flutter/features/schedule/data/models/offline/ref_recurring_session_row.dart';
 
 /// Implémentation **offline-first** de [CourseRepository].
 ///
 /// - [getMyCourses] : cours de l'enseignant connecté composés depuis l'emploi du
-///   temps (`ref_recurring_sessions`, filtre `teacher_id == uid`), classe résolue
-///   via `ref_classrooms`.
+///   temps (`ref_recurring_sessions`), classe résolue via `ref_classrooms`.
+///   **Aucun filtre d'identité côté client** : le pull sessions est scopé
+///   enseignant côté serveur (dérivé du token, commit back `1ec6be3` — DF-K),
+///   donc tout ce qui est en local appartient déjà au prof connecté.
 /// - [getCoursNotationDetail] : arbre période→sous-période depuis le **squelette
 ///   caché** (`ref_cours_notation`, statut ouvert/clôturé) + les **évaluations
 ///   locales** groupées par type. Les moyennes d'ensemble (moyenneClasse, rang,
@@ -39,8 +39,6 @@ import 'package:school_app_flutter/features/schedule/data/models/offline/ref_rec
 ///   encore été caché.
 /// - [createEvaluation] : déléguée au [EvaluationOfflineRepositoryImpl] (régime A,
 ///   insert-only + outbox).
-///
-/// ⚠ Hypothèse `CurrentUserContext.uid == teacher_id` (à VÉRIFIER en revue).
 class CourseOfflineRepositoryImpl implements CourseRepository {
   final CourseRepository _online;
   final AcademicsLocalDataSource _academicsLocal;
@@ -48,7 +46,6 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   final ScheduleRefLocalDataSource _scheduleRefLocal;
   final ClassroomLocalDataSource _classroomLocal;
   final EvaluationOfflineRepositoryImpl _evaluationRepo;
-  final CurrentUserContext? _currentUser;
   final BootstrapLocalRepository? _bootstrapRepository;
   final String _bootstrapKey;
 
@@ -59,7 +56,6 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     required ScheduleRefLocalDataSource scheduleRefLocalDataSource,
     required ClassroomLocalDataSource classroomLocalDataSource,
     required EvaluationOfflineRepositoryImpl evaluationRepository,
-    CurrentUserContext? currentUser,
     BootstrapLocalRepository? bootstrapRepository,
     String bootstrapKey = AppConstants.bootstrapPayloadKey,
   }) : _online = online,
@@ -68,7 +64,6 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
        _scheduleRefLocal = scheduleRefLocalDataSource,
        _classroomLocal = classroomLocalDataSource,
        _evaluationRepo = evaluationRepository,
-       _currentUser = currentUser,
        _bootstrapRepository = bootstrapRepository,
        _bootstrapKey = bootstrapKey;
 
@@ -77,21 +72,15 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   @override
   Future<Either<Failure, List<CourseSummary>>> getMyCourses() async {
     try {
-      final uid = _currentUser?.uid;
       final sessions = await _scheduleRefLocal.getAllSessions();
       // Scope ANNÉE COURANTE (bootstrap local) : après un rollover, les séances
       // d'années révolues accumulées en base ne doivent pas réapparaître dans
       // « Mes cours ». Année irrésolvable → repli sans filtre (premier
       // démarrage, bootstrap pas encore chargé).
       final academicYearId = await _resolveCurrentYear();
-      final mine = uid == null
-          ? const <RefRecurringSessionRow>[]
-          : sessions.where(
-              (s) =>
-                  s.teacherId == uid &&
-                  (academicYearId == null ||
-                      s.academicYearId == academicYearId),
-            );
+      final mine = academicYearId == null
+          ? sessions
+          : sessions.where((s) => s.academicYearId == academicYearId);
 
       final byClassroom = <String, Map<String, String>>{};
       final classroomLabel = <String, String>{};

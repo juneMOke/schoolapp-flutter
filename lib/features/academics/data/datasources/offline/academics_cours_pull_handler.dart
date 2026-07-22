@@ -1,27 +1,17 @@
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
 
-/// [PullHandler] des cours (référence, option B : pull par classe). Enregistré
-/// sur le `PullCoordinator`.
+/// [PullHandler] des cours du prof connecté (référence, ressource unique
+/// scopée enseignant — DF-K). Enregistré sur le `PullCoordinator`.
 ///
-/// **Self-sufficient** : résout l'`academicYearId` courant depuis le **bootstrap
-/// local** (comme le handler Classe) — les classes à itérer sont ensuite lues
-/// dans `ref_classrooms`. No-op propre si le bootstrap n'est pas encore chargé.
-/// Ne lève pas : l'échec (`Left`) est traduit en [PullOutcome.error].
+/// Plus de dépendance au bootstrap local / à l'année courante : le scope vient
+/// du token côté serveur, pas d'un `classroomId` résolu depuis `ref_classrooms`
+/// (ancienne option B, abandonnée avec le commit back `1ec6be3`). Ne lève pas :
+/// l'échec (`Left`) est traduit en [PullOutcome.error].
 class AcademicsCoursPullHandler implements PullHandler {
   final AcademicsCoursPullRepositoryImpl _repository;
-  final BootstrapLocalRepository _bootstrapRepository;
-  final String _bootstrapKey;
 
-  const AcademicsCoursPullHandler({
-    required AcademicsCoursPullRepositoryImpl repository,
-    required BootstrapLocalRepository bootstrapRepository,
-    String bootstrapKey = AppConstants.bootstrapPayloadKey,
-  }) : _repository = repository,
-       _bootstrapRepository = bootstrapRepository,
-       _bootstrapKey = bootstrapKey;
+  const AcademicsCoursPullHandler(this._repository);
 
   static const String resourceName = kAcademicsCoursResourcePrefix;
 
@@ -30,20 +20,7 @@ class AcademicsCoursPullHandler implements PullHandler {
 
   @override
   Future<PullOutcome> pull() async {
-    final bootstrap = await _bootstrapRepository.getStoredBootstrap(
-      _bootstrapKey,
-    );
-    final academicYearId = bootstrap.fold(
-      (_) => null,
-      (b) => b.academicYear.id,
-    );
-    if (academicYearId == null || academicYearId.isEmpty) {
-      return const PullOutcome.error(
-        'Année courante indisponible (bootstrap local non chargé)',
-      );
-    }
-
-    final result = await _repository.syncCours(academicYearId: academicYearId);
+    final result = await _repository.syncCours();
     return result.fold(
       (failure) => PullOutcome.error(failure.toString()),
       (outcome) => outcome.notModified

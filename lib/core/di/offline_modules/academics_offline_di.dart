@@ -39,8 +39,10 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 
 /// Registrar de la branche offline **Notes / Cours** (academics + schedule,
 /// ADR-006). Appelé depuis `registerOfflineModules` APRÈS le socle et les
-/// branches A/B (dépend de `ref_classrooms` — module Classe — pour l'itération
-/// du pull cours, et de `BootstrapLocalRepository` pour l'année courante).
+/// branches A/B. Le pull cours/sessions est scopé **enseignant dérivé du
+/// token** (DF-K) — plus de dépendance à `ref_classrooms`/l'année courante
+/// pour son itération ; `BootstrapLocalRepository` reste requis pour le scope
+/// année de `CourseOfflineRepositoryImpl.getMyCourses` (rollover).
 ///
 /// Ordre : DataSources → APIs → Repositories → Handlers (push sur `SyncEngine`,
 /// pull sur `PullCoordinator`). Aucun BLoC ici : la présentation est branchée en
@@ -89,6 +91,7 @@ void registerAcademicsOffline(GetIt getIt) {
     () => AcademicsCoursPullRepositoryImpl(
       api: getIt<AcademicsCoursPullApi>(),
       localDataSource: getIt<AcademicsRefLocalDataSource>(),
+      academicsLocalDataSource: getIt<AcademicsLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
     ),
@@ -137,7 +140,6 @@ void registerAcademicsOffline(GetIt getIt) {
       scheduleRefLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
-      currentUser: getIt<CurrentUserContext>(),
       bootstrapRepository: getIt<BootstrapLocalRepository>(),
     ),
   );
@@ -172,7 +174,6 @@ void registerAcademicsOffline(GetIt getIt) {
       coursPullRepository: getIt<AcademicsCoursPullRepositoryImpl>(),
       metierPullRepository: getIt<AcademicsMetierPullRepositoryImpl>(),
       notationRefPullRepository: getIt<NotationRefPullRepositoryImpl>(),
-      bootstrapRepository: getIt<BootstrapLocalRepository>(),
     ),
   );
 
@@ -202,10 +203,7 @@ void registerAcademicsOffline(GetIt getIt) {
     SessionsPullHandler(getIt<SchedulePullRepositoryImpl>()),
   );
   getIt<PullCoordinator>().registerHandler(
-    AcademicsCoursPullHandler(
-      repository: getIt<AcademicsCoursPullRepositoryImpl>(),
-      bootstrapRepository: getIt<BootstrapLocalRepository>(),
-    ),
+    AcademicsCoursPullHandler(getIt<AcademicsCoursPullRepositoryImpl>()),
   );
   getIt<PullCoordinator>().registerHandler(
     EvaluationsPullHandler(getIt<AcademicsMetierPullRepositoryImpl>()),

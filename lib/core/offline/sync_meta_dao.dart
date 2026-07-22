@@ -53,4 +53,14 @@ class SyncMetaDao {
       'synced_at': syncedAt,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
+
+  /// Supprime le curseur d'une ressource — pour une ressource **scopée à une
+  /// entité évincée** (ex. cours réaffecté à un autre prof) dont le cycle de
+  /// vie s'arrête là : sans ça, une entité qui redeviendrait valide plus tard
+  /// (ex. réaffectée en retour) reprendrait un curseur périmé au lieu de
+  /// rebootstraper, et perdrait silencieusement tout ce qui existait avant
+  /// l'éviction. No-op si la ressource n'a pas de curseur.
+  Future<void> deleteCursor(String resource) async {
+    await _db.delete(table, where: 'resource = ?', whereArgs: [resource]);
+  }
 }

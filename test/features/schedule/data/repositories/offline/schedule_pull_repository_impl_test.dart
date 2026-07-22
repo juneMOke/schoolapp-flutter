@@ -159,6 +159,15 @@ void main() {
       expect(await syncMeta.getCursor(kScheduleTimeSlotsResource), 'wm-fresh');
       verify(() => api.pullTimeSlots(auth, null, 100)).called(1);
     });
+
+    test('404 → PAS de traitement notModified (pas de notion d\'enseignant sur '
+        'les créneaux, école entière) : erreur propagée en Left', () async {
+      when(() => api.pullTimeSlots(auth, null, 100)).thenThrow(status(404));
+
+      final result = await repo.syncTimeSlots();
+
+      expect(result.isLeft(), isTrue);
+    });
   });
 
   group('syncSessions (keyset, curseur indépendant)', () {
@@ -204,6 +213,18 @@ void main() {
         (await local.getSessionsForYear('ay-1')).single.coursId,
         'cours-1',
       );
+    });
+
+    test('404 (compte non lié à un enseignant, DF-K) → notModified, jamais '
+        'une erreur', () async {
+      when(
+        () => api.pullSessions(auth, null, 100, null),
+      ).thenThrow(status(404));
+
+      final outcome = right(await repo.syncSessions());
+
+      expect(outcome.notModified, isTrue);
+      verify(() => api.pullSessions(auth, null, 100, null)).called(1);
     });
   });
 }

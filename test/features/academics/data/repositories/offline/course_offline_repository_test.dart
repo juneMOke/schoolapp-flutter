@@ -54,7 +54,6 @@ void main() {
         currentUser: CurrentUserContext()..set('me'),
         now: () => 1000,
       ),
-      currentUser: CurrentUserContext()..set('me'),
     );
   });
 
@@ -94,7 +93,8 @@ void main() {
     'sync_status': 'SYNCED',
   });
 
-  test('getMyCourses : filtre teacher + groupe par classe', () async {
+  test('getMyCourses : groupe par classe, sans filtre d\'identité côté client '
+      '(DF-K, sessions déjà scopées enseignant par le pull)', () async {
     await insertSession('co1', 'Maths');
     await db.insert('ref_classrooms', {
       'id': 'class-1',
@@ -184,7 +184,6 @@ void main() {
           idGenerator: _SeqId(() => 'x'),
           now: () => 1,
         ),
-        currentUser: CurrentUserContext()..set('me'),
       );
       when(
         () => online.getCoursNotationDetail('absent'),

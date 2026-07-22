@@ -8,6 +8,7 @@ part 'academics_metier_pull_api.g.dart';
 /// Client du PULL KEYSET métier — évaluations et notes, **scopés cours**,
 /// **curseurs indépendants** (split assumé, cf. contrat). Jeton `cursor` opaque
 /// renvoyé VERBATIM ; `304 Not Modified` applicatif → [DioException] 304.
+/// `403` = garde d'ownership serveur (cours pas/plus au prof, DF-L).
 @RestApi()
 abstract class AcademicsMetierPullApi {
   factory AcademicsMetierPullApi(Dio dio, {String baseUrl}) =

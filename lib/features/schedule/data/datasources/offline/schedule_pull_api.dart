@@ -24,7 +24,9 @@ abstract class SchedulePullApi {
   );
 
   /// Séances récurrentes de l'année. `academicYearId` null = année active
-  /// (défaut serveur).
+  /// (défaut serveur). Scope **enseignant dérivé du token** (commit back
+  /// `1ec6be3`, DF-K), jamais fourni par le client. `404` = compte non lié à un
+  /// enseignant.
   @GET(AppConstants.syncScheduleSessionsEndpoint)
   Future<HttpResponse<RecurringSessionPageDto>> pullSessions(
     @Extras() Map<String, dynamic> extras,

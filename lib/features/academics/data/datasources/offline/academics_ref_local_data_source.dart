@@ -4,35 +4,16 @@ import 'package:school_app_flutter/features/academics/data/models/offline/ref_co
 import 'package:school_app_flutter/features/academics/data/models/offline/ref_cours_row.dart';
 
 /// Accès sqflite à la table de **référence** `ref_cours` (read-only côté métier :
-/// jamais écrite par une action utilisateur, uniquement peuplée par le pull, par
-/// classe). L'application d'un delta est un upsert par uuid
+/// jamais écrite par une action utilisateur, uniquement peuplée par le pull,
+/// scopé enseignant — DF-K). L'application d'un delta est un upsert par uuid
 /// (`ConflictAlgorithm.replace`), sans garde `PENDING_SYNC`.
-///
-/// Lit aussi les ids de classes dans `ref_classrooms` (table du module Classe,
-/// même base) : c'est la source d'itération du pull cours (option B — pull par
-/// classe depuis les classes déjà rapatriées par le pull Classe).
 class AcademicsRefLocalDataSource {
   final Database _db;
 
   const AcademicsRefLocalDataSource(this._db);
 
   static const String coursTable = 'ref_cours';
-  static const String classroomsTable = 'ref_classrooms';
   static const String coursNotationTable = 'ref_cours_notation';
-
-  /// Ids des classes d'une année (source d'itération du pull cours). Lit
-  /// `ref_classrooms` peuplée par le module Classe ; liste vide si le pull
-  /// Classe n'a pas encore eu lieu (le pull cours est alors un no-op propre).
-  Future<List<String>> getClassroomIdsForYear(String academicYearId) async {
-    final rows = await _db.query(
-      classroomsTable,
-      columns: ['id'],
-      where: 'academic_year_id = ?',
-      whereArgs: [academicYearId],
-      orderBy: 'id ASC',
-    );
-    return rows.map((r) => r['id'] as String).toList(growable: false);
-  }
 
   Future<int> applyPulledCours(List<RefCoursRow> rows) async {
     var applied = 0;
@@ -65,16 +46,6 @@ class AcademicsRefLocalDataSource {
     return RefCoursRow.fromMap(rows.first);
   }
 
-  /// Cours d'une classe (résolution roster/barème).
-  Future<List<RefCoursRow>> getCoursForClassroom(String classroomId) async {
-    final rows = await _db.query(
-      coursTable,
-      where: 'classroom_id = ?',
-      whereArgs: [classroomId],
-    );
-    return rows.map(RefCoursRow.fromMap).toList(growable: false);
-  }
-
   /// Tous les cours en base (source d'itération du pull evaluations/notes NF-4).
   Future<List<RefCoursRow>> getAllCours() async {
     final rows = await _db.query(coursTable);
@@ -102,5 +73,39 @@ class AcademicsRefLocalDataSource {
     );
     if (rows.isEmpty) return null;
     return RefCoursNotationRow.fromMap(rows.first);
+  }
+
+  // ── Réconciliation (DF-L) — cours perdu (réaffectation prof) ────────────────
+
+  /// Évince un cours (référence + squelette de notation en cache). Le contenu
+  /// d'écriture rattaché (`evaluation`/`note_evaluation`) est purgé séparément
+  /// par `AcademicsLocalDataSource.evictCoursData` — les deux DAO possèdent
+  /// chacune leurs propres tables.
+  Future<void> evictCours(String coursId) async {
+    await _db.transaction((txn) async {
+      await txn.delete(
+        coursNotationTable,
+        where: 'cours_id = ?',
+        whereArgs: [coursId],
+      );
+      await txn.delete(coursTable, where: 'id = ?', whereArgs: [coursId]);
+    });
+  }
+
+  /// Évince les cours locaux **absents** de [keepIds] — le pull `cours`
+  /// (désormais scopé enseignant, DF-K) fait foi de « mes cours » sur un cycle
+  /// bootstrap complet. Le delta additif ne signale jamais un retrait
+  /// (réaffectation à un autre prof) : c'est cette diff explicite qui le fait.
+  /// Renvoie les ids évincés (pour cascade côté [AcademicsLocalDataSource]).
+  Future<List<String>> evictCoursNotIn(Set<String> keepIds) async {
+    final rows = await _db.query(coursTable, columns: ['id']);
+    final staleIds = rows
+        .map((r) => r['id'] as String)
+        .where((id) => !keepIds.contains(id))
+        .toList(growable: false);
+    for (final id in staleIds) {
+      await evictCours(id);
+    }
+    return staleIds;
   }
 }

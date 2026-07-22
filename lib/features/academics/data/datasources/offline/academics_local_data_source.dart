@@ -364,4 +364,37 @@ class AcademicsLocalDataSource {
     );
     return applied;
   }
+
+  // ── Réconciliation (DF-L) — cours perdu (réaffectation prof) ────────────────
+
+  /// Purge les évaluations d'un cours évincé (référence perdue — réaffectation,
+  /// garde d'ownership 403) et leurs notes, dans une seule transaction. Emporte
+  /// aussi le contenu `PENDING_SYNC` non encore poussé : une fois le cours
+  /// perdu, ce travail ne peut plus être poussé (le serveur le rejetterait en
+  /// 403 à son tour) — ce n'est pas une perte due à un bug de synchro, mais une
+  /// conséquence légitime de la perte d'accès.
+  Future<void> evictCoursData(String coursId) async {
+    await _db.transaction((txn) async {
+      final evalRows = await txn.query(
+        evaluationTable,
+        columns: ['id'],
+        where: 'cours_id = ?',
+        whereArgs: [coursId],
+      );
+      final evalIds = evalRows.map((r) => r['id'] as String).toList();
+      if (evalIds.isNotEmpty) {
+        final placeholders = List.filled(evalIds.length, '?').join(',');
+        await txn.delete(
+          noteTable,
+          where: 'evaluation_id IN ($placeholders)',
+          whereArgs: evalIds,
+        );
+      }
+      await txn.delete(
+        evaluationTable,
+        where: 'cours_id = ?',
+        whereArgs: [coursId],
+      );
+    });
+  }
 }

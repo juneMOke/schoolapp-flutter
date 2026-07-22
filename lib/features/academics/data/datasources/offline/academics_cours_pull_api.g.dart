@@ -22,14 +22,12 @@ class _AcademicsCoursPullApi implements AcademicsCoursPullApi {
   @override
   Future<HttpResponse<CoursPageDto>> pullCours(
     Map<String, dynamic> extras,
-    String classroomId,
     String? cursor,
     int? limit,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
-      r'classroomId': classroomId,
       r'cursor': cursor,
       r'limit': limit,
     };

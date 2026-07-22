@@ -327,4 +327,108 @@ void main() {
       },
     );
   });
+
+  group('evictCoursData (réconciliation DF-L — cours perdu)', () {
+    test('purge les évaluations SYNCED et PENDING_SYNC du cours + leurs notes, '
+        'laisse les autres cours intacts', () async {
+      // Cours évincé : une évaluation SYNCED + une PENDING_SYNC (travail
+      // offline pas encore poussé), chacune avec une note.
+      await db.insert('evaluation', {
+        'id': 'ev-synced',
+        'cours_id': 'co-lost',
+        'type': 'INTERRO',
+        'eval_date': 1,
+        'max_points': 20.0,
+        'poids': 1,
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+      await db.insert('note_evaluation', {
+        'id': 'n-synced',
+        'evaluation_id': 'ev-synced',
+        'student_id': 's1',
+        'points_obtenus': 12.0,
+        'statut': 'NOTEE',
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+      await local.createEvaluationWithOutbox(
+        row: const EvaluationRow(
+          id: 'ev-pending',
+          coursId: 'co-lost',
+          type: 'DEVOIR',
+          evalDate: 2,
+          maxPoints: 10,
+          poids: 1,
+          updatedAt: 1,
+        ),
+        outboxEntry: _entry(
+          id: 'obx-ev-pending',
+          type: 'ACADEMICS_EVALUATION',
+          aggregateId: 'ev-pending',
+          op: OutboxOperation.create,
+        ),
+      );
+      await db.insert('note_evaluation', {
+        'id': 'n-pending',
+        'evaluation_id': 'ev-pending',
+        'student_id': 's2',
+        'points_obtenus': 8.0,
+        'statut': 'NOTEE',
+        'updated_at': 1,
+        'sync_status': 'PENDING_SYNC',
+      });
+      // Cours NON évincé : doit rester intact.
+      await db.insert('evaluation', {
+        'id': 'ev-other',
+        'cours_id': 'co-kept',
+        'type': 'INTERRO',
+        'eval_date': 1,
+        'max_points': 20.0,
+        'poids': 1,
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+
+      await local.evictCoursData('co-lost');
+
+      expect(await local.getEvaluation('ev-synced'), isNull);
+      expect(await local.getEvaluation('ev-pending'), isNull);
+      expect(
+        await local.getNotesForEvaluation('ev-synced'),
+        isEmpty,
+        reason: 'note SYNCED évincée en cascade',
+      );
+      expect(
+        await local.getNotesForEvaluation('ev-pending'),
+        isEmpty,
+        reason:
+            'note PENDING_SYNC évincée en cascade (le cours est '
+            'perdu, ce travail ne sera jamais poussable)',
+      );
+      expect(
+        await local.getEvaluation('ev-other'),
+        isNotNull,
+        reason: 'un autre cours ne doit pas être touché',
+      );
+    });
+
+    test('idempotent : appeler deux fois ne lève pas', () async {
+      await db.insert('evaluation', {
+        'id': 'ev-1',
+        'cours_id': 'co-lost',
+        'type': 'INTERRO',
+        'eval_date': 1,
+        'max_points': 20.0,
+        'poids': 1,
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+
+      await local.evictCoursData('co-lost');
+      await local.evictCoursData('co-lost'); // ne doit pas lever
+
+      expect(await local.getEvaluation('ev-1'), isNull);
+    });
+  });
 }

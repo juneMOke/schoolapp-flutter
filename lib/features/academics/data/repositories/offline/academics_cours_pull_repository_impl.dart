@@ -6,57 +6,49 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_cours_pull_api.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart'
+    show kAcademicsEvaluationsResourcePrefix, kAcademicsNotesResourcePrefix;
 import 'package:school_app_flutter/features/academics/domain/entities/offline/cours_pull_outcome.dart';
 
-/// Préfixes `sync_meta` du curseur et du drapeau bootstrap **par classe** : la
-/// clé effective est `academics_cours:{classroomId}` (un curseur keyset propre à
-/// chaque classe, le contrat back scopant les cours par `classroomId`).
+/// Clé `sync_meta` du curseur et du drapeau bootstrap de la ressource cours —
+/// **une seule** ressource depuis DF-K (plus de clé par classe : le pull est
+/// scopé enseignant côté serveur, un seul flux ramène tous les cours du prof).
 const String kAcademicsCoursResourcePrefix = 'academics_cours';
 const String kAcademicsCoursBootstrapPrefix = 'academics_cours_bootstrap';
-
-String _coursResource(String classroomId) =>
-    '$kAcademicsCoursResourcePrefix:$classroomId';
-String _coursBootstrap(String classroomId) =>
-    '$kAcademicsCoursBootstrapPrefix:$classroomId';
 
 /// Page keyset incohérente : `hasMore` sans curseur qui progresse.
 class _IncoherentKeysetPage implements Exception {
   const _IncoherentKeysetPage();
 }
 
-/// Résultat d'un cycle keyset pour UNE classe.
-class _ClassroomCycle {
-  final int upserted;
-  final bool notModified;
-  final bool bootstrapComplete;
-  final int? serverTimeMs;
-  const _ClassroomCycle({
-    required this.upserted,
-    required this.notModified,
-    required this.bootstrapComplete,
-    this.serverTimeMs,
-  });
-}
-
 class _CycleAttempt {
-  final Either<Failure, _ClassroomCycle> result;
+  final Either<Failure, CoursPullOutcome> result;
   final bool rejectedCursor;
   const _CycleAttempt(this.result, {this.rejectedCursor = false});
 }
 
-/// Pull KEYSET des cours (référence read-only), **itéré par classe** (option B) :
-/// on lit les classes de l'année dans `ref_classrooms` (peuplée par le module
-/// Classe), puis on tire les cours de chaque classe avec un **curseur keyset
-/// propre à la classe**. Résumable (jeton opaque mémorisé par page), 304, 400→
-/// rebootstrap, anti-boucle. Money-grade : ne **lève jamais** (échec en `Left`).
+/// Pull KEYSET des cours du prof connecté (référence read-only), **ressource
+/// unique** depuis le contrat back `1ec6be3` (DF-K) : plus d'itération par
+/// classe, un seul curseur `sync_meta`. Résumable (jeton opaque mémorisé par
+/// page), 304, 400→rebootstrap, anti-boucle. `404` = compte non lié à un
+/// enseignant → traité comme un cycle à jour, jamais une erreur (« ne pas
+/// boucler », spec front §5). Money-grade : ne **lève jamais**.
 ///
-/// Sur échec d'une classe, on interrompt le cycle et on renvoie l'échec : le
-/// coordinateur re-tentera tout le pull cours au prochain cycle, les classes
-/// déjà tirées repartant de leur curseur (304 bon marché — idempotent).
+/// **Réconciliation DF-L** : le pull étant un delta additif, seul un cycle
+/// **bootstrap complet** (curseur de départ `null`, càd un premier passage ou
+/// un rejeu après 400) restitue l'ensemble courant des cours du prof — c'est
+/// le SEUL moment où on peut savoir qu'un cours local est absent parce qu'il a
+/// été réaffecté (le delta d'un cycle repris ne contient que des nouveautés,
+/// jamais l'univers complet ; en diffuser l'absence évincerait à tort tout ce
+/// qui n'a pas bougé depuis le dernier cycle). Sur un tel cycle, les cours
+/// locaux absents de l'ensemble pullé sont évincés en cascade (référence +
+/// squelette de notation + évaluations/notes).
 class AcademicsCoursPullRepositoryImpl {
   final AcademicsCoursPullApi _api;
-  final AcademicsRefLocalDataSource _local;
+  final AcademicsRefLocalDataSource _refLocal;
+  final AcademicsLocalDataSource _academicsLocal;
   final SyncMetaDao _syncMetaDao;
   final Map<String, dynamic> _requiredAuth;
   final Clock _now;
@@ -66,26 +58,24 @@ class AcademicsCoursPullRepositoryImpl {
   AcademicsCoursPullRepositoryImpl({
     required AcademicsCoursPullApi api,
     required AcademicsRefLocalDataSource localDataSource,
+    required AcademicsLocalDataSource academicsLocalDataSource,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
     Clock now = systemClock,
   }) : _api = api,
-       _local = localDataSource,
+       _refLocal = localDataSource,
+       _academicsLocal = academicsLocalDataSource,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
        _now = now;
 
   Future<Either<Failure, CoursPullOutcome>>? _tail;
 
-  /// Pull des cours de toutes les classes de [academicYearId].
-  Future<Either<Failure, CoursPullOutcome>> syncCours({
-    required String academicYearId,
-  }) {
+  /// Pull des cours du prof connecté (scope token, DF-K).
+  Future<Either<Failure, CoursPullOutcome>> syncCours() {
     final prev = _tail;
     late final Future<Either<Failure, CoursPullOutcome>> scheduled;
-    final run = prev == null
-        ? _pullAll(academicYearId)
-        : prev.then((_) => _pullAll(academicYearId));
+    final run = prev == null ? _pull() : prev.then((_) => _pull());
     scheduled = run.whenComplete(() {
       if (identical(_tail, scheduled)) _tail = null;
     });
@@ -93,115 +83,48 @@ class AcademicsCoursPullRepositoryImpl {
     return scheduled;
   }
 
-  Future<Either<Failure, CoursPullOutcome>> _pullAll(
-    String academicYearId,
-  ) async {
+  Future<Either<Failure, CoursPullOutcome>> _pull() async {
     final syncedAt = _now();
-    final List<String> classroomIds;
-    try {
-      classroomIds = await _local.getClassroomIdsForYear(academicYearId);
-    } catch (_) {
-      return const Left(ServerFailure('Lecture des classes locales échouée'));
-    }
-
-    // Aucune classe locale : no-op propre (le pull Classe n'a pas encore
-    // peuplé `ref_classrooms`). Réputé « à jour » (rien à tirer).
-    if (classroomIds.isEmpty) {
-      return Right(
-        CoursPullOutcome(
-          upserted: 0,
-          notModified: true,
-          bootstrapComplete: false,
-          syncedAt: syncedAt,
-        ),
-      );
-    }
-
-    // Best-effort : une classe en échec est SAUTÉE (rafraîchie au prochain
-    // cycle), les autres continuent — sinon une classe cassée (500 persistant)
-    // gèlerait indéfiniment la synchro de toutes les classes suivantes (les ids
-    // triés rendraient la privation stable). `Left` seulement si TOUT échoue.
-    var totalUpserted = 0;
-    var allNotModified = true;
-    var allBootstrapComplete = true;
-    var anySucceeded = false;
-    int? latestServerTimeMs;
-    Failure? lastFailure;
-    for (final classroomId in classroomIds) {
-      final cycle = await _pullClassroom(classroomId, syncedAt);
-      Failure? failure;
-      _ClassroomCycle? applied;
-      cycle.fold((f) => failure = f, (c) => applied = c);
-      if (failure != null) {
-        lastFailure = failure;
-        allBootstrapComplete = false;
-        allNotModified = false;
-        continue;
-      }
-      anySucceeded = true;
-      totalUpserted += applied!.upserted;
-      allNotModified = allNotModified && applied!.notModified;
-      allBootstrapComplete = allBootstrapComplete && applied!.bootstrapComplete;
-      final observed = applied!.serverTimeMs;
-      if (observed != null &&
-          (latestServerTimeMs == null || observed > latestServerTimeMs)) {
-        latestServerTimeMs = observed;
-      }
-    }
-
-    if (!anySucceeded && lastFailure != null) return Left(lastFailure);
-    return Right(
-      CoursPullOutcome(
-        upserted: totalUpserted,
-        notModified: allNotModified,
-        bootstrapComplete: allBootstrapComplete,
-        syncedAt: syncedAt,
-        serverTimeMs: latestServerTimeMs,
-      ),
-    );
-  }
-
-  /// Un cycle keyset complet pour une classe (avec repli bootstrap sur 400).
-  Future<Either<Failure, _ClassroomCycle>> _pullClassroom(
-    String classroomId,
-    int syncedAt,
-  ) async {
-    final resource = _coursResource(classroomId);
-    final stored = await _syncMetaDao.getCursor(resource);
-    final first = await _attemptCycle(classroomId, syncedAt, from: stored);
+    final stored = await _syncMetaDao.getCursor(kAcademicsCoursResourcePrefix);
+    final first = await _attemptCycle(syncedAt, from: stored);
     if (first.rejectedCursor && stored != null) {
-      await _syncMetaDao.setCursor(resource, cursor: null, syncedAt: syncedAt);
-      return (await _attemptCycle(classroomId, syncedAt, from: null)).result;
+      await _syncMetaDao.setCursor(
+        kAcademicsCoursResourcePrefix,
+        cursor: null,
+        syncedAt: syncedAt,
+      );
+      return (await _attemptCycle(syncedAt, from: null)).result;
     }
     return first.result;
   }
 
   Future<_CycleAttempt> _attemptCycle(
-    String classroomId,
     int syncedAt, {
     required String? from,
   }) async {
-    final resource = _coursResource(classroomId);
-    final bootstrapResource = _coursBootstrap(classroomId);
     try {
-      return _CycleAttempt(
-        Right(await _runCycle(classroomId, syncedAt, from: from)),
-      );
+      return _CycleAttempt(Right(await _runCycle(syncedAt, from: from)));
     } on DioException catch (e) {
       final status = e.response?.statusCode;
-      if (status == 304) {
-        final kept = await _syncMetaDao.getCursor(resource);
+      if (status == 304 || status == 404) {
+        // 304 = cycle sans changement ; 404 = compte non lié à un enseignant
+        // (spec §5 : traiter comme « offline notation indisponible pour ce
+        // compte », jamais une erreur qui boucle).
+        final kept = await _syncMetaDao.getCursor(
+          kAcademicsCoursResourcePrefix,
+        );
         await _syncMetaDao.setCursor(
-          resource,
+          kAcademicsCoursResourcePrefix,
           cursor: kept,
           syncedAt: syncedAt,
         );
         return _CycleAttempt(
           Right(
-            _ClassroomCycle(
+            CoursPullOutcome(
               upserted: 0,
               notModified: true,
-              bootstrapComplete: await _isBootstrapComplete(bootstrapResource),
+              bootstrapComplete: await _isBootstrapComplete(),
+              syncedAt: syncedAt,
             ),
           ),
         );
@@ -225,34 +148,31 @@ class AcademicsCoursPullRepositoryImpl {
     }
   }
 
-  Future<_ClassroomCycle> _runCycle(
-    String classroomId,
+  Future<CoursPullOutcome> _runCycle(
     int syncedAt, {
     required String? from,
   }) async {
-    final resource = _coursResource(classroomId);
-    final bootstrapResource = _coursBootstrap(classroomId);
+    final bootstrapSweep = from == null;
     var cursor = from;
     var upserted = 0;
     var reachedEnd = false;
     String? lastServerTime;
+    final seenIds = <String>{};
     while (true) {
       final sent = cursor;
-      final page = (await _api.pullCours(
-        _requiredAuth,
-        classroomId,
-        sent,
-        pageLimit,
-      )).data;
+      final page = (await _api.pullCours(_requiredAuth, sent, pageLimit)).data;
       lastServerTime = page.page.serverTime;
-      upserted += await _local.applyPulledCours(
+      for (final item in page.items) {
+        seenIds.add(item.id);
+      }
+      upserted += await _refLocal.applyPulledCours(
         page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
       );
 
       final nextToken = page.page.cursorToPersist;
       if (nextToken != null) cursor = nextToken;
       await _syncMetaDao.setCursor(
-        resource,
+        kAcademicsCoursResourcePrefix,
         cursor: cursor,
         syncedAt: syncedAt,
       );
@@ -268,21 +188,43 @@ class AcademicsCoursPullRepositoryImpl {
 
     if (reachedEnd) {
       await _syncMetaDao.setCursor(
-        bootstrapResource,
+        kAcademicsCoursBootstrapPrefix,
         cursor: 'DONE',
         syncedAt: syncedAt,
       );
+      // DF-L : seul un cycle bootstrap complet restitue l'ensemble courant —
+      // un cycle repris (delta) ne porte que des nouveautés, y diffuser une
+      // éviction évincerait à tort tout ce qui n'a pas changé depuis.
+      if (bootstrapSweep) {
+        final stale = await _refLocal.evictCoursNotIn(seenIds);
+        for (final coursId in stale) {
+          await _academicsLocal.evictCoursData(coursId);
+          // Purge les curseurs évaluations/notes de ce cours — sinon une
+          // réaffectation en retour reprendrait un curseur périmé au lieu de
+          // rebootstraper, et perdrait silencieusement tout ce qui existait
+          // avant l'éviction (même raison que le chemin 403, cf.
+          // AcademicsMetierPullRepositoryImpl).
+          for (final prefix in const [
+            kAcademicsEvaluationsResourcePrefix,
+            kAcademicsNotesResourcePrefix,
+          ]) {
+            await _syncMetaDao.deleteCursor('$prefix:$coursId');
+            await _syncMetaDao.deleteCursor('${prefix}_bootstrap:$coursId');
+          }
+        }
+      }
     }
-    return _ClassroomCycle(
+    return CoursPullOutcome(
       upserted: upserted,
       notModified: upserted == 0,
-      bootstrapComplete: await _isBootstrapComplete(bootstrapResource),
+      bootstrapComplete: await _isBootstrapComplete(),
+      syncedAt: syncedAt,
       serverTimeMs: upserted == 0
           ? null
           : EpochIsoHelper.tryToEpochMs(lastServerTime),
     );
   }
 
-  Future<bool> _isBootstrapComplete(String bootstrapResource) async =>
-      (await _syncMetaDao.getCursor(bootstrapResource)) != null;
+  Future<bool> _isBootstrapComplete() async =>
+      (await _syncMetaDao.getCursor(kAcademicsCoursBootstrapPrefix)) != null;
 }

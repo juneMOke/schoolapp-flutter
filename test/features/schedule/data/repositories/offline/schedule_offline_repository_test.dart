@@ -55,49 +55,27 @@ void main() {
     'synced_at': 1,
   });
 
-  test(
-    'getMyTimetable : grille créneau×jour filtrée sur mes séances',
-    () async {
-      await insertSlot('t1', 1, '08:00');
-      await insertSlot('t2', 2, '09:00');
-      await insertSession('s1', 'co1', 't1', 'MON', 'me');
-      await insertSession('s2', 'co2', 't2', 'TUE', 'me');
-      // séance d'un autre enseignant → exclue.
-      await insertSession('s3', 'co9', 't1', 'MON', 'autre');
+  test('getMyTimetable : grille créneau×jour, sans filtre d\'identité côté '
+      'client (DF-K, séances déjà scopées enseignant par le pull)', () async {
+    await insertSlot('t1', 1, '08:00');
+    await insertSlot('t2', 2, '09:00');
+    await insertSession('s1', 'co1', 't1', 'MON', 'me');
+    await insertSession('s2', 'co2', 't2', 'TUE', 'me');
 
-      final result = await repo.getMyTimetable('ay-1');
+    final result = await repo.getMyTimetable('ay-1');
 
-      final tt = result.getOrElse(() => fail('Left'));
-      expect(tt.teacherId, 'me');
-      expect(tt.days, [Weekday.mon, Weekday.tue]);
-      expect(tt.rows.length, 2);
-      expect(tt.rows.first.timeSlot.id, 't1', reason: 'ordonné par slot_order');
+    final tt = result.getOrElse(() => fail('Left'));
+    expect(tt.teacherId, 'me');
+    expect(tt.days, [Weekday.mon, Weekday.tue]);
+    expect(tt.rows.length, 2);
+    expect(tt.rows.first.timeSlot.id, 't1', reason: 'ordonné par slot_order');
 
-      final row1 = tt.rows.firstWhere((r) => r.timeSlot.id == 't1');
-      expect(row1.cells[Weekday.mon]!.coursId, 'co1');
-      expect(row1.cells[Weekday.tue], isNull);
+    final row1 = tt.rows.firstWhere((r) => r.timeSlot.id == 't1');
+    expect(row1.cells[Weekday.mon]!.coursId, 'co1');
+    expect(row1.cells[Weekday.tue], isNull);
 
-      final row2 = tt.rows.firstWhere((r) => r.timeSlot.id == 't2');
-      expect(row2.cells[Weekday.tue]!.coursId, 'co2');
-      expect(row2.cells[Weekday.mon], isNull);
-    },
-  );
-
-  test(
-    'uid nul → aucune séance (grille vide, aucune donnée d\'un autre)',
-    () async {
-      await insertSlot('t1', 1, '08:00');
-      await insertSession('s1', 'co1', 't1', 'MON', 'autre');
-      final repoNoUser = ScheduleOfflineRepositoryImpl(
-        online: MockOnlineSchedule(),
-        refLocalDataSource: ScheduleRefLocalDataSource(db),
-        currentUser: CurrentUserContext(),
-      );
-
-      final tt = (await repoNoUser.getMyTimetable(
-        'ay-1',
-      )).getOrElse(() => fail('Left'));
-      expect(tt.days, isEmpty);
-    },
-  );
+    final row2 = tt.rows.firstWhere((r) => r.timeSlot.id == 't2');
+    expect(row2.cells[Weekday.tue]!.coursId, 'co2');
+    expect(row2.cells[Weekday.mon], isNull);
+  });
 }

@@ -86,7 +86,9 @@ class SchedulePullRepositoryImpl {
     return scheduled;
   }
 
-  /// Pull des séances récurrentes (scope année active — défaut serveur).
+  /// Pull des séances récurrentes de l'enseignant connecté (scope **prof
+  /// dérivé du token** + année active — commit back `1ec6be3`, DF-K). `404` =
+  /// compte non lié à un enseignant.
   Future<Either<Failure, RefPullOutcome>> syncSessions() {
     late final Future<Either<Failure, RefPullOutcome>> scheduled;
     final prev = _sessionsTail;
@@ -94,6 +96,7 @@ class SchedulePullRepositoryImpl {
         _pull<RecurringSessionDeltaDto>(
           resource: kScheduleSessionsResource,
           bootstrapResource: kScheduleSessionsBootstrap,
+          treat404AsNotModified: true,
           fetchPage: (cursor) async => (await _api.pullSessions(
             _requiredAuth,
             cursor,
@@ -113,11 +116,16 @@ class SchedulePullRepositoryImpl {
   }
 
   /// Squelette de pull keyset générique, partagé par les deux ressources.
+  /// [treat404AsNotModified] : la ressource peut légitimement renvoyer `404`
+  /// pour un compte non lié à un enseignant (sessions, DF-K) — traité comme un
+  /// cycle à jour, jamais une erreur. Non pertinent pour les créneaux (scope
+  /// école, sans notion d'enseignant).
   Future<Either<Failure, RefPullOutcome>> _pull<I>({
     required String resource,
     required String bootstrapResource,
     required Future<KeysetPageDto<I>> Function(String? cursor) fetchPage,
     required Future<int> Function(KeysetPageDto<I> page, int syncedAt) apply,
+    bool treat404AsNotModified = false,
   }) async {
     final syncedAt = _now();
     final stored = await _syncMetaDao.getCursor(resource); // null = bootstrap
@@ -128,6 +136,7 @@ class SchedulePullRepositoryImpl {
       bootstrapResource: bootstrapResource,
       fetchPage: fetchPage,
       apply: apply,
+      treat404AsNotModified: treat404AsNotModified,
     );
     // 400 = curseur illisible / forgé / étranger → repartir du bootstrap. Hors
     // du `catch` (une exception dans un `catch` s'échapperait de `_pull` qui
@@ -141,6 +150,7 @@ class SchedulePullRepositoryImpl {
         bootstrapResource: bootstrapResource,
         fetchPage: fetchPage,
         apply: apply,
+        treat404AsNotModified: treat404AsNotModified,
       )).result;
     }
     return first.result;
@@ -153,6 +163,7 @@ class SchedulePullRepositoryImpl {
     required String bootstrapResource,
     required Future<KeysetPageDto<I>> Function(String? cursor) fetchPage,
     required Future<int> Function(KeysetPageDto<I> page, int syncedAt) apply,
+    bool treat404AsNotModified = false,
   }) async {
     try {
       return _CycleAttempt(
@@ -169,7 +180,7 @@ class SchedulePullRepositoryImpl {
       );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
-      if (status == 304) {
+      if (status == 304 || (status == 404 && treat404AsNotModified)) {
         final kept = await _syncMetaDao.getCursor(resource);
         await _syncMetaDao.setCursor(
           resource,

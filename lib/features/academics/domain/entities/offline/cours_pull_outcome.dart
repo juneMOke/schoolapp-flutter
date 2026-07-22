@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-/// Bilan agrégé d'un pull des cours (itéré par classe — option B). [notModified]
-/// vrai ⟺ **aucune** classe n'a rapporté de nouveauté ; [bootstrapComplete] vrai
-/// ⟺ **toutes** les classes itérées ont bouclé leur premier passage complet.
+/// Bilan d'un pull des cours (`AcademicsCoursPullRepositoryImpl`, ressource
+/// unique scopée enseignant — DF-K) ou d'un rafraîchissement des squelettes de
+/// notation (`NotationRefPullRepositoryImpl`, itéré par cours). [notModified]
+/// vrai ⟺ rien de nouveau à appliquer ; [bootstrapComplete] vrai ⟺ le premier
+/// passage complet a bouclé sans échec.
 class CoursPullOutcome extends Equatable {
   final int upserted;
   final bool notModified;
