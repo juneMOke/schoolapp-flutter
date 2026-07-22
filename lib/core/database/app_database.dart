@@ -173,6 +173,54 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
+  if (oldVersion < 11) {
+    // v11 — Notes / Cours : purge + rebootstrap forcé après le passage au
+    // contrat back scopé ENSEIGNANT (commit `1ec6be3`, DF-K/DF-L). Les pulls
+    // antérieurs (cours itéré par classe, séances de l'année entière) n'étaient
+    // PAS scopés au prof connecté : la base locale peut porter des cours,
+    // évaluations, notes et séances d'AUTRES enseignants.
+    //
+    // La réconciliation DF-L (éviction des cours absents d'un snapshot) ne se
+    // déclenche que sur un cycle **bootstrap** (curseur stocké `null`) — un
+    // curseur déjà posé par un pull antérieur empêcherait tout nettoyage
+    // automatique. On purge donc ici les données ET les curseurs `sync_meta`
+    // des ressources concernées : chaque compte qui migre repart d'un
+    // bootstrap propre au prochain pull, déjà scopé enseignant côté serveur.
+    // Tables 100% référence/dérivées de la synchro (aucune saisie utilisateur
+    // ne se perd : `evaluation`/`note_evaluation` sont recomposées par le pull
+    // métier, qui ne réitère que sur les cours qui reviendront correctement
+    // scopés — un travail `PENDING_SYNC` sur un cours qui n'était pas vraiment
+    // celui du prof n'aurait de toute façon jamais pu être poussé, DF-L §5.2).
+    for (final table in const [
+      'ref_cours',
+      'ref_cours_notation',
+      'evaluation',
+      'note_evaluation',
+      'ref_recurring_sessions',
+    ]) {
+      if (await _hasTable(db, table)) {
+        await db.delete(table);
+      }
+    }
+    if (await _hasTable(db, 'outbox') &&
+        await _hasColumn(db, 'outbox', 'aggregate_type')) {
+      await db.delete(
+        'outbox',
+        where:
+            "aggregate_type IN ('ACADEMICS_EVALUATION', 'ACADEMICS_NOTES_BATCH')",
+      );
+    }
+    if (await _hasTable(db, 'sync_meta')) {
+      await db.delete(
+        'sync_meta',
+        where:
+            "resource LIKE 'academics_cours%' "
+            "OR resource LIKE 'academics_evaluations%' "
+            "OR resource LIKE 'academics_notes%' "
+            "OR resource LIKE 'schedule_sessions%'",
+      );
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

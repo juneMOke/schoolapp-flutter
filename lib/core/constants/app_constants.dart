@@ -228,7 +228,11 @@ class AppConstants {
   // v10 (2026-07-20) : Auth (ADR-010, amendement m4) — borne offline par
   // utilisateur `auth_local_user.refresh_expires_at` (survit au logout, brûlée
   // sur révocation). Backfill depuis la session active vers son propriétaire.
-  static const int offlineDbSchemaVersion = 10;
+  // v11 (2026-07-22) : Notes / Cours — purge + rebootstrap forcé après le
+  // passage au contrat back scopé enseignant (commit `1ec6be3`, DF-K/DF-L) :
+  // les pulls antérieurs n'étaient pas scopés au prof connecté, la base locale
+  // pouvait porter des cours/évaluations/notes/séances d'autres enseignants.
+  static const int offlineDbSchemaVersion = 11;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
