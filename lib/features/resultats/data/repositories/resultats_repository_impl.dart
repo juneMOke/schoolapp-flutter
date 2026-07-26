@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/resultats/data/datasources/resultats_remote_data_source.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/periode_scolaire.dart';
@@ -8,14 +9,25 @@ import 'package:school_app_flutter/features/resultats/domain/entities/resultat_f
 import 'package:school_app_flutter/features/resultats/domain/entities/resultats_classe.dart';
 import 'package:school_app_flutter/features/resultats/domain/repositories/resultats_repository.dart';
 
+/// Lecture 100% distante (pas de miroir offline pour ce module) : chaque
+/// méthode tape le réseau à la demande utilisateur. **Gate connectivité** —
+/// sans elle, une tablette hors-ligne attendrait quand même le timeout HTTP à
+/// chaque sélection classe/période (même raisonnement que
+/// `SyncFinancePullsUseCase` / `SyncClassroomsUseCase`).
 class ResultatsRepositoryImpl implements ResultatsRepository {
   final ResultatsRemoteDataSource remoteDataSource;
   final Map<String, dynamic> requiredAuth;
+  final ConnectivityService connectivity;
 
   const ResultatsRepositoryImpl({
     required this.remoteDataSource,
     required this.requiredAuth,
+    required this.connectivity,
   });
+
+  static const _offlineFailure = NetworkFailure(
+    'Offline: resultats request skipped',
+  );
 
   @override
   Future<Either<Failure, ResultatsClasse>> getResultatsClasse(
@@ -23,6 +35,7 @@ class ResultatsRepositoryImpl implements ResultatsRepository {
     String periodeScolaireId,
     double? seuil,
   ) async {
+    if (!await connectivity.isOnline()) return const Left(_offlineFailure);
     try {
       final model = await remoteDataSource.getResultatsClasse(
         requiredAuth,
@@ -47,6 +60,7 @@ class ResultatsRepositoryImpl implements ResultatsRepository {
     String periodeScolaireId,
     String studentId,
   ) async {
+    if (!await connectivity.isOnline()) return const Left(_offlineFailure);
     try {
       final model = await remoteDataSource.getResultatFocus(
         requiredAuth,
@@ -73,6 +87,7 @@ class ResultatsRepositoryImpl implements ResultatsRepository {
     String? postnom,
     String? prenom,
   ) async {
+    if (!await connectivity.isOnline()) return const Left(_offlineFailure);
     try {
       final models = await remoteDataSource.searchRoster(
         requiredAuth,
@@ -99,6 +114,7 @@ class ResultatsRepositoryImpl implements ResultatsRepository {
   Future<Either<Failure, List<PeriodeScolaire>>> getPeriodesScolaires(
     String classroomId,
   ) async {
+    if (!await connectivity.isOnline()) return const Left(_offlineFailure);
     try {
       final models = await remoteDataSource.getPeriodesScolaires(
         requiredAuth,

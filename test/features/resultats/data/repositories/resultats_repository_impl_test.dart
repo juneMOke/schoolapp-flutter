@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/resultats/data/datasources/resultats_remote_data_source.dart';
@@ -14,6 +15,8 @@ import 'package:school_app_flutter/features/resultats/data/repositories/resultat
 
 class MockResultatsRemoteDataSource extends Mock
     implements ResultatsRemoteDataSource {}
+
+class MockConnectivityService extends Mock implements ConnectivityService {}
 
 const _auth = <String, dynamic>{'requiresAuth': true};
 
@@ -60,13 +63,17 @@ const _tMemberModel = ClassroomMemberModel(
 
 void main() {
   late MockResultatsRemoteDataSource mockDataSource;
+  late MockConnectivityService mockConnectivity;
   late ResultatsRepositoryImpl repository;
 
   setUp(() {
     mockDataSource = MockResultatsRemoteDataSource();
+    mockConnectivity = MockConnectivityService();
+    when(() => mockConnectivity.isOnline()).thenAnswer((_) async => true);
     repository = ResultatsRepositoryImpl(
       remoteDataSource: mockDataSource,
       requiredAuth: _auth,
+      connectivity: mockConnectivity,
     );
   });
 
@@ -291,5 +298,82 @@ void main() {
         (_) => fail('Left attendu'),
       );
     });
+  });
+
+  group('hors-ligne', () {
+    setUp(() {
+      when(() => mockConnectivity.isOnline()).thenAnswer((_) async => false);
+    });
+
+    test(
+      'getResultatsClasse ne tape pas le réseau et renvoie NetworkFailure',
+      () async {
+        final result = await repository.getResultatsClasse('c', 'per-1', null);
+
+        result.fold(
+          (f) => expect(f, isA<NetworkFailure>()),
+          (_) => fail('Left attendu'),
+        );
+        verifyNever(
+          () => mockDataSource.getResultatsClasse(any(), any(), any(), any()),
+        );
+      },
+    );
+
+    test(
+      'getResultatFocus ne tape pas le réseau et renvoie NetworkFailure',
+      () async {
+        final result = await repository.getResultatFocus('c', 'per-1', 'stu-1');
+
+        result.fold(
+          (f) => expect(f, isA<NetworkFailure>()),
+          (_) => fail('Left attendu'),
+        );
+        verifyNever(
+          () => mockDataSource.getResultatFocus(any(), any(), any(), any()),
+        );
+      },
+    );
+
+    test(
+      'searchRoster ne tape pas le réseau et renvoie NetworkFailure',
+      () async {
+        final result = await repository.searchRoster(
+          'c',
+          'ay',
+          null,
+          null,
+          null,
+        );
+
+        result.fold(
+          (f) => expect(f, isA<NetworkFailure>()),
+          (_) => fail('Left attendu'),
+        );
+        verifyNever(
+          () => mockDataSource.searchRoster(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+          ),
+        );
+      },
+    );
+
+    test(
+      'getPeriodesScolaires ne tape pas le réseau et renvoie NetworkFailure',
+      () async {
+        final result = await repository.getPeriodesScolaires('c');
+
+        result.fold(
+          (f) => expect(f, isA<NetworkFailure>()),
+          (_) => fail('Left attendu'),
+        );
+        verifyNever(() => mockDataSource.getPeriodesScolaires(any(), any()));
+      },
+    );
   });
 }

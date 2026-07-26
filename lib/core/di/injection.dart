@@ -1108,6 +1108,7 @@ Future<void> configureDependencies({
     () => ResultatsRepositoryImpl(
       remoteDataSource: getIt<ResultatsRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      connectivity: getIt<ConnectivityService>(),
     ),
   );
 

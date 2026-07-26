@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -166,7 +167,10 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   // ── UseCases (factory) ──
   // Classe
   getIt.registerFactory<SyncClassroomsUseCase>(
-    () => SyncClassroomsUseCase(getIt<ClassroomOfflineRepository>()),
+    () => SyncClassroomsUseCase(
+      getIt<ClassroomOfflineRepository>(),
+      getIt<ConnectivityService>(),
+    ),
   );
   getIt.registerFactory<GetOfflineClassroomsUseCase>(
     () => GetOfflineClassroomsUseCase(getIt<ClassroomOfflineRepository>()),
@@ -239,7 +243,10 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     ),
   );
   getIt.registerFactory<SyncDisciplinaryPullUseCase>(
-    () => SyncDisciplinaryPullUseCase(getIt<DisciplinaryPullRepository>()),
+    () => SyncDisciplinaryPullUseCase(
+      getIt<DisciplinaryPullRepository>(),
+      getIt<ConnectivityService>(),
+    ),
   );
   getIt.registerFactory<GetDisciplinaryFreshnessOfflineUseCase>(
     () => GetDisciplinaryFreshnessOfflineUseCase(
