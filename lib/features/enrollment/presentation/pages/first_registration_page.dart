@@ -92,7 +92,6 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
           showStatusFilter: true,
           onStatusChanged: (newStatus) {
             setState(() => _effectiveStatus = newStatus);
-            dispatch(StandardSearchCommand(status: newStatus));
           },
         ),
         onSearchCommand:

@@ -41,7 +41,8 @@ class _SearchFormState extends State<SearchForm> {
   final _surnameController = TextEditingController();
 
   DateTime? _selectedDateOfBirth;
-  DateTime? _lastActionAt;
+  DateTime? _lastSearchActionAt;
+  DateTime? _lastClearActionAt;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class _SearchFormState extends State<SearchForm> {
     final statusDropdown = widget.showStatusFilter
         ? SearchFormStatusFilterField(
             selectedStatus: widget.status,
-            onChanged: widget.onStatusChanged,
+            onChanged: _handleStatusChanged,
           )
         : null;
 
@@ -104,11 +105,14 @@ class _SearchFormState extends State<SearchForm> {
   Widget _buildActionButtons(AppLocalizations l10n) {
     final hasDate = _selectedDateOfBirth != null;
     final hasAllNames = _hasAllNameField();
-    final isActionLocked = _isActionLocked();
     final isSearchEnabled =
-        (hasAllNames || hasDate) && !widget.isLoading && !isActionLocked;
+        (hasAllNames || hasDate) &&
+        !widget.isLoading &&
+        !_isLocked(_lastSearchActionAt);
     final isClearEnabled =
-        _hasAnyCriteria() && !widget.isLoading && !isActionLocked;
+        _hasAnyCriteria() &&
+        !widget.isLoading &&
+        !_isLocked(_lastClearActionAt);
 
     final clearButton = EteeloButton.ghost(
       onPressed: isClearEnabled ? _clearSearch : null,
@@ -153,7 +157,7 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   void _performSearch() {
-    if (_isActionLocked()) return;
+    if (_isLocked(_lastSearchActionAt)) return;
     if (widget.isLoading) return;
 
     final hasDate = _selectedDateOfBirth != null;
@@ -161,23 +165,43 @@ class _SearchFormState extends State<SearchForm> {
 
     if (!hasAllNames && !hasDate) return;
 
-    // Format ISO 8601 pour l'API (yyyy-MM-dd).
-    final dateOfBirthParam = _selectedDateOfBirth != null
-        ? '${_selectedDateOfBirth!.year}-'
-              '${_selectedDateOfBirth!.month.toString().padLeft(2, '0')}-'
-              '${_selectedDateOfBirth!.day.toString().padLeft(2, '0')}'
-        : '';
+    _lastSearchActionAt = DateTime.now();
+    widget.dispatch(_buildCriteriaCommand(widget.status));
+  }
 
-    _markActionTriggered();
+  /// Reste sur le statut choisi mais préserve les critères nom/date déjà
+  /// saisis dans ce formulaire (le changement de statut ne doit pas faire
+  /// perdre une recherche en cours).
+  void _handleStatusChanged(String newStatus) {
+    widget.onStatusChanged?.call(newStatus);
+
+    final hasDate = _selectedDateOfBirth != null;
+    final hasAllNames = _hasAllNameField();
+
     widget.dispatch(
-      StandardSearchCommand(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        surname: _surnameController.text.trim(),
-        dateOfBirth: dateOfBirthParam,
-        status: widget.status,
-      ),
+      hasAllNames || hasDate
+          ? _buildCriteriaCommand(newStatus)
+          : StandardSearchCommand(status: newStatus),
     );
+  }
+
+  StandardSearchCommand _buildCriteriaCommand(String status) {
+    return StandardSearchCommand(
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      surname: _surnameController.text.trim(),
+      dateOfBirth: _formattedDateOfBirth(),
+      status: status,
+    );
+  }
+
+  // Format ISO 8601 pour l'API (yyyy-MM-dd).
+  String _formattedDateOfBirth() {
+    final date = _selectedDateOfBirth;
+    if (date == null) return '';
+    return '${date.year}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
   bool _hasAllNameField() {
@@ -194,7 +218,7 @@ class _SearchFormState extends State<SearchForm> {
   }
 
   void _clearSearch() {
-    if (_isActionLocked()) return;
+    if (_isLocked(_lastClearActionAt)) return;
     if (widget.isLoading) return;
 
     _firstNameController.clear();
@@ -202,20 +226,15 @@ class _SearchFormState extends State<SearchForm> {
     _surnameController.clear();
     setState(() => _selectedDateOfBirth = null);
 
-    _markActionTriggered();
+    _lastClearActionAt = DateTime.now();
     widget.dispatch(StandardSearchCommand(status: widget.status));
   }
 
-  bool _isActionLocked() {
-    final lastActionAt = _lastActionAt;
+  bool _isLocked(DateTime? lastActionAt) {
     if (lastActionAt == null) {
       return false;
     }
     return DateTime.now().difference(lastActionAt) < AppMotion.actionCooldown;
-  }
-
-  void _markActionTriggered() {
-    _lastActionAt = DateTime.now();
   }
 
   @override
