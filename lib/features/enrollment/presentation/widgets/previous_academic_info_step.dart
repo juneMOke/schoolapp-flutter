@@ -49,6 +49,11 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
   String? _selectedLevel;
 
   late bool _validatedPreviousYear;
+  // Devient true dès que l'utilisateur bascule le sélecteur à la main : la
+  // valeur ne suit alors plus automatiquement la moyenne saisie.
+  bool _validatedPreviousYearManuallySet = false;
+
+  static const double _validatedYearRateThreshold = 50;
 
   String _initialPrevYear = '';
   String _initialPrevSchool = '';
@@ -261,6 +266,7 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
       _prevRateController.text = _normalizeRateFromDouble(detail.previousRate);
       _prevRankController.text = _normalizeRankFromInt(detail.previousRank);
       _validatedPreviousYear = detail.validatedPreviousYear;
+      _validatedPreviousYearManuallySet = false;
     } finally {
       _isHydratingFromDetail = false;
     }
@@ -329,9 +335,23 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
 
   void _onFieldChanged() {
     if (_isHydratingFromDetail) return;
+    _applyAutoValidatedYearFromRate();
     _recomputeFormState();
     if (_showValidationHints && _isValid) {
       setState(() => _showValidationHints = false);
+    }
+  }
+
+  // Par défaut, une moyenne > 50 vaut année validée, sinon non validée.
+  // Ne s'applique plus une fois que l'utilisateur a tranché lui-même via le
+  // sélecteur (cf. onValidatedChanged).
+  void _applyAutoValidatedYearFromRate() {
+    if (_validatedPreviousYearManuallySet) return;
+    final parsedRate = double.tryParse(_prevRateController.text.trim());
+    if (parsedRate == null) return;
+    final computed = parsedRate > _validatedYearRateThreshold;
+    if (computed != _validatedPreviousYear) {
+      setState(() => _validatedPreviousYear = computed);
     }
   }
 
@@ -530,7 +550,10 @@ class PreviousAcademicInfoStepState extends State<PreviousAcademicInfoStep> {
         onSave: _onSave,
         isEditable: widget.isEditable,
         onValidatedChanged: (value) {
-          setState(() => _validatedPreviousYear = value);
+          setState(() {
+            _validatedPreviousYear = value;
+            _validatedPreviousYearManuallySet = true;
+          });
           _recomputeFormState();
         },
         prevYearError: showValidation && (year ?? '').isEmpty

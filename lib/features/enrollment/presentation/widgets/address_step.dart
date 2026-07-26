@@ -527,7 +527,8 @@ class AddressStepState extends State<AddressStep> {
         city.isNotEmpty &&
         district.isNotEmpty &&
         municipality.isNotEmpty &&
-        address.isNotEmpty;
+        address.isNotEmpty &&
+        additionalAddress.isNotEmpty;
 
     final dirtyNow =
         city != _initialCity ||
@@ -574,6 +575,9 @@ class AddressStepState extends State<AddressStep> {
     }
     if (_addressController.text.trim().isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.neighborhood));
+    }
+    if (_selectedAdditionalAddress.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.addressComplementary));
     }
     return errors;
   }
@@ -689,6 +693,12 @@ class AddressStepState extends State<AddressStep> {
           addressErrorText: _fieldError(
             _addressController.text,
             l10n.neighborhood,
+            l10n,
+            showValidation,
+          ),
+          additionalAddressErrorText: _fieldError(
+            _selectedAdditionalAddress,
+            l10n.addressComplementary,
             l10n,
             showValidation,
           ),
