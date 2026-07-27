@@ -22,14 +22,10 @@ class _EnrollmentPullApi implements EnrollmentPullApi {
   @override
   Future<HttpResponse<ReferentialBundleDto>> pullReferential(
     Map<String, dynamic> extras,
-    String? academicYearId,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{
-      r'academicYearId': academicYearId,
-    };
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HttpResponse<ReferentialBundleDto>>(

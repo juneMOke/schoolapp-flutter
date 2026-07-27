@@ -43,70 +43,133 @@ void main() {
   });
 
   group('ReferentialBundleDto.fromJson', () {
+    Map<String, dynamic> yearBundleJson({
+      required String yearId,
+      required bool current,
+    }) => {
+      'academicYear': {'id': yearId, 'name': '2025-2026', 'current': current},
+      'schoolLevelGroups': [
+        {
+          'id': 'grp-1',
+          'name': 'Secondaire',
+          'code': 'SEC',
+          'periodType': 'TRIMESTRE',
+          'academicYearId': yearId,
+          'displayOrder': 2,
+        },
+      ],
+      'schoolLevels': [
+        {
+          'id': 'lvl-1',
+          'name': '3ème Scientifique',
+          'code': '3SC',
+          'levelGroupId': 'grp-1',
+          'displayOrder': 5,
+          'splitIntoClassrooms': true,
+        },
+      ],
+      'feeTariffs': [
+        {
+          'id': 'ft-1',
+          'feeCode': 'INSCRIPTION',
+          'schoolLevelGroupId': 'grp-1',
+          'schoolLevelId': 'lvl-1',
+          'amountInCents': 1500000,
+          'currency': 'USD',
+          'academicYearId': yearId,
+        },
+      ],
+    };
+
+    Map<String, dynamic> schoolJson() => {
+      'id': 'sch-1',
+      'name': 'Ecole Etoile',
+      'country': 'RDC',
+      'city': 'Goma',
+      'district': 'Karisimbi',
+      'municipality': 'Katindo',
+      'address': 'Avenue du Lac',
+      'phone': '+243900000000',
+      'email': 'contact@etoile.cd',
+    };
+
     test(
-      'parse années/cycles/niveaux/tarifs + serverTime (clé wire `current`)',
+      'parse school + current + previous + serverTime (clé wire `current`)',
       () {
         final bundle = ReferentialBundleDto.fromJson({
-          'academicYears': [
-            {'id': 'ay-1', 'name': '2025-2026', 'current': true},
-          ],
-          'schoolLevelGroups': [
-            {
-              'id': 'grp-1',
-              'name': 'Secondaire',
-              'code': 'SEC',
-              'periodType': 'TRIMESTRE',
-              'academicYearId': 'ay-1',
-              'displayOrder': 2,
-            },
-          ],
-          'schoolLevels': [
-            {
-              'id': 'lvl-1',
-              'name': '3ème Scientifique',
-              'code': '3SC',
-              'levelGroupId': 'grp-1',
-              'displayOrder': 5,
-              'splitIntoClassrooms': true,
-            },
-          ],
-          'feeTariffs': [
-            {
-              'id': 'ft-1',
-              'feeCode': 'INSCRIPTION',
-              'schoolLevelGroupId': 'grp-1',
-              'schoolLevelId': 'lvl-1',
-              'amountInCents': 1500000,
-              'currency': 'USD',
-              'academicYearId': 'ay-1',
-            },
-          ],
+          'school': schoolJson(),
+          'current': yearBundleJson(yearId: 'ay-2', current: true),
+          'previous': yearBundleJson(yearId: 'ay-1', current: false),
           'serverTime': '2026-07-08T10:00:00Z',
         });
 
         expect(bundle.serverTime, '2026-07-08T10:00:00Z');
+        expect(bundle.school.id, 'sch-1');
+        expect(bundle.school.name, 'Ecole Etoile');
+        expect(bundle.school.city, 'Goma');
+
+        expect(bundle.current.academicYear.id, 'ay-2');
         // Clé wire `current` (et non `isCurrent`) → champ Dart `isCurrent`.
-        expect(bundle.academicYears.single.isCurrent, isTrue);
-        expect(bundle.schoolLevelGroups.single.displayOrder, 2);
-        expect(bundle.schoolLevels.single.splitIntoClassrooms, isTrue);
+        expect(bundle.current.academicYear.isCurrent, isTrue);
+        expect(bundle.current.schoolLevelGroups.single.displayOrder, 2);
+        expect(bundle.current.schoolLevels.single.splitIntoClassrooms, isTrue);
         // Argent en centimes entiers.
-        final tariff = bundle.feeTariffs.single;
+        final tariff = bundle.current.feeTariffs.single;
         expect(tariff.amountInCents, isA<int>());
         expect(tariff.amountInCents, 1500000);
         expect(tariff.label, isNull);
+
+        expect(bundle.previous, isNotNull);
+        expect(bundle.previous!.academicYear.id, 'ay-1');
+        expect(bundle.previous!.academicYear.isCurrent, isFalse);
       },
     );
+
+    test('`previous` absent/null → null (première année de l\'école, D3)', () {
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': yearBundleJson(yearId: 'ay-1', current: true),
+        'previous': null,
+        'serverTime': 't',
+      });
+      expect(bundle.previous, isNull);
+    });
 
     test(
       'clé `isCurrent` héritée ignorée → isCurrent = false (contrat = `current`)',
       () {
         final bundle = ReferentialBundleDto.fromJson({
-          'academicYears': [
-            {'id': 'ay-1', 'name': '2025-2026', 'isCurrent': true},
-          ],
+          'school': schoolJson(),
+          'current': {
+            'academicYear': {
+              'id': 'ay-1',
+              'name': '2025-2026',
+              'isCurrent': true,
+            },
+          },
           'serverTime': 't',
         });
-        expect(bundle.academicYears.single.isCurrent, isFalse);
+        expect(bundle.current.academicYear.isCurrent, isFalse);
+      },
+    );
+
+    test(
+      'listes absentes dans un slot année → collections vides (défensif)',
+      () {
+        final bundle = ReferentialBundleDto.fromJson({
+          'school': schoolJson(),
+          'current': {
+            'academicYear': {
+              'id': 'ay-1',
+              'name': '2025-2026',
+              'current': true,
+            },
+          },
+          'serverTime': 't',
+        });
+        expect(bundle.current.schoolLevelGroups, isEmpty);
+        expect(bundle.current.schoolLevels, isEmpty);
+        expect(bundle.current.feeTariffs, isEmpty);
       },
     );
   });
@@ -337,11 +400,5 @@ void main() {
       expect(agg.student.matriculationNumber, isNull);
       expect(agg.parents, isEmpty); // 'parents' absent → [] (pullList défensif)
     });
-  });
-
-  test('listes absentes → collections vides (défensif)', () {
-    final bundle = ReferentialBundleDto.fromJson({'serverTime': 't'});
-    expect(bundle.academicYears, isEmpty);
-    expect(bundle.feeTariffs, isEmpty);
   });
 }

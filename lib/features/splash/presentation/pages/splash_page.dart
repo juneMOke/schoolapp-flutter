@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/eteelo_splash_brand.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/splash_error_view.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/splash_footer.dart';
@@ -108,7 +108,7 @@ class _SplashPageState extends State<SplashPage>
           // En cas d'échec du bootstrap distant, le splash bascule sur
           // l'ErrorView (+ Réessayer) au lieu du chargement. buildWhen évite de
           // reconstruire l'animation à chaque tick du bootstrap.
-          child: BlocBuilder<BootstrapBloc, BootstrapState>(
+          child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
             buildWhen: (previous, current) =>
                 previous.hasBlockingFailure != current.hasBlockingFailure,
             builder: (context, state) {

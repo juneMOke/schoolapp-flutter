@@ -29,11 +29,12 @@ part 'enrollment_pull_api.g.dart';
 abstract class EnrollmentPullApi {
   factory EnrollmentPullApi(Dio dio, {String baseUrl}) = _EnrollmentPullApi;
 
-  /// Bundle référentiel (années, cycles, niveaux, tarifs) — always-200.
+  /// Bundle référentiel (école, années courante/précédente, cycles, niveaux,
+  /// tarifs) — always-200. Aucun paramètre : `current`/`previous` sont
+  /// toujours dérivés du tenant côté serveur (D1 — pas d'override d'année).
   @GET(AppConstants.syncReferentialEndpoint)
   Future<HttpResponse<ReferentialBundleDto>> pullReferential(
     @Extras() Map<String, dynamic> extras,
-    @Query('academicYearId') String? academicYearId,
   );
 
   /// Cohorte de réinscription N-1 (bornée/statique) — always-200, paginée par

@@ -7,8 +7,8 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-// ── Bootstrap (dépendance des pull handlers : année courante) ──
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
+// ── Référentiel Inscription (dépendance des pull handlers : année courante) ──
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 // ── Classe (offline) ──
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_handler.dart';
@@ -322,7 +322,8 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt<PullCoordinator>().registerHandler(
     ClassroomPullHandler(
       offlineRepository: getIt<ClassroomOfflineRepository>(),
-      bootstrapRepository: getIt<BootstrapLocalRepository>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt<PullCoordinator>().registerHandler(

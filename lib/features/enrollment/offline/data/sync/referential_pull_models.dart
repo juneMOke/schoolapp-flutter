@@ -1,31 +1,99 @@
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/pull_json_support.dart';
 
 // Pull du socle référentiel — `GET /api/v1/sync/referential`
-// (miroir `openApi.yaml`). Bundle always-200, gelé sur la saison (D2).
-// Lecture seule → `fromJson`.
+// (miroir `openApi.yaml`, amendé par `PLAN_referential_current_previous_FRONT.md`).
+// Bundle always-200, gelé sur la saison (D2). Lecture seule → `fromJson`.
 
-/// Bundle du socle nécessaire AVANT toute inscription : années, cycles, niveaux,
-/// grille tarifaire. Bundle full **always-200** (jamais 304), gelé sur la saison.
+/// Bundle racine : identité de l'école + deux slots année (`current`/`previous`).
+/// Bundle full **always-200** (jamais 304), gelé sur la saison. `previous` est
+/// `null` quand l'école n'a pas d'année antérieure (première année) — jamais un
+/// slot vide.
 class ReferentialBundleDto {
-  final List<RefAcademicYearDto> academicYears;
-  final List<RefSchoolLevelGroupDto> schoolLevelGroups;
-  final List<RefSchoolLevelDto> schoolLevels;
-  final List<RefFeeTariffDto> feeTariffs;
+  final RefSchoolDto school;
+  final ReferentialYearBundleDto current;
+  final ReferentialYearBundleDto? previous;
   final String serverTime; // ISO-8601
 
   const ReferentialBundleDto({
-    required this.academicYears,
-    required this.schoolLevelGroups,
-    required this.schoolLevels,
-    required this.feeTariffs,
+    required this.school,
+    required this.current,
+    this.previous,
     required this.serverTime,
   });
 
   factory ReferentialBundleDto.fromJson(Map<String, dynamic> j) =>
       ReferentialBundleDto(
-        academicYears: pullList(
-          j['academicYears'],
-          RefAcademicYearDto.fromJson,
+        school: RefSchoolDto.fromJson(j['school'] as Map<String, dynamic>),
+        current: ReferentialYearBundleDto.fromJson(
+          j['current'] as Map<String, dynamic>,
+        ),
+        previous: j['previous'] == null
+            ? null
+            : ReferentialYearBundleDto.fromJson(
+                j['previous'] as Map<String, dynamic>,
+              ),
+        serverTime: j['serverTime'] as String,
+      );
+}
+
+/// Identité du tenant (école) — racine du bundle, pas rattachée à une année
+/// (D5). Réutilisable tel quel si un `SchoolDto` équivalent existe déjà
+/// ailleurs côté serveur ; ici greenfield côté front (D6).
+class RefSchoolDto {
+  final String id;
+  final String name;
+  final String? country;
+  final String? city;
+  final String? district;
+  final String? municipality;
+  final String? address;
+  final String? phone;
+  final String? email;
+
+  const RefSchoolDto({
+    required this.id,
+    required this.name,
+    this.country,
+    this.city,
+    this.district,
+    this.municipality,
+    this.address,
+    this.phone,
+    this.email,
+  });
+
+  factory RefSchoolDto.fromJson(Map<String, dynamic> j) => RefSchoolDto(
+    id: j['id'] as String,
+    name: j['name'] as String,
+    country: j['country'] as String?,
+    city: j['city'] as String?,
+    district: j['district'] as String?,
+    municipality: j['municipality'] as String?,
+    address: j['address'] as String?,
+    phone: j['phone'] as String?,
+    email: j['email'] as String?,
+  );
+}
+
+/// Socle d'une année (`current` ou `previous`) : année + cycles/niveaux/tarifs
+/// de CETTE année. `current`/`previous` partagent exactement cette forme (D2).
+class ReferentialYearBundleDto {
+  final RefAcademicYearDto academicYear;
+  final List<RefSchoolLevelGroupDto> schoolLevelGroups;
+  final List<RefSchoolLevelDto> schoolLevels;
+  final List<RefFeeTariffDto> feeTariffs;
+
+  const ReferentialYearBundleDto({
+    required this.academicYear,
+    required this.schoolLevelGroups,
+    required this.schoolLevels,
+    required this.feeTariffs,
+  });
+
+  factory ReferentialYearBundleDto.fromJson(Map<String, dynamic> j) =>
+      ReferentialYearBundleDto(
+        academicYear: RefAcademicYearDto.fromJson(
+          j['academicYear'] as Map<String, dynamic>,
         ),
         schoolLevelGroups: pullList(
           j['schoolLevelGroups'],
@@ -33,7 +101,6 @@ class ReferentialBundleDto {
         ),
         schoolLevels: pullList(j['schoolLevels'], RefSchoolLevelDto.fromJson),
         feeTariffs: pullList(j['feeTariffs'], RefFeeTariffDto.fromJson),
-        serverTime: j['serverTime'] as String,
       );
 }
 

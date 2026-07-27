@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -32,10 +30,8 @@ class _FacturationPageState extends State<FacturationPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPayloadKey,
-        ),
+      context.read<AcademicYearContextBloc>().add(
+        const AcademicYearContextRequested(),
       );
     });
   }
@@ -43,19 +39,22 @@ class _FacturationPageState extends State<FacturationPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
-      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
+      child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
-            prev.status != curr.status || prev.bootstrap != curr.bootstrap,
-        builder: (context, bootstrapState) {
-          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-              bootstrapState.status == BootstrapContextLoadStatus.initial) {
+            prev.status != curr.status || prev.context != curr.context,
+        builder: (context, academicYearState) {
+          if (academicYearState.status ==
+                  AcademicYearContextLoadStatus.loading ||
+              academicYearState.status ==
+                  AcademicYearContextLoadStatus.initial) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
               child: Center(child: CircularProgressIndicator()),
             );
           }
 
-          if (bootstrapState.status != BootstrapContextLoadStatus.success) {
+          if (academicYearState.status !=
+              AcademicYearContextLoadStatus.success) {
             return BootstrapContextError(
               onLogout: () =>
                   context.read<AuthBloc>().add(const AuthLogoutRequested()),
@@ -63,7 +62,7 @@ class _FacturationPageState extends State<FacturationPage> {
           }
 
           final academicOptions = FacturationPageHelpers.buildAcademicOptions(
-            bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+            academicYearState.context?.schoolLevelGroups ?? const [],
           );
 
           return AnimatedSwitcher(
@@ -89,7 +88,7 @@ class _FacturationPageState extends State<FacturationPage> {
                           context.read<EnrollmentLocalListBloc>().add(
                             LocalListByEnrolledAcademicInfoRequested(
                               academicYearId:
-                                  bootstrapState.bootstrap?.academicYear.id ??
+                                  academicYearState.context?.academicYear.id ??
                                   '',
                               firstName: request.firstName,
                               lastName: request.lastName,
@@ -116,8 +115,11 @@ class _FacturationPageState extends State<FacturationPage> {
   /// Navigue vers la page de détail facturation avec le contexte d'affichage.
   void _onViewChargesRequested(EnrollmentSummary summary, String levelId) {
     final l10n = AppLocalizations.of(context)!;
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
 
     if (academicYearId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,11 +131,12 @@ class _FacturationPageState extends State<FacturationPage> {
     String levelName = '';
     String levelGroupName = '';
 
-    for (final groupBundle in bootstrap?.schoolLevelGroups ?? const []) {
-      for (final levelBundle in groupBundle.schoolLevels) {
-        if (levelBundle.schoolLevel.id == levelId) {
-          levelName = levelBundle.schoolLevel.name;
-          levelGroupName = groupBundle.schoolLevelGroup.name;
+    for (final groupBundle
+        in academicYearContext?.schoolLevelGroups ?? const []) {
+      for (final level in groupBundle.levels) {
+        if (level.id == levelId) {
+          levelName = level.name;
+          levelGroupName = groupBundle.group.name;
           break;
         }
       }

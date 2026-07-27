@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/widgets/bootstrap_offline_banner.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_degradation_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_router.dart';
@@ -50,7 +50,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final AuthBloc _authBloc;
-  late final BootstrapBloc _bootstrapBloc;
+  late final AcademicYearContextBloc _academicYearContextBloc;
   late final ForgotPasswordBloc _forgotPasswordBloc;
   late final SyncStatusCubit _syncStatusCubit;
   late final GoRouter _router;
@@ -59,20 +59,22 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _authBloc = getIt<AuthBloc>()..add(const AuthCheckRequested());
-    _bootstrapBloc = getIt<BootstrapBloc>()
-      ..add(
-        const BootstrapLocalRequested(key: AppConstants.bootstrapPayloadKey),
-      );
+    // Contrairement à l'ex-bootstrap (lecture Hive spéculative avant même
+    // l'auth), la résolution ne peut démarrer qu'une fois le schoolId connu
+    // (`CurrentUserContext`, posé par l'auth) : rien à déclencher ici, le
+    // redirect du router reste de toute façon bloqué sur `isAuthLoading`
+    // jusqu'à la transition `authenticated` ci-dessous.
+    _academicYearContextBloc = getIt<AcademicYearContextBloc>();
     _forgotPasswordBloc = getIt<ForgotPasswordBloc>();
     // Cubit global de synchro : instance unique app-lifetime, fournie à tout
     // l'arbre via `.value` (top bar + écrans write-path la lisent par contexte).
     _syncStatusCubit = getIt<SyncStatusCubit>();
-    _router = AppRouter.createRouter(_authBloc, _bootstrapBloc);
+    _router = AppRouter.createRouter(_authBloc, _academicYearContextBloc);
   }
 
   @override
   void dispose() {
-    _bootstrapBloc.close();
+    _academicYearContextBloc.close();
     _forgotPasswordBloc.close();
     _authBloc.close();
     _syncStatusCubit.close();
@@ -84,7 +86,9 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>.value(value: _authBloc),
-        BlocProvider<BootstrapBloc>.value(value: _bootstrapBloc),
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: _academicYearContextBloc,
+        ),
         BlocProvider<ForgotPasswordBloc>.value(value: _forgotPasswordBloc),
         BlocProvider<SyncStatusCubit>.value(value: _syncStatusCubit),
       ],
@@ -95,52 +99,50 @@ class _MyAppState extends State<MyApp> {
                 previous.status != current.status,
             listener: (context, state) {
               if (state.status == AuthStatus.authenticated) {
-                // Login OFFLINE (ADR-010 D-01/D-02) : pas de réseau → ne pas
-                // déclencher le bootstrap distant (il échouerait et bloquerait
-                // la navigation). Mais il faut RECHARGER le cache local : après
-                // un logout, BootstrapResetRequested a remis l'état à initial
-                // (bootstrap == null) et personne d'autre ne le repeuple →
-                // `blocksNavigation` resterait vrai → splash (spinner) infini.
-                // Le cache Hive, lui, survit au logout (piège #2 bootstrap).
-                if (state.isOffline) {
-                  _bootstrapBloc.add(
-                    const BootstrapLocalRequested(
-                      key: AppConstants.bootstrapPayloadKey,
-                    ),
-                  );
-                  // Push opportuniste + recalcul de pastille (revue G2/I2) : le
-                  // repli offline arrive souvent avec le réseau « up » (serveur
-                  // down, timeout 6 s, portail captif) → AUCUNE transition de
-                  // connectivité ne viendra jamais déclencher la resync de la
-                  // consigne. `notifyLocalWrite` est inoffensif hors-ligne réel
-                  // (flush re-checke isOnline) et gaté sans jetons (moteur).
-                  _syncStatusCubit.notifyLocalWrite();
-                  return;
-                }
-                _bootstrapBloc.add(const BootstrapRemoteCurrentYearRequested());
-                _bootstrapBloc.add(
-                  const BootstrapRemotePreviousYearRequested(),
+                // Un seul événement, en ligne comme hors-ligne (ADR-010
+                // D-01/D-02) : le repository lit d'abord le référentiel local
+                // et ne tente un pull réseau que s'il est absent — jamais de
+                // fetch distant voué à l'échec en offline.
+                _academicYearContextBloc.add(
+                  const AcademicYearContextRequested(),
                 );
-                // Jetons frais : dissipe une éventuelle pastille « Reconnexion
-                // requise » et pousse immédiatement l'outbox en attente (le
-                // travail saisi offline part sous le JWT de son auteur, D-05).
+                // Jetons frais ou repli offline : dans les deux cas, pousse
+                // l'outbox en attente et recalcule la pastille de synchro
+                // (D-05, réconciliation silencieuse au retour réseau si
+                // offline).
                 _syncStatusCubit.notifyLocalWrite();
                 return;
               }
 
               if (state.status == AuthStatus.unauthenticated) {
-                _bootstrapBloc.add(const BootstrapResetRequested());
+                _academicYearContextBloc.add(
+                  const AcademicYearContextResetRequested(),
+                );
               }
             },
           ),
-          // Session rejetée côté serveur (401/403) pendant le bootstrap distant
-          // → logout. Le couplage bootstrap→auth passe par main.dart (sens
-          // unique, comme auth→bootstrap).
-          BlocListener<BootstrapBloc, BootstrapState>(
+          // Session rejetée côté serveur (401/403) pendant le pull référentiel
+          // → logout. Le couplage contexte académique→auth passe par
+          // main.dart (sens unique, comme auth→contexte académique).
+          BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
             listenWhen: (previous, current) =>
                 !previous.sessionExpired && current.sessionExpired,
             listener: (context, state) =>
                 _authBloc.add(const AuthLogoutRequested()),
+          ),
+          // Retour réseau après une période hors-ligne : re-résout le contexte
+          // académique (le référentiel a pu changer pendant la coupure — le
+          // PullCoordinator le rafraîchit déjà en local, mais l'instance
+          // globale de ce Bloc ne le relirait pas d'elle-même).
+          BlocListener<SyncStatusCubit, SyncStatusState>(
+            listenWhen: (previous, current) =>
+                previous.status == SyncStatus.offline &&
+                current.status != SyncStatus.offline,
+            listener: (context, state) {
+              _academicYearContextBloc.add(
+                const AcademicYearContextRequested(),
+              );
+            },
           ),
         ],
         child: MaterialApp.router(
@@ -157,13 +159,13 @@ class _MyAppState extends State<MyApp> {
           title: 'ETEELO CONNECT',
           theme: AppTheme.light,
           routerConfig: _router,
-          // Bandeaux globaux au-dessus de toutes les routes : dégradation de
-          // session offline (ADR-010 D-08) puis « données en cache ».
-          builder: (context, child) => SessionDegradationBanner(
-            child: BootstrapOfflineBanner(
-              child: child ?? const SizedBox.shrink(),
-            ),
-          ),
+          // Bandeau global au-dessus de toutes les routes : dégradation de
+          // session offline (ADR-010 D-08). Le bandeau « données en cache »
+          // de l'ex-bootstrap est retiré (plus de distinction local/distant
+          // séparée à ce niveau) — le statut réseau global reste signalé par
+          // le `SyncIndicator` de la top bar.
+          builder: (context, child) =>
+              SessionDegradationBanner(child: child ?? const SizedBox.shrink()),
         ),
       ),
     );

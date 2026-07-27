@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -31,7 +32,7 @@ class EnrollmentSummaryUtils {
   }
 
   static String resolveTargetGroupName({
-    required dynamic bootstrap,
+    required AcademicYearContext? bootstrap,
     required String groupId,
     required String fallbackName,
   }) {
@@ -43,8 +44,8 @@ class EnrollmentSummaryUtils {
 
     if (bootstrap != null) {
       for (final bundle in bootstrap.schoolLevelGroups) {
-        if (bundle.schoolLevelGroup.id == id) {
-          final name = bundle.schoolLevelGroup.name.trim();
+        if (bundle.group.id == id) {
+          final name = bundle.group.name.trim();
           if (name.isNotEmpty) return name;
           break;
         }
@@ -55,7 +56,7 @@ class EnrollmentSummaryUtils {
   }
 
   static String resolveTargetLevelName({
-    required dynamic bootstrap,
+    required AcademicYearContext? bootstrap,
     required String groupId,
     required String levelId,
     required String fallbackName,
@@ -69,13 +70,13 @@ class EnrollmentSummaryUtils {
 
     if (bootstrap != null) {
       for (final groupBundle in bootstrap.schoolLevelGroups) {
-        if (group.isNotEmpty && groupBundle.schoolLevelGroup.id != group) {
+        if (group.isNotEmpty && groupBundle.group.id != group) {
           continue;
         }
 
-        for (final levelBundle in groupBundle.schoolLevels) {
-          if (levelBundle.schoolLevel.id == level) {
-            final name = levelBundle.schoolLevel.name.trim();
+        for (final schoolLevel in groupBundle.levels) {
+          if (schoolLevel.id == level) {
+            final name = schoolLevel.name.trim();
             if (name.isNotEmpty) return name;
             return level;
           }

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/sync_enrollment_pulls_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync_finance_pulls_use_case.dart';
@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync
 /// Scope BLoC dédié au module Finance.
 ///
 /// Instancie ses propres instances de [EnrollmentLocalListBloc] (recherche
-/// d'élèves **100 % locale**, offline-first) et de [BootstrapCurrentYearBloc]
+/// d'élèves **100 % locale**, offline-first) et de [AcademicYearContextBloc]
 /// via la factory GetIt — complètement isolées des instances gérées par
 /// `EnrollmentFeatureScope`.
 ///
@@ -35,13 +35,13 @@ class FinanceFeatureScope extends StatefulWidget {
 
 class _FinanceFeatureScopeState extends State<FinanceFeatureScope> {
   late final EnrollmentLocalListBloc _enrollmentLocalListBloc;
-  late final BootstrapCurrentYearBloc _bootstrapCurrentYearBloc;
+  late final AcademicYearContextBloc _academicYearContextBloc;
 
   @override
   void initState() {
     super.initState();
     _enrollmentLocalListBloc = GetIt.instance<EnrollmentLocalListBloc>();
-    _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
+    _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
     unawaited(GetIt.instance<SyncFinancePullsUseCase>()());
     unawaited(GetIt.instance<SyncEnrollmentPullsUseCase>()());
   }
@@ -49,7 +49,7 @@ class _FinanceFeatureScopeState extends State<FinanceFeatureScope> {
   @override
   void dispose() {
     _enrollmentLocalListBloc.close();
-    _bootstrapCurrentYearBloc.close();
+    _academicYearContextBloc.close();
     super.dispose();
   }
 
@@ -60,8 +60,8 @@ class _FinanceFeatureScopeState extends State<FinanceFeatureScope> {
         BlocProvider<EnrollmentLocalListBloc>.value(
           value: _enrollmentLocalListBloc,
         ),
-        BlocProvider<BootstrapCurrentYearBloc>.value(
-          value: _bootstrapCurrentYearBloc,
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: _academicYearContextBloc,
         ),
       ],
       child: widget.child,

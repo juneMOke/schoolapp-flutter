@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
@@ -64,23 +62,26 @@ class _EnrollmentCurrentYearBootstrapBuilderState
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BootstrapCurrentYearBloc, BootstrapContextState>(
+    return BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (_, _) => _requestSummariesIfContextAvailable(),
-      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-        builder: (context, bootstrapState) {
+      child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+        builder: (context, academicYearState) {
           final academicYearId =
-              bootstrapState.bootstrap?.academicYear.id ?? '';
+              academicYearState.context?.academicYear.id ?? '';
           final schoolId = context.select(
             (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
           );
           final hasBootstrapContext =
-              bootstrapState.status == BootstrapContextLoadStatus.success &&
+              academicYearState.status ==
+                  AcademicYearContextLoadStatus.success &&
               academicYearId.isNotEmpty &&
               schoolId.isNotEmpty;
 
-          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-              bootstrapState.status == BootstrapContextLoadStatus.initial) {
+          if (academicYearState.status ==
+                  AcademicYearContextLoadStatus.loading ||
+              academicYearState.status ==
+                  AcademicYearContextLoadStatus.initial) {
             return const Center(
               child: Padding(
                 padding: EnrollmentPageLayout.loadingPadding,
@@ -125,15 +126,15 @@ class _EnrollmentCurrentYearBootstrapBuilderState
       return;
     }
 
-    final bootstrapState = context.read<BootstrapCurrentYearBloc>().state;
-    final academicYearId = bootstrapState.bootstrap?.academicYear.id ?? '';
+    final academicYearState = context.read<AcademicYearContextBloc>().state;
+    final academicYearId = academicYearState.context?.academicYear.id ?? '';
     final schoolId = context.read<AuthBloc>().state.user?.schoolId ?? '';
     final listBloc = context.read<EnrollmentLocalListBloc>();
     final lastSummariesQuery = listBloc.state.lastSummariesQuery;
     final isSummariesLoading =
         listBloc.state.summariesStatus == EnrollmentLoadStatus.loading;
 
-    if (bootstrapState.status != BootstrapContextLoadStatus.success ||
+    if (academicYearState.status != AcademicYearContextLoadStatus.success ||
         academicYearId.isEmpty ||
         schoolId.isEmpty ||
         isSummariesLoading) {
@@ -160,10 +161,8 @@ class _EnrollmentCurrentYearBootstrapBuilderState
   }
 
   void _emitBootstrapCurrentYear() {
-    context.read<BootstrapCurrentYearBloc>().add(
-      const BootstrapContextLocalRequested(
-        key: AppConstants.bootstrapPayloadKey,
-      ),
+    context.read<AcademicYearContextBloc>().add(
+      const AcademicYearContextRequested(),
     );
   }
 }

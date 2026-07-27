@@ -66,16 +66,23 @@ import 'package:school_app_flutter/features/schedule/domain/usecases/get_my_time
 import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_edit_bloc.dart';
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
+import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
+import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/enrollment_academic_info_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/forgot_password_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
@@ -1152,4 +1159,31 @@ Future<void> configureDependencies({
   // Enregistre les DataSources locales, repositories offline-first, handlers
   // d'outbox et BLoCs de chaque branche. Point d'extension additif.
   registerOfflineModules(getIt);
+
+  // ── Contexte académique (remplace le module `bootstrap`) ────────────────────
+  // Lecture 100% locale du référentiel Inscription déjà pullé
+  // (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`),
+  // scopée à l'école courante. Dépend de `registerOfflineModules` ci-dessus
+  // (résolution paresseuse : l'ordre textuel importe peu, mais logiquement
+  // c'est un point d'extension du socle offline).
+  getIt.registerLazySingleton<AcademicYearContextRepository>(
+    () => AcademicYearContextRepositoryImpl(
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      pullRepository: getIt<EnrollmentPullRepository>(),
+      connectivity: getIt<ConnectivityService>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+
+  getIt.registerFactory<AcademicYearContextBloc>(
+    () => AcademicYearContextBloc(
+      repository: getIt<AcademicYearContextRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<AcademicYearPreviousContextBloc>(
+    () => AcademicYearPreviousContextBloc(
+      repository: getIt<AcademicYearContextRepository>(),
+    ),
+  );
 }

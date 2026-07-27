@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_page_layout.dart';
@@ -37,10 +35,8 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<BootstrapPreviousYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPreviousYearPayloadKey,
-        ),
+      context.read<AcademicYearPreviousContextBloc>().add(
+        const AcademicYearPreviousContextRequested(),
       );
     });
   }
@@ -107,14 +103,19 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     BuildContext context,
     Widget Function(BuildContext context, EnrollmentScreenContext ctx) onReady,
   ) {
-    return BlocBuilder<BootstrapPreviousYearBloc, BootstrapContextState>(
-      builder: (context, bootstrapState) {
+    return BlocBuilder<
+      AcademicYearPreviousContextBloc,
+      AcademicYearPreviousContextState
+    >(
+      builder: (context, academicYearState) {
         final schoolId = context.select(
           (AuthBloc bloc) => bloc.state.user?.schoolId ?? '',
         );
 
-        if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-            bootstrapState.status == BootstrapContextLoadStatus.initial) {
+        if (academicYearState.status ==
+                AcademicYearPreviousContextLoadStatus.loading ||
+            academicYearState.status ==
+                AcademicYearPreviousContextLoadStatus.initial) {
           return const Center(
             child: Padding(
               padding: EnrollmentPageLayout.loadingPadding,
@@ -123,7 +124,8 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
           );
         }
 
-        if (bootstrapState.status != BootstrapContextLoadStatus.success ||
+        if (academicYearState.status !=
+                AcademicYearPreviousContextLoadStatus.success ||
             schoolId.isEmpty) {
           return BootstrapContextError(
             onLogout: () =>
@@ -160,9 +162,11 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
     EnrollmentScreenContext ctx,
     EnrollmentSearchDispatcher dispatch,
   ) {
-    final bootstrapState = context.read<BootstrapPreviousYearBloc>().state;
+    final academicYearState = context
+        .read<AcademicYearPreviousContextBloc>()
+        .state;
     final academicOptions = ReRegistrationsPageHelpers.buildAcademicOptions(
-      bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+      academicYearState.context?.schoolLevelGroups ?? const [],
     );
 
     return ReRegistrationSearchForm(

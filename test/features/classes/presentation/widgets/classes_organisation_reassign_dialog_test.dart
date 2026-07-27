@@ -4,8 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
@@ -15,18 +14,18 @@ import 'package:school_app_flutter/features/classes/presentation/widgets/classes
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 // La réassignation passe désormais par le BLoC offline (PUT online + re-pull
-// best-effort) ; l'année scolaire courante est lue sur le BootstrapCurrentYearBloc.
+// best-effort) ; l'année scolaire courante est lue sur l'AcademicYearContextBloc.
 class MockClassroomOfflineBloc
     extends MockBloc<ClassroomOfflineEvent, ClassroomOfflineState>
     implements ClassroomOfflineBloc {}
 
-class MockBootstrapCurrentYearBloc
-    extends MockBloc<BootstrapContextEvent, BootstrapContextState>
-    implements BootstrapCurrentYearBloc {}
+class MockAcademicYearContextBloc
+    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
+    implements AcademicYearContextBloc {}
 
 void main() {
   late MockClassroomOfflineBloc bloc;
-  late MockBootstrapCurrentYearBloc bootstrapBloc;
+  late MockAcademicYearContextBloc academicYearContextBloc;
 
   const options = [
     ClassroomReassignOption(
@@ -78,10 +77,10 @@ void main() {
   setUp(() {
     bloc = MockClassroomOfflineBloc();
     when(() => bloc.state).thenReturn(const ClassroomOfflineState());
-    bootstrapBloc = MockBootstrapCurrentYearBloc();
+    academicYearContextBloc = MockAcademicYearContextBloc();
     when(
-      () => bootstrapBloc.state,
-    ).thenReturn(const BootstrapContextState.initial());
+      () => academicYearContextBloc.state,
+    ).thenReturn(const AcademicYearContextState.initial());
   });
 
   Future<void> openDialog(
@@ -101,7 +100,9 @@ void main() {
         home: MultiBlocProvider(
           providers: [
             BlocProvider<ClassroomOfflineBloc>.value(value: bloc),
-            BlocProvider<BootstrapCurrentYearBloc>.value(value: bootstrapBloc),
+            BlocProvider<AcademicYearContextBloc>.value(
+              value: academicYearContextBloc,
+            ),
           ],
           child: Builder(
             builder: (context) => Scaffold(

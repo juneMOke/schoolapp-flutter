@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -43,6 +44,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   replaceTariffs;
   final SyncMetaDao syncMetaDao;
   final Map<String, dynamic> requiredAuth;
+  final CurrentUserContext currentUser;
   final Clock now;
 
   /// Clés de curseur/fraîcheur dans `sync_meta` (une par ressource).
@@ -67,6 +69,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     required this.replaceTariffs,
     required this.syncMetaDao,
     required this.requiredAuth,
+    required this.currentUser,
     this.now = systemClock,
   });
 
@@ -74,7 +77,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   Future<Either<Failure, EnrollmentPullOutcome>> syncReferential() async {
     final syncedAt = now();
     try {
-      final response = await api.pullReferential(requiredAuth, null);
+      final response = await api.pullReferential(requiredAuth);
       final applied = await _applyReferential(response.data, syncedAt);
       final cursor = response.data.serverTime;
       await syncMetaDao.setCursor(
@@ -263,24 +266,33 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     }
   }
 
-  /// Années/cycles/niveaux via [referentialDao] + grille tarifaire via [replaceTariffs]
-  /// (`label` serveur nullable replié sur `fee_code` : colonne NOT NULL), le
-  /// tout **scopé** aux années du bundle (purge des lignes disparues du
-  /// snapshot). Deux transactions distinctes (le seam ne traverse pas les
-  /// modules) : un échec des tarifs laisse le référentiel appliqué mais le
-  /// curseur N'AVANCE PAS → l'intégralité est rejouée au pull suivant.
+  /// École/années/cycles/niveaux via [referentialDao] + grille tarifaire via
+  /// [replaceTariffs] (`label` serveur nullable replié sur `fee_code` :
+  /// colonne NOT NULL), le tout **scopé** aux années du bundle — `current` +
+  /// `previous` s'il est présent (purge des lignes disparues du snapshot).
+  /// Deux transactions distinctes (le seam ne traverse pas les modules) : un
+  /// échec des tarifs laisse le référentiel appliqué mais le curseur
+  /// N'AVANCE PAS → l'intégralité est rejouée au pull suivant.
   Future<int> _applyReferential(ReferentialBundleDto body, int syncedAt) async {
     final upserted = await referentialDao.upsertReferential(
       body,
       syncedAt: syncedAt,
+      schoolId: currentUser.schoolId ?? '',
     );
+    final allTariffs = [
+      ...body.current.feeTariffs,
+      ...?body.previous?.feeTariffs,
+    ];
     final yearIds = <String>{
-      for (final y in body.academicYears) y.id,
-      for (final g in body.schoolLevelGroups) g.academicYearId,
-      for (final t in body.feeTariffs) t.academicYearId,
+      body.current.academicYear.id,
+      if (body.previous != null) body.previous!.academicYear.id,
+      for (final g in body.current.schoolLevelGroups) g.academicYearId,
+      if (body.previous != null)
+        for (final g in body.previous!.schoolLevelGroups) g.academicYearId,
+      for (final t in allTariffs) t.academicYearId,
     }.toList(growable: false);
     await replaceTariffs(
-      body.feeTariffs
+      allTariffs
           .map(
             (t) => FeeTariffLocalModel(
               id: t.id,
@@ -299,7 +311,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
           .toList(growable: false),
       yearIds,
     );
-    return upserted + body.feeTariffs.length;
+    return upserted + allTariffs.length;
   }
 
   /// Bilan d'un pull : `notModified` si aucune ligne locale écrite (curseur tout

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
@@ -24,8 +24,8 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
   late final EnrollmentOfflineBloc _enrollmentOfflineBloc;
   // Bloc DÉDIÉ du listing LOCAL (bascule dure 100 % local), séparé du convergé.
   late final EnrollmentLocalListBloc _enrollmentLocalListBloc;
-  late final BootstrapCurrentYearBloc _bootstrapCurrentYearBloc;
-  late final BootstrapPreviousYearBloc _bootstrapPreviousYearBloc;
+  late final AcademicYearContextBloc _academicYearContextBloc;
+  late final AcademicYearPreviousContextBloc _academicYearPreviousContextBloc;
 
   @override
   void initState() {
@@ -33,8 +33,9 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
     _enrollmentBloc = GetIt.instance<EnrollmentBloc>();
     _enrollmentOfflineBloc = GetIt.instance<EnrollmentOfflineBloc>();
     _enrollmentLocalListBloc = GetIt.instance<EnrollmentLocalListBloc>();
-    _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
-    _bootstrapPreviousYearBloc = GetIt.instance<BootstrapPreviousYearBloc>();
+    _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
+    _academicYearPreviousContextBloc =
+        GetIt.instance<AcademicYearPreviousContextBloc>();
     // Rafraîchit les caches de référence Inscription (référentiel, cohorte
     // N-1, préinscriptions, delta) à l'entrée du module — silencieux et
     // best-effort, en complément du cycle global au retour online.
@@ -46,8 +47,8 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
     _enrollmentBloc.close();
     _enrollmentOfflineBloc.close();
     _enrollmentLocalListBloc.close();
-    _bootstrapCurrentYearBloc.close();
-    _bootstrapPreviousYearBloc.close();
+    _academicYearContextBloc.close();
+    _academicYearPreviousContextBloc.close();
     super.dispose();
   }
 
@@ -62,11 +63,11 @@ class _EnrollmentFeatureScopeState extends State<EnrollmentFeatureScope> {
         BlocProvider<EnrollmentLocalListBloc>.value(
           value: _enrollmentLocalListBloc,
         ),
-        BlocProvider<BootstrapCurrentYearBloc>.value(
-          value: _bootstrapCurrentYearBloc,
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: _academicYearContextBloc,
         ),
-        BlocProvider<BootstrapPreviousYearBloc>.value(
-          value: _bootstrapPreviousYearBloc,
+        BlocProvider<AcademicYearPreviousContextBloc>.value(
+          value: _academicYearPreviousContextBloc,
         ),
       ],
       child: widget.child,

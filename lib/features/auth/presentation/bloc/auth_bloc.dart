@@ -98,7 +98,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // pas de ligne de session (montée de version) — `evaluateFreshness` le
         // confirmera depuis `auth_local` s'il existe. Sans ça, une écriture
         // offline partirait avec `authorId` null → 403 terminal (cash bloqué).
-        _sessionManager.primeCurrentUser(session.user.id);
+        _sessionManager.primeCurrentUser(
+          session.user.id,
+          schoolId: session.user.schoolId,
+        );
         // Session valide en storage : dériver le mode de dégradation courant.
         final eval = await _sessionManager.evaluateFreshness();
         if (eval != null && eval.refreshExpired) {

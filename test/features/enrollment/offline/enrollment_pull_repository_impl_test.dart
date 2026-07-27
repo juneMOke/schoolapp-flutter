@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' show HttpResponse;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
@@ -47,6 +48,7 @@ void main() {
       },
       syncMetaDao: syncMeta,
       requiredAuth: auth,
+      currentUser: CurrentUserContext()..set('u1', schoolId: 'school-1'),
       now: () => clock,
     );
   });
@@ -87,28 +89,36 @@ void main() {
     serverTime: serverTime,
   );
 
-  ReferentialBundleDto bundle({List<RefFeeTariffDto>? tariffs}) =>
-      ReferentialBundleDto(
-        academicYears: const [
-          RefAcademicYearDto(id: 'ay-1', name: '2026', isCurrent: true),
-        ],
-        schoolLevelGroups: const [],
-        schoolLevels: const [],
-        feeTariffs:
-            tariffs ??
-            const [
-              RefFeeTariffDto(
-                id: 'tar-1',
-                feeCode: 'INSCRIPTION',
-                schoolLevelGroupId: 'grp-1',
-                schoolLevelId: 'lvl-1',
-                amountInCents: 5000,
-                currency: 'USD',
-                academicYearId: 'ay-1',
-              ),
-            ],
-        serverTime: '2026-07-08T10:00:00Z',
-      );
+  ReferentialBundleDto bundle({
+    List<RefFeeTariffDto>? tariffs,
+    ReferentialYearBundleDto? previous,
+  }) => ReferentialBundleDto(
+    school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+    current: ReferentialYearBundleDto(
+      academicYear: const RefAcademicYearDto(
+        id: 'ay-1',
+        name: '2026',
+        isCurrent: true,
+      ),
+      schoolLevelGroups: const [],
+      schoolLevels: const [],
+      feeTariffs:
+          tariffs ??
+          const [
+            RefFeeTariffDto(
+              id: 'tar-1',
+              feeCode: 'INSCRIPTION',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-1',
+              amountInCents: 5000,
+              currency: 'USD',
+              academicYearId: 'ay-1',
+            ),
+          ],
+    ),
+    previous: previous,
+    serverTime: '2026-07-08T10:00:00Z',
+  );
 
   ReenrollmentCandidateDto candidate({
     required String studentId,
@@ -215,26 +225,27 @@ void main() {
       '200 → upsert local + tarifs délégués + curseur = serverTime',
       () async {
         when(
-          () => api.pullReferential(any(), any()),
+          () => api.pullReferential(any()),
         ).thenAnswer((_) async => httpOk(bundle()));
 
         final result = await repo.syncReferential();
 
         final outcome = result.getOrElse(() => throw StateError('left'));
         expect(outcome.notModified, isFalse);
-        expect(outcome.upserted, 2); // 1 année + 1 tarif
+        expect(outcome.upserted, 3); // 1 école + 1 année + 1 tarif
         // Horloge SERVEUR (serverTime du bundle), pas l'horloge locale.
         expect(
           outcome.serverTimeMs,
           DateTime.parse('2026-07-08T10:00:00Z').millisecondsSinceEpoch,
         );
+        expect(await db.query('ref_school'), hasLength(1));
         expect(await db.query('ref_academic_years'), hasLength(1));
         expect(capturedTariffs, hasLength(1));
         expect(capturedTariffs.single.label, 'INSCRIPTION'); // repli fee_code
         expect(capturedTariffs.single.amountInCents, 5000);
         expect(capturedYears, ['ay-1']); // purge scopée aux années du bundle
-        // Curseur = serverTime du bundle, academicYearId non envoyé.
-        verify(() => api.pullReferential(auth, null)).called(1);
+        // Curseur = serverTime du bundle, plus de query param académique.
+        verify(() => api.pullReferential(auth)).called(1);
         expect(
           await syncMeta.getCursor(
             EnrollmentPullRepositoryImpl.referentialResource,
@@ -250,6 +261,46 @@ void main() {
       },
     );
 
+    test(
+      'previous non-null → tarifs des deux années agrégés et années scopées',
+      () async {
+        when(() => api.pullReferential(any())).thenAnswer(
+          (_) async => httpOk(
+            bundle(
+              previous: const ReferentialYearBundleDto(
+                academicYear: RefAcademicYearDto(
+                  id: 'ay-0',
+                  name: '2025',
+                  isCurrent: false,
+                ),
+                schoolLevelGroups: [],
+                schoolLevels: [],
+                feeTariffs: [
+                  RefFeeTariffDto(
+                    id: 'tar-0',
+                    feeCode: 'INSCRIPTION',
+                    schoolLevelGroupId: 'grp-0',
+                    schoolLevelId: 'lvl-0',
+                    amountInCents: 4500,
+                    currency: 'USD',
+                    academicYearId: 'ay-0',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        final result = await repo.syncReferential();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.upserted, 5); // 1 école + 2 années + 2 tarifs
+        expect(capturedTariffs, hasLength(2));
+        expect(capturedYears, containsAll(['ay-1', 'ay-0']));
+        expect(await db.query('ref_academic_years'), hasLength(2));
+      },
+    );
+
     test('curseur mémorisé n\'empêche pas le re-fetch (always-200)', () async {
       await syncMeta.setCursor(
         EnrollmentPullRepositoryImpl.referentialResource,
@@ -257,13 +308,13 @@ void main() {
         syncedAt: 1,
       );
       when(
-        () => api.pullReferential(any(), any()),
+        () => api.pullReferential(any()),
       ).thenAnswer((_) async => httpOk(bundle()));
 
       await repo.syncReferential();
 
       // Toujours re-fetché (jamais de conditionnel), curseur avancé au serverTime.
-      verify(() => api.pullReferential(auth, null)).called(1);
+      verify(() => api.pullReferential(auth)).called(1);
       expect(
         await syncMeta.getCursor(
           EnrollmentPullRepositoryImpl.referentialResource,
@@ -273,7 +324,7 @@ void main() {
     });
 
     test('erreur réseau → NetworkFailure', () async {
-      when(() => api.pullReferential(any(), any())).thenThrow(network());
+      when(() => api.pullReferential(any())).thenThrow(network());
 
       final result = await repo.syncReferential();
 
@@ -283,7 +334,7 @@ void main() {
     test('DioException portant une Failure (interceptor) → relayée telle '
         'quelle', () async {
       const failure = ServerFailure('Session expirée');
-      when(() => api.pullReferential(any(), any())).thenThrow(
+      when(() => api.pullReferential(any())).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: '/'),
           error: failure,
@@ -306,10 +357,11 @@ void main() {
             throw StateError('ref_fee_tariffs indisponible'),
         syncMetaDao: syncMeta,
         requiredAuth: auth,
+        currentUser: CurrentUserContext()..set('u1', schoolId: 'school-1'),
         now: () => clock,
       );
       when(
-        () => api.pullReferential(any(), any()),
+        () => api.pullReferential(any()),
       ).thenAnswer((_) async => httpOk(bundle()));
 
       final result = await failingRepo.syncReferential();

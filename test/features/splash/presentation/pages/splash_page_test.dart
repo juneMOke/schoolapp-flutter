@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/eteelo_animated_symbol.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/splash_error_view.dart';
@@ -13,30 +13,33 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../../test_helpers/widget_test_utils.dart';
 
-class _MockBootstrapBloc extends MockBloc<BootstrapEvent, BootstrapState>
-    implements BootstrapBloc {}
+class _MockAcademicYearContextBloc
+    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
+    implements AcademicYearContextBloc {}
 
 void main() {
   setUp(installCommonTestPluginMocks);
   tearDown(removeCommonTestPluginMocks);
 
-  const loadingState = BootstrapState.initial();
-  const failureState = BootstrapState(
-    status: BootstrapLoadStatus.failure,
-    bootstrap: null,
-    source: null,
+  const loadingState = AcademicYearContextState.initial();
+  const failureState = AcademicYearContextState(
+    status: AcademicYearContextLoadStatus.failure,
+    context: null,
     errorMessage: 'boom',
-    operation: BootstrapOperation.remoteCurrentYear,
   );
 
-  Future<_MockBootstrapBloc> pumpSplash(
+  Future<_MockAcademicYearContextBloc> pumpSplash(
     WidgetTester tester, {
     required Size size,
-    BootstrapState state = loadingState,
+    AcademicYearContextState state = loadingState,
   }) async {
-    final bloc = _MockBootstrapBloc();
+    final bloc = _MockAcademicYearContextBloc();
     when(() => bloc.state).thenReturn(state);
-    whenListen(bloc, Stream<BootstrapState>.value(state), initialState: state);
+    whenListen(
+      bloc,
+      Stream<AcademicYearContextState>.value(state),
+      initialState: state,
+    );
 
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = size;
@@ -49,7 +52,7 @@ void main() {
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<BootstrapBloc>.value(
+        home: BlocProvider<AcademicYearContextBloc>.value(
           value: bloc,
           child: const SplashPage(),
         ),
@@ -112,6 +115,6 @@ void main() {
     await tester.tap(find.text('Réessayer'));
     await tester.pump();
 
-    verify(() => bloc.add(const BootstrapRetryRequested())).called(1);
+    verify(() => bloc.add(const AcademicYearContextRetryRequested())).called(1);
   });
 }

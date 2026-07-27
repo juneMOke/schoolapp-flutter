@@ -195,17 +195,17 @@ class LoginResponseModel {
 
 Router configuration is in `lib/router/app_router.dart` with two key classes:
 
-1. **RouterNotifier** - Listens to AuthBloc and BootstrapBloc state changes to update routes dynamically
+1. **RouterNotifier** - Listens to AuthBloc and AcademicYearContextBloc state changes to update routes dynamically
 2. **GoRouter configuration** - Defines routes and redirect logic
 
 Routes are centralized in `app_routes_names.dart`.
 
 ### Redirect Logic Pattern
 
-Router navigates based on auth and bootstrap states:
+Router navigates based on auth and academic-year-context states:
 - Unauthenticated + splash done → Login route
-- Authenticated + bootstrap pending → Loading screen
-- Authenticated + bootstrap done → Home/App routes
+- Authenticated + academic year context pending → Loading screen
+- Authenticated + academic year context done → Home/App routes
 
 ## Failure Handling
 
@@ -301,21 +301,21 @@ when(() => mockUseCase.call(...)).thenAnswer((_) async => const Right(entity));
 
 ## Critical Integration Points
 
-### 1. Bootstrap Flow
+### 1. Academic Year Context Flow
 
-The app starts with `BootstrapBloc` that:
-- Loads cached data from local storage (Hive)
-- Fetches fresh data after authentication
-- Blocks navigation during bootstrap
+The app resolves its academic context via `AcademicYearContextBloc` (`lib/features/academic_year/`), which replaced the old `bootstrap` module. On `AuthStatus.authenticated` it:
+- Reads the academic year + school levels/groups 100% locally from the already-synced Inscription referential (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`), scoped by school (`CurrentUserContext`)
+- Triggers a network pull only if the referential is absent locally (never a speculative remote fetch while offline)
+- Blocks navigation until resolved (`blocksNavigation`/`hasBlockingFailure`, same role the old `BootstrapBloc` played)
 
-This ensures data consistency before showing enrolled students/classes.
+This ensures data consistency before showing enrolled students/classes. Feature scopes resolve their own independent instance (`registerFactory`) for local reads; a single global instance (provided in `main.dart`) drives the navigation gate.
 
 ### 2. Authentication Session Flow
 
 1. App initializes with `AuthCheckRequested` event
 2. Checks if stored token is valid
 3. If valid, loads user info; if invalid, clears session
-4. Auth state change triggers bootstrap data load
+4. Auth state change triggers academic year context resolution (`AcademicYearContextRequested`)
 
 ### 3. Token Lifecycle
 
@@ -462,8 +462,8 @@ Bypass en urgence : `git commit --no-verify` / `git push --no-verify`.
 3. **Run build_runner after Retrofit changes** - Generated `_` class won't update automatically
 4. **Equatable extends for copyWith()** - All state/event classes must extend Equatable for proper comparison
 5. **Token expiry check** - JWT validation happens at app start; expired tokens trigger logout
-6. **Bootstrap blocks navigation** - Router won't show app routes until bootstrap completes
+6. **Academic year context blocks navigation** - Router won't show app routes until `AcademicYearContextBloc` resolves (reads local referential, pulls only if absent)
 7. **Model → Entity conversion** - Always convert API models to entities in repositories, not in BLoCs
 8. **Async operations in BLoC** - Use handlers (`on<Event>(_handler)`) pattern, not setState
 9. **Authentication required marker** - Repositories must pass `requiredAuth` extra to Dio for auto-token injection
-10. **Local storage persistence** - Bootstrap uses Hive box; ensure migrations are run in `injection.dart`
+10. **Local storage persistence** - Offline data lives in the SQLCipher database (`lib/core/database/`); ensure migrations are added in `app_database.dart` when the schema changes

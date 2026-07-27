@@ -204,6 +204,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
           .replaceTariffsForYears(tariffs, academicYearIds: academicYearIds),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 

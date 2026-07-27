@@ -116,7 +116,8 @@ class AuthSessionManager
     );
     _observedUserVersion = session.userVersion;
     _clockTampered = false;
-    _currentUser?.set(uid); // estampillage authorId au write-time (D-05)
+    // estampillage authorId + schoolId au write-time (D-05)
+    _currentUser?.set(uid, schoolId: session.user.schoolId);
 
     // Des jetons frais rendent la consigne de CE compte obsolète. Celle d'un
     // AUTRE compte survit (slot partagé : elle attend son propriétaire).
@@ -134,7 +135,8 @@ class AuthSessionManager
   /// version) : sans cet amorçage, une écriture offline partirait avec un
   /// `authorId` null → 403 terminal (D-05). `uid` vide = pas d'amorçage
   /// (session héritée sans claim `uid`).
-  void primeCurrentUser(String? uid) => _currentUser?.set(uid);
+  void primeCurrentUser(String? uid, {String? schoolId}) =>
+      _currentUser?.set(uid, schoolId: schoolId);
 
   // ── Login offline (D-01/D-02) ────────────────────────────────────────────────
 
@@ -277,9 +279,8 @@ class AuthSessionManager
       }
     }
 
-    _currentUser?.set(
-      user.userId,
-    ); // estampillage authorId au write-time (D-05)
+    // estampillage authorId + schoolId au write-time (D-05)
+    _currentUser?.set(user.userId, schoolId: user.schoolId);
     return Right(
       AuthSessionSnapshot(session: session, mode: mode, isOffline: true),
     );
@@ -294,9 +295,10 @@ class AuthSessionManager
     final sessionRow = await _authLocalDao.getSession();
     if (user == null || sessionRow == null) return null;
 
-    // Restaure l'uid courant (ex. après redémarrage : la session existe mais le
-    // contexte mémoire est vide) — nécessaire pour estampiller authorId (D-05).
-    _currentUser?.set(user.userId);
+    // Restaure l'uid/schoolId courants (ex. après redémarrage : la session
+    // existe mais le contexte mémoire est vide) — nécessaire pour estampiller
+    // authorId (D-05) et scoper le référentiel par école.
+    _currentUser?.set(user.userId, schoolId: user.schoolId);
 
     final nowMs = _now();
     final eval = SessionFreshness.evaluate(

@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
@@ -42,12 +42,7 @@ Future<void> showClassesOrganisationReassignDialog({
   }
 
   final academicYearId =
-      context
-          .read<BootstrapCurrentYearBloc>()
-          .state
-          .bootstrap
-          ?.academicYear
-          .id ??
+      context.read<AcademicYearContextBloc>().state.context?.academicYear.id ??
       '';
 
   final bloc = context.read<ClassroomOfflineBloc>();
