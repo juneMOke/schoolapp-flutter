@@ -362,7 +362,7 @@
   "menuCourses": "Courses",
   "subMenuMyCourses": "My courses",
   "subMenuTimetable": "Timetable",
-  "myCoursesCount": "{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}",
+  "myCoursesCount": "{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}",
   "@myCoursesCount": {
     "placeholders": {
       "classCount": { "type": "int" },
@@ -371,7 +371,7 @@
   },
   "myCoursesExpandAll": "Expand all",
   "myCoursesCollapseAll": "Collapse all",
-  "myCoursesClassCourseCount": "{count, plural, =1{1 course} other{{count} courses}}",
+  "myCoursesClassCourseCount": "{count, plural, =0{0 courses} =1{1 course} other{{count} courses}}",
   "@myCoursesClassCourseCount": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -404,7 +404,7 @@
   "@courseDetailEvaluationCount": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "courseDetailToGrade": "{count, plural, =1{1 to grade} other{{count} to grade}}",
+  "courseDetailToGrade": "{count, plural, =0{0 to grade} =1{1 to grade} other{{count} to grade}}",
   "@courseDetailToGrade": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -433,7 +433,7 @@
   "courseDetailStatutClosed": "Closed",
   "courseDetailStatutCurrent": "In progress",
   "courseDetailStatutUpcoming": "Upcoming",
-  "courseDetailBucketNotes": "{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}",
+  "courseDetailBucketNotes": "{saisies}/{total} marks · {evals, plural, =0{0 eval.} =1{1 eval.} other{{evals} evals.}}",
   "@courseDetailBucketNotes": {
     "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
   },
@@ -457,7 +457,7 @@
     "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
   },
   "courseDetailBadgeUpcoming": "Upcoming",
-  "courseDetailEvalExpected": "{count, plural, =1{1 student expected} other{{count} students expected}}",
+  "courseDetailEvalExpected": "{count, plural, =0{0 students expected} =1{1 student expected} other{{count} students expected}}",
   "@courseDetailEvalExpected": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -500,7 +500,7 @@
   "evalCreateChapitresEmpty": "No chapters available for this course",
   "evalCreateCancel": "Cancel",
   "evalCreateSubmit": "Create evaluation",
-  "evalCreateHint": "{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
+  "evalCreateHint": "{count, plural, =0{No student in {classroom} will be added} =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
   "@evalCreateHint": {
     "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
   },
@@ -534,7 +534,7 @@
   },
   "evalModeTable": "Table",
   "evalModeFocus": "Focus",
-  "evalCountNotee": "{count, plural, =1{{count} graded} other{{count} graded}}",
+  "evalCountNotee": "{count, plural, =0{{count} graded} =1{{count} graded} other{{count} graded}}",
   "@evalCountNotee": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -572,13 +572,13 @@
   "@evalSaveCounter": {
     "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
   },
-  "evalSaveErrorsAlert": "{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}",
+  "evalSaveErrorsAlert": "{count, plural, =0{0 grades above the maximum} =1{1 grade above the maximum} other{{count} grades above the maximum}}",
   "@evalSaveErrorsAlert": {
     "placeholders": { "count": { "type": "int" } }
   },
   "evalSaveButton": "Save grades",
   "evalSaveButtonSaving": "Saving…",
-  "evalSaveSuccessToast": "Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
+  "evalSaveSuccessToast": "Grades saved — {notees, plural, =0{{notees} graded} =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
   "@evalSaveSuccessToast": {
     "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
   },
@@ -1626,7 +1626,7 @@
   "@presenceRateValue": {
     "placeholders": { "rate": { "type": "int" } }
   },
-  "presenceSchoolDaysCount": "{count, plural, =1{1 school day} other{{count} school days}}",
+  "presenceSchoolDaysCount": "{count, plural, =0{0 school days} =1{1 school day} other{{count} school days}}",
   "@presenceSchoolDaysCount": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -1748,7 +1748,7 @@
   "disciplinaryCaseResolvedLabel": "Case resolved",
   "disciplinaryCaseDismissedLabel": "Dismissed",
   "disciplinaryCaseClosedLabel": "Case closed",
-  "disciplinaryCommentsCountBadge": "{count, plural, =1{1 comment} other{{count} comments}}",
+  "disciplinaryCommentsCountBadge": "{count, plural, =0{0 comments} =1{1 comment} other{{count} comments}}",
   "@disciplinaryCommentsCountBadge": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -1759,15 +1759,15 @@
   "disciplinaryCommentsCloseAction": "Close",
   "disciplinaryFreshnessSynced": "Up to date",
   "disciplinaryFreshnessLocal": "This device only",
-  "disciplinaryCasesCountPill": "{count, plural, =1{1 case} other{{count} cases}}",
+  "disciplinaryCasesCountPill": "{count, plural, =0{0 case} =1{1 case} other{{count} cases}}",
   "@disciplinaryCasesCountPill": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "disciplinaryCasesOpenPill": "{count, plural, =1{1 open} other{{count} open}}",
+  "disciplinaryCasesOpenPill": "{count, plural, =0{0 open} =1{1 open} other{{count} open}}",
   "@disciplinaryCasesOpenPill": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "disciplinaryCasesGravePill": "{count, plural, =1{1 serious} other{{count} serious}}",
+  "disciplinaryCasesGravePill": "{count, plural, =0{0 serious} =1{1 serious} other{{count} serious}}",
   "@disciplinaryCasesGravePill": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -1808,15 +1808,15 @@
     },
 
     "syncLastSyncJustNow": "Just now",
-    "syncLastSyncMinutesAgo": "{count, plural, =1{1 min ago} other{{count} min ago}}",
+    "syncLastSyncMinutesAgo": "{count, plural, =0{0 min ago} =1{1 min ago} other{{count} min ago}}",
     "@syncLastSyncMinutesAgo": {
       "placeholders": { "count": { "type": "int" } }
     },
-    "syncLastSyncHoursAgo": "{count, plural, =1{1 h ago} other{{count} h ago}}",
+    "syncLastSyncHoursAgo": "{count, plural, =0{0 h ago} =1{1 h ago} other{{count} h ago}}",
     "@syncLastSyncHoursAgo": {
       "placeholders": { "count": { "type": "int" } }
     },
-    "syncLastSyncDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+    "syncLastSyncDaysAgo": "{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}",
     "@syncLastSyncDaysAgo": {
       "placeholders": { "count": { "type": "int" } }
     },
@@ -2153,13 +2153,12 @@
   "attendanceOverviewEmptyDescription": "No attendance has been recorded for this window. Statistics will appear as soon as the first attendance is taken.",
   "attendanceOverviewEmptyAction": "Take attendance",
   "attendanceOverviewLoadingA11yLabel": "Loading the attendance dashboard",
-  "disciplinaryFolderBreadcrumb": "Discipline list",
   "dossierTabsA11yLabel": "Student folder tabs",
   "dossierTabDisciplineLabel": "Discipline",
   "dossierTabDisciplineDescription": "Cases, sanctions & follow-up",
   "dossierTabPresenceLabel": "Attendance",
   "dossierTabPresenceDescription": "Absences & lateness",
-  "dossierOpenCasesChip": "{count, plural, =1{1 open case} other{{count} open cases}}",
+  "dossierOpenCasesChip": "{count, plural, =0{0 open case} =1{1 open case} other{{count} open cases}}",
   "@dossierOpenCasesChip": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -2175,7 +2174,7 @@
   "scheduleViewDay": "Day",
   "scheduleViewToggleSemantics": "Switch between Week and Day view",
   "scheduleWeekTitle": "Typical week",
-  "scheduleLoadSummary": "{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class",
+  "scheduleLoadSummary": "{count, plural, =0{{count} sessions} =1{{count} session} other{{count} sessions}} · {hours} h of class",
   "@scheduleLoadSummary": {
     "description": "Weekly load counter: number of sessions and total teaching hours.",
     "placeholders": {
@@ -2293,7 +2292,7 @@
   "resultatsSummaryFootnote": "{effectif} students · pass threshold {seuil}%",
   "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
 
-  "resultatsEleveResultsCount": "{count, plural, =1{1 student found} other{{count} students found}}",
+  "resultatsEleveResultsCount": "{count, plural, =0{0 students found} =1{1 student found} other{{count} students found}}",
   "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
 
   "resultatsFocusClassroom": "Class {classroom}",

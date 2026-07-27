@@ -314,12 +314,6 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT — splash screen'**
   String get splashSemanticsLabel;
 
-  /// No description provided for @bootstrapOfflineBanner.
-  ///
-  /// In en, this message translates to:
-  /// **'Offline mode — cached data'**
-  String get bootstrapOfflineBanner;
-
   /// Banner: session opened offline (ADR-010)
   ///
   /// In en, this message translates to:
@@ -1223,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCoursesCount.
   ///
   /// In en, this message translates to:
-  /// **'{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}'**
+  /// **'{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}'**
   String myCoursesCount(int classCount, int courseCount);
 
   /// No description provided for @myCoursesExpandAll.
@@ -1241,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCoursesClassCourseCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 course} other{{count} courses}}'**
+  /// **'{count, plural, =0{0 courses} =1{1 course} other{{count} courses}}'**
   String myCoursesClassCourseCount(int count);
 
   /// No description provided for @myCoursesStudentCount.
@@ -1367,7 +1361,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailToGrade.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 to grade} other{{count} to grade}}'**
+  /// **'{count, plural, =0{0 to grade} =1{1 to grade} other{{count} to grade}}'**
   String courseDetailToGrade(int count);
 
   /// No description provided for @courseDetailNextEvalEyebrow.
@@ -1433,7 +1427,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailBucketNotes.
   ///
   /// In en, this message translates to:
-  /// **'{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}'**
+  /// **'{saisies}/{total} marks · {evals, plural, =0{0 eval.} =1{1 eval.} other{{evals} evals.}}'**
   String courseDetailBucketNotes(int saisies, int total, int evals);
 
   /// No description provided for @courseDetailBucketNoEval.
@@ -1505,7 +1499,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailEvalExpected.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 student expected} other{{count} students expected}}'**
+  /// **'{count, plural, =0{0 students expected} =1{1 student expected} other{{count} students expected}}'**
   String courseDetailEvalExpected(int count);
 
   /// No description provided for @courseDetailReleveTitle.
@@ -1727,7 +1721,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalCreateHint.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
+  /// **'{count, plural, =0{No student in {classroom} will be added} =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
   String evalCreateHint(int count, String classroom);
 
   /// No description provided for @evalCreateSuccessToast.
@@ -1859,7 +1853,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalCountNotee.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{{count} graded} other{{count} graded}}'**
+  /// **'{count, plural, =0{{count} graded} =1{{count} graded} other{{count} graded}}'**
   String evalCountNotee(int count);
 
   /// No description provided for @evalCountEnAttente.
@@ -1961,7 +1955,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalSaveErrorsAlert.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
+  /// **'{count, plural, =0{0 grades above the maximum} =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
   String evalSaveErrorsAlert(int count);
 
   /// No description provided for @evalSaveButton.
@@ -1979,7 +1973,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalSaveSuccessToast.
   ///
   /// In en, this message translates to:
-  /// **'Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
+  /// **'Grades saved — {notees, plural, =0{{notees} graded} =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
   String evalSaveSuccessToast(int notees, int enAttente);
 
   /// No description provided for @evalSaveErrorToast.
@@ -3137,7 +3131,7 @@ abstract class AppLocalizations {
   /// No description provided for @targetLevelAutoBadgeHelp.
   ///
   /// In en, this message translates to:
-  /// **'Class automatically computed from last year's class. Change the cycle or level to override it.'**
+  /// **'Class automatically computed from last year\'s class. Change the cycle or level to override it.'**
   String get targetLevelAutoBadgeHelp;
 
   /// No description provided for @optionLabel.
@@ -6303,7 +6297,7 @@ abstract class AppLocalizations {
   /// No description provided for @presenceSchoolDaysCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 school day} other{{count} school days}}'**
+  /// **'{count, plural, =0{0 school days} =1{1 school day} other{{count} school days}}'**
   String presenceSchoolDaysCount(int count);
 
   /// No description provided for @presenceDistributionA11yLabel.
@@ -6855,7 +6849,7 @@ abstract class AppLocalizations {
   /// No description provided for @disciplinaryCommentsCountBadge.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 comment} other{{count} comments}}'**
+  /// **'{count, plural, =0{0 comments} =1{1 comment} other{{count} comments}}'**
   String disciplinaryCommentsCountBadge(int count);
 
   /// No description provided for @disciplinaryCommentsDialogTitle.
@@ -6903,19 +6897,19 @@ abstract class AppLocalizations {
   /// No description provided for @disciplinaryCasesCountPill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 case} other{{count} cases}}'**
+  /// **'{count, plural, =0{0 case} =1{1 case} other{{count} cases}}'**
   String disciplinaryCasesCountPill(int count);
 
   /// No description provided for @disciplinaryCasesOpenPill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 open} other{{count} open}}'**
+  /// **'{count, plural, =0{0 open} =1{1 open} other{{count} open}}'**
   String disciplinaryCasesOpenPill(int count);
 
   /// No description provided for @disciplinaryCasesGravePill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 serious} other{{count} serious}}'**
+  /// **'{count, plural, =0{0 serious} =1{1 serious} other{{count} serious}}'**
   String disciplinaryCasesGravePill(int count);
 
   /// No description provided for @disciplinaryCasesEmptyTitle.
@@ -7095,19 +7089,19 @@ abstract class AppLocalizations {
   /// No description provided for @syncLastSyncMinutesAgo.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 min ago} other{{count} min ago}}'**
+  /// **'{count, plural, =0{0 min ago} =1{1 min ago} other{{count} min ago}}'**
   String syncLastSyncMinutesAgo(int count);
 
   /// No description provided for @syncLastSyncHoursAgo.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 h ago} other{{count} h ago}}'**
+  /// **'{count, plural, =0{0 h ago} =1{1 h ago} other{{count} h ago}}'**
   String syncLastSyncHoursAgo(int count);
 
   /// No description provided for @syncLastSyncDaysAgo.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  /// **'{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}'**
   String syncLastSyncDaysAgo(int count);
 
   /// No description provided for @offlineQueuedGeneric.
@@ -8175,12 +8169,6 @@ abstract class AppLocalizations {
   /// **'Loading the attendance dashboard'**
   String get attendanceOverviewLoadingA11yLabel;
 
-  /// No description provided for @disciplinaryFolderBreadcrumb.
-  ///
-  /// In en, this message translates to:
-  /// **'Discipline list'**
-  String get disciplinaryFolderBreadcrumb;
-
   /// No description provided for @dossierTabsA11yLabel.
   ///
   /// In en, this message translates to:
@@ -8214,7 +8202,7 @@ abstract class AppLocalizations {
   /// No description provided for @dossierOpenCasesChip.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 open case} other{{count} open cases}}'**
+  /// **'{count, plural, =0{0 open case} =1{1 open case} other{{count} open cases}}'**
   String dossierOpenCasesChip(int count);
 
   /// No description provided for @dossierNoOpenCases.
@@ -8292,7 +8280,7 @@ abstract class AppLocalizations {
   /// Weekly load counter: number of sessions and total teaching hours.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class'**
+  /// **'{count, plural, =0{{count} sessions} =1{{count} session} other{{count} sessions}} · {hours} h of class'**
   String scheduleLoadSummary(int count, double hours);
 
   /// No description provided for @scheduleToday.
@@ -8748,7 +8736,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultatsEleveResultsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 student found} other{{count} students found}}'**
+  /// **'{count, plural, =0{0 students found} =1{1 student found} other{{count} students found}}'**
   String resultatsEleveResultsCount(int count);
 
   /// No description provided for @resultatsFocusClassroom.

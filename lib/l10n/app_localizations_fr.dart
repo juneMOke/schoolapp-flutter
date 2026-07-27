@@ -125,9 +125,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — écran de démarrage';
 
   @override
-  String get bootstrapOfflineBanner => 'Mode hors-ligne — données en cache';
-
-  @override
   String get sessionOfflineBanner => 'Session hors-ligne — vérifiée localement';
 
   @override
@@ -659,12 +656,14 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$classCount classes',
       one: '1 classe',
+      zero: '0 classe',
     );
     String _temp1 = intl.Intl.pluralLogic(
       courseCount,
       locale: localeName,
       other: '$courseCount cours',
       one: '1 cours',
+      zero: '0 cours',
     );
     return '$_temp0 · $_temp1';
   }
@@ -682,6 +681,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count cours',
       one: '1 cours',
+      zero: '0 cours',
     );
     return '$_temp0';
   }
@@ -779,6 +779,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count à saisir',
       one: '1 à saisir',
+      zero: '0 à saisir',
     );
     return '$_temp0';
   }
@@ -830,6 +831,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$evals éval.',
       one: '1 éval.',
+      zero: '0 éval.',
     );
     return '$saisies/$total notes · $_temp0';
   }
@@ -880,6 +882,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves attendus',
       one: '1 élève attendu',
+      zero: '0 élève attendu',
     );
     return '$_temp0';
   }
@@ -1012,6 +1015,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Les $count élèves de $classroom seront ajoutés',
       one: 'L\'élève de $classroom sera ajouté',
+      zero: 'Aucun élève de $classroom ne sera ajouté',
     );
     return '$_temp0 avec le statut « En attente ».';
   }
@@ -1095,6 +1099,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count notées',
       one: '$count notée',
+      zero: '$count notées',
     );
     return '$_temp0';
   }
@@ -1166,6 +1171,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count notes au-dessus du maximum',
       one: '1 note au-dessus du maximum',
+      zero: '0 note au-dessus du maximum',
     );
     return '$_temp0';
   }
@@ -1183,6 +1189,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$notees notées',
       one: '$notees notée',
+      zero: '$notees notées',
     );
     return 'Notes enregistrées — $_temp0 · $enAttente en attente';
   }
@@ -3701,6 +3708,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count jours scolaires',
       one: '1 jour scolaire',
+      zero: '0 jour scolaire',
     );
     return '$_temp0';
   }
@@ -4032,6 +4040,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count commentaires',
       one: '1 commentaire',
+      zero: '0 commentaire',
     );
     return '$_temp0';
   }
@@ -4064,6 +4073,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count cas',
       one: '1 cas',
+      zero: '0 cas',
     );
     return '$_temp0';
   }
@@ -4075,6 +4085,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count ouverts',
       one: '1 ouvert',
+      zero: '0 ouvert',
     );
     return '$_temp0';
   }
@@ -4086,6 +4097,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count graves',
       one: '1 grave',
+      zero: '0 grave',
     );
     return '$_temp0';
   }
@@ -4186,6 +4198,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Il y a $count min',
       one: 'Il y a 1 min',
+      zero: 'Il y a 0 min',
     );
     return '$_temp0';
   }
@@ -4197,6 +4210,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Il y a $count h',
       one: 'Il y a 1 h',
+      zero: 'Il y a 0 h',
     );
     return '$_temp0';
   }
@@ -4208,6 +4222,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Il y a $count jours',
       one: 'Il y a 1 jour',
+      zero: 'Il y a 0 jour',
     );
     return '$_temp0';
   }
@@ -4845,9 +4860,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Chargement du tableau de bord des présences';
 
   @override
-  String get disciplinaryFolderBreadcrumb => 'Liste disciplines';
-
-  @override
   String get dossierTabsA11yLabel => 'Onglets du dossier élève';
 
   @override
@@ -4869,6 +4881,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count cas ouverts',
       one: '1 cas ouvert',
+      zero: '0 cas ouvert',
     );
     return '$_temp0';
   }
@@ -4924,6 +4937,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count séances',
       one: '$count séance',
+      zero: '$count séances',
     );
     return '$_temp0 · $hoursString h de cours';
   }
@@ -5225,6 +5239,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves trouvés',
       one: '1 élève trouvé',
+      zero: '0 élève trouvé',
     );
     return '$_temp0';
   }
