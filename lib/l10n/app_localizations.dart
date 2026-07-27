@@ -3068,6 +3068,18 @@ abstract class AppLocalizations {
   /// **'Target level for this enrollment.'**
   String get targetLevelLabelHelp;
 
+  /// No description provided for @targetLevelAutoBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get targetLevelAutoBadge;
+
+  /// No description provided for @targetLevelAutoBadgeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Class automatically computed from last year's class. Change the cycle or level to override it.'**
+  String get targetLevelAutoBadgeHelp;
+
   /// No description provided for @optionLabel.
   ///
   /// In en, this message translates to:

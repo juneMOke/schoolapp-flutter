@@ -1793,6 +1793,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get targetLevelLabelHelp => 'Target level for this enrollment.';
 
   @override
+  String get targetLevelAutoBadge => 'Auto';
+
+  @override
+  String get targetLevelAutoBadgeHelp =>
+      'Class automatically computed from last year\'s class. Change the cycle or level to override it.';
+
+  @override
   String get optionLabel => 'Option';
 
   @override
