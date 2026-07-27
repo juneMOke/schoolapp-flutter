@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_draft_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
@@ -148,6 +149,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       dao: getIt<FinanceLocalDao>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       connectivity: getIt<ConnectivityService>(),
+      credentialsProbe: getIt<AuthSessionManager>(),
       extras: getIt<Map<String, dynamic>>(),
       // Le contrat n'a pas d'endpoint paiements scopé élève : la fraîcheur de
       // l'historique (et donc du « total payé » affiché) passe par le cycle
@@ -236,10 +238,18 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
   );
   getIt.registerFactory<SyncEnrollmentPullsUseCase>(
-    () => SyncEnrollmentPullsUseCase(getIt<EnrollmentPullRepository>()),
+    () => SyncEnrollmentPullsUseCase(
+      getIt<EnrollmentPullRepository>(),
+      getIt<AuthSessionManager>(),
+      getIt<ConnectivityService>(),
+    ),
   );
   getIt.registerFactory<SyncFinancePullsUseCase>(
-    () => SyncFinancePullsUseCase(getIt<FinancePullRepository>()),
+    () => SyncFinancePullsUseCase(
+      getIt<FinancePullRepository>(),
+      getIt<AuthSessionManager>(),
+      getIt<ConnectivityService>(),
+    ),
   );
   getIt.registerFactory<SaveDraftIdentityUseCase>(
     () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),

@@ -8,6 +8,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/keyset_page.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
@@ -21,10 +22,13 @@ class MockFinancePullApi extends Mock implements FinancePullApi {}
 
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
+class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
+
 void main() {
   late Database db;
   late MockFinancePullApi api;
   late MockConnectivityService connectivity;
+  late MockCredentialsProbe credentialsProbe;
   late SyncMetaDao syncMeta;
   late FinanceLedgerRefresher refresher;
 
@@ -39,6 +43,10 @@ void main() {
     db = await openFullOfflineDb();
     api = MockFinancePullApi();
     connectivity = MockConnectivityService();
+    credentialsProbe = MockCredentialsProbe();
+    when(
+      () => credentialsProbe.canAuthenticate(),
+    ).thenAnswer((_) async => true);
     syncMeta = SyncMetaDao(db);
     clock = 10000;
     paymentsSyncCalls = 0;
@@ -47,6 +55,7 @@ void main() {
       dao: FinanceLocalDao(db, const IdGenerator(Uuid())),
       syncMetaDao: syncMeta,
       connectivity: connectivity,
+      credentialsProbe: credentialsProbe,
       extras: auth,
       syncPayments: () async {
         paymentsSyncCalls++;
@@ -192,6 +201,7 @@ void main() {
         dao: FinanceLocalDao(db, const IdGenerator(Uuid())),
         syncMetaDao: syncMeta,
         connectivity: connectivity,
+        credentialsProbe: credentialsProbe,
         extras: auth,
         syncPayments: () async => throw Exception('boom'),
         now: () => clock,
@@ -220,6 +230,7 @@ void main() {
         dao: FinanceLocalDao(db, const IdGenerator(Uuid())),
         syncMetaDao: syncMeta,
         connectivity: connectivity,
+        credentialsProbe: credentialsProbe,
         extras: auth,
         syncPayments: () async => false,
         now: () => clock,
@@ -247,6 +258,7 @@ void main() {
         dao: FinanceLocalDao(db, const IdGenerator(Uuid())),
         syncMetaDao: syncMeta,
         connectivity: connectivity,
+        credentialsProbe: credentialsProbe,
         extras: auth,
         syncPayments: () => slow.future,
         paymentsDeadline: const Duration(milliseconds: 30),
@@ -365,4 +377,51 @@ void main() {
       () => api.pullStudentCharges(any(), any(), any(), any(), any()),
     ).called(1);
   });
+
+  test(
+    'gate crédentiels : sans session authentifiable, aucun des deux pulls ne '
+    'part et la fraîcheur n\'est pas bumpée',
+    () async {
+      when(
+        () => credentialsProbe.canAuthenticate(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            httpOk(StudentChargePageDto(items: [charge('ch-1')], page: env())),
+      );
+
+      await refresher.refresh(studentId, yearId);
+
+      verifyNever(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      );
+      expect(paymentsSyncCalls, 0);
+      expect(await syncMeta.getSyncedAt(resource), isNull);
+    },
+  );
+
+  test(
+    'gate crédentiels : une sonde en échec ne bloque pas la lecture (fail-open, '
+    'même politique que SyncStatusCubit)',
+    () async {
+      when(
+        () => credentialsProbe.canAuthenticate(),
+      ).thenThrow(Exception('storage indisponible'));
+      when(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            httpOk(StudentChargePageDto(items: [charge('ch-1')], page: env())),
+      );
+
+      await refresher.refresh(studentId, yearId);
+
+      verify(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).called(1);
+      expect(await syncMeta.getSyncedAt(resource), clock);
+    },
+  );
 }

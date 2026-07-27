@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 // ── Référentiel Inscription (dépendance des pull handlers : année courante) ──
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 // ── Classe (offline) ──
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_handler.dart';
@@ -205,7 +206,11 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     () => GetLocalAttendanceRateUseCase(getIt<AttendanceOfflineRepository>()),
   );
   getIt.registerFactory<SyncAttendancePullUseCase>(
-    () => SyncAttendancePullUseCase(getIt<AttendancePullRepository>()),
+    () => SyncAttendancePullUseCase(
+      getIt<AttendancePullRepository>(),
+      getIt<AuthSessionManager>(),
+      getIt<ConnectivityService>(),
+    ),
   );
   getIt.registerFactory<GetStudentAttendanceStatsUseCase>(
     () =>

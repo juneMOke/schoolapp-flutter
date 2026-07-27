@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -46,6 +47,7 @@ class FinanceLedgerRefresher {
   final FinanceLocalDao _dao;
   final SyncMetaDao _syncMetaDao;
   final ConnectivityService _connectivity;
+  final SessionCredentialsProbe _credentialsProbe;
   final Map<String, dynamic> _extras;
   final PaymentsSync? _syncPayments;
   final int Function() _now;
@@ -63,6 +65,7 @@ class FinanceLedgerRefresher {
     required FinanceLocalDao dao,
     required SyncMetaDao syncMetaDao,
     required ConnectivityService connectivity,
+    required SessionCredentialsProbe credentialsProbe,
     required Map<String, dynamic> extras,
     PaymentsSync? syncPayments,
     Duration paymentsDeadline = const Duration(seconds: 4),
@@ -71,12 +74,23 @@ class FinanceLedgerRefresher {
        _dao = dao,
        _syncMetaDao = syncMetaDao,
        _connectivity = connectivity,
+       _credentialsProbe = credentialsProbe,
        _extras = extras,
        _syncPayments = syncPayments,
        _paymentsDeadline = paymentsDeadline,
        _now = now;
 
   static String _resource(String studentId) => 'finance_ledger:$studentId';
+
+  /// Sonde défaillante (storage indisponible…) : ne pas bloquer la lecture —
+  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
+  Future<bool> _canAuthenticate() async {
+    try {
+      return await _credentialsProbe.canAuthenticate();
+    } catch (_) {
+      return true;
+    }
+  }
 
   /// Epoch ms de la dernière synchro réussie du grand-livre de l'élève (pour
   /// l'affichage de fraîcheur « à jour à HHhMM », ADR-002). Null si jamais.
@@ -93,6 +107,11 @@ class FinanceLedgerRefresher {
       // Pré-garde radio bon marché : hors-ligne → on lit le cache tel quel,
       // et AUCUN des deux pulls ne part.
       if (!await _connectivity.isOnline()) return;
+      // Gate crédentiels : sans jetons utilisables, les deux pulls partiraient
+      // en 401 systématique — ce point read est déclenché à CHAQUE lecture de
+      // la fiche élève (bien plus fréquent que le montage du scope Facturation),
+      // donc bien plus coûteux à laisser taper le réseau pour rien.
+      if (!await _canAuthenticate()) return;
       final now = _now();
       // Le cycle des paiements ne part QUE si le miroir des créances est à jour.
       // Ordre non négociable (cf. le ⚠️ de `enrollment_finance_offline_di.dart`)

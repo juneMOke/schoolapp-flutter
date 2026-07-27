@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 
@@ -13,12 +15,33 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/repositori
 /// L'ordre est PORTEUR : `syncEnrollmentSnapshots` (INSERT hydratant) précède
 /// `syncEnrollmentDelta` (UPDATE-only) — mêmes contraintes qu'en DI
 /// (`registerEnrollmentFinanceOffline`), à garder synchronisées.
+///
+/// **Gate crédentiels** : déclenché au montage (scope Inscription et scope
+/// Facturation) et par `EnrollmentOfflineBloc._onPull`, tous en dehors du
+/// `PullCoordinator` — sans revérifier ici, une tablette sans session valide
+/// taperait le réseau à chaque montage de ces scopes.
+///
+/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
+/// tablette hors-ligne taperait quand même le réseau (5 requêtes qui
+/// échoueraient après timeout) à chaque montage du scope Inscription.
 class SyncEnrollmentPullsUseCase {
   final EnrollmentPullRepository _repository;
+  final SessionCredentialsProbe _credentialsProbe;
+  final ConnectivityService _connectivity;
 
-  const SyncEnrollmentPullsUseCase(this._repository);
+  const SyncEnrollmentPullsUseCase(
+    this._repository,
+    this._credentialsProbe,
+    this._connectivity,
+  );
 
   Future<EnrollmentPullsReport> call() async {
+    if (!await _connectivity.isOnline()) {
+      return const EnrollmentPullsReport(updated: 0, notModified: 0, failed: 0);
+    }
+    if (!await _canAuthenticate()) {
+      return const EnrollmentPullsReport(updated: 0, notModified: 0, failed: 0);
+    }
     var updated = 0, notModified = 0, failed = 0;
     for (final pull in [
       _repository.syncReferential,
@@ -37,6 +60,16 @@ class SyncEnrollmentPullsUseCase {
       notModified: notModified,
       failed: failed,
     );
+  }
+
+  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
+  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
+  Future<bool> _canAuthenticate() async {
+    try {
+      return await _credentialsProbe.canAuthenticate();
+    } catch (_) {
+      return true;
+    }
   }
 }
 

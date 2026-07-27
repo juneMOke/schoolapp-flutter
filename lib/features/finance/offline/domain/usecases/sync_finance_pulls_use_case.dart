@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_pull_outcome.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_pull_repository.dart';
 
@@ -15,12 +17,44 @@ import 'package:school_app_flutter/features/finance/offline/domain/repositories/
 /// fait réencaisser (cf. le ⚠️ de `registerEnrollmentFinanceOffline`, et
 /// `FinanceLedgerRefresher` qui applique la même règle). Créances KO ⇒ on
 /// n'essaie même pas les paiements.
+///
+/// **Gate crédentiels** : ce déclencheur (montage du scope) contourne le
+/// `PullCoordinator` et son gate `SessionCredentialsProbe` — sans le
+/// revérifier ici, une tablette sans session valide taperait le réseau à
+/// chaque montage de la Facturation.
+///
+/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
+/// tablette hors-ligne taperait quand même le réseau à chaque montage.
 class SyncFinancePullsUseCase {
   final FinancePullRepository _repository;
+  final SessionCredentialsProbe _credentialsProbe;
+  final ConnectivityService _connectivity;
 
-  const SyncFinancePullsUseCase(this._repository);
+  const SyncFinancePullsUseCase(
+    this._repository,
+    this._credentialsProbe,
+    this._connectivity,
+  );
 
   Future<FinancePullsReport> call() async {
+    if (!await _connectivity.isOnline()) {
+      // Hors-ligne : ni créances ni paiements ne peuvent partir.
+      return const FinancePullsReport(
+        updated: 0,
+        notModified: 0,
+        failed: 0,
+        skipped: 2,
+      );
+    }
+    if (!await _canAuthenticate()) {
+      // Non authentifié : ni créances ni paiements ne peuvent partir.
+      return const FinancePullsReport(
+        updated: 0,
+        notModified: 0,
+        failed: 0,
+        skipped: 2,
+      );
+    }
     var updated = 0, notModified = 0;
 
     void tally(FinancePullOutcome outcome) =>
@@ -46,6 +80,16 @@ class SyncFinancePullsUseCase {
       notModified: notModified,
       failed: failed,
     );
+  }
+
+  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
+  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
+  Future<bool> _canAuthenticate() async {
+    try {
+      return await _credentialsProbe.canAuthenticate();
+    } catch (_) {
+      return true;
+    }
   }
 }
 
