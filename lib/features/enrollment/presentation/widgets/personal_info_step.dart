@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/constants/enrollment_form_defaults.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
@@ -157,7 +158,9 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
       _firstNameController.text = student.firstName;
       _lastNameController.text = student.lastName;
       _surnameController.text = student.surname;
-      _birthPlaceController.text = student.birthPlace;
+      _birthPlaceController.text = _resolveBirthPlaceOrDefault(
+        student.birthPlace,
+      );
       _selectedNationality = _resolveNationalityOrDefault(student.nationality);
       _selectedGender = student.gender;
       _selectedDate = _formatSelectedDate(student);
@@ -172,6 +175,17 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
     _initialNationality = _selectedNationality.trim();
     _initialGender = student.gender;
     _initialDate = _formatSelectedDate(student);
+  }
+
+  /// Lieu de naissance : « Kinshasa » par défaut sur un formulaire ÉDITABLE
+  /// dont la valeur est vide (nouveau dossier). L'ancrage `_initialBirthPlace`
+  /// reste la valeur persistée (vide) → le défaut compte comme une saisie à
+  /// enregistrer, jamais comme un état déjà sauvegardé. Consultation lecture
+  /// seule : la valeur affichée reste fidèle au dossier (pas de défaut).
+  String _resolveBirthPlaceOrDefault(String rawBirthPlace) {
+    if (!widget.isEditable) return rawBirthPlace;
+    if (rawBirthPlace.trim().isNotEmpty) return rawBirthPlace;
+    return EnrollmentFormDefaults.birthPlace;
   }
 
   String _resolveNationalityOrDefault(String? rawNationality) {

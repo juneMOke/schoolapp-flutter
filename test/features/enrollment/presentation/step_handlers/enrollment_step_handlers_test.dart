@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/step_handler
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/target_academic_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -263,6 +264,51 @@ void main() {
         ),
       );
       expect(dispatched.status, StepSubmitStatus.dispatched);
+    });
+  });
+
+  group('StudentChargesStepHandler.buildContent', () {
+    HandlerBuildContext buildContentContext(EnrollmentDetailPolicy policy) {
+      return HandlerBuildContext(
+        detail: _buildDetail(enrollmentId: 'enrollment-1'),
+        intent: const EnrollmentDetailIntent.newFirstRegistration()
+            .withEnrollmentId('enrollment-1'),
+        detailPolicy: policy,
+        onRefreshRequested: () {},
+        onSummaryEditRequested: (_) {},
+      );
+    }
+
+    test('flux brouillon → génération FF5 activée avec année + cycle', () {
+      final handler = StudentChargesStepHandler(
+        controller: EnrollmentStepSubmitController(),
+      );
+
+      final content =
+          handler.buildContent(
+                buildContentContext(const NewFirstRegistrationDetailPolicy()),
+              )
+              as StudentChargesStep;
+
+      expect(content.initializeDraftCharges, isTrue);
+      expect(content.academicYearId, 'ay-1');
+      expect(content.schoolLevelGroupId, 'group-1');
+      expect(content.studentId, 'student-1');
+      expect(content.levelId, 'level-1');
+    });
+
+    test('consultation lecture seule → aucune génération (lecture pure)', () {
+      final handler = StudentChargesStepHandler(
+        controller: EnrollmentStepSubmitController(),
+      );
+
+      final content =
+          handler.buildContent(
+                buildContentContext(const LocalConsultationDetailPolicy()),
+              )
+              as StudentChargesStep;
+
+      expect(content.initializeDraftCharges, isFalse);
     });
   });
 }

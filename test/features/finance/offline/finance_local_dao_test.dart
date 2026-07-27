@@ -42,7 +42,9 @@ void main() {
     String id,
     String feeCode,
     int amount, {
-    String level = 'lvl-1',
+    String? level = 'lvl-1',
+    String year = 'ay-1',
+    String? group,
     String? dueAt,
   }) => db.insert('ref_fee_tariffs', {
     'id': id,
@@ -51,7 +53,8 @@ void main() {
     'amount_in_cents': amount,
     'currency': 'USD',
     'school_level_id': level,
-    'academic_year_id': 'ay-1',
+    'school_level_group_id': group,
+    'academic_year_id': year,
     'due_at': dueAt,
   });
 
@@ -757,6 +760,305 @@ void main() {
         expect(canteen.dueAt, '2027-06-30', reason: 'fallback endDate');
       },
     );
+
+    test(
+      'rappel MÊME niveau → idempotent (aucune duplication, mêmes ids)',
+      () async {
+        await insertTariff('t1', 'TUITION', 100000);
+        await insertTariff('t2', 'CANTEEN', 20000);
+
+        final first = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 1000,
+        );
+        final second = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 2000,
+        );
+
+        expect(second, hasLength(2));
+        expect(
+          second.map((c) => c.id).toSet(),
+          first.map((c) => c.id).toSet(),
+          reason:
+              'no-op : les créances existantes sont renvoyées telles quelles',
+        );
+        expect(await db.query('student_charges'), hasLength(2));
+      },
+    );
+
+    test(
+      'niveau cible modifié → régénère les provisoires sans allocation',
+      () async {
+        await insertTariff('t1', 'TUITION', 100000);
+        await insertTariff('t2', 'TUITION-B', 120000, level: 'lvl-2');
+
+        await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 1000,
+        );
+        final regenerated = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-2',
+          nowMs: 2000,
+        );
+
+        expect(regenerated, hasLength(1));
+        expect(regenerated.single.feeCode, 'TUITION-B');
+        expect(
+          await db.query('student_charges'),
+          hasLength(1),
+          reason: 'les provisoires de l\'ancien niveau sont purgées',
+        );
+      },
+    );
+
+    test(
+      'provisoire déjà IMPUTÉE (allocation) → conservée à la régénération',
+      () async {
+        await insertTariff('t1', 'TUITION', 100000);
+        await insertTariff('t2', 'TUITION-B', 120000, level: 'lvl-2');
+
+        final first = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 1000,
+        );
+        await db.insert('payment_allocations', {
+          'id': 'alloc-1',
+          'client_uuid': 'alloc-1',
+          'payment_id': 'pay-1',
+          'student_charge_id': first.single.id,
+          'fee_code': 'TUITION',
+          'student_charge_label': 'TUITION',
+          'amount_in_cents': 30000,
+          'currency': 'USD',
+        });
+
+        final regenerated = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-2',
+          nowMs: 2000,
+        );
+
+        expect(
+          regenerated.map((c) => c.feeCode).toSet(),
+          {'TUITION', 'TUITION-B'},
+          reason:
+              'la créance payée survit (money-grade), la grille B s\'ajoute',
+        );
+        expect(await db.query('student_charges'), hasLength(2));
+      },
+    );
+
+    test(
+      'créance AUTORITAIRE présente (non provisoire) → no-op complet',
+      () async {
+        await insertTariff('t1', 'TUITION', 100000);
+        await db.insert('student_charges', {
+          'id': 'srv-charge',
+          'student_id': 's1',
+          'academic_year_id': 'ay-1',
+          'school_level_id': 'lvl-1',
+          'fee_code': 'TUITION',
+          'label': 'Scolarité',
+          'expected_amount_in_cents': 90000,
+          'amount_paid_in_cents': 0,
+          'optimistic_paid_in_cents': 0,
+          'currency': 'USD',
+          'status': 'DUE',
+          'sync_status': 'SYNCED',
+        });
+
+        final charges = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 1000,
+        );
+
+        expect(charges.single.id, 'srv-charge');
+        expect(
+          await db.query('student_charges'),
+          hasLength(1),
+          reason: 'le grand-livre serveur a la main : aucune génération locale',
+        );
+      },
+    );
+
+    test(
+      'dueFallback absent → résolu depuis ref_academic_years.end_date',
+      () async {
+        await db.insert('ref_academic_years', {
+          'id': 'ay-1',
+          'name': '2026-2027',
+          'end_date': '2027-07-02',
+          'is_current': 1,
+        });
+        await insertTariff('t1', 'CANTEEN', 20000);
+
+        final charges = await dao.initializeChargesForStudent(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          schoolLevelId: 'lvl-1',
+          nowMs: 1000,
+        );
+
+        expect(charges.single.dueAt, '2027-07-02');
+      },
+    );
+
+    test('MÊME fee_code aux deux niveaux + imputée conservée → JAMAIS de '
+        'doublon de frais dans l\'année', () async {
+      await insertTariff('t1', 'TUITION', 100000);
+      await insertTariff('t2', 'TUITION', 120000, level: 'lvl-2');
+
+      final first = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 1000,
+      );
+      // Encaissement sur la provisoire du niveau A → conservée au changement.
+      await db.insert('payment_allocations', {
+        'id': 'alloc-1',
+        'client_uuid': 'alloc-1',
+        'payment_id': 'pay-1',
+        'student_charge_id': first.single.id,
+        'fee_code': 'TUITION',
+        'student_charge_label': 'TUITION',
+        'amount_in_cents': 30000,
+        'currency': 'USD',
+      });
+
+      final regenerated = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-2',
+        nowMs: 2000,
+      );
+
+      expect(
+        regenerated.single.id,
+        first.single.id,
+        reason: 'la TUITION payée survit, la grille B ne la double pas',
+      );
+      // Rejeux successifs : état stable (pas de réinsertion à chaque visite).
+      final revisit = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-2',
+        nowMs: 3000,
+      );
+      expect(revisit.single.id, first.single.id);
+      expect(await db.query('student_charges'), hasLength(1));
+    });
+
+    test('tarif d\'une AUTRE année ignoré ; année NULL rattachée', () async {
+      await insertTariff('t1', 'TUITION', 100000);
+      await insertTariff('t2', 'TUITION-OLD', 80000, year: 'ay-0');
+      await db.insert('ref_fee_tariffs', {
+        'id': 't3',
+        'fee_code': 'ASSURANCE',
+        'label': 'ASSURANCE',
+        'amount_in_cents': 5000,
+        'currency': 'USD',
+        'school_level_id': 'lvl-1',
+        'academic_year_id': null,
+      });
+
+      final charges = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 1000,
+      );
+
+      expect(charges.map((c) => c.feeCode).toSet(), {'TUITION', 'ASSURANCE'});
+    });
+
+    test('tarif défini au CYCLE (school_level_id NULL) généré aussi', () async {
+      await insertTariff('t1', 'TUITION', 100000);
+      await insertTariff('t2', 'FRAIS-CYCLE', 15000, level: null, group: 'g1');
+      await insertTariff('t3', 'AUTRE-CYCLE', 9000, level: null, group: 'g2');
+
+      final charges = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        schoolLevelGroupId: 'g1',
+        nowMs: 1000,
+      );
+
+      expect(
+        charges.map((c) => c.feeCode).toSet(),
+        {'TUITION', 'FRAIS-CYCLE'},
+        reason: 'cycle g1 inclus, cycle g2 exclu',
+      );
+    });
+
+    test('créance autoritaire à année NULL → no-op (rattachée à la lecture '
+        'par année)', () async {
+      await insertTariff('t1', 'TUITION', 100000);
+      await db.insert('student_charges', {
+        'id': 'legacy-charge',
+        'student_id': 's1',
+        'academic_year_id': null,
+        'fee_code': 'TUITION',
+        'label': 'Scolarité',
+        'expected_amount_in_cents': 90000,
+        'amount_paid_in_cents': 0,
+        'optimistic_paid_in_cents': 0,
+        'currency': 'USD',
+        'status': 'DUE',
+        'sync_status': 'SYNCED',
+      });
+
+      final charges = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 1000,
+      );
+
+      expect(charges.single.id, 'legacy-charge');
+      expect(await db.query('student_charges'), hasLength(1));
+    });
+
+    test('tarif ajouté à la grille après coup → top-up sans doubler '
+        'l\'existant', () async {
+      await insertTariff('t1', 'TUITION', 100000);
+      final first = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 1000,
+      );
+
+      await insertTariff('t2', 'CANTEEN', 20000);
+      final second = await dao.initializeChargesForStudent(
+        studentId: 's1',
+        academicYearId: 'ay-1',
+        schoolLevelId: 'lvl-1',
+        nowMs: 2000,
+      );
+
+      expect(second, hasLength(2));
+      expect(
+        second.firstWhere((c) => c.feeCode == 'TUITION').id,
+        first.single.id,
+        reason: 'la créance existante garde son id (pas de régénération)',
+      );
+    });
   });
 
   group('applyPaymentAck (FF4 remap)', () {

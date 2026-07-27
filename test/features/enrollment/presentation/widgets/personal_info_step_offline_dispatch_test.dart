@@ -222,4 +222,95 @@ void main() {
       expect(identity.status, 'PRE_REGISTERED');
     },
   );
+
+  // ── Défaut « Kinshasa » du lieu de naissance ───────────────────────────────
+
+  const blankBirthPlace = StudentDetail(
+    id: 'stu-2',
+    firstName: '',
+    lastName: '',
+    surname: '',
+    dateOfBirth: '',
+    gender: Gender.male,
+    birthPlace: '',
+    nationality: '',
+    city: '',
+    district: '',
+    municipality: '',
+    neighborhood: '',
+    address: '',
+    schoolLevel: SchoolLevel(
+      id: '',
+      name: '',
+      code: '',
+      displayOrder: 0,
+      splitIntoClassrooms: false,
+    ),
+    schoolLevelGroup: SchoolLevelGroup(id: '', name: '', code: ''),
+  );
+
+  Future<void> pumpStep(
+    WidgetTester tester, {
+    required StudentDetail student,
+    required bool isEditable,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<EnrollmentBloc>.value(value: enrollmentBloc),
+            BlocProvider<EnrollmentOfflineBloc>.value(value: draftBloc),
+            BlocProvider<EnrollmentStepperFlowBloc>.value(value: flowBloc),
+          ],
+          child: Scaffold(
+            body: SingleChildScrollView(
+              child: PersonalInfoStep(
+                studentDetail: student,
+                enrollmentId: 'enr-1',
+                academicYearId: 'ay-1',
+                flowStepIndex: 0,
+                isEditable: isEditable,
+                detailIntent:
+                    const EnrollmentDetailIntent.newFirstRegistration()
+                        .withEnrollmentId('enr-1'),
+                detailPolicy: const _FakePolicy(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  Finder birthPlaceEditable(String text) => find.byWidgetPredicate(
+    (w) => w is EditableText && w.controller.text == text,
+  );
+
+  testWidgets(
+    'lieu de naissance vide + formulaire éditable → défaut « Kinshasa »',
+    (tester) async {
+      await pumpStep(tester, student: blankBirthPlace, isEditable: true);
+      expect(birthPlaceEditable('Kinshasa'), findsOneWidget);
+    },
+  );
+
+  testWidgets('lieu de naissance déjà saisi → jamais écrasé par le défaut', (
+    tester,
+  ) async {
+    await pumpStep(tester, student: prefilled, isEditable: true);
+    expect(birthPlaceEditable('Abidjan'), findsOneWidget);
+    expect(birthPlaceEditable('Kinshasa'), findsNothing);
+  });
+
+  testWidgets(
+    'consultation lecture seule → pas de défaut (valeur fidèle au dossier)',
+    (tester) async {
+      await pumpStep(tester, student: blankBirthPlace, isEditable: false);
+      expect(birthPlaceEditable('Kinshasa'), findsNothing);
+    },
+  );
 }

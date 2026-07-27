@@ -162,6 +162,7 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -874,6 +875,10 @@ Future<void> configureDependencies({
           getIt<GetPaymentAllocationsFromStudentChargesUseCase>(),
       updateStudentChargeExpectedAmountUseCase:
           getIt<UpdateStudentChargeExpectedAmountUseCase>(),
+      // FF5 (module offline) : génération des créances provisoires à l'étape
+      // Frais du wizard — résolu paresseusement, enregistré par
+      // registerOfflineModules avant toute création de bloc.
+      initializeChargesUseCase: getIt<InitializeChargesUseCase>(),
     ),
   );
 
