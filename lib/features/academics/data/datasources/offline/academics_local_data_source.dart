@@ -6,6 +6,36 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
 
+/// État canonique serveur (`NoteSyncView`) à écrire sur une note lors du
+/// réalignement post-ACK — `null` si le serveur n'a pas renvoyé de `note`
+/// exploitable pour cette ligne (parsing tolérant, DF-I).
+class NoteCanonicalState {
+  final double? pointsObtenus;
+  final String statut;
+
+  /// Epoch ms — `null` → on garde [NoteSyncAck.pushedUpdatedAt].
+  final int? updatedAt;
+
+  /// Epoch ms — temps de visibilité serveur (curseur), propre à cette note.
+  final int? serverUpdatedAt;
+
+  const NoteCanonicalState({
+    this.pointsObtenus,
+    required this.statut,
+    this.updatedAt,
+    this.serverUpdatedAt,
+  });
+}
+
+/// Instruction de réalignement d'UNE note après ACK — [pushedUpdatedAt] sert
+/// de garde LWW (n'aligne que si la note poussée n'a pas été ré-éditée depuis).
+class NoteSyncAck {
+  final int pushedUpdatedAt;
+  final NoteCanonicalState? canonical;
+
+  const NoteSyncAck({required this.pushedUpdatedAt, this.canonical});
+}
+
 /// Accès sqflite aux tables d'écriture Notes/Cours (`evaluation` régime A,
 /// `note_evaluation` régime C). Chaque écriture locale et son enfilage d'outbox
 /// se font dans **une seule transaction** (atomicité « saisie enregistrée /
@@ -74,6 +104,32 @@ class AcademicsLocalDataSource {
       orderBy: 'student_id ASC',
     );
     return rows.map(NoteEvaluationRow.fromMap).toList(growable: false);
+  }
+
+  /// Notes de plusieurs évaluations, groupées par `evaluation_id` — alimente
+  /// la moyenne indicative (ADR-006/FRONT §8). Même exclusion que
+  /// [notedCountByEvaluation] : les notes `SYNC_ERROR` (rejetées terminalement
+  /// par le serveur) sont EXCLUES, elles ne doivent pas fausser la moyenne
+  /// affichée avec une valeur que le serveur a refusée.
+  Future<Map<String, List<NoteEvaluationRow>>> getNotesForEvaluations(
+    List<String> evaluationIds,
+  ) async {
+    if (evaluationIds.isEmpty) return const {};
+    final placeholders = List.filled(evaluationIds.length, '?').join(',');
+    final rows = await _db.query(
+      noteTable,
+      where:
+          'evaluation_id IN ($placeholders) '
+          "AND sync_status != '${SyncState.syncError.dbValue}'",
+      whereArgs: evaluationIds,
+      orderBy: 'student_id ASC',
+    );
+    final byEvaluation = <String, List<NoteEvaluationRow>>{};
+    for (final row in rows) {
+      final note = NoteEvaluationRow.fromMap(row);
+      (byEvaluation[note.evaluationId] ??= []).add(note);
+    }
+    return byEvaluation;
   }
 
   /// Notes encore à pousser d'une évaluation (alimente le payload de lot).
@@ -208,13 +264,63 @@ class AcademicsLocalDataSource {
   /// `(evaluationId, studentId)` (la forme de la réponse serveur), avec garde
   /// LWW : on ne marque SYNCED que si la note est toujours `PENDING_SYNC` **et**
   /// que son `updated_at` est resté celui qui a été poussé
-  /// ([studentIdToPushedUpdatedAt]). Une note ré-éditée pendant le dispatch garde
-  /// son `PENDING_SYNC` et sera re-poussée.
+  /// ([NoteSyncAck.pushedUpdatedAt]). Une note ré-éditée pendant le dispatch
+  /// garde son `PENDING_SYNC` et sera re-poussée.
+  ///
+  /// Quand [NoteSyncAck.canonical] est renseigné (état `NoteSyncView` renvoyé
+  /// par le serveur), le local est **réaligné** sur cet état — indispensable
+  /// sur un `SUPERSEDED` : la valeur poussée par CE client a perdu le LWW face
+  /// à un état serveur plus récent, le local doit refléter ce dernier, pas ce
+  /// qui a été envoyé. Sans `canonical` (parsing tolérant, outcome sans `note`
+  /// exploitable), on se contente de basculer `sync_status` sans toucher aux
+  /// valeurs — comportement de repli inchangé.
   Future<void> markNotesSynced({
     required String evaluationId,
-    required Map<String, int> studentIdToPushedUpdatedAt,
-    int? serverUpdatedAt,
+    required Map<String, NoteSyncAck> studentIdToAck,
     required int syncedAt,
+  }) async {
+    if (studentIdToAck.isEmpty) return;
+    await _db.transaction((txn) async {
+      for (final entry in studentIdToAck.entries) {
+        final ack = entry.value;
+        final canonical = ack.canonical;
+        final values = <String, Object?>{
+          'sync_status': SyncState.synced.dbValue,
+          'synced_at': syncedAt,
+          if (canonical != null) ...{
+            'points_obtenus': canonical.pointsObtenus,
+            'statut': canonical.statut,
+            'updated_at': canonical.updatedAt ?? ack.pushedUpdatedAt,
+            'server_updated_at': ?canonical.serverUpdatedAt,
+          },
+        };
+        await txn.update(
+          noteTable,
+          values,
+          where:
+              'evaluation_id = ? AND student_id = ? AND updated_at = ? '
+              'AND sync_status = ?',
+          whereArgs: [
+            evaluationId,
+            entry.key,
+            ack.pushedUpdatedAt,
+            SyncState.pendingSync.dbValue,
+          ],
+        );
+      }
+    });
+  }
+
+  /// Marque en erreur (rejet métier terminal, outcome `REJECTED`) les notes
+  /// données, résolues par la clé naturelle `(evaluationId, studentId)`, avec la
+  /// même garde LWW que [markNotesSynced] (ne touche pas une note ré-éditée
+  /// depuis le push). [studentIdToReason] persiste le motif serveur
+  /// (`UNKNOWN_EVALUATION`/`PERIODE_CLOSE`/`INVALID: …`/
+  /// `EVALUATION_CONTEXT_UNAVAILABLE`) — surfacé à l'UI, jamais perdu en silence.
+  Future<void> markNotesSyncError({
+    required String evaluationId,
+    required Map<String, int> studentIdToPushedUpdatedAt,
+    Map<String, String?> studentIdToReason = const {},
   }) async {
     if (studentIdToPushedUpdatedAt.isEmpty) return;
     await _db.transaction((txn) async {
@@ -222,9 +328,8 @@ class AcademicsLocalDataSource {
         await txn.update(
           noteTable,
           {
-            'sync_status': SyncState.synced.dbValue,
-            'synced_at': syncedAt,
-            'server_updated_at': ?serverUpdatedAt,
+            'sync_status': SyncState.syncError.dbValue,
+            'rejection_reason': studentIdToReason[entry.key],
           },
           where:
               'evaluation_id = ? AND student_id = ? AND updated_at = ? '
@@ -240,33 +345,25 @@ class AcademicsLocalDataSource {
     });
   }
 
-  /// Marque en erreur (rejet métier terminal, outcome `REJECTED`) les notes
-  /// données, résolues par la clé naturelle `(evaluationId, studentId)`, avec la
-  /// même garde LWW que [markNotesSynced] (ne touche pas une note ré-éditée depuis
-  /// le push). Le motif de rejet est porté par l'UI, pas stocké sur la ligne (la
-  /// table `note_evaluation` n'a pas de colonne d'erreur).
-  Future<void> markNotesSyncError({
-    required String evaluationId,
-    required Map<String, int> studentIdToPushedUpdatedAt,
+  /// Marque une évaluation `SYNC_ERROR` (backstop `422` terminal à la création,
+  /// DF-N : `PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/`MAX_REACHED`), persistant le
+  /// code pour surfaçage UI. Même garde TOCTOU que [markEvaluationSynced] — une
+  /// évaluation étant immuable, elle protège surtout contre un réalignement
+  /// d'une entrée périmée.
+  Future<void> markEvaluationSyncError({
+    required String id,
+    String? rejectionCode,
+    int? updatedAtGuard,
   }) async {
-    if (studentIdToPushedUpdatedAt.isEmpty) return;
-    await _db.transaction((txn) async {
-      for (final entry in studentIdToPushedUpdatedAt.entries) {
-        await txn.update(
-          noteTable,
-          {'sync_status': SyncState.syncError.dbValue},
-          where:
-              'evaluation_id = ? AND student_id = ? AND updated_at = ? '
-              'AND sync_status = ?',
-          whereArgs: [
-            evaluationId,
-            entry.key,
-            entry.value,
-            SyncState.pendingSync.dbValue,
-          ],
-        );
-      }
-    });
+    await _db.update(
+      evaluationTable,
+      {
+        'sync_status': SyncState.syncError.dbValue,
+        'rejection_code': rejectionCode,
+      },
+      where: updatedAtGuard == null ? 'id = ?' : 'id = ? AND updated_at = ?',
+      whereArgs: updatedAtGuard == null ? [id] : [id, updatedAtGuard],
+    );
   }
 
   // ── Application du pull métier (skip PENDING_SYNC : jamais de clobber) ───────

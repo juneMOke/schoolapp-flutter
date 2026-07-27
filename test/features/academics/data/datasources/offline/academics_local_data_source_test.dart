@@ -286,8 +286,10 @@ void main() {
         // L'ACK réaligne s1 et s2 aux updated_at POUSSÉS (1000).
         await local.markNotesSynced(
           evaluationId: 'ev-1',
-          studentIdToPushedUpdatedAt: {'s1': 1000, 's2': 1000},
-          serverUpdatedAt: 8000,
+          studentIdToAck: {
+            's1': const NoteSyncAck(pushedUpdatedAt: 1000),
+            's2': const NoteSyncAck(pushedUpdatedAt: 1000),
+          },
           syncedAt: 9000,
         );
 
@@ -299,6 +301,48 @@ void main() {
         // s2 a bougé (updated_at 3000 ≠ 1000 poussé) → reste à re-pousser.
         expect(after['s2']!.syncState, SyncState.pendingSync);
         expect(after['s2']!.pointsObtenus, 19);
+      },
+    );
+
+    test(
+      'markNotesSynced réaligne sur l\'état canonique serveur (SUPERSEDED)',
+      () async {
+        await local.upsertNotesWithOutbox(
+          evaluationId: 'ev-1',
+          incoming: [note('s1', id: 'n1', points: 10, updatedAt: 1000)],
+          buildOutboxEntry: (_) => _entry(
+            id: 'obx-notes-1',
+            type: 'ACADEMICS_NOTES_BATCH',
+            aggregateId: 'ev-1',
+            op: OutboxOperation.upsert,
+          ),
+        );
+
+        // Le serveur a un état plus récent (SUPERSEDED) : le local doit
+        // refléter CE qu'il renvoie, pas la valeur poussée par ce client.
+        await local.markNotesSynced(
+          evaluationId: 'ev-1',
+          studentIdToAck: {
+            's1': const NoteSyncAck(
+              pushedUpdatedAt: 1000,
+              canonical: NoteCanonicalState(
+                pointsObtenus: 17,
+                statut: 'NOTEE',
+                updatedAt: 5000,
+                serverUpdatedAt: 6000,
+              ),
+            ),
+          },
+          syncedAt: 9000,
+        );
+
+        final after = (await local.getNotesForEvaluation(
+          'ev-1',
+        )).singleWhere((n) => n.studentId == 's1');
+        expect(after.syncState, SyncState.synced);
+        expect(after.pointsObtenus, 17);
+        expect(after.updatedAt, 5000);
+        expect(after.serverUpdatedAt, 6000);
       },
     );
 

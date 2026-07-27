@@ -59,6 +59,10 @@ class EvalSummaryCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
                   _ChaptersLine(chapitres: eval.chapitres),
                 ],
+                if (eval.rejectionCode != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  _RejectionBanner(code: eval.rejectionCode!),
+                ],
               ],
             ),
           ),
@@ -209,6 +213,49 @@ class _EvalChip extends StatelessWidget {
           color: fg,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+}
+
+/// Bannière de rejet serveur (backstop `422` terminal, DF-N) — jamais perdue
+/// en silence : la création offline a échoué définitivement, à recréer.
+class _RejectionBanner extends StatelessWidget {
+  final String code;
+
+  const _RejectionBanner({required this.code});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.08),
+        borderRadius: AppRadius.brSm,
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 16,
+            color: AppColors.error,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              evalRejectionLabel(l10n, code),
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

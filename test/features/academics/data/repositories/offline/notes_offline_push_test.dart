@@ -167,7 +167,7 @@ void main() {
       final entry = await saveSample();
       when(() => syncApi.submitNotes(any(), any())).thenAnswer(
         (_) async => NotesBatchResponseModel(
-          serverUpdatedAt: '2026-06-10T08:00:00Z',
+          serverTime: '2026-06-10T08:00:00Z',
           outcomes: [outcome('s1', 'APPLIED'), outcome('s2', 'SUPERSEDED')],
         ),
       );

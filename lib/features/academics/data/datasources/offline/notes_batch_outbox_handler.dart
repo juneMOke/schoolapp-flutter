@@ -114,30 +114,61 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
         for (final n in request.notes)
           if (n.updatedAtMs != null) n.studentId: n.updatedAtMs!,
       };
-      final applied = <String, int>{};
+      final applied = <String, NoteSyncAck>{};
       final rejected = <String, int>{};
+      final rejectedReasons = <String, String?>{};
       for (final o in response.outcomes) {
         final pushed = pushedUpdatedAt[o.studentId];
         if (pushed == null) continue; // outcome hors du lot poussé : ignoré.
         if (o.isApplied) {
-          applied[o.studentId] = pushed;
+          final canonicalNote = o.note;
+          applied[o.studentId] = NoteSyncAck(
+            pushedUpdatedAt: pushed,
+            // Réaligne sur l'état SERVEUR (indispensable sur SUPERSEDED : le
+            // push de ce client a perdu le LWW) ; `null` si l'outcome n'a pas
+            // porté de `note` exploitable (parsing tolérant, DF-I) — le
+            // datasource se contente alors de basculer sync_status.
+            canonical: canonicalNote == null
+                ? null
+                : NoteCanonicalState(
+                    pointsObtenus: canonicalNote.pointsObtenus,
+                    statut: canonicalNote.statut,
+                    updatedAt: EpochIsoHelper.tryToEpochMs(
+                      canonicalNote.updatedAt,
+                    ),
+                    serverUpdatedAt: EpochIsoHelper.tryToEpochMs(
+                      canonicalNote.serverUpdatedAt,
+                    ),
+                  ),
+          );
         } else if (o.isRejected && !applied.containsKey(o.studentId)) {
           // Un studentId à la fois APPLIED et REJECTED (réponse serveur
           // contradictoire) : APPLIED gagne, on ne le compte pas deux fois.
           rejected[o.studentId] = pushed;
+          rejectedReasons[o.studentId] = o.reason;
         }
       }
+      // APPLIED gagne TOUJOURS, quel que soit l'ORDRE des outcomes dans la
+      // réponse (le contrat ne le garantit pas) : un REJECTED vu avant
+      // l'APPLIED du même studentId ne doit pas persister un rejet erroné.
+      // Aujourd'hui `markNotesSynced` précède `markNotesSyncError` et la
+      // garde SQL (`sync_status = PENDING_SYNC`) rend le second no-op une
+      // fois le premier appliqué — mais c'est un effet de bord de l'ordre
+      // des appels, pas une garantie explicite : on la rend order-independent
+      // ici pour ne jamais en dépendre.
+      rejected.removeWhere((id, _) => applied.containsKey(id));
+      rejectedReasons.removeWhere((id, _) => applied.containsKey(id));
 
       final syncedAt = now();
       await localDataSource.markNotesSynced(
         evaluationId: request.evaluationId,
-        studentIdToPushedUpdatedAt: applied,
-        serverUpdatedAt: EpochIsoHelper.tryToEpochMs(response.serverUpdatedAt),
+        studentIdToAck: applied,
         syncedAt: syncedAt,
       );
       await localDataSource.markNotesSyncError(
         evaluationId: request.evaluationId,
         studentIdToPushedUpdatedAt: rejected,
+        studentIdToReason: rejectedReasons,
       );
 
       // Acquittement seulement si CHAQUE note poussée a un outcome terminal.

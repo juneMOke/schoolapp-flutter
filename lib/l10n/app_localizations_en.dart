@@ -991,7 +991,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateFieldChapitres => 'Related chapters';
 
   @override
-  String get evalCreateChapitresComingSoon => 'Coming soon';
+  String get evalCreateChapitresEmpty =>
+      'No chapters available for this course';
 
   @override
   String get evalCreateCancel => 'Cancel';
@@ -1020,6 +1021,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get evalCreateClosedPeriodError =>
       'Closed period: you can\'t add an evaluation to it.';
+
+  @override
+  String get evalCreateMaxReachedError => 'Entry cap reached for this date.';
+
+  @override
+  String get evalRejectionPeriodClosed => 'Rejected: closed period';
+
+  @override
+  String get evalRejectionExamNotAllowed => 'Rejected: exam not allowed';
+
+  @override
+  String get evalRejectionMaxReached => 'Rejected: cap reached';
+
+  @override
+  String get evalRejectionGeneric => 'Rejected by the server';
+
+  @override
+  String get noteRejectionUnknownEvaluation =>
+      'Evaluation unknown to the server';
+
+  @override
+  String get noteRejectionPeriodeClose => 'Closed period';
+
+  @override
+  String get noteRejectionInvalid => 'Invalid grade';
+
+  @override
+  String get noteRejectionContextUnavailable => 'Context unavailable';
+
+  @override
+  String get noteRejectionGeneric => 'Rejected by the server';
 
   @override
   String get evalDetailBack => 'Back to course';

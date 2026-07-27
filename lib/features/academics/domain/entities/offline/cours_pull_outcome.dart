@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 /// Bilan d'un pull des cours (`AcademicsCoursPullRepositoryImpl`, ressource
-/// unique scopée enseignant — DF-K) ou d'un rafraîchissement des squelettes de
-/// notation (`NotationRefPullRepositoryImpl`, itéré par cours). [notModified]
+/// unique scopée enseignant — DF-K) ou du bundle `grades-referential`
+/// (`GradesReferentialPullRepositoryImpl`, ETag non paginé). [notModified]
 /// vrai ⟺ rien de nouveau à appliquer ; [bootstrapComplete] vrai ⟺ le premier
 /// passage complet a bouclé sans échec.
 class CoursPullOutcome extends Equatable {

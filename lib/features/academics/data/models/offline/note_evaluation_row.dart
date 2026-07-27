@@ -23,6 +23,11 @@ class NoteEvaluationRow extends Equatable {
   final String syncStatus;
   final int? syncedAt;
 
+  /// Motif du rejet serveur (`UNKNOWN_EVALUATION`/`PERIODE_CLOSE`/`INVALID: …`/
+  /// `EVALUATION_CONTEXT_UNAVAILABLE`) — `null` tant qu'aucun rejet, posé
+  /// seulement sur un outcome `REJECTED`, surfacé à l'UI.
+  final String? rejectionReason;
+
   const NoteEvaluationRow({
     required this.id,
     required this.evaluationId,
@@ -33,6 +38,7 @@ class NoteEvaluationRow extends Equatable {
     this.serverUpdatedAt,
     this.syncStatus = 'PENDING_SYNC',
     this.syncedAt,
+    this.rejectionReason,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -60,6 +66,7 @@ class NoteEvaluationRow extends Equatable {
         serverUpdatedAt: _asIntOrNull(map['server_updated_at']),
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         syncedAt: _asIntOrNull(map['synced_at']),
+        rejectionReason: map['rejection_reason'] as String?,
       );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -72,6 +79,7 @@ class NoteEvaluationRow extends Equatable {
     'server_updated_at': serverUpdatedAt,
     'sync_status': syncStatus,
     'synced_at': syncedAt,
+    'rejection_reason': rejectionReason,
   };
 
   SyncState get syncState => SyncState.fromDbValue(syncStatus);
@@ -87,5 +95,6 @@ class NoteEvaluationRow extends Equatable {
     serverUpdatedAt,
     syncStatus,
     syncedAt,
+    rejectionReason,
   ];
 }

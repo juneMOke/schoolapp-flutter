@@ -47,6 +47,8 @@ class EvaluationOfflineRepositoryImpl {
   /// EXAMEN). [date] est ancrée UTC à minuit pour un aller-retour date-only sans
   /// dérive de fuseau. Rattachement temporel exclusif : un seul de [sousPeriodeId]
   /// / [periodeScolaireId] doit être non nul (garanti par l'appelant / l'UI).
+  /// [chapitreIds] est intra-agrégat (régime A) : figé à la création, jamais
+  /// modifié ensuite.
   Future<Either<Failure, EvaluationRow>> createEvaluation({
     required String coursId,
     required String type,
@@ -55,6 +57,7 @@ class EvaluationOfflineRepositoryImpl {
     required int poids,
     String? sousPeriodeId,
     String? periodeScolaireId,
+    List<String> chapitreIds = const [],
   }) async {
     try {
       final nowMs = _now();
@@ -75,6 +78,7 @@ class EvaluationOfflineRepositoryImpl {
         sousPeriodeId: sousPeriodeId,
         periodeScolaireId: periodeScolaireId,
         updatedAt: nowMs,
+        chapitreIdsJson: EvaluationRow.encodeChapitreIds(chapitreIds),
       );
 
       final entry = OutboxEntry(
@@ -84,6 +88,7 @@ class EvaluationOfflineRepositoryImpl {
         operation: OutboxOperation.create,
         payload: EvaluationPushRequestModel(
           authorId: _currentUser?.uid,
+          coursId: coursId,
           evaluation: EvaluationInputModel.fromRow(row),
         ).toJsonString(),
         createdAt: nowMs,

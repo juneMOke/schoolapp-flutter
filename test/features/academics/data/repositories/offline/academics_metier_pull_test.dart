@@ -379,4 +379,58 @@ void main() {
       );
     },
   );
+
+  group('chapitreIds (couverture) au pull', () {
+    test('EvaluationDeltaDto.fromJson porte chapitreIds ; toLocalRow les '
+        'persiste en JSON', () {
+      final dto = EvaluationDeltaDto.fromJson({
+        'id': 'ev-1',
+        'coursId': 'co1',
+        'type': 'INTERRO',
+        'date': '2026-06-10',
+        'maxPoints': 20,
+        'poids': 1,
+        'chapitreIds': ['ch1', 'ch2'],
+        'serverUpdatedAt': '2026-06-10T08:00:00Z',
+      });
+
+      expect(dto.chapitreIds, ['ch1', 'ch2']);
+      final row = dto.toLocalRow(10000);
+      expect(row.chapitreIds, ['ch1', 'ch2']);
+    });
+
+    test('chapitreIds absent → liste vide (rétro-compatible)', () {
+      final dto = EvaluationDeltaDto.fromJson({
+        'id': 'ev-1',
+        'coursId': 'co1',
+        'type': 'INTERRO',
+        'date': '2026-06-10',
+        'maxPoints': 20,
+        'poids': 1,
+        'serverUpdatedAt': '2026-06-10T08:00:00Z',
+      });
+
+      expect(dto.chapitreIds, isEmpty);
+    });
+
+    test('applyPulledEvaluations persiste la couverture, relisible depuis '
+        'EvaluationRow.chapitreIds', () async {
+      await insertCours('co1');
+      await local.applyPulledEvaluations([
+        const EvaluationDeltaDto(
+          id: 'ev-1',
+          coursId: 'co1',
+          type: 'INTERRO',
+          date: '2026-06-10',
+          maxPoints: 20,
+          poids: 1,
+          chapitreIds: ['ch1'],
+          serverUpdatedAt: '2026-06-10T08:00:00Z',
+        ).toLocalRow(10000),
+      ]);
+
+      final stored = await local.getEvaluation('ev-1');
+      expect(stored!.chapitreIds, ['ch1']);
+    });
+  });
 }

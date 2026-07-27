@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/chapitre_option.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/create_evaluation_request.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
@@ -47,6 +48,7 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   String? _periodeId;
   String? _sousPeriodeId;
   DateTime? _date;
+  Set<String> _chapitreIds = const {};
   late final TextEditingController _maxController;
   late final TextEditingController _poidsController;
 
@@ -124,6 +126,40 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   bool get _isTargetClosed =>
       _isExamen ? _isPeriodeClosed : _isPeriodeClosed || _isSousPeriodeClosed;
 
+  /// Plafond EXAMEN de la période (`maxExamenParPeriodeScolaire`, bundle) —
+  /// un seul créneau examen par période dans le modèle actuel (`PeriodeNotation.
+  /// examen`), donc « atteint » dès qu'un examen existe. Plafond `null` (bundle
+  /// pas encore pullé) → pas de blocage local, le backstop serveur reste le
+  /// dernier rempart.
+  bool get _examenPlafondReached {
+    final maxExamen = widget.detail.plafonds?.maxExamenParPeriodeScolaire;
+    if (maxExamen == null) return false;
+    final existing = _selectedPeriode?.examen != null ? 1 : 0;
+    return existing >= maxExamen;
+  }
+
+  /// Plafond journalier (`maxJournalierParSousPeriode`, bundle) — nombre
+  /// d'évaluations (tous types journaliers confondus) déjà présentes dans la
+  /// sous-période sélectionnée, pour la date choisie.
+  bool get _journalierPlafondReached {
+    final maxJournalier = widget.detail.plafonds?.maxJournalierParSousPeriode;
+    final date = _date;
+    final sp = _selectedSousPeriode;
+    if (maxJournalier == null || date == null || sp == null) return false;
+    final day = DateTime.utc(date.year, date.month, date.day);
+    var count = 0;
+    for (final groupe in sp.evaluationsParType) {
+      for (final ev in groupe.evaluations) {
+        final evDay = DateTime.utc(ev.date.year, ev.date.month, ev.date.day);
+        if (evDay == day) count++;
+      }
+    }
+    return count >= maxJournalier;
+  }
+
+  bool get _isPlafondReached =>
+      _isExamen ? _examenPlafondReached : _journalierPlafondReached;
+
   double get _maxValue =>
       double.tryParse(_maxController.text.trim().replaceAll(',', '.')) ?? 0;
 
@@ -159,16 +195,34 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
     });
   }
 
+  /// Type EXAMEN grisé si la branche n'a pas d'examen (`maxExamenParPeriodeScolaire`
+  /// `null`, bundle) — jamais traité comme 0 ; plafonds pas encore en cache
+  /// (`null`) → pas de grisage (le backstop serveur reste le dernier rempart).
+  Set<TypeEvaluation> get _disabledTypes {
+    final plafonds = widget.detail.plafonds;
+    if (plafonds == null || plafonds.maxExamenParPeriodeScolaire != null) {
+      return const {};
+    }
+    return const {TypeEvaluation.examen};
+  }
+
   void _submit() {
-    // Garde métier : jamais d'évaluation sur une période clôturée (le bouton est
-    // déjà désactivé, ceci couvre les chemins programmatiques).
-    if (_isTargetClosed) return;
+    // Garde métier : jamais d'évaluation sur une période clôturée, un
+    // plafond atteint, ou un type grisé (ex. EXAMEN devenu indisponible si le
+    // bundle se rafraîchit pendant que la modale est ouverte) — le bouton est
+    // déjà désactivé en pratique, ceci couvre les chemins programmatiques.
+    if (_isTargetClosed ||
+        _isPlafondReached ||
+        _disabledTypes.contains(_type)) {
+      return;
+    }
     final request = _isExamen
         ? CreateEvaluationRequest.examen(
             date: _date!,
             maxPoints: _maxValue,
             periodeScolaireId: _periodeId!,
             poids: _poidsValue,
+            chapitreIds: _chapitreIds.toList(growable: false),
           )
         : CreateEvaluationRequest.journaliere(
             type: _type,
@@ -176,6 +230,7 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
             maxPoints: _maxValue,
             sousPeriodeId: _sousPeriodeId!,
             poids: _poidsValue,
+            chapitreIds: _chapitreIds.toList(growable: false),
           );
     context.read<CreateEvaluationBloc>().add(
       CreateEvaluationSubmitted(
@@ -202,9 +257,20 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            EvalTypeCards(selected: _type, onChanged: _onTypeChanged),
+            EvalTypeCards(
+              selected: _type,
+              onChanged: _onTypeChanged,
+              disabledTypes: _disabledTypes,
+            ),
             const SizedBox(height: AppSpacing.lg),
             _cascade(l10n),
+            if (!_isTargetClosed && _isPlafondReached) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.evalCreateMaxReachedError,
+                style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             EteeloDateInput(
               label: l10n.evalCreateFieldDate,
@@ -241,7 +307,11 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            const _DormantChaptersField(),
+            _ChaptersField(
+              options: widget.detail.chapitresDisponibles,
+              selectedIds: _chapitreIds,
+              onChanged: (ids) => setState(() => _chapitreIds = ids),
+            ),
             const SizedBox(height: AppSpacing.lg),
             _hint(l10n),
             const SizedBox(height: AppSpacing.md),
@@ -271,6 +341,10 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
                 EteeloSelectItem<String>(
                   value: p.periodeScolaireId,
                   label: periodeScolaireLabel(l10n, p.ordre, decoupage),
+                  // Verrou de clôture (bundle, DF-M) : une période CLOTUREE ne
+                  // peut plus recevoir de saisie — grisée, pas seulement
+                  // bloquée après coup par errorText/submit.
+                  enabled: p.statut != StatutPeriode.cloturee,
                 ),
             ],
           ),
@@ -293,6 +367,9 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
                 EteeloSelectItem<String>(
                   value: sp.sousPeriodeId,
                   label: l10n.courseDetailPeriodLabel(sp.ordre),
+                  // Verrou de clôture (bundle, DF-M) : idem période, une
+                  // sous-période CLOTUREE est grisée dans le picker.
+                  enabled: sp.statut != StatutPeriode.cloturee,
                 ),
             ],
           ),
@@ -347,7 +424,12 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
               icon: Icons.check_rounded,
               isLoading: state.isInProgress,
               size: EteeloButtonSize.regular,
-              onPressed: (_isValid && !_isTargetClosed && !state.isInProgress)
+              onPressed:
+                  (_isValid &&
+                      !_isTargetClosed &&
+                      !_isPlafondReached &&
+                      !_disabledTypes.contains(_type) &&
+                      !state.isInProgress)
                   ? _submit
                   : null,
             ),
@@ -358,10 +440,20 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   }
 }
 
-/// Champ « Chapitres concernés » dormant (décision produit) : présent visuellement
-/// mais désactivé, faute de source de données côté client pour l'instant.
-class _DormantChaptersField extends StatelessWidget {
-  const _DormantChaptersField();
+/// Champ « Chapitres concernés » : checklist des chapitres du cours (bundle
+/// `grades-referential`, cochables, couverture intra-agrégat de l'évaluation).
+/// Vide (bundle pas encore pullé / cours sans chapitre) → message muet, jamais
+/// un champ vide silencieux.
+class _ChaptersField extends StatelessWidget {
+  final List<ChapitreOption> options;
+  final Set<String> selectedIds;
+  final ValueChanged<Set<String>> onChanged;
+
+  const _ChaptersField({
+    required this.options,
+    required this.selectedIds,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -376,33 +468,59 @@ class _DormantChaptersField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Container(
-          width: double.infinity,
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceAlt,
-            borderRadius: AppRadius.brSm,
-            border: Border.all(color: AppColors.borderStrong),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.menu_book_outlined,
-                size: 16,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                l10n.evalCreateChapitresComingSoon,
-                style: AppTypography.bodySmall.copyWith(
+        if (options.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              borderRadius: AppRadius.brSm,
+              border: Border.all(color: AppColors.borderStrong),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.menu_book_outlined,
+                  size: 16,
                   color: AppColors.textMuted,
                 ),
-              ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.evalCreateChapitresEmpty,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final option in options)
+                FilterChip(
+                  label: Text(option.titre),
+                  selected: selectedIds.contains(option.id),
+                  onSelected: (checked) {
+                    final next = {...selectedIds};
+                    if (checked) {
+                      next.add(option.id);
+                    } else {
+                      next.remove(option.id);
+                    }
+                    onChanged(next);
+                  },
+                ),
             ],
           ),
-        ),
       ],
     );
   }

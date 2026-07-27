@@ -19,10 +19,21 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 /// dépendance (elle référence un `cours` serveur, jamais un agrégat créé offline).
 ///
 /// - succès → SYNCED.
-/// - rejet métier (400/422 validation, 404 introuvable, 403 interdit) → failed
+/// - **`422` backstop (DF-N)** : `PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/`MAX_REACHED`,
+///   code porté en tête de `ApiErrorResponse.message` → échec **terminal**,
+///   évaluation `SYNC_ERROR` + code persisté (`rejection_code`, surfacé à
+///   l'UI), **jamais de re-push** (à la création seulement, un rejeu idempotent
+///   ressort en 200).
+/// - rejet métier (400 validation, 404 introuvable, 403 interdit) → failed
 ///   (terminal). 401 reste transitoire (réussira après ré-auth).
 /// - réseau / 5xx / timeout / 401 → retry (backoff).
 class EvaluationOutboxHandler implements OutboxSyncHandler {
+  /// Codes applicatifs des backstops `422` (préfixe du message, DF-N).
+  static const List<String> backstopCodes = [
+    'PERIOD_CLOSED',
+    'EXAM_NOT_ALLOWED',
+    'MAX_REACHED',
+  ];
   final AcademicsEvaluationSyncApi syncApi;
   final AcademicsLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
@@ -67,6 +78,24 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
       );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        final code = _backstopCode(e) ?? 'REJECTED';
+        try {
+          await localDataSource.markEvaluationSyncError(
+            id: request.evaluation.id,
+            rejectionCode: code,
+          );
+        } catch (_) {
+          // Le rejet serveur est TERMINAL même si l'écriture locale échoue
+          // (DB busy, disque…) : un throw ici ne doit JAMAIS s'échapper vers
+          // le catch générique ci-dessous — sinon un 422 déterministe (le
+          // serveur ne changera pas d'avis) serait reclassé `retry` et
+          // repoussé indéfiniment. Le bookkeeping local pourra rester
+          // incomplet, mais l'outbox, lui, ne boucle jamais sur un rejet
+          // qu'on sait définitif.
+        }
+        return OutboxDispatchResult.failed(code);
+      }
       final failure = e.error;
       if (failure is ValidationFailure ||
           failure is NotFoundFailure ||
@@ -81,5 +110,20 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());
     }
+  }
+
+  /// Extrait le code applicatif en tête de `ApiErrorResponse.message` (le
+  /// projet ne porte pas de champ `code` dédié) — `null` si le message ne
+  /// commence par aucun des 3 codes connus (défensif, contrat inattendu).
+  String? _backstopCode(DioException e) {
+    final data = e.response?.data;
+    final message = (data is Map && data['message'] is String)
+        ? data['message'] as String
+        : null;
+    if (message == null) return null;
+    for (final code in backstopCodes) {
+      if (message.startsWith(code)) return code;
+    }
+    return null;
   }
 }

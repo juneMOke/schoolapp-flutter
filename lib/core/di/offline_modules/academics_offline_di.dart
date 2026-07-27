@@ -1,13 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
 // ── Academics (offline) ──
-import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_cours_pull_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_cours_pull_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_evaluation_sync_api.dart';
@@ -17,17 +16,19 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_notes_sync_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_outbox_handler.dart';
-import 'package:school_app_flutter/features/academics/data/datasources/offline/notation_ref_pull_handler.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/grades_referential_pull_api.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/grades_referential_pull_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/notes_batch_outbox_handler.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_ref_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
@@ -41,8 +42,7 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 /// ADR-006). Appelé depuis `registerOfflineModules` APRÈS le socle et les
 /// branches A/B. Le pull cours/sessions est scopé **enseignant dérivé du
 /// token** (DF-K) — plus de dépendance à `ref_classrooms`/l'année courante
-/// pour son itération ; `BootstrapLocalRepository` reste requis pour le scope
-/// année de `CourseOfflineRepositoryImpl.getMyCourses` (rollover).
+/// pour son itération.
 ///
 /// Ordre : DataSources → APIs → Repositories → Handlers (push sur `SyncEngine`,
 /// pull sur `PullCoordinator`). Aucun BLoC ici : la présentation est branchée en
@@ -76,6 +76,9 @@ void registerAcademicsOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<AcademicsNotesSyncApi>(
     () => AcademicsNotesSyncApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<GradesReferentialPullApi>(
+    () => GradesReferentialPullApi(getIt<Dio>()),
   );
 
   // ── Repositories (pull résumables + écriture offline) ──
@@ -137,10 +140,9 @@ void registerAcademicsOffline(GetIt getIt) {
       online: getIt<CourseRepositoryImpl>(),
       academicsLocalDataSource: getIt<AcademicsLocalDataSource>(),
       academicsRefLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
-      scheduleRefLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
-      bootstrapRepository: getIt<BootstrapLocalRepository>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
     ),
   );
   // Impl offline-first de NotationRepository (lecture composée notes+roster,
@@ -154,12 +156,15 @@ void registerAcademicsOffline(GetIt getIt) {
       notesRepository: getIt<NotesOfflineRepositoryImpl>(),
     ),
   );
-  // Réutilise le DataSource ONLINE (CourseRemoteDataSource) pour peupler le
-  // cache des squelettes de notation — jamais l'interface rebindée offline.
-  getIt.registerLazySingleton<NotationRefPullRepositoryImpl>(
-    () => NotationRefPullRepositoryImpl(
-      remoteDataSource: getIt<CourseRemoteDataSource>(),
+  // Bundle `grades-referential` (ETag, cadré prof) : source du statut de
+  // clôture / plafonds / chapitres, composés par `CourseOfflineRepositoryImpl.
+  // getCoursNotationDetail`. Remplace l'ancien squelette `ref_cours_notation`
+  // (workaround réutilisant un endpoint ONLINE, retiré).
+  getIt.registerLazySingleton<GradesReferentialPullRepositoryImpl>(
+    () => GradesReferentialPullRepositoryImpl(
+      api: getIt<GradesReferentialPullApi>(),
       refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
     ),
   );
@@ -173,7 +178,10 @@ void registerAcademicsOffline(GetIt getIt) {
       schedulePullRepository: getIt<SchedulePullRepositoryImpl>(),
       coursPullRepository: getIt<AcademicsCoursPullRepositoryImpl>(),
       metierPullRepository: getIt<AcademicsMetierPullRepositoryImpl>(),
-      notationRefPullRepository: getIt<NotationRefPullRepositoryImpl>(),
+      gradesReferentialPullRepository:
+          getIt<GradesReferentialPullRepositoryImpl>(),
+      credentialsProbe: getIt<AuthSessionManager>(),
+      connectivity: getIt<ConnectivityService>(),
     ),
   );
 
@@ -212,6 +220,6 @@ void registerAcademicsOffline(GetIt getIt) {
     NotesPullHandler(getIt<AcademicsMetierPullRepositoryImpl>()),
   );
   getIt<PullCoordinator>().registerHandler(
-    NotationRefPullHandler(getIt<NotationRefPullRepositoryImpl>()),
+    GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
   );
 }

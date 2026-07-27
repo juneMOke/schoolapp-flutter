@@ -2,10 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
 
-/// Une note d'un lot poussé au `/sync` (régime C, LWW). Le serveur upsert sur la
-/// clé naturelle `(evaluationId, studentId)` si `updatedAt` entrant est plus
-/// récent. `pointsObtenus` nul = absent (le `statut` porte alors l'absence).
+/// Une note d'un lot poussé au `/sync` (régime C, LWW) — `NoteLineInput`. Le
+/// serveur upsert sur la clé naturelle `(evaluationId, studentId)` si
+/// `updatedAt` entrant est plus récent. `pointsObtenus` nul = absent (le
+/// `statut` porte alors l'absence). `evaluationId` voyage **par ligne** (le
+/// contrat `NoteBatchSyncRequest` ne le porte pas au niveau du lot).
 class NoteInputModel extends Equatable {
+  final String evaluationId;
   final String studentId;
   final String statut;
   final double? pointsObtenus;
@@ -14,6 +17,7 @@ class NoteInputModel extends Equatable {
   final String updatedAt;
 
   const NoteInputModel({
+    required this.evaluationId,
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
@@ -22,6 +26,7 @@ class NoteInputModel extends Equatable {
 
   /// `updatedAt` local (epoch ms) → ISO.
   factory NoteInputModel.fromRow(NoteEvaluationRow row) => NoteInputModel(
+    evaluationId: row.evaluationId,
     studentId: row.studentId,
     statut: row.statut,
     pointsObtenus: row.pointsObtenus,
@@ -29,6 +34,7 @@ class NoteInputModel extends Equatable {
   );
 
   factory NoteInputModel.fromJson(Map<String, dynamic> json) => NoteInputModel(
+    evaluationId: json['evaluationId'] as String,
     studentId: json['studentId'] as String,
     statut: json['statut'] as String,
     pointsObtenus: (json['pointsObtenus'] as num?)?.toDouble(),
@@ -36,6 +42,7 @@ class NoteInputModel extends Equatable {
   );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    'evaluationId': evaluationId,
     'studentId': studentId,
     'statut': statut,
     // Toujours présent (peut être null) : distingue « absent » d'« omis ».
@@ -48,5 +55,11 @@ class NoteInputModel extends Equatable {
   int? get updatedAtMs => EpochIsoHelper.tryToEpochMs(updatedAt);
 
   @override
-  List<Object?> get props => [studentId, statut, pointsObtenus, updatedAt];
+  List<Object?> get props => [
+    evaluationId,
+    studentId,
+    statut,
+    pointsObtenus,
+    updatedAt,
+  ];
 }

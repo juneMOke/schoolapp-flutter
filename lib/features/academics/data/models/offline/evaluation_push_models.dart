@@ -4,22 +4,30 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_input_model.dart';
 
 /// Enveloppe d'ingest d'une évaluation (`POST /sync/academics/evaluations`,
-/// régime A) : `{authorId?, evaluation}`. Sert aussi de **payload d'outbox**
-/// (`toJsonString`/`fromJsonString`). Le serveur applique `ON CONFLICT (id) DO
-/// NOTHING` (idempotent sur l'uuid client) : 201 créée ≡ 200 rejeu, les deux
-/// succès.
+/// régime A) : `{authorId?, coursId, evaluation}` — `coursId` est requis **au
+/// niveau racine** de l'enveloppe (`EvaluationSyncRequest`), distinct du
+/// `CreateEvaluationCommand` imbriqué qui ne le porte pas. Sert aussi de
+/// **payload d'outbox** (`toJsonString`/`fromJsonString`). Le serveur applique
+/// `ON CONFLICT (id) DO NOTHING` (idempotent sur l'uuid client) : 201 créée ≡
+/// 200 rejeu, les deux succès.
 class EvaluationPushRequestModel extends Equatable {
+  final String coursId;
   final EvaluationInputModel evaluation;
 
   /// Uid de l'auteur (ADR-010 D-05), figé à la saisie. Le serveur (garde A3)
   /// rejette 403 si `authorId ≠ uid` du JWT. `null` = session héritée sans uid.
   final String? authorId;
 
-  const EvaluationPushRequestModel({required this.evaluation, this.authorId});
+  const EvaluationPushRequestModel({
+    required this.coursId,
+    required this.evaluation,
+    this.authorId,
+  });
 
   factory EvaluationPushRequestModel.fromJson(Map<String, dynamic> json) =>
       EvaluationPushRequestModel(
         authorId: json['authorId'] as String?,
+        coursId: json['coursId'] as String,
         evaluation: EvaluationInputModel.fromJson(
           json['evaluation'] as Map<String, dynamic>,
         ),
@@ -27,6 +35,7 @@ class EvaluationPushRequestModel extends Equatable {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     if (authorId != null) 'authorId': authorId,
+    'coursId': coursId,
     'evaluation': evaluation.toJson(),
   };
 
@@ -38,7 +47,7 @@ class EvaluationPushRequestModel extends Equatable {
       );
 
   @override
-  List<Object?> get props => [evaluation, authorId];
+  List<Object?> get props => [coursId, evaluation, authorId];
 }
 
 /// Réponse du serveur au push d'une évaluation. On ne consomme que ce qui sert

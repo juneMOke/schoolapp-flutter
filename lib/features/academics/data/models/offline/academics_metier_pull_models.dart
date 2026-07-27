@@ -61,6 +61,7 @@ class EvaluationDeltaDto {
   final int poids;
   final String? sousPeriodeId;
   final String? periodeScolaireId;
+  final List<String> chapitreIds;
   final String serverUpdatedAt;
 
   const EvaluationDeltaDto({
@@ -72,6 +73,7 @@ class EvaluationDeltaDto {
     required this.poids,
     this.sousPeriodeId,
     this.periodeScolaireId,
+    this.chapitreIds = const [],
     required this.serverUpdatedAt,
   });
 
@@ -85,6 +87,11 @@ class EvaluationDeltaDto {
         poids: (j['poids'] as num?)?.toInt() ?? 1,
         sousPeriodeId: j['sousPeriodeId'] as String?,
         periodeScolaireId: j['periodeScolaireId'] as String?,
+        chapitreIds:
+            (j['chapitreIds'] as List<dynamic>?)?.whereType<String>().toList(
+              growable: false,
+            ) ??
+            const [],
         serverUpdatedAt: j['serverUpdatedAt'] as String,
       );
 
@@ -103,6 +110,7 @@ class EvaluationDeltaDto {
       serverUpdatedAt: serverMs,
       syncStatus: 'SYNCED',
       syncedAt: syncedAt,
+      chapitreIdsJson: EvaluationRow.encodeChapitreIds(chapitreIds),
     );
   }
 }

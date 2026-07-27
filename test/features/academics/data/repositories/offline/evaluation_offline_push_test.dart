@@ -38,6 +38,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(
       EvaluationPushRequestModel(
+        coursId: 'x',
         evaluation: EvaluationInputModel(
           id: 'x',
           coursId: 'x',
@@ -118,6 +119,7 @@ void main() {
           entry.payload,
         );
         expect(payload.authorId, 'teacher-uid');
+        expect(payload.coursId, 'c-1');
         expect(payload.evaluation.coursId, 'c-1');
         expect(payload.evaluation.type, 'INTERRO');
         expect(payload.evaluation.sousPeriodeId, 'sp-1');

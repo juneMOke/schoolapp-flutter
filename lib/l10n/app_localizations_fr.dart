@@ -996,7 +996,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get evalCreateFieldChapitres => 'Chapitres concernés';
 
   @override
-  String get evalCreateChapitresComingSoon => 'Bientôt disponible';
+  String get evalCreateChapitresEmpty =>
+      'Aucun chapitre disponible pour ce cours';
 
   @override
   String get evalCreateCancel => 'Annuler';
@@ -1025,6 +1026,37 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get evalCreateClosedPeriodError =>
       'Période clôturée : impossible d\'y ajouter une évaluation.';
+
+  @override
+  String get evalCreateMaxReachedError =>
+      'Plafond de saisie atteint pour cette date.';
+
+  @override
+  String get evalRejectionPeriodClosed => 'Rejetée : période clôturée';
+
+  @override
+  String get evalRejectionExamNotAllowed => 'Rejetée : examen non autorisé';
+
+  @override
+  String get evalRejectionMaxReached => 'Rejetée : plafond atteint';
+
+  @override
+  String get evalRejectionGeneric => 'Rejetée par le serveur';
+
+  @override
+  String get noteRejectionUnknownEvaluation => 'Évaluation inconnue du serveur';
+
+  @override
+  String get noteRejectionPeriodeClose => 'Période close';
+
+  @override
+  String get noteRejectionInvalid => 'Note invalide';
+
+  @override
+  String get noteRejectionContextUnavailable => 'Contexte indisponible';
+
+  @override
+  String get noteRejectionGeneric => 'Rejetée par le serveur';
 
   @override
   String get evalDetailBack => 'Retour au cours';

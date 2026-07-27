@@ -1706,11 +1706,11 @@ abstract class AppLocalizations {
   /// **'Related chapters'**
   String get evalCreateFieldChapitres;
 
-  /// No description provided for @evalCreateChapitresComingSoon.
+  /// No description provided for @evalCreateChapitresEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get evalCreateChapitresComingSoon;
+  /// **'No chapters available for this course'**
+  String get evalCreateChapitresEmpty;
 
   /// No description provided for @evalCreateCancel.
   ///
@@ -1747,6 +1747,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Closed period: you can\'t add an evaluation to it.'**
   String get evalCreateClosedPeriodError;
+
+  /// No description provided for @evalCreateMaxReachedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry cap reached for this date.'**
+  String get evalCreateMaxReachedError;
+
+  /// No description provided for @evalRejectionPeriodClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: closed period'**
+  String get evalRejectionPeriodClosed;
+
+  /// No description provided for @evalRejectionExamNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: exam not allowed'**
+  String get evalRejectionExamNotAllowed;
+
+  /// No description provided for @evalRejectionMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: cap reached'**
+  String get evalRejectionMaxReached;
+
+  /// No description provided for @evalRejectionGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server'**
+  String get evalRejectionGeneric;
+
+  /// No description provided for @noteRejectionUnknownEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation unknown to the server'**
+  String get noteRejectionUnknownEvaluation;
+
+  /// No description provided for @noteRejectionPeriodeClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed period'**
+  String get noteRejectionPeriodeClose;
+
+  /// No description provided for @noteRejectionInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid grade'**
+  String get noteRejectionInvalid;
+
+  /// No description provided for @noteRejectionContextUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Context unavailable'**
+  String get noteRejectionContextUnavailable;
+
+  /// No description provided for @noteRejectionGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server'**
+  String get noteRejectionGeneric;
 
   /// No description provided for @evalDetailBack.
   ///

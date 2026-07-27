@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 
@@ -29,6 +31,14 @@ class EvaluationRow extends Equatable {
   final String syncStatus;
   final int? syncedAt;
 
+  /// Couverture de chapitres (intra-agrégat, régime A donc immuable après
+  /// création), sérialisée en JSON (`chapitre_ids_json`, défaut `'[]'`).
+  final String chapitreIdsJson;
+
+  /// Code du backstop `422` terminal (`PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/
+  /// `MAX_REACHED`) ayant rejeté la création — `null` tant qu'aucun rejet.
+  final String? rejectionCode;
+
   const EvaluationRow({
     required this.id,
     required this.coursId,
@@ -42,6 +52,8 @@ class EvaluationRow extends Equatable {
     this.serverUpdatedAt,
     this.syncStatus = 'PENDING_SYNC',
     this.syncedAt,
+    this.chapitreIdsJson = '[]',
+    this.rejectionCode,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -58,6 +70,9 @@ class EvaluationRow extends Equatable {
     return double.tryParse(v.toString());
   }
 
+  /// Encode une liste d'ids de chapitres en JSON (pour [chapitreIdsJson]).
+  static String encodeChapitreIds(List<String> ids) => jsonEncode(ids);
+
   factory EvaluationRow.fromMap(Map<String, Object?> map) => EvaluationRow(
     id: map['id'] as String,
     coursId: map['cours_id'] as String,
@@ -71,6 +86,8 @@ class EvaluationRow extends Equatable {
     serverUpdatedAt: _asIntOrNull(map['server_updated_at']),
     syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
     syncedAt: _asIntOrNull(map['synced_at']),
+    chapitreIdsJson: (map['chapitre_ids_json'] as String?) ?? '[]',
+    rejectionCode: map['rejection_code'] as String?,
   );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -86,9 +103,23 @@ class EvaluationRow extends Equatable {
     'server_updated_at': serverUpdatedAt,
     'sync_status': syncStatus,
     'synced_at': syncedAt,
+    'chapitre_ids_json': chapitreIdsJson,
+    'rejection_code': rejectionCode,
   };
 
   SyncState get syncState => SyncState.fromDbValue(syncStatus);
+
+  /// Ids de chapitres couverts, décodés tolérant : JSON illisible ou entrées
+  /// non-string → liste vide (jamais de crash sur une ligne mal formée).
+  List<String> get chapitreIds {
+    try {
+      final decoded = jsonDecode(chapitreIdsJson);
+      if (decoded is! List) return const [];
+      return decoded.whereType<String>().toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
 
   @override
   List<Object?> get props => [
@@ -104,5 +135,7 @@ class EvaluationRow extends Equatable {
     serverUpdatedAt,
     syncStatus,
     syncedAt,
+    chapitreIdsJson,
+    rejectionCode,
   ];
 }

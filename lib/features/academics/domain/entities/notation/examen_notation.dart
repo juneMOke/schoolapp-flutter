@@ -13,6 +13,10 @@ class ExamenNotation extends Equatable {
   final StatutSaisieEvaluation statutSaisie;
   final double pourcentageSaisie;
 
+  /// Code du backstop `422` terminal ayant rejeté la création offline —
+  /// `null` hors rejet.
+  final String? rejectionCode;
+
   const ExamenNotation({
     required this.evaluationId,
     required this.nom,
@@ -22,6 +26,7 @@ class ExamenNotation extends Equatable {
     this.moyenneGenerale,
     required this.statutSaisie,
     required this.pourcentageSaisie,
+    this.rejectionCode,
   });
 
   @override
@@ -34,5 +39,6 @@ class ExamenNotation extends Equatable {
     moyenneGenerale,
     statutSaisie,
     pourcentageSaisie,
+    rejectionCode,
   ];
 }

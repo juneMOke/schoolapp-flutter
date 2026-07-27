@@ -5,19 +5,22 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
-import 'package:school_app_flutter/features/academics/data/models/offline/ref_cours_notation_row.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart'
+    show kAcademicsCoursBootstrapPrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart'
+    show kGradesReferentialResource;
 import 'package:school_app_flutter/features/academics/domain/entities/notation/create_evaluation_request.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_saisie_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
-import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
@@ -34,6 +37,7 @@ void main() {
   late Database db;
   late AcademicsLocalDataSource local;
   late AcademicsRefLocalDataSource refLocal;
+  late SyncMetaDao syncMetaDao;
   late CourseOfflineRepositoryImpl repo;
   var idSeq = 0;
 
@@ -41,12 +45,12 @@ void main() {
     db = await openFullOfflineDb();
     local = AcademicsLocalDataSource(db);
     refLocal = AcademicsRefLocalDataSource(db);
+    syncMetaDao = SyncMetaDao(db);
     idSeq = 0;
     repo = CourseOfflineRepositoryImpl(
       online: MockOnlineCourse(),
       academicsLocalDataSource: local,
       academicsRefLocalDataSource: refLocal,
-      scheduleRefLocalDataSource: ScheduleRefLocalDataSource(db),
       classroomLocalDataSource: ClassroomLocalDataSource(db),
       evaluationRepository: EvaluationOfflineRepositoryImpl(
         localDataSource: local,
@@ -54,25 +58,26 @@ void main() {
         currentUser: CurrentUserContext()..set('me'),
         now: () => 1000,
       ),
+      syncMetaDao: syncMetaDao,
     );
   });
 
   tearDown(() async => db.close());
 
-  Future<void> insertSession(String cours, String subject) =>
-      db.insert('ref_recurring_sessions', {
-        'id': 's-$cours',
-        'academic_year_id': 'ay-1',
-        'cours_id': cours,
-        'time_slot_id': 't1',
-        'day_of_week': 'MON',
-        'teacher_id': 'me',
-        'classroom_id': 'class-1',
-        'teacher_label': 'M. Moi',
-        'classroom_label': '3e A',
-        'subject_label': subject,
-        'synced_at': 1,
-      });
+  /// Marque `ref_cours` et le bundle `grades-referential` comme ayant terminé
+  /// leur premier cycle — sinon `getMyCourses` replie sur l'online (guide §4).
+  Future<void> markReferentialsBootstrapped() async {
+    await syncMetaDao.setCursor(
+      kAcademicsCoursBootstrapPrefix,
+      cursor: 'DONE',
+      syncedAt: 1,
+    );
+    await syncMetaDao.setCursor(
+      kGradesReferentialResource,
+      cursor: 'etag-1',
+      syncedAt: 1,
+    );
+  }
 
   Future<void> insertEval(
     String id,
@@ -93,36 +98,169 @@ void main() {
     'sync_status': 'SYNCED',
   });
 
-  test('getMyCourses : groupe par classe, sans filtre d\'identité côté client '
-      '(DF-K, sessions déjà scopées enseignant par le pull)', () async {
-    await insertSession('co1', 'Maths');
-    await db.insert('ref_classrooms', {
-      'id': 'class-1',
-      'academic_year_id': 'ay-1',
-      'name': '3ème A',
-      'total_count': 30,
-    });
+  group(
+    'getMyCourses (jointure ref_cours → ref_ligne_bareme → ref_branche)',
+    () {
+      test(
+        'groupe par classe, triés par ordre du barème, sans filtre d\'identité '
+        'côté client (DF-K, ref_cours déjà scopé enseignant par le pull)',
+        () async {
+          await markReferentialsBootstrapped();
+          await db.insert('ref_branche', {'id': 'b1', 'nom': 'Maths'});
+          await db.insert('ref_branche', {'id': 'b2', 'nom': 'Français'});
+          await db.insert('ref_ligne_bareme', {
+            'id': 'lb1',
+            'grille_id': 'g1',
+            'rubrique_id': 'r1',
+            'branche_id': 'b1',
+            'ordre': 2,
+            'max_journalier_par_sous_periode': 2,
+          });
+          await db.insert('ref_ligne_bareme', {
+            'id': 'lb2',
+            'grille_id': 'g1',
+            'rubrique_id': 'r2',
+            'branche_id': 'b2',
+            'ordre': 1,
+            'max_journalier_par_sous_periode': 2,
+          });
+          await db.insert('ref_cours', {
+            'id': 'co-maths',
+            'classroom_id': 'class-1',
+            'ligne_bareme_id': 'lb1',
+            'synced_at': 1,
+          });
+          await db.insert('ref_cours', {
+            'id': 'co-francais',
+            'classroom_id': 'class-1',
+            'ligne_bareme_id': 'lb2',
+            'synced_at': 1,
+          });
+          await db.insert('ref_classrooms', {
+            'id': 'class-1',
+            'academic_year_id': 'ay-1',
+            'name': '3ème A',
+            'total_count': 30,
+          });
 
-    final summaries = (await repo.getMyCourses()).getOrElse(() => fail('Left'));
-    expect(summaries.single.classroom.name, '3ème A');
-    expect(summaries.single.courses.single.id, 'co1');
-  });
+          final summaries = (await repo.getMyCourses()).getOrElse(
+            () => fail('Left'),
+          );
 
-  group('getCoursNotationDetail (squelette + évals locales)', () {
-    setUp(() async {
-      await refLocal.upsertCoursNotation(
-        const RefCoursNotationRow(
-          coursId: 'co1',
-          classroomId: 'class-1',
-          brancheNom: 'Maths',
-          effectif: 2,
-          periodesJson:
-              '[{"periodeScolaireId":"p1","ordre":1,"statut":"OUVERTE",'
-              '"sousPeriodes":[{"sousPeriodeId":"sp1","ordre":1,'
-              '"statut":"OUVERTE"}]}]',
-          syncedAt: 1,
-        ),
+          expect(summaries.single.classroom.name, '3ème A');
+          // Ordre du BARÈME (lb2 ordre=1 avant lb1 ordre=2), pas l'uuid.
+          expect(summaries.single.courses.map((c) => c.id).toList(), [
+            'co-francais',
+            'co-maths',
+          ]);
+        },
       );
+
+      test(
+        'cours sans ligne de barème/branche en cache → classe masquée',
+        () async {
+          await markReferentialsBootstrapped();
+          await db.insert('ref_cours', {
+            'id': 'co-orphan',
+            'classroom_id': 'class-1',
+            'ligne_bareme_id': 'lb-unknown',
+            'synced_at': 1,
+          });
+
+          final summaries = (await repo.getMyCourses()).getOrElse(
+            () => fail('Left'),
+          );
+          expect(summaries, isEmpty);
+        },
+      );
+
+      test(
+        'ref_cours ou grades-referential pas encore bootstrappés → repli online',
+        () async {
+          final online = MockOnlineCourse();
+          final repo2 = CourseOfflineRepositoryImpl(
+            online: online,
+            academicsLocalDataSource: local,
+            academicsRefLocalDataSource: refLocal,
+            classroomLocalDataSource: ClassroomLocalDataSource(db),
+            evaluationRepository: EvaluationOfflineRepositoryImpl(
+              localDataSource: local,
+              idGenerator: _SeqId(() => 'x'),
+              now: () => 1,
+            ),
+            syncMetaDao: syncMetaDao,
+          );
+          when(
+            () => online.getMyCourses(),
+          ).thenAnswer((_) async => const Right([]));
+
+          final result = (await repo2.getMyCourses()).getOrElse(
+            () => fail('Left'),
+          );
+
+          expect(result, isEmpty);
+          verify(() => online.getMyCourses()).called(1);
+        },
+      );
+    },
+  );
+
+  group('getCoursNotationDetail (bundle grades-referential + évals locales)', () {
+    setUp(() async {
+      await db.insert('ref_cours', {
+        'id': 'co1',
+        'classroom_id': 'class-1',
+        'ligne_bareme_id': 'lb1',
+        'synced_at': 1,
+      });
+      await db.insert('ref_classrooms', {
+        'id': 'class-1',
+        'academic_year_id': 'ay-1',
+        'school_level_group_id': 'g1',
+        'name': '3ème A',
+        'total_count': 2,
+      });
+      await db.insert('ref_classroom_members', {
+        'id': 'm-s1',
+        'classroom_id': 'class-1',
+        'academic_year_id': 'ay-1',
+        'student_id': 's1',
+        'student_first_name': 'A',
+        'student_last_name': 'B',
+        'status': 'ACTIVE',
+      });
+      await db.insert('ref_classroom_members', {
+        'id': 'm-s2',
+        'classroom_id': 'class-1',
+        'academic_year_id': 'ay-1',
+        'student_id': 's2',
+        'student_first_name': 'C',
+        'student_last_name': 'D',
+        'status': 'ACTIVE',
+      });
+      await db.insert('ref_branche', {'id': 'b1', 'nom': 'Maths'});
+      await db.insert('ref_ligne_bareme', {
+        'id': 'lb1',
+        'grille_id': 'g1',
+        'rubrique_id': 'r1',
+        'branche_id': 'b1',
+        'ordre': 1,
+        'max_journalier_par_sous_periode': 2,
+        'max_examen_par_periode_scolaire': 1,
+      });
+      await db.insert('ref_periode', {
+        'id': 'p1',
+        'academic_year_id': 'ay-1',
+        'school_level_group_id': 'g1',
+        'ordre': 1,
+        'statut': 'OUVERTE',
+      });
+      await db.insert('ref_sous_periode', {
+        'id': 'sp1',
+        'periode_scolaire_id': 'p1',
+        'ordre': 1,
+        'statut': 'OUVERTE',
+      });
       await insertEval('e-int', 'INTERRO', 'co1', sousPeriode: 'sp1');
       await insertEval('e-exam', 'EXAMEN', 'co1', periode: 'p1');
       // 2 notes NOTEE sur l'interro (effectif 2 → COMPLETE) ; 0 sur l'examen.
@@ -140,7 +278,8 @@ void main() {
     });
 
     test(
-      'compose l\'arbre + taux de saisie dérivé ; moyennes null (ADR-006)',
+      'compose l\'arbre + taux de saisie dérivé ; moyenne de classe '
+      'indicative dérivée localement (ADR-006 : la saisie va offline)',
       () async {
         final detail = (await repo.getCoursNotationDetail(
           'co1',
@@ -153,11 +292,11 @@ void main() {
         expect(periode.statut, StatutPeriode.ouverte);
 
         final sp = periode.sousPeriodes.single;
-        expect(
-          sp.moyenneClasse,
-          isNull,
-          reason: 'calcul d\'ensemble = serveur',
-        );
+        // s1 et s2 : 12/20 (poids 1) chacun → moyenne de classe 60 %.
+        expect(sp.moyenneClasse, 60);
+        expect(sp.nombreElevesNotes, 2);
+        expect(sp.nombreEleves50, 2);
+        expect(sp.moyennesEleves.map((m) => m.moyenne).toSet(), {60.0});
         final groupe = sp.evaluationsParType.single;
         expect(groupe.type, TypeEvaluation.interro);
         final interro = groupe.evaluations.single;
@@ -168,22 +307,102 @@ void main() {
         // L'examen est rattaché à la période, taux dérivé (0 note → nonSaisie).
         expect(periode.examen!.evaluationId, 'e-exam');
         expect(periode.examen!.statutSaisie, StatutSaisieEvaluation.nonSaisie);
+
+        // Plafonds + chapitres résolus depuis le bundle.
+        expect(detail.plafonds!.maxJournalierParSousPeriode, 2);
+        expect(detail.plafonds!.maxExamenParPeriodeScolaire, 1);
       },
     );
 
-    test('squelette absent → délègue à l\'online', () async {
+    test('moyenne indicative : ABSENT_JUSTIFIE exclu, ABSENT_NON_JUSTIFIE=0, '
+        'EN_ATTENTE exclu, élève sans note = moyenne null', () async {
+      // s1 : NOTEE 12/20 sur l'interro (déjà en place, setUp) — moyenne 60.
+      // s2 : ABSENT_JUSTIFIE sur l'interro (remplace la note NOTEE du
+      // setUp) — exclu entièrement, pas de moyenne.
+      await db.update(
+        'note_evaluation',
+        {'statut': 'ABSENT_JUSTIFIE', 'points_obtenus': null},
+        where: 'id = ?',
+        whereArgs: ['n-s2'],
+      );
+      // Un 2e cours de la même classe (autre élève 's3' ABSENT_NON_JUSTIFIE
+      // sur une 2e interro) exercerait un scénario séparé — ici on ajoute
+      // simplement une 2e évaluation à la même sous-période avec s1 en
+      // ABSENT_NON_JUSTIFIE pour vérifier le poids 0 dans la moyenne.
+      await insertEval('e-int2', 'INTERRO', 'co1', sousPeriode: 'sp1');
+      await db.insert('note_evaluation', {
+        'id': 'n-s1-int2',
+        'evaluation_id': 'e-int2',
+        'student_id': 's1',
+        'points_obtenus': null,
+        'statut': 'ABSENT_NON_JUSTIFIE',
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+      // s2 : EN_ATTENTE sur la 2e interro — exclu.
+      await db.insert('note_evaluation', {
+        'id': 'n-s2-int2',
+        'evaluation_id': 'e-int2',
+        'student_id': 's2',
+        'points_obtenus': null,
+        'statut': 'EN_ATTENTE',
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+
+      final detail = (await repo.getCoursNotationDetail(
+        'co1',
+      )).getOrElse(() => fail('Left'));
+
+      final sp = detail.periodes.single.sousPeriodes.single;
+      final byStudent = {for (final m in sp.moyennesEleves) m.studentId: m};
+      // s1 : (12/20*1 [NOTEE] + 0/1*1 [ABSENT_NON_JUSTIFIE]) / (1+1) = 30%.
+      expect(byStudent['s1']!.moyenne, 30);
+      // s2 : NOTEE remplacée par ABSENT_JUSTIFIE (exclu) + EN_ATTENTE
+      // (exclu) → aucune note comptée.
+      expect(byStudent['s2']!.moyenne, isNull);
+    });
+
+    test('plusieurs examens sur UNE période (maxExamen > 1) : le PREMIER par '
+        'date reste affiché, jamais éclipsé silencieusement par un examen '
+        'créé après', () async {
+      // e-exam (setUp) : 10/06/2026. On ajoute un 2e examen ANTÉRIEUR
+      // (03/06/2026) sur la même période p1 — inséré APRÈS dans la table
+      // (ordre d'insertion ≠ ordre de date) pour bien isoler le tri sur
+      // eval_date, pas sur l'ordre de lecture SQL.
+      await db.insert('evaluation', {
+        'id': 'e-exam-early',
+        'cours_id': 'co1',
+        'type': 'EXAMEN',
+        'eval_date': DateTime.utc(2026, 6, 3).millisecondsSinceEpoch,
+        'max_points': 20.0,
+        'poids': 1,
+        'periode_scolaire_id': 'p1',
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+
+      final detail = (await repo.getCoursNotationDetail(
+        'co1',
+      )).getOrElse(() => fail('Left'));
+
+      final periode = detail.periodes.single;
+      expect(periode.examen!.evaluationId, 'e-exam-early');
+    });
+
+    test('cours absent de ref_cours → délègue à l\'online', () async {
       final online = MockOnlineCourse();
       final repo2 = CourseOfflineRepositoryImpl(
         online: online,
         academicsLocalDataSource: local,
         academicsRefLocalDataSource: refLocal,
-        scheduleRefLocalDataSource: ScheduleRefLocalDataSource(db),
         classroomLocalDataSource: ClassroomLocalDataSource(db),
         evaluationRepository: EvaluationOfflineRepositoryImpl(
           localDataSource: local,
           idGenerator: _SeqId(() => 'x'),
           now: () => 1,
         ),
+        syncMetaDao: syncMetaDao,
       );
       when(
         () => online.getCoursNotationDetail('absent'),
@@ -192,6 +411,70 @@ void main() {
       await repo2.getCoursNotationDetail('absent');
       verify(() => online.getCoursNotationDetail('absent')).called(1);
     });
+
+    test('cours connu mais ligne de barème pas encore dans le bundle → '
+        'délègue à l\'online (pas de détail dégradé)', () async {
+      await db.insert('ref_cours', {
+        'id': 'co-no-bundle',
+        'classroom_id': 'class-1',
+        'ligne_bareme_id': 'lb-unknown',
+        'synced_at': 1,
+      });
+      final online = MockOnlineCourse();
+      final repo2 = CourseOfflineRepositoryImpl(
+        online: online,
+        academicsLocalDataSource: local,
+        academicsRefLocalDataSource: refLocal,
+        classroomLocalDataSource: ClassroomLocalDataSource(db),
+        evaluationRepository: EvaluationOfflineRepositoryImpl(
+          localDataSource: local,
+          idGenerator: _SeqId(() => 'x'),
+          now: () => 1,
+        ),
+        syncMetaDao: syncMetaDao,
+      );
+      when(
+        () => online.getCoursNotationDetail('co-no-bundle'),
+      ).thenAnswer((_) async => const Left(NotFoundFailure('nope')));
+
+      await repo2.getCoursNotationDetail('co-no-bundle');
+      verify(() => online.getCoursNotationDetail('co-no-bundle')).called(1);
+    });
+
+    test(
+      'chapitres couverts résolus depuis le bundle (titres, pas ids)',
+      () async {
+        await db.insert('ref_chapitre', {
+          'id': 'ch1',
+          'cours_id': 'co1',
+          'titre': 'Fractions',
+          'ordre': 1,
+        });
+        await db.update(
+          'evaluation',
+          {'chapitre_ids_json': '["ch1","ch-unknown"]'},
+          where: 'id = ?',
+          whereArgs: ['e-int'],
+        );
+
+        final detail = (await repo.getCoursNotationDetail(
+          'co1',
+        )).getOrElse(() => fail('Left'));
+
+        expect(detail.chapitresDisponibles.single.titre, 'Fractions');
+        final interro = detail
+            .periodes
+            .single
+            .sousPeriodes
+            .single
+            .evaluationsParType
+            .single
+            .evaluations
+            .single;
+        // 'ch-unknown' n'a pas de correspondance dans le bundle → omis.
+        expect(interro.chapitres, ['Fractions']);
+      },
+    );
   });
 
   group('createEvaluation (régime A, offline)', () {

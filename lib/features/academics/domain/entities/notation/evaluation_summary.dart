@@ -20,6 +20,11 @@ class EvaluationSummary extends Equatable {
   /// Pourcentage d'élèves de la classe dont la note est saisie (décidée).
   final double pourcentageSaisie;
 
+  /// Code du backstop `422` terminal ayant rejeté la création offline
+  /// (`PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/`MAX_REACHED`/`REJECTED`) — `null`
+  /// hors rejet (chemin online, ou évaluation acceptée).
+  final String? rejectionCode;
+
   const EvaluationSummary({
     required this.id,
     required this.type,
@@ -30,6 +35,7 @@ class EvaluationSummary extends Equatable {
     required this.poids,
     required this.statutSaisie,
     required this.pourcentageSaisie,
+    this.rejectionCode,
   });
 
   @override
@@ -43,5 +49,6 @@ class EvaluationSummary extends Equatable {
     poids,
     statutSaisie,
     pourcentageSaisie,
+    rejectionCode,
   ];
 }

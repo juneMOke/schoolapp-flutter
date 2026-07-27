@@ -6,7 +6,8 @@ import 'package:school_app_flutter/features/academics/data/models/offline/evalua
 /// Aligné sur le contrat de création online : `type` en valeur wire majuscule,
 /// `date` au format date-only `yyyy-MM-dd`, `poids` émis seulement s'il est non
 /// nul, rattachement temporel **exclusif** (`sousPeriodeId` XOR `periodeScolaireId`).
-/// `chapitreIds` reste `[]` en V1 (chapitres hors périmètre offline) → omis.
+/// `chapitreIds` voyage **intra-agrégat** (couverture, régime A donc immuable
+/// après création) — émis seulement s'il est non vide.
 class EvaluationInputModel extends Equatable {
   final String id;
   final String coursId;
@@ -16,6 +17,7 @@ class EvaluationInputModel extends Equatable {
   final int poids;
   final String? sousPeriodeId;
   final String? periodeScolaireId;
+  final List<String> chapitreIds;
 
   const EvaluationInputModel({
     required this.id,
@@ -26,6 +28,7 @@ class EvaluationInputModel extends Equatable {
     required this.poids,
     this.sousPeriodeId,
     this.periodeScolaireId,
+    this.chapitreIds = const [],
   });
 
   /// Construit le volet depuis la ligne locale. `evalDate` (epoch ms, ancré UTC
@@ -40,6 +43,7 @@ class EvaluationInputModel extends Equatable {
         poids: row.poids,
         sousPeriodeId: row.sousPeriodeId,
         periodeScolaireId: row.periodeScolaireId,
+        chapitreIds: row.chapitreIds,
       );
 
   factory EvaluationInputModel.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +56,11 @@ class EvaluationInputModel extends Equatable {
         poids: (json['poids'] as num?)?.toInt() ?? 1,
         sousPeriodeId: json['sousPeriodeId'] as String?,
         periodeScolaireId: json['periodeScolaireId'] as String?,
+        chapitreIds:
+            (json['chapitreIds'] as List<dynamic>?)?.whereType<String>().toList(
+              growable: false,
+            ) ??
+            const [],
       );
 
   Map<String, dynamic> toJson() {
@@ -67,6 +76,7 @@ class EvaluationInputModel extends Equatable {
     if (periodeScolaireId != null) {
       json['periodeScolaireId'] = periodeScolaireId;
     }
+    if (chapitreIds.isNotEmpty) json['chapitreIds'] = chapitreIds;
     return json;
   }
 
@@ -80,5 +90,6 @@ class EvaluationInputModel extends Equatable {
     poids,
     sousPeriodeId,
     periodeScolaireId,
+    chapitreIds,
   ];
 }
