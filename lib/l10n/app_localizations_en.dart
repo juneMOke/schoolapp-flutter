@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
 
   @override
+  String get bootstrapOfflineBanner => 'Offline mode — cached data';
+
+  @override
   String get sessionOfflineBanner => 'Offline session — verified locally';
 
   @override
@@ -988,8 +991,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateFieldChapitres => 'Related chapters';
 
   @override
-  String get evalCreateChapitresEmpty =>
-      'No chapters available for this course';
+  String get evalCreateChapitresComingSoon => 'Coming soon';
 
   @override
   String get evalCreateCancel => 'Cancel';
@@ -1018,37 +1020,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get evalCreateClosedPeriodError =>
       'Closed period: you can\'t add an evaluation to it.';
-
-  @override
-  String get evalCreateMaxReachedError => 'Entry cap reached for this date.';
-
-  @override
-  String get evalRejectionPeriodClosed => 'Rejected: closed period';
-
-  @override
-  String get evalRejectionExamNotAllowed => 'Rejected: exam not allowed';
-
-  @override
-  String get evalRejectionMaxReached => 'Rejected: cap reached';
-
-  @override
-  String get evalRejectionGeneric => 'Rejected by the server';
-
-  @override
-  String get noteRejectionUnknownEvaluation =>
-      'Evaluation unknown to the server';
-
-  @override
-  String get noteRejectionPeriodeClose => 'Closed period';
-
-  @override
-  String get noteRejectionInvalid => 'Invalid grade';
-
-  @override
-  String get noteRejectionContextUnavailable => 'Context unavailable';
-
-  @override
-  String get noteRejectionGeneric => 'Rejected by the server';
 
   @override
   String get evalDetailBack => 'Back to course';
@@ -1820,13 +1791,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get targetLevelLabelHelp => 'Target level for this enrollment.';
-
-  @override
-  String get targetLevelAutoBadge => 'Auto';
-
-  @override
-  String get targetLevelAutoBadgeHelp =>
-      'Class automatically computed from last year\'s class. Change the cycle or level to override it.';
 
   @override
   String get optionLabel => 'Option';
