@@ -18,6 +18,7 @@ class StudentChargesModel extends Equatable {
   final double amountPaidInCents;
   final String currency;
   final String status;
+  final String? dueAt;
 
   const StudentChargesModel({
     required this.id,
@@ -32,6 +33,7 @@ class StudentChargesModel extends Equatable {
     required this.amountPaidInCents,
     required this.currency,
     required this.status,
+    this.dueAt,
   });
 
   factory StudentChargesModel.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +54,7 @@ class StudentChargesModel extends Equatable {
     amountPaidInCents: amountPaidInCents,
     currency: currency,
     status: StudentChargeStatusX.fromApiValue(status),
+    dueAt: dueAt,
   );
 
   @override
@@ -68,5 +71,6 @@ class StudentChargesModel extends Equatable {
     amountPaidInCents,
     currency,
     status,
+    dueAt,
   ];
 }

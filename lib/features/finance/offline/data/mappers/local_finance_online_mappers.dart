@@ -24,6 +24,7 @@ extension LocalStudentChargeToOnline on LocalStudentCharge {
     isProvisional: isProvisional,
     currency: currency,
     status: status,
+    dueAt: dueAt,
   );
 }
 

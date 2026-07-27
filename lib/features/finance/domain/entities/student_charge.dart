@@ -37,6 +37,7 @@ class StudentCharge extends Equatable {
   final bool isProvisional;
   final String currency;
   final StudentChargeStatus status;
+  final String? dueAt; // yyyy-MM-dd | null
 
   const StudentCharge({
     required this.id,
@@ -53,6 +54,7 @@ class StudentCharge extends Equatable {
     this.isProvisional = false,
     required this.currency,
     required this.status,
+    this.dueAt,
   });
 
   /// Déjà payé TOTAL affiché : miroir serveur + encaissements de ce poste non
@@ -81,6 +83,7 @@ class StudentCharge extends Equatable {
     bool? isProvisional,
     String? currency,
     StudentChargeStatus? status,
+    String? dueAt,
   }) {
     return StudentCharge(
       id: id ?? this.id,
@@ -99,6 +102,7 @@ class StudentCharge extends Equatable {
       isProvisional: isProvisional ?? this.isProvisional,
       currency: currency ?? this.currency,
       status: status ?? this.status,
+      dueAt: dueAt ?? this.dueAt,
     );
   }
 
@@ -118,5 +122,6 @@ class StudentCharge extends Equatable {
     isProvisional,
     currency,
     status,
+    dueAt,
   ];
 }

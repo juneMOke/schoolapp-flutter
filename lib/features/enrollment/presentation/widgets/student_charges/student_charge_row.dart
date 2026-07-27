@@ -37,6 +37,12 @@ class StudentChargeRow extends StatelessWidget {
     final fallbackLabel = studentCharge.label.isNotEmpty
         ? studentCharge.label
         : studentCharge.feeCode;
+    final dueAt = studentCharge.dueAt == null
+        ? null
+        : DateTime.tryParse(studentCharge.dueAt!);
+    final secondaryText = dueAt != null
+        ? l10n.studentChargeDueAtLabel(dueAt)
+        : studentCharge.feeCode;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -67,7 +73,7 @@ class StudentChargeRow extends StatelessWidget {
                 ),
                 const SizedBox(height: AppDimensions.spacingXS),
                 Text(
-                  studentCharge.feeCode,
+                  secondaryText,
                   style: AppTextStyles.codeMuted.copyWith(
                     color: AppColors.textMuted,
                   ),

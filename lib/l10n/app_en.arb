@@ -1060,6 +1060,10 @@
   "studentChargeFeeCodeLatePaymentFee": "Late Payment Fee",
   "studentChargeFeeCodeRefund": "Refund",
   "studentChargeFeeCodeOther": "Other",
+  "studentChargeDueAtLabel": "Due: {date}",
+  "@studentChargeDueAtLabel": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMd" } }
+  },
   "studentChargeFeeCodeFallback": "School fee",
   "facturationSearchTitle": "Search Students",
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",

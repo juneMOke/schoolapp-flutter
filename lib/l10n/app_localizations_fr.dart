@@ -125,9 +125,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — écran de démarrage';
 
   @override
-  String get bootstrapOfflineBanner => 'Mode hors-ligne — données en cache';
-
-  @override
   String get sessionOfflineBanner => 'Session hors-ligne — vérifiée localement';
 
   @override
@@ -996,7 +993,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get evalCreateFieldChapitres => 'Chapitres concernés';
 
   @override
-  String get evalCreateChapitresComingSoon => 'Bientôt disponible';
+  String get evalCreateChapitresEmpty =>
+      'Aucun chapitre disponible pour ce cours';
 
   @override
   String get evalCreateCancel => 'Annuler';
@@ -1021,6 +1019,41 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get evalCreateErrorToast =>
       'La création de l\'évaluation a échoué. Réessayez.';
+
+  @override
+  String get evalCreateClosedPeriodError =>
+      'Période clôturée : impossible d\'y ajouter une évaluation.';
+
+  @override
+  String get evalCreateMaxReachedError =>
+      'Plafond de saisie atteint pour cette date.';
+
+  @override
+  String get evalRejectionPeriodClosed => 'Rejetée : période clôturée';
+
+  @override
+  String get evalRejectionExamNotAllowed => 'Rejetée : examen non autorisé';
+
+  @override
+  String get evalRejectionMaxReached => 'Rejetée : plafond atteint';
+
+  @override
+  String get evalRejectionGeneric => 'Rejetée par le serveur';
+
+  @override
+  String get noteRejectionUnknownEvaluation => 'Évaluation inconnue du serveur';
+
+  @override
+  String get noteRejectionPeriodeClose => 'Période close';
+
+  @override
+  String get noteRejectionInvalid => 'Note invalide';
+
+  @override
+  String get noteRejectionContextUnavailable => 'Contexte indisponible';
+
+  @override
+  String get noteRejectionGeneric => 'Rejetée par le serveur';
 
   @override
   String get evalDetailBack => 'Retour au cours';
@@ -1800,6 +1833,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get targetLevelLabelHelp => 'Niveau souhaité pour l\'inscription.';
 
   @override
+  String get targetLevelAutoBadge => 'Auto';
+
+  @override
+  String get targetLevelAutoBadgeHelp =>
+      'Classe calculée automatiquement depuis la classe de l\'année précédente. Modifiez le cycle ou le niveau pour la remplacer.';
+
+  @override
   String get optionLabel => 'Option';
 
   @override
@@ -2325,6 +2365,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get studentChargeFeeCodeOther => 'Autre';
+
+  @override
+  String studentChargeDueAtLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Échéance : $dateString';
+  }
 
   @override
   String get studentChargeFeeCodeFallback => 'Frais scolaire';

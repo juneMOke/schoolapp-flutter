@@ -20,6 +20,7 @@ StudentChargesModel _$StudentChargesModelFromJson(Map<String, dynamic> json) =>
       amountPaidInCents: (json['amountPaidInCents'] as num).toDouble(),
       currency: json['currency'] as String,
       status: json['status'] as String,
+      dueAt: json['dueAt'] as String?,
     );
 
 Map<String, dynamic> _$StudentChargesModelToJson(
@@ -37,4 +38,5 @@ Map<String, dynamic> _$StudentChargesModelToJson(
   'amountPaidInCents': instance.amountPaidInCents,
   'currency': instance.currency,
   'status': instance.status,
+  'dueAt': instance.dueAt,
 };

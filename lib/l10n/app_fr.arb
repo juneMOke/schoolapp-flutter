@@ -1074,6 +1074,10 @@
   "studentChargeFeeCodeLatePaymentFee": "Pénalité de retard",
   "studentChargeFeeCodeRefund": "Remboursement",
   "studentChargeFeeCodeOther": "Autre",
+  "studentChargeDueAtLabel": "Échéance : {date}",
+  "@studentChargeDueAtLabel": {
+    "placeholders": { "date": { "type": "DateTime", "format": "yMMMd" } }
+  },
   "studentChargeFeeCodeFallback": "Frais scolaire",
   "facturationSearchTitle": "Rechercher les élèves",
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",

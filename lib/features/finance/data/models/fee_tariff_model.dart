@@ -11,6 +11,7 @@ class FeeTariffModel extends Equatable {
   final double amount;
   final String currency;
   final String levelId;
+  final String? dueAt;
 
   const FeeTariffModel({
     required this.id,
@@ -18,6 +19,7 @@ class FeeTariffModel extends Equatable {
     required this.amount,
     required this.currency,
     required this.levelId,
+    this.dueAt,
   });
 
   factory FeeTariffModel.fromJson(Map<String, dynamic> json) =>
@@ -31,8 +33,9 @@ class FeeTariffModel extends Equatable {
     amount: amount,
     currency: currency,
     levelId: levelId,
+    dueAt: dueAt,
   );
 
   @override
-  List<Object?> get props => [id, label, amount, currency, levelId];
+  List<Object?> get props => [id, label, amount, currency, levelId, dueAt];
 }
