@@ -5114,6 +5114,30 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get facturationCreatePaymentConfirmValidate;
 
+  /// No description provided for @facturationCreatePaymentCloseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this collection?'**
+  String get facturationCreatePaymentCloseConfirmTitle;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The information you entered will be lost if you close now.'**
+  String get facturationCreatePaymentCloseConfirmMessage;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get facturationCreatePaymentCloseConfirmAction;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get facturationCreatePaymentCloseConfirmCancel;
+
   /// No description provided for @facturationCreatePaymentSuccessMessage.
   ///
   /// In en, this message translates to:

@@ -2979,6 +2979,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationCreatePaymentConfirmValidate => 'Confirm';
 
   @override
+  String get facturationCreatePaymentCloseConfirmTitle =>
+      'Close this collection?';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmMessage =>
+      'The information you entered will be lost if you close now.';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmAction => 'Close';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmCancel => 'Keep editing';
+
+  @override
   String get facturationCreatePaymentSuccessMessage =>
       'Payment successfully recorded.';
 

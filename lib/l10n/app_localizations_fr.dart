@@ -3008,6 +3008,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationCreatePaymentConfirmValidate => 'Confirmer';
 
   @override
+  String get facturationCreatePaymentCloseConfirmTitle =>
+      'Fermer l\'encaissement ?';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmMessage =>
+      'Les informations saisies seront perdues si vous fermez maintenant.';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmAction => 'Fermer';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmCancel =>
+      'Continuer la saisie';
+
+  @override
   String get facturationCreatePaymentSuccessMessage =>
       'Paiement enregistré avec succès.';
 
