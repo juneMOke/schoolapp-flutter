@@ -339,6 +339,22 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (oldVersion < 16) {
+    // v16 — Classe : re-contrat CB-2 en pull KEYSET (`classrooms` bundlé →
+    // deux flux indépendants `classrooms`/`classroom-members`, curseur opaque
+    // au lieu de l'ancien `updatedSince` ISO). La clé `sync_meta.classrooms`
+    // est RÉUTILISÉE mais son format de curseur change de nature : un curseur
+    // ISO hérité d'avant ce contrat serait renvoyé tel quel au nouvel endpoint
+    // keyset, et son rejet dépendrait d'un 400 strict côté serveur pour
+    // s'auto-guérir (cf. `ClassroomPullRepositoryImpl._attemptCycle`). On
+    // purge donc ce curseur ici (comme v11 pour `academics_cours%`) : chaque
+    // compte qui migre repart d'un bootstrap keyset propre au prochain pull.
+    // Aucune perte de donnée (table 100% dérivée de la synchro, réécrite au
+    // prochain pull) ; `classroom_members` est une clé neuve, rien à purger.
+    if (await _hasTable(db, 'sync_meta')) {
+      await db.delete('sync_meta', where: "resource = 'classrooms'");
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

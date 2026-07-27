@@ -20,7 +20,7 @@ part 'enrollment_pull_api.g.dart';
 ///    tant que `hasMore`, puis mémorise `nextWatermark` (début du prochain
 ///    cycle, Δ appliqué). `cursor` absent → bootstrap. Rien de neuf → `304 Not
 ///    Modified` (corps vide) qui arrive comme une [DioException] de statut 304
-///    (hors 2xx, idiome socle cf. `ClassroomSyncApi`). `hasMore=false` ≠ 304 :
+///    (hors 2xx, idiome socle cf. `ClassroomPullApi`). `hasMore=false` ≠ 304 :
 ///    c'est la dernière page.
 ///
 /// `limit` = taille de page (défaut serveur 100, borné [1, 500]). Le token porte

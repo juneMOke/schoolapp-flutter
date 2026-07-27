@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'classroom_sync_api.dart';
+part of 'classroom_member_pull_api.dart';
 
 // dart format off
 
@@ -10,8 +10,8 @@ part of 'classroom_sync_api.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
-class _ClassroomSyncApi implements ClassroomSyncApi {
-  _ClassroomSyncApi(this._dio, {this.baseUrl, this.errorLogger});
+class _ClassroomMemberPullApi implements ClassroomMemberPullApi {
+  _ClassroomMemberPullApi(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -20,39 +20,42 @@ class _ClassroomSyncApi implements ClassroomSyncApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<ClassroomDeltaModel> pullClassrooms(
+  Future<HttpResponse<ClassroomMemberPageDto>> pullMembers(
     Map<String, dynamic> extras,
+    String? cursor,
+    int? limit,
     String academicYearId,
-    String? updatedSince,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
     final queryParameters = <String, dynamic>{
+      r'cursor': cursor,
+      r'limit': limit,
       r'academicYearId': academicYearId,
-      r'updatedSince': updatedSince,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ClassroomDeltaModel>(
+    final _options = _setStreamType<HttpResponse<ClassroomMemberPageDto>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/sync/classrooms',
+            '/api/v1/sync/classroom-members',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ClassroomDeltaModel _value;
+    late ClassroomMemberPageDto _value;
     try {
-      _value = ClassroomDeltaModel.fromJson(_result.data!);
+      _value = ClassroomMemberPageDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
-    return _value;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

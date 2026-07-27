@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -12,40 +11,47 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
-import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_sync_api.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_transfer_row.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart'
+    show kClassroomsResource;
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
 
 /// Type d'agrégat outbox du transfert d'élève (routage du handler de push).
 const String kClassroomTransferAggregateType = 'CLASSROOM_TRANSFER';
 
-/// Implémentation offline-first (CF2/CF3/CF4). Pull delta → upsert local →
-/// curseur ; lectures locales composées ; transfert = événement local + outbox
-/// (flush opportuniste). 304 honoré.
+/// Implémentation offline-first (CF2/CF3/CF4). `syncClassrooms` **orchestre**
+/// deux repositories de pull keyset dédiés (`ClassroomPullRepository` +
+/// `ClassroomMemberPullRepository`, chacun sur sa propre ressource/curseur —
+/// aucune logique HTTP ici) ; lectures locales composées ; transfert =
+/// événement local + outbox (flush opportuniste).
 class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
-  final ClassroomSyncApi syncApi;
+  final ClassroomPullRepository classroomPullRepository;
+  final ClassroomMemberPullRepository classroomMemberPullRepository;
   final ClassroomLocalDataSource localDataSource;
   final SyncMetaDao syncMetaDao;
   final IdGenerator idGenerator;
   final SyncEngine syncEngine;
-  final Map<String, dynamic> requiredAuth;
   final CurrentUserContext? _currentUser;
   final Clock now;
 
-  /// Clé de curseur/fraîcheur dans `sync_meta`.
-  static const String syncResource = 'classrooms';
+  /// Fraîcheur exposée par ce repository = celle du flux `classrooms` (les
+  /// deux flux keyset partagent le même `now()` à chaque orchestration
+  /// manuelle, cf. [syncClassrooms]).
+  static const String syncResource = kClassroomsResource;
 
   const ClassroomOfflineRepositoryImpl({
-    required this.syncApi,
+    required this.classroomPullRepository,
+    required this.classroomMemberPullRepository,
     required this.localDataSource,
     required this.syncMetaDao,
     required this.idGenerator,
     required this.syncEngine,
-    required this.requiredAuth,
     CurrentUserContext? currentUser,
     this.now = systemClock,
   }) : _currentUser = currentUser;
@@ -55,62 +61,29 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
     required String academicYearId,
   }) async {
     final syncedAt = now();
-    try {
-      final cursor = await syncMetaDao.getCursor(syncResource);
-      final delta = await syncApi.pullClassrooms(
-        requiredAuth,
-        academicYearId,
-        cursor,
-      );
-
-      // 304 « logique » : delta vide → aucune écriture, curseur conservé.
-      if (delta.isEmpty) {
-        await syncMetaDao.setCursor(
-          syncResource,
-          cursor: cursor,
-          syncedAt: syncedAt,
-        );
-        return Right(ClassroomSyncOutcome.notModifiedAt(syncedAt, cursor));
-      }
-
-      await localDataSource.upsertDelta(
-        classrooms: delta.classrooms,
-        members: delta.members,
-        syncedAt: syncedAt,
-      );
-      final nextCursor = delta.serverCursor ?? cursor;
-      await syncMetaDao.setCursor(
-        syncResource,
-        cursor: nextCursor,
-        syncedAt: syncedAt,
-      );
-      return Right(
-        ClassroomSyncOutcome(
-          classroomsUpserted: delta.classrooms.length,
-          membersUpserted: delta.members.length,
-          notModified: false,
-          syncedAt: syncedAt,
-          cursor: nextCursor,
+    // Chaque flux tourne indépendamment (pas de court-circuit) : un flux peut
+    // avoir plusieurs pages pendant que l'autre est déjà à jour, et l'échec de
+    // l'un ne doit pas empêcher l'autre de progresser.
+    final classroomsResult = await classroomPullRepository.syncClassrooms(
+      academicYearId: academicYearId,
+    );
+    final membersResult = await classroomMemberPullRepository.syncMembers(
+      academicYearId: academicYearId,
+    );
+    return classroomsResult.fold(
+      Left.new,
+      (c) => membersResult.fold(
+        Left.new,
+        (m) => Right(
+          ClassroomSyncOutcome(
+            classroomsUpserted: c.upserted,
+            membersUpserted: m.upserted,
+            notModified: c.notModified && m.notModified,
+            syncedAt: syncedAt,
+          ),
         ),
-      );
-    } on DioException catch (e) {
-      // 304 Not Modified transporté en exception (corps vide non parsable).
-      if (e.response?.statusCode == 304) {
-        final cursor = await syncMetaDao.getCursor(syncResource);
-        await syncMetaDao.setCursor(
-          syncResource,
-          cursor: cursor,
-          syncedAt: syncedAt,
-        );
-        return Right(ClassroomSyncOutcome.notModifiedAt(syncedAt, cursor));
-      }
-      if (e.error is Failure) return Left(e.error as Failure);
-      return const Left(NetworkFailure('Network error occurred'));
-    } on FormatException catch (_) {
-      return const Left(ServerFailure('Invalid classroom sync payload'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
+      ),
+    );
   }
 
   @override

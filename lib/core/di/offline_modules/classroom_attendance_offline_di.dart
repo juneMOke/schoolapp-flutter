@@ -12,16 +12,22 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 // ── Classe (offline) ──
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_member_pull_api.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_member_pull_handler.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_api.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_handler.dart';
-import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_sync_api.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_transfer_outbox_handler.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_transfer_pull_api.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_transfer_pull_handler.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_transfer_sync_api.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_transfer_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
@@ -81,8 +87,11 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   final requiredAuth = getIt<Map<String, dynamic>>();
 
   // ── DataSources locales + clients de sync ──
-  getIt.registerLazySingleton<ClassroomSyncApi>(
-    () => ClassroomSyncApi(getIt<Dio>()),
+  getIt.registerLazySingleton<ClassroomPullApi>(
+    () => ClassroomPullApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<ClassroomMemberPullApi>(
+    () => ClassroomMemberPullApi(getIt<Dio>()),
   );
   getIt.registerLazySingleton<ClassroomTransferSyncApi>(
     () => ClassroomTransferSyncApi(getIt<Dio>()),
@@ -113,14 +122,30 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
 
   // ── Repositories offline-first ──
+  getIt.registerLazySingleton<ClassroomPullRepository>(
+    () => ClassroomPullRepositoryImpl(
+      api: getIt<ClassroomPullApi>(),
+      localDataSource: getIt<ClassroomLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: requiredAuth,
+    ),
+  );
+  getIt.registerLazySingleton<ClassroomMemberPullRepository>(
+    () => ClassroomMemberPullRepositoryImpl(
+      api: getIt<ClassroomMemberPullApi>(),
+      localDataSource: getIt<ClassroomLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      requiredAuth: requiredAuth,
+    ),
+  );
   getIt.registerLazySingleton<ClassroomOfflineRepository>(
     () => ClassroomOfflineRepositoryImpl(
-      syncApi: getIt<ClassroomSyncApi>(),
+      classroomPullRepository: getIt<ClassroomPullRepository>(),
+      classroomMemberPullRepository: getIt<ClassroomMemberPullRepository>(),
       localDataSource: getIt<ClassroomLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
-      requiredAuth: requiredAuth,
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
@@ -326,7 +351,14 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   // ── Handlers de pull delta (routés par ressource sur le coordinateur) ──
   getIt<PullCoordinator>().registerHandler(
     ClassroomPullHandler(
-      offlineRepository: getIt<ClassroomOfflineRepository>(),
+      pullRepository: getIt<ClassroomPullRepository>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt<PullCoordinator>().registerHandler(
+    ClassroomMemberPullHandler(
+      pullRepository: getIt<ClassroomMemberPullRepository>(),
       referentialDao: getIt<EnrollmentReferentialDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),

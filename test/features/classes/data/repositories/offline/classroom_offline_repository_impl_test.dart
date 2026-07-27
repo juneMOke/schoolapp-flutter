@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -9,34 +8,41 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
-import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_sync_api.dart';
-import 'package:school_app_flutter/features/classes/data/models/offline/classroom_delta_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_dto.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_member_pull_outcome.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_pull_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
-class MockClassroomSyncApi extends Mock implements ClassroomSyncApi {}
+class MockClassroomPullRepository extends Mock
+    implements ClassroomPullRepository {}
+
+class MockClassroomMemberPullRepository extends Mock
+    implements ClassroomMemberPullRepository {}
 
 class MockSyncEngine extends Mock implements SyncEngine {}
 
 void main() {
   late Database db;
-  late MockClassroomSyncApi api;
+  late MockClassroomPullRepository classroomPull;
+  late MockClassroomMemberPullRepository memberPull;
   late ClassroomLocalDataSource local;
   late SyncMetaDao syncMeta;
   late MockSyncEngine syncEngine;
   late ClassroomOfflineRepositoryImpl repo;
 
-  const auth = <String, dynamic>{'requiresAuth': true};
   const yearId = 'year-1';
   var clock = 10000;
 
   setUp(() async {
     db = await openFullOfflineDb();
-    api = MockClassroomSyncApi();
+    classroomPull = MockClassroomPullRepository();
+    memberPull = MockClassroomMemberPullRepository();
     local = ClassroomLocalDataSource(db);
     syncMeta = SyncMetaDao(db);
     syncEngine = MockSyncEngine();
@@ -45,12 +51,12 @@ void main() {
     ).thenAnswer((_) async => const SyncFlushReport());
     clock = 10000;
     repo = ClassroomOfflineRepositoryImpl(
-      syncApi: api,
+      classroomPullRepository: classroomPull,
+      classroomMemberPullRepository: memberPull,
       localDataSource: local,
       syncMetaDao: syncMeta,
       idGenerator: const IdGenerator(Uuid()),
       syncEngine: syncEngine,
-      requiredAuth: auth,
       now: () => clock,
     );
   });
@@ -80,116 +86,116 @@ void main() {
         status: status,
       );
 
-  group('syncClassrooms', () {
-    test('upsert local + avance le curseur + fraîcheur', () async {
-      when(() => api.pullClassrooms(any(), yearId, any())).thenAnswer(
-        (_) async => ClassroomDeltaModel(
-          classrooms: [classroom('c1')],
-          members: [member('m1')],
-          serverCursor: '2026-06-01T08:00:00.000Z',
+  group('syncClassrooms (orchestration des deux flux dédiés)', () {
+    test('agrège les deux Right (upserted + notModified combinés)', () async {
+      when(
+        () => classroomPull.syncClassrooms(
+          academicYearId: any(named: 'academicYearId'),
         ),
+      ).thenAnswer(
+        (_) async => const Right(
+          ClassroomPullOutcome(upserted: 2, notModified: false, syncedAt: 1),
+        ),
+      );
+      when(
+        () => memberPull.syncMembers(
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const Right(ClassroomMemberPullOutcome.notModifiedAt(1, 'cur')),
       );
 
       final result = await repo.syncClassrooms(academicYearId: yearId);
 
       final outcome = result.getOrElse(() => throw StateError('left'));
+      expect(outcome.classroomsUpserted, 2);
+      expect(outcome.membersUpserted, 0);
+      // notModified agrégé = ET logique des deux flux.
       expect(outcome.notModified, isFalse);
-      expect(outcome.classroomsUpserted, 1);
-      expect(outcome.membersUpserted, 1);
-      expect(
-        await syncMeta.getCursor('classrooms'),
-        '2026-06-01T08:00:00.000Z',
-      );
-      expect(await syncMeta.getSyncedAt('classrooms'), 10000);
-      expect(await local.countActiveRoster('c1'), 1);
+      expect(outcome.syncedAt, 10000);
+      verify(
+        () => classroomPull.syncClassrooms(academicYearId: yearId),
+      ).called(1);
+      verify(() => memberPull.syncMembers(academicYearId: yearId)).called(1);
     });
 
-    test('passe le curseur mémorisé comme updatedSince', () async {
-      await syncMeta.setCursor(
-        'classrooms',
-        cursor: '2026-06-02T08:00:00.000Z',
-        syncedAt: 1,
+    test('les deux flux notModified → outcome notModified', () async {
+      when(
+        () => classroomPull.syncClassrooms(
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right(ClassroomPullOutcome.notModifiedAt(1, 'c')),
       );
-      when(() => api.pullClassrooms(any(), yearId, any())).thenAnswer(
+      when(
+        () => memberPull.syncMembers(
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer(
         (_) async =>
-            const ClassroomDeltaModel(serverCursor: '2026-06-03T08:00:00.000Z'),
+            const Right(ClassroomMemberPullOutcome.notModifiedAt(1, 'm')),
       );
 
-      await repo.syncClassrooms(academicYearId: yearId);
+      final result = await repo.syncClassrooms(academicYearId: yearId);
 
-      verify(
-        () => api.pullClassrooms(auth, yearId, '2026-06-02T08:00:00.000Z'),
-      ).called(1);
+      expect(
+        result.getOrElse(() => throw StateError('left')).notModified,
+        isTrue,
+      );
     });
 
     test(
-      'delta vide → notModified, curseur conservé, fraîcheur bumpée',
+      'échec du flux classrooms → Left, flux membres quand même appelé',
       () async {
-        await syncMeta.setCursor(
-          'classrooms',
-          cursor: '2026-06-04T08:00:00.000Z',
-          syncedAt: 1,
-        );
         when(
-          () => api.pullClassrooms(any(), yearId, any()),
-        ).thenAnswer((_) async => const ClassroomDeltaModel());
+          () => classroomPull.syncClassrooms(
+            academicYearId: any(named: 'academicYearId'),
+          ),
+        ).thenAnswer((_) async => const Left(NetworkFailure('down')));
+        when(
+          () => memberPull.syncMembers(
+            academicYearId: any(named: 'academicYearId'),
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const Right(ClassroomMemberPullOutcome.notModifiedAt(1, 'm')),
+        );
 
         final result = await repo.syncClassrooms(academicYearId: yearId);
 
-        final outcome = result.getOrElse(() => throw StateError('left'));
-        expect(outcome.notModified, isTrue);
-        expect(
-          await syncMeta.getCursor('classrooms'),
-          '2026-06-04T08:00:00.000Z',
-        );
-        expect(await syncMeta.getSyncedAt('classrooms'), 10000);
+        expect(result, isA<Left<Failure, dynamic>>());
+        verify(() => memberPull.syncMembers(academicYearId: yearId)).called(1);
       },
     );
 
-    test('DioException 304 → notModified sans écriture', () async {
-      await syncMeta.setCursor(
-        'classrooms',
-        cursor: '2026-06-04T08:00:00.000Z',
-        syncedAt: 1,
-      );
-      when(() => api.pullClassrooms(any(), yearId, any())).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/sync/classrooms'),
-          response: Response(
-            requestOptions: RequestOptions(path: '/sync/classrooms'),
-            statusCode: 304,
-          ),
+    test('échec du flux membres → Left', () async {
+      when(
+        () => classroomPull.syncClassrooms(
+          academicYearId: any(named: 'academicYearId'),
         ),
+      ).thenAnswer(
+        (_) async => const Right(ClassroomPullOutcome.notModifiedAt(1, 'c')),
       );
+      when(
+        () => memberPull.syncMembers(
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer((_) async => const Left(ServerFailure('boom')));
 
       final result = await repo.syncClassrooms(academicYearId: yearId);
 
-      expect(result.isRight(), isTrue);
-      final outcome = result.getOrElse(() => throw StateError('left'));
-      expect(outcome.notModified, isTrue);
-      expect(
-        await syncMeta.getCursor('classrooms'),
-        '2026-06-04T08:00:00.000Z',
-      );
-    });
-
-    test('DioException porteuse d\'un Failure → Left', () async {
-      when(() => api.pullClassrooms(any(), yearId, any())).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/sync/classrooms'),
-          error: const UnauthorizedFailure(),
-        ),
-      );
-
-      final result = await repo.syncClassrooms(academicYearId: yearId);
       expect(result, isA<Left<Failure, dynamic>>());
     });
   });
 
   group('lectures offline', () {
     setUp(() async {
-      await local.upsertDelta(
+      await local.upsertClassrooms(
         classrooms: [classroom('c1')],
+        syncedAt: 8888,
+      );
+      await local.upsertMembers(
         members: [
           member('m1'),
           member('m2', status: 'INACTIVE'),
@@ -227,11 +233,14 @@ void main() {
 
   group('recordTransfer (offline, composition à la lecture)', () {
     setUp(() async {
-      await local.upsertDelta(
+      await local.upsertClassrooms(
         classrooms: [classroom('c1'), classroom('c2')],
-        members: [member('m1')], // m1 dans c1 (miroir)
         syncedAt: 8888,
       );
+      await local.upsertMembers(
+        members: [member('m1')],
+        syncedAt: 8888,
+      ); // m1 dans c1 (miroir)
     });
 
     RecordClassroomTransferDraft draft() => const RecordClassroomTransferDraft(

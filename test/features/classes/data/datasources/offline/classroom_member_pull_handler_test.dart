@@ -4,36 +4,36 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
-import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_pull_handler.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_pull_outcome.dart';
-import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
+import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_member_pull_handler.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_member_pull_outcome.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
-class MockClassroomPullRepository extends Mock
-    implements ClassroomPullRepository {}
+class MockClassroomMemberPullRepository extends Mock
+    implements ClassroomMemberPullRepository {}
 
 class MockEnrollmentReferentialDao extends Mock
     implements EnrollmentReferentialDao {}
 
 void main() {
-  late MockClassroomPullRepository repo;
+  late MockClassroomMemberPullRepository repo;
   late MockEnrollmentReferentialDao referentialDao;
   late CurrentUserContext currentUser;
-  late ClassroomPullHandler handler;
+  late ClassroomMemberPullHandler handler;
 
   setUp(() {
-    repo = MockClassroomPullRepository();
+    repo = MockClassroomMemberPullRepository();
     referentialDao = MockEnrollmentReferentialDao();
     currentUser = CurrentUserContext()..set('u1', schoolId: 'school-1');
-    handler = ClassroomPullHandler(
+    handler = ClassroomMemberPullHandler(
       pullRepository: repo,
       referentialDao: referentialDao,
       currentUser: currentUser,
     );
   });
 
-  test('resource == classrooms', () {
-    expect(handler.resource, 'classrooms');
+  test('resource == classroom_members', () {
+    expect(handler.resource, 'classroom_members');
   });
 
   test(
@@ -43,18 +43,22 @@ void main() {
         () => referentialDao.findCurrentAcademicYearId('school-1'),
       ).thenAnswer((_) async => 'year-1');
       when(
-        () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
+        () => repo.syncMembers(academicYearId: any(named: 'academicYearId')),
       ).thenAnswer(
         (_) async => const Right(
-          ClassroomPullOutcome(upserted: 2, notModified: false, syncedAt: 10),
+          ClassroomMemberPullOutcome(
+            upserted: 5,
+            notModified: false,
+            syncedAt: 10,
+          ),
         ),
       );
 
       final outcome = await handler.pull();
 
       expect(outcome.result, PullResult.updated);
-      expect(outcome.upserted, 2);
-      verify(() => repo.syncClassrooms(academicYearId: 'year-1')).called(1);
+      expect(outcome.upserted, 5);
+      verify(() => repo.syncMembers(academicYearId: 'year-1')).called(1);
     },
   );
 
@@ -63,9 +67,10 @@ void main() {
       () => referentialDao.findCurrentAcademicYearId('school-1'),
     ).thenAnswer((_) async => 'year-1');
     when(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
+      () => repo.syncMembers(academicYearId: any(named: 'academicYearId')),
     ).thenAnswer(
-      (_) async => const Right(ClassroomPullOutcome.notModifiedAt(10, 'cur')),
+      (_) async =>
+          const Right(ClassroomMemberPullOutcome.notModifiedAt(10, 'cur')),
     );
 
     final outcome = await handler.pull();
@@ -73,7 +78,7 @@ void main() {
     expect(outcome.result, PullResult.notModified);
   });
 
-  test('référentiel indisponible → error, syncClassrooms non appelé', () async {
+  test('référentiel indisponible → error, syncMembers non appelé', () async {
     when(
       () => referentialDao.findCurrentAcademicYearId('school-1'),
     ).thenAnswer((_) async => null);
@@ -82,12 +87,12 @@ void main() {
 
     expect(outcome.result, PullResult.error);
     verifyNever(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
+      () => repo.syncMembers(academicYearId: any(named: 'academicYearId')),
     );
   });
 
   test('aucune session active → error', () async {
-    final orphanHandler = ClassroomPullHandler(
+    final orphanHandler = ClassroomMemberPullHandler(
       pullRepository: repo,
       referentialDao: referentialDao,
       currentUser: CurrentUserContext(),
@@ -103,7 +108,7 @@ void main() {
       () => referentialDao.findCurrentAcademicYearId('school-1'),
     ).thenAnswer((_) async => 'year-1');
     when(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
+      () => repo.syncMembers(academicYearId: any(named: 'academicYearId')),
     ).thenAnswer((_) async => const Left(NetworkFailure('down')));
 
     final outcome = await handler.pull();

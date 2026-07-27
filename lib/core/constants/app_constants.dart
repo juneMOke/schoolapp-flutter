@@ -249,7 +249,13 @@ class AppConstants {
   // id référentiel du niveau N-1 (distinct du texte libre
   // `previous_school_level`), utilisé par le calcul auto de la classe cible
   // en réinscription. Renseigné uniquement au seed RE ; aucun backfill.
-  static const int offlineDbSchemaVersion = 15;
+  // v16 (2026-07-27) : Classe — re-contrat CB-2 en pull KEYSET (`classrooms`
+  // bundlé → deux flux indépendants `classrooms`/`classroom-members`, curseur
+  // opaque au lieu de l'ancien `updatedSince` ISO). La clé `sync_meta.classrooms`
+  // est réutilisée mais change de nature de curseur : purge du curseur hérité
+  // (comme v11) pour repartir d'un bootstrap propre, sans dépendre d'un rejet
+  // 400 serveur pour s'auto-guérir.
+  static const int offlineDbSchemaVersion = 16;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -337,12 +343,19 @@ class AppConstants {
   /// (celui-ci reste en service pour les lectures online hors offline).
   static const String syncAttendanceEndpoint = '/api/v1/sync/attendance';
 
-  /// GET delta des classes + rosters (CB-2). Renvoie les `ref_classrooms` +
-  /// `ref_classroom_members` modifiés depuis `updatedSince` (ISO-8601), plus un
-  /// `serverCursor` (ISO). Query : `academicYearId`, `updatedSince`.
-  /// 304 Not Modified honoré (delta minimal).
-  /// ✅ LIVRÉ V1.0 côté back (2026-07-07) — roster ACTIVE+INACTIVE.
+  /// Pull KEYSET des `ref_classrooms` (CB-2, re-contracté 2026-07-27 —
+  /// remplace l'ancien contrat bundlé `updatedSince`/`serverCursor`) :
+  /// `KeysetPage<ClassroomSyncView>` (`nextCursor`/`nextWatermark`/`hasMore`),
+  /// jeton `cursor` opaque, 304 applicatif. Query : `academicYearId`, `cursor`,
+  /// `limit`. Ressource **indépendante** de [syncClassroomMembersEndpoint] (curseur
+  /// séparé, pas de synchro artificielle entre les deux flux).
   static const String syncClassroomsEndpoint = '/api/v1/sync/classrooms';
+
+  /// Pull KEYSET du roster (`ref_classroom_members`), même contrat que
+  /// [syncClassroomsEndpoint] mais ressource indépendante (curseur séparé,
+  /// ACTIVE+INACTIVE — la sortie d'un élève doit se propager au cache).
+  static const String syncClassroomMembersEndpoint =
+      '/api/v1/sync/classroom-members';
 
   /// Volet transfert du module Classe (contrat openapi_classroom_sync 1.1.0) :
   ///  - **POST** = push de l'événement de transfert (régime A, idempotent sur

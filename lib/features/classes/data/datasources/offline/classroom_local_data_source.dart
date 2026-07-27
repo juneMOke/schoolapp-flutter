@@ -52,17 +52,13 @@ class ClassroomLocalDataSource {
       'student_middle_name COLLATE NOCASE ASC, '
       'student_first_name COLLATE NOCASE ASC';
 
-  /// Upsert transactionnel du delta reçu (CF2). `synced_at` posé sur chaque
-  /// ligne touchée (fraîcheur ADR-002). `REPLACE` sur la PK = idempotent.
-  Future<void> upsertDelta({
+  /// Upsert transactionnel (par lots) d'une page de classes pullées (CF2, flux
+  /// `classrooms` — indépendant du roster). `synced_at` posé sur chaque ligne
+  /// touchée (fraîcheur ADR-002). `REPLACE` sur la PK = idempotent.
+  Future<void> upsertClassrooms({
     required List<ClassroomDto> classrooms,
-    required List<ClassroomMemberDto> members,
     required int syncedAt,
   }) async {
-    // Découpage en lots (classes puis membres, listes indépendantes sans FK) :
-    // le verrou de l'unique connexion sqflite est relâché entre les lots, pour
-    // ne pas geler les lectures UI sur un gros roster. REPLACE idempotent →
-    // apply partielle sûre (le pull n'avance son curseur qu'après l'apply complet).
     await applyInBatches(
       _db,
       classrooms,
@@ -78,6 +74,15 @@ class ClassroomLocalDataSource {
         await batch.commit(noResult: true);
       },
     );
+  }
+
+  /// Upsert transactionnel (par lots) d'une page de membres pullés (CF2, flux
+  /// `classroom-members` — indépendant des classes). `synced_at` posé sur
+  /// chaque ligne touchée (fraîcheur ADR-002). `REPLACE` sur la PK = idempotent.
+  Future<void> upsertMembers({
+    required List<ClassroomMemberDto> members,
+    required int syncedAt,
+  }) async {
     await applyInBatches(
       _db,
       members,

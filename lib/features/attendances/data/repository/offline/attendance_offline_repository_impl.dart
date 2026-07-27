@@ -27,6 +27,8 @@ import 'package:school_app_flutter/features/attendances/domain/entities/student_
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_transfer_row.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart'
+    show kClassroomMembersResource;
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart'
     show kClassroomTransfersBootstrapResource;
 
@@ -238,8 +240,9 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
         dateStr: dateStr,
         academicYearId: academicYearId,
       );
-      // Fraîcheur du roster sous-jacent (curseur des classes, cf. Classe CF2).
-      final syncedAt = await syncMetaDao.getSyncedAt('classrooms');
+      // Fraîcheur du roster sous-jacent (curseur du flux membres, cf. Classe CF2
+      // — indépendant du flux classes depuis le passage keyset double-flux).
+      final syncedAt = await syncMetaDao.getSyncedAt(kClassroomMembersResource);
       return Right(
         LocalAttendanceRate(
           effectif: effectif,

@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/attendances/domain/entities/offline/
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart'
+    show kClassroomMembersResource;
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
@@ -71,13 +73,12 @@ void main() {
       now: () => clock,
     );
 
-    await roster.upsertDelta(
-      classrooms: const [],
+    await roster.upsertMembers(
       members: [member('s1'), member('s2'), member('s3')],
       syncedAt: 9999,
     );
     await syncMeta.setCursor(
-      'classrooms',
+      kClassroomMembersResource,
       cursor: '2026-06-05T08:00:00.000Z',
       syncedAt: 9999,
     );

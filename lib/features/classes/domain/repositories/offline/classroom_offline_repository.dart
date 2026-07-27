@@ -12,7 +12,9 @@ import 'package:school_app_flutter/features/classes/domain/entities/offline/reco
 /// Le seul geste d'écriture — le transfert — est **offline** (ADR-004 amendé) :
 /// événement append-only local + outbox, flush opportuniste.
 abstract class ClassroomOfflineRepository {
-  /// Pull delta (CF2) : alimente le local, avance le curseur, honore 304.
+  /// Pull des classes (CF2) : orchestre deux flux keyset **indépendants**
+  /// (`classrooms` + `classroom-members`, curseurs propres à chacun),
+  /// alimente le local, honore 304 par flux.
   Future<Either<Failure, ClassroomSyncOutcome>> syncClassrooms({
     required String academicYearId,
   });

@@ -50,6 +50,16 @@ void main() {
     status: status,
   );
 
+  /// Upsert combiné classes + membres, sur les deux flux indépendants (CF2).
+  Future<void> upsertDelta({
+    List<ClassroomDto> classrooms = const [],
+    List<ClassroomMemberDto> members = const [],
+    required int syncedAt,
+  }) async {
+    await dao.upsertClassrooms(classrooms: classrooms, syncedAt: syncedAt);
+    await dao.upsertMembers(members: members, syncedAt: syncedAt);
+  }
+
   setUp(() async {
     db = await openFullOfflineDb();
     dao = ClassroomLocalDataSource(db);
@@ -57,8 +67,9 @@ void main() {
 
   tearDown(() async => db.close());
 
-  test('upsertDelta insère classes et membres avec synced_at', () async {
-    await dao.upsertDelta(
+  test('upsertClassrooms/upsertMembers insèrent classes et membres avec '
+      'synced_at', () async {
+    await upsertDelta(
       classrooms: [classroom()],
       members: [member(id: 'm1', first: 'John', last: 'Doe')],
       syncedAt: 5000,
@@ -77,8 +88,8 @@ void main() {
     // 250 > kPullApplyBatchSize (100) → au moins 3 lots ; garantit qu'aucun
     // membre n'est perdu à la frontière des lots (verrou relâché entre lots).
     const count = 250;
-    await dao.upsertDelta(
-      classrooms: [classroom()],
+    await dao.upsertClassrooms(classrooms: [classroom()], syncedAt: 5000);
+    await dao.upsertMembers(
       members: [
         for (var i = 0; i < count; i++)
           member(id: 'm$i', first: 'Prenom$i', last: 'Nom$i'),
@@ -90,15 +101,13 @@ void main() {
     expect(await db.query('ref_classroom_members'), hasLength(count));
   });
 
-  test('upsertDelta est idempotent (REPLACE sur la PK)', () async {
-    await dao.upsertDelta(
+  test('upsertClassrooms est idempotent (REPLACE sur la PK)', () async {
+    await dao.upsertClassrooms(
       classrooms: [classroom(total: 30)],
-      members: const [],
       syncedAt: 1000,
     );
-    await dao.upsertDelta(
+    await dao.upsertClassrooms(
       classrooms: [classroom(total: 31)],
-      members: const [],
       syncedAt: 2000,
     );
 
@@ -109,9 +118,8 @@ void main() {
 
   test('les compteurs ne supposent pas total = female + male', () async {
     // 30 total, 16F + 13G = 29 → 1 élève OTHER inclus dans le total.
-    await dao.upsertDelta(
+    await dao.upsertClassrooms(
       classrooms: [classroom(total: 30, female: 16, male: 13)],
-      members: const [],
       syncedAt: 1000,
     );
     final c = (await dao.getClassrooms(academicYearId: yearId)).first;
@@ -120,12 +128,11 @@ void main() {
   });
 
   test('getClassrooms filtre par niveau', () async {
-    await dao.upsertDelta(
+    await dao.upsertClassrooms(
       classrooms: [
         classroom(id: 'c1', levelId: 'level-1'),
         classroom(id: 'c2', levelId: 'level-2'),
       ],
-      members: const [],
       syncedAt: 1000,
     );
     final level1 = await dao.getClassrooms(
@@ -136,7 +143,7 @@ void main() {
   });
 
   test('getRoster ne renvoie que les ACTIVE, trié', () async {
-    await dao.upsertDelta(
+    await upsertDelta(
       classrooms: [classroom()],
       members: [
         member(id: 'm1', first: 'Bob', last: 'Zulu'),
@@ -150,7 +157,7 @@ void main() {
   });
 
   test('searchRoster est insensible à la casse (nom/prénom)', () async {
-    await dao.upsertDelta(
+    await upsertDelta(
       classrooms: [classroom()],
       members: [
         member(id: 'm1', first: 'Jean', last: 'Dupont'),
@@ -171,7 +178,7 @@ void main() {
   });
 
   test('searchRoster vide = roster complet', () async {
-    await dao.upsertDelta(
+    await upsertDelta(
       classrooms: [classroom()],
       members: [member(id: 'm1', first: 'Jean', last: 'Dupont')],
       syncedAt: 1000,
@@ -181,7 +188,7 @@ void main() {
   });
 
   test('countActiveRoster ignore les INACTIVE', () async {
-    await dao.upsertDelta(
+    await upsertDelta(
       classrooms: [classroom()],
       members: [
         member(id: 'm1', first: 'A', last: 'A'),
@@ -195,7 +202,7 @@ void main() {
 
   test('round-trip fromMap/toMap conserve les champs', () async {
     final dto = classroom(updatedAt: 42);
-    await dao.upsertDelta(classrooms: [dto], members: const [], syncedAt: 99);
+    await dao.upsertClassrooms(classrooms: [dto], syncedAt: 99);
     final loaded = await dao.getClassroomById(classroomId);
     expect(loaded, isNotNull);
     expect(loaded!.updatedAt, 42);
