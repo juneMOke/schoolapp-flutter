@@ -5,11 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_academic_year.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
@@ -28,9 +27,10 @@ class _MockOfflineBloc extends Mock implements EnrollmentOfflineBloc {}
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
 
-class _MockCurrentYearBloc extends Mock implements BootstrapCurrentYearBloc {}
+class _MockCurrentYearBloc extends Mock implements AcademicYearContextBloc {}
 
-class _MockPreviousYearBloc extends Mock implements BootstrapPreviousYearBloc {}
+class _MockPreviousYearBloc extends Mock
+    implements AcademicYearPreviousContextBloc {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -48,9 +48,8 @@ void main() {
   late StreamController<EnrollmentOfflineState> offlineStates;
   late EnrollmentOfflineState offlineState;
 
-  final currentBootstrap = Bootstrap(
-    schoolId: 'sch-1',
-    academicYear: BootstrapAcademicYear(
+  final currentAcademicYearContext = AcademicYearContext(
+    academicYear: AcademicYear(
       id: 'ay-current',
       name: '2026-2027',
       startDate: DateTime(2026, 9, 1),
@@ -60,9 +59,9 @@ void main() {
     schoolLevelGroups: const [],
   );
 
-  BootstrapContextState currentYearLoaded() => BootstrapContextState(
-    status: BootstrapContextLoadStatus.success,
-    bootstrap: currentBootstrap,
+  AcademicYearContextState currentYearLoaded() => AcademicYearContextState(
+    status: AcademicYearContextLoadStatus.success,
+    context: currentAcademicYearContext,
     errorMessage: null,
   );
 
@@ -89,15 +88,15 @@ void main() {
     when(() => currentYearBloc.state).thenReturn(currentYearLoaded());
     when(
       () => currentYearBloc.stream,
-    ).thenAnswer((_) => const Stream<BootstrapContextState>.empty());
+    ).thenAnswer((_) => const Stream<AcademicYearContextState>.empty());
     when(() => currentYearBloc.close()).thenAnswer((_) async {});
 
     when(
       () => previousYearBloc.state,
-    ).thenReturn(const BootstrapContextState.initial());
+    ).thenReturn(const AcademicYearPreviousContextState.initial());
     when(
       () => previousYearBloc.stream,
-    ).thenAnswer((_) => const Stream<BootstrapContextState>.empty());
+    ).thenAnswer((_) => const Stream<AcademicYearPreviousContextState>.empty());
     when(() => previousYearBloc.close()).thenAnswer((_) async {});
   });
 
@@ -113,10 +112,8 @@ void main() {
           providers: [
             BlocProvider<EnrollmentOfflineBloc>.value(value: offlineBloc),
             BlocProvider<EnrollmentBloc>.value(value: enrollmentBloc),
-            BlocProvider<BootstrapCurrentYearBloc>.value(
-              value: currentYearBloc,
-            ),
-            BlocProvider<BootstrapPreviousYearBloc>.value(
+            BlocProvider<AcademicYearContextBloc>.value(value: currentYearBloc),
+            BlocProvider<AcademicYearPreviousContextBloc>.value(
               value: previousYearBloc,
             ),
           ],

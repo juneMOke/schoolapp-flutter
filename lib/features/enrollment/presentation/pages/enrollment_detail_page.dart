@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/deta
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_scaffold.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_detail_state_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_scope.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -74,7 +75,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   EnrollmentDetail? _cachedAggregate;
   LocalEnrollmentDetail? _cachedLocal;
   DraftIds? _cachedIds;
-  Bootstrap? _cachedBootstrap;
+  AcademicYearContext? _cachedAcademicYearContext;
 
   bool get _isNewOffline =>
       _effectiveIntent.origin == EnrollmentDetailOrigin.newFirstRegistration;
@@ -111,6 +112,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     _seededIntent = null;
     _localReadOnly = null;
     _forceLocalReadOnly = false;
+    _draftFormShown = false;
     if (_isNewOffline) {
       context.read<EnrollmentOfflineBloc>().add(const StartDraftRequested());
       return;
@@ -168,18 +170,14 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
 
   void _requestBootstrapContexts() {
     if (_policy.requiresCurrentYearBootstrap(_effectiveIntent)) {
-      context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPayloadKey,
-        ),
+      context.read<AcademicYearContextBloc>().add(
+        const AcademicYearContextRequested(),
       );
     }
 
     if (_policy.requiresPreviousYearBootstrap(_effectiveIntent)) {
-      context.read<BootstrapPreviousYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPreviousYearPayloadKey,
-        ),
+      context.read<AcademicYearPreviousContextBloc>().add(
+        const AcademicYearPreviousContextRequested(),
       );
     }
   }
@@ -207,7 +205,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   // entrée). RE lit la cohorte N-1 par studentId ; PRE lit la préinscription par
   // id. Cohorte/snapshot non peuplés (pull dormant) → l'événement échoue et le
   // wizard reste vide (régression assumée, décision utilisateur).
-  void _maybeSeedFromLocalRef(Bootstrap? bootstrap) {
+  void _maybeSeedFromLocalRef(AcademicYearContext? academicYearContext) {
     if (!mounted || !_policy.seedsFromLocalRef) return;
     if (_seededIntent == _effectiveIntent) return;
     // Gel READ_ONLY (ADR-010) : le seed CRÉE des lignes brouillon en base
@@ -216,7 +214,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     // retombe sur son état vide/erreur, et le bouton Réessayer du seed est
     // lui aussi neutralisé par ce même garde au rejeu.
     if (SessionWriteGate.blocksWritesOf(context)) return;
-    final yearId = bootstrap?.academicYear.id;
+    final yearId = academicYearContext?.academicYear.id;
     if (yearId == null || yearId.trim().isEmpty) return;
     _seededIntent = _effectiveIntent;
     final offline = context.read<EnrollmentOfflineBloc>();
@@ -248,7 +246,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   void _retryLocalSeed() {
     _seededIntent = null;
     _maybeSeedFromLocalRef(
-      context.read<BootstrapCurrentYearBloc>().state.bootstrap,
+      context.read<AcademicYearContextBloc>().state.context,
     );
   }
 
@@ -306,12 +304,16 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   // Vue LECTURE SEULE d'un dossier local non synchronisé : agrégat reconstruit
   // depuis le local (mapper + bootstrap), rendu via le stepper en consultation.
   Widget _buildLocalReadOnly(BuildContext context, AppLocalizations l10n) {
-    return BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-      builder: (context, bootstrapState) {
+    return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+      builder: (context, academicYearState) {
         final detail = mapLocalToEnrollmentDetail(
           _localReadOnly!,
-          levels: schoolLevelsFromBootstrap(bootstrapState.bootstrap),
-          groups: schoolLevelGroupsFromBootstrap(bootstrapState.bootstrap),
+          levels: schoolLevelsFromAcademicYearContext(
+            academicYearState.context,
+          ),
+          groups: schoolLevelGroupsFromAcademicYearContext(
+            academicYearState.context,
+          ),
         );
         return EnrollmentJourneyScaffold(
           modeLabel: _buildJourneyModeLabel(l10n),
@@ -388,32 +390,36 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           listener: _onReenrollmentExisting,
         ),
       ],
-      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-        builder: (context, bootstrapState) {
+      child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+        builder: (context, academicYearState) {
           // Seed local RE/PRE : déclenché après la frame (dispatch interdit
           // pendant build), dès que l'année courante est chargée ; idempotent
           // (garde _seededIntent), couvre le cas « bootstrap déjà en cache ».
           if (_policy.seedsFromLocalRef && _seededIntent != _effectiveIntent) {
-            final bootstrap = bootstrapState.bootstrap;
+            final academicYearContext = academicYearState.context;
             WidgetsBinding.instance.addPostFrameCallback(
-              (_) => _maybeSeedFromLocalRef(bootstrap),
+              (_) => _maybeSeedFromLocalRef(academicYearContext),
             );
           }
-          final detail = _resolveLocalDraftDetail(bootstrapState.bootstrap);
-          return EnrollmentJourneyScaffold(
-            modeLabel: _buildJourneyModeLabel(l10n),
-            studentDisplayName: _localDraftDisplayName(detail, l10n),
-            currentStep: _currentStep,
-            body: detail == null
-                ? _buildLocalDraftPending()
-                : EnrollmentDetailContentShell(
-                    child: EnrollmentStepperScope(
-                      enrollmentDetail: detail,
-                      detailIntent: _effectiveIntent,
-                      detailPolicy: _policy,
-                      onStepChanged: _onStepChanged,
+          final detail = _resolveLocalDraftDetail(academicYearState.context);
+          _draftFormShown = detail != null;
+          return _wrapWithExitGuard(
+            EnrollmentJourneyScaffold(
+              modeLabel: _buildJourneyModeLabel(l10n),
+              studentDisplayName: _localDraftDisplayName(detail, l10n),
+              currentStep: _currentStep,
+              onExitRequested: _onExitRequested,
+              body: detail == null
+                  ? _buildLocalDraftPending()
+                  : EnrollmentDetailContentShell(
+                      child: EnrollmentStepperScope(
+                        enrollmentDetail: detail,
+                        detailIntent: _effectiveIntent,
+                        detailPolicy: _policy,
+                        onStepChanged: _onStepChanged,
+                      ),
                     ),
-                  ),
+            ),
           );
         },
       ),
@@ -464,21 +470,23 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     );
   }
 
-  EnrollmentDetail? _resolveLocalDraftDetail(Bootstrap? bootstrap) {
+  EnrollmentDetail? _resolveLocalDraftDetail(
+    AcademicYearContext? academicYearContext,
+  ) {
     final local = _draftLocal;
     final ids = _draftIds;
 
     if (_cachedAggregate != null &&
         identical(_cachedLocal, local) &&
         identical(_cachedIds, ids) &&
-        identical(_cachedBootstrap, bootstrap)) {
+        identical(_cachedAcademicYearContext, academicYearContext)) {
       return _cachedAggregate;
     }
 
-    final aggregate = _composeLocalDraftDetail(local, ids, bootstrap);
+    final aggregate = _composeLocalDraftDetail(local, ids, academicYearContext);
     _cachedLocal = local;
     _cachedIds = ids;
-    _cachedBootstrap = bootstrap;
+    _cachedAcademicYearContext = academicYearContext;
     _cachedAggregate = aggregate;
     return aggregate;
   }
@@ -486,23 +494,25 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   EnrollmentDetail? _composeLocalDraftDetail(
     LocalEnrollmentDetail? local,
     DraftIds? ids,
-    Bootstrap? bootstrap,
+    AcademicYearContext? academicYearContext,
   ) {
     if (local != null) {
       return mapLocalToEnrollmentDetail(
         local,
-        levels: schoolLevelsFromBootstrap(bootstrap),
-        groups: schoolLevelGroupsFromBootstrap(bootstrap),
+        levels: schoolLevelsFromAcademicYearContext(academicYearContext),
+        groups: schoolLevelGroupsFromAcademicYearContext(academicYearContext),
       );
     }
 
     // Amorce vide : uniquement pour le brouillon vierge NEW — un parcours seedé
     // attend le détail local (jamais de formulaire vide flash sur RE/PRE).
-    if (ids != null && bootstrap != null && !_policy.requiresDraftSeed) {
+    if (ids != null &&
+        academicYearContext != null &&
+        !_policy.requiresDraftSeed) {
       return buildDraftSeedDetail(
         enrollmentId: ids.enrollmentId,
         studentId: ids.studentId,
-        academicYearId: bootstrap.academicYear.id,
+        academicYearId: academicYearContext.academicYear.id,
       );
     }
 
@@ -549,5 +559,76 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
       return;
     }
     setState(() => _currentStep = step);
+  }
+
+  // ── Garde de sortie du wizard (brouillon en cours) ─────────────────────────
+
+  /// Le formulaire du brouillon est effectivement affiché (agrégat composé).
+  /// Faux sur le spinner d'amorce, l'écran d'erreur de seed (cohorte non
+  /// peuplée, session gelée READ_ONLY) et la fenêtre transitoire de la sonde
+  /// RE → la sortie y est libre : il n'y a rien à abandonner. Assigné pendant
+  /// le build du flux brouillon (dérivé, pas un setState).
+  bool _draftFormShown = false;
+
+  /// Sortie confirmée requise : uniquement pendant un parcours d'édition de
+  /// brouillon local (NEW/RE/PRE/reprise) dont le formulaire est matérialisé.
+  /// La consultation lecture seule sort librement. La redirection de succès
+  /// post-finalisation passe par `goNamed` (jamais un pop) → non interceptée.
+  bool get _needsExitConfirmation =>
+      _policy.usesLocalDraft && _localReadOnly == null && _draftFormShown;
+
+  /// Anti double-dialogue : un second déclencheur (back système pendant que la
+  /// popin de l'app bar est ouverte) est ignoré.
+  bool _exitDialogOpen = false;
+
+  Future<void> _onExitRequested() async {
+    if (!_needsExitConfirmation) {
+      _leaveJourney();
+      return;
+    }
+    if (_exitDialogOpen) return;
+    _exitDialogOpen = true;
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final confirmed = await showAppConfirmationDialog(
+        context: context,
+        title: l10n.wizardExitConfirmTitle,
+        message: l10n.wizardExitConfirmMessage,
+        confirmLabel: l10n.wizardExitConfirmAction,
+        cancelLabel: l10n.wizardExitStayAction,
+        isDestructive: true,
+        headerIcon: Icons.logout_rounded,
+        confirmIcon: Icons.logout_rounded,
+      );
+      if (!mounted || !confirmed) return;
+      _leaveJourney();
+    } finally {
+      _exitDialogOpen = false;
+    }
+  }
+
+  void _leaveJourney() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    // Wizard ouvert via `go` (pile déclarative remplacée) : retour au listing
+    // Première inscription — même atterrissage que le chemin de succès.
+    EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(context);
+  }
+
+  /// Enveloppe le flux brouillon dans un [PopScope] : le retour SYSTÈME
+  /// (geste/bouton Android) passe par la même confirmation que les boutons de
+  /// l'app bar. `context.pop()` de GoRouter (déclenché après confirmation)
+  /// n'emprunte pas `maybePop` → il n'est pas re-intercepté.
+  Widget _wrapWithExitGuard(Widget child) {
+    return PopScope(
+      canPop: !_needsExitConfirmation,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _onExitRequested();
+      },
+      child: child,
+    );
   }
 }

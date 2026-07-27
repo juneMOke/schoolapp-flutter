@@ -14,12 +14,17 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
   final int currentStep;
   final Widget body;
 
+  /// Sortie déléguée (retour + fermeture de l'app bar) — voir
+  /// [EnrollmentJourneyAppBar.onExitRequested].
+  final VoidCallback? onExitRequested;
+
   const EnrollmentJourneyScaffold({
     super.key,
     required this.modeLabel,
     required this.studentDisplayName,
     required this.currentStep,
     required this.body,
+    this.onExitRequested,
   });
 
   @override
@@ -31,6 +36,7 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
         studentDisplayName: studentDisplayName,
         currentStep: currentStep,
         totalSteps: EnrollmentWizardStep.values.length,
+        onExitRequested: onExitRequested,
       ),
       body: body,
     );
