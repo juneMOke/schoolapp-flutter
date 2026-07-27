@@ -138,7 +138,10 @@ const TableSchema enrollmentsTable = TableSchema(
 // - argent en INTEGER centimes (`*_in_cents`), jamais REAL (cf. règle argent).
 
 /// `ref_academic_years` — années scolaires pré-synchronisées (D1). `is_current`
-/// pré-sélectionne l'année active hors-ligne.
+/// pré-sélectionne l'année active hors-ligne. `school_id` (stampé côté client
+/// depuis `CurrentUserContext`, pas depuis le payload serveur) scope la
+/// résolution courante/précédente par école — nécessaire sur un device
+/// multi-écoles (bootstrap remplacé, cf. décision FRONT).
 const TableSchema refAcademicYearsTable = TableSchema(
   name: 'ref_academic_years',
   createTableSql: '''
@@ -148,6 +151,32 @@ const TableSchema refAcademicYearsTable = TableSchema(
       start_date TEXT,
       end_date TEXT,
       is_current INTEGER NOT NULL DEFAULT 0,
+      school_id TEXT NOT NULL DEFAULT '',
+      synced_at INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_academic_years_school '
+        'ON ref_academic_years(school_id)',
+  ],
+);
+
+/// `ref_school` — identité de l'école (tenant), cache mono-ligne (D5/D6 :
+/// racine du bundle, pas dupliquée par année). Réécrite en entier à chaque
+/// pull référentiel (`upsertReferential` purge puis réinsère).
+const TableSchema refSchoolTable = TableSchema(
+  name: 'ref_school',
+  createTableSql: '''
+    CREATE TABLE ref_school (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      country TEXT,
+      city TEXT,
+      district TEXT,
+      municipality TEXT,
+      address TEXT,
+      phone TEXT,
+      email TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
     )
   ''',
@@ -410,6 +439,7 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   studentParentTable,
   enrollmentsTable,
   // Inscription — tables de référence (pull, lecture seule)
+  refSchoolTable,
   refAcademicYearsTable,
   refSchoolLevelGroupsTable,
   refSchoolLevelsTable,

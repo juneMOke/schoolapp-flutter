@@ -63,14 +63,6 @@ class AppConstants {
   static const String classroomsDistributeEndpoint =
       '/api/v1/classrooms/distribute';
 
-  static const String academicYearBySchoolEndpoint =
-      '/api/v1/academic-years/current';
-
-  static const String bootstrapEndpoint = '/api/v1/bootstrap';
-  static const String bootstrapCurrentYearEndpoint =
-      '/api/v1/bootstrap/current-year';
-  static const String bootstrapPreviousYearEndpoint =
-      '/api/v1/bootstrap/previous-year';
   static const String feeTariffsEndpoint = '/api/v1/finance/tariffs';
   static const String initializeStudentChargesEndpoint =
       '/api/v1/finance/student-charges/{studentId}/initialize-charges';
@@ -86,11 +78,6 @@ class AppConstants {
   static const String updateStudentChargeExpectedAmountEndpoint =
       '/api/v1/finance/student-charges/{studentChargeId}';
   static const String financeStatsEndpoint = '/api/v1/finance-stats';
-
-  static const String bootstrapPayloadKey = 'bootstrap_payload';
-  static const String bootstrapSchemaVersionKey =
-      'bootstrap_local_schema_version';
-  static const String bootstrapSchemaVersion = '1';
 
   static const String accessTokenKey = 'access_token';
   static const String tokenTypeKey = 'token_type';
@@ -113,9 +100,6 @@ class AppConstants {
   static const String userRoleKey = 'user_role';
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
-
-  static const String bootstrapPreviousYearPayloadKey =
-      'bootstrap_previous_year_payload';
 
   // ─── Support / Contact ───────────────────────────────────────────────────────
   /// Adresse de contact de l'administration (actions « Contacter l'administrateur »
@@ -232,7 +216,24 @@ class AppConstants {
   // passage au contrat back scopé enseignant (commit `1ec6be3`, DF-K/DF-L) :
   // les pulls antérieurs n'étaient pas scopés au prof connecté, la base locale
   // pouvait porter des cours/évaluations/notes/séances d'autres enseignants.
-  static const int offlineDbSchemaVersion = 11;
+  // v12 (2026-07-23) : Notes / Cours — bundle `grades-referential` (ETag,
+  // cadré prof) : 5 tables réf neuves (branches, lignes de barème + plafonds,
+  // chapitres, périodes/sous-périodes), devient la seule source du statut de
+  // clôture (retire le squelette `ref_cours_notation`, workaround online v9).
+  // `evaluation.chapitre_ids_json`/`rejection_code`, `note_evaluation.rejection_reason`.
+  // v13 (2026-07-26) : Inscription — `ref_academic_years.school_id` (bootstrap
+  // remplacé par le référentiel scopé école). Backfill best-effort depuis
+  // `auth_local_user` (mono-école sur device connu) ; sinon vide, réécrit au
+  // prochain pull référentiel.
+  // v14 (2026-07-26) : Inscription — `ref_school` (identité du tenant), le
+  // bundle référentiel renvoyant désormais `school` + `current`/`previous`
+  // au lieu d'une liste plate d'années. Table neuve, aucun backfill (réécrite
+  // au prochain pull référentiel).
+  // v15 (2026-07-26) : Inscription — `enrollments.previous_school_level_id`,
+  // id référentiel du niveau N-1 (distinct du texte libre
+  // `previous_school_level`), utilisé par le calcul auto de la classe cible
+  // en réinscription. Renseigné uniquement au seed RE ; aucun backfill.
+  static const int offlineDbSchemaVersion = 15;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -380,6 +381,18 @@ class AppConstants {
   ///    l'état serveur. Toujours 200.
   static const String syncAcademicsNotesEndpoint =
       '/api/v1/sync/academics/notes';
+
+  /// Pull du **bundle** grille & périodes (réf de saisie, lecture seule),
+  /// cadré **enseignant dérivé du token**. Mécanisme **ETag applicatif**
+  /// (`If-None-Match` → `200` + en-tête `ETag` + corps, ou `304` sans corps) —
+  /// **pas** keyset, non paginé. `404` = compte non lié à un enseignant.
+  /// Contenu : branches, lignes de barème (plafonds `maxJournalierParSousPeriode`/
+  /// `maxExamenParPeriodeScolaire` nullable), chapitres (`contenu` omis),
+  /// périodes/sous-périodes à plat avec statut de clôture. → `ref_branche`,
+  /// `ref_ligne_bareme`, `ref_chapitre`, `ref_periode`, `ref_sous_periode`
+  /// (remplacement d'ensemble à chaque `200`).
+  static const String syncAcademicsGradesReferentialEndpoint =
+      '/api/v1/sync/academics/grades-referential';
 
   /// Pull KEYSET de la trame horaire de l'école (réf, lecture seule). Scope
   /// école résolu par le JWT. Query : `cursor`, `limit`. → `ref_time_slots`.

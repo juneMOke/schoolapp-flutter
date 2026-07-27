@@ -221,6 +221,111 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (oldVersion < 12) {
+    // v12 — Notes / Cours : bundle `grades-referential` (ETag, cadré prof) —
+    // 5 tables réf neuves (`ref_branche`, `ref_ligne_bareme`, `ref_chapitre`,
+    // `ref_periode`, `ref_sous_periode`), remplacement d'ensemble à chaque
+    // pull. Devient la SEULE source du statut de clôture ; le squelette
+    // `ref_cours_notation` (v9, alimenté par un endpoint ONLINE réutilisé) est
+    // retiré — sa table reste présente mais inerte, purgée ici. `evaluation`
+    // gagne `chapitre_ids_json` (couverture intra-agrégat, régime A) et
+    // `rejection_code` (backstop 422 terminal, DF-N) ; `note_evaluation` gagne
+    // `rejection_reason` (motif REJECTED, surfacé à l'UI). Tables neuves →
+    // aucun backfill.
+    for (final name in const [
+      'ref_branche',
+      'ref_ligne_bareme',
+      'ref_chapitre',
+      'ref_periode',
+      'ref_sous_periode',
+    ]) {
+      final table = schema.firstWhere((t) => t.name == name);
+      await db.execute(_asIfNotExists(table.createTableSql));
+      for (final indexSql in table.createIndexSql) {
+        await db.execute(_indexAsIfNotExists(indexSql));
+      }
+    }
+    if (await _hasTable(db, 'evaluation')) {
+      if (!await _hasColumn(db, 'evaluation', 'chapitre_ids_json')) {
+        await db.execute(
+          'ALTER TABLE evaluation ADD COLUMN chapitre_ids_json TEXT '
+          "NOT NULL DEFAULT '[]'",
+        );
+      }
+      if (!await _hasColumn(db, 'evaluation', 'rejection_code')) {
+        await db.execute(
+          'ALTER TABLE evaluation ADD COLUMN rejection_code TEXT',
+        );
+      }
+    }
+    if (await _hasTable(db, 'note_evaluation') &&
+        !await _hasColumn(db, 'note_evaluation', 'rejection_reason')) {
+      await db.execute(
+        'ALTER TABLE note_evaluation ADD COLUMN rejection_reason TEXT',
+      );
+    }
+    // Le squelette `ref_cours_notation` (workaround online, v9) est retiré au
+    // profit du bundle : purge sa donnée (table conservée inerte, jamais
+    // droppée — idiome constant de ce migrateur) + son curseur `sync_meta`
+    // résiduel, pour ne rien laisser d'orphelin.
+    if (await _hasTable(db, 'ref_cours_notation')) {
+      await db.delete('ref_cours_notation');
+    }
+    if (await _hasTable(db, 'sync_meta')) {
+      await db.delete(
+        'sync_meta',
+        where: "resource LIKE 'academics_cours_notation%'",
+      );
+    }
+  }
+  if (oldVersion < 13) {
+    // v13 — Inscription : `ref_academic_years.school_id`, colonne neuve pour
+    // scoper par école la résolution année courante/précédente (le module
+    // `bootstrap` — cache Hive online-only — est remplacé par le référentiel
+    // offline déjà pullé pour Inscription, décision FRONT 2026-07-26). Stampée
+    // côté client (jamais attendue du payload serveur). Backfill best-effort
+    // depuis l'utilisateur de la session active (device mono-école en
+    // pratique) ; à défaut reste vide — sans conséquence, le prochain pull
+    // référentiel réécrit la colonne pour chaque ligne (`upsertReferential`).
+    if (await _hasTable(db, 'ref_academic_years') &&
+        !await _hasColumn(db, 'ref_academic_years', 'school_id')) {
+      await db.execute(
+        'ALTER TABLE ref_academic_years ADD COLUMN school_id TEXT '
+        "NOT NULL DEFAULT ''",
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ref_academic_years_school '
+        'ON ref_academic_years(school_id)',
+      );
+      if (await _hasTable(db, 'auth_local_user') &&
+          await _hasTable(db, 'auth_local_session')) {
+        await db.execute('''
+          UPDATE ref_academic_years
+          SET school_id = (
+            SELECT u.school_id FROM auth_local_user u
+            JOIN auth_local_session s ON s.user_id = u.user_id
+            WHERE s.id = 1
+          )
+          WHERE EXISTS (
+            SELECT 1 FROM auth_local_user u
+            JOIN auth_local_session s ON s.user_id = u.user_id
+            WHERE s.id = 1
+          )
+        ''');
+      }
+    }
+  }
+  if (oldVersion < 14) {
+    // v14 — Inscription : `ref_school` (identité du tenant). Le bundle
+    // référentiel renvoie désormais `school` + `current`/`previous` au lieu
+    // d'une liste plate d'années — table neuve, aucun backfill (réécrite au
+    // prochain pull référentiel).
+    final table = schema.firstWhere((t) => t.name == 'ref_school');
+    await db.execute(_asIfNotExists(table.createTableSql));
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
   if (oldVersion < 15) {
     // v15 — Inscription : `enrollments.previous_school_level_id`, id
     // référentiel du niveau N-1 (distinct du texte libre

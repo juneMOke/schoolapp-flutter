@@ -35,6 +35,7 @@ void main() {
         'student_parent',
         'enrollments',
         // Inscription — tables de référence (pull, lecture seule)
+        'ref_school',
         'ref_academic_years',
         'ref_school_level_groups',
         'ref_school_levels',
@@ -49,8 +50,8 @@ void main() {
     );
   });
 
-  test('la liste exportée contient exactement 14 tables', () {
-    expect(enrollmentFinanceOfflineTables, hasLength(14));
+  test('la liste exportée contient exactement 15 tables', () {
+    expect(enrollmentFinanceOfflineTables, hasLength(15));
   });
 
   test('index F2/FF1 présents (phone, sync_status, client_uuid…)', () async {

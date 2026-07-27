@@ -20,6 +20,9 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// - `ref_cours`              — le cours = classe × ligne de barème × prof (réf).
 /// - `evaluation`             — évaluation, insert-only, uuid honoré (régime A).
 /// - `note_evaluation`        — note, upsert clé naturelle + LWW (régime C).
+/// - `ref_branche`/`ref_ligne_bareme`/`ref_chapitre`/`ref_periode`/
+///   `ref_sous_periode` — bundle `grades-referential` (ETag, remplacement
+///   d'ensemble) : branches, plafonds de saisie, chapitres, statut de clôture.
 ///
 /// Conventions (identiques aux autres branches) :
 /// - enums en TEXT, valeurs exactes SCREAMING_SNAKE.
@@ -127,7 +130,9 @@ const TableSchema evaluationTable = TableSchema(
       updated_at INTEGER NOT NULL,
       server_updated_at INTEGER,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
-      synced_at INTEGER
+      synced_at INTEGER,
+      chapitre_ids_json TEXT NOT NULL DEFAULT '[]',
+      rejection_code TEXT
     )
   ''',
   createIndexSql: [
@@ -154,6 +159,7 @@ const TableSchema noteEvaluationTable = TableSchema(
       server_updated_at INTEGER,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       synced_at INTEGER,
+      rejection_reason TEXT,
       UNIQUE (evaluation_id, student_id)
     )
   ''',
@@ -163,14 +169,14 @@ const TableSchema noteEvaluationTable = TableSchema(
   ],
 );
 
-/// `ref_cours_notation` — **squelette du détail de notation d'un cours** mis en
-/// cache (réf, lecture seule) : l'arbre période → sous-période avec leur **statut
-/// d'ouverture** (OUVERTE/CLOTUREE), l'effectif et la branche. Nécessaire hors
-/// ligne au détail cours ET à la garde de création (période clôturée). Les
-/// **évaluations** ne sont PAS stockées ici — elles restent composées depuis la
-/// table locale `evaluation` (pour fusionner le local non synchronisé). L'arbre
-/// est stocké en JSON (`periodes_json`) : structure lentement variable, pas de
-/// requête relationnelle dessus.
+/// `ref_cours_notation` — **RETIRÉE (v12)** : squelette du détail de notation
+/// d'un cours (arbre période → sous-période + statut, workaround alimenté en
+/// réutilisant un endpoint ONLINE), remplacé par le bundle `grades-referential`
+/// (`ref_periode`/`ref_sous_periode`, 100% local — cf. `CourseOfflineRepositoryImpl.
+/// getCoursNotationDetail`). Définition **conservée** pour que l'étape de
+/// migration `v8→v9` (qui la crée pour les bases pré-v9) reste rejouable ; la
+/// table reste présente mais inerte, purgée par la migration `v11→v12`. Aucun
+/// DAO ne la lit/l'écrit plus.
 const TableSchema refCoursNotationTable = TableSchema(
   name: 'ref_cours_notation',
   createTableSql: '''
@@ -186,6 +192,102 @@ const TableSchema refCoursNotationTable = TableSchema(
   ''',
 );
 
+/// `ref_branche` — branche académique (bundle `grades-referential`, réf,
+/// lecture seule). Remplacement d'ensemble à chaque pull (pas de delta).
+const TableSchema refBrancheTable = TableSchema(
+  name: 'ref_branche',
+  createTableSql: '''
+    CREATE TABLE ref_branche (
+      id TEXT PRIMARY KEY,
+      nom TEXT NOT NULL,
+      code TEXT
+    )
+  ''',
+);
+
+/// `ref_ligne_bareme` — plafonds de saisie (`max_journalier_par_sous_periode`,
+/// `max_examen_par_periode_scolaire` **NULLABLE** = branche sans examen, jamais
+/// traité comme 0) + pont vers la branche. Bundle `grades-referential`, réf,
+/// lecture seule.
+const TableSchema refLigneBaremeTable = TableSchema(
+  name: 'ref_ligne_bareme',
+  createTableSql: '''
+    CREATE TABLE ref_ligne_bareme (
+      id TEXT PRIMARY KEY,
+      grille_id TEXT NOT NULL,
+      rubrique_id TEXT NOT NULL,
+      branche_id TEXT NOT NULL,
+      ordre INTEGER NOT NULL DEFAULT 0,
+      max_journalier_par_sous_periode INTEGER NOT NULL,
+      max_examen_par_periode_scolaire INTEGER
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_ligne_bareme_branche ON ref_ligne_bareme(branche_id)',
+  ],
+);
+
+/// `ref_chapitre` — chapitre d'un cours, cochable à la création d'évaluation
+/// (`contenu` volontairement omis du bundle). Bundle `grades-referential`, réf,
+/// lecture seule.
+const TableSchema refChapitreTable = TableSchema(
+  name: 'ref_chapitre',
+  createTableSql: '''
+    CREATE TABLE ref_chapitre (
+      id TEXT PRIMARY KEY,
+      cours_id TEXT NOT NULL,
+      titre TEXT NOT NULL,
+      ordre INTEGER NOT NULL DEFAULT 0
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_chapitre_cours ON ref_chapitre(cours_id)',
+  ],
+);
+
+/// `ref_periode` — période scolaire à plat (statut de clôture, portée
+/// année × groupe de niveau). Bundle `grades-referential`, réf, lecture seule —
+/// **seule** source du statut de clôture (remplace le squelette
+/// `ref_cours_notation`, retiré).
+const TableSchema refPeriodeTable = TableSchema(
+  name: 'ref_periode',
+  createTableSql: '''
+    CREATE TABLE ref_periode (
+      id TEXT PRIMARY KEY,
+      academic_year_id TEXT NOT NULL,
+      school_level_group_id TEXT NOT NULL,
+      ordre INTEGER NOT NULL DEFAULT 0,
+      statut TEXT NOT NULL,
+      start_date TEXT,
+      end_date TEXT
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_periode_group '
+        'ON ref_periode(academic_year_id, school_level_group_id)',
+  ],
+);
+
+/// `ref_sous_periode` — sous-période à plat (lien parent + statut de clôture).
+/// Bundle `grades-referential`, réf, lecture seule.
+const TableSchema refSousPeriodeTable = TableSchema(
+  name: 'ref_sous_periode',
+  createTableSql: '''
+    CREATE TABLE ref_sous_periode (
+      id TEXT PRIMARY KEY,
+      periode_scolaire_id TEXT NOT NULL,
+      ordre INTEGER NOT NULL DEFAULT 0,
+      statut TEXT NOT NULL,
+      start_date TEXT,
+      end_date TEXT
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_ref_sous_periode_parent '
+        'ON ref_sous_periode(periode_scolaire_id)',
+  ],
+);
+
 /// Contribution de schéma de la branche Notes / Cours, insérée dans
 /// `buildOfflineSchema()`.
 const List<TableSchema> academicsOfflineTables = [
@@ -195,4 +297,9 @@ const List<TableSchema> academicsOfflineTables = [
   evaluationTable,
   noteEvaluationTable,
   refCoursNotationTable,
+  refBrancheTable,
+  refLigneBaremeTable,
+  refChapitreTable,
+  refPeriodeTable,
+  refSousPeriodeTable,
 ];
