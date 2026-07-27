@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_chip.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -11,7 +13,7 @@ typedef OnTargetGroupChanged =
 
 class TargetYearFields extends StatelessWidget {
   final AppLocalizations l10n;
-  final Bootstrap? bootstrap;
+  final AcademicYearContext? bootstrap;
   final TextEditingController currYearController;
   final TextEditingController targetOptionController;
   final String selectedSchoolLevelGroupId;
@@ -21,6 +23,10 @@ class TargetYearFields extends StatelessWidget {
   final String? groupError;
   final String? levelError;
   final bool isEditable;
+
+  /// Classe cible calculée automatiquement (réinscription) et pas encore
+  /// modifiée à la main — affiche un badge « Auto ».
+  final bool isAutoComputed;
 
   const TargetYearFields({
     super.key,
@@ -35,30 +41,29 @@ class TargetYearFields extends StatelessWidget {
     this.groupError,
     this.levelError,
     this.isEditable = true,
+    this.isAutoComputed = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final groupBundles = bootstrap?.schoolLevelGroups ?? const [];
     final selectedGroupBundle = groupBundles
-        .where((g) => g.schoolLevelGroup.id == selectedSchoolLevelGroupId)
+        .where((g) => g.group.id == selectedSchoolLevelGroupId)
         .firstOrNull;
 
     final groupItems = groupBundles
         .map(
           (bundle) => EteeloSelectItem<String>(
-            value: bundle.schoolLevelGroup.id,
-            label: bundle.schoolLevelGroup.name,
+            value: bundle.group.id,
+            label: bundle.group.name,
           ),
         )
         .toList(growable: false);
 
-    final levelItems = (selectedGroupBundle?.schoolLevels ?? const [])
+    final levelItems = (selectedGroupBundle?.levels ?? const [])
         .map(
-          (levelBundle) => EteeloSelectItem<String>(
-            value: levelBundle.schoolLevel.id,
-            label: levelBundle.schoolLevel.name,
-          ),
+          (level) =>
+              EteeloSelectItem<String>(value: level.id, label: level.name),
         )
         .toList(growable: false);
 
@@ -69,60 +74,77 @@ class TargetYearFields extends StatelessWidget {
       (item) => item.value == selectedSchoolLevelId,
     );
 
-    return WizardFieldsGrid(
-      fields: [
-        WizardGridField(
-          EteeloTextInput(
-            controller: currYearController,
-            label: l10n.currentAcademicYearLabel,
-            required: true,
-            readOnly: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isAutoComputed) ...[
+          Tooltip(
+            message: l10n.targetLevelAutoBadgeHelp,
+            child: EteeloChip(
+              icon: Icons.auto_awesome,
+              label: l10n.targetLevelAutoBadge,
+            ),
           ),
-        ),
-        WizardGridField(
-          EteeloSelectInput<String>(
-            label: l10n.targetCycleLabel,
-            required: true,
-            value: hasSelectedGroup ? selectedSchoolLevelGroupId : null,
-            items: groupItems,
-            onChanged: (value) {
-              if (value == null) return;
-              final newBundle = groupBundles
-                  .where((g) => g.schoolLevelGroup.id == value)
-                  .firstOrNull;
-              onGroupChanged(
-                value,
-                newBundle?.schoolLevels.firstOrNull?.schoolLevel.id ?? '',
-              );
-            },
-            errorText: groupError,
-            enabled: isEditable,
-            readOnly: !isEditable,
-          ),
-        ),
-        WizardGridField(
-          EteeloSelectInput<String>(
-            label: l10n.targetLevelLabel,
-            required: true,
-            value: hasSelectedLevel ? selectedSchoolLevelId : null,
-            items: levelItems,
-            onChanged: (value) {
-              if (value == null) return;
-              onLevelChanged(value);
-            },
-            errorText: levelError,
-            // Cascade : le niveau est désactivé tant que le cycle est vide.
-            enabled: isEditable && selectedSchoolLevelGroupId.isNotEmpty,
-            readOnly: !isEditable,
-          ),
-        ),
-        WizardGridField(
-          EteeloTextInput(
-            controller: targetOptionController,
-            label: l10n.optionLabel,
-            readOnly: !isEditable,
-            inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
-          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        WizardFieldsGrid(
+          fields: [
+            WizardGridField(
+              EteeloTextInput(
+                controller: currYearController,
+                label: l10n.currentAcademicYearLabel,
+                required: true,
+                readOnly: true,
+              ),
+            ),
+            WizardGridField(
+              EteeloSelectInput<String>(
+                label: l10n.targetCycleLabel,
+                required: true,
+                value: hasSelectedGroup ? selectedSchoolLevelGroupId : null,
+                items: groupItems,
+                onChanged: (value) {
+                  if (value == null) return;
+                  final newBundle = groupBundles
+                      .where((g) => g.group.id == value)
+                      .firstOrNull;
+                  onGroupChanged(
+                    value,
+                    newBundle?.levels.firstOrNull?.id ?? '',
+                  );
+                },
+                errorText: groupError,
+                enabled: isEditable,
+                readOnly: !isEditable,
+              ),
+            ),
+            WizardGridField(
+              EteeloSelectInput<String>(
+                label: l10n.targetLevelLabel,
+                required: true,
+                value: hasSelectedLevel ? selectedSchoolLevelId : null,
+                items: levelItems,
+                onChanged: (value) {
+                  if (value == null) return;
+                  onLevelChanged(value);
+                },
+                errorText: levelError,
+                // Cascade : le niveau est désactivé tant que le cycle est vide.
+                enabled: isEditable && selectedSchoolLevelGroupId.isNotEmpty,
+                readOnly: !isEditable,
+              ),
+            ),
+            WizardGridField(
+              EteeloTextInput(
+                controller: targetOptionController,
+                label: l10n.optionLabel,
+                readOnly: !isEditable,
+                inputFormatters: const [
+                  FirstLetterUppercaseTextInputFormatter(),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );

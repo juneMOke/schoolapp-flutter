@@ -17,6 +17,11 @@ class LocalEnrollment extends Equatable {
   final String? previousAcademicYear;
   final String? previousSchoolLevelGroup;
   final String? previousSchoolLevel;
+
+  /// Id référentiel du niveau N-1 (distinct du texte libre
+  /// [previousSchoolLevel]) — seedé pour les réinscriptions, alimente le
+  /// calcul auto de la classe cible.
+  final String? previousSchoolLevelId;
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
@@ -40,6 +45,7 @@ class LocalEnrollment extends Equatable {
     this.previousAcademicYear,
     this.previousSchoolLevelGroup,
     this.previousSchoolLevel,
+    this.previousSchoolLevelId,
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
@@ -65,6 +71,7 @@ class LocalEnrollment extends Equatable {
     previousAcademicYear,
     previousSchoolLevelGroup,
     previousSchoolLevel,
+    previousSchoolLevelId,
     previousRate,
     previousRank,
     validatedPreviousYear,

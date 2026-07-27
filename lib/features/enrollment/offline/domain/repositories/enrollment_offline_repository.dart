@@ -56,6 +56,12 @@ class ConfirmEnrollmentDraft {
   final String? previousAcademicYear;
   final String? previousSchoolLevelGroup;
   final String? previousSchoolLevel;
+
+  /// Id référentiel du niveau N-1 (distinct du texte libre
+  /// [previousSchoolLevel]) — connu uniquement en réinscription
+  /// (`ReenrollmentCandidate.previousSchoolLevelId`), alimente le calcul
+  /// auto de la classe cible. Pas un champ édité par le wizard.
+  final String? previousSchoolLevelId;
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
@@ -91,6 +97,7 @@ class ConfirmEnrollmentDraft {
     this.previousAcademicYear,
     this.previousSchoolLevelGroup,
     this.previousSchoolLevel,
+    this.previousSchoolLevelId,
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,

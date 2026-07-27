@@ -10,6 +10,12 @@ class EnrollmentSchoolDetail extends Equatable {
   final String previousAcademicYear;
   final String previousSchoolLevelGroup;
   final String previousSchoolLevel;
+
+  /// Id référentiel du niveau N-1 (distinct du texte libre
+  /// [previousSchoolLevel]) — vide si inconnu (hors réinscription, ou
+  /// dossier créé avant l'introduction de ce champ). Alimente le calcul
+  /// auto de la classe cible.
+  final String previousSchoolLevelId;
   final double previousRate;
   final int? previousRank;
   final bool validatedPreviousYear;
@@ -27,6 +33,7 @@ class EnrollmentSchoolDetail extends Equatable {
     required this.previousAcademicYear,
     required this.previousSchoolLevelGroup,
     required this.previousSchoolLevel,
+    this.previousSchoolLevelId = '',
     required this.previousRate,
     this.previousRank,
     required this.validatedPreviousYear,
@@ -46,6 +53,7 @@ class EnrollmentSchoolDetail extends Equatable {
     previousAcademicYear,
     previousSchoolLevelGroup,
     previousSchoolLevel,
+    previousSchoolLevelId,
     previousRate,
     previousRank,
     validatedPreviousYear,

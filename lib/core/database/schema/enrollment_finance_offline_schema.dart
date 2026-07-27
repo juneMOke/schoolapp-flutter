@@ -110,6 +110,7 @@ const TableSchema enrollmentsTable = TableSchema(
       previous_academic_year TEXT,
       previous_school_level_group TEXT,
       previous_school_level TEXT,
+      previous_school_level_id TEXT,
       previous_rate REAL,
       previous_rank INTEGER,
       validated_previous_year INTEGER,

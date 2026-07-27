@@ -110,16 +110,32 @@ class EnrollmentSeedDao {
     return rows.first['id'] as String?;
   }
 
+  /// `SELECT` enrichi du vivier N-1 : ajoute le libellé du niveau/cycle N-1
+  /// (résolus depuis `previous_school_level_id`, le backend ne renvoie que
+  /// l'id) et le nom de l'école COURANTE (`ref_school`, ligne unique) —
+  /// réutilisé comme « établissement précédent » car une réinscription se
+  /// fait forcément dans la même école. `LEFT JOIN` : un référentiel N-1 purgé
+  /// (année sortie du scope courant/précédent) dégrade en `NULL`, jamais en
+  /// échec de lecture.
+  static const _candidateSelect = '''
+    SELECT
+      rpys.*,
+      rsl.name AS previous_level_name,
+      rslg.name AS previous_level_group_name,
+      (SELECT name FROM ref_school LIMIT 1) AS current_school_name
+    FROM ref_previous_year_students rpys
+    LEFT JOIN ref_school_levels rsl ON rsl.id = rpys.previous_school_level_id
+    LEFT JOIN ref_school_level_groups rslg ON rslg.id = rsl.level_group_id
+  ''';
+
   /// Candidat de réinscription par `student_id` canonique (photo de départ du
   /// brouillon RE). `null` = cohorte non peuplée (pull dormant) ou élève absent.
   Future<ReenrollmentCandidate?> findReenrollmentCandidateByStudentId(
     String studentId,
   ) async {
-    final rows = await _db.query(
-      'ref_previous_year_students',
-      where: 'student_id = ?',
-      whereArgs: [studentId],
-      limit: 1,
+    final rows = await _db.rawQuery(
+      '$_candidateSelect WHERE rpys.student_id = ? LIMIT 1',
+      [studentId],
     );
     if (rows.isEmpty) return null;
     return _candidateFromRow(rows.first);
@@ -137,19 +153,18 @@ class EnrollmentSeedDao {
     final clauses = <String>[];
     final args = <Object?>[];
     if (schoolLevelId != null) {
-      clauses.add('previous_school_level_id = ?');
+      clauses.add('rpys.previous_school_level_id = ?');
       args.add(schoolLevelId);
     } else if (schoolLevelGroupId != null) {
       clauses.add(
-        'previous_school_level_id IN '
+        'rpys.previous_school_level_id IN '
         '(SELECT id FROM ref_school_levels WHERE level_group_id = ?)',
       );
       args.add(schoolLevelGroupId);
     }
     final where = clauses.isEmpty ? '' : 'WHERE ${clauses.join(' AND ')}';
     final rows = await _db.rawQuery(
-      'SELECT * FROM ref_previous_year_students $where '
-      'ORDER BY last_name, first_name',
+      '$_candidateSelect $where ORDER BY rpys.last_name, rpys.first_name',
       args,
     );
     return rows.map(_candidateFromRow).toList();
@@ -172,6 +187,9 @@ class EnrollmentSeedDao {
         guardianPhone: r['guardian_phone'] as String?,
         previousBalanceInCents: (r['previous_balance_in_cents'] as int?) ?? 0,
         currency: r['currency'] as String?,
+        previousSchoolLevelName: r['previous_level_name'] as String?,
+        previousSchoolLevelGroupName: r['previous_level_group_name'] as String?,
+        previousSchoolName: r['current_school_name'] as String?,
       );
 
   /// Préinscription par `id` (photo de départ du brouillon PRE). `null` =

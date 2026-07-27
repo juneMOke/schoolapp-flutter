@@ -840,6 +840,8 @@
   "targetCycleLabelHelp": "Target cycle for this enrollment.",
   "targetLevelLabel": "Target level",
   "targetLevelLabelHelp": "Target level for this enrollment.",
+  "targetLevelAutoBadge": "Auto",
+  "targetLevelAutoBadgeHelp": "Class automatically computed from last year's class. Change the cycle or level to override it.",
   "optionLabel": "Option",
   "optionLabelHelp": "Desired option or specialization.",
   "toDefine": "To be defined",

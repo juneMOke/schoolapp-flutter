@@ -22,6 +22,19 @@ class ReenrollmentCandidate extends Equatable {
   final int previousBalanceInCents;
   final String? currency;
 
+  /// Libellé du niveau N-1 (résolu localement depuis [previousSchoolLevelId]
+  /// via `ref_school_levels` — le backend de la cohorte ne renvoie qu'un id).
+  /// `null` si le référentiel N-1 n'est plus en cache (purge).
+  final String? previousSchoolLevelName;
+
+  /// Libellé du cycle N-1 (résolu via `ref_school_level_groups`), idem.
+  final String? previousSchoolLevelGroupName;
+
+  /// Nom de l'établissement N-1 : une réinscription se fait dans la MÊME
+  /// école, donc résolu depuis `ref_school` (l'école courante) plutôt que
+  /// porté par la cohorte (qui n'a pas ce champ).
+  final String? previousSchoolName;
+
   const ReenrollmentCandidate({
     required this.studentId,
     required this.matriculationNumber,
@@ -38,6 +51,9 @@ class ReenrollmentCandidate extends Equatable {
     this.guardianPhone,
     this.previousBalanceInCents = 0,
     this.currency,
+    this.previousSchoolLevelName,
+    this.previousSchoolLevelGroupName,
+    this.previousSchoolName,
   });
 
   @override
@@ -57,5 +73,8 @@ class ReenrollmentCandidate extends Equatable {
     guardianPhone,
     previousBalanceInCents,
     currency,
+    previousSchoolLevelName,
+    previousSchoolLevelGroupName,
+    previousSchoolName,
   ];
 }

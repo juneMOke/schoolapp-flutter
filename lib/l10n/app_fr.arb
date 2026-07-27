@@ -847,6 +847,8 @@
   "targetCycleLabelHelp": "Cycle souhaité pour l'inscription.",
   "targetLevelLabel": "Niveau souhaité",
   "targetLevelLabelHelp": "Niveau souhaité pour l'inscription.",
+  "targetLevelAutoBadge": "Auto",
+  "targetLevelAutoBadgeHelp": "Classe calculée automatiquement depuis la classe de l'année précédente. Modifiez le cycle ou le niveau pour la remplacer.",
   "optionLabel": "Option",
   "optionLabelHelp": "Option ou spécialisation souhaitée.",
   "toDefine": "À définir",

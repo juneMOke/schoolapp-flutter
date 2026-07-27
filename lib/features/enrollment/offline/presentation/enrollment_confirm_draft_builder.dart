@@ -65,6 +65,7 @@ abstract final class EnrollmentConfirmDraftBuilder {
         enrollment.previousSchoolLevelGroup,
       ),
       previousSchoolLevel: _nullIfEmpty(enrollment.previousSchoolLevel),
+      previousSchoolLevelId: _nullIfEmpty(enrollment.previousSchoolLevelId),
       previousRate: enrollment.previousRate,
       previousRank: enrollment.previousRank,
       validatedPreviousYear: enrollment.validatedPreviousYear,
@@ -90,7 +91,11 @@ abstract final class EnrollmentConfirmDraftBuilder {
   /// `source_ref` ET de matricule du brouillon ; l'année cible vient du
   /// bootstrap courant (la cohorte ne porte que l'année N-1). Le tuteur
   /// dénormalisé (nom + téléphone) est projeté en un `ConfirmParentDraft` que
-  /// l'utilisateur complète à l'étape Tuteurs.
+  /// l'utilisateur complète à l'étape Tuteurs. Antécédents (établissement,
+  /// cycle, niveau N-1) préremplis depuis les libellés résolus localement par
+  /// [ReenrollmentCandidate] (cf. `EnrollmentSeedDao._candidateSelect`) — la
+  /// moyenne/rang/année validée restent, eux, à saisir (absents du contrat
+  /// backend de la cohorte).
   static ConfirmEnrollmentDraft fromReenrollmentCandidate({
     required ReenrollmentCandidate candidate,
     required String academicYearId,
@@ -108,6 +113,10 @@ abstract final class EnrollmentConfirmDraftBuilder {
       status: 'PRE_REGISTERED',
       sourceRef: _nullIfEmpty(candidate.matriculationNumber),
       academicYearId: academicYearId,
+      previousSchoolLevelId: _nn(candidate.previousSchoolLevelId),
+      previousSchoolLevelGroup: _nn(candidate.previousSchoolLevelGroupName),
+      previousSchoolLevel: _nn(candidate.previousSchoolLevelName),
+      previousSchoolName: _nn(candidate.previousSchoolName),
       enrollmentDate: _today(),
       parents: _guardianParents(
         candidate.guardianName,

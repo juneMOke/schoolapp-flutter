@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -75,6 +75,7 @@ EnrollmentDetail mapLocalToEnrollmentDetail(
       previousAcademicYear: enrollment.previousAcademicYear ?? '',
       previousSchoolLevelGroup: enrollment.previousSchoolLevelGroup ?? '',
       previousSchoolLevel: enrollment.previousSchoolLevel ?? '',
+      previousSchoolLevelId: enrollment.previousSchoolLevelId ?? '',
       previousRate: enrollment.previousRate ?? 0,
       previousRank: enrollment.previousRank,
       validatedPreviousYear: enrollment.validatedPreviousYear ?? false,
@@ -138,34 +139,26 @@ EnrollmentDetail buildDraftSeedDetail({
   );
 }
 
-/// Aplati les niveaux scolaires du bootstrap en entités domaine (résolution du
-/// niveau visé par le mapper).
-List<SchoolLevel> schoolLevelsFromBootstrap(Bootstrap? bootstrap) {
-  if (bootstrap == null) return const [];
+/// Aplati les niveaux scolaires du contexte académique en entités domaine
+/// (résolution du niveau visé par le mapper).
+List<SchoolLevel> schoolLevelsFromAcademicYearContext(
+  AcademicYearContext? academicYearContext,
+) {
+  if (academicYearContext == null) return const [];
   return [
-    for (final group in bootstrap.schoolLevelGroups)
-      for (final bundle in group.schoolLevels)
-        SchoolLevel(
-          id: bundle.schoolLevel.id,
-          name: bundle.schoolLevel.name,
-          code: bundle.schoolLevel.code,
-          displayOrder: bundle.schoolLevel.displayOrder,
-          splitIntoClassrooms: bundle.schoolLevel.splitIntoClassrooms,
-        ),
+    for (final bundle in academicYearContext.schoolLevelGroups)
+      for (final level in bundle.levels) level,
   ];
 }
 
-/// Aplati les groupes de niveaux (cycles) du bootstrap en entités domaine.
-List<SchoolLevelGroup> schoolLevelGroupsFromBootstrap(Bootstrap? bootstrap) {
-  if (bootstrap == null) return const [];
-  return bootstrap.schoolLevelGroups
-      .map(
-        (group) => SchoolLevelGroup(
-          id: group.schoolLevelGroup.id,
-          name: group.schoolLevelGroup.name,
-          code: group.schoolLevelGroup.code,
-        ),
-      )
+/// Aplati les groupes de niveaux (cycles) du contexte académique en entités
+/// domaine.
+List<SchoolLevelGroup> schoolLevelGroupsFromAcademicYearContext(
+  AcademicYearContext? academicYearContext,
+) {
+  if (academicYearContext == null) return const [];
+  return academicYearContext.schoolLevelGroups
+      .map((bundle) => bundle.group)
       .toList(growable: false);
 }
 

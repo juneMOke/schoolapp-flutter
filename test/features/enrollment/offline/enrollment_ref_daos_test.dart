@@ -26,38 +26,46 @@ void main() {
     await db.close();
   });
 
+  const defaultSchool = RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile');
+
   ReferentialBundleDto bundle({
-    List<RefAcademicYearDto>? years,
+    RefSchoolDto? school,
+    RefAcademicYearDto? currentYear,
     List<RefSchoolLevelGroupDto>? groups,
     List<RefSchoolLevelDto>? levels,
+    ReferentialYearBundleDto? previous,
   }) => ReferentialBundleDto(
-    academicYears:
-        years ??
-        const [RefAcademicYearDto(id: 'ay-1', name: '2026', isCurrent: true)],
-    schoolLevelGroups:
-        groups ??
-        const [
-          RefSchoolLevelGroupDto(
-            id: 'grp-1',
-            name: 'Primaire',
-            code: 'PRIM',
-            academicYearId: 'ay-1',
-            displayOrder: 1,
-          ),
-        ],
-    schoolLevels:
-        levels ??
-        const [
-          RefSchoolLevelDto(
-            id: 'lvl-1',
-            name: '1ère Primaire',
-            code: 'P1',
-            levelGroupId: 'grp-1',
-            displayOrder: 1,
-            splitIntoClassrooms: true,
-          ),
-        ],
-    feeTariffs: const [],
+    school: school ?? defaultSchool,
+    current: ReferentialYearBundleDto(
+      academicYear:
+          currentYear ??
+          const RefAcademicYearDto(id: 'ay-1', name: '2026', isCurrent: true),
+      schoolLevelGroups:
+          groups ??
+          const [
+            RefSchoolLevelGroupDto(
+              id: 'grp-1',
+              name: 'Primaire',
+              code: 'PRIM',
+              academicYearId: 'ay-1',
+              displayOrder: 1,
+            ),
+          ],
+      schoolLevels:
+          levels ??
+          const [
+            RefSchoolLevelDto(
+              id: 'lvl-1',
+              name: '1ère Primaire',
+              code: 'P1',
+              levelGroupId: 'grp-1',
+              displayOrder: 1,
+              splitIntoClassrooms: true,
+            ),
+          ],
+      feeTariffs: const [],
+    ),
+    previous: previous,
     serverTime: '2026-07-08T10:00:00Z',
   );
 
@@ -141,13 +149,18 @@ void main() {
   );
 
   group('upsertReferential', () {
-    test('insère années/cycles/niveaux et renvoie le compte', () async {
+    test('insère école/année/cycle/niveau et renvoie le compte', () async {
       final count = await referentialDao.upsertReferential(
         bundle(),
         syncedAt: 500,
+        schoolId: 'school-1',
       );
 
-      expect(count, 3);
+      expect(count, 4); // ref_school + année + cycle + niveau
+      final school = (await db.query('ref_school')).single;
+      expect(school['id'], 'sch-1');
+      expect(school['name'], 'Ecole Etoile');
+      expect(school['synced_at'], 500);
       final year = (await db.query('ref_academic_years')).single;
       expect(year['name'], '2026');
       expect(year['is_current'], 1);
@@ -159,15 +172,102 @@ void main() {
       expect(level['level_group_id'], 'grp-1');
     });
 
+    test(
+      'ref_school : cache mono-ligne, remplacée en entier au pull suivant (id différent)',
+      () async {
+        await referentialDao.upsertReferential(
+          bundle(
+            school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
+          ),
+          syncedAt: 500,
+          schoolId: 'school-1',
+        );
+        await referentialDao.upsertReferential(
+          bundle(
+            school: const RefSchoolDto(id: 'sch-2', name: 'Ecole du Lac'),
+          ),
+          syncedAt: 600,
+          schoolId: 'school-1',
+        );
+
+        final rows = await db.query('ref_school');
+        expect(rows, hasLength(1));
+        expect(rows.single['id'], 'sch-2');
+        expect(rows.single['name'], 'Ecole du Lac');
+      },
+    );
+
+    test(
+      'previous non-null : écrit aussi l\'année précédente (is_current=0) et ses cycles/niveaux',
+      () async {
+        final count = await referentialDao.upsertReferential(
+          bundle(
+            previous: const ReferentialYearBundleDto(
+              academicYear: RefAcademicYearDto(
+                id: 'ay-0',
+                name: '2025',
+                isCurrent: false,
+              ),
+              schoolLevelGroups: [
+                RefSchoolLevelGroupDto(
+                  id: 'grp-0',
+                  name: 'Primaire 2025',
+                  code: 'PRIM',
+                  academicYearId: 'ay-0',
+                  displayOrder: 1,
+                ),
+              ],
+              schoolLevels: [
+                RefSchoolLevelDto(
+                  id: 'lvl-0',
+                  name: '1ère Primaire 2025',
+                  code: 'P1',
+                  levelGroupId: 'grp-0',
+                  displayOrder: 1,
+                  splitIntoClassrooms: false,
+                ),
+              ],
+              feeTariffs: [],
+            ),
+          ),
+          syncedAt: 500,
+          schoolId: 'school-1',
+        );
+
+        expect(count, 7); // ref_school + 2 années + 2 cycles + 2 niveaux
+        final years = await db.query('ref_academic_years', orderBy: 'id');
+        expect(years.map((r) => r['id']), ['ay-0', 'ay-1']);
+        final previousYear = years.firstWhere((r) => r['id'] == 'ay-0');
+        expect(previousYear['is_current'], 0);
+        final currentYear = years.firstWhere((r) => r['id'] == 'ay-1');
+        expect(currentYear['is_current'], 1);
+        expect(
+          (await db.query('ref_school_level_groups')).map((r) => r['id']),
+          containsAll(['grp-0', 'grp-1']),
+        );
+        expect(
+          (await db.query('ref_school_levels')).map((r) => r['id']),
+          containsAll(['lvl-0', 'lvl-1']),
+        );
+      },
+    );
+
     test('est idempotent — rejouer remplace sans dupliquer', () async {
-      await referentialDao.upsertReferential(bundle(), syncedAt: 500);
+      await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
       await referentialDao.upsertReferential(
         bundle(
-          years: const [
-            RefAcademicYearDto(id: 'ay-1', name: '2026-2027', isCurrent: true),
-          ],
+          currentYear: const RefAcademicYearDto(
+            id: 'ay-1',
+            name: '2026-2027',
+            isCurrent: true,
+          ),
         ),
         syncedAt: 600,
+        schoolId: 'school-1',
       );
 
       final rows = await db.query('ref_academic_years');
@@ -177,14 +277,21 @@ void main() {
     });
 
     test('remet is_current à zéro : jamais deux années courantes', () async {
-      await referentialDao.upsertReferential(bundle(), syncedAt: 500);
+      await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
       await referentialDao.upsertReferential(
         bundle(
-          years: const [
-            RefAcademicYearDto(id: 'ay-2', name: '2027', isCurrent: true),
-          ],
+          currentYear: const RefAcademicYearDto(
+            id: 'ay-2',
+            name: '2027',
+            isCurrent: true,
+          ),
         ),
         syncedAt: 600,
+        schoolId: 'school-1',
       );
 
       final current = await db.query(
@@ -194,22 +301,6 @@ void main() {
       expect(current, hasLength(1));
       expect(current.single['id'], 'ay-2');
     });
-
-    test(
-      'un bundle sans années ne touche ni is_current ni les tables',
-      () async {
-        await referentialDao.upsertReferential(bundle(), syncedAt: 500);
-        final count = await referentialDao.upsertReferential(
-          bundle(years: const [], groups: const [], levels: const []),
-          syncedAt: 600,
-        );
-
-        expect(count, 0);
-        final year = (await db.query('ref_academic_years')).single;
-        expect(year['is_current'], 1);
-        expect(await db.query('ref_school_levels'), hasLength(1));
-      },
-    );
 
     test('purge les cycles/niveaux disparus du snapshot (scopé année)', () async {
       await referentialDao.upsertReferential(
@@ -250,10 +341,15 @@ void main() {
           ],
         ),
         syncedAt: 500,
+        schoolId: 'school-1',
       );
 
       // Nouveau snapshot de la même année SANS grp-2/lvl-2 (supprimés serveur).
-      await referentialDao.upsertReferential(bundle(), syncedAt: 600);
+      await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 600,
+        schoolId: 'school-1',
+      );
 
       expect((await db.query('ref_school_level_groups')).map((r) => r['id']), [
         'grp-1',
@@ -289,7 +385,11 @@ void main() {
         'synced_at': 1,
       });
 
-      await referentialDao.upsertReferential(bundle(), syncedAt: 600);
+      await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 600,
+        schoolId: 'school-1',
+      );
 
       expect(await db.query('ref_academic_years'), hasLength(2));
       expect(
@@ -308,6 +408,262 @@ void main() {
         ),
         hasLength(1),
       );
+    });
+
+    test(
+      'stampe school_id sur chaque année (jamais depuis le payload)',
+      () async {
+        await referentialDao.upsertReferential(
+          bundle(),
+          syncedAt: 500,
+          schoolId: 'school-1',
+        );
+
+        final year = (await db.query('ref_academic_years')).single;
+        expect(year['school_id'], 'school-1');
+      },
+    );
+
+    test('device multi-écoles : un pull pour school-2 NE désarme PAS '
+        'is_current de school-1 déjà en cache (revue adversariale)', () async {
+      await referentialDao.upsertReferential(
+        bundle(),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      await referentialDao.upsertReferential(
+        bundle(
+          currentYear: const RefAcademicYearDto(
+            id: 'ay-2',
+            name: '2027',
+            isCurrent: true,
+          ),
+          groups: const [],
+          levels: const [],
+        ),
+        syncedAt: 600,
+        schoolId: 'school-2',
+      );
+
+      final school1Year = (await db.query(
+        'ref_academic_years',
+        where: 'school_id = ?',
+        whereArgs: ['school-1'],
+      )).single;
+      expect(
+        school1Year['is_current'],
+        1,
+        reason:
+            'ay-1 (school-1) doit rester is_current : le pull de school-2 '
+            'ne doit toucher QUE les lignes de school-2',
+      );
+      expect(
+        await referentialDao.findCurrentAcademicYearId('school-1'),
+        'ay-1',
+      );
+      expect(
+        await referentialDao.findCurrentAcademicYearId('school-2'),
+        'ay-2',
+      );
+    });
+  });
+
+  group(
+    'findCurrentAcademicYearId / findPreviousAcademicYearId (scopés école)',
+    () {
+      setUp(() async {
+        await db.insert('ref_academic_years', {
+          'id': 'ay-other-school',
+          'name': '2026 (autre école)',
+          'start_date': '2026-09-01T00:00:00Z',
+          'is_current': 1,
+          'school_id': 'school-2',
+          'synced_at': 1,
+        });
+      });
+
+      test('findCurrentAcademicYearId ignore les autres écoles', () async {
+        await db.insert('ref_academic_years', {
+          'id': 'ay-1',
+          'name': '2026',
+          'start_date': '2026-09-01T00:00:00Z',
+          'is_current': 1,
+          'school_id': 'school-1',
+          'synced_at': 1,
+        });
+
+        expect(
+          await referentialDao.findCurrentAcademicYearId('school-1'),
+          'ay-1',
+        );
+        expect(
+          await referentialDao.findCurrentAcademicYearId('school-3'),
+          isNull,
+        );
+      });
+
+      test(
+        'findPreviousAcademicYearId : la plus récente année STRICTEMENT '
+        'antérieure à la courante (comparaison de dates, pas un flag serveur)',
+        () async {
+          await db.insert('ref_academic_years', {
+            'id': 'ay-cur',
+            'name': '2026-2027',
+            'start_date': '2026-09-01T00:00:00Z',
+            'is_current': 1,
+            'school_id': 'school-1',
+            'synced_at': 1,
+          });
+          await db.insert('ref_academic_years', {
+            'id': 'ay-prev',
+            'name': '2025-2026',
+            'start_date': '2025-09-01T00:00:00Z',
+            'is_current': 0,
+            'school_id': 'school-1',
+            'synced_at': 1,
+          });
+          await db.insert('ref_academic_years', {
+            'id': 'ay-prev-prev',
+            'name': '2024-2025',
+            'start_date': '2024-09-01T00:00:00Z',
+            'is_current': 0,
+            'school_id': 'school-1',
+            'synced_at': 1,
+          });
+
+          expect(
+            await referentialDao.findPreviousAcademicYearId('school-1'),
+            'ay-prev',
+          );
+        },
+      );
+
+      test(
+        'findPreviousAcademicYearId : pas d\'année courante résolue → null',
+        () async {
+          expect(
+            await referentialDao.findPreviousAcademicYearId('school-1'),
+            isNull,
+          );
+        },
+      );
+
+      test(
+        'findPreviousAcademicYearId : aucune année antérieure connue → null',
+        () async {
+          await db.insert('ref_academic_years', {
+            'id': 'ay-cur',
+            'name': '2026-2027',
+            'start_date': '2026-09-01T00:00:00Z',
+            'is_current': 1,
+            'school_id': 'school-1',
+            'synced_at': 1,
+          });
+
+          expect(
+            await referentialDao.findPreviousAcademicYearId('school-1'),
+            isNull,
+          );
+        },
+      );
+    },
+  );
+
+  group('getSchool', () {
+    test(
+      'null tant qu\'aucun pull référentiel n\'a écrit ref_school',
+      () async {
+        expect(await referentialDao.getSchool(), isNull);
+      },
+    );
+
+    test('renvoie l\'école écrite par le dernier pull', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          school: const RefSchoolDto(
+            id: 'sch-1',
+            name: 'Ecole Etoile',
+            city: 'Goma',
+          ),
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      final school = await referentialDao.getSchool();
+      expect(school, isNotNull);
+      expect(school!.id, 'sch-1');
+      expect(school.name, 'Ecole Etoile');
+      expect(school.city, 'Goma');
+    });
+  });
+
+  group('markSchoolLevelSplit', () {
+    test('patch optimiste : passe le niveau à réparti', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          levels: const [
+            RefSchoolLevelDto(
+              id: 'lvl-1',
+              name: '1ère Primaire',
+              code: 'P1',
+              levelGroupId: 'grp-1',
+              displayOrder: 1,
+              splitIntoClassrooms: false,
+            ),
+          ],
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+
+      await referentialDao.markSchoolLevelSplit('lvl-1');
+
+      final level = (await db.query('ref_school_levels')).single;
+      expect(level['split_into_classrooms'], 1);
+    });
+
+    test('reconfirmé sans conflit par le prochain pull référentiel', () async {
+      await referentialDao.upsertReferential(
+        bundle(
+          levels: const [
+            RefSchoolLevelDto(
+              id: 'lvl-1',
+              name: '1ère Primaire',
+              code: 'P1',
+              levelGroupId: 'grp-1',
+              displayOrder: 1,
+              splitIntoClassrooms: false,
+            ),
+          ],
+        ),
+        syncedAt: 500,
+        schoolId: 'school-1',
+      );
+      await referentialDao.markSchoolLevelSplit('lvl-1');
+
+      // Le prochain pull renvoie le flag serveur (vrai désormais) : pas de
+      // conflit, le patch local et le serveur convergent.
+      await referentialDao.upsertReferential(
+        bundle(
+          levels: const [
+            RefSchoolLevelDto(
+              id: 'lvl-1',
+              name: '1ère Primaire',
+              code: 'P1',
+              levelGroupId: 'grp-1',
+              displayOrder: 1,
+              splitIntoClassrooms: true,
+            ),
+          ],
+        ),
+        syncedAt: 600,
+        schoolId: 'school-1',
+      );
+
+      final level = (await db.query('ref_school_levels')).single;
+      expect(level['split_into_classrooms'], 1);
     });
   });
 
@@ -671,6 +1027,43 @@ void main() {
         await seedDao.findReenrollmentCandidateByStudentId('inconnu'),
         isNull,
       );
+    });
+
+    test(
+      'libellés cycle/niveau + nom école résolus depuis le référentiel local '
+      '(préremplissage RE, pas de saisie from scratch)',
+      () async {
+        await referentialDao.upsertReferential(
+          bundle(),
+          syncedAt: 500,
+          schoolId: 'school-1',
+        );
+        await seedDao.replaceReenrollmentCohort([
+          candidate(previousSchoolLevelId: 'lvl-1'),
+        ], syncedAt: 1);
+
+        final found = await seedDao.findReenrollmentCandidateByStudentId(
+          'stu-1',
+        );
+
+        expect(found, isNotNull);
+        expect(found!.previousSchoolLevelName, '1ère Primaire');
+        expect(found.previousSchoolLevelGroupName, 'Primaire');
+        expect(found.previousSchoolName, 'Ecole Etoile');
+      },
+    );
+
+    test('niveau N-1 introuvable dans le référentiel courant (purgé) → '
+        'libellés null, pas de valeur inventée', () async {
+      await seedDao.replaceReenrollmentCohort([
+        candidate(previousSchoolLevelId: 'lvl-disparu'),
+      ], syncedAt: 1);
+
+      final found = await seedDao.findReenrollmentCandidateByStudentId('stu-1');
+
+      expect(found, isNotNull);
+      expect(found!.previousSchoolLevelName, isNull);
+      expect(found.previousSchoolLevelGroupName, isNull);
     });
   });
 

@@ -114,6 +114,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
           previousAcademicYear: seed.previousAcademicYear,
           previousSchoolLevelGroup: seed.previousSchoolLevelGroup,
           previousSchoolLevel: seed.previousSchoolLevel,
+          previousSchoolLevelId: seed.previousSchoolLevelId,
           previousRate: seed.previousRate,
           previousRank: seed.previousRank,
           validatedPreviousYear: seed.validatedPreviousYear,

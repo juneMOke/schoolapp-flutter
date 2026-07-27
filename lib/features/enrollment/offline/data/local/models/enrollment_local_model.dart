@@ -25,6 +25,11 @@ class EnrollmentLocalModel {
   final String? previousAcademicYear;
   final String? previousSchoolLevelGroup;
   final String? previousSchoolLevel;
+
+  /// Id référentiel du niveau N-1 (distinct du texte libre
+  /// [previousSchoolLevel]) — seedé pour les réinscriptions, alimente le
+  /// calcul auto de la classe cible.
+  final String? previousSchoolLevelId;
   final double? previousRate;
   final int? previousRank;
   final bool? validatedPreviousYear;
@@ -51,6 +56,7 @@ class EnrollmentLocalModel {
     this.previousAcademicYear,
     this.previousSchoolLevelGroup,
     this.previousSchoolLevel,
+    this.previousSchoolLevelId,
     this.previousRate,
     this.previousRank,
     this.validatedPreviousYear,
@@ -78,6 +84,7 @@ class EnrollmentLocalModel {
     'previous_academic_year': previousAcademicYear,
     'previous_school_level_group': previousSchoolLevelGroup,
     'previous_school_level': previousSchoolLevel,
+    'previous_school_level_id': previousSchoolLevelId,
     'previous_rate': previousRate,
     'previous_rank': previousRank,
     'validated_previous_year': _boolToDb(validatedPreviousYear),
@@ -106,6 +113,7 @@ class EnrollmentLocalModel {
         previousAcademicYear: m['previous_academic_year'] as String?,
         previousSchoolLevelGroup: m['previous_school_level_group'] as String?,
         previousSchoolLevel: m['previous_school_level'] as String?,
+        previousSchoolLevelId: m['previous_school_level_id'] as String?,
         previousRate: (m['previous_rate'] as num?)?.toDouble(),
         previousRank: m['previous_rank'] as int?,
         validatedPreviousYear: _boolFromDb(m['validated_previous_year']),
@@ -132,6 +140,7 @@ class EnrollmentLocalModel {
     previousAcademicYear: previousAcademicYear,
     previousSchoolLevelGroup: previousSchoolLevelGroup,
     previousSchoolLevel: previousSchoolLevel,
+    previousSchoolLevelId: previousSchoolLevelId,
     previousRate: previousRate,
     previousRank: previousRank,
     validatedPreviousYear: validatedPreviousYear,

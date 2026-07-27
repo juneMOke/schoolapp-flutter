@@ -221,6 +221,19 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (oldVersion < 15) {
+    // v15 — Inscription : `enrollments.previous_school_level_id`, id
+    // référentiel du niveau N-1 (distinct du texte libre
+    // `previous_school_level`), utilisé par le calcul auto de la classe
+    // cible en réinscription. Seedé uniquement pour les nouveaux dossiers RE
+    // — aucun backfill des dossiers existants.
+    if (await _hasTable(db, 'enrollments') &&
+        !await _hasColumn(db, 'enrollments', 'previous_school_level_id')) {
+      await db.execute(
+        'ALTER TABLE enrollments ADD COLUMN previous_school_level_id TEXT',
+      );
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

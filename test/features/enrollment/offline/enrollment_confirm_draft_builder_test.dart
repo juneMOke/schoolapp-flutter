@@ -231,6 +231,76 @@ void main() {
       );
       expect(draft.gender, 'MALE');
     });
+
+    test(
+      'previousSchoolLevelId propagé (alimente le calcul auto de la classe cible)',
+      () {
+        const withPreviousLevel = ReenrollmentCandidate(
+          studentId: 's1',
+          matriculationNumber: 'M1',
+          firstName: 'A',
+          lastName: 'B',
+          gender: 'MALE',
+          dateOfBirth: '2015-04-02',
+          previousSchoolLevelId: 'lvl-6e',
+        );
+        final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+          candidate: withPreviousLevel,
+          academicYearId: 'ay-2026',
+        );
+        expect(draft.previousSchoolLevelId, 'lvl-6e');
+      },
+    );
+
+    test(
+      'previousSchoolLevelId absent → null (pas de calcul auto possible)',
+      () {
+        final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+          candidate: candidate,
+          academicYearId: 'ay-2026',
+        );
+        expect(draft.previousSchoolLevelId, isNull);
+      },
+    );
+
+    test(
+      'établissement/cycle/niveau précédents (libellés résolus localement) '
+      'préremplissent le brouillon — pas de saisie manuelle from scratch',
+      () {
+        const withLabels = ReenrollmentCandidate(
+          studentId: 's1',
+          matriculationNumber: 'M1',
+          firstName: 'A',
+          lastName: 'B',
+          gender: 'MALE',
+          dateOfBirth: '2015-04-02',
+          previousSchoolLevelId: 'lvl-6e',
+          previousSchoolLevelName: '6e Primaire',
+          previousSchoolLevelGroupName: 'Primaire',
+          previousSchoolName: 'Ecole Etoile',
+        );
+        final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+          candidate: withLabels,
+          academicYearId: 'ay-2026',
+        );
+        expect(draft.previousSchoolLevel, '6e Primaire');
+        expect(draft.previousSchoolLevelGroup, 'Primaire');
+        expect(draft.previousSchoolName, 'Ecole Etoile');
+      },
+    );
+
+    test(
+      'libellés absents (référentiel N-1 purgé) → null, pas de valeur inventée',
+      () {
+        final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
+          candidate: candidate,
+          academicYearId: 'ay-2026',
+        );
+        expect(draft.previousSchoolLevel, isNull);
+        expect(draft.previousSchoolLevelGroup, isNull);
+        expect(draft.previousSchoolName, isNull);
+      },
+    );
   });
 
   group('fromPreEnrollment (seed PRE local)', () {
