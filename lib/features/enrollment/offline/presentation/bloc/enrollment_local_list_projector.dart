@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/local_enrollment_summary_mapper.dart';
@@ -24,18 +25,15 @@ class EnrollmentLocalPage {
 ///
 /// Le DAO local n'offre que des filtres grossiers (`getEnrollments(status)` /
 /// `searchByAcademicInfo(niveaux)`). On applique ici le reste des critères
-/// saisis (parties de nom en « contient » insensible à la casse, DOB exacte)
-/// pour retrouver une sémantique de recherche fidèle à l'online, puis on
-/// projette chaque `LocalEnrollmentListItem` sur le `EnrollmentSummary` consommé
-/// par les widgets de résultats, et enfin on découpe la page demandée.
+/// saisis (parties de nom en « contient » insensible à la casse et aux accents,
+/// DOB exacte) pour retrouver une sémantique de recherche fidèle à l'online,
+/// puis on projette chaque `LocalEnrollmentListItem` sur le `EnrollmentSummary`
+/// consommé par les widgets de résultats, et enfin on découpe la page demandée.
 class EnrollmentLocalListProjector {
   const EnrollmentLocalListProjector._();
 
-  static bool _contains(String? field, String? term) {
-    final t = term?.trim() ?? '';
-    if (t.isEmpty) return true;
-    return (field ?? '').toLowerCase().contains(t.toLowerCase());
-  }
+  static bool _contains(String? field, String? term) =>
+      SearchNormalizationHelper.contains(field, term);
 
   /// Filtre client-side puis mappe en résumés (ordre du DAO préservé).
   static List<EnrollmentSummary> project(

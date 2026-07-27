@@ -81,6 +81,29 @@ void main() {
       expect(result.map((s) => s.enrollmentId), ['e3']);
     });
 
+    test('filtre prénom insensible aux accents (terme sans accent)', () {
+      final withAccents = [
+        _item(enrollmentId: 'e4', firstName: 'José', lastName: 'Nkemba'),
+        _item(enrollmentId: 'e5', firstName: 'Émile', lastName: 'Kalonji'),
+      ];
+      final result = EnrollmentLocalListProjector.project(
+        withAccents,
+        firstName: 'jose',
+      );
+      expect(result.map((s) => s.enrollmentId), ['e4']);
+    });
+
+    test('filtre prénom insensible aux accents (terme avec accent)', () {
+      final withAccents = [
+        _item(enrollmentId: 'e6', firstName: 'Ecole', lastName: 'Test'),
+      ];
+      final result = EnrollmentLocalListProjector.project(
+        withAccents,
+        firstName: 'écolé',
+      );
+      expect(result.map((s) => s.enrollmentId), ['e6']);
+    });
+
     test('critères combinés (ET)', () {
       final result = EnrollmentLocalListProjector.project(
         items,
@@ -176,6 +199,18 @@ void main() {
         ],
         localDossiers: const [],
         firstName: 'Awa',
+      );
+      expect(result.map((s) => s.student.id), ['stu-A']);
+    });
+
+    test('raffinage nom insensible aux accents appliqué au vivier', () {
+      final result = EnrollmentLocalListProjector.projectReenrollment(
+        candidates: [
+          cand(studentId: 'stu-A', firstName: 'José'),
+          cand(studentId: 'stu-B', firstName: 'Bob'),
+        ],
+        localDossiers: const [],
+        firstName: 'jose',
       );
       expect(result.map((s) => s.student.id), ['stu-A']);
     });
