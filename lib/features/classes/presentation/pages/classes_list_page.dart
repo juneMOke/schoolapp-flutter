@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_policy.dart';
@@ -50,10 +48,8 @@ class _ClassesListPageState extends State<ClassesListPage> {
       if (!mounted) {
         return;
       }
-      context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPayloadKey,
-        ),
+      context.read<AcademicYearContextBloc>().add(
+        const AcademicYearContextRequested(),
       );
     });
   }
@@ -77,13 +73,21 @@ class _ClassesListPageState extends State<ClassesListPage> {
           // connue, peupler le cache local classes/rosters (pull CF2) pour que
           // la lecture du roster (ClassroomBloc, redirigée en local) trouve des
           // données. Une seule fois par montage.
-          BlocListener<BootstrapCurrentYearBloc, BootstrapContextState>(
+          BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
             listenWhen: (previous, current) =>
                 previous.status != current.status &&
-                current.status == BootstrapContextLoadStatus.success,
+                current.status == AcademicYearContextLoadStatus.success,
             listener: (context, state) {
-              final academicYearId = state.bootstrap?.academicYear.id ?? '';
-              if (academicYearId.isEmpty || _classroomsPullRequested) {
+              final academicYearId = state.context?.academicYear.id ?? '';
+              if (academicYearId.isEmpty) {
+                return;
+              }
+              // Lecture locale immédiate pour peupler le dropdown (données
+              // déjà en cache) + pull best-effort une seule fois par montage.
+              context.read<ClassroomOfflineBloc>().add(
+                OfflineClassroomsRequested(academicYearId: academicYearId),
+              );
+              if (_classroomsPullRequested) {
                 return;
               }
               _classroomsPullRequested = true;
@@ -132,21 +136,25 @@ class _ClassesListPageState extends State<ClassesListPage> {
               if (state.syncStatus != ClassroomStatus.success) {
                 return;
               }
-              final request = _lastRequest;
-              if (request == null ||
-                  !request.targetsClassroom ||
-                  request.selectedClassroom == null) {
-                return;
-              }
               final academicYearId =
                   context
-                      .read<BootstrapCurrentYearBloc>()
+                      .read<AcademicYearContextBloc>()
                       .state
-                      .bootstrap
+                      .context
                       ?.academicYear
                       .id ??
                   '';
               if (academicYearId.isEmpty) {
+                return;
+              }
+              // Re-lit les classes en local (dropdown à jour après le pull).
+              context.read<ClassroomOfflineBloc>().add(
+                OfflineClassroomsRequested(academicYearId: academicYearId),
+              );
+              final request = _lastRequest;
+              if (request == null ||
+                  !request.targetsClassroom ||
+                  request.selectedClassroom == null) {
                 return;
               }
               context.read<ClassroomBloc>().add(
@@ -158,16 +166,19 @@ class _ClassesListPageState extends State<ClassesListPage> {
             },
           ),
         ],
-        child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-          buildWhen: ClassesListPageHelpers.buildWhenBootstrapChanges,
-          builder: (context, bootstrapState) {
-            if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                bootstrapState.status == BootstrapContextLoadStatus.initial) {
+        child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+          buildWhen: ClassesListPageHelpers.buildWhenAcademicYearContextChanges,
+          builder: (context, academicYearState) {
+            if (academicYearState.status ==
+                    AcademicYearContextLoadStatus.loading ||
+                academicYearState.status ==
+                    AcademicYearContextLoadStatus.initial) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-                bootstrapState.bootstrap == null) {
+            if (academicYearState.status !=
+                    AcademicYearContextLoadStatus.success ||
+                academicYearState.context == null) {
               return BootstrapContextError(
                 onLogout: () {
                   context.read<AuthBloc>().add(const AuthLogoutRequested());
@@ -175,8 +186,13 @@ class _ClassesListPageState extends State<ClassesListPage> {
               );
             }
 
+            final classrooms = context
+                .watch<ClassroomOfflineBloc>()
+                .state
+                .classrooms;
             final options = ClassesListPageHelpers.buildCycleOptions(
-              bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+              academicYearState.context!.schoolLevelGroups,
+              classrooms,
             );
 
             return ClassesListPageContent(
@@ -194,8 +210,11 @@ class _ClassesListPageState extends State<ClassesListPage> {
   }
 
   void _handleSearch(ClassesListSearchRequest request) {
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
       return;
     }

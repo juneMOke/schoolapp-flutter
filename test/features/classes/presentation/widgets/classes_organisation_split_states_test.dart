@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_results.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_states.dart';
@@ -15,7 +14,7 @@ void main() {
     WidgetTester tester, {
     required ClassroomStatus status,
     ClassroomErrorType errorType = ClassroomErrorType.none,
-    LevelDistributionOverview? overview,
+    List<OfflineClassroom> classrooms = const <OfflineClassroom>[],
     String? errorMessage,
     VoidCallback? onRetry,
   }) async {
@@ -32,10 +31,11 @@ void main() {
         home: Scaffold(
           body: SingleChildScrollView(
             child: ClassesOrganisationSplitResults(
-              overviewStatus: status,
-              overviewErrorType: errorType,
-              overview: overview,
+              classroomsStatus: status,
+              classroomsErrorType: errorType,
+              classrooms: classrooms,
               composedRosters: const {},
+              unassignedEnrollments: const <EnrollmentSummary>[],
               isReassigning: false,
               reassigningMemberId: '',
               errorMessage: errorMessage,
@@ -65,10 +65,7 @@ void main() {
     await pumpState(
       tester,
       status: ClassroomStatus.success,
-      overview: const LevelDistributionOverview(
-        unassignedEnrollments: <EnrollmentSummary>[],
-        classrooms: <ClassroomWithMembers>[],
-      ),
+      classrooms: const <OfflineClassroom>[],
     );
 
     expect(find.byType(ClassesOrganisationSplitEmptyState), findsOneWidget);

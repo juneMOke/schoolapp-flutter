@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/search/search_invitation_card.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
@@ -85,44 +85,60 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           );
         }
 
-        // Surcouche offline : les rosters composés (miroir ± transferts pending)
-        // remplacent les membres de l'aperçu online par classe → le transfert
-        // local apparaît en place, sans re-pull serveur.
+        // Source primaire LOCALE (CF3) : classes + rosters composés du niveau
+        // (miroir ± transferts pending). L'aperçu online ne reste utile ici que
+        // pour le nombre d'élèves non affectés (aucun équivalent local).
         return BlocBuilder<ClassroomOfflineBloc, ClassroomOfflineState>(
           buildWhen: (previous, current) =>
+              previous.levelClassroomsStatus != current.levelClassroomsStatus ||
+              previous.levelClassrooms != current.levelClassrooms ||
+              previous.levelClassroomsErrorType !=
+                  current.levelClassroomsErrorType ||
               previous.levelRosters != current.levelRosters,
           builder: (context, offlineState) => ClassesOrganisationSplitResults(
-            overviewStatus: classroomState.distributionOverviewStatus,
-            overviewErrorType: classroomState.distributionOverviewErrorType,
-            overview: classroomState.distributionOverview,
+            classroomsStatus: offlineState.levelClassroomsStatus,
+            classroomsErrorType: offlineState.levelClassroomsErrorType,
+            classrooms: offlineState.levelClassrooms,
             composedRosters: offlineState.levelRosters,
+            unassignedEnrollments:
+                classroomState.distributionOverview?.unassignedEnrollments ??
+                const [],
             isReassigning:
                 classroomState.reassignStatus == ClassroomStatus.loading,
             reassigningMemberId: classroomState.reassigningMemberId,
             errorMessage:
                 ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
                   l10n,
-                  classroomState.distributionOverviewErrorType,
+                  offlineState.levelClassroomsErrorType,
                 ),
             onTransferTap: onTransferTap,
-            onRetry: () => _retryOverview(context, selectedLevel!),
+            onRetry: () => _retryLocalClassrooms(context, selectedLevel!),
           ),
         );
       },
     );
   }
 
-  void _retryOverview(
+  void _retryLocalClassrooms(
     BuildContext context,
     ClassesOrganisationLevelOption level,
   ) {
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
       return;
     }
-    context.read<ClassroomBloc>().add(
-      ClassroomDistributionOverviewRequested(
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelClassroomsRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelRostersRequested(
         academicYearId: academicYearId,
         schoolLevelId: level.schoolLevelId,
       ),

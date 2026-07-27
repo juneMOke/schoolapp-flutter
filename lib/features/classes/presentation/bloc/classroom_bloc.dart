@@ -97,6 +97,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
       state.copyWith(
         distributionStatus: ClassroomStatus.loading,
         distributionErrorType: ClassroomErrorType.none,
+        distributionRePullFailed: false,
       ),
     );
 
@@ -114,10 +115,13 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
           distributionErrorType: _mapFailureToErrorType(failure),
         ),
       ),
-      (_) => emit(
+      // Right(true) → répartition + re-pull local OK ; Right(false) → répartition
+      // serveur acquise, re-pull local KO (succès partiel à retenter, PAS un échec).
+      (rePullOk) => emit(
         state.copyWith(
           distributionStatus: ClassroomStatus.success,
           distributionErrorType: ClassroomErrorType.none,
+          distributionRePullFailed: !rePullOk,
         ),
       ),
     );

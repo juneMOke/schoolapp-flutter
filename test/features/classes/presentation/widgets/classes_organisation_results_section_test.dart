@@ -5,17 +5,17 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/search/search_invitation_card.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_classroom_card.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_results_section.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_unassigned_members_section.dart';
@@ -47,18 +47,6 @@ void main() {
     schoolLevelId: 'level-1',
     schoolLevelName: '2eme annee',
     splitIntoClassrooms: false,
-    classrooms: <BootstrapClassroom>[
-      BootstrapClassroom(
-        id: 'class-1',
-        version: 1,
-        schoolLevelId: 'level-1',
-        name: 'Classe A',
-        capacity: 40,
-        totalCount: 0,
-        femaleCount: 0,
-        maleCount: 0,
-      ),
-    ],
   );
 
   const splitLevel = ClassesOrganisationLevelOption(
@@ -67,18 +55,6 @@ void main() {
     schoolLevelId: 'level-1',
     schoolLevelName: '2eme annee',
     splitIntoClassrooms: true,
-    classrooms: <BootstrapClassroom>[
-      BootstrapClassroom(
-        id: 'class-1',
-        version: 1,
-        schoolLevelId: 'level-1',
-        name: 'Classe A',
-        capacity: 40,
-        totalCount: 1,
-        femaleCount: 1,
-        maleCount: 0,
-      ),
-    ],
   );
 
   const overview = LevelDistributionOverview(
@@ -97,38 +73,33 @@ void main() {
         ),
       ),
     ],
-    classrooms: <ClassroomWithMembers>[
-      ClassroomWithMembers(
-        classroom: Classroom(
-          id: 'class-1',
-          schoolLevelGroupId: 'cycle-1',
-          schoolLevelId: 'level-1',
-          academicYearId: 'year-1',
-          name: 'Classe A',
-          capacity: 40,
-          teacherId: null,
-          teacherFirstName: null,
-          teacherLastName: null,
-          teacherMiddleName: null,
-          totalCount: 1,
-          femaleCount: 1,
-          maleCount: 0,
-        ),
-        members: <ClassroomMember>[
-          ClassroomMember(
-            id: 'member-1',
-            studentId: 'student-2',
-            classroomId: 'class-1',
-            academicYearId: 'year-1',
-            studentFirstName: 'Anna',
-            studentLastName: 'Smith',
-            studentMiddleName: 'L',
-            studentGender: ClassroomMemberGender.female,
-          ),
-        ],
-      ),
-    ],
+    classrooms: <ClassroomWithMembers>[],
   );
+
+  const offlineClassroom = OfflineClassroom(
+    id: 'class-1',
+    academicYearId: 'year-1',
+    schoolLevelGroupId: 'cycle-1',
+    schoolLevelId: 'level-1',
+    name: 'Classe A',
+    capacity: 40,
+    totalCount: 1,
+    femaleCount: 1,
+    maleCount: 0,
+  );
+
+  const offlineMembers = <ClassroomMember>[
+    ClassroomMember(
+      id: 'member-1',
+      studentId: 'student-2',
+      classroomId: 'class-1',
+      academicYearId: 'year-1',
+      studentFirstName: 'Anna',
+      studentLastName: 'Smith',
+      studentMiddleName: 'L',
+      studentGender: ClassroomMemberGender.female,
+    ),
+  ];
 
   setUp(() {
     classroomBloc = MockClassroomBloc();
@@ -152,6 +123,7 @@ void main() {
     required ClassesOrganisationCycleOption? selectedCycle,
     required ClassesOrganisationLevelOption? selectedLevel,
     ClassroomState? blocState,
+    ClassroomOfflineState? offlineBlocState,
   }) async {
     final state = blocState ?? const ClassroomState();
     when(() => classroomBloc.state).thenReturn(state);
@@ -159,6 +131,14 @@ void main() {
       classroomBloc,
       Stream<ClassroomState>.value(state),
       initialState: state,
+    );
+
+    final offlineStateValue = offlineBlocState ?? const ClassroomOfflineState();
+    when(() => offlineBloc.state).thenReturn(offlineStateValue);
+    whenListen(
+      offlineBloc,
+      Stream<ClassroomOfflineState>.value(offlineStateValue),
+      initialState: offlineStateValue,
     );
 
     await tester.pumpWidget(
@@ -258,12 +238,43 @@ void main() {
           distributionOverviewStatus: ClassroomStatus.success,
           distributionOverview: overview,
         ),
+        offlineBlocState: const ClassroomOfflineState(
+          levelClassroomsStatus: ClassroomStatus.success,
+          levelClassrooms: <OfflineClassroom>[offlineClassroom],
+          levelRosters: <String, List<ClassroomMember>>{
+            'class-1': offlineMembers,
+          },
+        ),
       );
 
       expect(
         find.byType(ClassesOrganisationUnassignedMembersSection),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'affiche les classes depuis le cache local même si l aperçu online est en échec',
+    (tester) async {
+      await pumpSection(
+        tester,
+        selectedCycle: cycle,
+        selectedLevel: splitLevel,
+        blocState: const ClassroomState(
+          distributionOverviewStatus: ClassroomStatus.failure,
+          distributionOverviewErrorType: ClassroomErrorType.network,
+        ),
+        offlineBlocState: const ClassroomOfflineState(
+          levelClassroomsStatus: ClassroomStatus.success,
+          levelClassrooms: <OfflineClassroom>[offlineClassroom],
+          levelRosters: <String, List<ClassroomMember>>{
+            'class-1': offlineMembers,
+          },
+        ),
+      );
+
+      expect(find.byType(ClassesOrganisationClassroomCard), findsOneWidget);
     },
   );
 }

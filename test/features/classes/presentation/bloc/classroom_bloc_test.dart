@@ -203,7 +203,7 @@ void main() {
 
   group('ClassroomDistributionRequested', () {
     blocTest<ClassroomBloc, ClassroomState>(
-      'emits distribution [loading, success] when distribution succeeds',
+      'emits distribution [loading, success] when distribution and local re-pull succeed',
       setUp: () {
         when(
           () => mockDistributeStudentsToClassroomsUseCase(
@@ -212,7 +212,7 @@ void main() {
             schoolLevelId: tSchoolLevelId,
             distributionCriterion: ClassroomDistributionCriterion.gender,
           ),
-        ).thenAnswer((_) async => const Right(null));
+        ).thenAnswer((_) async => const Right(true));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
@@ -226,6 +226,36 @@ void main() {
       expect: () => const [
         ClassroomState(distributionStatus: ClassroomStatus.loading),
         ClassroomState(distributionStatus: ClassroomStatus.success),
+      ],
+    );
+
+    blocTest<ClassroomBloc, ClassroomState>(
+      'emits distribution success with distributionRePullFailed when the local re-pull fails',
+      setUp: () {
+        when(
+          () => mockDistributeStudentsToClassroomsUseCase(
+            academicYearId: tAcademicYearId,
+            schoolLevelGroupId: tSchoolLevelGroupId,
+            schoolLevelId: tSchoolLevelId,
+            distributionCriterion: ClassroomDistributionCriterion.gender,
+          ),
+        ).thenAnswer((_) async => const Right(false));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const ClassroomDistributionRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelGroupId: tSchoolLevelGroupId,
+          schoolLevelId: tSchoolLevelId,
+          distributionCriterion: ClassroomDistributionCriterion.gender,
+        ),
+      ),
+      expect: () => const [
+        ClassroomState(distributionStatus: ClassroomStatus.loading),
+        ClassroomState(
+          distributionStatus: ClassroomStatus.success,
+          distributionRePullFailed: true,
+        ),
       ],
     );
 

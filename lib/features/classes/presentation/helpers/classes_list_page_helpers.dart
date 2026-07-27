@@ -1,37 +1,48 @@
 import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class ClassesListPageHelpers {
   const ClassesListPageHelpers._();
 
+  /// [classrooms] : toutes les classes de l'année (lecture locale
+  /// `ClassroomOfflineBloc`), regroupées ici par niveau.
   static List<ClassesListCycleOption> buildCycleOptions(
-    List<BootstrapSchoolLevelGroupBundle> bundles,
+    List<SchoolLevelGroupBundle> bundles,
+    List<OfflineClassroom> classrooms,
   ) {
+    final classroomsByLevel = <String, List<OfflineClassroom>>{};
+    for (final classroom in classrooms) {
+      final levelId = classroom.schoolLevelId;
+      if (levelId == null) continue;
+      (classroomsByLevel[levelId] ??= []).add(classroom);
+    }
+
     return SortedNestedOptionsHelper.build(
       outers: bundles,
-      outerOrder: (bundle) => bundle.schoolLevelGroup.displayOrder,
-      inners: (bundle) => bundle.schoolLevels,
-      innerOrder: (levelBundle) => levelBundle.schoolLevel.displayOrder,
-      mapInner: (bundle, levelBundle) => ClassesListLevelOption(
-        schoolLevelGroupId: bundle.schoolLevelGroup.id,
-        schoolLevelGroupName: bundle.schoolLevelGroup.name,
-        schoolLevelId: levelBundle.schoolLevel.id,
-        label: levelBundle.schoolLevel.name,
-        displayOrder: levelBundle.schoolLevel.displayOrder,
-        splitIntoClassrooms: levelBundle.schoolLevel.splitIntoClassrooms,
-        classrooms: levelBundle.classrooms,
+      outerOrder: (bundle) => bundle.group.displayOrder,
+      inners: (bundle) => bundle.levels,
+      innerOrder: (level) => level.displayOrder,
+      mapInner: (bundle, level) => ClassesListLevelOption(
+        schoolLevelGroupId: bundle.group.id,
+        schoolLevelGroupName: bundle.group.name,
+        schoolLevelId: level.id,
+        label: level.name,
+        displayOrder: level.displayOrder,
+        splitIntoClassrooms: level.splitIntoClassrooms,
+        classrooms: classroomsByLevel[level.id] ?? const [],
       ),
       mapOuter: (bundle, levels) => ClassesListCycleOption(
-        id: bundle.schoolLevelGroup.id,
-        label: bundle.schoolLevelGroup.name,
-        displayOrder: bundle.schoolLevelGroup.displayOrder,
+        id: bundle.group.id,
+        label: bundle.group.name,
+        displayOrder: bundle.group.displayOrder,
         levels: levels,
       ),
     );
@@ -88,12 +99,12 @@ class ClassesListPageHelpers {
     return enrollmentState.summariesStatus == EnrollmentLoadStatus.loading;
   }
 
-  static bool buildWhenBootstrapChanges(
-    BootstrapContextState previous,
-    BootstrapContextState current,
+  static bool buildWhenAcademicYearContextChanges(
+    AcademicYearContextState previous,
+    AcademicYearContextState current,
   ) {
     return previous.status != current.status ||
-        previous.bootstrap != current.bootstrap;
+        previous.context != current.context;
   }
 
   static bool listenWhenEnrollmentStatusChanges(

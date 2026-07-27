@@ -7,27 +7,34 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_classroom_card.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_states.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_unassigned_members_section.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Disposition des cartes de classe pilotée par le basculeur (PARCOURS 5).
 enum _ClassroomLayout { grid, list }
 
 class ClassesOrganisationSplitResults extends StatefulWidget {
-  final ClassroomStatus overviewStatus;
-  final ClassroomErrorType overviewErrorType;
-  final LevelDistributionOverview? overview;
+  final ClassroomStatus classroomsStatus;
+  final ClassroomErrorType classroomsErrorType;
+
+  /// Classes du niveau lues depuis le miroir LOCAL (CF3) : source primaire de
+  /// l'affichage, indépendante de la disponibilité/fraîcheur de l'aperçu online.
+  final List<OfflineClassroom> classrooms;
 
   /// Roster composé offline (miroir ± transferts pending) par `classroomId`.
-  /// Quand une classe y figure, ses membres remplacent ceux de l'aperçu online
-  /// (affichage optimiste). Sinon (classe pas encore synchronisée en local), on
-  /// garde les membres online.
+  /// Seule source de membres désormais (plus de repli sur l'aperçu online).
   final Map<String, List<ClassroomMember>> composedRosters;
+
+  /// Élèves non affectés du niveau : concept propre aux inscriptions, sans
+  /// équivalent dans le miroir local des classes — best-effort online.
+  final List<EnrollmentSummary> unassignedEnrollments;
   final bool isReassigning;
   final String reassigningMemberId;
   final String? errorMessage;
@@ -36,10 +43,11 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
 
   const ClassesOrganisationSplitResults({
     super.key,
-    required this.overviewStatus,
-    required this.overviewErrorType,
-    required this.overview,
+    required this.classroomsStatus,
+    required this.classroomsErrorType,
+    required this.classrooms,
     required this.composedRosters,
+    required this.unassignedEnrollments,
     required this.isReassigning,
     required this.reassigningMemberId,
     required this.errorMessage,
@@ -60,34 +68,35 @@ class _ClassesOrganisationSplitResultsState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (widget.overviewStatus == ClassroomStatus.loading ||
-        widget.overviewStatus == ClassroomStatus.initial) {
+    if (widget.classroomsStatus == ClassroomStatus.loading ||
+        widget.classroomsStatus == ClassroomStatus.initial) {
       return const ClassesOrganisationClassroomsSkeleton();
     }
 
-    if (widget.overviewStatus == ClassroomStatus.failure) {
+    if (widget.classroomsStatus == ClassroomStatus.failure) {
       return ClassesOrganisationSplitErrorState(
-        errorType: widget.overviewErrorType,
+        errorType: widget.classroomsErrorType,
         message: widget.errorMessage ?? l10n.classesOrganisationErrorUnknown,
         onRetry: widget.onRetry,
       );
     }
 
-    final data = widget.overview;
-    if (data == null || data.classrooms.isEmpty) {
+    if (widget.classrooms.isEmpty) {
       return const ClassesOrganisationSplitEmptyState();
     }
 
-    // Surcouche offline : pour chaque classe connue localement, on substitue le
-    // roster composé (transferts pending inclus) aux membres de l'aperçu online.
+    // Source primaire LOCALE : classes + rosters composés du miroir (transferts
+    // pending inclus), aucun repli sur l'aperçu online.
     final classrooms = [
-      for (final bucket in data.classrooms)
-        widget.composedRosters.containsKey(bucket.classroom.id)
-            ? ClassroomWithMembers(
-                classroom: bucket.classroom,
-                members: widget.composedRosters[bucket.classroom.id]!,
-              )
-            : bucket,
+      for (final offlineClassroom in widget.classrooms)
+        ClassroomWithMembers(
+          classroom: ClassesOrganisationPageHelpers.classroomFromOffline(
+            offlineClassroom,
+          ),
+          members:
+              widget.composedRosters[offlineClassroom.id] ??
+              const <ClassroomMember>[],
+        ),
     ];
 
     final distributedCount = classrooms.fold<int>(
@@ -115,10 +124,10 @@ class _ClassesOrganisationSplitResultsState
           onLayoutChanged: (value) => setState(() => _layout = value),
         ),
         const SizedBox(height: AppDimensions.spacingL),
-        if (data.unassignedEnrollments.isNotEmpty) ...[
+        if (widget.unassignedEnrollments.isNotEmpty) ...[
           ClassesOrganisationUnassignedMembersSection(
-            count: data.unassignedEnrollments.length,
-            members: data.unassignedEnrollments
+            count: widget.unassignedEnrollments.length,
+            members: widget.unassignedEnrollments
                 .map(
                   (item) => ClassroomMember(
                     id: item.enrollmentId,

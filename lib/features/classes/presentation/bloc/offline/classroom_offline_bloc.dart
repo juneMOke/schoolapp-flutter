@@ -43,6 +43,7 @@ class ClassroomOfflineBloc
        super(const ClassroomOfflineState()) {
     on<ClassroomsSyncRequested>(_onSyncRequested);
     on<OfflineClassroomsRequested>(_onClassroomsRequested);
+    on<OfflineLevelClassroomsRequested>(_onLevelClassroomsRequested);
     on<OfflineRosterRequested>(_onRosterRequested);
     on<OfflineLevelRostersRequested>(_onLevelRostersRequested);
     on<MemberTransferRequested>(_onTransferRequested);
@@ -79,10 +80,7 @@ class ClassroomOfflineBloc
       ),
     );
 
-    final result = await _getClassrooms(
-      academicYearId: event.academicYearId,
-      schoolLevelId: event.schoolLevelId,
-    );
+    final result = await _getClassrooms(academicYearId: event.academicYearId);
 
     result.fold(
       (failure) => emit(
@@ -96,6 +94,39 @@ class ClassroomOfflineBloc
           classroomsStatus: ClassroomStatus.success,
           classrooms: classrooms,
           classroomsErrorType: ClassroomErrorType.none,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLevelClassroomsRequested(
+    OfflineLevelClassroomsRequested event,
+    Emitter<ClassroomOfflineState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        levelClassroomsStatus: ClassroomStatus.loading,
+        levelClassroomsErrorType: ClassroomErrorType.none,
+      ),
+    );
+
+    final result = await _getClassrooms(
+      academicYearId: event.academicYearId,
+      schoolLevelId: event.schoolLevelId,
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          levelClassroomsStatus: ClassroomStatus.failure,
+          levelClassroomsErrorType: _mapFailureToErrorType(failure),
+        ),
+      ),
+      (classrooms) => emit(
+        state.copyWith(
+          levelClassroomsStatus: ClassroomStatus.success,
+          levelClassrooms: classrooms,
+          levelClassroomsErrorType: ClassroomErrorType.none,
         ),
       ),
     );

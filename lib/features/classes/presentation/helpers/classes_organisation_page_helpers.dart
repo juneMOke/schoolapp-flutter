@@ -1,8 +1,10 @@
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -10,21 +12,20 @@ class ClassesOrganisationPageHelpers {
   const ClassesOrganisationPageHelpers._();
 
   static List<ClassesOrganisationLevelOption> buildAcademicOptions(
-    List<BootstrapSchoolLevelGroupBundle> bundles,
+    List<SchoolLevelGroupBundle> bundles,
   ) {
     final seen = <String>{};
     final sortedOptions = SortedNestedOptionsHelper.buildFlat(
       outers: bundles,
-      outerOrder: (bundle) => bundle.schoolLevelGroup.displayOrder,
-      inners: (bundle) => bundle.schoolLevels,
-      innerOrder: (levelBundle) => levelBundle.schoolLevel.displayOrder,
-      mapItem: (groupBundle, levelBundle) => ClassesOrganisationLevelOption(
-        schoolLevelGroupId: groupBundle.schoolLevelGroup.id,
-        schoolLevelGroupName: groupBundle.schoolLevelGroup.name,
-        schoolLevelId: levelBundle.schoolLevel.id,
-        schoolLevelName: levelBundle.schoolLevel.name,
-        splitIntoClassrooms: levelBundle.schoolLevel.splitIntoClassrooms,
-        classrooms: levelBundle.classrooms,
+      outerOrder: (bundle) => bundle.group.displayOrder,
+      inners: (bundle) => bundle.levels,
+      innerOrder: (level) => level.displayOrder,
+      mapItem: (groupBundle, level) => ClassesOrganisationLevelOption(
+        schoolLevelGroupId: groupBundle.group.id,
+        schoolLevelGroupName: groupBundle.group.name,
+        schoolLevelId: level.id,
+        schoolLevelName: level.name,
+        splitIntoClassrooms: level.splitIntoClassrooms,
       ),
     );
 
@@ -108,12 +109,12 @@ class ClassesOrganisationPageHelpers {
     return previous.reassignStatus != current.reassignStatus;
   }
 
-  static bool buildWhenBootstrapChanges(
-    BootstrapContextState previous,
-    BootstrapContextState current,
+  static bool buildWhenAcademicYearContextChanges(
+    AcademicYearContextState previous,
+    AcademicYearContextState current,
   ) {
     return previous.status != current.status ||
-        previous.bootstrap != current.bootstrap;
+        previous.context != current.context;
   }
 
   static bool buildWhenSearchFormChanges(
@@ -124,6 +125,25 @@ class ClassesOrganisationPageHelpers {
         previous.membersStatus != current.membersStatus ||
         previous.distributionStatus != current.distributionStatus;
   }
+
+  /// Conversion d'affichage : classe lue localement (CF3, champs nullable) vers
+  /// l'entité online attendue par les widgets de carte/popin partagés avec la
+  /// répartition. Lecture seule — n'écrit jamais le miroir.
+  static Classroom classroomFromOffline(OfflineClassroom c) => Classroom(
+    id: c.id,
+    schoolLevelGroupId: c.schoolLevelGroupId ?? '',
+    schoolLevelId: c.schoolLevelId ?? '',
+    academicYearId: c.academicYearId,
+    name: c.name,
+    capacity: c.capacity ?? 0,
+    teacherId: c.teacherId,
+    teacherFirstName: c.teacherFirstName,
+    teacherLastName: c.teacherLastName,
+    teacherMiddleName: c.teacherMiddleName,
+    totalCount: c.totalCount,
+    femaleCount: c.femaleCount,
+    maleCount: c.maleCount,
+  );
 
   static bool buildWhenClassroomResultsChange(
     ClassroomState previous,

@@ -18,14 +18,33 @@ class ClassroomsSyncRequested extends ClassroomOfflineEvent {
   List<Object?> get props => [academicYearId];
 }
 
-/// Lecture offline des classes + compteurs (CF3), niveau optionnel.
+/// Lecture offline des classes + compteurs (CF3) de TOUTE l'année (dropdowns
+/// de recherche : Présences/Classes/Résultats). Non filtrée par niveau —
+/// pour un working-set scopé à un seul niveau (Organisation), voir
+/// [OfflineLevelClassroomsRequested] : les deux alimentent des champs d'état
+/// SÉPARÉS, jamais partagés (revue adversariale — un champ unique partagé
+/// entre « toute l'année » et « un seul niveau » exposait un dropdown
+/// transitoirement tronqué après une visite de l'écran d'organisation).
 class OfflineClassroomsRequested extends ClassroomOfflineEvent {
   final String academicYearId;
-  final String? schoolLevelId;
 
-  const OfflineClassroomsRequested({
+  const OfflineClassroomsRequested({required this.academicYearId});
+
+  @override
+  List<Object?> get props => [academicYearId];
+}
+
+/// Lecture offline des classes d'UN SEUL niveau (CF3) : working-set dédié de
+/// l'écran d'organisation (aperçu de répartition, cibles du dialogue de
+/// transfert/affectation) — jamais consommé par les dropdowns de recherche
+/// (voir [OfflineClassroomsRequested]).
+class OfflineLevelClassroomsRequested extends ClassroomOfflineEvent {
+  final String academicYearId;
+  final String schoolLevelId;
+
+  const OfflineLevelClassroomsRequested({
     required this.academicYearId,
-    this.schoolLevelId,
+    required this.schoolLevelId,
   });
 
   @override

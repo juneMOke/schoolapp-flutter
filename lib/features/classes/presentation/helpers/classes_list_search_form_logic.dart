@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 
 class ClassesListSearchFormLogic {
@@ -70,8 +70,8 @@ class ClassesListSearchFormLogic {
     return null;
   }
 
-  static BootstrapClassroom? findClassroom(
-    List<BootstrapClassroom> options,
+  static OfflineClassroom? findClassroom(
+    List<OfflineClassroom> options,
     String? classroomId,
   ) {
     if (classroomId == null) {

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 
 class ClassesOrganisationCycleOption extends Equatable {
@@ -23,7 +22,6 @@ class ClassesOrganisationLevelOption extends Equatable {
   final String schoolLevelId;
   final String schoolLevelName;
   final bool splitIntoClassrooms;
-  final List<BootstrapClassroom> classrooms;
 
   const ClassesOrganisationLevelOption({
     required this.schoolLevelGroupId,
@@ -31,7 +29,6 @@ class ClassesOrganisationLevelOption extends Equatable {
     required this.schoolLevelId,
     required this.schoolLevelName,
     required this.splitIntoClassrooms,
-    required this.classrooms,
   });
 
   String get key => '$schoolLevelGroupId::$schoolLevelId';
@@ -42,14 +39,12 @@ class ClassesOrganisationLevelOption extends Equatable {
     String? schoolLevelId,
     String? schoolLevelName,
     bool? splitIntoClassrooms,
-    List<BootstrapClassroom>? classrooms,
   }) => ClassesOrganisationLevelOption(
     schoolLevelGroupId: schoolLevelGroupId ?? this.schoolLevelGroupId,
     schoolLevelGroupName: schoolLevelGroupName ?? this.schoolLevelGroupName,
     schoolLevelId: schoolLevelId ?? this.schoolLevelId,
     schoolLevelName: schoolLevelName ?? this.schoolLevelName,
     splitIntoClassrooms: splitIntoClassrooms ?? this.splitIntoClassrooms,
-    classrooms: classrooms ?? this.classrooms,
   );
 
   @override
@@ -59,7 +54,6 @@ class ClassesOrganisationLevelOption extends Equatable {
     schoolLevelId,
     schoolLevelName,
     splitIntoClassrooms,
-    classrooms,
   ];
 }
 

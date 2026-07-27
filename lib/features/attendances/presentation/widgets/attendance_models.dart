@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_record.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 
 class AttendanceCycleOption extends Equatable {
   final String id;
@@ -25,7 +25,7 @@ class AttendanceLevelOption extends Equatable {
   final String schoolLevelId;
   final String label;
   final int displayOrder;
-  final List<BootstrapClassroom> classrooms;
+  final List<OfflineClassroom> classrooms;
 
   const AttendanceLevelOption({
     required this.schoolLevelGroupId,
@@ -50,7 +50,7 @@ class AttendanceLevelOption extends Equatable {
 class AttendanceSearchRequest extends Equatable {
   final AttendanceCycleOption selectedCycle;
   final AttendanceLevelOption selectedLevel;
-  final BootstrapClassroom selectedClassroom;
+  final OfflineClassroom selectedClassroom;
   final DateTime date;
 
   const AttendanceSearchRequest({

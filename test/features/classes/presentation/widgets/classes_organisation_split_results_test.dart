@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_results.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
-  ClassroomWithMembers bucket(String name, int male, int female) {
+  ({OfflineClassroom classroom, List<ClassroomMember> members}) bucket(
+    String name,
+    int male,
+    int female,
+  ) {
     final members = <ClassroomMember>[
       for (var i = 0; i < male; i++)
         ClassroomMember(
@@ -36,18 +38,14 @@ void main() {
           studentGender: ClassroomMemberGender.female,
         ),
     ];
-    return ClassroomWithMembers(
-      classroom: Classroom(
+    return (
+      classroom: OfflineClassroom(
         id: 'c-$name',
+        academicYearId: 'y',
         schoolLevelGroupId: 'g',
         schoolLevelId: 'l',
-        academicYearId: 'y',
         name: name,
         capacity: 40,
-        teacherId: null,
-        teacherFirstName: null,
-        teacherLastName: null,
-        teacherMiddleName: null,
         totalCount: members.length,
         femaleCount: female,
         maleCount: male,
@@ -57,10 +55,8 @@ void main() {
   }
 
   Future<void> pumpView(WidgetTester tester) async {
-    final overview = LevelDistributionOverview(
-      unassignedEnrollments: const <EnrollmentSummary>[],
-      classrooms: [bucket('A', 1, 1), bucket('B', 1, 0)],
-    );
+    final a = bucket('A', 1, 1);
+    final b = bucket('B', 1, 0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -75,10 +71,14 @@ void main() {
         home: Scaffold(
           body: SingleChildScrollView(
             child: ClassesOrganisationSplitResults(
-              overviewStatus: ClassroomStatus.success,
-              overviewErrorType: ClassroomErrorType.none,
-              overview: overview,
-              composedRosters: const {},
+              classroomsStatus: ClassroomStatus.success,
+              classroomsErrorType: ClassroomErrorType.none,
+              classrooms: [a.classroom, b.classroom],
+              composedRosters: {
+                a.classroom.id: a.members,
+                b.classroom.id: b.members,
+              },
+              unassignedEnrollments: const <EnrollmentSummary>[],
               isReassigning: false,
               reassigningMemberId: '',
               errorMessage: null,

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_pending_distribution_card.dart';
@@ -40,55 +37,58 @@ void main() {
     studentGender: g,
   );
 
-  ClassroomWithMembers bucket(String name, int capacity, int count) =>
-      ClassroomWithMembers(
-        classroom: Classroom(
-          id: 'c-$name',
-          schoolLevelGroupId: 'g',
-          schoolLevelId: 'l',
-          academicYearId: 'y',
-          name: name,
-          capacity: capacity,
-          teacherId: null,
-          teacherFirstName: null,
-          teacherLastName: null,
-          teacherMiddleName: null,
-          totalCount: count,
-          femaleCount: count ~/ 2,
-          maleCount: count - count ~/ 2,
+  ({OfflineClassroom classroom, List<ClassroomMember> members}) bucket(
+    String name,
+    int capacity,
+    int count,
+  ) => (
+    classroom: OfflineClassroom(
+      id: 'c-$name',
+      academicYearId: 'y',
+      schoolLevelGroupId: 'g',
+      schoolLevelId: 'l',
+      name: name,
+      capacity: capacity,
+      totalCount: count,
+      femaleCount: count ~/ 2,
+      maleCount: count - count ~/ 2,
+    ),
+    members: [
+      for (var i = 0; i < count; i++)
+        member(
+          '$name-$i',
+          'Nguyen-Van-Tran',
+          'Jean-Baptiste',
+          'Marie-Christine',
+          i.isEven ? ClassroomMemberGender.male : ClassroomMemberGender.female,
         ),
-        members: [
-          for (var i = 0; i < count; i++)
-            member(
-              '$name-$i',
-              'Nguyen-Van-Tran',
-              'Jean-Baptiste',
-              'Marie-Christine',
-              i.isEven
-                  ? ClassroomMemberGender.male
-                  : ClassroomMemberGender.female,
-            ),
-        ],
-      );
-
-  final overview = LevelDistributionOverview(
-    unassignedEnrollments: const [
-      EnrollmentSummary(
-        enrollmentId: 'enr-1',
-        enrollmentCode: 'ENR-1',
-        status: 'COMPLETED',
-        student: StudentSummary(
-          id: 'stu-1',
-          firstName: 'Marie-Christine',
-          lastName: 'Nguyen-Van-Tran',
-          surname: 'Jean-Baptiste',
-          dateOfBirth: '2014-01-01',
-          gender: Gender.female,
-        ),
-      ),
     ],
-    classrooms: [bucket('A', 40, 5), bucket('B', 40, 40), bucket('C', 40, 35)],
   );
+
+  final buckets = [
+    bucket('A', 40, 5),
+    bucket('B', 40, 40),
+    bucket('C', 40, 35),
+  ];
+  final overviewClassrooms = [for (final b in buckets) b.classroom];
+  final overviewComposedRosters = {
+    for (final b in buckets) b.classroom.id: b.members,
+  };
+  const overviewUnassignedEnrollments = [
+    EnrollmentSummary(
+      enrollmentId: 'enr-1',
+      enrollmentCode: 'ENR-1',
+      status: 'COMPLETED',
+      student: StudentSummary(
+        id: 'stu-1',
+        firstName: 'Marie-Christine',
+        lastName: 'Nguyen-Van-Tran',
+        surname: 'Jean-Baptiste',
+        dateOfBirth: '2014-01-01',
+        gender: Gender.female,
+      ),
+    ),
+  ];
 
   const cycle = ClassesOrganisationCycleOption(
     id: 'cycle-1',
@@ -100,7 +100,6 @@ void main() {
         schoolLevelId: 'level-1',
         schoolLevelName: '1H',
         splitIntoClassrooms: true,
-        classrooms: <BootstrapClassroom>[],
       ),
     ],
   );
@@ -171,10 +170,11 @@ void main() {
     await pumpAtWidths(
       tester,
       ClassesOrganisationSplitResults(
-        overviewStatus: ClassroomStatus.success,
-        overviewErrorType: ClassroomErrorType.none,
-        overview: overview,
-        composedRosters: const {},
+        classroomsStatus: ClassroomStatus.success,
+        classroomsErrorType: ClassroomErrorType.none,
+        classrooms: overviewClassrooms,
+        composedRosters: overviewComposedRosters,
+        unassignedEnrollments: overviewUnassignedEnrollments,
         isReassigning: false,
         reassigningMemberId: '',
         errorMessage: null,

@@ -120,6 +120,7 @@ import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstra
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
@@ -647,7 +648,12 @@ Future<void> configureDependencies({
   );
 
   getIt.registerFactory<DistributeStudentsToClassroomsUseCase>(
-    () => DistributeStudentsToClassroomsUseCase(getIt<ClassroomRepository>()),
+    // offlineRepository résolu paresseusement (registerOfflineModules) : repull
+    // local du miroir des classes après une répartition serveur réussie.
+    () => DistributeStudentsToClassroomsUseCase(
+      repository: getIt<ClassroomRepository>(),
+      offlineRepository: getIt<ClassroomOfflineRepository>(),
+    ),
   );
 
   getIt.registerFactory<GetLevelDistributionOverviewUseCase>(

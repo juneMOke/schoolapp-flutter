@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_organisation_page_helpers.dart';
@@ -42,10 +40,8 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       if (!mounted) {
         return;
       }
-      context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPayloadKey,
-        ),
+      context.read<AcademicYearContextBloc>().add(
+        const AcademicYearContextRequested(),
       );
     });
   }
@@ -109,16 +105,20 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             );
           }
         },
-        child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-          buildWhen: ClassesOrganisationPageHelpers.buildWhenBootstrapChanges,
-          builder: (context, bootstrapState) {
-            if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-                bootstrapState.status == BootstrapContextLoadStatus.initial) {
+        child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+          buildWhen: ClassesOrganisationPageHelpers
+              .buildWhenAcademicYearContextChanges,
+          builder: (context, academicYearState) {
+            if (academicYearState.status ==
+                    AcademicYearContextLoadStatus.loading ||
+                academicYearState.status ==
+                    AcademicYearContextLoadStatus.initial) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-                bootstrapState.bootstrap == null) {
+            if (academicYearState.status !=
+                    AcademicYearContextLoadStatus.success ||
+                academicYearState.context == null) {
               return BootstrapContextError(
                 onLogout: () {
                   context.read<AuthBloc>().add(const AuthLogoutRequested());
@@ -127,13 +127,12 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
             }
 
             final options = ClassesOrganisationPageHelpers.buildAcademicOptions(
-              bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
+              academicYearState.context!.schoolLevelGroups,
             );
             final cycles = ClassesOrganisationPageHelpers.buildCycleOptions(
               options,
             );
-            final schoolYear =
-                bootstrapState.bootstrap?.academicYear.name ?? '';
+            final schoolYear = academicYearState.context!.academicYear.name;
 
             return ClassesOrganisationPageContent(
               schoolYear: schoolYear,
@@ -164,41 +163,51 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    // L'aperçu de distribution (lecture) reste porté par le ClassroomBloc online.
-    final classroomState = context.read<ClassroomBloc>().state;
     final selectedLevel = _selectedLevel;
     if (selectedLevel == null) {
       return;
     }
 
-    final overview = classroomState.distributionOverview;
-    if (overview == null) {
+    // Classes cibles proposées depuis les données LOCALES (classes + rosters
+    // composés du niveau) : cohérent avec l'affichage de l'écran, qui lit déjà
+    // ces mêmes données. Rien à proposer tant que le niveau n'est pas chargé.
+    if (offlineState.levelClassrooms.isEmpty) {
       return;
     }
 
     // Toutes les classes du niveau sont proposées : la popin marque la classe
     // actuelle « Actuelle » et les classes pleines « Complet » (désactivées).
-    final options = overview.classrooms
-        .map(
-          (item) => ClassroomReassignOption(
-            id: item.classroom.id,
-            name: item.classroom.name,
-            totalCount: item.members.length,
-            capacity: item.classroom.capacity,
-            femaleCount: item.members
+    // `levelClassrooms` est un working-set DÉDIÉ à ce niveau (jamais partagé
+    // avec le dropdown année complète des autres pages) : un filtre défensif
+    // supplémentaire écarte malgré tout toute classe d'un autre niveau.
+    final options = offlineState.levelClassrooms
+        .where(
+          (offlineClassroom) =>
+              offlineClassroom.schoolLevelId == selectedLevel.schoolLevelId,
+        )
+        .map((offlineClassroom) {
+          final members =
+              offlineState.levelRosters[offlineClassroom.id] ??
+              const <ClassroomMember>[];
+          return ClassroomReassignOption(
+            id: offlineClassroom.id,
+            name: offlineClassroom.name,
+            totalCount: members.length,
+            capacity: offlineClassroom.capacity ?? 0,
+            femaleCount: members
                 .where(
                   (member) =>
                       member.studentGender == ClassroomMemberGender.female,
                 )
                 .length,
-            maleCount: item.members
+            maleCount: members
                 .where(
                   (member) =>
                       member.studentGender == ClassroomMemberGender.male,
                 )
                 .length,
-          ),
-        )
+          );
+        })
         .toList(growable: false);
 
     // Au moins une classe doit être sélectionnable : ni la classe actuelle, ni
@@ -249,12 +258,17 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     // - niveau réparti : pour afficher les sous-classes et leurs membres ;
     // - niveau non réparti : pour rappeler l'effectif et le ratio G/F des
     //   élèves restant à répartir (tous non affectés).
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
       return;
     }
 
+    // Aperçu online : ne sert plus qu'à alimenter le nombre d'élèves non
+    // affectés (aucun équivalent dans le miroir local des classes).
     context.read<ClassroomBloc>().add(
       ClassroomDistributionOverviewRequested(
         academicYearId: academicYearId,
@@ -262,9 +276,16 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       ),
     );
 
-    // Rosters composés offline du niveau : servent l'affichage optimiste (un
-    // transfert local non synchronisé apparaît en place) en surcouche de
-    // l'aperçu online, sans re-pull serveur.
+    // Niveau réparti : classes + rosters composés LOCAUX (miroir ± transferts
+    // pending) — source primaire de l'affichage, sans re-pull serveur ici.
+    // Working-set DÉDIÉ à ce niveau (`levelClassrooms`), jamais partagé avec
+    // le dropdown année complète des autres pages (Présences/Classes list).
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelClassroomsRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
     context.read<ClassroomOfflineBloc>().add(
       OfflineLevelRostersRequested(
         academicYearId: academicYearId,
@@ -279,8 +300,11 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
       return;
     }
@@ -303,22 +327,30 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
   }
 
   /// Effets de bord appliqués au SUCCÈS de la répartition : marquer le niveau
-  /// comme réparti (patch bootstrap + état local) puis recharger l'aperçu pour
-  /// alimenter la vue répartie et le récapitulatif de la sur-couche.
+  /// comme réparti (patch référentiel local + état en mémoire) puis recharger
+  /// l'aperçu pour alimenter la vue répartie et le récapitulatif de la
+  /// sur-couche.
   void _applyDistributionSuccess(ClassesOrganisationLevelOption level) {
     if (!mounted) {
       return;
     }
-    context.read<BootstrapCurrentYearBloc>().add(
-      BootstrapContextSchoolLevelSplitPatched(
-        schoolLevelId: level.schoolLevelId,
-        key: AppConstants.bootstrapPayloadKey,
-      ),
+    context.read<AcademicYearContextBloc>().add(
+      AcademicYearContextSchoolLevelSplitPatched(level.schoolLevelId),
     );
     final updatedLevel = level.copyWith(splitIntoClassrooms: true);
     setState(() {
       _selectedLevel = updatedLevel;
     });
     _loadOverviewIfNeeded(updatedLevel);
+
+    // Répartition serveur acquise mais re-pull local KO : le miroir des
+    // classes n'a pas encore la nouvelle répartition (à retenter au prochain
+    // retour online), pas un échec de la répartition elle-même.
+    if (context.read<ClassroomBloc>().state.distributionRePullFailed) {
+      AppSnackBar.showInfo(
+        context,
+        AppLocalizations.of(context)!.offlineQueuedGeneric,
+      );
+    }
   }
 }

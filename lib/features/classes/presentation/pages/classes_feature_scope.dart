@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
@@ -18,7 +18,7 @@ class ClassesFeatureScope extends StatefulWidget {
 
 class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   late final EnrollmentBloc _enrollmentBloc;
-  late final BootstrapCurrentYearBloc _bootstrapCurrentYearBloc;
+  late final AcademicYearContextBloc _academicYearContextBloc;
   late final ClassroomBloc _classroomBloc;
   late final ClassroomStatsBloc _classroomStatsBloc;
   late final ClassroomOfflineBloc _classroomOfflineBloc;
@@ -27,7 +27,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   void initState() {
     super.initState();
     _enrollmentBloc = GetIt.instance<EnrollmentBloc>();
-    _bootstrapCurrentYearBloc = GetIt.instance<BootstrapCurrentYearBloc>();
+    _academicYearContextBloc = GetIt.instance<AcademicYearContextBloc>();
     _classroomBloc = GetIt.instance<ClassroomBloc>();
     _classroomStatsBloc = GetIt.instance<ClassroomStatsBloc>();
     _classroomOfflineBloc = GetIt.instance<ClassroomOfflineBloc>();
@@ -36,7 +36,7 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
   @override
   void dispose() {
     _enrollmentBloc.close();
-    _bootstrapCurrentYearBloc.close();
+    _academicYearContextBloc.close();
     _classroomBloc.close();
     _classroomStatsBloc.close();
     _classroomOfflineBloc.close();
@@ -48,8 +48,8 @@ class _ClassesFeatureScopeState extends State<ClassesFeatureScope> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<EnrollmentBloc>.value(value: _enrollmentBloc),
-        BlocProvider<BootstrapCurrentYearBloc>.value(
-          value: _bootstrapCurrentYearBloc,
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: _academicYearContextBloc,
         ),
         BlocProvider<ClassroomBloc>.value(value: _classroomBloc),
         BlocProvider<ClassroomStatsBloc>.value(value: _classroomStatsBloc),

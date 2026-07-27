@@ -16,10 +16,17 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 ///  - **Affectation d'un non-réparti** (distribution, ADR-004) : ONLINE, PUT +
 ///    re-pull → [reassignStatus] + [reassignRePullFailed].
 class ClassroomOfflineState extends Equatable {
-  // ── Classes (CF3) ──
+  // ── Classes de TOUTE l'année (CF3, dropdowns Présences/Classes/Résultats) ──
   final ClassroomStatus classroomsStatus;
   final List<OfflineClassroom> classrooms;
   final ClassroomErrorType classroomsErrorType;
+
+  // ── Classes d'UN SEUL niveau (CF3, working-set dédié Organisation) — jamais
+  // partagé avec [classrooms] ci-dessus (revue adversariale, cf.
+  // `OfflineLevelClassroomsRequested`).
+  final ClassroomStatus levelClassroomsStatus;
+  final List<OfflineClassroom> levelClassrooms;
+  final ClassroomErrorType levelClassroomsErrorType;
 
   // ── Roster d'une classe (CF3) ──
   final ClassroomStatus rosterStatus;
@@ -64,6 +71,9 @@ class ClassroomOfflineState extends Equatable {
     this.classroomsStatus = ClassroomStatus.initial,
     this.classrooms = const [],
     this.classroomsErrorType = ClassroomErrorType.none,
+    this.levelClassroomsStatus = ClassroomStatus.initial,
+    this.levelClassrooms = const [],
+    this.levelClassroomsErrorType = ClassroomErrorType.none,
     this.rosterStatus = ClassroomStatus.initial,
     this.roster = const [],
     this.rosterErrorType = ClassroomErrorType.none,
@@ -85,6 +95,9 @@ class ClassroomOfflineState extends Equatable {
     ClassroomStatus? classroomsStatus,
     List<OfflineClassroom>? classrooms,
     ClassroomErrorType? classroomsErrorType,
+    ClassroomStatus? levelClassroomsStatus,
+    List<OfflineClassroom>? levelClassrooms,
+    ClassroomErrorType? levelClassroomsErrorType,
     ClassroomStatus? rosterStatus,
     List<ClassroomMember>? roster,
     ClassroomErrorType? rosterErrorType,
@@ -104,6 +117,10 @@ class ClassroomOfflineState extends Equatable {
     classroomsStatus: classroomsStatus ?? this.classroomsStatus,
     classrooms: classrooms ?? this.classrooms,
     classroomsErrorType: classroomsErrorType ?? this.classroomsErrorType,
+    levelClassroomsStatus: levelClassroomsStatus ?? this.levelClassroomsStatus,
+    levelClassrooms: levelClassrooms ?? this.levelClassrooms,
+    levelClassroomsErrorType:
+        levelClassroomsErrorType ?? this.levelClassroomsErrorType,
     rosterStatus: rosterStatus ?? this.rosterStatus,
     roster: roster ?? this.roster,
     rosterErrorType: rosterErrorType ?? this.rosterErrorType,
@@ -128,6 +145,9 @@ class ClassroomOfflineState extends Equatable {
     classroomsStatus,
     classrooms,
     classroomsErrorType,
+    levelClassroomsStatus,
+    levelClassrooms,
+    levelClassroomsErrorType,
     rosterStatus,
     roster,
     rosterErrorType,

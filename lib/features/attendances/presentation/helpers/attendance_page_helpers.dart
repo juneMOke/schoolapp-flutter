@@ -1,44 +1,55 @@
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/core/helpers/sorted_nested_options_helper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendancePageHelpers {
   const AttendancePageHelpers._();
 
+  /// [classrooms] : toutes les classes de l'année (lecture locale `ClassroomOfflineBloc`),
+  /// regroupées ici par niveau — indépendant du référentiel cycles/niveaux.
   static List<AttendanceCycleOption> buildCycleOptions(
-    List<BootstrapSchoolLevelGroupBundle> bundles,
+    List<SchoolLevelGroupBundle> bundles,
+    List<OfflineClassroom> classrooms,
   ) {
+    final classroomsByLevel = <String, List<OfflineClassroom>>{};
+    for (final classroom in classrooms) {
+      final levelId = classroom.schoolLevelId;
+      if (levelId == null) continue;
+      (classroomsByLevel[levelId] ??= []).add(classroom);
+    }
+
     return SortedNestedOptionsHelper.build(
       outers: bundles,
-      outerOrder: (bundle) => bundle.schoolLevelGroup.displayOrder,
-      inners: (bundle) => bundle.schoolLevels,
-      innerOrder: (levelBundle) => levelBundle.schoolLevel.displayOrder,
-      mapInner: (bundle, levelBundle) => AttendanceLevelOption(
-        schoolLevelGroupId: bundle.schoolLevelGroup.id,
-        schoolLevelId: levelBundle.schoolLevel.id,
-        label: levelBundle.schoolLevel.name,
-        displayOrder: levelBundle.schoolLevel.displayOrder,
-        classrooms: levelBundle.classrooms,
+      outerOrder: (bundle) => bundle.group.displayOrder,
+      inners: (bundle) => bundle.levels,
+      innerOrder: (level) => level.displayOrder,
+      mapInner: (bundle, level) => AttendanceLevelOption(
+        schoolLevelGroupId: bundle.group.id,
+        schoolLevelId: level.id,
+        label: level.name,
+        displayOrder: level.displayOrder,
+        classrooms: classroomsByLevel[level.id] ?? const [],
       ),
       mapOuter: (bundle, levels) => AttendanceCycleOption(
-        id: bundle.schoolLevelGroup.id,
-        label: bundle.schoolLevelGroup.name,
-        displayOrder: bundle.schoolLevelGroup.displayOrder,
+        id: bundle.group.id,
+        label: bundle.group.name,
+        displayOrder: bundle.group.displayOrder,
         levels: levels,
       ),
     );
   }
 
-  static bool buildWhenBootstrapChanges(
-    BootstrapContextState previous,
-    BootstrapContextState current,
+  static bool buildWhenAcademicYearContextChanges(
+    AcademicYearContextState previous,
+    AcademicYearContextState current,
   ) {
     return previous.status != current.status ||
-        previous.bootstrap != current.bootstrap;
+        previous.context != current.context;
   }
 
   static bool buildWhenFetchStatusChanges(

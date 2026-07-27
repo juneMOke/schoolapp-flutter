@@ -149,23 +149,17 @@ void main() {
     );
   });
 
-  group('OfflineClassroomsRequested', () {
+  group('OfflineClassroomsRequested (année complète, dropdowns)', () {
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
       'emits [loading, success] quand les classes locales sont chargées',
       setUp: () {
         when(
-          () => mockGetClassrooms(
-            academicYearId: tAcademicYearId,
-            schoolLevelId: tSchoolLevelId,
-          ),
+          () => mockGetClassrooms(academicYearId: tAcademicYearId),
         ).thenAnswer((_) async => const Right([tOfflineClassroom]));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const OfflineClassroomsRequested(
-          academicYearId: tAcademicYearId,
-          schoolLevelId: tSchoolLevelId,
-        ),
+        const OfflineClassroomsRequested(academicYearId: tAcademicYearId),
       ),
       expect: () => const [
         ClassroomOfflineState(classroomsStatus: ClassroomStatus.loading),
@@ -180,10 +174,7 @@ void main() {
       'emits failure avec storage errorType sur StorageFailure',
       setUp: () {
         when(
-          () => mockGetClassrooms(
-            academicYearId: tAcademicYearId,
-            schoolLevelId: null,
-          ),
+          () => mockGetClassrooms(academicYearId: tAcademicYearId),
         ).thenAnswer((_) async => const Left(StorageFailure('db')));
       },
       build: buildBloc,
@@ -195,6 +186,63 @@ void main() {
         ClassroomOfflineState(
           classroomsStatus: ClassroomStatus.failure,
           classroomsErrorType: ClassroomErrorType.storage,
+        ),
+      ],
+    );
+  });
+
+  group('OfflineLevelClassroomsRequested (working-set dédié Organisation, '
+      'jamais partagé avec OfflineClassroomsRequested)', () {
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'emits [loading, success] dans levelClassrooms — classrooms (année '
+      'complète) reste intact',
+      setUp: () {
+        when(
+          () => mockGetClassrooms(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => const Right([tOfflineClassroom]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const OfflineLevelClassroomsRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(levelClassroomsStatus: ClassroomStatus.loading),
+        ClassroomOfflineState(
+          levelClassroomsStatus: ClassroomStatus.success,
+          levelClassrooms: [tOfflineClassroom],
+        ),
+      ],
+      verify: (bloc) => expect(bloc.state.classrooms, isEmpty),
+    );
+
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'emits failure avec storage errorType sur StorageFailure',
+      setUp: () {
+        when(
+          () => mockGetClassrooms(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => const Left(StorageFailure('db')));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const OfflineLevelClassroomsRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(levelClassroomsStatus: ClassroomStatus.loading),
+        ClassroomOfflineState(
+          levelClassroomsStatus: ClassroomStatus.failure,
+          levelClassroomsErrorType: ClassroomErrorType.storage,
         ),
       ],
     );
