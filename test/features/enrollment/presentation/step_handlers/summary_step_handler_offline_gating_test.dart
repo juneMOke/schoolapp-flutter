@@ -68,20 +68,35 @@ void main() {
     ).thenAnswer((_) => const Stream<EnrollmentOfflineState>.empty());
   });
 
+  // La finalisation passe désormais par une popin de confirmation : le contexte
+  // doit porter un Navigator (MaterialApp) pour que showDialog fonctionne.
   Future<BuildContext> pumpContext(WidgetTester tester) async {
     late BuildContext captured;
     await tester.pumpWidget(
-      BlocProvider<EnrollmentOfflineBloc>.value(
-        value: offlineBloc,
-        child: Builder(
-          builder: (context) {
-            captured = context;
-            return const SizedBox.shrink();
-          },
+      MaterialApp(
+        home: BlocProvider<EnrollmentOfflineBloc>.value(
+          value: offlineBloc,
+          child: Builder(
+            builder: (context) {
+              captured = context;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
     return captured;
+  }
+
+  _MockL10n buildL10n() {
+    final l10n = _MockL10n();
+    when(() => l10n.enrollmentFinalizeConfirmTitle).thenReturn('Valider ?');
+    when(
+      () => l10n.enrollmentFinalizeConfirmMessage,
+    ).thenReturn('Confirmer le dossier ?');
+    when(() => l10n.validateEnrollment).thenReturn('Valider l\'inscription');
+    when(() => l10n.cancel).thenReturn('Annuler');
+    return l10n;
   }
 
   HandlerSubmitContext buildSubmitContext(
@@ -96,21 +111,41 @@ void main() {
       detail: _buildDetail(),
       intent: intent,
       detailPolicy: const _FakePolicy(),
-      l10n: _MockL10n(),
+      l10n: buildL10n(),
     );
   }
 
-  testWidgets('NEW → finalise le brouillon local', (tester) async {
+  // Déroule la soumission jusqu'au bout : ouverture de la popin, tap sur le
+  // bouton [confirmLabel] (ou annulation), puis résultat du handler.
+  Future<StepSubmitResult> submitThroughDialog(
+    WidgetTester tester,
+    Future<StepSubmitResult> pending, {
+    required String tapLabel,
+  }) async {
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(tapLabel));
+    await tester.pumpAndSettle();
+    return pending;
+  }
+
+  testWidgets('NEW → popin confirmée → finalise le brouillon local', (
+    tester,
+  ) async {
     final context = await pumpContext(tester);
     final handler = SummaryStepHandler();
 
-    final result = await handler.submit(
+    final pending = handler.submit(
       buildSubmitContext(
         context,
         const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
           'enr-1',
         ),
       ),
+    );
+    final result = await submitThroughDialog(
+      tester,
+      pending,
+      tapLabel: 'Valider l\'inscription',
     );
 
     expect(result.status, StepSubmitStatus.dispatched);
@@ -119,13 +154,35 @@ void main() {
     expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');
   });
 
+  testWidgets('popin refusée → aucune finalisation (noop)', (tester) async {
+    final context = await pumpContext(tester);
+    final handler = SummaryStepHandler();
+
+    final pending = handler.submit(
+      buildSubmitContext(
+        context,
+        const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
+          'enr-1',
+        ),
+      ),
+    );
+    final result = await submitThroughDialog(
+      tester,
+      pending,
+      tapLabel: 'Annuler',
+    );
+
+    expect(result.status, StepSubmitStatus.noop);
+    verifyNever(() => offlineBloc.add(any()));
+  });
+
   testWidgets(
-    'RE → MÊME chemin : finalise le brouillon local (seedé en amont)',
+    'RE → MÊME chemin : popin confirmée → finalise le brouillon local',
     (tester) async {
       final context = await pumpContext(tester);
       final handler = SummaryStepHandler();
 
-      final result = await handler.submit(
+      final pending = handler.submit(
         buildSubmitContext(
           context,
           const EnrollmentDetailIntent.reRegistration(
@@ -133,6 +190,11 @@ void main() {
             studentId: 'stu-2',
           ),
         ),
+      );
+      final result = await submitThroughDialog(
+        tester,
+        pending,
+        tapLabel: 'Valider l\'inscription',
       );
 
       expect(result.status, StepSubmitStatus.dispatched);

@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
@@ -92,6 +93,30 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
     if (offlineBloc.state is EnrollmentDraftSaving) {
       return const StepSubmitResult.blocked();
     }
+
+    // Dernière étape : confirmation explicite avant la finalisation (bascule
+    // DRAFT → PENDING_SYNC irréversible côté wizard — le brouillon n'est plus
+    // ré-ouvrable ensuite). Le dialogue est modal : pas de double dispatch.
+    final confirmed = await showAppConfirmationDialog(
+      context: buildContext,
+      title: context.l10n.enrollmentFinalizeConfirmTitle,
+      message: context.l10n.enrollmentFinalizeConfirmMessage,
+      confirmLabel: context.l10n.validateEnrollment,
+      cancelLabel: context.l10n.cancel,
+      headerIcon: Icons.fact_check_outlined,
+      confirmIcon: Icons.check_rounded,
+    );
+    if (!confirmed || !buildContext.mounted) {
+      return const StepSubmitResult.noop();
+    }
+
+    // Re-vérification après l'attente du dialogue (TOCTOU) : une écriture
+    // d'étape en file au moment du tap a pu démarrer pendant l'ouverture — on
+    // ne finalise jamais par-dessus une écriture en cours.
+    if (offlineBloc.state is EnrollmentDraftSaving) {
+      return const StepSubmitResult.blocked();
+    }
+
     offlineBloc.add(FinalizeDraftRequested(enrollmentId));
     return const StepSubmitResult.dispatched();
   }
