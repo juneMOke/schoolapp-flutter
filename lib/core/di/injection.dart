@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
@@ -101,22 +101,6 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_local_data_source.dart';
-import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_remote_data_source.dart';
-import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_local_repository_impl.dart';
-import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_remote_repository_impl.dart';
-import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_local_migration_service.dart';
-import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_storage_service.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_remote_repository.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/clear_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_current_year_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_previous_year_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
@@ -186,24 +170,17 @@ final GetIt getIt = GetIt.instance;
 
 Future<void> configureDependencies({
   EnvConfig? envConfig,
-  String bootstrapBoxName = 'bootstrap_box',
+  Database? offlineDatabase,
 }) async {
-  await Hive.initFlutter();
-  final bootstrapBox = await Hive.openBox<String>(bootstrapBoxName);
-
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
-  );
-
-  getIt.registerLazySingleton<Box<String>>(
-    () => bootstrapBox,
-    instanceName: 'bootstrapBox',
   );
 
   // ── Socle offline (base chiffrée + outbox + moteur de synchro) ──────────────
   // Ouvre la base SQLCipher et enregistre DAOs/moteur/connectivité. Doit
   // précéder les features (qui liront le cache / écriront dans l'outbox).
-  await registerOfflineCore(getIt);
+  // `offlineDatabase` permet aux tests d'injecter une base ffi en mémoire.
+  await registerOfflineCore(getIt, database: offlineDatabase);
 
   final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
   getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
@@ -438,97 +415,6 @@ Future<void> configureDependencies({
     () => ForgotPasswordBloc(
       generateOtpUseCase: getIt<GenerateOtpUseCase>(),
       validateOtpUseCase: getIt<ValidateOtpUseCase>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapStorageService>(
-    () => BootstrapStorageService(
-      getIt<Box<String>>(instanceName: 'bootstrapBox'),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalMigrationService>(
-    () => BootstrapLocalMigrationService(
-      legacyStorage: getIt<FlutterSecureStorage>(),
-      bootstrapBox: getIt<Box<String>>(instanceName: 'bootstrapBox'),
-    ),
-  );
-
-  await getIt<BootstrapLocalMigrationService>().migrateIfNeeded();
-
-  getIt.registerLazySingleton<BootstrapRemoteDataSource>(
-    () => BootstrapRemoteDataSource(getIt<Dio>()),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalDataSource>(
-    () => BootstrapLocalDataSourceImpl(getIt<BootstrapStorageService>()),
-  );
-
-  getIt.registerLazySingleton<BootstrapRemoteRepository>(
-    () => BootstrapRemoteRepositoryImpl(
-      remoteDataSource: getIt<BootstrapRemoteDataSource>(),
-      requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalRepository>(
-    () => BootstrapLocalRepositoryImpl(
-      localDataSource: getIt<BootstrapLocalDataSource>(),
-    ),
-  );
-
-  getIt.registerFactory<GetRemoteBootstrapCurrentYearUseCase>(
-    () => GetRemoteBootstrapCurrentYearUseCase(
-      getIt<BootstrapRemoteRepository>(),
-    ),
-  );
-
-  getIt.registerFactory<GetRemoteBootstrapPreviousYearUseCase>(
-    () => GetRemoteBootstrapPreviousYearUseCase(
-      getIt<BootstrapRemoteRepository>(),
-    ),
-  );
-
-  getIt.registerFactory<GetLocalBootstrapUseCase>(
-    () => GetLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<SaveLocalBootstrapUseCase>(
-    () => SaveLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<ClearLocalBootstrapUseCase>(
-    () => ClearLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<BootstrapBloc>(
-    () => BootstrapBloc(
-      getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapCurrentYearUseCase>(),
-      getRemoteBootstrapPreviousYearUseCase:
-          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<BootstrapCurrentYearBloc>(
-    () => BootstrapCurrentYearBloc(
-      getRemoteBootstrapCurrentYearUseCase:
-          getIt<GetRemoteBootstrapCurrentYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<BootstrapPreviousYearBloc>(
-    () => BootstrapPreviousYearBloc(
-      getRemoteBootstrapPreviousYearUseCase:
-          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
     ),
   );
 
