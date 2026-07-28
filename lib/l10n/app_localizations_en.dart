@@ -1375,6 +1375,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fill the form above then click Search to display enrollment files.';
 
   @override
+  String get firstRegistrationSearchByStudentGroup => 'By student';
+
+  @override
+  String get firstRegistrationSearchByLevelGroup => 'By target level';
+
+  @override
+  String get firstRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get firstRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get firstRegistrationSearchModeStudentBadge => 'Student';
+
+  @override
+  String get firstRegistrationSearchModeLevelBadge => 'Level';
+
+  @override
+  String get firstRegistrationSearchLevelPlaceholder => 'Choose a cycle';
+
+  @override
   String get firstName => 'First Name';
 
   @override

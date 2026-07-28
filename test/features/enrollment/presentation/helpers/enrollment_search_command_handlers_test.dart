@@ -203,5 +203,38 @@ void main() {
         ),
       ).called(1);
     });
+
+    testWidgets(
+      'info académique + statut (Première inscription) → recherche locale par '
+      'niveau, bornée statut/type',
+      (tester) async {
+        await dispatch(
+          tester,
+          const AcademicInfoSearchCommand(
+            firstName: '',
+            lastName: '',
+            surname: '',
+            schoolLevelGroupId: 'grp-1',
+            schoolLevelId: 'lvl-2',
+            status: 'IN_PROGRESS',
+          ),
+        );
+
+        verify(
+          () => bloc.add(
+            const LocalListByAcademicInfoAndStatusRequested(
+              status: 'IN_PROGRESS',
+              academicYearId: 'ay-2025',
+              firstName: '',
+              lastName: '',
+              surname: '',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-2',
+              page: 0,
+            ),
+          ),
+        ).called(1);
+      },
+    );
   });
 }

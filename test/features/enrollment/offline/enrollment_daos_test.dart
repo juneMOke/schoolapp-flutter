@@ -298,6 +298,31 @@ void main() {
       );
     });
 
+    test(
+      'searchByAcademicInfo + filtre par statut (Première inscription)',
+      () async {
+        expect(
+          await readDao.searchByAcademicInfo(status: 'IN_PROGRESS'),
+          hasLength(1),
+        );
+        expect(
+          await readDao.searchByAcademicInfo(status: 'COMPLETED'),
+          isEmpty,
+        );
+      },
+    );
+
+    test('searchByAcademicInfo + filtre par type d\'inscription', () async {
+      expect(
+        await readDao.searchByAcademicInfo(enrollmentType: 'NEW_ENROLLMENT'),
+        hasLength(1),
+      );
+      expect(
+        await readDao.searchByAcademicInfo(enrollmentType: 'PRE_ENROLLMENT'),
+        isEmpty,
+      );
+    });
+
     test('getDetail assemble élève + tuteurs + documents', () async {
       final detail = await readDao.getDetail('e1');
       expect(detail, isNotNull);
@@ -562,6 +587,15 @@ void main() {
         await readDao.searchByAcademicInfo(academicYearId: 'ay-2026'),
         hasLength(1),
       );
+      // Le filtre `status` (Première inscription, recherche par niveau visé)
+      // ne doit JAMAIS exclure les brouillons DRAFT : c'est le statut MÉTIER
+      // (IN_PROGRESS) qui est filtré, pas le `sync_status` technique.
+      final draftByStatus = await readDao.searchByAcademicInfo(
+        status: 'IN_PROGRESS',
+        academicYearId: 'ay-2026',
+      );
+      expect(draftByStatus, hasLength(1));
+      expect(draftByStatus.first.syncState, SyncState.draft);
     });
 
     test('updateDraftStudentColumns : partiel, n\'écrase pas les autres '

@@ -2294,6 +2294,48 @@ abstract class AppLocalizations {
   /// **'Fill the form above then click Search to display enrollment files.'**
   String get reRegistrationSearchInvitationMessage;
 
+  /// No description provided for @firstRegistrationSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get firstRegistrationSearchByStudentGroup;
+
+  /// No description provided for @firstRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By target level'**
+  String get firstRegistrationSearchByLevelGroup;
+
+  /// No description provided for @firstRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get firstRegistrationSearchOrSeparator;
+
+  /// No description provided for @firstRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get firstRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @firstRegistrationSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get firstRegistrationSearchModeStudentBadge;
+
+  /// No description provided for @firstRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get firstRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @firstRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle'**
+  String get firstRegistrationSearchLevelPlaceholder;
+
   /// No description provided for @firstName.
   ///
   /// In en, this message translates to:

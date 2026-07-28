@@ -215,9 +215,11 @@ abstract class EnrollmentOfflineRepository {
   });
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> searchByAcademicInfo({
+    String? status,
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? enrollmentType,
   });
 
   /// Recherche **Facturation** : les élèves réellement inscrits l'année courante

@@ -63,6 +63,7 @@ class EnrollmentLocalListBloc
     on<LocalListByDateOfBirthRequested>(_onByDateOfBirth);
     on<LocalListByAcademicInfoRequested>(_onByAcademicInfo);
     on<LocalListByEnrolledAcademicInfoRequested>(_onByEnrolledAcademicInfo);
+    on<LocalListByAcademicInfoAndStatusRequested>(_onByAcademicInfoAndStatus);
   }
 
   void _onReset(
@@ -216,6 +217,27 @@ class EnrollmentLocalListBloc
     ),
   );
 
+  Future<void> _onByAcademicInfoAndStatus(
+    LocalListByAcademicInfoAndStatusRequested event,
+    Emitter<EnrollmentLocalListState> emit,
+  ) => _load(
+    emit,
+    EnrollmentSummariesQuery(
+      type: EnrollmentSummaryQueryType.byAcademicInfo,
+      academicInfoSource: AcademicInfoSource.currentYearByStatus,
+      status: event.status,
+      academicYearId: event.academicYearId,
+      enrollmentType: event.enrollmentType,
+      page: event.page,
+      size: event.size,
+      firstName: event.firstName,
+      lastName: event.lastName,
+      surname: event.surname,
+      schoolLevelGroupId: event.schoolLevelGroupId,
+      schoolLevelId: event.schoolLevelId,
+    ),
+  );
+
   /// Lit la base locale adaptée au type de requête, raffine/pagine côté client,
   /// met en cache la liste filtrée complète et émet la page demandée.
   Future<void> _load(
@@ -269,6 +291,25 @@ class EnrollmentLocalListBloc
           academicYearId: _nullIfEmpty(query.academicYearId),
           schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
           schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+        )).map(
+          (items) => EnrollmentLocalListProjector.project(
+            items,
+            firstName: query.firstName,
+            lastName: query.lastName,
+            surname: query.surname,
+            dateOfBirth: query.dateOfBirth,
+          ),
+        ),
+      (
+        EnrollmentSummaryQueryType.byAcademicInfo,
+        AcademicInfoSource.currentYearByStatus,
+      ) =>
+        (await _search.byAcademicInfo(
+          status: _nullIfEmpty(query.status),
+          academicYearId: _nullIfEmpty(query.academicYearId),
+          schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
+          schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+          enrollmentType: query.enrollmentType,
         )).map(
           (items) => EnrollmentLocalListProjector.project(
             items,

@@ -356,14 +356,18 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
 
   @override
   Future<Either<Failure, List<LocalEnrollmentListItem>>> searchByAcademicInfo({
+    String? status,
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? enrollmentType,
   }) => _guardList(
     () => _readDao.searchByAcademicInfo(
+      status: status,
       academicYearId: academicYearId,
       schoolLevelId: schoolLevelId,
       schoolLevelGroupId: schoolLevelGroupId,
+      enrollmentType: enrollmentType,
     ),
   );
 

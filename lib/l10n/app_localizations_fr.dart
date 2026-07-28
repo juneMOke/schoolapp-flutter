@@ -1382,6 +1382,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.';
 
   @override
+  String get firstRegistrationSearchByStudentGroup => 'Par élève';
+
+  @override
+  String get firstRegistrationSearchByLevelGroup => 'Par niveau visé';
+
+  @override
+  String get firstRegistrationSearchOrSeparator => 'OU';
+
+  @override
+  String get firstRegistrationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get firstRegistrationSearchModeStudentBadge => 'Élève';
+
+  @override
+  String get firstRegistrationSearchModeLevelBadge => 'Niveau';
+
+  @override
+  String get firstRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
   String get firstName => 'Prénom';
 
   @override

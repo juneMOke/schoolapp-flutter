@@ -18,6 +18,26 @@ class EnrollmentSearchCommandHandlers {
 
     switch (command) {
       case AcademicInfoSearchCommand():
+        final status = command.status;
+        if (status != null) {
+          // Première inscription : recherche « par niveau visé », bornée au
+          // statut actif de l'onglet et au type de la page.
+          bloc.add(
+            LocalListByAcademicInfoAndStatusRequested(
+              status: status,
+              academicYearId: screenCtx.academicYearId,
+              enrollmentType: screenCtx.enrollmentType,
+              firstName: command.firstName,
+              lastName: command.lastName,
+              surname: command.surname,
+              schoolLevelGroupId: command.schoolLevelGroupId,
+              schoolLevelId: command.schoolLevelId,
+              page: 0,
+            ),
+          );
+          return;
+        }
+        // Réinscription : vivier N-1, comportement historique inchangé.
         bloc.add(
           LocalListByAcademicInfoRequested(
             firstName: command.firstName,

@@ -19,7 +19,14 @@ enum EnrollmentSummaryQueryType {
 /// - [currentYearEnrolled] : uniquement les élèves **réellement inscrits** cette
 ///   année (dossiers finalisés, `sync_status` SYNCED, PENDING_SYNC ou
 ///   SYNC_ERROR) — la recherche de la **Facturation** (élèves facturables).
-enum AcademicInfoSource { reenrollmentCohort, currentYearEnrolled }
+/// - [currentYearByStatus] : dossiers de l'année courante bornés au niveau visé
+///   ET au statut métier (`status`), brouillons inclus — la recherche « par
+///   niveau visé » de la **Première inscription**.
+enum AcademicInfoSource {
+  reenrollmentCohort,
+  currentYearEnrolled,
+  currentYearByStatus,
+}
 
 /// Photo immuable de la dernière requête de liste jouée — sert à la rejouer
 /// (refresh / pagination) et à reconstituer les chips de critères. Partagée par

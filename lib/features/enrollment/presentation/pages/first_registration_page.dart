@@ -7,18 +7,20 @@ import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_origin.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/first_registration_page_helpers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_current_year_bootstrap_builder.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_scaffold.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_registration_search_form.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
@@ -83,17 +85,25 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
                 ),
               ),
             ),
-        searchSectionBuilder: (context, screenCtx, dispatch) => SearchForm(
-          academicYearId: screenCtx.academicYearId,
-          status: _effectiveStatus,
-          isLoading: screenCtx.isLoading,
-          dispatch: dispatch,
-          subtitle: l10n.searchFormSubtitleFirstRegistration,
-          showStatusFilter: true,
-          onStatusChanged: (newStatus) {
-            setState(() => _effectiveStatus = newStatus);
-          },
-        ),
+        searchSectionBuilder: (context, screenCtx, dispatch) {
+          final academicYearState = context
+              .read<AcademicYearContextBloc>()
+              .state;
+          final academicOptions =
+              FirstRegistrationPageHelpers.buildAcademicOptions(
+                academicYearState.context?.schoolLevelGroups ?? const [],
+              );
+
+          return FirstRegistrationSearchForm(
+            options: academicOptions,
+            isLoading: screenCtx.isLoading,
+            status: _effectiveStatus,
+            dispatch: dispatch,
+            onStatusChanged: (newStatus) {
+              setState(() => _effectiveStatus = newStatus);
+            },
+          );
+        },
         onSearchCommand:
             EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
         resultsSummaryBuilder: (context, state, screenCtx) =>

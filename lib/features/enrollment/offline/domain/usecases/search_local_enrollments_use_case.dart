@@ -33,4 +33,23 @@ class SearchLocalEnrollmentsUseCase {
     schoolLevelId: schoolLevelId,
     schoolLevelGroupId: schoolLevelGroupId,
   );
+
+  /// Recherche **Première inscription** : dossiers de l'année [academicYearId]
+  /// bornés au niveau/groupe visé, sans exclusion par `sync_status` (un
+  /// brouillon `IN_PROGRESS` doit rester trouvable). Bornée par [status] pour
+  /// rester scopée à l'onglet actif (« En cours » / « Complété »). Le
+  /// raffinement nom/surnom est fait côté présentation.
+  Future<Either<Failure, List<LocalEnrollmentListItem>>> byAcademicInfo({
+    String? status,
+    String? academicYearId,
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+    String? enrollmentType,
+  }) => _repository.searchByAcademicInfo(
+    status: status,
+    academicYearId: academicYearId,
+    schoolLevelId: schoolLevelId,
+    schoolLevelGroupId: schoolLevelGroupId,
+    enrollmentType: enrollmentType,
+  );
 }

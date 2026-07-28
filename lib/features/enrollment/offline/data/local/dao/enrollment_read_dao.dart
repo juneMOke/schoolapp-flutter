@@ -86,15 +86,24 @@ class EnrollmentReadDao {
     return rows.map(_listItem).toList();
   }
 
-  /// Recherche par info académique (année / niveau / groupe de niveau).
+  /// Recherche par info académique (année / niveau / groupe de niveau),
+  /// optionnellement bornée au statut métier et/ou au type d'inscription (ex.
+  /// Première inscription : statut `IN_PROGRESS`/`COMPLETED`, aucun filtre de
+  /// type). Brouillons inclus (repris depuis le listing) : aucun filtre
+  /// `sync_status`.
   Future<List<LocalEnrollmentListItem>> searchByAcademicInfo({
+    String? status,
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    String? enrollmentType,
   }) async {
-    // Brouillons inclus (repris depuis le listing) : aucun filtre `sync_status`.
     final clauses = <String>[];
     final args = <Object?>[];
+    if (status != null) {
+      clauses.add('e.status = ?');
+      args.add(status);
+    }
     if (academicYearId != null) {
       clauses.add('e.academic_year_id = ?');
       args.add(academicYearId);
@@ -106,6 +115,10 @@ class EnrollmentReadDao {
     if (schoolLevelGroupId != null) {
       clauses.add('e.school_level_group_id = ?');
       args.add(schoolLevelGroupId);
+    }
+    if (enrollmentType != null) {
+      clauses.add('e.enrollment_type = ?');
+      args.add(enrollmentType);
     }
     final where = clauses.isEmpty ? '' : 'WHERE ${clauses.join(' AND ')}';
     final rows = await _db.rawQuery(

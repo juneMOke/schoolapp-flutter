@@ -88,12 +88,18 @@ class AcademicInfoSearchCommand extends EnrollmentSearchCommand {
   final String schoolLevelGroupId;
   final String schoolLevelId;
 
+  /// Statut métier optionnel. `null` = recherche de **réinscription** (vivier
+  /// N-1, comportement historique inchangé). Non-null = recherche « par niveau
+  /// visé » de la **Première inscription**, bornée au statut actif de l'onglet.
+  final String? status;
+
   const AcademicInfoSearchCommand({
     required this.firstName,
     required this.lastName,
     required this.surname,
     required this.schoolLevelGroupId,
     required this.schoolLevelId,
+    this.status,
   });
 }
 
