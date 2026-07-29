@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_me
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 // Réutilise les enums de statut/erreur du BLoC online (calque de style, DRY).
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 
 /// État unique offline-first du module Classe (CF2/CF3/CF4).
 ///
@@ -47,6 +48,11 @@ class ClassroomOfflineState extends Equatable {
   /// qu'aucun niveau n'a été chargé.
   final Map<String, List<ClassroomMember>> levelRosters;
 
+  // ── Élèves non affectés du niveau, calculé 100% offline (CF3/CF4) ──
+  final ClassroomStatus levelUnassignedStatus;
+  final List<EnrollmentSummary> levelUnassignedEnrollments;
+  final ClassroomErrorType levelUnassignedErrorType;
+
   // ── Transfert OFFLINE (CF4) ──
   final ClassroomStatus transferStatus;
   final ClassroomErrorType transferErrorType;
@@ -81,6 +87,9 @@ class ClassroomOfflineState extends Equatable {
     this.freshness,
     this.levelRostersStatus = ClassroomStatus.initial,
     this.levelRosters = const {},
+    this.levelUnassignedStatus = ClassroomStatus.initial,
+    this.levelUnassignedEnrollments = const [],
+    this.levelUnassignedErrorType = ClassroomErrorType.none,
     this.transferStatus = ClassroomStatus.initial,
     this.transferErrorType = ClassroomErrorType.none,
     this.transferringStudentId = '',
@@ -105,6 +114,9 @@ class ClassroomOfflineState extends Equatable {
     Object? freshness = _undefined,
     ClassroomStatus? levelRostersStatus,
     Map<String, List<ClassroomMember>>? levelRosters,
+    ClassroomStatus? levelUnassignedStatus,
+    List<EnrollmentSummary>? levelUnassignedEnrollments,
+    ClassroomErrorType? levelUnassignedErrorType,
     ClassroomStatus? transferStatus,
     ClassroomErrorType? transferErrorType,
     String? transferringStudentId,
@@ -130,6 +142,11 @@ class ClassroomOfflineState extends Equatable {
         : freshness as int?,
     levelRostersStatus: levelRostersStatus ?? this.levelRostersStatus,
     levelRosters: levelRosters ?? this.levelRosters,
+    levelUnassignedStatus: levelUnassignedStatus ?? this.levelUnassignedStatus,
+    levelUnassignedEnrollments:
+        levelUnassignedEnrollments ?? this.levelUnassignedEnrollments,
+    levelUnassignedErrorType:
+        levelUnassignedErrorType ?? this.levelUnassignedErrorType,
     transferStatus: transferStatus ?? this.transferStatus,
     transferErrorType: transferErrorType ?? this.transferErrorType,
     transferringStudentId: transferringStudentId ?? this.transferringStudentId,
@@ -155,6 +172,9 @@ class ClassroomOfflineState extends Equatable {
     freshness,
     levelRostersStatus,
     levelRosters,
+    levelUnassignedStatus,
+    levelUnassignedEnrollments,
+    levelUnassignedErrorType,
     transferStatus,
     transferErrorType,
     transferringStudentId,

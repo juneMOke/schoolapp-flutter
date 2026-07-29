@@ -1,6 +1,11 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -13,6 +18,9 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
+    implements SyncStatusCubit {}
 
 /// Largeurs représentatives : téléphone très étroit → desktop.
 const _widths = <double>[320, 360, 700, 1100];
@@ -112,6 +120,12 @@ void main() {
     bool settle = true,
   }) async {
     for (final width in _widths) {
+      final syncStatusCubit = _MockSyncStatusCubit();
+      whenListen(
+        syncStatusCubit,
+        const Stream<SyncStatusState>.empty(),
+        initialState: const SyncStatusState(status: SyncStatus.synced),
+      );
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('fr'),
@@ -122,12 +136,15 @@ void main() {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
+          home: BlocProvider<SyncStatusCubit>.value(
+            value: syncStatusCubit,
             // Reproduit la vraie page : largeur bornée + hauteur NON bornée.
-            body: Center(
-              child: SizedBox(
-                width: width,
-                child: SingleChildScrollView(child: child),
+            child: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: width,
+                  child: SingleChildScrollView(child: child),
+                ),
               ),
             ),
           ),

@@ -254,10 +254,6 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
   }
 
   void _loadOverviewIfNeeded(ClassesOrganisationLevelOption level) {
-    // On charge l'aperçu de distribution dans les deux cas :
-    // - niveau réparti : pour afficher les sous-classes et leurs membres ;
-    // - niveau non réparti : pour rappeler l'effectif et le ratio G/F des
-    //   élèves restant à répartir (tous non affectés).
     final academicYearContext = context
         .read<AcademicYearContextBloc>()
         .state
@@ -267,8 +263,11 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    // Aperçu online : ne sert plus qu'à alimenter le nombre d'élèves non
-    // affectés (aucun équivalent dans le miroir local des classes).
+    // Aperçu ONLINE : ne sert plus qu'à la récap « effectif par classe » de la
+    // sur-couche de résultat de répartition (post-distribution — cf.
+    // classes_organisation_distribution_result_dialog.dart,
+    // distributionOverview.classrooms). Le nombre d'élèves non affectés
+    // (rappel G/F ci-dessous) vient désormais du calcul 100% local plus bas.
     context.read<ClassroomBloc>().add(
       ClassroomDistributionOverviewRequested(
         academicYearId: academicYearId,
@@ -288,6 +287,15 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     );
     context.read<ClassroomOfflineBloc>().add(
       OfflineLevelRostersRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
+    // Non-affectés du niveau : calculé 100% localement (remplace l'aperçu
+    // online pour ce seul usage — celui-ci reste dispatché ci-dessus pour la
+    // recap de la sur-couche de résultat de répartition).
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelUnassignedEnrollmentsRequested(
         academicYearId: academicYearId,
         schoolLevelId: level.schoolLevelId,
       ),

@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/classes/domain/repositories/offline/
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
@@ -51,6 +52,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/offline/
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 // ── Discipline (offline) ──
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_case_outbox_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_local_data_source.dart';
@@ -207,6 +209,15 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt.registerFactory<GetComposedRostersUseCase>(
     () => GetComposedRostersUseCase(getIt<ClassroomOfflineRepository>()),
   );
+  // Non-affectés du niveau (100% offline) : combine le miroir Inscription
+  // (élèves réellement inscrits) et les rosters composés Classe (déjà
+  // affectés) — cf. docstring du usecase pour la sémantique exacte.
+  getIt.registerFactory<GetUnassignedLevelEnrollmentsUseCase>(
+    () => GetUnassignedLevelEnrollmentsUseCase(
+      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
+      classroomRepository: getIt<ClassroomOfflineRepository>(),
+    ),
+  );
   getIt.registerFactory<RecordClassroomTransferUseCase>(
     () => RecordClassroomTransferUseCase(getIt<ClassroomOfflineRepository>()),
   );
@@ -296,6 +307,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
       getRoster: getIt<GetOfflineRosterUseCase>(),
       getComposedRosters: getIt<GetComposedRostersUseCase>(),
+      getUnassignedEnrollments: getIt<GetUnassignedLevelEnrollmentsUseCase>(),
       recordTransfer: getIt<RecordClassroomTransferUseCase>(),
       reassignMember: getIt<ReassignMemberOnlineUseCase>(),
     ),

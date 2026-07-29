@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
@@ -17,6 +18,9 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 
 class MockSyncClassroomsUseCase extends Mock implements SyncClassroomsUseCase {}
 
@@ -28,6 +32,9 @@ class MockGetOfflineRosterUseCase extends Mock
 
 class MockGetComposedRostersUseCase extends Mock
     implements GetComposedRostersUseCase {}
+
+class MockGetUnassignedLevelEnrollmentsUseCase extends Mock
+    implements GetUnassignedLevelEnrollmentsUseCase {}
 
 class MockReassignMemberOnlineUseCase extends Mock
     implements ReassignMemberOnlineUseCase {}
@@ -72,11 +79,26 @@ const tSyncOutcome = ClassroomSyncOutcome(
   syncedAt: 1720000000000,
 );
 
+const tUnassignedEnrollment = EnrollmentSummary(
+  enrollmentId: 'enrollment-9',
+  enrollmentCode: 'MAT-9',
+  status: 'COMPLETED',
+  student: StudentSummary(
+    id: 'student-9',
+    firstName: 'Awa',
+    lastName: 'Ndiaye',
+    surname: 'Fatou',
+    dateOfBirth: '2012-05-01',
+    gender: Gender.female,
+  ),
+);
+
 void main() {
   late MockSyncClassroomsUseCase mockSyncClassrooms;
   late MockGetOfflineClassroomsUseCase mockGetClassrooms;
   late MockGetOfflineRosterUseCase mockGetRoster;
   late MockGetComposedRostersUseCase mockGetComposedRosters;
+  late MockGetUnassignedLevelEnrollmentsUseCase mockGetUnassignedEnrollments;
   late MockRecordClassroomTransferUseCase mockRecordTransfer;
   late MockReassignMemberOnlineUseCase mockReassignMember;
 
@@ -89,6 +111,7 @@ void main() {
     mockGetClassrooms = MockGetOfflineClassroomsUseCase();
     mockGetRoster = MockGetOfflineRosterUseCase();
     mockGetComposedRosters = MockGetComposedRostersUseCase();
+    mockGetUnassignedEnrollments = MockGetUnassignedLevelEnrollmentsUseCase();
     mockRecordTransfer = MockRecordClassroomTransferUseCase();
     mockReassignMember = MockReassignMemberOnlineUseCase();
     // Par défaut, le rechargement des rosters composés post-transfert renvoie {}.
@@ -105,6 +128,7 @@ void main() {
     getClassrooms: mockGetClassrooms,
     getRoster: mockGetRoster,
     getComposedRosters: mockGetComposedRosters,
+    getUnassignedEnrollments: mockGetUnassignedEnrollments,
     recordTransfer: mockRecordTransfer,
     reassignMember: mockReassignMember,
   );
@@ -283,6 +307,107 @@ void main() {
         ClassroomOfflineState(
           rosterStatus: ClassroomStatus.failure,
           rosterErrorType: ClassroomErrorType.notFound,
+        ),
+      ],
+    );
+  });
+
+  group('OfflineLevelUnassignedEnrollmentsRequested', () {
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'emits [loading, success] avec les non-affectés calculés offline',
+      setUp: () {
+        when(
+          () => mockGetUnassignedEnrollments(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => const Right([tUnassignedEnrollment]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const OfflineLevelUnassignedEnrollmentsRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(levelUnassignedStatus: ClassroomStatus.loading),
+        ClassroomOfflineState(
+          levelUnassignedStatus: ClassroomStatus.success,
+          levelUnassignedEnrollments: [tUnassignedEnrollment],
+        ),
+      ],
+    );
+
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'emits failure avec storage errorType sur StorageFailure',
+      setUp: () {
+        when(
+          () => mockGetUnassignedEnrollments(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => const Left(StorageFailure('db')));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const OfflineLevelUnassignedEnrollmentsRequested(
+          academicYearId: tAcademicYearId,
+          schoolLevelId: tSchoolLevelId,
+        ),
+      ),
+      expect: () => const [
+        ClassroomOfflineState(levelUnassignedStatus: ClassroomStatus.loading),
+        ClassroomOfflineState(
+          levelUnassignedStatus: ClassroomStatus.failure,
+          levelUnassignedErrorType: ClassroomErrorType.storage,
+        ),
+      ],
+    );
+
+    blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
+      'un échec APRÈS un succès purge la liste (jamais un effectif périmé '
+      'affiché comme fiable)',
+      setUp: () {
+        final answers = [
+          const Right<Failure, List<EnrollmentSummary>>([
+            tUnassignedEnrollment,
+          ]),
+          const Left<Failure, List<EnrollmentSummary>>(StorageFailure('db')),
+        ];
+        when(
+          () => mockGetUnassignedEnrollments(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        ).thenAnswer((_) async => answers.removeAt(0));
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(
+          const OfflineLevelUnassignedEnrollmentsRequested(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(
+          const OfflineLevelUnassignedEnrollmentsRequested(
+            academicYearId: tAcademicYearId,
+            schoolLevelId: tSchoolLevelId,
+          ),
+        );
+      },
+      skip: 2, // loading + success du premier appel
+      expect: () => const [
+        ClassroomOfflineState(
+          levelUnassignedStatus: ClassroomStatus.loading,
+          levelUnassignedEnrollments: [tUnassignedEnrollment],
+        ),
+        ClassroomOfflineState(
+          levelUnassignedStatus: ClassroomStatus.failure,
+          levelUnassignedEnrollments: [],
+          levelUnassignedErrorType: ClassroomErrorType.storage,
         ),
       ],
     );

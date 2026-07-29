@@ -32,8 +32,9 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
   /// Seule source de membres désormais (plus de repli sur l'aperçu online).
   final Map<String, List<ClassroomMember>> composedRosters;
 
-  /// Élèves non affectés du niveau : concept propre aux inscriptions, sans
-  /// équivalent dans le miroir local des classes — best-effort online.
+  /// Élèves non affectés du niveau : calculé 100% offline
+  /// (`GetUnassignedLevelEnrollmentsUseCase`, croise le miroir local
+  /// Inscription et les rosters composés Classe).
   final List<EnrollmentSummary> unassignedEnrollments;
   final bool isReassigning;
   final String reassigningMemberId;

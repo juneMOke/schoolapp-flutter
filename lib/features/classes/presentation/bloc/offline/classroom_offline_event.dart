@@ -77,6 +77,25 @@ class OfflineLevelRostersRequested extends ClassroomOfflineEvent {
   List<Object?> get props => [academicYearId, schoolLevelId];
 }
 
+/// Élèves d'un niveau non affectés à une classe (CF3/CF4), calculé 100%
+/// hors-ligne : alimente le rappel d'effectif (G/F) de la carte « Niveau non
+/// réparti » et la section « non affectés » de la vue répartie — remplace
+/// l'aperçu ONLINE (`ClassroomDistributionOverviewRequested`) pour cet usage
+/// précis (l'aperçu online reste dispatché ailleurs pour la sur-couche de
+/// résultat de répartition, qui a besoin de la composition serveur fraîche).
+class OfflineLevelUnassignedEnrollmentsRequested extends ClassroomOfflineEvent {
+  final String academicYearId;
+  final String schoolLevelId;
+
+  const OfflineLevelUnassignedEnrollmentsRequested({
+    required this.academicYearId,
+    required this.schoolLevelId,
+  });
+
+  @override
+  List<Object?> get props => [academicYearId, schoolLevelId];
+}
+
 /// Transfert d'élève OFFLINE (CF4, ADR-004 amendé) : événement local + outbox,
 /// flush opportuniste. Composition à la lecture (aucune écriture du miroir).
 class MemberTransferRequested extends ClassroomOfflineEvent {

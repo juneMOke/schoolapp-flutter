@@ -179,9 +179,12 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
   (page **liste**, CF3) se lit en LOCAL — `ClassroomBloc._onClassroomMembersRequested`
   redirigé vers `GetOfflineRosterUseCase` (pattern Présence, widgets inchangés ;
   handler **batch** et organisation **inchangés online**) + pull au montage +
-  coordination `syncStatus` (échec=snackbar, succès=relecture). Restent **online
-  par conception** : organisation/répartition, `unassignedEnrollments`, stats
-  école. `CLS-4` (fraîcheur affichée) non fait. Résidu : « cache absent » non
+  coordination `syncStatus` (échec=snackbar, succès=relecture). Organisation :
+  le rappel d'effectif « non-affectés » (compteur + G/F) est maintenant
+  **offline** (`GetUnassignedLevelEnrollmentsUseCase`) ; la distribution
+  (écriture) et la réassignation restent **online par conception** (ADR-004,
+  bouton désactivé hors-ligne). Stats école reste online par conception.
+  `CLS-4` (fraîcheur affichée) non fait. Résidu : « cache absent » non
   distingué de « classe vide » (raffinement).
 - **Présence** (`PRE-3`, lecture appel) — ✅ **FAIT** : source de `AttendanceBloc`
   redirigée `GetAttendanceUseCase` → `LoadDailyAttendanceUseCase` (pas de swap de

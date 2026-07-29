@@ -117,7 +117,7 @@ Le module a 3 surfaces distinctes ; **seule la consultation** est cible offline 
 | Surface | Fichier | Régime |
 |---|---|---|
 | **Consultation** (chercher une classe → roster, recherche nominale) | `classes_list_page.dart` | **cible offline** (roster local) |
-| **Organisation / répartition** (distribution, non-affectés, réassignation) | `classes_organisation_page.dart` | **online** (CF4/CF5 : `distributionOverview` + `unassignedEnrollments` non représentables offline) |
+| **Organisation / répartition** (distribution, non-affectés, réassignation) | `classes_organisation_page.dart` | **mixte** : effectif/G-F « non-affectés » **offline** (`GetUnassignedLevelEnrollmentsUseCase`, diff élèves réellement inscrits ∖ rosters composés du niveau) · distribution (écriture) et réassignation **online** (CF4/CF5, `DistributeStudentsToClassroomsUseCase`/`ReassignMemberOnlineUseCase`) |
 | **Stats école** | `classes_stats_dashboard_page.dart` | **online** (agrégat serveur, ADR-004) |
 
 ### 1. Lecture — consultation d'un roster (cible)
@@ -143,7 +143,7 @@ Reste **ONLINE V1** (CF4 Option A) : `classes_organisation_reassign_dialog` → 
 **Résidu assumé** : un pull en échec avec une classe consultée montre un roster vide (état « succès ») **plus** un snackbar d'erreur — le « cache absent » n'est pas encore distingué de « classe réellement vide » (raffinement ultérieur). Recherche nominale d'élève = **online** (Inscription, gated).
 
 ### Ce qui NE bascule PAS (documenté)
-- Organisation / répartition / non-affectés (`unassignedEnrollments` absents du cache local) → **online**.
+- Organisation / répartition : la **distribution** elle-même (POST, création des classes) et la **réassignation** d'un non-réparti (PUT) restent **online**, jamais rejouables offline (ADR-004) — le bouton « Lancer la répartition » se désactive quand `SyncStatusCubit` est `offline` (message adapté). Le rappel d'effectif « non-affectés » (compteur + G/F) qui alimente cette même carte est en revanche **offline** depuis `GetUnassignedLevelEnrollmentsUseCase` (voir ci-dessus) — l'aperçu online (`ClassroomBloc.distributionOverview`) reste dispatché mais ne sert plus qu'à la récap « effectif par classe » de la sur-couche de résultat post-distribution (`distributionOverview.classrooms`).
 - Recherche nominale d'élève (Inscription, pas de pull) → **online**.
 - Stats école (agrégat serveur) → **online**.
 

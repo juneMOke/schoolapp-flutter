@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/search/search_invitation_card.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
@@ -53,20 +52,29 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
       );
     }
 
-    return BlocBuilder<ClassroomBloc, ClassroomState>(
+    // Source LOCALE (CF3/CF4) pour tout ce qu'affiche cette section : classes
+    // + rosters composés du niveau (miroir ± transferts pending), non-affectés
+    // (remplace l'aperçu online — cf. docstring de
+    // `OfflineLevelUnassignedEnrollmentsRequested`), ET affectation d'un
+    // non-réparti (`MemberReassignRequested` est exclusivement dispatché sur
+    // ce bloc, cf. `classes_organisation_reassign_dialog.dart` — ClassroomBloc
+    // online n'a plus aucune raison d'être lu ici).
+    return BlocBuilder<ClassroomOfflineBloc, ClassroomOfflineState>(
       buildWhen: (previous, current) =>
-          previous.distributionOverviewStatus !=
-              current.distributionOverviewStatus ||
-          previous.distributionOverview != current.distributionOverview ||
-          previous.distributionOverviewErrorType !=
-              current.distributionOverviewErrorType ||
+          previous.levelUnassignedStatus != current.levelUnassignedStatus ||
+          previous.levelUnassignedEnrollments !=
+              current.levelUnassignedEnrollments ||
+          previous.levelClassroomsStatus != current.levelClassroomsStatus ||
+          previous.levelClassrooms != current.levelClassrooms ||
+          previous.levelClassroomsErrorType !=
+              current.levelClassroomsErrorType ||
+          previous.levelRosters != current.levelRosters ||
           previous.reassignStatus != current.reassignStatus ||
           previous.reassigningMemberId != current.reassigningMemberId,
-      builder: (context, classroomState) {
+      builder: (context, offlineState) {
         if (!selectedLevel!.splitIntoClassrooms) {
           final List<EnrollmentSummary> unassigned =
-              classroomState.distributionOverview?.unassignedEnrollments ??
-              const [];
+              offlineState.levelUnassignedEnrollments;
           final maleCount = unassigned
               .where((enrollment) => enrollment.student.gender == Gender.male)
               .length;
@@ -76,7 +84,7 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
 
           return ClassesOrganisationPendingDistributionCard(
             isDistributing: isDistributing,
-            overviewStatus: classroomState.distributionOverviewStatus,
+            overviewStatus: offlineState.levelUnassignedStatus,
             levelName: selectedLevel!.schoolLevelName,
             studentsToDistribute: unassigned.length,
             maleCount: maleCount,
@@ -85,35 +93,21 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           );
         }
 
-        // Source primaire LOCALE (CF3) : classes + rosters composés du niveau
-        // (miroir ± transferts pending). L'aperçu online ne reste utile ici que
-        // pour le nombre d'élèves non affectés (aucun équivalent local).
-        return BlocBuilder<ClassroomOfflineBloc, ClassroomOfflineState>(
-          buildWhen: (previous, current) =>
-              previous.levelClassroomsStatus != current.levelClassroomsStatus ||
-              previous.levelClassrooms != current.levelClassrooms ||
-              previous.levelClassroomsErrorType !=
-                  current.levelClassroomsErrorType ||
-              previous.levelRosters != current.levelRosters,
-          builder: (context, offlineState) => ClassesOrganisationSplitResults(
-            classroomsStatus: offlineState.levelClassroomsStatus,
-            classroomsErrorType: offlineState.levelClassroomsErrorType,
-            classrooms: offlineState.levelClassrooms,
-            composedRosters: offlineState.levelRosters,
-            unassignedEnrollments:
-                classroomState.distributionOverview?.unassignedEnrollments ??
-                const [],
-            isReassigning:
-                classroomState.reassignStatus == ClassroomStatus.loading,
-            reassigningMemberId: classroomState.reassigningMemberId,
-            errorMessage:
-                ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                  l10n,
-                  offlineState.levelClassroomsErrorType,
-                ),
-            onTransferTap: onTransferTap,
-            onRetry: () => _retryLocalClassrooms(context, selectedLevel!),
-          ),
+        return ClassesOrganisationSplitResults(
+          classroomsStatus: offlineState.levelClassroomsStatus,
+          classroomsErrorType: offlineState.levelClassroomsErrorType,
+          classrooms: offlineState.levelClassrooms,
+          composedRosters: offlineState.levelRosters,
+          unassignedEnrollments: offlineState.levelUnassignedEnrollments,
+          isReassigning: offlineState.reassignStatus == ClassroomStatus.loading,
+          reassigningMemberId: offlineState.reassigningMemberId,
+          errorMessage:
+              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                l10n,
+                offlineState.levelClassroomsErrorType,
+              ),
+          onTransferTap: onTransferTap,
+          onRetry: () => _retryLocalClassrooms(context, selectedLevel!),
         );
       },
     );
@@ -139,6 +133,12 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
     );
     context.read<ClassroomOfflineBloc>().add(
       OfflineLevelRostersRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
+    context.read<ClassroomOfflineBloc>().add(
+      OfflineLevelUnassignedEnrollmentsRequested(
         academicYearId: academicYearId,
         schoolLevelId: level.schoolLevelId,
       ),

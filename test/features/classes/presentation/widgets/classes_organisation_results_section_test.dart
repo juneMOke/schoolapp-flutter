@@ -5,9 +5,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/search/search_invitation_card.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/classroom_with_members.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/level_distribution_overview.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
@@ -31,9 +32,13 @@ class MockClassroomOfflineBloc
     extends MockBloc<ClassroomOfflineEvent, ClassroomOfflineState>
     implements ClassroomOfflineBloc {}
 
+class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
+    implements SyncStatusCubit {}
+
 void main() {
   late MockClassroomBloc classroomBloc;
   late MockClassroomOfflineBloc offlineBloc;
+  late _MockSyncStatusCubit syncStatusCubit;
 
   const cycle = ClassesOrganisationCycleOption(
     id: 'cycle-1',
@@ -57,24 +62,21 @@ void main() {
     splitIntoClassrooms: true,
   );
 
-  const overview = LevelDistributionOverview(
-    unassignedEnrollments: <EnrollmentSummary>[
-      EnrollmentSummary(
-        enrollmentId: 'enr-1',
-        enrollmentCode: 'ENR-1',
-        status: 'COMPLETED',
-        student: StudentSummary(
-          id: 'student-1',
-          firstName: 'Jane',
-          lastName: 'Doe',
-          surname: 'K',
-          dateOfBirth: '2012-01-01',
-          gender: Gender.female,
-        ),
+  const unassignedEnrollments = <EnrollmentSummary>[
+    EnrollmentSummary(
+      enrollmentId: 'enr-1',
+      enrollmentCode: 'ENR-1',
+      status: 'COMPLETED',
+      student: StudentSummary(
+        id: 'student-1',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        surname: 'K',
+        dateOfBirth: '2012-01-01',
+        gender: Gender.female,
       ),
-    ],
-    classrooms: <ClassroomWithMembers>[],
-  );
+    ),
+  ];
 
   const offlineClassroom = OfflineClassroom(
     id: 'class-1',
@@ -116,6 +118,12 @@ void main() {
       const Stream<ClassroomOfflineState>.empty(),
       initialState: const ClassroomOfflineState(),
     );
+    syncStatusCubit = _MockSyncStatusCubit();
+    whenListen(
+      syncStatusCubit,
+      const Stream<SyncStatusState>.empty(),
+      initialState: const SyncStatusState(status: SyncStatus.synced),
+    );
   });
 
   Future<void> pumpSection(
@@ -124,6 +132,7 @@ void main() {
     required ClassesOrganisationLevelOption? selectedLevel,
     ClassroomState? blocState,
     ClassroomOfflineState? offlineBlocState,
+    bool settle = true,
   }) async {
     final state = blocState ?? const ClassroomState();
     when(() => classroomBloc.state).thenReturn(state);
@@ -155,6 +164,7 @@ void main() {
           providers: [
             BlocProvider<ClassroomBloc>.value(value: classroomBloc),
             BlocProvider<ClassroomOfflineBloc>.value(value: offlineBloc),
+            BlocProvider<SyncStatusCubit>.value(value: syncStatusCubit),
           ],
           child: Scaffold(
             body: SingleChildScrollView(
@@ -171,7 +181,11 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
   testWidgets(
@@ -216,15 +230,20 @@ void main() {
       tester,
       selectedCycle: cycle,
       selectedLevel: nonSplitLevel,
-      blocState: const ClassroomState(
-        distributionOverviewStatus: ClassroomStatus.success,
-        distributionOverview: overview,
+      // Non-affectés calculés 100% offline (remplace l'aperçu online) : la
+      // carte lit désormais `levelUnassignedStatus`/`levelUnassignedEnrollments`.
+      offlineBlocState: const ClassroomOfflineState(
+        levelUnassignedStatus: ClassroomStatus.success,
+        levelUnassignedEnrollments: unassignedEnrollments,
       ),
     );
 
     expect(find.byType(FilledButton), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsWidgets);
     expect(find.text('Niveau pas encore réparti'), findsOneWidget);
+    // Un seul élève non affecté dans `unassignedEnrollments` (fille) → effectif 1, F · 1.
+    expect(find.text('F · 1'), findsOneWidget);
+    expect(find.text('G · 0'), findsOneWidget);
   });
 
   testWidgets(
@@ -234,16 +253,14 @@ void main() {
         tester,
         selectedCycle: cycle,
         selectedLevel: splitLevel,
-        blocState: const ClassroomState(
-          distributionOverviewStatus: ClassroomStatus.success,
-          distributionOverview: overview,
-        ),
         offlineBlocState: const ClassroomOfflineState(
           levelClassroomsStatus: ClassroomStatus.success,
           levelClassrooms: <OfflineClassroom>[offlineClassroom],
           levelRosters: <String, List<ClassroomMember>>{
             'class-1': offlineMembers,
           },
+          levelUnassignedStatus: ClassroomStatus.success,
+          levelUnassignedEnrollments: unassignedEnrollments,
         ),
       );
 
@@ -251,6 +268,35 @@ void main() {
         find.byType(ClassesOrganisationUnassignedMembersSection),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'le spinner de réassignation est piloté par ClassroomOfflineBloc (bloc '
+    'qui reçoit réellement MemberReassignRequested), pas ClassroomBloc online',
+    (tester) async {
+      await pumpSection(
+        tester,
+        selectedCycle: cycle,
+        selectedLevel: splitLevel,
+        offlineBlocState: const ClassroomOfflineState(
+          levelClassroomsStatus: ClassroomStatus.success,
+          levelClassrooms: <OfflineClassroom>[offlineClassroom],
+          levelRosters: <String, List<ClassroomMember>>{
+            'class-1': offlineMembers,
+          },
+          levelUnassignedStatus: ClassroomStatus.success,
+          levelUnassignedEnrollments: <EnrollmentSummary>[],
+          // Réassignation en cours sur l'unique membre affiché.
+          reassignStatus: ClassroomStatus.loading,
+          reassigningMemberId: 'member-1',
+        ),
+        // pumpAndSettle ne termine jamais tant qu'un CircularProgressIndicator
+        // (animation indéterminée perpétuelle) est monté.
+        settle: false,
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
     },
   );
 

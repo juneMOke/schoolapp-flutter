@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/offline/reco
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
@@ -24,6 +25,7 @@ class ClassroomOfflineBloc
   final GetOfflineClassroomsUseCase _getClassrooms;
   final GetOfflineRosterUseCase _getRoster;
   final GetComposedRostersUseCase _getComposedRosters;
+  final GetUnassignedLevelEnrollmentsUseCase _getUnassignedEnrollments;
   final RecordClassroomTransferUseCase _recordTransfer;
   final ReassignMemberOnlineUseCase _reassignMember;
 
@@ -32,12 +34,14 @@ class ClassroomOfflineBloc
     required GetOfflineClassroomsUseCase getClassrooms,
     required GetOfflineRosterUseCase getRoster,
     required GetComposedRostersUseCase getComposedRosters,
+    required GetUnassignedLevelEnrollmentsUseCase getUnassignedEnrollments,
     required RecordClassroomTransferUseCase recordTransfer,
     required ReassignMemberOnlineUseCase reassignMember,
   }) : _syncClassrooms = syncClassrooms,
        _getClassrooms = getClassrooms,
        _getRoster = getRoster,
        _getComposedRosters = getComposedRosters,
+       _getUnassignedEnrollments = getUnassignedEnrollments,
        _recordTransfer = recordTransfer,
        _reassignMember = reassignMember,
        super(const ClassroomOfflineState()) {
@@ -46,6 +50,9 @@ class ClassroomOfflineBloc
     on<OfflineLevelClassroomsRequested>(_onLevelClassroomsRequested);
     on<OfflineRosterRequested>(_onRosterRequested);
     on<OfflineLevelRostersRequested>(_onLevelRostersRequested);
+    on<OfflineLevelUnassignedEnrollmentsRequested>(
+      _onLevelUnassignedEnrollmentsRequested,
+    );
     on<MemberTransferRequested>(_onTransferRequested);
     on<MemberReassignRequested>(_onReassignRequested);
   }
@@ -182,6 +189,43 @@ class ClassroomOfflineBloc
         state.copyWith(
           levelRostersStatus: ClassroomStatus.success,
           levelRosters: rosters,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLevelUnassignedEnrollmentsRequested(
+    OfflineLevelUnassignedEnrollmentsRequested event,
+    Emitter<ClassroomOfflineState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        levelUnassignedStatus: ClassroomStatus.loading,
+        levelUnassignedErrorType: ClassroomErrorType.none,
+      ),
+    );
+
+    final result = await _getUnassignedEnrollments(
+      academicYearId: event.academicYearId,
+      schoolLevelId: event.schoolLevelId,
+    );
+
+    result.fold(
+      // Purge la liste : un échec ne doit jamais laisser afficher l'effectif
+      // (périmé, potentiellement du niveau précédent) comme si de rien
+      // n'était (cf. EnrollmentLocalListBloc._load, même principe).
+      (failure) => emit(
+        state.copyWith(
+          levelUnassignedStatus: ClassroomStatus.failure,
+          levelUnassignedEnrollments: const [],
+          levelUnassignedErrorType: _mapFailureToErrorType(failure),
+        ),
+      ),
+      (unassigned) => emit(
+        state.copyWith(
+          levelUnassignedStatus: ClassroomStatus.success,
+          levelUnassignedEnrollments: unassigned,
+          levelUnassignedErrorType: ClassroomErrorType.none,
         ),
       ),
     );

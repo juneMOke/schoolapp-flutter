@@ -116,14 +116,11 @@ class _ShimmerBox extends StatefulWidget {
 
 class _ShimmerBoxState extends State<_ShimmerBox>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: AppMotion.skeletonPulse,
-  )..repeat(reverse: true);
+  AnimationController? _controller;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -135,14 +132,19 @@ class _ShimmerBoxState extends State<_ShimmerBox>
       return _box(AppColors.border);
     }
 
+    final controller = _controller ??= AnimationController(
+      vsync: this,
+      duration: AppMotion.skeletonPulse,
+    )..repeat(reverse: true);
+
     return AnimatedBuilder(
-      animation: _controller,
+      animation: controller,
       builder: (context, _) {
         final color =
             Color.lerp(
               AppColors.border,
               AppColors.surfaceRaised,
-              _controller.value,
+              controller.value,
             ) ??
             AppColors.border;
         return _box(color);
