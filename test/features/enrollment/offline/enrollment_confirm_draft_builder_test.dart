@@ -82,13 +82,13 @@ void main() {
       expect(draft.studentId, isNull); // le repo génère l'uuid client
     });
 
-    test('RE → RE_ENROLLMENT/PRE_REGISTERED, studentId canonique conservé', () {
+    test('RE → RE_ENROLLMENT/IN_PROGRESS, studentId canonique conservé', () {
       final draft = EnrollmentConfirmDraftBuilder.fromDetail(
         detail: detail(),
         origin: EnrollmentDetailOrigin.reRegistration,
       );
       expect(draft.enrollmentType, 'RE_ENROLLMENT');
-      expect(draft.status, 'PRE_REGISTERED');
+      expect(draft.status, 'IN_PROGRESS');
       expect(draft.studentId, 'stu-canonique'); // pas de doublon élève
     });
 
@@ -167,13 +167,13 @@ void main() {
       guardianPhone: '+243900000000',
     );
 
-    test('RE_ENROLLMENT/PRE_REGISTERED, élève canonique conservé', () {
+    test('RE_ENROLLMENT/IN_PROGRESS, élève canonique conservé', () {
       final draft = EnrollmentConfirmDraftBuilder.fromReenrollmentCandidate(
         candidate: candidate,
         academicYearId: 'ay-2026',
       );
       expect(draft.enrollmentType, 'RE_ENROLLMENT');
-      expect(draft.status, 'PRE_REGISTERED');
+      expect(draft.status, 'IN_PROGRESS');
       expect(draft.studentId, 'stu-canonique');
       expect(draft.academicYearId, 'ay-2026');
     });

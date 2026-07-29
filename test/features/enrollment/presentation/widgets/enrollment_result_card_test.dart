@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_chip.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_result_card.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_result_card.dart';
@@ -54,17 +55,46 @@ void main() {
     expect(badge.style, StatusBadgeStyle.filled);
   });
 
+  testWidgets('dossier RE avec brouillon local affiche « En cours » (pas « '
+      'Pré-inscrit »), quel que soit le statut brut porté', (tester) async {
+    const reDraft = EnrollmentSummary(
+      enrollmentId: 'enr-re',
+      enrollmentCode: 'RE-001',
+      status: 'PRE_REGISTERED',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.draft,
+      student: StudentSummary(
+        id: 'stu-2',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(EnrollmentResultCard(enrollment: reDraft, onTap: () {})),
+    );
+
+    // Pastille pilotée par le TYPE + l'axe syncState (isLocalDraft), jamais
+    // par le statut métier brut : « En cours » remplace « Pré-inscrit ».
+    expect(find.text('En cours'), findsOneWidget);
+    expect(find.text('Pré-inscrit'), findsNothing);
+  });
+
   testWidgets(
-    'dossier RE (statut PRE_REGISTERED) affiche « Réinscription », pas '
-    '« Pré-inscrit »',
+    'dossier RE finalisé/synchronisé (pas de brouillon local) affiche « '
+    'Réinscrit », quel que soit le statut brut porté',
     (tester) async {
-      const reEnrollment = EnrollmentSummary(
-        enrollmentId: 'enr-re',
-        enrollmentCode: 'RE-001',
-        status: 'PRE_REGISTERED',
+      const reFinalized = EnrollmentSummary(
+        enrollmentId: 'enr-re-2',
+        enrollmentCode: 'RE-002',
+        status: 'IN_PROGRESS',
         enrollmentType: 'RE_ENROLLMENT',
+        syncState: SyncState.synced,
         student: StudentSummary(
-          id: 'stu-2',
+          id: 'stu-4',
           firstName: 'Amina',
           lastName: 'Moke',
           surname: 'Junior',
@@ -75,14 +105,12 @@ void main() {
 
       await tester.pumpWidget(
         buildHarness(
-          EnrollmentResultCard(enrollment: reEnrollment, onTap: () {}),
+          EnrollmentResultCard(enrollment: reFinalized, onTap: () {}),
         ),
       );
 
-      // La pastille est pilotée par le TYPE : « Réinscription » remplace le
-      // libellé de statut « Pré-inscrit ».
-      expect(find.text('Réinscription'), findsOneWidget);
-      expect(find.text('Pré-inscrit'), findsNothing);
+      expect(find.text('Réinscrit'), findsOneWidget);
+      expect(find.text('En cours'), findsNothing);
     },
   );
 

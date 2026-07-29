@@ -54,5 +54,49 @@ void main() {
       expect(intent.origin, EnrollmentDetailOrigin.firstRegistration);
       expect(intent.status, 'COMPLETED');
     });
+
+    test('toLocation inclut enrollmentType pour localDraftResume (reprise '
+        'd\'un brouillon RE — évite la corruption du type au re-save) ; pas '
+        'de status (draftStatus est dérivé du type par la policy)', () {
+      const intent = EnrollmentDetailIntent.localDraftResume(
+        enrollmentId: 'draft-1',
+        studentId: 'stu-1',
+        enrollmentType: 'RE_ENROLLMENT',
+      );
+
+      expect(
+        intent.toLocation(),
+        '/enrollments/detail/draft-1?origin=localDraftResume&studentId=stu-1'
+        '&enrollmentType=RE_ENROLLMENT',
+      );
+    });
+
+    test('fromRouteContext parse enrollmentType pour localDraftResume', () {
+      final intent = EnrollmentDetailIntent.fromRouteContext(
+        enrollmentId: 'draft-1',
+        queryParameters: const {
+          'origin': 'localDraftResume',
+          'enrollmentType': 'RE_ENROLLMENT',
+        },
+      );
+
+      expect(intent.origin, EnrollmentDetailOrigin.localDraftResume);
+      expect(intent.enrollmentType, 'RE_ENROLLMENT');
+    });
+
+    test('fromRouteContext ignore un status parasite dans l\'url pour '
+        'localDraftResume (le constructeur nommé ne l\'accepte plus — '
+        'draftStatus est dérivé du type, jamais lu depuis l\'url)', () {
+      final intent = EnrollmentDetailIntent.fromRouteContext(
+        enrollmentId: 'draft-1',
+        queryParameters: const {
+          'origin': 'localDraftResume',
+          'enrollmentType': 'RE_ENROLLMENT',
+          'status': 'PRE_REGISTERED',
+        },
+      );
+
+      expect(intent.status, isNull);
+    });
   });
 }

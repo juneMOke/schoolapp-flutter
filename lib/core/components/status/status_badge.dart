@@ -338,10 +338,11 @@ class StatusBadge extends StatelessWidget {
   // ---------------------------------------------------------------------------
 
   /// Pastille de **type** « Réinscription » (dossier `RE_ENROLLMENT`) : axe
-  /// distinct du statut métier. Affichée à la place du statut pour ne pas
-  /// confondre un dossier de réinscription (statut PRE_REGISTERED) avec une
-  /// vraie pré-inscription. Couleur alignée sur le module Statistiques
-  /// ([AppColors.enrollmentStatsRe]).
+  /// distinct du statut métier. Affichée à la place du statut, quel que soit
+  /// ce dernier (IN_PROGRESS en flux normal, ou un legacy PRE_REGISTERED sur
+  /// un dossier créé avant l'alignement RE↔NEW), pour ne pas confondre un
+  /// dossier de réinscription avec une vraie pré-inscription. Couleur alignée
+  /// sur le module Statistiques ([AppColors.enrollmentStatsRe]).
   factory StatusBadge.enrollmentReEnrollment({
     required String label,
     StatusBadgeSize size = StatusBadgeSize.medium,

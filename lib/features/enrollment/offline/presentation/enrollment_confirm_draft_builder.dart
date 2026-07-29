@@ -14,7 +14,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 /// offline (cf. [ConfirmEnrollmentDraft]) :
 ///  - NEW (première inscription) → `NEW_ENROLLMENT` / `IN_PROGRESS`, `studentId`
 ///    null (le repo génère l'uuid client + matricule « en cours ») ;
-///  - RE  → `RE_ENROLLMENT` / `PRE_REGISTERED`, `studentId` connu ;
+///  - RE  → `RE_ENROLLMENT` / `IN_PROGRESS` (même cycle que NEW, pour
+///    apparaître dans le listing Première inscription — la pastille
+///    « Réinscription » le distingue), `studentId` connu ;
 ///  - PRE → `PRE_ENROLLMENT` / `PRE_REGISTERED`, `studentId` connu.
 /// [sourceRef] = référence d'origine du contrat agrégat (id de préinscription
 /// PRE ; matricule RE fourni plus tard par le seed cohorte locale).
@@ -110,7 +112,10 @@ abstract final class EnrollmentConfirmDraftBuilder {
       birthPlace: _nn(candidate.birthPlace),
       matriculationNumber: _nullIfEmpty(candidate.matriculationNumber),
       enrollmentType: 'RE_ENROLLMENT',
-      status: 'PRE_REGISTERED',
+      // Même cycle que NEW (IN_PROGRESS) : le brouillon RE doit apparaître
+      // dans le listing Première inscription, distingué par la pastille
+      // « Réinscription » (enrollmentType), pas par le status.
+      status: 'IN_PROGRESS',
       sourceRef: _nullIfEmpty(candidate.matriculationNumber),
       academicYearId: academicYearId,
       previousSchoolLevelId: _nn(candidate.previousSchoolLevelId),
@@ -200,8 +205,8 @@ abstract final class EnrollmentConfirmDraftBuilder {
     return switch (origin) {
       EnrollmentDetailOrigin.newFirstRegistration ||
       EnrollmentDetailOrigin.firstRegistration ||
-      EnrollmentDetailOrigin.localDraftResume => 'IN_PROGRESS',
-      EnrollmentDetailOrigin.reRegistration ||
+      EnrollmentDetailOrigin.localDraftResume ||
+      EnrollmentDetailOrigin.reRegistration => 'IN_PROGRESS',
       EnrollmentDetailOrigin.preRegistration => 'PRE_REGISTERED',
     };
   }

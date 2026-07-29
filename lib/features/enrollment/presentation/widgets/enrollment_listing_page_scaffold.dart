@@ -134,6 +134,7 @@ class EnrollmentListingPageScaffold extends StatelessWidget {
                 ? EnrollmentDetailIntent.localDraftResume(
                     enrollmentId: summary.enrollmentId,
                     studentId: summary.student.id,
+                    enrollmentType: summary.enrollmentType,
                   )
                 : detailIntentFactory(summary);
             // Un candidat de réinscription n'a pas encore de dossier

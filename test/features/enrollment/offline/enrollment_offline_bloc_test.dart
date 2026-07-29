@@ -108,7 +108,7 @@ void main() {
     gender: 'FEMALE',
     dateOfBirth: '2015-04-02',
     enrollmentType: 'RE_ENROLLMENT',
-    status: 'PRE_REGISTERED',
+    status: 'IN_PROGRESS',
     sourceRef: 'KIN-2025-0001',
     academicYearId: 'ay-2026',
     enrollmentDate: '2026-07-08',
@@ -431,7 +431,7 @@ void main() {
         final seedArg = captured[0] as ConfirmEnrollmentDraft;
         expect(captured[1], isNull); // RE : nouveau dossier N → uuid client
         expect(seedArg.enrollmentType, 'RE_ENROLLMENT');
-        expect(seedArg.status, 'PRE_REGISTERED');
+        expect(seedArg.status, 'IN_PROGRESS');
         expect(seedArg.matriculationNumber, 'KIN-2025-0001');
         expect(seedArg.sourceRef, 'KIN-2025-0001');
         expect(seedArg.academicYearId, 'ay-2026');

@@ -1038,6 +1038,10 @@
   "@enrollmentReenrollmentCandidateBadge": {
     "description": "Pastille sur la page Réinscriptions : candidat du vivier N-1 pas encore réinscrit (aucun dossier local, tap = démarrer). Remplace « En attente » dans ce contexte."
   },
+  "enrollmentReRegisteredBadge": "Réinscrit",
+  "@enrollmentReRegisteredBadge": {
+    "description": "Pastille de type sur une ligne de listing : dossier de réinscription (RE_ENROLLMENT) finalisé/synchronisé (pas de brouillon local en cours). Remplace « Réinscription » (générique) une fois le dossier confirmé."
+  },
   "enrollmentStatusAdminCompleted": "Complété (Administratif)",
   "enrollmentStatusFinancialCompleted": "Complété (Financier)",
   "enrollmentStatusCompleted": "Complété",

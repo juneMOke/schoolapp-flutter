@@ -718,7 +718,7 @@ void main() {
       id: 'e1',
       studentId: 's1',
       enrollmentType: 'RE_ENROLLMENT',
-      status: 'PRE_REGISTERED',
+      status: 'IN_PROGRESS',
       academicYearId: 'ay-2026',
       schoolLevelId: 'lvl-2',
       enrollmentDate: '2026-07-08',
@@ -781,7 +781,7 @@ void main() {
           id: 'e1',
           studentId: 's1',
           enrollmentType: 'RE_ENROLLMENT',
-          status: 'PRE_REGISTERED',
+          status: 'IN_PROGRESS',
           academicYearId: 'ay-2026',
           enrollmentDate: '2026-07-08',
           updatedAt: 200,
@@ -796,6 +796,33 @@ void main() {
       expect(e['source_ref'], 'KIN-2025-0001'); // conservé
       expect(e['school_level_id'], 'lvl-2'); // niveau conservé (null ignoré)
       expect(e['previous_school_name'], 'EP Les Aiglons'); // conservé
+    });
+
+    test('insertDraftEnrollment écrase enrollment_type/status SANS condition '
+        '(pas de COALESCE, contrairement à school_level_id) — c\'est à '
+        'l\'appelant de transmettre la bonne valeur', () async {
+      await draftDao.seedDraft(
+        student: seededStudent(),
+        enrollment: seededEnrollment(), // RE_ENROLLMENT/IN_PROGRESS
+        parents: const [],
+        nowMs: 100,
+      );
+
+      await draftDao.insertDraftEnrollment(
+        const EnrollmentLocalModel(
+          id: 'e1',
+          studentId: 's1',
+          enrollmentType: 'PRE_ENROLLMENT',
+          status: 'PRE_REGISTERED',
+          academicYearId: 'ay-2026',
+          enrollmentDate: '2026-07-08',
+          updatedAt: 200,
+        ),
+      );
+
+      final e = (await db.query('enrollments')).single;
+      expect(e['enrollment_type'], 'PRE_ENROLLMENT');
+      expect(e['status'], 'PRE_REGISTERED');
     });
 
     test('refuse de re-seeder un dossier local déjà confirmé', () async {

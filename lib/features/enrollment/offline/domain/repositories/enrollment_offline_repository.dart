@@ -43,7 +43,7 @@ class ConfirmEnrollmentDraft {
   final String? matriculationNumber; // non-null en RE (cohorte)
 
   final String enrollmentType; // NEW_ENROLLMENT|RE_ENROLLMENT|PRE_ENROLLMENT
-  final String status; // IN_PROGRESS (NEW) | PRE_REGISTERED (RE/PRE)
+  final String status; // IN_PROGRESS (NEW/RE) | PRE_REGISTERED (PRE)
 
   /// Référence d'origine du dossier (contrat agrégat) : matricule (RE),
   /// id de préinscription (PRE), null (NEW).

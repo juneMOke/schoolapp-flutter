@@ -2226,6 +2226,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enrollmentReenrollmentCandidateBadge => 'À réinscrire';
 
   @override
+  String get enrollmentReRegisteredBadge => 'Réinscrit';
+
+  @override
   String get enrollmentStatusAdminCompleted => 'Complété (Administratif)';
 
   @override

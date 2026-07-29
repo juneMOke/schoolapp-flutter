@@ -126,7 +126,7 @@ void main() {
       birthPlace: 'Kinshasa',
       matriculationNumber: 'KIN-2025-0001',
       enrollmentType: 'RE_ENROLLMENT',
-      status: 'PRE_REGISTERED',
+      status: 'IN_PROGRESS',
       sourceRef: 'KIN-2025-0001',
       academicYearId: 'ay-2026',
       enrollmentDate: '2026-07-08',
@@ -354,6 +354,37 @@ void main() {
       expect(e.studentId, 's1');
       expect(e.schoolLevelId, 'lvl-1');
       expect(e.updatedAt, clock);
+      expect(e.enrollmentType, 'NEW_ENROLLMENT');
+      expect(e.status, 'IN_PROGRESS');
+    });
+
+    test('transmet enrollmentType/status tels quels (ex. reprise RE) — ne les '
+        'requalifie jamais en dur', () async {
+      when(() => draftDao.insertDraftStudent(any())).thenAnswer((_) async {});
+      when(
+        () => draftDao.insertDraftEnrollment(any()),
+      ).thenAnswer((_) async {});
+
+      await repo.saveDraftIdentity(
+        enrollmentId: 'e-re',
+        studentId: 's-re',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        gender: 'FEMALE',
+        dateOfBirth: '2015-04-02',
+        enrollmentType: 'RE_ENROLLMENT',
+        status: 'IN_PROGRESS',
+        academicYearId: 'ay-2026',
+        enrollmentDate: '2026-07-06',
+      );
+
+      final e =
+          verify(
+                () => draftDao.insertDraftEnrollment(captureAny()),
+              ).captured.single
+              as EnrollmentLocalModel;
+      expect(e.enrollmentType, 'RE_ENROLLMENT');
+      expect(e.status, 'IN_PROGRESS');
     });
 
     test('exception DAO → Left(StorageFailure)', () async {

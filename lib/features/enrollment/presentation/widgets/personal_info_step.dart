@@ -371,8 +371,9 @@ class PersonalInfoStepState extends State<PersonalInfoStep> {
         // Matricule jamais porté par l'étape : null est ignoré par l'écriture
         // préservante (le matricule seedé RE reste intact).
         matriculationNumber: null,
-        // Type/statut par ORIGINE (RE_ENROLLMENT/PRE_REGISTERED, etc.) : un
-        // re-save d'identité ne doit jamais requalifier un brouillon seedé.
+        // Type/statut par ORIGINE (ex. RE_ENROLLMENT/IN_PROGRESS,
+        // PRE_ENROLLMENT/PRE_REGISTERED) : un re-save d'identité ne doit
+        // jamais requalifier un brouillon seedé.
         enrollmentType: widget.detailPolicy.draftEnrollmentType,
         status: widget.detailPolicy.draftStatus,
         academicYearId: widget.academicYearId,

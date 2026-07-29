@@ -244,6 +244,67 @@ pas comme quick-fix Phase 0.**
 ---
 
 ## Journal
+- **2026-07-29** — **Inscription · Réinscription (RE) alignée sur le cycle de
+  status de Première inscription + bug de corruption corrigé + pastille à 3
+  états (working tree).** Décision produit : un dossier RE (`enrollment_type=
+  'RE_ENROLLMENT'`) portait `status='PRE_REGISTERED'` **constant** tout son
+  cycle de vie (jamais `IN_PROGRESS`, ni même après push — `finalizeDraft` ne
+  bascule que `sync_status`, jamais le `status` métier) ; il n'apparaissait
+  donc jamais dans le listing Première inscription (filtre `status=
+  IN_PROGRESS`). Nouvelle règle : RE suit **exactement** le même cycle que
+  NEW (`IN_PROGRESS` en brouillon) → apparaît désormais aussi sur Première
+  inscription (double affichage **assumé**, décision utilisateur), distingué
+  par la pastille type existante (`StatusBadge.enrollmentReEnrollment`,
+  pilotée par `enrollmentType`, pas par `status`). PRE_ENROLLMENT inchangé
+  (`PRE_REGISTERED`). Changements : `EnrollmentConfirmDraftBuilder.
+  fromReenrollmentCandidate` (seed cohorte) + `ReRegistrationDetailPolicy.
+  draftStatus` (chaque save d'étape tant que DRAFT/PENDING_SYNC).
+  **Bug de corruption trouvé et corrigé dans le même lot** : la reprise d'un
+  brouillon local DRAFT depuis N'IMPORTE QUELLE page de listing route
+  toujours vers l'origine `localDraftResume` (`EnrollmentListingPageScaffold`,
+  sur `summary.isLocalDraft`) → `LocalDraftResumeDetailPolicy`, qui avait des
+  défauts codés en dur `NEW_ENROLLMENT`/`IN_PROGRESS` **peu importe le vrai
+  type du dossier repris**. Comme `EnrollmentDraftDao.insertDraftEnrollment`
+  écrase `enrollment_type`/`status` **sans condition** (pas de COALESCE,
+  contrairement à `school_level_id`), un simple re-save d'identité sur un
+  brouillon RE/PRE repris via ce chemin corrompait silencieusement
+  `enrollment_type` en `NEW_ENROLLMENT` — la pastille « Réinscription »
+  aurait disparu à la première reprise. **Fix** : `LocalDraftResumeDetailPolicy`
+  paramétrée avec le vrai `enrollmentType` (nouveau champ sur
+  `EnrollmentDetailIntent`, porté par `EnrollmentSummary` au tap → query
+  param) ; `draftStatus` **DÉRIVÉ du type** (switch `PRE_ENROLLMENT→
+  PRE_REGISTERED, sinon IN_PROGRESS`), **jamais lu depuis un `status`
+  persisté** — auto-guérit un brouillon RE legacy (créé avant ce changement,
+  encore en `PRE_REGISTERED` en base) au prochain re-save au lieu de le
+  laisser figé indéfiniment. **Revue adversariale (workflow 3 lenses →
+  verify, 9 confirmés/9 corrigés)** : 2 MAJOR (le design initial — passthrough
+  `status ?? super.draftStatus` — ne guérissait jamais le legacy, corrigé par
+  la dérivation ci-dessus ; aucun test e2e du vrai point d'écriture
+  `EnrollmentListingPageScaffold.onViewRequested`, ajouté
+  `enrollment_listing_page_scaffold_test.dart` via vrai `GoRouter`), 2 MINOR
+  (fixture de test trompeuse ; pas de test DB roundtrip seed→resume→re-save),
+  5 NOTE (commentaires stale dans 5 fichiers prod + 2 tests ; code mort
+  `FirstRegistrationDetailPolicy.status`/`isStepEditable` jamais consulté côté
+  rendu pour l'origine `firstRegistration`, toujours court-circuité vers
+  `LocalConsultationDetailPolicy`, cf. fix loading-infini du 2026-07-16
+  ci-dessous).
+  **Suite (retour utilisateur « petite régression » sur l'onglet
+  Réinscription)** : en réalité pas une régression du changement ci-dessus —
+  la pastille RE affichait un libellé **générique** « Réinscription » pour
+  TOUT dossier RE (brouillon commencé ou finalisé confondus) depuis
+  l'introduction même du pill (`629c0ec`, 16 juillet), jamais de distinction
+  à 3 états. Ajout de la distinction, pilotée par l'axe `syncState`/
+  `isLocalDraft` (indépendant du `status` métier, donc non affecté par le
+  changement ci-dessus) dans les 2 widgets partagés (`EnrollmentResultCard`,
+  `EnrollmentDataTable`) : **« À réinscrire »** (candidat N-1 non commencé,
+  inchangé), **« En cours »** (brouillon local — réutilise
+  `enrollmentStatusInProgress`), **« Réinscrit »** (finalisé/synchronisé,
+  nouvelle clé l10n `enrollmentReRegisteredBadge`, FR+EN). `flutter gen-l10n`
+  suivi de `dart format` sur les fichiers générés (le générateur produit un
+  diff de reformatage massif non lié — nettoyé). `flutter analyze` clean,
+  **529 tests enrollment verts** (+8 vs avant ce lot), suite complète
+  **1983 tests verts** (2 échecs préexistants `test/widget_test.dart`, sans
+  rapport, login/auth). **NON commité.**
 - **2026-07-16** — **Inscription · DÉTAIL Première inscription = LECTURE SEULE
   LOCALE (fix loading infini, working tree).** Symptôme : ouvrir le détail d'un
   dossier depuis la Première inscription tournait en **spinner infini** au lieu

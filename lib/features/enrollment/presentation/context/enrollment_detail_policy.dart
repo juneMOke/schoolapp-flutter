@@ -155,8 +155,9 @@ class EnrollmentDetailPolicyResolver {
       ),
       EnrollmentDetailOrigin.newFirstRegistration =>
         const NewFirstRegistrationDetailPolicy(),
-      EnrollmentDetailOrigin.localDraftResume =>
-        const LocalDraftResumeDetailPolicy(),
+      EnrollmentDetailOrigin.localDraftResume => LocalDraftResumeDetailPolicy(
+        enrollmentType: intent.enrollmentType,
+      ),
     };
   }
 }
@@ -169,7 +170,29 @@ class EnrollmentDetailPolicyResolver {
 /// la finalisation (`DRAFT → PENDING_SYNC`). Éditable partout sauf le
 /// récapitulatif (comme NEW) → `usesLocalDraft` vrai, `requiresDraftSeed` faux.
 class LocalDraftResumeDetailPolicy extends EnrollmentDetailPolicy {
-  const LocalDraftResumeDetailPolicy();
+  /// Type réel du dossier repris (porté par le listing au tap —
+  /// `EnrollmentSummary.enrollmentType`). Sans lui, un re-save d'identité
+  /// écraserait un brouillon RE/PRE avec le défaut NEW (`insertDraftEnrollment`
+  /// écrit `draftEnrollmentType` sans condition) : null → défaut NEW, cohérent
+  /// pour un vrai brouillon NEW.
+  final String? enrollmentType;
+
+  const LocalDraftResumeDetailPolicy({this.enrollmentType});
+
+  @override
+  String get draftEnrollmentType => enrollmentType ?? super.draftEnrollmentType;
+
+  /// DÉRIVÉ du type, PAS de la valeur `status` persistée en base : un
+  /// brouillon RE créé avant l'alignement RE↔NEW porte encore un status
+  /// legacy `PRE_REGISTERED` (aucun mécanisme de migration n'existe ailleurs
+  /// pour ces lignes déjà persistées — `insertDraftEnrollment` écrit tel quel
+  /// ce qu'on lui donne). Dériver du type fait que ce brouillon legacy se
+  /// corrige tout seul au prochain re-save au lieu de rester figé.
+  @override
+  String get draftStatus => switch (enrollmentType) {
+    'PRE_ENROLLMENT' => 'PRE_REGISTERED',
+    _ => 'IN_PROGRESS',
+  };
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.detail;
@@ -255,8 +278,11 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   @override
   String get draftEnrollmentType => 'RE_ENROLLMENT';
 
+  /// Même cycle que NEW (`IN_PROGRESS`) : le brouillon doit apparaître dans
+  /// le listing Première inscription — `draftEnrollmentType` (pastille
+  /// « Réinscription ») le distingue, pas le status.
   @override
-  String get draftStatus => 'PRE_REGISTERED';
+  String get draftStatus => 'IN_PROGRESS';
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.preview;
@@ -286,6 +312,12 @@ class ReRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   bool requiresPreviousYearBootstrap(EnrollmentDetailIntent intent) => true;
 }
 
+/// `status`/`isStepEditable` ci-dessous ne sont plus jamais consultés côté
+/// rendu pour cette origine : `EnrollmentDetailPage` court-circuite TOUJOURS
+/// `firstRegistration` vers `LocalConsultationDetailPolicy` (lecture seule
+/// 100% locale, fix #19) avant d'atteindre le stepper qui les lirait. Gardés
+/// pour la résolution/les tests, pas un gate live — ne pas s'y fier pour
+/// raisonner sur l'éditabilité réelle d'un dossier Première inscription.
 class FirstRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   final String? status;
 

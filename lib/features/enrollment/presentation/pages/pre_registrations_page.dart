@@ -26,9 +26,11 @@ class PreRegistrationsPage extends StatefulWidget {
 class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
   EnrollmentListingViewMode _preferredViewMode = EnrollmentListingViewMode.auto;
   static const String _status = 'PRE_REGISTERED';
-  // Scope PAR TYPE : la page ne montre que les vraies pré-inscriptions. Sans ce
-  // filtre, un dossier de réinscription (type RE_ENROLLMENT, même statut
-  // PRE_REGISTERED) apparaîtrait ici à tort.
+  // Scope PAR TYPE : la page ne montre que les vraies pré-inscriptions. Garde
+  // explicite indépendante du status (RE_ENROLLMENT est désormais IN_PROGRESS
+  // — cf. LocalDraftResumeDetailPolicy.draftStatus, dérivé du type et non lu
+  // depuis un status persisté, donc un dossier RE legacy encore en
+  // PRE_REGISTERED se recale de lui-même au prochain re-save).
   static const String _enrollmentType = 'PRE_ENROLLMENT';
   static const String _adminEmail = 'support@school.local';
 

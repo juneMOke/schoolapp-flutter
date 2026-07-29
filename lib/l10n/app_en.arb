@@ -1023,6 +1023,10 @@
   "@enrollmentReenrollmentCandidateBadge": {
     "description": "Re-enrollments page pill: prior-year cohort candidate not yet re-enrolled (no local dossier, tap = start). Replaces 'Pending' in this context."
   },
+  "enrollmentReRegisteredBadge": "Re-enrolled",
+  "@enrollmentReRegisteredBadge": {
+    "description": "Listing row type pill: finalized/synced re-enrollment dossier (RE_ENROLLMENT, no local draft in progress). Replaces the generic 'Re-enrollment' pill once the dossier is confirmed."
+  },
   "enrollmentStatusAdminCompleted": "Admin Completed",
   "enrollmentStatusFinancialCompleted": "Financial Completed",
   "enrollmentStatusCompleted": "Completed",

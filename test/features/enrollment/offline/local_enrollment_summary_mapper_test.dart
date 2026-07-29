@@ -64,10 +64,10 @@ void main() {
   });
 
   test('propage enrollmentType → isReEnrollment distingue une réinscription '
-      'même au statut PRE_REGISTERED', () {
-    // Cœur du bug : un dossier RE porte le statut PRE_REGISTERED (comme une
-    // pré-inscription) mais reste une réinscription → l'affichage doit s'appuyer
-    // sur le type, pas sur le statut.
+      'quel que soit le statut brut porté', () {
+    // isReEnrollment ne dérive QUE du type, jamais du statut (même un dossier
+    // RE legacy encore en PRE_REGISTERED reste identifié comme réinscription
+    // — l'affichage doit toujours s'appuyer sur le type, pas sur le statut).
     final re = localItemToEnrollmentSummary(
       item(
         enrollmentType: EnrollmentType.reEnrollment,

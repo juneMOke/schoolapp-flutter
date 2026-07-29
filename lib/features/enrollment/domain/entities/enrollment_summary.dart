@@ -10,10 +10,12 @@ class EnrollmentSummary extends Equatable {
 
   /// Type d'inscription (valeur API : `NEW_ENROLLMENT` / `RE_ENROLLMENT` /
   /// `PRE_ENROLLMENT`). Axe **orthogonal** au [status] : un dossier de
-  /// réinscription porte légitimement `status = PRE_REGISTERED` tout en étant
-  /// de type `RE_ENROLLMENT`. Null pour un résumé issu du serveur (le DTO
-  /// online ne l'expose pas encore) → l'UI retombe sur l'affichage par statut.
-  /// Voir [isReEnrollment].
+  /// réinscription suit le même cycle de `status` qu'une première inscription
+  /// (`IN_PROGRESS` en brouillon) — seul un dossier RE créé avant cet
+  /// alignement peut encore porter `status = PRE_REGISTERED` (auto-guérison
+  /// au prochain re-save, cf. `LocalDraftResumeDetailPolicy.draftStatus`).
+  /// Null pour un résumé issu du serveur (le DTO online ne l'expose pas
+  /// encore) → l'UI retombe sur l'affichage par statut. Voir [isReEnrollment].
   final String? enrollmentType;
 
   /// État de synchro du dossier LOCAL projeté dans la liste (null pour un
@@ -38,8 +40,9 @@ class EnrollmentSummary extends Equatable {
 
   /// Vrai pour un dossier de **réinscription** (type `RE_ENROLLMENT`) : la ligne
   /// affiche une pastille de type « Réinscription » à la place du statut, pour
-  /// ne pas le confondre avec une pré-inscription (même `status` PRE_REGISTERED,
-  /// type différent).
+  /// distinguer visuellement du statut brut (`IN_PROGRESS` en flux normal, ou
+  /// un legacy `PRE_REGISTERED` — un dossier RE ne se fie jamais au `status`
+  /// pour son affichage, seulement au `enrollmentType`).
   bool get isReEnrollment => enrollmentType == 'RE_ENROLLMENT';
 
   /// Vrai pour un **candidat de réinscription** du vivier N-1 pas encore

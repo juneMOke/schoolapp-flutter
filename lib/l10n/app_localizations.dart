@@ -3800,6 +3800,12 @@ abstract class AppLocalizations {
   /// **'To re-enroll'**
   String get enrollmentReenrollmentCandidateBadge;
 
+  /// Listing row type pill: finalized/synced re-enrollment dossier (RE_ENROLLMENT, no local draft in progress). Replaces the generic 'Re-enrollment' pill once the dossier is confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolled'**
+  String get enrollmentReRegisteredBadge;
+
   /// No description provided for @enrollmentStatusAdminCompleted.
   ///
   /// In en, this message translates to:

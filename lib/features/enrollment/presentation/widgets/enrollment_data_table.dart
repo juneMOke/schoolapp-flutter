@@ -238,12 +238,16 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         children: [
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 122),
-            // Type « Réinscription » pour un dossier RE (axe distinct du
-            // statut), « À réinscrire » pour un candidat N-1 non commencé,
-            // sinon statut métier — même logique que la carte grille.
+            // Un dossier RE distingue « En cours » (brouillon local) de
+            // « Réinscrit » (finalisé/synchronisé) — axe syncState,
+            // indépendant du statut métier. « À réinscrire » pour un candidat
+            // N-1 non commencé, sinon statut métier — même logique que la
+            // carte grille.
             child: enrollment.isReEnrollment
                 ? StatusBadge.enrollmentReEnrollment(
-                    label: l10n.enrollmentTypeReEnrollment,
+                    label: enrollment.isLocalDraft
+                        ? l10n.enrollmentStatusInProgress
+                        : l10n.enrollmentReRegisteredBadge,
                   )
                 : enrollment.isReenrollmentCandidate
                 ? StatusBadge.enrollmentPending(

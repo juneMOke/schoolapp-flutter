@@ -29,7 +29,9 @@ EnrollmentSummary localItemToEnrollmentSummary(LocalEnrollmentListItem item) =>
       enrollmentCode: item.matriculationNumber ?? '',
       status: item.status.apiValue,
       // Type conservé (axe distinct du statut) : un dossier RE_ENROLLMENT est
-      // affiché « Réinscription » même s'il porte le statut PRE_REGISTERED.
+      // affiché « Réinscription » quel que soit son statut brut (IN_PROGRESS
+      // en flux normal, ou un legacy PRE_REGISTERED sur un dossier créé avant
+      // l'alignement RE↔NEW).
       enrollmentType: item.enrollmentType.apiValue,
       // Axe synchro conservé : distingue un brouillon local (DRAFT, repris au
       // tap + badge « Brouillon ») des dossiers finalisés/synchronisés.

@@ -47,16 +47,20 @@ class _FakePolicy extends EnrollmentDetailPolicy {
   }) {}
 }
 
-/// Policy éditable dont le brouillon est de type RE (comme la réinscription) :
-/// vérifie que l'étape Identité dispatche le type/statut de la POLICY.
-class _FakeRePolicy extends _FakePolicy {
-  const _FakeRePolicy();
+/// Policy éditable dont le brouillon porte un type/statut ARBITRAIRE
+/// (délibérément différents des défauts NEW_ENROLLMENT/IN_PROGRESS de
+/// `EnrollmentDetailPolicy`, pas des valeurs représentatives d'une vraie
+/// réinscription — voir `ReRegistrationDetailPolicy`, qui vaut aujourd'hui
+/// RE_ENROLLMENT/IN_PROGRESS) : vérifie que l'étape Identité dispatche
+/// fidèlement CE QUE LA POLICY RETOURNE, peu importe la valeur.
+class _FakeCustomTypePolicy extends _FakePolicy {
+  const _FakeCustomTypePolicy();
 
   @override
   String get draftEnrollmentType => 'RE_ENROLLMENT';
 
   @override
-  String get draftStatus => 'PRE_REGISTERED';
+  String get draftStatus => 'ADMIN_COMPLETED';
 }
 
 void main() {
@@ -206,12 +210,13 @@ void main() {
   );
 
   testWidgets(
-    'RE : le re-save d\'identité porte le type/statut de la POLICY '
-    '(pas NEW_ENROLLMENT/IN_PROGRESS) — ne requalifie pas le brouillon seedé',
+    'le re-save d\'identité porte le type/statut de la POLICY (pas les '
+    'défauts NEW_ENROLLMENT/IN_PROGRESS de la classe de base) — ne '
+    'requalifie pas le brouillon seedé',
     (tester) async {
       final identity = await pumpAndSave(
         tester,
-        policy: const _FakeRePolicy(),
+        policy: const _FakeCustomTypePolicy(),
         intent: const EnrollmentDetailIntent.reRegistration(
           enrollmentId: 'enr-1',
           studentId: 'stu-1',
@@ -219,7 +224,7 @@ void main() {
       );
 
       expect(identity.enrollmentType, 'RE_ENROLLMENT');
-      expect(identity.status, 'PRE_REGISTERED');
+      expect(identity.status, 'ADMIN_COMPLETED');
     },
   );
 

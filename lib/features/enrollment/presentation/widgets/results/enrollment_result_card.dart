@@ -32,11 +32,15 @@ class EnrollmentResultCard extends StatelessWidget {
     final isReCandidate = enrollment.isReenrollmentCandidate;
     final fullName =
         '${enrollment.student.lastName} ${enrollment.student.firstName}';
-    // Pastille : type « Réinscription » pour un dossier RE (axe distinct du
-    // statut), « À réinscrire » pour un candidat, sinon statut métier — évite
-    // qu'une réinscription (statut PRE_REGISTERED) s'affiche « Pré-inscrit ».
+    // Pastille : un dossier RE distingue « En cours » (brouillon local pas
+    // encore finalisé) de « Réinscrit » (finalisé/synchronisé) — axe
+    // syncState, indépendant du statut métier ; « À réinscrire » pour un
+    // candidat ; sinon statut métier — évite qu'une réinscription s'affiche
+    // par erreur avec le libellé du statut brut (ex. « Pré-inscrit »).
     final pillLabel = isReEnrollment
-        ? l10n.enrollmentTypeReEnrollment
+        ? (enrollment.isLocalDraft
+              ? l10n.enrollmentStatusInProgress
+              : l10n.enrollmentReRegisteredBadge)
         : isReCandidate
         ? l10n.enrollmentReenrollmentCandidateBadge
         : _statusLabel(status, l10n);
@@ -76,7 +80,7 @@ class EnrollmentResultCard extends StatelessWidget {
       ),
       statusPill: isReEnrollment
           ? StatusBadge.enrollmentReEnrollment(
-              label: l10n.enrollmentTypeReEnrollment,
+              label: pillLabel,
               style: StatusBadgeStyle.filled,
             )
           : isReCandidate

@@ -119,6 +119,76 @@ void main() {
     },
   );
 
+  testWidgets('dossier RE avec brouillon local : pastille « En cours »', (
+    tester,
+  ) async {
+    const reDraft = EnrollmentSummary(
+      enrollmentId: 'enr-re-1',
+      enrollmentCode: 'RE-001',
+      status: 'PRE_REGISTERED',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.draft,
+      student: StudentSummary(
+        id: 'stu-10',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[reDraft],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('En cours'), findsOneWidget);
+    expect(find.text('Réinscrit'), findsNothing);
+  });
+
+  testWidgets('dossier RE finalisé/synchronisé : pastille « Réinscrit »', (
+    tester,
+  ) async {
+    const reFinalized = EnrollmentSummary(
+      enrollmentId: 'enr-re-2',
+      enrollmentCode: 'RE-002',
+      status: 'IN_PROGRESS',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.synced,
+      student: StudentSummary(
+        id: 'stu-11',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[reFinalized],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Réinscrit'), findsOneWidget);
+    expect(find.text('En cours'), findsNothing);
+  });
+
   testWidgets('Téléphone (<600px) : 2 colonnes, date en sous-texte du nom', (
     tester,
   ) async {

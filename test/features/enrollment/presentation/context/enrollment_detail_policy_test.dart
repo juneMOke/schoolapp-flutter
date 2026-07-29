@@ -107,7 +107,7 @@ void main() {
     test('triplet type/statut du brouillon par origine', () {
       final re = EnrollmentDetailPolicyResolver.fromIntent(reIntent);
       expect(re.draftEnrollmentType, 'RE_ENROLLMENT');
-      expect(re.draftStatus, 'PRE_REGISTERED');
+      expect(re.draftStatus, 'IN_PROGRESS');
 
       final pre = EnrollmentDetailPolicyResolver.fromIntent(preIntent);
       expect(pre.draftEnrollmentType, 'PRE_ENROLLMENT');
@@ -183,5 +183,41 @@ void main() {
       expect(policy.seedEnrollmentId(intent), isNull);
       expect(policy.seedSourceRef(intent), isNull);
     });
+
+    test('sans enrollmentType (intent minimal) → défauts NEW/IN_PROGRESS', () {
+      final policy = EnrollmentDetailPolicyResolver.fromIntent(intent);
+      expect(policy.draftEnrollmentType, 'NEW_ENROLLMENT');
+      expect(policy.draftStatus, 'IN_PROGRESS');
+    });
+
+    test('reprise d\'un brouillon RE : préserve RE_ENROLLMENT/IN_PROGRESS '
+        '(ne requalifie jamais en NEW_ENROLLMENT) — y compris un brouillon '
+        'LEGACY créé avant l\'alignement RE↔NEW : draftStatus est DÉRIVÉ du '
+        'type, jamais lu depuis un status persisté qui pourrait être une '
+        'valeur périmée (auto-guérison au prochain re-save)', () {
+      const reResumeIntent = EnrollmentDetailIntent.localDraftResume(
+        enrollmentId: 'draft-re',
+        studentId: 'stu-1',
+        enrollmentType: 'RE_ENROLLMENT',
+      );
+      final policy = EnrollmentDetailPolicyResolver.fromIntent(reResumeIntent);
+      expect(policy.draftEnrollmentType, 'RE_ENROLLMENT');
+      expect(policy.draftStatus, 'IN_PROGRESS');
+    });
+
+    test(
+      'reprise d\'un brouillon PRE : préserve PRE_ENROLLMENT/PRE_REGISTERED',
+      () {
+        const preResumeIntent = EnrollmentDetailIntent.localDraftResume(
+          enrollmentId: 'draft-pre',
+          enrollmentType: 'PRE_ENROLLMENT',
+        );
+        final policy = EnrollmentDetailPolicyResolver.fromIntent(
+          preResumeIntent,
+        );
+        expect(policy.draftEnrollmentType, 'PRE_ENROLLMENT');
+        expect(policy.draftStatus, 'PRE_REGISTERED');
+      },
+    );
   });
 }
