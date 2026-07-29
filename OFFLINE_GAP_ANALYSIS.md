@@ -57,6 +57,7 @@ pas** (refetch online) ; un **encaissement local n'apparaît pas** avant l'ACK.
 | **B3** | Discipline : refetch post-création via le BLoC **online** | `disciplinary_student_detail_page.dart:264-272` | Cas créé hors-ligne **invisible** | Ouvert (Phase 2) |
 | **B4** | Présence : stockage « par exception » → 0 ligne = « tous présents » **=** « appel non fait » | `attendance_local_data_source.dart:81-98` | Ambiguïté d'état (AF-1 non tenu) ; taux 100 % ambigu | Ouvert (Phase 4) |
 | **B5** | Outbox : pas de cap poison ; `deleteAcked()`/`pendingReadyForSchool()` jamais appelés | `sync_engine.dart:120-128` ; `outbox_dao.dart:40,117` | Entrée en échec `PENDING` **indéfiniment** ; ACKED s'accumulent ; garde tenant inactif | ✅ Phase 1 (cap poison + purge) ; tenant scope **différé** (voir SOC-3) |
+| **B6** | `SYNC_ERROR` (rejet 4xx métier **ou** poison après 50 tentatives) : **aucune méthode de requeue/retry** sur `OutboxDao`, état **invisible côté UI**, chemins de sortie incohérents d'un module à l'autre | `outbox_dao.dart:16,20,28,72,74` (enqueue/pendingReady/markSyncError — pas de symétrique) ; `sync_status_cubit.dart:199-200` (pastille globale seule) ; `sync_indicator.dart:24,32` (`onTap` jamais fourni, `top_bar_actions.dart:24`) ; `enrollment_result_card.dart:95` + `local_finance_online_mappers.dart:44-45` (aucun badge dédié, fusionné avec `PENDING_SYNC`) | Dossier Inscription / paiement Finance rejeté = **mort et invisible** pour l'utilisateur (aucun « Réessayer » câblé) ; Discipline/Présence « réparés » **par effet de bord fortuit** (id d'outbox déterministe → `ConflictAlgorithm.replace`), pas par un retry conçu ; Classes/transfert = entrée orpheline à vie (pas de purge dédiée) | Ouvert — voir `SOC-4` §3 et Journal 2026-07-29 |
 
 ---
 
@@ -78,6 +79,23 @@ Sévérité : **P0** bloque l'offline-first · **P1** cœur · **P2** raffinemen
   `pendingReadyForSchool` **filtrerait tout** aujourd'hui (les writers ne
   renseignent pas `school_id`, nullable) → à câbler **avec** l'écriture du
   `school_id` à l'enqueue, pas avant. Mono-établissement V1 : non bloquant.
+- `SOC-4` **P1** — `SYNC_ERROR` (rejet 4xx **ou** poison `_defaultMaxAttempts`
+  dépassé, `sync_engine.dart:81,212-221`) est un état **terminal, invisible et
+  irrécupérable côté UI** (= `B6`). `OutboxDao` n'expose **aucune** méthode
+  `requeue`/`retry`/`resetToPending` (seules `enqueue`/`markAcked`/
+  `markSyncError`/`reschedule` existent) ; le seul levier de sortie est un
+  **effet de bord** de `enqueue()` (`ConflictAlgorithm.replace` sur l'id) —
+  fonctionne par hasard pour Discipline/Présence (id déterministe par
+  ressource/jour, aucune garde sur `sync_status` avant réécriture) mais
+  n'existe pas pour Inscription (`seedDraft`/`finalizeDraft` refusent tout
+  non-DRAFT) ni Finance (paiement immuable, cul-de-sac documenté dans
+  `payment_outbox_handler.dart:62-71`), et laisse une entrée **orpheline** pour
+  Classes/transfert (id neuf à chaque tentative, pas de purge dédiée). Côté
+  UI : la pastille globale `SyncIndicator` passe en rouge « Conflit » dès
+  `errorCount()>0` (`sync_status_cubit.dart:199-200`) mais sans compteur ni
+  `onTap` câblé (`top_bar_actions.dart:24`) ; **aucun** badge par-enregistrement
+  ne distingue `SYNC_ERROR` de `PENDING_SYNC` dans Enrollment/Classes/Finance/
+  Attendances. Détail complet + citations : Journal 2026-07-29. Non commencé.
 
 ### Inscription
 - `ENR-1` **P1** — lectures locales : **listing + détail basculés en HYBRIDE
@@ -308,6 +326,63 @@ pas comme quick-fix Phase 0.**
   **529 tests enrollment verts** (+8 vs avant ce lot), suite complète
   **1983 tests verts** (2 échecs préexistants `test/widget_test.dart`, sans
   rapport, login/auth). **NON commité.**
+- **2026-07-29** — **Socle offline · AUDIT `SYNC_ERROR` = terminal invisible/
+  irrécupérable (`B6`/`SOC-4`, analyse seule, aucun code touché).** Question
+  posée : un enregistrement en échec 4xx (`SYNC_ERROR`) est-il un jour rejoué,
+  et comment est-il visible dans l'UI ? Recherche par 2 agents indépendants
+  (récupération + UI) puis synthèse, plusieurs citations re-vérifiées à la
+  main. **Récupération** : `SyncEngine.flush()` ne resélectionne que
+  `status = PENDING` (`outbox_dao.dart:28`, `pendingReady()`) ; `markSyncError()`
+  (ligne 74) est à sens unique, **aucune** méthode `requeue`/`retry`/
+  `resetToPending` n'existe sur `OutboxDao` (grep exhaustif = 0 résultat) — un
+  commentaire du DAO annonce même *« non rejouable automatiquement, à corriger
+  côté présentation »* (ligne 72) mais cette correction n'a **jamais été
+  câblée**. Le seul levier de sortie est un **effet de bord** : `enqueue()`
+  fait un `INSERT … ConflictAlgorithm.replace` sur la PK `id` (ligne 16-22) —
+  si un module réutilise un **id d'outbox déterministe** pour la même
+  ressource, une nouvelle écriture métier écrase silencieusement la ligne
+  `SYNC_ERROR` par une ligne fraîche `PENDING`. **3 régimes constatés** : (1)
+  **coalescing fortuit** — Discipline (`DISCIPLINARY_CASE:{caseId}`,
+  `disciplinary_case_offline_repository_impl.dart:51-52` ;
+  `disciplinary_local_data_source.dart:88-150` ne garde pas sur le statut
+  courant) et Présence (`ATTENDANCE:{classroomId}|{date}|{academicYearId}`,
+  `attendance_offline_repository_impl.dart:207-216`) — avancer un statut,
+  commenter, ou ressaisir l'appel du jour **répare sans le vouloir** une
+  entrée en échec (bonus hors périmètre : Academics notes/évaluations utilise
+  le même patron) ; (2) **terminal strict, voulu** — Inscription
+  (`seedDraft`/`finalizeDraft` refusent toute ligne non-DRAFT,
+  `enrollment_draft_dao.dart:118,244`) et Finance (paiement immuable,
+  `finance_payment_write_dao.dart:23-80` n'a pas d'update, cul-de-sac
+  **documenté explicitement** dans `payment_outbox_handler.dart:62-71` — c'est
+  pour ça que la dépendance Inscription→Paiement bascule en `blocked` plutôt
+  que `failed`) ; (3) **orphelin** — Classes/transfert
+  (`classroom_offline_repository_impl.dart:180,194` mint un id neuf à chaque
+  tentative, pas de coalescing **ni** de garde ; l'ancienne ligne `SYNC_ERROR`
+  ne disparaît jamais, `OutboxDao` n'a que `deleteAcked()`, et
+  `classroom_local_data_source.dart:25-48` la compte indéfiniment comme
+  « transfert non synchronisé »). **UI** : niveau global, la pastille
+  `SyncIndicator` passe en rouge (`Icons.sync_problem`) libellée **« Conflit »**
+  (`app_fr.arb:1819`) dès `OutboxDao.errorCount()>0`
+  (`sync_status_cubit.dart:199-200`) — état binaire agrégé, sans compteur — et
+  son `onTap` (existe sur le widget, `sync_indicator.dart:32`) n'est **jamais
+  fourni** en usage réel (`top_bar_actions.dart:24`) : pas de menu, pas de
+  liste d'erreurs. Niveau enregistrement : **aucun** des 4 modules explorés
+  n'a de badge dédié — Enrollment ne badge que `DRAFT`
+  (`enrollment_result_card.dart:95`) et fusionne `SYNC_ERROR`/`PENDING_SYNC`
+  via `isUnsyncedLocalWrite` (`local_enrollment_summary_mapper.dart:18-19`,
+  bascule juste en lecture seule, sans badge) ; Finance fusionne
+  **volontairement** les deux dans un badge neutre gris « En attente de
+  synchro » (`local_finance_online_mappers.dart:44-45`,
+  `finance_pending_sync_badge.dart`) ; Classes et Attendances/Discipline
+  n'ont **aucune** UI touchant `syncState` (grep vide). Aucune clé l10n type
+  « échec de synchronisation » n'existe dans `app_fr.arb`. **Conclusion** : pas
+  un blocage structurel absolu (le moteur n'interdit rien en soi), mais
+  **définitif en pratique** pour Inscription/Finance, et **invisible partout**
+  — le gap n'est pas dans le moteur (poison cap = `B5`/`SOC-2`, déjà livré)
+  mais dans l'**absence de tout mécanisme de reprise + de toute UI dédiée**
+  post-poison/post-4xx. Ajouté au tableau `B6` (§2) et `SOC-4` (§3). Aucun
+  correctif appliqué — **audit seul**, priorisation à trancher (Phase 4,
+  surtout critique côté Finance).
 - **2026-07-16** — **Inscription · DÉTAIL Première inscription = LECTURE SEULE
   LOCALE (fix loading infini, working tree).** Symptôme : ouvrir le détail d'un
   dossier depuis la Première inscription tournait en **spinner infini** au lieu
