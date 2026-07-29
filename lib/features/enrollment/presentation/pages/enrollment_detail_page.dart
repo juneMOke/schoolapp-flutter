@@ -229,9 +229,19 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           SeedFromCohortRequested(studentId: studentId, academicYearId: yearId),
         );
       case EnrollmentDetailOrigin.preRegistration:
+        // Candidat brut (segment de route littéral `new`) : le vrai
+        // preEnrollmentId est porté par `studentId` (slot réutilisé, cf.
+        // `EnrollmentDetailIntent.preRegistration`) — jamais par
+        // `enrollmentId`, qui vaut `new` tant qu'aucun dossier n'existe.
+        final preEnrollmentId =
+            _effectiveIntent.studentId ?? _effectiveIntent.enrollmentId;
+        if (preEnrollmentId.trim().isEmpty) {
+          _seededIntent = null;
+          return;
+        }
         offline.add(
           SeedFromPreEnrollmentRequested(
-            preEnrollmentId: _effectiveIntent.enrollmentId,
+            preEnrollmentId: preEnrollmentId,
             academicYearId: yearId,
           ),
         );
@@ -250,15 +260,15 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     );
   }
 
-  // Sonde au tap RE : un dossier existe déjà pour cet élève cette année → on
-  // l'OUVRE au lieu de seeder un doublon (le seed a été court-circuité côté bloc).
+  // Sonde au tap RE/PRE : un dossier existe déjà pour ce candidat → on l'OUVRE
+  // au lieu de seeder un doublon (le seed a été court-circuité côté bloc).
   // `DRAFT` → reprise éditable (chargement du brouillon par id) ; finalisé →
   // lecture seule (chargement local + bascule forcée, option b).
   void _onReenrollmentExisting(
     BuildContext context,
     EnrollmentOfflineState state,
   ) {
-    if (state is! EnrollmentReenrollmentExisting) return;
+    if (state is! EnrollmentLocalDossierExisting) return;
     final bloc = context.read<EnrollmentOfflineBloc>();
     if (state.syncState == SyncState.draft) {
       bloc.add(LoadDraftDetailRequested(state.enrollmentId));
@@ -386,7 +396,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
         // seule) au lieu d'un seed en doublon.
         BlocListener<EnrollmentOfflineBloc, EnrollmentOfflineState>(
           listenWhen: (previous, current) =>
-              previous != current && current is EnrollmentReenrollmentExisting,
+              previous != current && current is EnrollmentLocalDossierExisting,
           listener: _onReenrollmentExisting,
         ),
       ],

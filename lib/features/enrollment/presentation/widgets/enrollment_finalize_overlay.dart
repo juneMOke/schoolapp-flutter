@@ -29,6 +29,7 @@ Future<EnrollmentFinalizeOutcome> showEnrollmentFinalizeOverlay({
   required BuildContext context,
   required EnrollmentOfflineBloc offlineBloc,
   required String enrollmentId,
+  String? finalStatus,
 }) async {
   final outcome = await showDialog<EnrollmentFinalizeOutcome>(
     context: context,
@@ -36,7 +37,10 @@ Future<EnrollmentFinalizeOutcome> showEnrollmentFinalizeOverlay({
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
     builder: (_) => BlocProvider<EnrollmentOfflineBloc>.value(
       value: offlineBloc,
-      child: _EnrollmentFinalizeOverlay(enrollmentId: enrollmentId),
+      child: _EnrollmentFinalizeOverlay(
+        enrollmentId: enrollmentId,
+        finalStatus: finalStatus,
+      ),
     ),
   );
   return outcome ?? EnrollmentFinalizeOutcome.failed;
@@ -46,8 +50,12 @@ enum _Phase { processing, success, error }
 
 class _EnrollmentFinalizeOverlay extends StatefulWidget {
   final String enrollmentId;
+  final String? finalStatus;
 
-  const _EnrollmentFinalizeOverlay({required this.enrollmentId});
+  const _EnrollmentFinalizeOverlay({
+    required this.enrollmentId,
+    this.finalStatus,
+  });
 
   @override
   State<_EnrollmentFinalizeOverlay> createState() =>
@@ -75,7 +83,10 @@ class _EnrollmentFinalizeOverlayState
       _awaitingBloc = true;
     });
     context.read<EnrollmentOfflineBloc>().add(
-      FinalizeDraftRequested(widget.enrollmentId),
+      FinalizeDraftRequested(
+        widget.enrollmentId,
+        finalStatus: widget.finalStatus,
+      ),
     );
   }
 

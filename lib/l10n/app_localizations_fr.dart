@@ -1330,10 +1330,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Filtrez la liste des inscriptions';
 
   @override
-  String get searchFormSubtitlePreRegistration =>
-      'Demandes reçues en ligne, en attente de validation';
-
-  @override
   String get reRegistrationSearchHint =>
       'Retrouvez un élève ou une classe de l\'année précédente à réinscrire';
 
@@ -1388,6 +1384,46 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get reRegistrationSearchInvitationMessage =>
       'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.';
+
+  @override
+  String get preRegistrationSearchHint =>
+      'Retrouvez une pré-inscription par élève ou par cycle/niveau souhaité';
+
+  @override
+  String get preRegistrationSearchHelpPill =>
+      'Retrouvez une demande précise (nom + post-nom + prénom) ou toutes les demandes d\'un cycle/niveau souhaité. Vous pouvez aussi combiner les deux.';
+
+  @override
+  String get preRegistrationSearchTitle => 'Rechercher une pré-inscription';
+
+  @override
+  String get preRegistrationSearchByNameGroup => 'Par nom';
+
+  @override
+  String get preRegistrationSearchByLevelGroup => 'Par cycle / niveau';
+
+  @override
+  String get preRegistrationSearchOrSeparator => 'OU';
+
+  @override
+  String get preRegistrationSearchActiveModeLabel => 'Recherche active par :';
+
+  @override
+  String get preRegistrationSearchModeNameBadge => 'Nom';
+
+  @override
+  String get preRegistrationSearchModeLevelBadge => 'Cycle / niveau';
+
+  @override
+  String get preRegistrationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get preRegistrationSearchInvitationTitle =>
+      'Lancez une recherche de pré-inscription';
+
+  @override
+  String get preRegistrationSearchInvitationMessage =>
+      'Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les demandes.';
 
   @override
   String get firstRegistrationSearchByStudentGroup => 'Par élève';

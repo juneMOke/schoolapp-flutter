@@ -295,6 +295,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   Future<Either<Failure, Unit>> finalizeDraft({
     required String enrollmentId,
     bool emitDocument = true,
+    String? finalStatus,
   }) async {
     try {
       final now = _now();
@@ -314,6 +315,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         emitDocument: emitDocument,
         authorId: _currentUser?.uid, // estampillage authorId (ADR-010 D-05)
         nowMs: now,
+        finalStatus: finalStatus,
       );
       if (!ok) {
         return const Left(
@@ -419,6 +421,28 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         ? const <LocalEnrollmentListItem>[]
         : await _readDao.getEnrollments(academicYearId: currentYearId);
     return ReenrollmentSearchResult(
+      candidates: candidates,
+      localDossiers: localDossiers,
+    );
+  });
+
+  @override
+  Future<Either<Failure, PreEnrollmentSearchResult>> searchPreEnrollmentCohort({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _guardRead(() async {
+    final candidates = await _seedDao.searchPreEnrollmentCandidates(
+      schoolLevelId: schoolLevelId,
+      schoolLevelGroupId: schoolLevelGroupId,
+    );
+    // Même principe que searchReenrollmentCohort : superposition scopée à
+    // l'année COURANTE, sinon un dossier PRE d'une autre année masquerait à
+    // tort le candidat pour l'année N.
+    final currentYearId = await _seedDao.findCurrentAcademicYearId();
+    final localDossiers = currentYearId == null
+        ? const <LocalEnrollmentListItem>[]
+        : await _readDao.getEnrollments(academicYearId: currentYearId);
+    return PreEnrollmentSearchResult(
       candidates: candidates,
       localDossiers: localDossiers,
     );

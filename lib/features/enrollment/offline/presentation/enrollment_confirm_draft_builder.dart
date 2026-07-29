@@ -17,7 +17,9 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 ///  - RE  → `RE_ENROLLMENT` / `IN_PROGRESS` (même cycle que NEW, pour
 ///    apparaître dans le listing Première inscription — la pastille
 ///    « Réinscription » le distingue), `studentId` connu ;
-///  - PRE → `PRE_ENROLLMENT` / `PRE_REGISTERED`, `studentId` connu.
+///  - PRE → `PRE_ENROLLMENT` / `IN_PROGRESS` au seed (même raison que RE —
+///    `COMPLETED` n'est écrit qu'à la finalisation, cf. `finalizeStatus`),
+///    `studentId` connu.
 /// [sourceRef] = référence d'origine du contrat agrégat (id de préinscription
 /// PRE ; matricule RE fourni plus tard par le seed cohorte locale).
 abstract final class EnrollmentConfirmDraftBuilder {
@@ -147,7 +149,10 @@ abstract final class EnrollmentConfirmDraftBuilder {
       dateOfBirth: pre.dateOfBirth ?? '',
       birthPlace: _nn(pre.birthPlace),
       enrollmentType: 'PRE_ENROLLMENT',
-      status: 'PRE_REGISTERED',
+      // IN_PROGRESS pendant la saisie (2 états seulement, pas de 3e pastille
+      // "candidat non engagé") : COMPLETED n'est écrit qu'à la finalisation
+      // (cf. PreRegistrationDetailPolicy.finalizeStatus).
+      status: 'IN_PROGRESS',
       sourceRef: _nullIfEmpty(pre.id),
       academicYearId: academicYearId,
       schoolLevelId: _nn(pre.desiredSchoolLevelId),
@@ -206,8 +211,8 @@ abstract final class EnrollmentConfirmDraftBuilder {
       EnrollmentDetailOrigin.newFirstRegistration ||
       EnrollmentDetailOrigin.firstRegistration ||
       EnrollmentDetailOrigin.localDraftResume ||
-      EnrollmentDetailOrigin.reRegistration => 'IN_PROGRESS',
-      EnrollmentDetailOrigin.preRegistration => 'PRE_REGISTERED',
+      EnrollmentDetailOrigin.reRegistration ||
+      EnrollmentDetailOrigin.preRegistration => 'IN_PROGRESS',
     };
   }
 

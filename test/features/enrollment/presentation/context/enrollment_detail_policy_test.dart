@@ -108,14 +108,21 @@ void main() {
       final re = EnrollmentDetailPolicyResolver.fromIntent(reIntent);
       expect(re.draftEnrollmentType, 'RE_ENROLLMENT');
       expect(re.draftStatus, 'IN_PROGRESS');
+      // RE reste IN_PROGRESS en continu (la distinction "Réinscrit" vient de
+      // l'état de synchro, jamais d'un changement de statut).
+      expect(re.finalizeStatus, isNull);
 
       final pre = EnrollmentDetailPolicyResolver.fromIntent(preIntent);
       expect(pre.draftEnrollmentType, 'PRE_ENROLLMENT');
-      expect(pre.draftStatus, 'PRE_REGISTERED');
+      // Même cycle que NEW/RE pendant la saisie (pas de 3e pastille).
+      expect(pre.draftStatus, 'IN_PROGRESS');
+      // PRE n'a que 2 états : la finalisation écrit explicitement COMPLETED.
+      expect(pre.finalizeStatus, 'COMPLETED');
 
       final anew = EnrollmentDetailPolicyResolver.fromIntent(newIntent);
       expect(anew.draftEnrollmentType, 'NEW_ENROLLMENT');
       expect(anew.draftStatus, 'IN_PROGRESS');
+      expect(anew.finalizeStatus, isNull);
     });
 
     test(
@@ -203,21 +210,19 @@ void main() {
       final policy = EnrollmentDetailPolicyResolver.fromIntent(reResumeIntent);
       expect(policy.draftEnrollmentType, 'RE_ENROLLMENT');
       expect(policy.draftStatus, 'IN_PROGRESS');
+      expect(policy.finalizeStatus, isNull);
     });
 
-    test(
-      'reprise d\'un brouillon PRE : préserve PRE_ENROLLMENT/PRE_REGISTERED',
-      () {
-        const preResumeIntent = EnrollmentDetailIntent.localDraftResume(
-          enrollmentId: 'draft-pre',
-          enrollmentType: 'PRE_ENROLLMENT',
-        );
-        final policy = EnrollmentDetailPolicyResolver.fromIntent(
-          preResumeIntent,
-        );
-        expect(policy.draftEnrollmentType, 'PRE_ENROLLMENT');
-        expect(policy.draftStatus, 'PRE_REGISTERED');
-      },
-    );
+    test('reprise d\'un brouillon PRE : préserve PRE_ENROLLMENT/IN_PROGRESS, '
+        'finalise vers COMPLETED (pas de 3e état comme RE)', () {
+      const preResumeIntent = EnrollmentDetailIntent.localDraftResume(
+        enrollmentId: 'draft-pre',
+        enrollmentType: 'PRE_ENROLLMENT',
+      );
+      final policy = EnrollmentDetailPolicyResolver.fromIntent(preResumeIntent);
+      expect(policy.draftEnrollmentType, 'PRE_ENROLLMENT');
+      expect(policy.draftStatus, 'IN_PROGRESS');
+      expect(policy.finalizeStatus, 'COMPLETED');
+    });
   });
 }

@@ -12,8 +12,10 @@ class FinalizeDraftUseCase {
   Future<Either<Failure, Unit>> call({
     required String enrollmentId,
     bool emitDocument = true,
+    String? finalStatus,
   }) => _repository.finalizeDraft(
     enrollmentId: enrollmentId,
     emitDocument: emitDocument,
+    finalStatus: finalStatus,
   );
 }

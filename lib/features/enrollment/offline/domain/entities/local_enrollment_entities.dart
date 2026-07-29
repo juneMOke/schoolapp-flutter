@@ -11,5 +11,6 @@ export 'local_generated_document.dart';
 export 'local_parent.dart';
 export 'local_student.dart';
 export 'pre_enrollment_candidate.dart';
+export 'pre_enrollment_search_result.dart';
 export 'reenrollment_candidate.dart';
 export 'reenrollment_search_result.dart';

@@ -93,6 +93,46 @@ class EnrollmentLocalListProjector {
         .toList(growable: false);
   }
 
+  /// Superpose le **vivier de pré-inscription** et les **dossiers PRE locaux**
+  /// (année courante) : chaque candidat est remplacé par son dossier local de
+  /// même **id exact** s'il existe (contrairement à RE, dédup par `studentId` :
+  /// ici `preEnrollmentId == enrollmentId` dès le seed, pas besoin de passer
+  /// par l'élève). Puis raffine (nom/surnom/DOB) en préservant l'ordre du
+  /// vivier. Les dossiers sans candidat correspondant sont ignorés.
+  static List<EnrollmentSummary> projectPreEnrollment({
+    required List<PreEnrollmentCandidate> candidates,
+    required List<LocalEnrollmentListItem> localDossiers,
+    String? firstName,
+    String? lastName,
+    String? surname,
+    String? dateOfBirth,
+  }) {
+    final byId = <String, EnrollmentSummary>{};
+    final order = <String>[];
+    for (final c in candidates) {
+      byId[c.id] = preEnrollmentCandidateToEnrollmentSummary(c);
+      order.add(c.id);
+    }
+    // `localDossiers` est trié par `updated_at` DESC (getEnrollments) : on ne
+    // superpose que le PREMIER dossier rencontré par id (le plus récent), et
+    // seulement tant que l'entrée est encore le candidat brut (id vide) —
+    // jamais écrasé par un dossier plus ancien.
+    for (final d in localDossiers) {
+      final current = byId[d.enrollmentId];
+      if (current != null && current.enrollmentId.isEmpty) {
+        byId[d.enrollmentId] = localItemToEnrollmentSummary(d);
+      }
+    }
+    final dob = dateOfBirth?.trim() ?? '';
+    return order
+        .map((id) => byId[id]!)
+        .where((s) => _contains(s.student.firstName, firstName))
+        .where((s) => _contains(s.student.lastName, lastName))
+        .where((s) => _contains(s.student.surname, surname))
+        .where((s) => dob.isEmpty || s.student.dateOfBirth == dob)
+        .toList(growable: false);
+  }
+
   /// Découpe la page [page] (bornée) d'une liste déjà filtrée/projetée.
   static EnrollmentLocalPage paginate(
     List<EnrollmentSummary> all, {

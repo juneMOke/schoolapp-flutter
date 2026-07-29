@@ -22,11 +22,20 @@ class EnrollmentDetailIntent extends Equatable {
     this.enrollmentType,
   });
 
-  const EnrollmentDetailIntent.preRegistration({required String enrollmentId})
-    : this(
-        origin: EnrollmentDetailOrigin.preRegistration,
-        enrollmentId: enrollmentId,
-      );
+  /// [studentId] réutilise le slot générique pour porter le `preEnrollmentId`
+  /// d'un candidat BRUT (`enrollmentId` encore vide, segment de route littéral
+  /// `new`) à travers le round-trip GoRouter — même procédé que
+  /// `.reRegistration` avec son `studentId` réel. Une fois le dossier seedé
+  /// (id réel), `studentId` redevient superflu (le dossier se rouvre par
+  /// `enrollmentId`).
+  const EnrollmentDetailIntent.preRegistration({
+    required String enrollmentId,
+    String? studentId,
+  }) : this(
+         origin: EnrollmentDetailOrigin.preRegistration,
+         enrollmentId: enrollmentId,
+         studentId: studentId,
+       );
 
   const EnrollmentDetailIntent.newFirstRegistration()
     : this(
@@ -112,7 +121,12 @@ class EnrollmentDetailIntent extends Equatable {
 
     return switch (origin) {
       EnrollmentDetailOrigin.preRegistration =>
-        EnrollmentDetailIntent.preRegistration(enrollmentId: enrollmentId),
+        EnrollmentDetailIntent.preRegistration(
+          enrollmentId: enrollmentId,
+          studentId: (studentId != null && studentId.isNotEmpty)
+              ? studentId
+              : null,
+        ),
       EnrollmentDetailOrigin.reRegistration =>
         (studentId != null && studentId.isNotEmpty)
             ? EnrollmentDetailIntent.reRegistration(

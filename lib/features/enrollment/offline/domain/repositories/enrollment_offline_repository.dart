@@ -203,9 +203,12 @@ abstract class EnrollmentOfflineRepository {
 
   /// Étape Résumé : DRAFT → PENDING_SYNC + document provisoire + enqueue outbox
   /// idempotente, puis flush opportuniste. NotFound si déjà confirmé/absent.
+  /// [finalStatus] : statut métier à écrire explicitement (PRE → `COMPLETED`) ;
+  /// `null` ne touche pas `status` (NEW/RE restent `IN_PROGRESS` en continu).
   Future<Either<Failure, Unit>> finalizeDraft({
     required String enrollmentId,
     bool emitDocument = true,
+    String? finalStatus,
   });
 
   Future<Either<Failure, List<LocalEnrollmentListItem>>> getEnrollments({
@@ -239,6 +242,16 @@ abstract class EnrollmentOfflineRepository {
   /// `is_current`) pour la superposition read-your-writes. Le scope année
   /// courante évite qu'un dossier N-1 terminé masque le candidat à réinscrire.
   Future<Either<Failure, ReenrollmentSearchResult>> searchReenrollmentCohort({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  });
+
+  /// Recherche de **pré-inscription** : le vivier `ref_pre_enrollments` (filtré
+  /// par niveau souhaité) + les dossiers PRE locaux de l'année **courante**
+  /// (résolue via `is_current`) pour la superposition read-your-writes. Même
+  /// principe que [searchReenrollmentCohort], sans notion d'établissement
+  /// précédent (une préinscription n'en a pas).
+  Future<Either<Failure, PreEnrollmentSearchResult>> searchPreEnrollmentCohort({
     String? schoolLevelId,
     String? schoolLevelGroupId,
   });

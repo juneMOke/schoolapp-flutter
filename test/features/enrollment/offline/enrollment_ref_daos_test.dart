@@ -90,12 +90,15 @@ void main() {
     String id = 'pre-1',
     String updatedAt = '2026-07-08T09:30:00Z',
     String firstName = 'Beni',
+    String lastName = 'Kabila',
+    String? desiredSchoolLevelId,
   }) => PreEnrollmentDto(
     id: id,
     firstName: firstName,
-    lastName: 'Kabila',
+    lastName: lastName,
     surname: 'Divin',
     guardianPhone: '+243900000001',
+    desiredSchoolLevelId: desiredSchoolLevelId,
     updatedAt: updatedAt,
   );
 
@@ -803,6 +806,75 @@ void main() {
       final row = (await db.query('ref_pre_enrollments')).single;
       expect(row['first_name'], 'Beni');
       expect(row['updated_at'], 500); // repli = syncedAt
+    });
+  });
+
+  group('searchPreEnrollmentCandidates', () {
+    setUp(() async {
+      // Deux candidats à des niveaux souhaités différents, dans deux groupes.
+      await seedDao.upsertPreEnrollments([
+        preEnrollment(
+          id: 'pre-A',
+          lastName: 'Ambwe',
+          desiredSchoolLevelId: 'lvl-A',
+        ),
+        preEnrollment(
+          id: 'pre-B',
+          lastName: 'Bofoko',
+          desiredSchoolLevelId: 'lvl-B',
+        ),
+        // Aucun niveau souhaité (le pull ne le garantit pas) : ne remonte que
+        // sans filtre — ne doit jamais faire planter la requête.
+        preEnrollment(id: 'pre-C', lastName: 'Chikwanine'),
+      ], syncedAt: 1);
+      await db.insert('ref_school_levels', {
+        'id': 'lvl-A',
+        'name': 'Niveau A',
+        'code': 'A',
+        'level_group_id': 'grp-1',
+        'display_order': 1,
+        'split_into_classrooms': 0,
+        'synced_at': 1,
+      });
+      await db.insert('ref_school_levels', {
+        'id': 'lvl-B',
+        'name': 'Niveau B',
+        'code': 'B',
+        'level_group_id': 'grp-2',
+        'display_order': 1,
+        'split_into_classrooms': 0,
+        'synced_at': 1,
+      });
+    });
+
+    test('filtre par niveau (desired_school_level_id)', () async {
+      final result = await seedDao.searchPreEnrollmentCandidates(
+        schoolLevelId: 'lvl-A',
+      );
+      expect(result.map((c) => c.id), ['pre-A']);
+    });
+
+    test(
+      'filtre par groupe → niveaux du groupe (sous-select ref_school_levels)',
+      () async {
+        final result = await seedDao.searchPreEnrollmentCandidates(
+          schoolLevelGroupId: 'grp-2',
+        );
+        expect(result.map((c) => c.id), ['pre-B']);
+      },
+    );
+
+    test('sans filtre → tout le vivier trié par nom (y compris niveau souhaité '
+        'NULL)', () async {
+      final result = await seedDao.searchPreEnrollmentCandidates();
+      expect(result.map((c) => c.id).toSet(), {'pre-A', 'pre-B', 'pre-C'});
+    });
+
+    test('niveau sans candidat → vide', () async {
+      final result = await seedDao.searchPreEnrollmentCandidates(
+        schoolLevelId: 'lvl-inconnu',
+      );
+      expect(result, isEmpty);
     });
   });
 

@@ -27,6 +27,12 @@ class EnrollmentResultCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final status = EnrollmentStatus.fromString(enrollment.status);
     final isReEnrollment = enrollment.isReEnrollment;
+    // PRE n'a que 2 pastilles (En cours / Pré-inscrit) — pas de 3e état
+    // "candidat non engagé" comme RE : un candidat brut affiche déjà « En
+    // cours » comme un dossier fraîchement seedé. Testé AVANT `isReCandidate`
+    // : ce dernier (`enrollmentId.isEmpty`) est type-agnostique et classerait
+    // sinon à tort un candidat PRE brut comme « À réinscrire ».
+    final isPreEnrollment = enrollment.isPreEnrollment;
     // Candidat du vivier N-1 pas encore réinscrit → « À réinscrire » plutôt que
     // le statut brut PENDING (« En attente »), scopé à la page Réinscriptions.
     final isReCandidate = enrollment.isReenrollmentCandidate;
@@ -34,13 +40,17 @@ class EnrollmentResultCard extends StatelessWidget {
         '${enrollment.student.lastName} ${enrollment.student.firstName}';
     // Pastille : un dossier RE distingue « En cours » (brouillon local pas
     // encore finalisé) de « Réinscrit » (finalisé/synchronisé) — axe
-    // syncState, indépendant du statut métier ; « À réinscrire » pour un
-    // candidat ; sinon statut métier — évite qu'une réinscription s'affiche
-    // par erreur avec le libellé du statut brut (ex. « Pré-inscrit »).
+    // syncState, indépendant du statut métier ; PRE lit directement le statut
+    // métier (IN_PROGRESS/COMPLETED, écrit explicitement à la finalisation) ;
+    // « À réinscrire » pour un candidat RE ; sinon statut métier générique.
     final pillLabel = isReEnrollment
         ? (enrollment.isLocalDraft
               ? l10n.enrollmentStatusInProgress
               : l10n.enrollmentReRegisteredBadge)
+        : isPreEnrollment
+        ? (status == EnrollmentStatus.completed
+              ? l10n.enrollmentStatusPreRegistered
+              : l10n.enrollmentStatusInProgress)
         : isReCandidate
         ? l10n.enrollmentReenrollmentCandidateBadge
         : _statusLabel(status, l10n);
@@ -83,6 +93,16 @@ class EnrollmentResultCard extends StatelessWidget {
               label: pillLabel,
               style: StatusBadgeStyle.filled,
             )
+          : isPreEnrollment
+          ? (status == EnrollmentStatus.completed
+                ? StatusBadge.enrollmentCompleted(
+                    label: pillLabel,
+                    style: StatusBadgeStyle.filled,
+                  )
+                : StatusBadge.enrollmentInProgress(
+                    label: pillLabel,
+                    style: StatusBadgeStyle.filled,
+                  ))
           : isReCandidate
           ? StatusBadge.enrollmentPending(
               label: l10n.enrollmentReenrollmentCandidateBadge,

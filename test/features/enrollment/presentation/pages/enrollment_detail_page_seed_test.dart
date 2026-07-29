@@ -174,6 +174,32 @@ void main() {
   );
 
   testWidgets(
+    'PRE (candidat brut, forme réelle produite par PreRegistrationsPage) → '
+    'le preEnrollmentId est lu depuis `studentId`, PAS `enrollmentId` (qui '
+    'vaut `new` tant qu\'aucun dossier n\'existe) — régression du bug de '
+    'round-trip GoRouter',
+    (tester) async {
+      await pumpPage(
+        tester,
+        const EnrollmentDetailIntent.preRegistration(
+          enrollmentId: 'new',
+          studentId: 'pre-9',
+        ),
+      );
+      await tester.pump();
+
+      verify(
+        () => offlineBloc.add(
+          const SeedFromPreEnrollmentRequested(
+            preEnrollmentId: 'pre-9',
+            academicYearId: 'ay-current',
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  testWidgets(
     'seed en échec (cohorte vide) → écran d\'erreur + « Réessayer » redispatch le seed',
     (tester) async {
       await pumpPage(
@@ -227,7 +253,7 @@ void main() {
           .pump(); // 1er dispatch = SeedFromCohortRequested (sonde bloc)
 
       // Le bloc a sondé et trouvé un BROUILLON existant pour cet élève.
-      offlineState = const EnrollmentReenrollmentExisting(
+      offlineState = const EnrollmentLocalDossierExisting(
         'e-existing',
         SyncState.draft,
       );
@@ -258,7 +284,7 @@ void main() {
       await tester.pump();
 
       // Dossier FINALISÉ (PENDING_SYNC) → option b : lecture seule.
-      offlineState = const EnrollmentReenrollmentExisting(
+      offlineState = const EnrollmentLocalDossierExisting(
         'e-existing',
         SyncState.pendingSync,
       );

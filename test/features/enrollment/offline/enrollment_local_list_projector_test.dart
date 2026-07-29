@@ -216,6 +216,85 @@ void main() {
     });
   });
 
+  group('EnrollmentLocalListProjector.projectPreEnrollment', () {
+    PreEnrollmentCandidate cand({
+      required String id,
+      String firstName = 'Awa',
+      String lastName = 'Ndiaye',
+      String dateOfBirth = '2012-05-01',
+    }) => PreEnrollmentCandidate(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      gender: 'FEMALE',
+      dateOfBirth: dateOfBirth,
+    );
+
+    test('candidat sans dossier → summary candidat (id vide, EN COURS dès le '
+        'candidat brut — pas de 3e état comme RE)', () {
+      final result = EnrollmentLocalListProjector.projectPreEnrollment(
+        candidates: [cand(id: 'pre-A')],
+        localDossiers: const [],
+      );
+      final s = result.single;
+      expect(s.enrollmentId, ''); // pas encore de dossier → tap = seed
+      expect(s.status, 'IN_PROGRESS');
+      expect(s.enrollmentType, 'PRE_ENROLLMENT');
+      expect(s.syncState, isNull);
+      expect(
+        s.student.id,
+        'pre-A',
+      ); // slot réutilisé : porte le preEnrollmentId
+    });
+
+    test('dossier local du même id EXACT → prime le candidat (dédup par id, '
+        'pas par studentId comme RE)', () {
+      final result = EnrollmentLocalListProjector.projectPreEnrollment(
+        candidates: [
+          cand(id: 'pre-A'),
+          cand(id: 'pre-B'),
+        ],
+        localDossiers: [
+          _item(
+            enrollmentId: 'pre-A',
+            studentId: 'stu-generated',
+            type: EnrollmentType.preEnrollment,
+          ),
+        ],
+      );
+      // Ordre du vivier préservé ; pre-A rendu via son dossier, pre-B candidat.
+      expect(result.first.enrollmentId, 'pre-A'); // dossier prime
+      expect(result.first.student.id, 'stu-generated'); // élève réel du dossier
+      expect(result.last.enrollmentId, ''); // candidat frais
+      expect(result.last.student.id, 'pre-B');
+    });
+
+    test(
+      'dossier local sans candidat correspondant → ignoré (hors vivier)',
+      () {
+        final result = EnrollmentLocalListProjector.projectPreEnrollment(
+          candidates: [cand(id: 'pre-A')],
+          localDossiers: [
+            _item(enrollmentId: 'orphan', type: EnrollmentType.preEnrollment),
+          ],
+        );
+        expect(result.map((s) => s.student.id), ['pre-A']);
+      },
+    );
+
+    test('raffinage nom appliqué au vivier superposé', () {
+      final result = EnrollmentLocalListProjector.projectPreEnrollment(
+        candidates: [
+          cand(id: 'pre-A', firstName: 'Awa'),
+          cand(id: 'pre-B', firstName: 'Bob'),
+        ],
+        localDossiers: const [],
+        firstName: 'Awa',
+      );
+      expect(result.map((s) => s.student.id), ['pre-A']);
+    });
+  });
+
   group('EnrollmentLocalListProjector.paginate', () {
     final all = EnrollmentLocalListProjector.project([
       _item(enrollmentId: 'e1'),

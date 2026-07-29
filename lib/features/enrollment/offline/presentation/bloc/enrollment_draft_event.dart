@@ -185,12 +185,19 @@ class LoadDraftDetailRequested extends EnrollmentOfflineEvent {
 }
 
 /// Étape Résumé : confirme le brouillon (DRAFT → PENDING_SYNC).
+/// [finalStatus] : statut métier à écrire explicitement (PRE → `COMPLETED`) ;
+/// `null` ne touche pas `status` (comportement NEW/RE inchangé).
 class FinalizeDraftRequested extends EnrollmentOfflineEvent {
   final String enrollmentId;
   final bool emitDocument;
+  final String? finalStatus;
 
-  const FinalizeDraftRequested(this.enrollmentId, {this.emitDocument = true});
+  const FinalizeDraftRequested(
+    this.enrollmentId, {
+    this.emitDocument = true,
+    this.finalStatus,
+  });
 
   @override
-  List<Object?> get props => [enrollmentId, emitDocument];
+  List<Object?> get props => [enrollmentId, emitDocument, finalStatus];
 }

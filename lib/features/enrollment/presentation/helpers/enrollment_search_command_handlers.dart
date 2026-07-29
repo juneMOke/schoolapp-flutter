@@ -117,4 +117,35 @@ class EnrollmentSearchCommandHandlers {
         );
     }
   }
+
+  /// Traduit une commande de recherche **pré-inscription** vers le listing
+  /// LOCAL. Point d'entrée DÉDIÉ (pas [dispatchThroughLocalListBloc]) : ce
+  /// dernier discrimine Réinscription vs Première inscription uniquement via
+  /// `command.status != null` — un `AcademicInfoSearchCommand` PRE (bi-mode,
+  /// sans status) tomberait dans la branche RE (vivier N-1) si on le
+  /// réutilisait tel quel. PRE a son propre vivier `ref_pre_enrollments`.
+  static void dispatchPreEnrollmentThroughLocalListBloc(
+    BuildContext context,
+    EnrollmentSearchCommand command,
+    EnrollmentScreenContext screenCtx,
+  ) {
+    final bloc = context.read<EnrollmentLocalListBloc>();
+    switch (command) {
+      case AcademicInfoSearchCommand():
+        bloc.add(
+          LocalListByPreEnrollmentAcademicInfoRequested(
+            firstName: command.firstName,
+            lastName: command.lastName,
+            surname: command.surname,
+            schoolLevelGroupId: command.schoolLevelGroupId,
+            schoolLevelId: command.schoolLevelId,
+            page: 0,
+          ),
+        );
+      case StandardSearchCommand():
+        // Le formulaire PRE est bi-mode uniquement (comme RE) : ce cas n'a pas
+        // de chemin produit, gardé pour l'exhaustivité du switch scellé.
+        break;
+    }
+  }
 }

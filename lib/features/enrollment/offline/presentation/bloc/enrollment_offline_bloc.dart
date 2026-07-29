@@ -155,7 +155,7 @@ class EnrollmentOfflineBloc
     final existing = probe.getOrElse(() => null);
     if (existing != null) {
       emit(
-        EnrollmentReenrollmentExisting(
+        EnrollmentLocalDossierExisting(
           existing.enrollmentId,
           existing.syncState,
         ),
@@ -179,11 +179,31 @@ class EnrollmentOfflineBloc
   /// projette la photo de départ, puis seede en conservant l'`id` comme
   /// enrollmentId (idempotence G2) et `source_ref`. Snapshot non peuplé →
   /// `NotFoundFailure` → état d'erreur.
+  ///
+  /// Sonde au tap AVANT de seeder : `preEnrollmentId` EST l'id déterministe du
+  /// futur dossier (contrairement à RE, dont l'id est un uuid client généré à
+  /// chaque seed) — un second tap sur le même candidat re-seederait par-dessus
+  /// avec un `studentId` neuf (`seedDraft` en génère un si `null`),
+  /// orphelinant les données déjà saisies. On ouvre le dossier existant au
+  /// lieu de reseeder (reprise DRAFT / lecture seule finalisé — même état que
+  /// la sonde RE, cf. [_onSeedFromCohort]).
   Future<void> _onSeedFromPreEnrollment(
     SeedFromPreEnrollmentRequested event,
     Emitter<EnrollmentOfflineState> emit,
   ) async {
     emit(const EnrollmentDraftSaving());
+    final existing = await _getDetail(event.preEnrollmentId);
+    final existingDetail = existing.fold((_) => null, (d) => d);
+    if (existingDetail != null) {
+      emit(
+        EnrollmentLocalDossierExisting(
+          existingDetail.enrollment.id,
+          existingDetail.enrollment.syncState,
+        ),
+      );
+      return;
+    }
+
     final pre = await _getPreEnrollment(event.preEnrollmentId);
     await pre.fold((f) async => emit(EnrollmentDraftError(_map(f))), (p) async {
       final seed = EnrollmentConfirmDraftBuilder.fromPreEnrollment(
@@ -325,6 +345,7 @@ class EnrollmentOfflineBloc
     final result = await _finalize(
       enrollmentId: event.enrollmentId,
       emitDocument: event.emitDocument,
+      finalStatus: event.finalStatus,
     );
     emit(
       result.fold(

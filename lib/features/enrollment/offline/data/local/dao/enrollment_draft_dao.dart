@@ -224,12 +224,15 @@ class EnrollmentDraftDao {
   /// déterministe** (`outbox-enr-<id>`) → un second appel remplace l'entrée
   /// (idempotent). No-op renvoyant `false` si l'inscription n'est plus en DRAFT
   /// (re-confirmation) ou introuvable ; `true` si la bascule a eu lieu.
+  /// [finalStatus] non-null écrit aussi la colonne `status` (PRE → `COMPLETED`) ;
+  /// `null` ne la touche pas (NEW/RE restent `IN_PROGRESS` en continu).
   Future<bool> finalizeDraft(
     String enrollmentId, {
     GeneratedDocumentLocalModel? document,
     bool emitDocument = true,
     String? schoolId,
     String? authorId,
+    String? finalStatus,
     required int nowMs,
   }) async {
     return _db.transaction<bool>((txn) async {
@@ -316,15 +319,29 @@ class EnrollmentDraftDao {
       );
       await txn.update(
         'enrollments',
-        {'sync_status': SyncState.pendingSync.dbValue, 'updated_at': nowMs},
+        {
+          'sync_status': SyncState.pendingSync.dbValue,
+          'updated_at': nowMs,
+          'status': ?finalStatus,
+        },
         where: 'id = ?',
         whereArgs: [enrollmentId],
       );
 
+      // Outbox : le payload doit porter le statut POST-bascule (`finalStatus`
+      // écrase `status` dans la ligne juste au-dessus) — `enrollment` a été lu
+      // avant l'UPDATE et resterait périmé si on le poussait tel quel.
+      final outboxEnrollment = finalStatus == null
+          ? enrollment
+          : EnrollmentLocalModel.fromMap({
+              ...eRows.first,
+              'status': finalStatus,
+            });
+
       // Outbox : 1 agrégat = 1 entrée, id déterministe (idempotence re-confirm).
       await enqueueEnrollmentAggregate(
         txn,
-        enrollment: enrollment,
+        enrollment: outboxEnrollment,
         student: student,
         parents: parents,
         emitDocument: emitDocument,

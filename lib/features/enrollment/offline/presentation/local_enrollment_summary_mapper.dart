@@ -68,3 +68,28 @@ EnrollmentSummary reenrollmentCandidateToEnrollmentSummary(
     gender: c.gender.toUpperCase() == 'FEMALE' ? Gender.female : Gender.male,
   ),
 );
+
+/// Projette un **candidat de pré-inscription** (vivier `ref_pre_enrollments`)
+/// sur le [EnrollmentSummary] du listing. `enrollmentId` vide = pas encore de
+/// dossier local (tap → seed du brouillon PRE) ; `enrollmentType` posé dès le
+/// candidat brut (contrairement à RE) car PRE n'a que 2 pastilles — un
+/// candidat non engagé affiche déjà « En cours », jamais un 3e état dédié.
+/// `student.id` réutilise le slot générique pour porter le `preEnrollmentId`
+/// AVANT seed (même procédé que RE avec `studentId`) : consommé par le
+/// routage du tap pour déclencher `SeedFromPreEnrollmentRequested`.
+EnrollmentSummary preEnrollmentCandidateToEnrollmentSummary(
+  PreEnrollmentCandidate c,
+) => EnrollmentSummary(
+  enrollmentId: '',
+  enrollmentCode: '',
+  status: 'IN_PROGRESS',
+  enrollmentType: 'PRE_ENROLLMENT',
+  student: StudentSummary(
+    id: c.id,
+    firstName: c.firstName,
+    lastName: c.lastName,
+    surname: c.surname ?? '',
+    dateOfBirth: c.dateOfBirth ?? '',
+    gender: c.gender?.toUpperCase() == 'FEMALE' ? Gender.female : Gender.male,
+  ),
+);

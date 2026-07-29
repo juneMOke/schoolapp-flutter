@@ -128,6 +128,7 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
       context: buildContext,
       offlineBloc: offlineBloc,
       enrollmentId: enrollmentId,
+      finalStatus: context.detailPolicy.finalizeStatus,
     );
     if (!context.context.mounted) {
       return const StepSubmitResult.dispatched();

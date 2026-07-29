@@ -103,6 +103,39 @@ void main() {
     );
   });
 
+  test(
+    'preEnrollmentCandidateToEnrollmentSummary : IN_PROGRESS dès le candidat '
+    'brut (pas de 3e état candidat comme RE), isPreEnrollment vrai, id vide',
+    () {
+      const pre = PreEnrollmentCandidate(
+        id: 'pre-1',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        gender: 'FEMALE',
+        dateOfBirth: '2015-04-02',
+      );
+      final s = preEnrollmentCandidateToEnrollmentSummary(pre);
+      expect(s.enrollmentId, '');
+      expect(s.status, 'IN_PROGRESS');
+      expect(s.enrollmentType, 'PRE_ENROLLMENT');
+      expect(s.isPreEnrollment, isTrue);
+      expect(s.isReEnrollment, isFalse);
+      // Le slot studentId porte le preEnrollmentId avant seed.
+      expect(s.student.id, 'pre-1');
+      expect(s.student.firstName, 'Amina');
+    },
+  );
+
+  test('propage enrollmentType PRE_ENROLLMENT → isPreEnrollment vrai quel que '
+      'soit le statut (dossier local, pas seulement le candidat brut)', () {
+    final s = localItemToEnrollmentSummary(
+      item(enrollmentType: EnrollmentType.preEnrollment, status: 'COMPLETED'),
+    );
+    expect(s.enrollmentType, 'PRE_ENROLLMENT');
+    expect(s.isPreEnrollment, isTrue);
+    expect(s.status, 'COMPLETED');
+  });
+
   group('isUnsyncedLocalWrite (source de vérité read-your-writes)', () {
     test('PENDING_SYNC et SYNC_ERROR → true (surface read-your-writes)', () {
       expect(isUnsyncedLocalWrite(SyncState.pendingSync), isTrue);

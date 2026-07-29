@@ -22,10 +22,14 @@ enum EnrollmentSummaryQueryType {
 /// - [currentYearByStatus] : dossiers de l'année courante bornés au niveau visé
 ///   ET au statut métier (`status`), brouillons inclus — la recherche « par
 ///   niveau visé » de la **Première inscription**.
+/// - [preEnrollmentCohort] : vivier `ref_pre_enrollments` ∪ dossiers PRE locaux
+///   de l'année courante — la recherche de **pré-inscription** (miroir de
+///   [reenrollmentCohort], sans notion d'établissement précédent).
 enum AcademicInfoSource {
   reenrollmentCohort,
   currentYearEnrolled,
   currentYearByStatus,
+  preEnrollmentCohort,
 }
 
 /// Photo immuable de la dernière requête de liste jouée — sert à la rejouer

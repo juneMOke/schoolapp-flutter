@@ -2204,12 +2204,6 @@ abstract class AppLocalizations {
   /// **'Filter the enrollments list'**
   String get searchFormSubtitleFirstRegistration;
 
-  /// No description provided for @searchFormSubtitlePreRegistration.
-  ///
-  /// In en, this message translates to:
-  /// **'Online requests received, pending validation'**
-  String get searchFormSubtitlePreRegistration;
-
   /// No description provided for @reRegistrationSearchHint.
   ///
   /// In en, this message translates to:
@@ -2305,6 +2299,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill the form above then click Search to display enrollment files.'**
   String get reRegistrationSearchInvitationMessage;
+
+  /// No description provided for @preRegistrationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a pre-registration by student or by desired cycle/level'**
+  String get preRegistrationSearchHint;
+
+  /// No description provided for @preRegistrationSearchHelpPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.'**
+  String get preRegistrationSearchHelpPill;
+
+  /// No description provided for @preRegistrationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a pre-registration'**
+  String get preRegistrationSearchTitle;
+
+  /// No description provided for @preRegistrationSearchByNameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get preRegistrationSearchByNameGroup;
+
+  /// No description provided for @preRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle / level'**
+  String get preRegistrationSearchByLevelGroup;
+
+  /// No description provided for @preRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get preRegistrationSearchOrSeparator;
+
+  /// No description provided for @preRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get preRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @preRegistrationSearchModeNameBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get preRegistrationSearchModeNameBadge;
+
+  /// No description provided for @preRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle / level'**
+  String get preRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @preRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get preRegistrationSearchLevelPlaceholder;
+
+  /// No description provided for @preRegistrationSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a pre-registration search'**
+  String get preRegistrationSearchInvitationTitle;
+
+  /// No description provided for @preRegistrationSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the form above then click Search to display requests.'**
+  String get preRegistrationSearchInvitationMessage;
 
   /// No description provided for @firstRegistrationSearchByStudentGroup.
   ///

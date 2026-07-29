@@ -1323,10 +1323,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Filter the enrollments list';
 
   @override
-  String get searchFormSubtitlePreRegistration =>
-      'Online requests received, pending validation';
-
-  @override
   String get reRegistrationSearchHint =>
       'Find a student or a class from the previous year to re-enroll';
 
@@ -1381,6 +1377,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reRegistrationSearchInvitationMessage =>
       'Fill the form above then click Search to display enrollment files.';
+
+  @override
+  String get preRegistrationSearchHint =>
+      'Find a pre-registration by student or by desired cycle/level';
+
+  @override
+  String get preRegistrationSearchHelpPill =>
+      'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.';
+
+  @override
+  String get preRegistrationSearchTitle => 'Search a pre-registration';
+
+  @override
+  String get preRegistrationSearchByNameGroup => 'By name';
+
+  @override
+  String get preRegistrationSearchByLevelGroup => 'By cycle / level';
+
+  @override
+  String get preRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get preRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get preRegistrationSearchModeNameBadge => 'Name';
+
+  @override
+  String get preRegistrationSearchModeLevelBadge => 'Cycle / level';
+
+  @override
+  String get preRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
+
+  @override
+  String get preRegistrationSearchInvitationTitle =>
+      'Start a pre-registration search';
+
+  @override
+  String get preRegistrationSearchInvitationMessage =>
+      'Fill the form above then click Search to display requests.';
 
   @override
   String get firstRegistrationSearchByStudentGroup => 'By student';

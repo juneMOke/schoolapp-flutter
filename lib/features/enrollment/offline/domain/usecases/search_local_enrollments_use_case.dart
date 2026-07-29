@@ -21,6 +21,19 @@ class SearchLocalEnrollmentsUseCase {
     schoolLevelGroupId: schoolLevelGroupId,
   );
 
+  /// Recherche locale de **pré-inscription** : le vivier `ref_pre_enrollments`
+  /// (filtré niveau souhaité) + les dossiers PRE locaux de l'année courante,
+  /// pour la superposition read-your-writes. Le raffinement nom/surnom/DOB et
+  /// la déduplication (par id exact, pas par studentId) sont faits côté
+  /// présentation.
+  Future<Either<Failure, PreEnrollmentSearchResult>> byPreEnrollmentCohort({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _repository.searchPreEnrollmentCohort(
+    schoolLevelId: schoolLevelId,
+    schoolLevelGroupId: schoolLevelGroupId,
+  );
+
   /// Recherche **Facturation** : les élèves réellement inscrits l'année courante
   /// (dossiers finalisés SYNCED|PENDING_SYNC|SYNC_ERROR), optionnellement bornés
   /// au niveau / groupe. Le raffinement nom/surnom est fait côté présentation.

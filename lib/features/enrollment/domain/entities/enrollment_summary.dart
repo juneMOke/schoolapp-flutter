@@ -51,6 +51,15 @@ class EnrollmentSummary extends Equatable {
   /// ligne affiche « À réinscrire » plutôt que le statut brut `PENDING`.
   bool get isReenrollmentCandidate => enrollmentId.isEmpty;
 
+  /// Vrai pour un dossier (ou candidat) de **pré-inscription** (type
+  /// `PRE_ENROLLMENT`) — qu'il soit encore un candidat brut du vivier
+  /// (`enrollmentId` vide) ou déjà un dossier local. Contrairement à RE, PRE
+  /// n'a que 2 pastilles (En cours / Pré-inscrit) : pas de 3e état "candidat
+  /// non engagé", donc pas de getter séparé pour le candidat brut — un
+  /// candidat PRE affiche déjà « En cours » comme un dossier fraîchement
+  /// seedé (voir `preEnrollmentCandidateToEnrollmentSummary`).
+  bool get isPreEnrollment => enrollmentType == 'PRE_ENROLLMENT';
+
   @override
   List<Object?> get props => [
     enrollmentId,

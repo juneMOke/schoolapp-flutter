@@ -790,4 +790,77 @@ void main() {
       },
     );
   });
+
+  group('searchPreEnrollmentCohort', () {
+    const pre = PreEnrollmentCandidate(
+      id: 'pre-A',
+      firstName: 'Awa',
+      lastName: 'Ndiaye',
+      gender: 'FEMALE',
+      dateOfBirth: '2012-05-01',
+      desiredSchoolLevelId: 'lvl-2',
+    );
+
+    test(
+      'année courante résolue → superpose les dossiers de CETTE année',
+      () async {
+        when(
+          () => seedDao.searchPreEnrollmentCandidates(
+            schoolLevelId: any(named: 'schoolLevelId'),
+            schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+          ),
+        ).thenAnswer((_) async => [pre]);
+        when(
+          () => seedDao.findCurrentAcademicYearId(),
+        ).thenAnswer((_) async => 'ay-cur');
+        when(
+          () => readDao.getEnrollments(
+            status: any(named: 'status'),
+            academicYearId: any(named: 'academicYearId'),
+          ),
+        ).thenAnswer((_) async => const []);
+
+        final result = await repo.searchPreEnrollmentCohort(
+          schoolLevelId: 'lvl-2',
+        );
+
+        final r = result.getOrElse(() => throw StateError('left'));
+        expect(r.candidates, [pre]);
+        // Overlay scopé à l'année COURANTE (même principe que RE).
+        verify(
+          () => readDao.getEnrollments(
+            status: any(named: 'status'),
+            academicYearId: 'ay-cur',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'année courante non résolue → aucun overlay (getEnrollments non appelé)',
+      () async {
+        when(
+          () => seedDao.searchPreEnrollmentCandidates(
+            schoolLevelId: any(named: 'schoolLevelId'),
+            schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+          ),
+        ).thenAnswer((_) async => [pre]);
+        when(
+          () => seedDao.findCurrentAcademicYearId(),
+        ).thenAnswer((_) async => null);
+
+        final result = await repo.searchPreEnrollmentCohort();
+
+        final r = result.getOrElse(() => throw StateError('left'));
+        expect(r.candidates, [pre]);
+        expect(r.localDossiers, isEmpty);
+        verifyNever(
+          () => readDao.getEnrollments(
+            status: any(named: 'status'),
+            academicYearId: any(named: 'academicYearId'),
+          ),
+        );
+      },
+    );
+  });
 }

@@ -62,6 +62,9 @@ class EnrollmentLocalListBloc
     );
     on<LocalListByDateOfBirthRequested>(_onByDateOfBirth);
     on<LocalListByAcademicInfoRequested>(_onByAcademicInfo);
+    on<LocalListByPreEnrollmentAcademicInfoRequested>(
+      _onByPreEnrollmentAcademicInfo,
+    );
     on<LocalListByEnrolledAcademicInfoRequested>(_onByEnrolledAcademicInfo);
     on<LocalListByAcademicInfoAndStatusRequested>(_onByAcademicInfoAndStatus);
   }
@@ -197,6 +200,26 @@ class EnrollmentLocalListBloc
     ),
   );
 
+  Future<void> _onByPreEnrollmentAcademicInfo(
+    LocalListByPreEnrollmentAcademicInfoRequested event,
+    Emitter<EnrollmentLocalListState> emit,
+  ) => _load(
+    emit,
+    EnrollmentSummariesQuery(
+      type: EnrollmentSummaryQueryType.byAcademicInfo,
+      academicInfoSource: AcademicInfoSource.preEnrollmentCohort,
+      status: '',
+      academicYearId: '',
+      page: event.page,
+      size: event.size,
+      firstName: event.firstName,
+      lastName: event.lastName,
+      surname: event.surname,
+      schoolLevelGroupId: event.schoolLevelGroupId,
+      schoolLevelId: event.schoolLevelId,
+    ),
+  );
+
   Future<void> _onByEnrolledAcademicInfo(
     LocalListByEnrolledAcademicInfoRequested event,
     Emitter<EnrollmentLocalListState> emit,
@@ -275,6 +298,23 @@ class EnrollmentLocalListBloc
           schoolLevelId: _nullIfEmpty(query.schoolLevelId),
         )).map(
           (r) => EnrollmentLocalListProjector.projectReenrollment(
+            candidates: r.candidates,
+            localDossiers: r.localDossiers,
+            firstName: query.firstName,
+            lastName: query.lastName,
+            surname: query.surname,
+            dateOfBirth: query.dateOfBirth,
+          ),
+        ),
+      (
+        EnrollmentSummaryQueryType.byAcademicInfo,
+        AcademicInfoSource.preEnrollmentCohort,
+      ) =>
+        (await _search.byPreEnrollmentCohort(
+          schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
+          schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+        )).map(
+          (r) => EnrollmentLocalListProjector.projectPreEnrollment(
             candidates: r.candidates,
             localDossiers: r.localDossiers,
             firstName: query.firstName,

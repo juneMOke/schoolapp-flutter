@@ -89,6 +89,13 @@ abstract class EnrollmentDetailPolicy {
   /// Statut métier initial du brouillon (valeur API).
   String get draftStatus => 'IN_PROGRESS';
 
+  /// Statut métier à écrire explicitement à la finalisation (valeur API).
+  /// `null` = ne pas toucher `status` (NEW/RE restent `IN_PROGRESS` en
+  /// continu, la distinction "finalisé" venant de l'état de synchro, pas
+  /// d'un changement de statut). Non-`null` pour PRE (`COMPLETED`), qui a
+  /// besoin d'un vrai changement de statut pastille à 2 états.
+  String? get finalizeStatus => null;
+
   /// Id d'inscription à conserver au seed (id serveur connu : PRE, reprise) —
   /// null → uuid client neuf (NEW, RE : nouveau dossier pour l'année N).
   String? seedEnrollmentId(EnrollmentDetailIntent intent) => null;
@@ -183,16 +190,22 @@ class LocalDraftResumeDetailPolicy extends EnrollmentDetailPolicy {
   String get draftEnrollmentType => enrollmentType ?? super.draftEnrollmentType;
 
   /// DÉRIVÉ du type, PAS de la valeur `status` persistée en base : un
-  /// brouillon RE créé avant l'alignement RE↔NEW porte encore un status
-  /// legacy `PRE_REGISTERED` (aucun mécanisme de migration n'existe ailleurs
-  /// pour ces lignes déjà persistées — `insertDraftEnrollment` écrit tel quel
-  /// ce qu'on lui donne). Dériver du type fait que ce brouillon legacy se
-  /// corrige tout seul au prochain re-save au lieu de rester figé.
+  /// brouillon RE (ou PRE) créé avant l'alignement sur `IN_PROGRESS` porte
+  /// encore un status legacy (`PRE_REGISTERED`) (aucun mécanisme de migration
+  /// n'existe ailleurs pour ces lignes déjà persistées —
+  /// `insertDraftEnrollment` écrit tel quel ce qu'on lui donne). Dériver du
+  /// type fait que ce brouillon legacy se corrige tout seul au prochain
+  /// re-save au lieu de rester figé — NEW/RE/PRE partagent tous `IN_PROGRESS`
+  /// pendant la saisie (PRE ne se distingue qu'à la finalisation, cf.
+  /// [finalizeStatus]).
   @override
-  String get draftStatus => switch (enrollmentType) {
-    'PRE_ENROLLMENT' => 'PRE_REGISTERED',
-    _ => 'IN_PROGRESS',
-  };
+  String get draftStatus => 'IN_PROGRESS';
+
+  /// Un brouillon PRE repris doit finaliser vers `COMPLETED` (pas
+  /// `IN_PROGRESS` en continu comme RE) : la pastille PRE n'a que 2 états.
+  @override
+  String? get finalizeStatus =>
+      enrollmentType == 'PRE_ENROLLMENT' ? 'COMPLETED' : null;
 
   @override
   EnrollmentDetail? detail(EnrollmentState state) => state.detail;
@@ -230,8 +243,17 @@ class PreRegistrationDetailPolicy extends EnrollmentDetailPolicy {
   @override
   String get draftEnrollmentType => 'PRE_ENROLLMENT';
 
+  /// Même cycle que NEW/RE pendant la saisie : le brouillon doit apparaître
+  /// dans le listing Première inscription (`draftEnrollmentType` — pastille
+  /// « Pré-inscription » — le distingue, pas le status). `COMPLETED` n'est
+  /// écrit qu'à la finalisation, cf. [finalizeStatus].
   @override
-  String get draftStatus => 'PRE_REGISTERED';
+  String get draftStatus => 'IN_PROGRESS';
+
+  /// PRE n'a que 2 états (pas de 3e pastille "candidat non engagé" comme RE) :
+  /// la finalisation doit donc écrire explicitement `COMPLETED`.
+  @override
+  String? get finalizeStatus => 'COMPLETED';
 
   /// La préinscription EST un dossier serveur : l'id est conservé (idempotence
   /// G2 au push) et sert de référence d'origine.

@@ -236,6 +236,43 @@ class LocalListByAcademicInfoAndStatusRequested
   ];
 }
 
+/// Recherche par info académique (pré-inscriptions) : vivier
+/// `ref_pre_enrollments`, raffinement nom client-side. Réutilise le type de
+/// requête `byAcademicInfo` (widgets de résultats inchangés), la source étant
+/// portée par [AcademicInfoSource.preEnrollmentCohort]. Pas d'axe
+/// status/enrollmentType : le vivier PRE n'en a pas besoin (miroir RE).
+class LocalListByPreEnrollmentAcademicInfoRequested
+    extends EnrollmentLocalListEvent {
+  final String firstName;
+  final String lastName;
+  final String surname;
+  final String schoolLevelGroupId;
+  final String schoolLevelId;
+  final int page;
+  final int size;
+
+  const LocalListByPreEnrollmentAcademicInfoRequested({
+    required this.firstName,
+    required this.lastName,
+    required this.surname,
+    required this.schoolLevelGroupId,
+    required this.schoolLevelId,
+    this.page = 0,
+    this.size = AppConstants.enrollmentDefaultPageSize,
+  });
+
+  @override
+  List<Object?> get props => [
+    firstName,
+    lastName,
+    surname,
+    schoolLevelGroupId,
+    schoolLevelId,
+    page,
+    size,
+  ];
+}
+
 /// Recherche **Facturation** : les élèves réellement inscrits l'année courante
 /// (dossiers finalisés SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
 /// réinscription N-1. Base = table `enrollments` scopée année + niveaux ;

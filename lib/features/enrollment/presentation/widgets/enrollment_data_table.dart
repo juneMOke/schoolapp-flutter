@@ -232,6 +232,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     // Statut métier + (si brouillon local) badge « Brouillon » sur la même
     // ligne. Chaque badge est borné (le FittedBox de la cellule impose des
     // contraintes non bornées ; le `Flexible` interne du badge casserait sinon).
+    final status = EnrollmentStatus.fromString(enrollment.status);
     return DataTableCellSpec(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -240,22 +241,31 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             constraints: const BoxConstraints(maxWidth: 122),
             // Un dossier RE distingue « En cours » (brouillon local) de
             // « Réinscrit » (finalisé/synchronisé) — axe syncState,
-            // indépendant du statut métier. « À réinscrire » pour un candidat
-            // N-1 non commencé, sinon statut métier — même logique que la
-            // carte grille.
+            // indépendant du statut métier. PRE lit directement le statut
+            // métier (2 pastilles seulement — testé AVANT
+            // `isReenrollmentCandidate`, type-agnostique, qui classerait
+            // sinon à tort un candidat PRE brut comme « À réinscrire »).
+            // « À réinscrire » pour un candidat RE N-1 non commencé, sinon
+            // statut métier générique — même logique que la carte grille.
             child: enrollment.isReEnrollment
                 ? StatusBadge.enrollmentReEnrollment(
                     label: enrollment.isLocalDraft
                         ? l10n.enrollmentStatusInProgress
                         : l10n.enrollmentReRegisteredBadge,
                   )
+                : enrollment.isPreEnrollment
+                ? (status == EnrollmentStatus.completed
+                      ? StatusBadge.enrollmentCompleted(
+                          label: l10n.enrollmentStatusPreRegistered,
+                        )
+                      : StatusBadge.enrollmentInProgress(
+                          label: l10n.enrollmentStatusInProgress,
+                        ))
                 : enrollment.isReenrollmentCandidate
                 ? StatusBadge.enrollmentPending(
                     label: l10n.enrollmentReenrollmentCandidateBadge,
                   )
-                : EnrollmentStatusBadge(
-                    status: EnrollmentStatus.fromString(enrollment.status),
-                  ),
+                : EnrollmentStatusBadge(status: status),
           ),
           if (enrollment.isLocalDraft) ...[
             const SizedBox(width: AppSpacing.xs),

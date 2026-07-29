@@ -92,13 +92,13 @@ void main() {
       expect(draft.studentId, 'stu-canonique'); // pas de doublon élève
     });
 
-    test('PRE → PRE_ENROLLMENT/PRE_REGISTERED, studentId conservé', () {
+    test('PRE → PRE_ENROLLMENT/IN_PROGRESS, studentId conservé', () {
       final draft = EnrollmentConfirmDraftBuilder.fromDetail(
         detail: detail(),
         origin: EnrollmentDetailOrigin.preRegistration,
       );
       expect(draft.enrollmentType, 'PRE_ENROLLMENT');
-      expect(draft.status, 'PRE_REGISTERED');
+      expect(draft.status, 'IN_PROGRESS');
       expect(draft.studentId, 'stu-canonique');
     });
 
@@ -315,13 +315,15 @@ void main() {
       guardianPhone: '+243111',
     );
 
-    test('PRE_ENROLLMENT/PRE_REGISTERED, id → source_ref, élève null', () {
+    test('PRE_ENROLLMENT/IN_PROGRESS, id → source_ref, élève null', () {
       final draft = EnrollmentConfirmDraftBuilder.fromPreEnrollment(
         pre: pre,
         academicYearId: 'ay-2026',
       );
       expect(draft.enrollmentType, 'PRE_ENROLLMENT');
-      expect(draft.status, 'PRE_REGISTERED');
+      // IN_PROGRESS pendant la saisie (2 états, pas de candidat non engagé) :
+      // COMPLETED n'est écrit qu'à la finalisation.
+      expect(draft.status, 'IN_PROGRESS');
       expect(draft.sourceRef, 'pre-1');
       expect(draft.studentId, isNull); // élève créé au seed (uuid client)
       expect(draft.schoolLevelId, 'lvl-9');

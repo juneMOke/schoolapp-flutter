@@ -140,6 +140,11 @@ void main() {
         academicYearId: any(named: 'academicYearId'),
       ),
     ).thenAnswer((_) async => const Right(null));
+    // Défaut PRE : aucun dossier local pour ce preEnrollmentId → la sonde au
+    // tap (_getDetail) laisse passer le seed.
+    when(
+      () => getDetail(any()),
+    ).thenAnswer((_) async => const Left(NotFoundFailure()));
   });
 
   EnrollmentOfflineBloc buildBloc() => EnrollmentOfflineBloc(
@@ -493,7 +498,7 @@ void main() {
       ),
       expect: () => const [
         EnrollmentDraftSaving(),
-        EnrollmentReenrollmentExisting('e-draft', SyncState.draft),
+        EnrollmentLocalDossierExisting('e-draft', SyncState.draft),
       ],
       verify: (_) {
         verifyNever(() => getReenrollmentCandidate(any()));
@@ -573,7 +578,7 @@ void main() {
       ),
       expect: () => const [
         EnrollmentDraftSaving(),
-        EnrollmentReenrollmentExisting('e-sync', SyncState.pendingSync),
+        EnrollmentLocalDossierExisting('e-sync', SyncState.pendingSync),
       ],
       verify: (_) {
         verifyNever(
@@ -620,6 +625,80 @@ void main() {
         expect(seedArg.sourceRef, 'pre-1');
         expect(seedArg.studentId, isNull); // élève créé au seed (uuid client)
         expect(seedArg.schoolLevelId, 'lvl-1');
+      },
+    );
+
+    blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+      'SeedFromPreEnrollmentRequested : sonde trouve un DRAFT (déjà seedé) → '
+      'Existing (reprise), jamais de re-seed ni de lecture snapshot',
+      setUp: () {
+        when(
+          () => getDetail('pre-1'),
+        ).thenAnswer((_) async => const Right(detail)); // id='e1', DRAFT
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const SeedFromPreEnrollmentRequested(
+          preEnrollmentId: 'pre-1',
+          academicYearId: 'ay-2026',
+        ),
+      ),
+      expect: () => const [
+        EnrollmentDraftSaving(),
+        EnrollmentLocalDossierExisting('e1', SyncState.draft),
+      ],
+      verify: (_) {
+        verifyNever(() => getPreEnrollment(any()));
+        verifyNever(
+          () => seedDraft(any(), enrollmentId: any(named: 'enrollmentId')),
+        );
+      },
+    );
+
+    blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+      'SeedFromPreEnrollmentRequested : sonde trouve un FINALISÉ → Existing '
+      '(lecture seule), jamais de re-seed',
+      setUp: () {
+        when(() => getDetail('pre-1')).thenAnswer(
+          (_) async => const Right(
+            LocalEnrollmentDetail(
+              enrollment: LocalEnrollment(
+                id: 'pre-1',
+                studentId: 's9',
+                enrollmentType: EnrollmentType.preEnrollment,
+                status: OfflineEnrollmentStatus.completed,
+                academicYearId: 'ay-2026',
+                enrollmentDate: '2026-07-06',
+                syncState: SyncState.pendingSync,
+              ),
+              student: LocalStudent(
+                id: 's9',
+                firstName: 'Amina',
+                lastName: 'Moke',
+                gender: OfflineGender.female,
+                dateOfBirth: '2015-04-02',
+                syncState: SyncState.pendingSync,
+              ),
+            ),
+          ),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const SeedFromPreEnrollmentRequested(
+          preEnrollmentId: 'pre-1',
+          academicYearId: 'ay-2026',
+        ),
+      ),
+      expect: () => const [
+        EnrollmentDraftSaving(),
+        EnrollmentLocalDossierExisting('pre-1', SyncState.pendingSync),
+      ],
+      verify: (_) {
+        verifyNever(() => getPreEnrollment(any()));
+        verifyNever(
+          () => seedDraft(any(), enrollmentId: any(named: 'enrollmentId')),
+        );
       },
     );
 

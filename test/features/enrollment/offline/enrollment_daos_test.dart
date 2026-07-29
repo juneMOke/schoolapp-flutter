@@ -697,6 +697,36 @@ void main() {
     test('finalizeDraft renvoie false si l\'inscription est absente', () async {
       expect(await draftDao.finalizeDraft('ghost', nowMs: 1000), isFalse);
     });
+
+    test('finalizeDraft avec finalStatus non-null écrit aussi la colonne '
+        '`status`, ET le payload outbox porte le statut À JOUR (pas la valeur '
+        'périmée lue avant la bascule)', () async {
+      await draftDao.insertDraftStudent(student());
+      await draftDao.insertDraftEnrollment(enrollment()); // status IN_PROGRESS
+      final ok = await draftDao.finalizeDraft(
+        'e1',
+        finalStatus: 'COMPLETED',
+        nowMs: 1000,
+      );
+      expect(ok, isTrue);
+      expect((await db.query('enrollments')).first['status'], 'COMPLETED');
+
+      final ob = await db.query('outbox');
+      final payload =
+          jsonDecode(ob.first['payload'] as String) as Map<String, dynamic>;
+      expect(
+        (payload['enrollment'] as Map<String, dynamic>)['status'],
+        'COMPLETED',
+      );
+    });
+
+    test('finalizeDraft avec finalStatus null (défaut) ne touche pas `status` '
+        '— non-régression NEW/RE', () async {
+      await draftDao.insertDraftStudent(student());
+      await draftDao.insertDraftEnrollment(enrollment()); // status IN_PROGRESS
+      await draftDao.finalizeDraft('e1', nowMs: 1000);
+      expect((await db.query('enrollments')).first['status'], 'IN_PROGRESS');
+    });
   });
 
   group('seedDraft (photo de départ RE/PRE)', () {

@@ -98,5 +98,51 @@ void main() {
 
       expect(intent.status, isNull);
     });
+
+    test(
+      'toLocation porte le preEnrollmentId via studentId pour preRegistration '
+      '(candidat brut, enrollmentId encore vide)',
+      () {
+        const intent = EnrollmentDetailIntent.preRegistration(
+          enrollmentId: '',
+          studentId: 'pre-1',
+        );
+
+        expect(
+          intent.toLocation(),
+          '/enrollments/detail/?origin=preRegistration&studentId=pre-1',
+        );
+      },
+    );
+
+    test('fromRouteContext round-trip : le preEnrollmentId (studentId) survit '
+        'même quand le segment de route est le placeholder littéral `new` — '
+        'régression du bug de perte d\'id au round-trip GoRouter', () {
+      final intent = EnrollmentDetailIntent.fromRouteContext(
+        enrollmentId: 'new',
+        queryParameters: const {
+          'origin': 'preRegistration',
+          'studentId': 'pre-1',
+        },
+      );
+
+      expect(intent.origin, EnrollmentDetailOrigin.preRegistration);
+      expect(intent.studentId, 'pre-1');
+    });
+
+    test(
+      'fromRouteContext sans studentId (dossier déjà connu) → studentId null, '
+      'rétro-compatible',
+      () {
+        final intent = EnrollmentDetailIntent.fromRouteContext(
+          enrollmentId: 'e-existing',
+          queryParameters: const {'origin': 'preRegistration'},
+        );
+
+        expect(intent.origin, EnrollmentDetailOrigin.preRegistration);
+        expect(intent.enrollmentId, 'e-existing');
+        expect(intent.studentId, isNull);
+      },
+    );
   });
 }

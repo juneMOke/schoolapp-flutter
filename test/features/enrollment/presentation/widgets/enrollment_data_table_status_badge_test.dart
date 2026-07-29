@@ -189,6 +189,78 @@ void main() {
     expect(find.text('En cours'), findsNothing);
   });
 
+  testWidgets(
+    'candidat de pré-inscription (enrollmentId vide) : pastille « En cours '
+    '», PAS « À réinscrire »',
+    (tester) async {
+      const preCandidate = EnrollmentSummary(
+        enrollmentId: '',
+        enrollmentCode: '',
+        status: 'IN_PROGRESS',
+        enrollmentType: 'PRE_ENROLLMENT',
+        student: StudentSummary(
+          id: 'pre-12',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[preCandidate],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('En cours'), findsOneWidget);
+      expect(find.text('À réinscrire'), findsNothing);
+      expect(find.text('Pré-inscrit'), findsNothing);
+    },
+  );
+
+  testWidgets('dossier PRE COMPLETED : pastille « Pré-inscrit »', (
+    tester,
+  ) async {
+    const preCompleted = EnrollmentSummary(
+      enrollmentId: 'pre-13',
+      enrollmentCode: '',
+      status: 'COMPLETED',
+      enrollmentType: 'PRE_ENROLLMENT',
+      syncState: SyncState.pendingSync,
+      student: StudentSummary(
+        id: 'stu-pre-13',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[preCompleted],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Pré-inscrit'), findsOneWidget);
+    expect(find.text('En cours'), findsNothing);
+  });
+
   testWidgets('Téléphone (<600px) : 2 colonnes, date en sous-texte du nom', (
     tester,
   ) async {

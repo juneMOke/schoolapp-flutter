@@ -61,6 +61,19 @@ ReenrollmentCandidate _candidate({
   dateOfBirth: dateOfBirth,
 );
 
+PreEnrollmentCandidate _preCandidate({
+  required String id,
+  String firstName = 'Awa',
+  String lastName = 'Ndiaye',
+  String dateOfBirth = '2012-05-01',
+}) => PreEnrollmentCandidate(
+  id: id,
+  firstName: firstName,
+  lastName: lastName,
+  gender: 'FEMALE',
+  dateOfBirth: dateOfBirth,
+);
+
 void main() {
   late _MockGetLocalEnrollments getLocal;
   late _MockSearchLocalEnrollments search;
@@ -288,6 +301,102 @@ void main() {
       ).called(1);
       // Le bloc n'appelle pas `_getEnrollments` pour la RE : c'est le repo
       // (searchReenrollmentCohort) qui superpose les dossiers de l'année courante.
+      verifyNever(() => getLocal(status: any(named: 'status')));
+    },
+  );
+
+  blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+    'byPreEnrollmentAcademicInfo (PRE) : superpose vivier + dossiers locaux, '
+    'dédup par id EXACT (pas studentId)',
+    setUp: () {
+      when(
+        () => search.byPreEnrollmentCohort(
+          schoolLevelId: any(named: 'schoolLevelId'),
+          schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+        ),
+      ).thenAnswer(
+        (_) async => Right(
+          PreEnrollmentSearchResult(
+            candidates: [
+              _preCandidate(id: 'pre-A', firstName: 'Awa'),
+              _preCandidate(id: 'pre-B', firstName: 'Bob'),
+            ],
+            // Dossier PRE déjà démarré (même id) → prime le candidat (dédup).
+            localDossiers: [
+              _item(
+                enrollmentId: 'pre-A',
+                studentId: 'stu-generated',
+                firstName: 'Awa',
+                type: EnrollmentType.preEnrollment,
+                syncState: SyncState.draft,
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+    build: build,
+    act: (bloc) => bloc.add(
+      const LocalListByPreEnrollmentAcademicInfoRequested(
+        firstName: '',
+        lastName: '',
+        surname: '',
+        schoolLevelGroupId: 'grp-1',
+        schoolLevelId: 'lvl-2',
+      ),
+    ),
+    skip: 1,
+    expect: () => [
+      // pre-A via son dossier ('pre-A'), pre-B en candidat frais ('').
+      isA<EnrollmentLocalListState>().having(ids, 'ids', ['pre-A', '']),
+    ],
+  );
+
+  blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+    'byPreEnrollmentAcademicInfo (PRE) : appelle byPreEnrollmentCohort, '
+    'jamais getEnrollments côté bloc',
+    setUp: () {
+      when(
+        () => search.byPreEnrollmentCohort(
+          schoolLevelId: any(named: 'schoolLevelId'),
+          schoolLevelGroupId: any(named: 'schoolLevelGroupId'),
+        ),
+      ).thenAnswer(
+        (_) async => Right(
+          PreEnrollmentSearchResult(
+            candidates: [_preCandidate(id: 'pre-9')],
+            localDossiers: const [],
+          ),
+        ),
+      );
+    },
+    build: build,
+    act: (bloc) => bloc.add(
+      const LocalListByPreEnrollmentAcademicInfoRequested(
+        firstName: '',
+        lastName: '',
+        surname: '',
+        schoolLevelGroupId: 'grp-1',
+        schoolLevelId: 'lvl-2',
+      ),
+    ),
+    expect: () => [
+      isA<EnrollmentLocalListState>(),
+      isA<EnrollmentLocalListState>()
+          .having(ids, 'ids', [''])
+          .having(
+            (s) => s.summariesQueryType,
+            'type',
+            EnrollmentSummaryQueryType.byAcademicInfo,
+          ),
+    ],
+    verify: (_) {
+      verify(
+        () => search.byPreEnrollmentCohort(
+          schoolLevelGroupId: 'grp-1',
+          schoolLevelId: 'lvl-2',
+        ),
+      ).called(1);
       verifyNever(() => getLocal(status: any(named: 'status')));
     },
   );

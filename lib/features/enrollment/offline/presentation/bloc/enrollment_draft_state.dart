@@ -72,14 +72,14 @@ class EnrollmentDraftFinalizeError extends EnrollmentOfflineState {
   List<Object?> get props => [message];
 }
 
-/// Sonde au tap RE : un dossier local existe DÉJÀ pour cet élève cette année →
-/// la page l'ouvre au lieu de seeder un doublon. [syncState] pilote le mode
+/// Sonde au tap RE/PRE : un dossier local existe DÉJÀ pour ce candidat → la
+/// page l'ouvre au lieu de seeder un doublon. [syncState] pilote le mode
 /// (option b) : `DRAFT` → reprise éditable ; finalisé → lecture seule.
-class EnrollmentReenrollmentExisting extends EnrollmentOfflineState {
+class EnrollmentLocalDossierExisting extends EnrollmentOfflineState {
   final String enrollmentId;
   final SyncState syncState;
 
-  const EnrollmentReenrollmentExisting(this.enrollmentId, this.syncState);
+  const EnrollmentLocalDossierExisting(this.enrollmentId, this.syncState);
 
   @override
   List<Object?> get props => [enrollmentId, syncState];

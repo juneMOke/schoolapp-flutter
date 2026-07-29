@@ -202,18 +202,51 @@ class EnrollmentSeedDao {
       limit: 1,
     );
     if (rows.isEmpty) return null;
-    final r = rows.first;
-    return PreEnrollmentCandidate(
-      id: r['id'] as String,
-      firstName: r['first_name'] as String,
-      lastName: r['last_name'] as String,
-      surname: r['surname'] as String?,
-      gender: r['gender'] as String?,
-      dateOfBirth: r['date_of_birth'] as String?,
-      birthPlace: r['birth_place'] as String?,
-      desiredSchoolLevelId: r['desired_school_level_id'] as String?,
-      guardianName: r['guardian_name'] as String?,
-      guardianPhone: r['guardian_phone'] as String?,
-    );
+    return _preEnrollmentFromRow(rows.first);
   }
+
+  /// Recherche des candidats à la pré-inscription (vivier `ref_pre_enrollments`)
+  /// filtrée par niveau souhaité. Pas de `LEFT JOIN` référentiel ici
+  /// (contrairement à [searchReenrollmentCandidates]) : une préinscription n'a
+  /// pas d'établissement précédent à préremplir, seulement un niveau souhaité
+  /// brut (`desired_school_level_id`, potentiellement `NULL` — un tel candidat
+  /// ne remonte alors que sans filtre). Le raffinage nom/DOB reste côté
+  /// présentation. Trié par nom pour une liste stable.
+  Future<List<PreEnrollmentCandidate>> searchPreEnrollmentCandidates({
+    String? schoolLevelId,
+    String? schoolLevelGroupId,
+  }) async {
+    final clauses = <String>[];
+    final args = <Object?>[];
+    if (schoolLevelId != null) {
+      clauses.add('desired_school_level_id = ?');
+      args.add(schoolLevelId);
+    } else if (schoolLevelGroupId != null) {
+      clauses.add(
+        'desired_school_level_id IN '
+        '(SELECT id FROM ref_school_levels WHERE level_group_id = ?)',
+      );
+      args.add(schoolLevelGroupId);
+    }
+    final where = clauses.isEmpty ? '' : 'WHERE ${clauses.join(' AND ')}';
+    final rows = await _db.rawQuery(
+      'SELECT * FROM ref_pre_enrollments $where ORDER BY last_name, first_name',
+      args,
+    );
+    return rows.map(_preEnrollmentFromRow).toList();
+  }
+
+  PreEnrollmentCandidate _preEnrollmentFromRow(Map<String, Object?> r) =>
+      PreEnrollmentCandidate(
+        id: r['id'] as String,
+        firstName: r['first_name'] as String,
+        lastName: r['last_name'] as String,
+        surname: r['surname'] as String?,
+        gender: r['gender'] as String?,
+        dateOfBirth: r['date_of_birth'] as String?,
+        birthPlace: r['birth_place'] as String?,
+        desiredSchoolLevelId: r['desired_school_level_id'] as String?,
+        guardianName: r['guardian_name'] as String?,
+        guardianPhone: r['guardian_phone'] as String?,
+      );
 }

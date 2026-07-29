@@ -237,4 +237,78 @@ void main() {
       },
     );
   });
+
+  group(
+    'EnrollmentSearchCommandHandlers.dispatchPreEnrollmentThroughLocalListBloc',
+    () {
+      late _MockEnrollmentLocalListBloc bloc;
+
+      setUp(() {
+        bloc = _MockEnrollmentLocalListBloc();
+        when(
+          () => bloc.stream,
+        ).thenAnswer((_) => const Stream<EnrollmentLocalListState>.empty());
+        when(
+          () => bloc.state,
+        ).thenReturn(const EnrollmentLocalListState.initial());
+      });
+
+      Future<void> dispatch(
+        WidgetTester tester,
+        EnrollmentSearchCommand command,
+      ) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: BlocProvider<EnrollmentLocalListBloc>.value(
+              value: bloc,
+              child: Builder(
+                builder: (context) {
+                  EnrollmentSearchCommandHandlers.dispatchPreEnrollmentThroughLocalListBloc(
+                    context,
+                    command,
+                    const EnrollmentScreenContext(
+                      schoolId: 'school-1',
+                      academicYearId: 'ay-2025',
+                      isLoading: false,
+                    ),
+                  );
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      testWidgets(
+        'info académique (bi-mode, sans status) → vivier PRE, PAS le vivier '
+        'RE (contrairement à dispatchThroughLocalListBloc)',
+        (tester) async {
+          await dispatch(
+            tester,
+            const AcademicInfoSearchCommand(
+              firstName: 'Awa',
+              lastName: 'Ndiaye',
+              surname: '',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-2',
+            ),
+          );
+
+          verify(
+            () => bloc.add(
+              const LocalListByPreEnrollmentAcademicInfoRequested(
+                firstName: 'Awa',
+                lastName: 'Ndiaye',
+                surname: '',
+                schoolLevelGroupId: 'grp-1',
+                schoolLevelId: 'lvl-2',
+                page: 0,
+              ),
+            ),
+          ).called(1);
+        },
+      );
+    },
+  );
 }
