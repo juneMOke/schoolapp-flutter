@@ -328,7 +328,7 @@ class EnrollmentOfflineBloc
     );
     emit(
       result.fold(
-        (f) => EnrollmentDraftError(_map(f)),
+        (f) => EnrollmentDraftFinalizeError(_map(f)),
         (_) => EnrollmentDraftFinalizedPendingSync(event.enrollmentId),
       ),
     );

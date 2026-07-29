@@ -59,6 +59,19 @@ class EnrollmentDraftError extends EnrollmentOfflineState {
   List<Object?> get props => [message];
 }
 
+/// Échec de la **finalisation** spécifiquement — distinct de
+/// [EnrollmentDraftError] (étape/seed) pour que la sur-couche de résultat de
+/// la validation finale (`EnrollmentFinalizeOverlay`) soit seule à réagir,
+/// sans déclencher aussi le toast générique du scope du stepper.
+class EnrollmentDraftFinalizeError extends EnrollmentOfflineState {
+  final String message;
+
+  const EnrollmentDraftFinalizeError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
 /// Sonde au tap RE : un dossier local existe DÉJÀ pour cet élève cette année →
 /// la page l'ouvre au lieu de seeder un doublon. [syncState] pilote le mode
 /// (option b) : `DRAFT` → reprise éditable ; finalisé → lecture seule.

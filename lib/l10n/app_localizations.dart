@@ -668,6 +668,18 @@ abstract class AppLocalizations {
   /// **'Start gender-based distribution'**
   String get classesOrganisationDistributeByGenderAction;
 
+  /// No description provided for @classesOrganisationDistributeOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You seem to be offline. A connection is required to start the distribution.'**
+  String get classesOrganisationDistributeOfflineHint;
+
+  /// No description provided for @classesOrganisationDistributeLoadErrorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to compute the headcount to distribute right now. Please try again later.'**
+  String get classesOrganisationDistributeLoadErrorHint;
+
   /// No description provided for @classesDistributionResultEyebrow.
   ///
   /// In en, this message translates to:
@@ -3457,6 +3469,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This action confirms the file and queues it for synchronization. Review the summary before validating.'**
   String get enrollmentFinalizeConfirmMessage;
+
+  /// No description provided for @enrollmentFinalizeProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating enrollment…'**
+  String get enrollmentFinalizeProcessingTitle;
+
+  /// No description provided for @enrollmentFinalizeSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment validated'**
+  String get enrollmentFinalizeSuccessTitle;
+
+  /// No description provided for @enrollmentFinalizeErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation failed'**
+  String get enrollmentFinalizeErrorTitle;
+
+  /// No description provided for @enrollmentFinalizeRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentFinalizeRetryAction;
+
+  /// No description provided for @enrollmentFinalizeCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get enrollmentFinalizeCloseAction;
+
+  /// No description provided for @enrollmentFinalizeContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get enrollmentFinalizeContinueAction;
 
   /// No description provided for @stepSaveStateIdle.
   ///

@@ -321,6 +321,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Start gender-based distribution';
 
   @override
+  String get classesOrganisationDistributeOfflineHint =>
+      'You seem to be offline. A connection is required to start the distribution.';
+
+  @override
+  String get classesOrganisationDistributeLoadErrorHint =>
+      'Unable to compute the headcount to distribute right now. Please try again later.';
+
+  @override
   String get classesDistributionResultEyebrow => 'Gender distribution';
 
   @override
@@ -2007,6 +2015,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentFinalizeConfirmMessage =>
       'This action confirms the file and queues it for synchronization. Review the summary before validating.';
+
+  @override
+  String get enrollmentFinalizeProcessingTitle => 'Validating enrollment…';
+
+  @override
+  String get enrollmentFinalizeSuccessTitle => 'Enrollment validated';
+
+  @override
+  String get enrollmentFinalizeErrorTitle => 'Validation failed';
+
+  @override
+  String get enrollmentFinalizeRetryAction => 'Retry';
+
+  @override
+  String get enrollmentFinalizeCloseAction => 'Close';
+
+  @override
+  String get enrollmentFinalizeContinueAction => 'Continue';
 
   @override
   String get stepSaveStateIdle => 'No input yet';

@@ -325,6 +325,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Lancer la répartition par genre';
 
   @override
+  String get classesOrganisationDistributeOfflineHint =>
+      'Vous semblez hors-ligne. Une connexion est nécessaire pour lancer la répartition.';
+
+  @override
+  String get classesOrganisationDistributeLoadErrorHint =>
+      'Impossible de calculer l\'effectif à répartir pour le moment. Réessayez plus tard.';
+
+  @override
   String get classesDistributionResultEyebrow => 'Répartition par genre';
 
   @override
@@ -2021,6 +2029,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentFinalizeConfirmMessage =>
       'Cette action confirme le dossier et le place en file de synchronisation. Vérifiez le récapitulatif avant de valider.';
+
+  @override
+  String get enrollmentFinalizeProcessingTitle =>
+      'Validation de l\'inscription…';
+
+  @override
+  String get enrollmentFinalizeSuccessTitle => 'Inscription validée';
+
+  @override
+  String get enrollmentFinalizeErrorTitle => 'Échec de la validation';
+
+  @override
+  String get enrollmentFinalizeRetryAction => 'Réessayer';
+
+  @override
+  String get enrollmentFinalizeCloseAction => 'Fermer';
+
+  @override
+  String get enrollmentFinalizeContinueAction => 'Continuer';
 
   @override
   String get stepSaveStateIdle => 'Aucune saisie';

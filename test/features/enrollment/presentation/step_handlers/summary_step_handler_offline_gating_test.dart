@@ -1,8 +1,15 @@
+import 'dart:async';
+
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -13,6 +20,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/school_le
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
@@ -25,7 +33,16 @@ import 'package:school_app_flutter/features/student/domain/entities/parent_summa
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class _MockOfflineBloc extends Mock implements EnrollmentOfflineBloc {}
+// La finalisation dispatche FinalizeDraftRequested puis affiche la popin de
+// résultat (EnrollmentFinalizeOverlay, processing → succès | échec) : on
+// pilote les états offline à la main via un StreamController (whenListen),
+// comme pour la sur-couche d'encaissement (Finances).
+class _MockOfflineBloc
+    extends MockBloc<EnrollmentOfflineEvent, EnrollmentOfflineState>
+    implements EnrollmentOfflineBloc {}
+
+class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
+    implements SyncStatusCubit {}
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
 
@@ -59,32 +76,78 @@ void main() {
   });
 
   late _MockOfflineBloc offlineBloc;
+  late _MockSyncStatusCubit syncCubit;
+  late StreamController<EnrollmentOfflineState> states;
 
   setUp(() {
     offlineBloc = _MockOfflineBloc();
-    when(() => offlineBloc.state).thenReturn(const EnrollmentOfflineInitial());
-    when(
-      () => offlineBloc.stream,
-    ).thenAnswer((_) => const Stream<EnrollmentOfflineState>.empty());
+    states = StreamController<EnrollmentOfflineState>.broadcast();
+    whenListen(
+      offlineBloc,
+      states.stream,
+      initialState: const EnrollmentOfflineInitial(),
+    );
+
+    syncCubit = _MockSyncStatusCubit();
+    whenListen(
+      syncCubit,
+      const Stream<SyncStatusState>.empty(),
+      initialState: const SyncStatusState(status: SyncStatus.synced),
+    );
+    when(() => syncCubit.notifyLocalWrite()).thenAnswer((_) async {});
   });
 
-  // La finalisation passe désormais par une popin de confirmation : le contexte
-  // doit porter un Navigator (MaterialApp) pour que showDialog fonctionne.
+  tearDown(() async {
+    await states.close();
+  });
+
+  // La finalisation passe par une popin de confirmation PUIS par la popin de
+  // résultat de la sur-couche : les deux poussent une route sur le Navigator
+  // racine, d'où le besoin d'un MaterialApp complet (+ délégués l10n, la
+  // sur-couche affichant ses propres textes via AppLocalizations.of).
   Future<BuildContext> pumpContext(WidgetTester tester) async {
     late BuildContext captured;
+    // Le succès finalise en redirigeant via `context.goNamed` (GoRouter) : la
+    // route racine doit exister pour que la redirection ne plante pas.
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          name: AppRoutesNames.home,
+          builder: (context, state) =>
+              BlocProvider<EnrollmentOfflineBloc>.value(
+                value: offlineBloc,
+                child: Builder(
+                  builder: (context) {
+                    captured = context;
+                    return const Scaffold(body: SizedBox.shrink());
+                  },
+                ),
+              ),
+        ),
+      ],
+    );
     await tester.pumpWidget(
-      MaterialApp(
-        home: BlocProvider<EnrollmentOfflineBloc>.value(
-          value: offlineBloc,
-          child: Builder(
-            builder: (context) {
-              captured = context;
-              return const SizedBox.shrink();
-            },
-          ),
+      // Le cubit de synchro est fourni AU-DESSUS de MaterialApp (comme à la
+      // racine en prod) pour que la popin, poussée sur le root navigator, le
+      // trouve via context.read.
+      BlocProvider<SyncStatusCubit>.value(
+        value: syncCubit,
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('fr'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
         ),
       ),
     );
+    await tester.pumpAndSettle();
     return captured;
   }
 
@@ -115,44 +178,92 @@ void main() {
     );
   }
 
-  // Déroule la soumission jusqu'au bout : ouverture de la popin, tap sur le
-  // bouton [confirmLabel] (ou annulation), puis résultat du handler.
+  // Déroule la soumission jusqu'au bout : ouverture de la popin de
+  // confirmation, tap sur [confirmLabel] (ou annulation), puis — si confirmée
+  // — la popin de résultat (processing → succès | échec) simulée via
+  // [terminalState] et fermée via [resultActionLabel].
   Future<StepSubmitResult> submitThroughDialog(
     WidgetTester tester,
     Future<StepSubmitResult> pending, {
     required String tapLabel,
+    EnrollmentOfflineState? terminalState,
+    String? resultActionLabel,
   }) async {
     await tester.pumpAndSettle();
     await tester.tap(find.text(tapLabel));
-    await tester.pumpAndSettle();
+    // Ferme la popin de confirmation et ouvre la popin de résultat
+    // (processing) — pas de pumpAndSettle : le médaillon de traitement tourne
+    // en boucle (animation infinie).
+    await tester.pump();
+
+    if (terminalState != null) {
+      states.add(terminalState);
+      await tester.pump(); // applique l'issue
+      await tester.pump(const Duration(milliseconds: 600)); // halo/anim
+      await tester.tap(find.text(resultActionLabel!));
+      await tester.pump();
+    }
+
     return pending;
   }
 
-  testWidgets('NEW → popin confirmée → finalise le brouillon local', (
-    tester,
-  ) async {
-    final context = await pumpContext(tester);
-    final handler = SummaryStepHandler();
+  testWidgets(
+    'NEW → popin confirmée → finalise le brouillon local → succès → redirige',
+    (tester) async {
+      final context = await pumpContext(tester);
+      final handler = SummaryStepHandler();
 
-    final pending = handler.submit(
-      buildSubmitContext(
-        context,
-        const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
-          'enr-1',
+      final pending = handler.submit(
+        buildSubmitContext(
+          context,
+          const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
+            'enr-1',
+          ),
         ),
-      ),
-    );
-    final result = await submitThroughDialog(
-      tester,
-      pending,
-      tapLabel: 'Valider l\'inscription',
-    );
+      );
+      final result = await submitThroughDialog(
+        tester,
+        pending,
+        tapLabel: 'Valider l\'inscription',
+        terminalState: const EnrollmentDraftFinalizedPendingSync('enr-1'),
+        resultActionLabel: 'Continuer',
+      );
 
-    expect(result.status, StepSubmitStatus.dispatched);
-    final captured = verify(() => offlineBloc.add(captureAny())).captured;
-    expect(captured.single, isA<FinalizeDraftRequested>());
-    expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');
-  });
+      expect(result.status, StepSubmitStatus.completed);
+      final captured = verify(() => offlineBloc.add(captureAny())).captured;
+      expect(captured.single, isA<FinalizeDraftRequested>());
+      expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');
+      verify(() => syncCubit.notifyLocalWrite()).called(1);
+    },
+  );
+
+  testWidgets(
+    'popin confirmée → échec de la finalisation → reste éditable (blocked)',
+    (tester) async {
+      final context = await pumpContext(tester);
+      final handler = SummaryStepHandler();
+
+      final pending = handler.submit(
+        buildSubmitContext(
+          context,
+          const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
+            'enr-1',
+          ),
+        ),
+      );
+      final result = await submitThroughDialog(
+        tester,
+        pending,
+        tapLabel: 'Valider l\'inscription',
+        terminalState: const EnrollmentDraftFinalizeError('boom'),
+        resultActionLabel: 'Fermer',
+      );
+
+      expect(result.status, StepSubmitStatus.blocked);
+      verify(() => offlineBloc.add(captureAny())).called(1);
+      verifyNever(() => syncCubit.notifyLocalWrite());
+    },
+  );
 
   testWidgets('popin refusée → aucune finalisation (noop)', (tester) async {
     final context = await pumpContext(tester);
@@ -195,9 +306,11 @@ void main() {
         tester,
         pending,
         tapLabel: 'Valider l\'inscription',
+        terminalState: const EnrollmentDraftFinalizedPendingSync('enr-1'),
+        resultActionLabel: 'Continuer',
       );
 
-      expect(result.status, StepSubmitStatus.dispatched);
+      expect(result.status, StepSubmitStatus.completed);
       final captured = verify(() => offlineBloc.add(captureAny())).captured;
       expect(captured.single, isA<FinalizeDraftRequested>());
       expect((captured.single as FinalizeDraftRequested).enrollmentId, 'enr-1');

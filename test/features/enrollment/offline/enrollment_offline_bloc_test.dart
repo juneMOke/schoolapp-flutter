@@ -293,7 +293,7 @@ void main() {
     );
 
     blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
-      'FinalizeDraftRequested introuvable → [Saving, Error]',
+      'FinalizeDraftRequested introuvable → [Saving, FinalizeError]',
       setUp: () {
         when(
           () => finalize(
@@ -306,7 +306,7 @@ void main() {
       act: (bloc) => bloc.add(const FinalizeDraftRequested('e1')),
       expect: () => const [
         EnrollmentDraftSaving(),
-        EnrollmentDraftError('Dossier introuvable en local.'),
+        EnrollmentDraftFinalizeError('Dossier introuvable en local.'),
       ],
     );
   });

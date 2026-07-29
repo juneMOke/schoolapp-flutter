@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
-import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_policy.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_finalize_overlay.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/summary_step.dart';
@@ -76,9 +76,10 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
     // `EnrollmentStatusUpdateRequested(COMPLETED)` mais par la **finalisation
     // du brouillon local** (DRAFT → PENDING_SYNC + 1 agrégat outbox) — même
     // chemin pour TOUS les parcours : NEW vierge comme RE/PRE/reprise seedés
-    // depuis le dossier serveur. Le retour visuel « en attente de synchro »,
-    // la pastille globale et la navigation de succès sont pris en charge par
-    // le BlocListener offline du scope du stepper (enrollment_stepper_scope).
+    // depuis le dossier serveur. Le retour visuel « en attente de synchro »
+    // et la pastille globale sont pris en charge par la popin de résultat
+    // (`EnrollmentFinalizeOverlay`) ; la navigation de succès est déclenchée
+    // ci-dessous, une fois la popin refermée.
     //
     // Le contexte de test unitaire est un BuildContext factice (pas un Element,
     // donc sans provider) : on dégrade proprement sans planter. En production le
@@ -106,7 +107,7 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
       headerIcon: Icons.fact_check_outlined,
       confirmIcon: Icons.check_rounded,
     );
-    if (!confirmed || !buildContext.mounted) {
+    if (!confirmed || !context.context.mounted) {
       return const StepSubmitResult.noop();
     }
 
@@ -116,9 +117,34 @@ class SummaryStepHandler extends BaseEnrollmentStepHandler {
     if (offlineBloc.state is EnrollmentDraftSaving) {
       return const StepSubmitResult.blocked();
     }
+    if (!context.context.mounted) {
+      return const StepSubmitResult.blocked();
+    }
 
-    offlineBloc.add(FinalizeDraftRequested(enrollmentId));
-    return const StepSubmitResult.dispatched();
+    // La finalisation elle-même (dispatch + processing → succès | échec) est
+    // portée par la sur-couche : elle dispatche `FinalizeDraftRequested` et
+    // affiche le résultat pendant que l'écriture locale se déroule.
+    final outcome = await showEnrollmentFinalizeOverlay(
+      context: buildContext,
+      offlineBloc: offlineBloc,
+      enrollmentId: enrollmentId,
+    );
+    if (!context.context.mounted) {
+      return const StepSubmitResult.dispatched();
+    }
+
+    if (outcome == EnrollmentFinalizeOutcome.failed) {
+      // Échec : le formulaire reste éditable, aucune navigation.
+      return const StepSubmitResult.blocked();
+    }
+    if (!context.context.mounted) {
+      return const StepSubmitResult.blocked();
+    }
+
+    EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(
+      buildContext,
+    );
+    return const StepSubmitResult.completed(consumeNavigation: true);
   }
 
   @override
