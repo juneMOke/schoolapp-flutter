@@ -77,7 +77,13 @@ class ClassesOrganisationSearchRequest extends Equatable {
 class ClassroomMemberReassignIntent extends Equatable {
   /// Classe d'origine de l'élève. `null` → élève non réparti (mode affectation).
   final String? classroomId;
-  final String classroomMemberId;
+
+  /// Dossier d'inscription à affecter — renseigné **uniquement** en mode
+  /// affectation ([classroomId] `null`), où la ligne cliquée n'est pas un membre
+  /// de classe mais un non-réparti. Le POST d'affectation exige cet identifiant :
+  /// lui envoyer un `classroomMemberId` (que l'élève n'a pas encore) retourne 404.
+  final String? enrollmentId;
+
   final String studentId;
   final String studentFirstName;
   final String studentLastName;
@@ -86,18 +92,18 @@ class ClassroomMemberReassignIntent extends Equatable {
 
   const ClassroomMemberReassignIntent({
     required this.classroomId,
-    required this.classroomMemberId,
     required this.studentId,
     required this.studentFirstName,
     required this.studentLastName,
     required this.studentGender,
     required this.studentDisplayName,
+    this.enrollmentId,
   });
 
   @override
   List<Object?> get props => [
     classroomId,
-    classroomMemberId,
+    enrollmentId,
     studentId,
     studentFirstName,
     studentLastName,

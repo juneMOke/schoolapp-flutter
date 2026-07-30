@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/classes/data/models/offline/classroo
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_member_pull_outcome.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_pull_outcome.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_member_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
@@ -316,5 +317,79 @@ void main() {
         expect(map['c2']!.single.hasPendingTransfer, isTrue);
       },
     );
+  });
+
+  group('upsertAssignedMember (intégration du 201 d\'affectation)', () {
+    setUp(() async {
+      await local.upsertClassrooms(
+        classrooms: [classroom('c1'), classroom('c2')],
+        syncedAt: 8888,
+      );
+    });
+
+    const created = ClassroomMember(
+      id: 'm-new',
+      studentId: 's-new',
+      classroomId: 'c2',
+      academicYearId: yearId,
+      studentFirstName: 'Jane',
+      studentLastName: 'Doe',
+      studentMiddleName: 'K',
+      studentGender: ClassroomMemberGender.female,
+    );
+
+    test(
+      'le membre créé apparaît aussitôt dans le roster de la classe',
+      () async {
+        final result = await repo.upsertAssignedMember(created);
+
+        expect(result.isRight(), isTrue);
+        final roster = await repo.getRoster(classroomId: 'c2');
+        expect(roster.getOrElse(() => []).map((m) => m.id), ['m-new']);
+      },
+    );
+
+    test(
+      'genre réécrit au format wire (lecture aller-retour fidèle)',
+      () async {
+        await repo.upsertAssignedMember(created);
+
+        final roster = await repo.getRoster(classroomId: 'c2');
+        expect(
+          roster.getOrElse(() => []).single.studentGender,
+          ClassroomMemberGender.female,
+        );
+      },
+    );
+
+    test('ligne ACTIVE : elle compte dans les rosters composés', () async {
+      await repo.upsertAssignedMember(created);
+
+      final composed = await repo.getComposedRosters(
+        academicYearId: yearId,
+        schoolLevelId: 'level-1',
+      );
+      final map = composed.getOrElse(() => {});
+      expect(map['c2']!.single.id, 'm-new');
+      expect(map['c1'], isEmpty);
+    });
+
+    test('rejeu idempotent : pas de doublon de roster', () async {
+      await repo.upsertAssignedMember(created);
+      await repo.upsertAssignedMember(created);
+
+      final roster = await repo.getRoster(classroomId: 'c2');
+      expect(roster.getOrElse(() => []), hasLength(1));
+    });
+
+    test('base fermée → StorageFailure, jamais une exception', () async {
+      await db.close();
+
+      final result = await repo.upsertAssignedMember(created);
+
+      expect(result, isA<Left<Failure, void>>());
+      // Réouverture pour que le tearDown n'échoue pas sur un double close.
+      db = await openFullOfflineDb();
+    });
   });
 }

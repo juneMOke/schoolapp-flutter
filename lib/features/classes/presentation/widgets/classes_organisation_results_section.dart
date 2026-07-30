@@ -56,7 +56,7 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
     // + rosters composés du niveau (miroir ± transferts pending), non-affectés
     // (remplace l'aperçu online — cf. docstring de
     // `OfflineLevelUnassignedEnrollmentsRequested`), ET affectation d'un
-    // non-réparti (`MemberReassignRequested` est exclusivement dispatché sur
+    // non-réparti (`MemberAssignRequested` est exclusivement dispatché sur
     // ce bloc, cf. `classes_organisation_reassign_dialog.dart` — ClassroomBloc
     // online n'a plus aucune raison d'être lu ici).
     return BlocBuilder<ClassroomOfflineBloc, ClassroomOfflineState>(
@@ -69,8 +69,8 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           previous.levelClassroomsErrorType !=
               current.levelClassroomsErrorType ||
           previous.levelRosters != current.levelRosters ||
-          previous.reassignStatus != current.reassignStatus ||
-          previous.reassigningMemberId != current.reassigningMemberId,
+          previous.assignStatus != current.assignStatus ||
+          previous.assigningEnrollmentId != current.assigningEnrollmentId,
       builder: (context, offlineState) {
         if (!selectedLevel!.splitIntoClassrooms) {
           final List<EnrollmentSummary> unassigned =
@@ -99,8 +99,8 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           classrooms: offlineState.levelClassrooms,
           composedRosters: offlineState.levelRosters,
           unassignedEnrollments: offlineState.levelUnassignedEnrollments,
-          isReassigning: offlineState.reassignStatus == ClassroomStatus.loading,
-          reassigningMemberId: offlineState.reassigningMemberId,
+          isAssigning: offlineState.assignStatus == ClassroomStatus.loading,
+          assigningEnrollmentId: offlineState.assigningEnrollmentId,
           errorMessage:
               ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
                 l10n,

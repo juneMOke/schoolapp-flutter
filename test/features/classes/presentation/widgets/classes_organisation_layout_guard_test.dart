@@ -82,6 +82,21 @@ void main() {
   final overviewComposedRosters = {
     for (final b in buckets) b.classroom.id: b.members,
   };
+  // Noms volontairement longs : la section non-répartie doit tenir à 320 px.
+  EnrollmentSummary unassigned(String id, Gender gender) => EnrollmentSummary(
+    enrollmentId: 'enr-$id',
+    enrollmentCode: 'ENR-$id',
+    status: 'COMPLETED',
+    student: StudentSummary(
+      id: 'stu-$id',
+      firstName: 'Marie-Christine',
+      lastName: 'Nguyen-Van-Tran',
+      surname: 'Jean-Baptiste',
+      dateOfBirth: '2014-01-01',
+      gender: gender,
+    ),
+  );
+
   const overviewUnassignedEnrollments = [
     EnrollmentSummary(
       enrollmentId: 'enr-1',
@@ -192,8 +207,8 @@ void main() {
         classrooms: overviewClassrooms,
         composedRosters: overviewComposedRosters,
         unassignedEnrollments: overviewUnassignedEnrollments,
-        isReassigning: false,
-        reassigningMemberId: '',
+        isAssigning: false,
+        assigningEnrollmentId: '',
         errorMessage: null,
         onTransferTap: (_) {},
         onRetry: () {},
@@ -221,24 +236,12 @@ void main() {
       tester,
       ClassesOrganisationUnassignedMembersSection(
         count: 3,
-        members: [
-          member(
-            '1',
-            'Nguyen-Van-Tran',
-            'Jean-Baptiste',
-            'Marie-Christine',
-            ClassroomMemberGender.female,
-          ),
-          member(
-            '2',
-            'Nguyen-Van-Tran',
-            'Jean-Baptiste',
-            'Marie-Christine',
-            ClassroomMemberGender.male,
-          ),
+        enrollments: [
+          unassigned('1', Gender.female),
+          unassigned('2', Gender.male),
         ],
         isReassigning: false,
-        reassigningMemberId: '',
+        assigningEnrollmentId: '',
         onTransferTap: (_) {},
       ),
     );

@@ -240,7 +240,6 @@
   },
   "classesOrganisationTransferAction": "Transférer",
   "classesOrganisationTransferInProgress": "Transfert en cours...",
-  "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
   "classesOrganisationTransferQueued": "Transfert enregistré — en attente de synchronisation.",
   "classesOrganisationTransferPendingBadge": "En attente",
   "classesOrganisationTransferNoTarget": "Aucune sous-classe de destination disponible.",
@@ -297,6 +296,9 @@
   "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
   "classesOrganisationAssignAction": "Affecter",
   "classesOrganisationAssignDialogTitle": "Affecter l'élève",
+  "classesOrganisationAssignSuccess": "Élève affecté à la classe.",
+  "classesOrganisationAssignRejected": "Affectation refusée : cet élève est déjà dans une classe, ou son inscription n'est pas sur ce niveau. Actualisez la liste.",
+  "classesOrganisationAssignNotFound": "Classe ou inscription introuvable. Actualisez la liste.",
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {

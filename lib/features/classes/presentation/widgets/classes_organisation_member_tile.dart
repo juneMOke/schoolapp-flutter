@@ -23,6 +23,12 @@ enum ClassesOrganisationMemberAction { transfer, assign }
 class ClassesOrganisationMemberTile extends StatefulWidget {
   final ClassroomMember member;
   final String? classroomId;
+
+  /// Dossier d'inscription de l'élève — à ne renseigner que pour une ligne
+  /// **non répartie** ([ClassesOrganisationMemberAction.assign]) : c'est la clé
+  /// exigée par l'affectation serveur. `null` pour un membre déjà en classe.
+  final String? enrollmentId;
+
   final bool isReassigning;
   final bool isCurrentReassigningMember;
   final ClassesOrganisationMemberAction action;
@@ -35,6 +41,7 @@ class ClassesOrganisationMemberTile extends StatefulWidget {
     required this.isCurrentReassigningMember,
     required this.action,
     required this.onTransferTap,
+    this.enrollmentId,
     super.key,
   });
 
@@ -64,7 +71,7 @@ class _ClassesOrganisationMemberTileState
     widget.onTransferTap(
       ClassroomMemberReassignIntent(
         classroomId: widget.classroomId,
-        classroomMemberId: widget.member.id,
+        enrollmentId: widget.enrollmentId,
         studentId: widget.member.studentId,
         studentFirstName: widget.member.studentFirstName,
         studentLastName: widget.member.studentLastName,

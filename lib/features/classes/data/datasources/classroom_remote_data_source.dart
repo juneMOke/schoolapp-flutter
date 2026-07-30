@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/features/classes/data/models/assign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/level_distribution_overview_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
-import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_stats_response_model.dart';
 
 part 'classroom_remote_data_source.g.dart';
@@ -30,6 +30,22 @@ abstract class ClassroomRemoteDataSource {
     @Query('academicYearId') String academicYearId,
   );
 
+  /// Première affectation d'un élève **non réparti** (201 → membre canonique).
+  /// Même chemin que le GET ci-dessus, verbe POST.
+  ///
+  /// Un non-réparti n'a pas encore de ligne roster, donc pas de
+  /// `classroomMemberId` : l'identité transportée est son `enrollmentId`.
+  /// Le DÉPLACEMENT d'un membre déjà en classe est un geste distinct, traité
+  /// hors ligne par l'événement `classroom_transfers` (outbox), pas ici.
+  /// Erreurs métier du contrat : 422 si le niveau de l'inscription diffère de
+  /// celui de la classe, 400 si l'inscription a déjà une classe pour l'année.
+  @POST(AppConstants.classroomMembersEndpoint)
+  Future<ClassroomMemberModel> assignEnrollmentToClassroom(
+    @Extras() Map<String, dynamic> extras,
+    @Path('classroomId') String classroomId,
+    @Body() AssignClassroomMemberRequestModel request,
+  );
+
   @GET(AppConstants.classroomDistributionOverviewEndpoint)
   Future<LevelDistributionOverviewModel> getLevelDistributionOverview(
     @Extras() Map<String, dynamic> extras,
@@ -46,13 +62,5 @@ abstract class ClassroomRemoteDataSource {
   Future<void> distributeStudentsToClassrooms(
     @Extras() Map<String, dynamic> extras,
     @Body() DistributionRequestModel request,
-  );
-
-  @PUT(AppConstants.classroomMemberReassignEndpoint)
-  Future<void> reassignClassroomMember(
-    @Extras() Map<String, dynamic> extras,
-    @Path('classroomId') String targetClassroomId,
-    @Path('classroomMemberId') String classroomMemberId,
-    @Body() ReassignClassroomMemberRequestModel request,
   );
 }

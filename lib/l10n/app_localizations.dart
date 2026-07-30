@@ -884,12 +884,6 @@ abstract class AppLocalizations {
   /// **'Transfer in progress...'**
   String get classesOrganisationTransferInProgress;
 
-  /// No description provided for @classesOrganisationTransferSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer completed successfully.'**
-  String get classesOrganisationTransferSuccess;
-
   /// No description provided for @classesOrganisationTransferQueued.
   ///
   /// In en, this message translates to:
@@ -997,6 +991,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Assign the student'**
   String get classesOrganisationAssignDialogTitle;
+
+  /// No description provided for @classesOrganisationAssignSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Student assigned to the class.'**
+  String get classesOrganisationAssignSuccess;
+
+  /// No description provided for @classesOrganisationAssignRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.'**
+  String get classesOrganisationAssignRejected;
+
+  /// No description provided for @classesOrganisationAssignNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Class or enrolment not found. Refresh the list.'**
+  String get classesOrganisationAssignNotFound;
 
   /// No description provided for @classesOrganisationLoadingClassroomsCount.
   ///

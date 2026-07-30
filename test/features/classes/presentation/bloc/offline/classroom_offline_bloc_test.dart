@@ -11,7 +11,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/offline/reco
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/assign_enrollment_to_classroom_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -36,8 +36,8 @@ class MockGetComposedRostersUseCase extends Mock
 class MockGetUnassignedLevelEnrollmentsUseCase extends Mock
     implements GetUnassignedLevelEnrollmentsUseCase {}
 
-class MockReassignMemberOnlineUseCase extends Mock
-    implements ReassignMemberOnlineUseCase {}
+class MockAssignEnrollmentToClassroomUseCase extends Mock
+    implements AssignEnrollmentToClassroomUseCase {}
 
 class MockRecordClassroomTransferUseCase extends Mock
     implements RecordClassroomTransferUseCase {}
@@ -50,6 +50,7 @@ const tSchoolLevelId = 'level-1';
 const tClassroomId = 'classroom-1';
 const tTargetClassroomId = 'classroom-2';
 const tClassroomMemberId = 'member-1';
+const tEnrollmentId = 'enrollment-1';
 
 const tOfflineClassroom = OfflineClassroom(
   id: tClassroomId,
@@ -100,7 +101,7 @@ void main() {
   late MockGetComposedRostersUseCase mockGetComposedRosters;
   late MockGetUnassignedLevelEnrollmentsUseCase mockGetUnassignedEnrollments;
   late MockRecordClassroomTransferUseCase mockRecordTransfer;
-  late MockReassignMemberOnlineUseCase mockReassignMember;
+  late MockAssignEnrollmentToClassroomUseCase mockAssignEnrollment;
 
   setUpAll(() {
     registerFallbackValue(FakeRecordClassroomTransferDraft());
@@ -113,7 +114,7 @@ void main() {
     mockGetComposedRosters = MockGetComposedRostersUseCase();
     mockGetUnassignedEnrollments = MockGetUnassignedLevelEnrollmentsUseCase();
     mockRecordTransfer = MockRecordClassroomTransferUseCase();
-    mockReassignMember = MockReassignMemberOnlineUseCase();
+    mockAssignEnrollment = MockAssignEnrollmentToClassroomUseCase();
     // Par défaut, le rechargement des rosters composés post-transfert renvoie {}.
     when(
       () => mockGetComposedRosters(
@@ -130,7 +131,7 @@ void main() {
     getComposedRosters: mockGetComposedRosters,
     getUnassignedEnrollments: mockGetUnassignedEnrollments,
     recordTransfer: mockRecordTransfer,
-    reassignMember: mockReassignMember,
+    assignEnrollment: mockAssignEnrollment,
   );
 
   group('ClassroomsSyncRequested', () {
@@ -479,93 +480,93 @@ void main() {
     );
   });
 
-  group('MemberReassignRequested', () {
+  group('MemberAssignRequested', () {
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
-      'Right(true) → [loading, success] sans re-pull en échec',
+      'Right(true) → [loading, success] miroir local à jour',
       setUp: () {
         when(
-          () => mockReassignMember(
-            classroomMemberId: tClassroomMemberId,
-            targetClassroomId: tTargetClassroomId,
+          () => mockAssignEnrollment(
+            classroomId: tTargetClassroomId,
+            enrollmentId: tEnrollmentId,
             academicYearId: tAcademicYearId,
           ),
         ).thenAnswer((_) async => const Right(true));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const MemberReassignRequested(
-          classroomMemberId: tClassroomMemberId,
+        const MemberAssignRequested(
+          enrollmentId: tEnrollmentId,
           targetClassroomId: tTargetClassroomId,
           academicYearId: tAcademicYearId,
         ),
       ),
       expect: () => const [
         ClassroomOfflineState(
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: tClassroomMemberId,
+          assignStatus: ClassroomStatus.loading,
+          assigningEnrollmentId: tEnrollmentId,
         ),
-        ClassroomOfflineState(reassignStatus: ClassroomStatus.success),
+        ClassroomOfflineState(assignStatus: ClassroomStatus.success),
       ],
     );
 
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
-      'Right(false) → succès partiel (reassignRePullFailed = true)',
+      'Right(false) → succès partiel (assignRePullFailed = true)',
       setUp: () {
         when(
-          () => mockReassignMember(
-            classroomMemberId: tClassroomMemberId,
-            targetClassroomId: tTargetClassroomId,
+          () => mockAssignEnrollment(
+            classroomId: tTargetClassroomId,
+            enrollmentId: tEnrollmentId,
             academicYearId: tAcademicYearId,
           ),
         ).thenAnswer((_) async => const Right(false));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const MemberReassignRequested(
-          classroomMemberId: tClassroomMemberId,
+        const MemberAssignRequested(
+          enrollmentId: tEnrollmentId,
           targetClassroomId: tTargetClassroomId,
           academicYearId: tAcademicYearId,
         ),
       ),
       expect: () => const [
         ClassroomOfflineState(
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: tClassroomMemberId,
+          assignStatus: ClassroomStatus.loading,
+          assigningEnrollmentId: tEnrollmentId,
         ),
         ClassroomOfflineState(
-          reassignStatus: ClassroomStatus.success,
-          reassignRePullFailed: true,
+          assignStatus: ClassroomStatus.success,
+          assignRePullFailed: true,
         ),
       ],
     );
 
     blocTest<ClassroomOfflineBloc, ClassroomOfflineState>(
-      'Left → [loading, failure] avec network errorType (déplacement KO)',
+      'Left → [loading, failure] avec network errorType (affectation KO)',
       setUp: () {
         when(
-          () => mockReassignMember(
-            classroomMemberId: tClassroomMemberId,
-            targetClassroomId: tTargetClassroomId,
+          () => mockAssignEnrollment(
+            classroomId: tTargetClassroomId,
+            enrollmentId: tEnrollmentId,
             academicYearId: tAcademicYearId,
           ),
         ).thenAnswer((_) async => const Left(NetworkFailure('offline')));
       },
       build: buildBloc,
       act: (bloc) => bloc.add(
-        const MemberReassignRequested(
-          classroomMemberId: tClassroomMemberId,
+        const MemberAssignRequested(
+          enrollmentId: tEnrollmentId,
           targetClassroomId: tTargetClassroomId,
           academicYearId: tAcademicYearId,
         ),
       ),
       expect: () => const [
         ClassroomOfflineState(
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: tClassroomMemberId,
+          assignStatus: ClassroomStatus.loading,
+          assigningEnrollmentId: tEnrollmentId,
         ),
         ClassroomOfflineState(
-          reassignStatus: ClassroomStatus.failure,
-          reassignErrorType: ClassroomErrorType.network,
+          assignStatus: ClassroomStatus.failure,
+          assignErrorType: ClassroomErrorType.network,
         ),
       ],
     );

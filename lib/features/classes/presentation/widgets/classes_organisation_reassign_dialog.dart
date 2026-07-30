@@ -62,9 +62,16 @@ Future<void> showClassesOrganisationReassignDialog({
   } else {
     // AFFECTATION d'un non-réparti : ONLINE (distribution, ADR-004) — un
     // non-réparti n'existe pas dans le miroir offline, donc pas d'événement.
+    // Le POST d'affectation identifie l'élève par son dossier d'inscription :
+    // hors mode affectation l'intent ne le porte pas, on n'émet alors rien
+    // plutôt que d'envoyer une identité que le serveur ne reconnaîtrait pas.
+    final enrollmentId = intent.enrollmentId;
+    if (enrollmentId == null || enrollmentId.isEmpty) {
+      return;
+    }
     bloc.add(
-      MemberReassignRequested(
-        classroomMemberId: intent.classroomMemberId,
+      MemberAssignRequested(
+        enrollmentId: enrollmentId,
         targetClassroomId: selectedTargetId,
         academicYearId: academicYearId,
       ),

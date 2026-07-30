@@ -11,7 +11,6 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -35,15 +34,10 @@ class MockGetOfflineRosterUseCase extends Mock
 class MockGetLevelDistributionOverviewUseCase extends Mock
     implements GetLevelDistributionOverviewUseCase {}
 
-class MockReassignClassroomMemberUseCase extends Mock
-    implements ReassignClassroomMemberUseCase {}
-
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
-const tTargetClassroomId = 'classroom-2';
-const tClassroomMemberId = 'member-1';
 
 const tStudentSummary = StudentSummary(
   id: 'student-1',
@@ -106,7 +100,6 @@ void main() {
   mockDistributeStudentsToClassroomsUseCase;
   late MockGetLevelDistributionOverviewUseCase
   mockGetLevelDistributionOverviewUseCase;
-  late MockReassignClassroomMemberUseCase mockReassignClassroomMemberUseCase;
 
   setUp(() {
     mockGetClassroomsUseCase = MockGetClassroomsUseCase();
@@ -116,7 +109,6 @@ void main() {
         MockDistributeStudentsToClassroomsUseCase();
     mockGetLevelDistributionOverviewUseCase =
         MockGetLevelDistributionOverviewUseCase();
-    mockReassignClassroomMemberUseCase = MockReassignClassroomMemberUseCase();
   });
 
   ClassroomBloc buildBloc() => ClassroomBloc(
@@ -127,7 +119,6 @@ void main() {
         mockDistributeStudentsToClassroomsUseCase,
     getLevelDistributionOverviewUseCase:
         mockGetLevelDistributionOverviewUseCase,
-    reassignClassroomMemberUseCase: mockReassignClassroomMemberUseCase,
   );
 
   group('ClassroomRequested', () {
@@ -397,63 +388,6 @@ void main() {
         ClassroomState(
           distributionOverviewStatus: ClassroomStatus.failure,
           distributionOverviewErrorType: ClassroomErrorType.notFound,
-        ),
-      ],
-    );
-  });
-
-  group('ClassroomMemberReassignRequested', () {
-    blocTest<ClassroomBloc, ClassroomState>(
-      'emits reassign [loading, success] when transfer succeeds',
-      setUp: () {
-        when(
-          () => mockReassignClassroomMemberUseCase(
-            classroomMemberId: tClassroomMemberId,
-            targetClassroomId: tTargetClassroomId,
-          ),
-        ).thenAnswer((_) async => const Right(null));
-      },
-      build: buildBloc,
-      act: (bloc) => bloc.add(
-        const ClassroomMemberReassignRequested(
-          classroomMemberId: tClassroomMemberId,
-          targetClassroomId: tTargetClassroomId,
-        ),
-      ),
-      expect: () => const [
-        ClassroomState(
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: tClassroomMemberId,
-        ),
-        ClassroomState(reassignStatus: ClassroomStatus.success),
-      ],
-    );
-
-    blocTest<ClassroomBloc, ClassroomState>(
-      'emits reassign failure with notFound error type on NotFoundFailure',
-      setUp: () {
-        when(
-          () => mockReassignClassroomMemberUseCase(
-            classroomMemberId: tClassroomMemberId,
-            targetClassroomId: tTargetClassroomId,
-          ),
-        ).thenAnswer((_) async => const Left(NotFoundFailure('Not found')));
-      },
-      build: buildBloc,
-      act: (bloc) => bloc.add(
-        const ClassroomMemberReassignRequested(
-          classroomMemberId: tClassroomMemberId,
-          targetClassroomId: tTargetClassroomId,
-        ),
-      ),
-      expect: () => const [
-        ClassroomState(
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: tClassroomMemberId,
-        ),
-        ClassroomState(
-          reassignStatus: ClassroomStatus.failure,
-          reassignErrorType: ClassroomErrorType.notFound,
         ),
       ],
     );

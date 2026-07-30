@@ -82,6 +82,27 @@ class ClassesOrganisationPageHelpers {
     };
   }
 
+  /// Messages de l'**affectation** d'un non-réparti (POST members). Deux codes
+  /// sont ré-écrits par rapport au tronc commun, parce qu'ils recouvrent ici
+  /// des refus métier précis, pas une saisie invalide :
+  ///  - `validation` : le contrat rend 422 (niveau de l'inscription ≠ niveau de
+  ///    la classe) ET 400 (l'inscription a déjà une classe pour l'année) ;
+  ///    l'enveloppe d'erreur ne portant aucun code machine, on ne peut pas les
+  ///    distinguer — le message couvre les deux et invite à actualiser ;
+  ///  - `notFound` : classe ou inscription disparue côté serveur (liste locale
+  ///    périmée), et non « aucun résultat ».
+  /// Le reste (réseau, 401/403, 5xx, stockage) garde le tronc commun.
+  static String mapAssignErrorToMessage(
+    AppLocalizations l10n,
+    ClassroomErrorType errorType,
+  ) {
+    return switch (errorType) {
+      ClassroomErrorType.validation => l10n.classesOrganisationAssignRejected,
+      ClassroomErrorType.notFound => l10n.classesOrganisationAssignNotFound,
+      _ => mapClassroomErrorToMessage(l10n, errorType),
+    };
+  }
+
   static bool isSearching(
     ClassroomState classroomState,
     EnrollmentState enrollmentState,
@@ -100,13 +121,6 @@ class ClassesOrganisationPageHelpers {
     ClassroomState current,
   ) {
     return previous.distributionStatus != current.distributionStatus;
-  }
-
-  static bool listenReassignStatus(
-    ClassroomState previous,
-    ClassroomState current,
-  ) {
-    return previous.reassignStatus != current.reassignStatus;
   }
 
   static bool buildWhenAcademicYearContextChanges(

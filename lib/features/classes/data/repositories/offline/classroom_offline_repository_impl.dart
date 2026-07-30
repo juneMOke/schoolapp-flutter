@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_transfer_row.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart'
     show kClassroomsResource;
@@ -208,6 +209,36 @@ class ClassroomOfflineRepositoryImpl implements ClassroomOfflineRepository {
       return Right(transferId);
     } catch (_) {
       return const Left(StorageFailure('Local transfer write failed'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> upsertAssignedMember(
+    ClassroomMember member,
+  ) async {
+    try {
+      await localDataSource.upsertMembers(
+        members: [
+          ClassroomMemberDto(
+            id: member.id,
+            studentId: member.studentId,
+            classroomId: member.classroomId,
+            academicYearId: member.academicYearId,
+            studentFirstName: member.studentFirstName,
+            studentLastName: member.studentLastName,
+            studentMiddleName: member.studentMiddleName,
+            studentGender: member.studentGender.toApiValue(),
+            // ACTIVE par construction : le contrat ne crée un membre que pour
+            // une inscription COMPLETED, et l'entité domaine ne transporte pas
+            // `status`. `version`/`updatedAt` restent nuls — non lus par les
+            // rosters, renseignés au prochain pull.
+          ),
+        ],
+        syncedAt: now(),
+      );
+      return const Right(null);
+    } catch (_) {
+      return const Left(StorageFailure('Local member write failed'));
     }
   }
 

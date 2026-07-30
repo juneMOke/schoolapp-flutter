@@ -109,7 +109,6 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
@@ -549,10 +548,6 @@ Future<void> configureDependencies({
     () => GetClassroomStatsUseCase(getIt<ClassroomRepository>()),
   );
 
-  getIt.registerFactory<ReassignClassroomMemberUseCase>(
-    () => ReassignClassroomMemberUseCase(getIt<ClassroomRepository>()),
-  );
-
   getIt.registerFactory<ClassroomBloc>(
     () => ClassroomBloc(
       getClassroomsUseCase: getIt<GetClassroomsUseCase>(),
@@ -565,7 +560,6 @@ Future<void> configureDependencies({
           getIt<DistributeStudentsToClassroomsUseCase>(),
       getLevelDistributionOverviewUseCase:
           getIt<GetLevelDistributionOverviewUseCase>(),
-      reassignClassroomMemberUseCase: getIt<ReassignClassroomMemberUseCase>(),
     ),
   );
 

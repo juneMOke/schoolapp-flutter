@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/assign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
-import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom.dart';
@@ -147,25 +147,27 @@ class ClassroomRepositoryImpl implements ClassroomRepository {
   }
 
   @override
-  Future<Either<Failure, void>> reassignClassroomMember({
-    required String classroomMemberId,
-    required String targetClassroomId,
+  Future<Either<Failure, ClassroomMember>> assignEnrollmentToClassroom({
+    required String classroomId,
+    required String enrollmentId,
   }) async {
     try {
-      await remoteDataSource.reassignClassroomMember(
+      final model = await remoteDataSource.assignEnrollmentToClassroom(
         requiredAuth,
-        targetClassroomId,
-        classroomMemberId,
-        ReassignClassroomMemberRequestModel(
-          targetClassroomId: targetClassroomId,
-        ),
+        classroomId,
+        AssignClassroomMemberRequestModel(enrollmentId: enrollmentId),
       );
-      return const Right(null);
+      return Right(model.toEntity());
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);
       }
       return const Left(NetworkFailure('Network error occurred'));
+    } on FormatException catch (_) {
+      // 201 au schéma inattendu (champ requis vide, genre hors énum) : le
+      // serveur a bien créé le membre, mais on ne peut pas l'intégrer au
+      // miroir — le prochain pull rattrapera.
+      return const Left(ServerFailure('Invalid classroom member payload'));
     } catch (_) {
       return const Left(ServerFailure('Unexpected error occurred'));
     }

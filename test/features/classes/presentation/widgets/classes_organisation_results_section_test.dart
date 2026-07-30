@@ -272,8 +272,8 @@ void main() {
   );
 
   testWidgets(
-    'le spinner de réassignation est piloté par ClassroomOfflineBloc (bloc '
-    'qui reçoit réellement MemberReassignRequested), pas ClassroomBloc online',
+    'le spinner d\'affectation est piloté par ClassroomOfflineBloc (bloc '
+    'qui reçoit réellement MemberAssignRequested), pas ClassroomBloc online',
     (tester) async {
       await pumpSection(
         tester,
@@ -286,17 +286,29 @@ void main() {
             'class-1': offlineMembers,
           },
           levelUnassignedStatus: ClassroomStatus.success,
-          levelUnassignedEnrollments: <EnrollmentSummary>[],
-          // Réassignation en cours sur l'unique membre affiché.
-          reassignStatus: ClassroomStatus.loading,
-          reassigningMemberId: 'member-1',
+          levelUnassignedEnrollments: unassignedEnrollments,
+          // État réellement atteignable : l'affectation cible un DOSSIER
+          // d'inscription (zone ambre), jamais un membre de classe — d'où
+          // l'identité `enr-1` et non un `classroomMemberId`.
+          assignStatus: ClassroomStatus.loading,
+          assigningEnrollmentId: 'enr-1',
         ),
         // pumpAndSettle ne termine jamais tant qu'un CircularProgressIndicator
         // (animation indéterminée perpétuelle) est monté.
         settle: false,
       );
 
+      // Un seul spinner : la tuile du non-réparti visé. Les tuiles de la zone
+      // classes se figent (opacité) mais n'affichent jamais d'attente — une
+      // affectation ne les concerne pas.
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(ClassesOrganisationUnassignedMembersSection),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
     },
   );
 

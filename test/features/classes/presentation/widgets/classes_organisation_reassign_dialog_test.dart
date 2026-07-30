@@ -56,7 +56,6 @@ void main() {
 
   const transferIntent = ClassroomMemberReassignIntent(
     classroomId: 'c1',
-    classroomMemberId: 'm1',
     studentId: 's1',
     studentFirstName: 'Jane',
     studentLastName: 'Doe',
@@ -66,7 +65,7 @@ void main() {
 
   const assignIntent = ClassroomMemberReassignIntent(
     classroomId: null,
-    classroomMemberId: 'm9',
+    enrollmentId: 'enr-9',
     studentId: 's9',
     studentFirstName: 'Paul',
     studentLastName: 'Martin',
@@ -185,8 +184,8 @@ void main() {
 
       verify(
         () => bloc.add(
-          const MemberReassignRequested(
-            classroomMemberId: 'm9',
+          const MemberAssignRequested(
+            enrollmentId: 'enr-9',
             targetClassroomId: 'c2',
             academicYearId: '',
           ),

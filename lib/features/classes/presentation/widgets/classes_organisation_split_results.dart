@@ -36,8 +36,14 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
   /// (`GetUnassignedLevelEnrollmentsUseCase`, croise le miroir local
   /// Inscription et les rosters composés Classe).
   final List<EnrollmentSummary> unassignedEnrollments;
-  final bool isReassigning;
-  final String reassigningMemberId;
+
+  /// Une affectation de non-réparti est en cours : les tuiles des DEUX zones
+  /// (non-répartis et classes) se figent, l'écran n'accepte qu'un geste à la fois.
+  final bool isAssigning;
+
+  /// Inscription en cours d'affectation (tuile en attente dans la zone ambre).
+  final String assigningEnrollmentId;
+
   final String? errorMessage;
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
   final VoidCallback onRetry;
@@ -49,8 +55,8 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
     required this.classrooms,
     required this.composedRosters,
     required this.unassignedEnrollments,
-    required this.isReassigning,
-    required this.reassigningMemberId,
+    required this.isAssigning,
+    required this.assigningEnrollmentId,
     required this.errorMessage,
     required this.onTransferTap,
     required this.onRetry,
@@ -128,24 +134,9 @@ class _ClassesOrganisationSplitResultsState
         if (widget.unassignedEnrollments.isNotEmpty) ...[
           ClassesOrganisationUnassignedMembersSection(
             count: widget.unassignedEnrollments.length,
-            members: widget.unassignedEnrollments
-                .map(
-                  (item) => ClassroomMember(
-                    id: item.enrollmentId,
-                    studentId: item.student.id,
-                    classroomId: '',
-                    academicYearId: '',
-                    studentFirstName: item.student.firstName,
-                    studentLastName: item.student.lastName,
-                    studentMiddleName: item.student.surname,
-                    studentGender: item.student.gender.name == 'female'
-                        ? ClassroomMemberGender.female
-                        : ClassroomMemberGender.male,
-                  ),
-                )
-                .toList(growable: false),
-            isReassigning: widget.isReassigning,
-            reassigningMemberId: widget.reassigningMemberId,
+            enrollments: widget.unassignedEnrollments,
+            isReassigning: widget.isAssigning,
+            assigningEnrollmentId: widget.assigningEnrollmentId,
             onTransferTap: widget.onTransferTap,
           ),
           const SizedBox(height: AppDimensions.spacingM),
@@ -153,8 +144,8 @@ class _ClassesOrganisationSplitResultsState
         _ClassroomsView(
           classrooms: classrooms,
           layout: _layout,
-          isReassigning: widget.isReassigning,
-          reassigningMemberId: widget.reassigningMemberId,
+          isReassigning: widget.isAssigning,
+          reassigningMemberId: widget.assigningEnrollmentId,
           onTransferTap: widget.onTransferTap,
         ),
       ],

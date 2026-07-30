@@ -29,11 +29,11 @@ import 'package:school_app_flutter/features/classes/domain/repositories/offline/
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_pull_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_transfer_pull_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/assign_enrollment_to_classroom_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
 // ── Présence (offline) ──
@@ -223,8 +223,9 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   // Affectation d'un non-réparti = distribution ONLINE (ADR-004) : ne peut pas
   // être un événement de transfert (le non-réparti n'est pas dans le miroir).
-  getIt.registerFactory<ReassignMemberOnlineUseCase>(
-    () => ReassignMemberOnlineUseCase(
+  // POST members → intégration du membre créé au miroir → re-pull.
+  getIt.registerFactory<AssignEnrollmentToClassroomUseCase>(
+    () => AssignEnrollmentToClassroomUseCase(
       onlineRepository: getIt<ClassroomRepository>(),
       offlineRepository: getIt<ClassroomOfflineRepository>(),
     ),
@@ -309,7 +310,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       getComposedRosters: getIt<GetComposedRostersUseCase>(),
       getUnassignedEnrollments: getIt<GetUnassignedLevelEnrollmentsUseCase>(),
       recordTransfer: getIt<RecordClassroomTransferUseCase>(),
-      reassignMember: getIt<ReassignMemberOnlineUseCase>(),
+      assignEnrollment: getIt<AssignEnrollmentToClassroomUseCase>(),
     ),
   );
   getIt.registerFactory<AttendanceOfflineBloc>(

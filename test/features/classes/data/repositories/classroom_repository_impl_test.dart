@@ -4,13 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/assign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_with_members_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_stats_response_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_member_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/classroom_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/distribution_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/models/level_distribution_overview_model.dart';
-import 'package:school_app_flutter/features/classes/data/models/reassign_classroom_member_request_model.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_distribution_criterion.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
@@ -30,16 +30,16 @@ class MockClassroomRemoteDataSource extends Mock
 class FakeDistributionRequestModel extends Fake
     implements DistributionRequestModel {}
 
-class FakeReassignClassroomMemberRequestModel extends Fake
-    implements ReassignClassroomMemberRequestModel {}
+class FakeAssignClassroomMemberRequestModel extends Fake
+    implements AssignClassroomMemberRequestModel {}
 
 const tRequiredAuth = <String, dynamic>{'requiresAuth': true};
 const tSchoolLevelGroupId = 'group-1';
 const tSchoolLevelId = 'level-1';
 const tAcademicYearId = 'year-1';
 const tClassroomId = 'classroom-1';
-const tClassroomMemberId = 'member-1';
 const tTargetClassroomId = 'classroom-2';
+const tEnrollmentId = 'enrollment-1';
 
 final tClassroomStatsResponseModel = ClassroomStatsResponseModel(
   context: ClassroomStatsContextModel(
@@ -277,7 +277,7 @@ void main() {
 
   setUp(() {
     registerFallbackValue(FakeDistributionRequestModel());
-    registerFallbackValue(FakeReassignClassroomMemberRequestModel());
+    registerFallbackValue(FakeAssignClassroomMemberRequestModel());
     mockRemoteDataSource = MockClassroomRemoteDataSource();
     repository = ClassroomRepositoryImpl(
       remoteDataSource: mockRemoteDataSource,
@@ -708,58 +708,120 @@ void main() {
     });
   });
 
-  group('reassignClassroomMember', () {
+  group('assignEnrollmentToClassroom', () {
+    const tCreatedMemberModel = ClassroomMemberModel(
+      id: 'member-created',
+      studentId: 'student-1',
+      classroomId: tTargetClassroomId,
+      academicYearId: tAcademicYearId,
+      studentFirstName: 'Jane',
+      studentLastName: 'Doe',
+      studentMiddleName: 'K',
+      studentGender: 'FEMALE',
+    );
+
+    test('POSTe le seul enrollmentId et renvoie le membre créé', () async {
+      when(
+        () => mockRemoteDataSource.assignEnrollmentToClassroom(
+          tRequiredAuth,
+          tTargetClassroomId,
+          any(),
+        ),
+      ).thenAnswer((_) async => tCreatedMemberModel);
+
+      final result = await repository.assignEnrollmentToClassroom(
+        classroomId: tTargetClassroomId,
+        enrollmentId: tEnrollmentId,
+      );
+
+      expect(
+        result,
+        Right<Failure, ClassroomMember>(tCreatedMemberModel.toEntity()),
+      );
+
+      // Régression du mauvais endpoint : le corps ne transporte QUE
+      // l'enrollmentId (la classe cible est dans le chemin), et surtout jamais
+      // un classroomMemberId — que le non-réparti n'a pas encore.
+      final captured =
+          verify(
+                () => mockRemoteDataSource.assignEnrollmentToClassroom(
+                  tRequiredAuth,
+                  tTargetClassroomId,
+                  captureAny(),
+                ),
+              ).captured.single
+              as AssignClassroomMemberRequestModel;
+      expect(captured.enrollmentId, tEnrollmentId);
+      expect(captured.toJson(), {'enrollmentId': tEnrollmentId});
+    });
+
     test(
-      'returns Right(void) and sends target classroom payload on success',
+      'remonte la Failure portée par la DioException (422/400/404)',
       () async {
+        const failure = ValidationFailure('Invalid request data');
         when(
-          () => mockRemoteDataSource.reassignClassroomMember(
+          () => mockRemoteDataSource.assignEnrollmentToClassroom(
             tRequiredAuth,
             tTargetClassroomId,
-            tClassroomMemberId,
             any(),
           ),
-        ).thenAnswer((_) async {});
+        ).thenThrow(_dioException(error: failure));
 
-        final result = await repository.reassignClassroomMember(
-          classroomMemberId: tClassroomMemberId,
-          targetClassroomId: tTargetClassroomId,
+        final result = await repository.assignEnrollmentToClassroom(
+          classroomId: tTargetClassroomId,
+          enrollmentId: tEnrollmentId,
         );
 
-        expect(result.isRight(), true);
-        final captured =
-            verify(
-                  () => mockRemoteDataSource.reassignClassroomMember(
-                    tRequiredAuth,
-                    tTargetClassroomId,
-                    tClassroomMemberId,
-                    captureAny(),
-                  ),
-                ).captured.single
-                as ReassignClassroomMemberRequestModel;
-
-        expect(captured.targetClassroomId, tTargetClassroomId);
+        expect(result, const Left<Failure, ClassroomMember>(failure));
       },
     );
 
-    test('returns Left(Failure) when DioException carries a Failure', () async {
-      const failure = NotFoundFailure('Resource not found');
+    test('DioException sans Failure → NetworkFailure', () async {
       when(
-        () => mockRemoteDataSource.reassignClassroomMember(
+        () => mockRemoteDataSource.assignEnrollmentToClassroom(
           tRequiredAuth,
           tTargetClassroomId,
-          tClassroomMemberId,
           any(),
         ),
-      ).thenThrow(_dioException(error: failure));
+      ).thenThrow(_dioException());
 
-      final result = await repository.reassignClassroomMember(
-        classroomMemberId: tClassroomMemberId,
-        targetClassroomId: tTargetClassroomId,
+      final result = await repository.assignEnrollmentToClassroom(
+        classroomId: tTargetClassroomId,
+        enrollmentId: tEnrollmentId,
       );
 
-      expect(result, const Left<Failure, void>(failure));
+      expect(
+        result,
+        const Left<Failure, ClassroomMember>(
+          NetworkFailure('Network error occurred'),
+        ),
+      );
     });
+
+    test(
+      '201 au schéma inattendu → ServerFailure, jamais une exception',
+      () async {
+        when(
+          () => mockRemoteDataSource.assignEnrollmentToClassroom(
+            tRequiredAuth,
+            tTargetClassroomId,
+            any(),
+          ),
+        ).thenThrow(const FormatException('Invalid classroom member payload'));
+
+        final result = await repository.assignEnrollmentToClassroom(
+          classroomId: tTargetClassroomId,
+          enrollmentId: tEnrollmentId,
+        );
+
+        expect(
+          result,
+          const Left<Failure, ClassroomMember>(
+            ServerFailure('Invalid classroom member payload'),
+          ),
+        );
+      },
+    );
   });
 }
 

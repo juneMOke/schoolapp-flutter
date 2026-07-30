@@ -259,7 +259,6 @@
   },
   "classesOrganisationTransferAction": "Transfer",
   "classesOrganisationTransferInProgress": "Transfer in progress...",
-  "classesOrganisationTransferSuccess": "Transfer completed successfully.",
   "classesOrganisationTransferQueued": "Transfer saved — pending synchronization.",
   "classesOrganisationTransferPendingBadge": "Pending",
   "classesOrganisationTransferNoTarget": "No destination classroom is available.",
@@ -304,6 +303,9 @@
   "classesOrganisationNoMembers": "No student in this classroom.",
   "classesOrganisationAssignAction": "Assign",
   "classesOrganisationAssignDialogTitle": "Assign the student",
+  "classesOrganisationAssignSuccess": "Student assigned to the class.",
+  "classesOrganisationAssignRejected": "Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.",
+  "classesOrganisationAssignNotFound": "Class or enrolment not found. Refresh the list.",
   "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {

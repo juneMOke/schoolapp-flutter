@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/record_classroom_transfer_draft.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/assign_enrollment_to_classroom_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/offline/reassign_member_online_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/offline/cl
 
 /// BLoC offline-first du module Classe : pull delta (CF2), lecture locale des
 /// classes + roster composé (CF3), **transfert d'élève OFFLINE** (CF4, événement
-/// + outbox) et affectation d'un non-réparti ONLINE (distribution, ADR-004).
+/// + outbox) et affectation d'un non-réparti ONLINE (POST members, ADR-004).
 ///
 /// État unique porteur (calque de [ClassroomBloc]) : les zones classes / roster
 /// / transfert / affectation coexistent à l'écran. Le transfert émet un état
@@ -27,7 +27,7 @@ class ClassroomOfflineBloc
   final GetComposedRostersUseCase _getComposedRosters;
   final GetUnassignedLevelEnrollmentsUseCase _getUnassignedEnrollments;
   final RecordClassroomTransferUseCase _recordTransfer;
-  final ReassignMemberOnlineUseCase _reassignMember;
+  final AssignEnrollmentToClassroomUseCase _assignEnrollment;
 
   ClassroomOfflineBloc({
     required SyncClassroomsUseCase syncClassrooms,
@@ -36,14 +36,14 @@ class ClassroomOfflineBloc
     required GetComposedRostersUseCase getComposedRosters,
     required GetUnassignedLevelEnrollmentsUseCase getUnassignedEnrollments,
     required RecordClassroomTransferUseCase recordTransfer,
-    required ReassignMemberOnlineUseCase reassignMember,
+    required AssignEnrollmentToClassroomUseCase assignEnrollment,
   }) : _syncClassrooms = syncClassrooms,
        _getClassrooms = getClassrooms,
        _getRoster = getRoster,
        _getComposedRosters = getComposedRosters,
        _getUnassignedEnrollments = getUnassignedEnrollments,
        _recordTransfer = recordTransfer,
-       _reassignMember = reassignMember,
+       _assignEnrollment = assignEnrollment,
        super(const ClassroomOfflineState()) {
     on<ClassroomsSyncRequested>(_onSyncRequested);
     on<OfflineClassroomsRequested>(_onClassroomsRequested);
@@ -54,7 +54,7 @@ class ClassroomOfflineBloc
       _onLevelUnassignedEnrollmentsRequested,
     );
     on<MemberTransferRequested>(_onTransferRequested);
-    on<MemberReassignRequested>(_onReassignRequested);
+    on<MemberAssignRequested>(_onAssignRequested);
   }
 
   Future<void> _onSyncRequested(
@@ -292,41 +292,42 @@ class ClassroomOfflineBloc
     );
   }
 
-  Future<void> _onReassignRequested(
-    MemberReassignRequested event,
+  Future<void> _onAssignRequested(
+    MemberAssignRequested event,
     Emitter<ClassroomOfflineState> emit,
   ) async {
     emit(
       state.copyWith(
-        reassignStatus: ClassroomStatus.loading,
-        reassignErrorType: ClassroomErrorType.none,
-        reassigningMemberId: event.classroomMemberId,
-        reassignRePullFailed: false,
+        assignStatus: ClassroomStatus.loading,
+        assignErrorType: ClassroomErrorType.none,
+        assigningEnrollmentId: event.enrollmentId,
+        assignRePullFailed: false,
       ),
     );
 
-    final result = await _reassignMember(
-      classroomMemberId: event.classroomMemberId,
-      targetClassroomId: event.targetClassroomId,
+    final result = await _assignEnrollment(
+      classroomId: event.targetClassroomId,
+      enrollmentId: event.enrollmentId,
       academicYearId: event.academicYearId,
     );
 
     result.fold(
       (failure) => emit(
         state.copyWith(
-          reassignStatus: ClassroomStatus.failure,
-          reassignErrorType: _mapFailureToErrorType(failure),
-          reassigningMemberId: '',
+          assignStatus: ClassroomStatus.failure,
+          assignErrorType: _mapFailureToErrorType(failure),
+          assigningEnrollmentId: '',
         ),
       ),
-      // Right(true) → déplacement + re-pull OK ; Right(false) → déplacement OK,
-      // re-pull local KO (succès partiel à retenter, PAS un échec).
-      (rePullOk) => emit(
+      // Right(true) → affectation + miroir à jour ; Right(false) → affectation
+      // serveur acquise, miroir local KO (succès partiel à retenter, PAS un
+      // échec).
+      (mirrorOk) => emit(
         state.copyWith(
-          reassignStatus: ClassroomStatus.success,
-          reassignErrorType: ClassroomErrorType.none,
-          reassigningMemberId: '',
-          reassignRePullFailed: !rePullOk,
+          assignStatus: ClassroomStatus.success,
+          assignErrorType: ClassroomErrorType.none,
+          assigningEnrollmentId: '',
+          assignRePullFailed: !mirrorOk,
         ),
       ),
     );

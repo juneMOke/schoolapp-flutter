@@ -128,22 +128,22 @@ class MemberTransferRequested extends ClassroomOfflineEvent {
 
 /// Affectation d'un élève **non réparti** ONLINE (distribution, ADR-004) : un
 /// non-réparti n'existe pas dans le miroir offline → ce geste ne peut pas être
-/// un événement de transfert. Il passe par le PUT serveur + re-pull local.
-class MemberReassignRequested extends ClassroomOfflineEvent {
-  final String classroomMemberId;
+/// un événement de transfert. Il passe par le POST serveur (création de la
+/// ligne roster), l'intégration du membre créé au miroir, puis le re-pull.
+///
+/// L'identité transportée est celle du **dossier d'inscription**, pas d'un
+/// membre de classe : l'élève n'en a pas encore.
+class MemberAssignRequested extends ClassroomOfflineEvent {
+  final String enrollmentId;
   final String targetClassroomId;
   final String academicYearId;
 
-  const MemberReassignRequested({
-    required this.classroomMemberId,
+  const MemberAssignRequested({
+    required this.enrollmentId,
     required this.targetClassroomId,
     required this.academicYearId,
   });
 
   @override
-  List<Object?> get props => [
-    classroomMemberId,
-    targetClassroomId,
-    academicYearId,
-  ];
+  List<Object?> get props => [enrollmentId, targetClassroomId, academicYearId];
 }

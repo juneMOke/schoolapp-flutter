@@ -445,10 +445,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationTransferInProgress => 'Transfer in progress...';
 
   @override
-  String get classesOrganisationTransferSuccess =>
-      'Transfer completed successfully.';
-
-  @override
   String get classesOrganisationTransferQueued =>
       'Transfer saved — pending synchronization.';
 
@@ -516,6 +512,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classesOrganisationAssignDialogTitle => 'Assign the student';
+
+  @override
+  String get classesOrganisationAssignSuccess =>
+      'Student assigned to the class.';
+
+  @override
+  String get classesOrganisationAssignRejected =>
+      'Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.';
+
+  @override
+  String get classesOrganisationAssignNotFound =>
+      'Class or enrolment not found. Refresh the list.';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {

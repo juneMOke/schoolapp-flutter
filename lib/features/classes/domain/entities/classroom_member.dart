@@ -17,6 +17,14 @@ enum ClassroomMemberGender {
         throw FormatException('Invalid classroom member gender: $value');
     }
   }
+
+  /// Réciproque de [fromApiValue] (SCREAMING_SNAKE du contrat) : sert à
+  /// réécrire dans le miroir local un membre reçu du serveur.
+  String toApiValue() => switch (this) {
+    ClassroomMemberGender.male => 'MALE',
+    ClassroomMemberGender.female => 'FEMALE',
+    ClassroomMemberGender.other => 'OTHER',
+  };
 }
 
 class ClassroomMember extends Equatable {

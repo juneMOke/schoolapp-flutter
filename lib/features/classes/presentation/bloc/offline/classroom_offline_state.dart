@@ -14,8 +14,8 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 /// Deux gestes d'écriture, deux régimes :
 ///  - **Transfert** (CF4, ADR-004 amendé) : OFFLINE, événement + outbox →
 ///    [transferStatus] + [transferPendingSync] (succès = « en attente de synchro »).
-///  - **Affectation d'un non-réparti** (distribution, ADR-004) : ONLINE, PUT +
-///    re-pull → [reassignStatus] + [reassignRePullFailed].
+///  - **Affectation d'un non-réparti** (distribution, ADR-004) : ONLINE, POST +
+///    intégration au miroir + re-pull → [assignStatus] + [assignRePullFailed].
 class ClassroomOfflineState extends Equatable {
   // ── Classes de TOUTE l'année (CF3, dropdowns Présences/Classes/Résultats) ──
   final ClassroomStatus classroomsStatus;
@@ -65,13 +65,18 @@ class ClassroomOfflineState extends Equatable {
   final bool transferPendingSync;
 
   // ── Affectation d'un non-réparti ONLINE (distribution) ──
-  final ClassroomStatus reassignStatus;
-  final ClassroomErrorType reassignErrorType;
-  final String reassigningMemberId;
+  final ClassroomStatus assignStatus;
+  final ClassroomErrorType assignErrorType;
+
+  /// Dossier d'inscription dont l'affectation est en cours (anti-double-envoi
+  /// UI). Un non-réparti n'ayant pas de ligne roster, c'est bien son
+  /// `enrollmentId` — et non un `classroomMemberId` — qui l'identifie ici.
+  final String assigningEnrollmentId;
 
   /// `true` uniquement après un succès partiel (Right(false)) : l'affectation
-  /// serveur est acquise mais le re-pull local a échoué (à retenter).
-  final bool reassignRePullFailed;
+  /// serveur est acquise mais la mise à jour du miroir local a échoué
+  /// (intégration du membre créé et/ou re-pull) — à retenter.
+  final bool assignRePullFailed;
 
   const ClassroomOfflineState({
     this.classroomsStatus = ClassroomStatus.initial,
@@ -94,10 +99,10 @@ class ClassroomOfflineState extends Equatable {
     this.transferErrorType = ClassroomErrorType.none,
     this.transferringStudentId = '',
     this.transferPendingSync = false,
-    this.reassignStatus = ClassroomStatus.initial,
-    this.reassignErrorType = ClassroomErrorType.none,
-    this.reassigningMemberId = '',
-    this.reassignRePullFailed = false,
+    this.assignStatus = ClassroomStatus.initial,
+    this.assignErrorType = ClassroomErrorType.none,
+    this.assigningEnrollmentId = '',
+    this.assignRePullFailed = false,
   });
 
   ClassroomOfflineState copyWith({
@@ -121,10 +126,10 @@ class ClassroomOfflineState extends Equatable {
     ClassroomErrorType? transferErrorType,
     String? transferringStudentId,
     bool? transferPendingSync,
-    ClassroomStatus? reassignStatus,
-    ClassroomErrorType? reassignErrorType,
-    String? reassigningMemberId,
-    bool? reassignRePullFailed,
+    ClassroomStatus? assignStatus,
+    ClassroomErrorType? assignErrorType,
+    String? assigningEnrollmentId,
+    bool? assignRePullFailed,
   }) => ClassroomOfflineState(
     classroomsStatus: classroomsStatus ?? this.classroomsStatus,
     classrooms: classrooms ?? this.classrooms,
@@ -151,10 +156,10 @@ class ClassroomOfflineState extends Equatable {
     transferErrorType: transferErrorType ?? this.transferErrorType,
     transferringStudentId: transferringStudentId ?? this.transferringStudentId,
     transferPendingSync: transferPendingSync ?? this.transferPendingSync,
-    reassignStatus: reassignStatus ?? this.reassignStatus,
-    reassignErrorType: reassignErrorType ?? this.reassignErrorType,
-    reassigningMemberId: reassigningMemberId ?? this.reassigningMemberId,
-    reassignRePullFailed: reassignRePullFailed ?? this.reassignRePullFailed,
+    assignStatus: assignStatus ?? this.assignStatus,
+    assignErrorType: assignErrorType ?? this.assignErrorType,
+    assigningEnrollmentId: assigningEnrollmentId ?? this.assigningEnrollmentId,
+    assignRePullFailed: assignRePullFailed ?? this.assignRePullFailed,
   );
 
   @override
@@ -179,10 +184,10 @@ class ClassroomOfflineState extends Equatable {
     transferErrorType,
     transferringStudentId,
     transferPendingSync,
-    reassignStatus,
-    reassignErrorType,
-    reassigningMemberId,
-    reassignRePullFailed,
+    assignStatus,
+    assignErrorType,
+    assigningEnrollmentId,
+    assignRePullFailed,
   ];
 }
 

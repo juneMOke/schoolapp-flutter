@@ -51,62 +51,32 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
-      child: BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
-        // Deux gestes distincts sur le BLoC offline :
-        //  - TRANSFERT (A→B) : OFFLINE, événement + outbox → toast « en attente
-        //    de synchro » (acquis en local, la synchro suivra) ;
-        //  - AFFECTATION d'un non-réparti : ONLINE (distribution) → PUT + re-pull.
-        // Dans les deux cas, le rechargement post-succès (`_loadOverviewIfNeeded`)
-        // reste purement LOCAL : aucun appel réseau ne doit être déclenché par un
-        // transfert (censé fonctionner hors connexion) ni par une affectation.
-        listenWhen: (previous, current) =>
-            previous.reassignStatus != current.reassignStatus ||
-            previous.transferStatus != current.transferStatus,
-        listener: (context, state) {
-          if (state.transferStatus == ClassroomStatus.success) {
-            AppSnackBar.showSuccess(
-              context,
-              l10n.classesOrganisationTransferQueued,
-            );
-            final selectedLevel = _selectedLevel;
-            if (selectedLevel != null) {
-              _loadOverviewIfNeeded(selectedLevel);
-            }
-          }
-          if (state.transferStatus == ClassroomStatus.failure) {
-            AppSnackBar.showError(
-              context,
-              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                l10n,
-                state.transferErrorType,
-              ),
-            );
-          }
-          if (state.reassignStatus == ClassroomStatus.success) {
-            // Succès partiel (Right(false)) : affectation serveur acquise mais
-            // re-pull local KO → message nuancé. Le rechargement reste local
-            // (miroir déjà à jour côté serveur, à re-synchroniser plus tard).
-            AppSnackBar.showSuccess(
-              context,
-              state.reassignRePullFailed
-                  ? l10n.offlineQueuedGeneric
-                  : l10n.classesOrganisationTransferSuccess,
-            );
-            final selectedLevel = _selectedLevel;
-            if (selectedLevel != null) {
-              _loadOverviewIfNeeded(selectedLevel);
-            }
-          }
-          if (state.reassignStatus == ClassroomStatus.failure) {
-            AppSnackBar.showError(
-              context,
-              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                l10n,
-                state.reassignErrorType,
-              ),
-            );
-          }
-        },
+      // Deux gestes distincts sur le BLoC offline, donc DEUX listeners séparés :
+      //  - TRANSFERT (A→B) : OFFLINE, événement + outbox → toast « en attente
+      //    de synchro » (acquis en local, la synchro suivra) ;
+      //  - AFFECTATION d'un non-réparti : ONLINE (POST members) → création du
+      //    membre, intégration au miroir, re-pull.
+      // Un listener UNIQUE ne conviendrait pas : les deux statuts sont collants
+      // (ils restent `success`/`failure` après le geste), si bien qu'une
+      // notification déclenchée par l'un rejouait le toast terminal de l'autre —
+      // p. ex. « Élève affecté » re-tiré à chaque étape du transfert suivant.
+      // Chaque listener ne s'abonne donc qu'à SON propre statut.
+      // Dans les deux cas, le rechargement post-succès (`_loadOverviewIfNeeded`)
+      // reste purement LOCAL : aucun appel réseau ne doit être déclenché par un
+      // transfert (censé fonctionner hors connexion) ni par une affectation.
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
+            listenWhen: (previous, current) =>
+                previous.transferStatus != current.transferStatus,
+            listener: (context, state) => _onTransferStatusChanged(state, l10n),
+          ),
+          BlocListener<ClassroomOfflineBloc, ClassroomOfflineState>(
+            listenWhen: (previous, current) =>
+                previous.assignStatus != current.assignStatus,
+            listener: (context, state) => _onAssignStatusChanged(state, l10n),
+          ),
+        ],
         child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
           buildWhen: ClassesOrganisationPageHelpers
               .buildWhenAcademicYearContextChanges,
@@ -155,12 +125,69 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     );
   }
 
+  /// Issue du TRANSFERT (offline) : le geste est acquis en local dès que
+  /// l'événement est enfilé, d'où le message « en attente de synchro ».
+  void _onTransferStatusChanged(
+    ClassroomOfflineState state,
+    AppLocalizations l10n,
+  ) {
+    if (state.transferStatus == ClassroomStatus.success) {
+      AppSnackBar.showSuccess(context, l10n.classesOrganisationTransferQueued);
+      final selectedLevel = _selectedLevel;
+      if (selectedLevel != null) {
+        _loadOverviewIfNeeded(selectedLevel);
+      }
+      return;
+    }
+    if (state.transferStatus == ClassroomStatus.failure) {
+      AppSnackBar.showError(
+        context,
+        ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+          l10n,
+          state.transferErrorType,
+        ),
+      );
+    }
+  }
+
+  /// Issue de l'AFFECTATION d'un non-réparti (online).
+  void _onAssignStatusChanged(
+    ClassroomOfflineState state,
+    AppLocalizations l10n,
+  ) {
+    if (state.assignStatus == ClassroomStatus.success) {
+      // Succès partiel (Right(false)) : affectation serveur acquise mais
+      // miroir local pas à jour → message nuancé. Le rechargement reste
+      // local (la vérité est côté serveur, à re-synchroniser plus tard).
+      AppSnackBar.showSuccess(
+        context,
+        state.assignRePullFailed
+            ? l10n.offlineQueuedGeneric
+            : l10n.classesOrganisationAssignSuccess,
+      );
+      final selectedLevel = _selectedLevel;
+      if (selectedLevel != null) {
+        _loadOverviewIfNeeded(selectedLevel);
+      }
+      return;
+    }
+    if (state.assignStatus == ClassroomStatus.failure) {
+      AppSnackBar.showError(
+        context,
+        ClassesOrganisationPageHelpers.mapAssignErrorToMessage(
+          l10n,
+          state.assignErrorType,
+        ),
+      );
+    }
+  }
+
   Future<void> _handleReassignTap(ClassroomMemberReassignIntent intent) async {
     final l10n = AppLocalizations.of(context)!;
     // Anti-double-envoi : transfert (offline) ou affectation (online) en cours.
     final offlineState = context.read<ClassroomOfflineBloc>().state;
     if (offlineState.transferStatus == ClassroomStatus.loading ||
-        offlineState.reassignStatus == ClassroomStatus.loading) {
+        offlineState.assignStatus == ClassroomStatus.loading) {
       AppSnackBar.showInfo(context, l10n.classesOrganisationTransferInProgress);
       return;
     }

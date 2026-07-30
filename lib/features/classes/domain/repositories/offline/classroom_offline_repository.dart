@@ -59,6 +59,16 @@ abstract class ClassroomOfflineRepository {
     RecordClassroomTransferDraft draft,
   );
 
+  /// Intègre au miroir `ref_classroom_members` le membre **canonique** renvoyé
+  /// par le serveur après une affectation (201 du POST members).
+  ///
+  /// Sans ça, l'élève resterait affiché dans « non répartis » jusqu'au prochain
+  /// pull : les rosters composés — et donc le calcul des non-affectés — se
+  /// lisent exclusivement dans le miroir. Écriture idempotente (`REPLACE` sur
+  /// la PK) : le pull suivant réécrira la même ligne, enrichie de `version` /
+  /// `updatedAt`.
+  Future<Either<Failure, void>> upsertAssignedMember(ClassroomMember member);
+
   /// Horodatage epoch ms de dernière synchro des classes (fraîcheur ADR-002).
   Future<int?> getFreshness();
 }
