@@ -16,9 +16,12 @@ import 'package:school_app_flutter/features/student/domain/entities/student_summ
 /// ([SearchLocalEnrollmentsUseCase.currentYearEnrolled], seule dépendance à
 /// l'inscription réutilisée ici) : on soustrait en plus les élèves déjà
 /// présents dans les rosters composés du niveau ([ClassroomOfflineRepository
-/// .getComposedRosters]) et on exclut les dossiers `CANCELLED` (un élève
-/// annulé n'a plus besoin de classe — Facturation ne fait pas ce tri, ne pas
-/// reproduire cette lacune ici sans le vouloir).
+/// .getComposedRosters]) et on ne retient que les dossiers `COMPLETED` (un
+/// élève dont l'inscription n'est pas finalisée — ou annulée — n'a pas à
+/// être proposé pour une répartition en classe — Facturation ne fait pas ce
+/// tri, ne pas reproduire cette restriction là-bas sans le vouloir).
+/// `academicYearId` est toujours résolu en amont sur l'année courante
+/// (`AcademicYearContextBloc`), donc déjà scopé avant d'atteindre ce usecase.
 class GetUnassignedLevelEnrollmentsUseCase {
   final SearchLocalEnrollmentsUseCase _searchEnrollments;
   final ClassroomOfflineRepository _classroomRepository;
@@ -62,7 +65,7 @@ class GetUnassignedLevelEnrollmentsUseCase {
     final seenStudentIds = <String>{};
 
     return enrolled
-        .where((item) => item.status != OfflineEnrollmentStatus.cancelled)
+        .where((item) => item.status == OfflineEnrollmentStatus.completed)
         .where((item) => !assignedStudentIds.contains(item.studentId))
         .where((item) => seenStudentIds.add(item.studentId))
         .map(_toEnrollmentSummary)

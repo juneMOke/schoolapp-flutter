@@ -125,14 +125,39 @@ void main() {
     expect(unassigned.map((e) => e.student.id).toSet(), {'s1', 's2'});
   });
 
-  test('exclut les dossiers CANCELLED (jamais « à répartir »)', () async {
+  test('ne retient que les dossiers COMPLETED (jamais un dossier non finalisé '
+      'ou annulé)', () async {
     stubEnrolled([
       _item(
         enrollmentId: 'e1',
         studentId: 's1',
+        status: OfflineEnrollmentStatus.preRegistered,
+      ),
+      _item(
+        enrollmentId: 'e2',
+        studentId: 's2',
+        status: OfflineEnrollmentStatus.inProgress,
+      ),
+      _item(
+        enrollmentId: 'e3',
+        studentId: 's3',
+        status: OfflineEnrollmentStatus.adminCompleted,
+      ),
+      _item(
+        enrollmentId: 'e4',
+        studentId: 's4',
+        status: OfflineEnrollmentStatus.financialCompleted,
+      ),
+      _item(
+        enrollmentId: 'e5',
+        studentId: 's5',
         status: OfflineEnrollmentStatus.cancelled,
       ),
-      _item(enrollmentId: 'e2', studentId: 's2'),
+      _item(
+        enrollmentId: 'e6',
+        studentId: 's6',
+        status: OfflineEnrollmentStatus.completed,
+      ),
     ]);
     stubRosters(const {});
 
@@ -143,7 +168,7 @@ void main() {
 
     final unassigned = result.getOrElse(() => const []);
     expect(unassigned, hasLength(1));
-    expect(unassigned.single.student.id, 's2');
+    expect(unassigned.single.student.id, 's6');
   });
 
   test('mappe correctement genre/nom/statut vers EnrollmentSummary', () async {
