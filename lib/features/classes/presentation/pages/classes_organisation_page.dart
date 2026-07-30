@@ -56,7 +56,9 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
         //  - TRANSFERT (A→B) : OFFLINE, événement + outbox → toast « en attente
         //    de synchro » (acquis en local, la synchro suivra) ;
         //  - AFFECTATION d'un non-réparti : ONLINE (distribution) → PUT + re-pull.
-        // Les lectures (aperçu) restent sur ClassroomBloc online.
+        // Dans les deux cas, le rechargement post-succès (`_loadOverviewIfNeeded`)
+        // reste purement LOCAL : aucun appel réseau ne doit être déclenché par un
+        // transfert (censé fonctionner hors connexion) ni par une affectation.
         listenWhen: (previous, current) =>
             previous.reassignStatus != current.reassignStatus ||
             previous.transferStatus != current.transferStatus,
@@ -82,8 +84,8 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
           }
           if (state.reassignStatus == ClassroomStatus.success) {
             // Succès partiel (Right(false)) : affectation serveur acquise mais
-            // re-pull local KO → message nuancé. Les lectures étant online, on
-            // recharge quand même l'aperçu qui reflète l'état serveur à jour.
+            // re-pull local KO → message nuancé. Le rechargement reste local
+            // (miroir déjà à jour côté serveur, à re-synchroniser plus tard).
             AppSnackBar.showSuccess(
               context,
               state.reassignRePullFailed
@@ -253,6 +255,12 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     _loadOverviewIfNeeded(level);
   }
 
+  // Rechargement 100% LOCAL (classes + rosters composés + non-affectés du
+  // niveau, miroir ± transferts pending) : source primaire de l'affichage,
+  // sans aucun appel réseau. Appelé après un changement de niveau ou un
+  // transfert/affectation réussi — un geste qui, pour le transfert, est
+  // censé rester utilisable hors connexion (CF4) : aucun appel online ne
+  // doit se glisser ici.
   void _loadOverviewIfNeeded(ClassesOrganisationLevelOption level) {
     final academicYearContext = context
         .read<AcademicYearContextBloc>()
@@ -263,20 +271,6 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       return;
     }
 
-    // Aperçu ONLINE : ne sert plus qu'à la récap « effectif par classe » de la
-    // sur-couche de résultat de répartition (post-distribution — cf.
-    // classes_organisation_distribution_result_dialog.dart,
-    // distributionOverview.classrooms). Le nombre d'élèves non affectés
-    // (rappel G/F ci-dessous) vient désormais du calcul 100% local plus bas.
-    context.read<ClassroomBloc>().add(
-      ClassroomDistributionOverviewRequested(
-        academicYearId: academicYearId,
-        schoolLevelId: level.schoolLevelId,
-      ),
-    );
-
-    // Niveau réparti : classes + rosters composés LOCAUX (miroir ± transferts
-    // pending) — source primaire de l'affichage, sans re-pull serveur ici.
     // Working-set DÉDIÉ à ce niveau (`levelClassrooms`), jamais partagé avec
     // le dropdown année complète des autres pages (Présences/Classes list).
     context.read<ClassroomOfflineBloc>().add(
@@ -291,11 +285,33 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
         schoolLevelId: level.schoolLevelId,
       ),
     );
-    // Non-affectés du niveau : calculé 100% localement (remplace l'aperçu
-    // online pour ce seul usage — celui-ci reste dispatché ci-dessus pour la
-    // recap de la sur-couche de résultat de répartition).
     context.read<ClassroomOfflineBloc>().add(
       OfflineLevelUnassignedEnrollmentsRequested(
+        academicYearId: academicYearId,
+        schoolLevelId: level.schoolLevelId,
+      ),
+    );
+  }
+
+  // Aperçu ONLINE : sert exclusivement la récap « effectif par classe » de la
+  // sur-couche de résultat de répartition (post-distribution — cf.
+  // classes_organisation_distribution_result_dialog.dart,
+  // distributionOverview.classrooms). La répartition étant déjà une action
+  // online, ce seul appel réseau y reste légitime — il ne doit PAS être
+  // déclenché par un simple changement de niveau ou par le transfert/
+  // affectation (cf. [_loadOverviewIfNeeded], purement local).
+  void _requestDistributionOverview(ClassesOrganisationLevelOption level) {
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
+    if (academicYearId.isEmpty) {
+      return;
+    }
+
+    context.read<ClassroomBloc>().add(
+      ClassroomDistributionOverviewRequested(
         academicYearId: academicYearId,
         schoolLevelId: level.schoolLevelId,
       ),
@@ -350,6 +366,7 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
       _selectedLevel = updatedLevel;
     });
     _loadOverviewIfNeeded(updatedLevel);
+    _requestDistributionOverview(updatedLevel);
 
     // Répartition serveur acquise mais re-pull local KO : le miroir des
     // classes n'a pas encore la nouvelle répartition (à retenter au prochain
