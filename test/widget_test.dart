@@ -17,7 +17,9 @@ void main() {
         appEnvironment: AppEnvironment.dev.label,
         apiBaseUrl: 'http://127.0.0.1:8080',
       ),
-      offlineDatabase: await openFullOfflineDb(),
+      // `noIsolate` : sous `testWidgets` (FakeAsync), une requête servie par
+      // l'isolat ffi ne revient jamais — cf. `openFullOfflineDb`.
+      offlineDatabase: await openFullOfflineDb(noIsolate: true),
     );
   });
 
