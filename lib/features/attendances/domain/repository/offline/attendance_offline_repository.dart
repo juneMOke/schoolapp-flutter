@@ -36,12 +36,13 @@ abstract class AttendanceOfflineRepository {
   });
 
   /// Statistiques d'assiduité d'un élève sur une période (AF-3, §5), calculées
-  /// **en local** : dénominateur = jours appelés de sa classe (COUNT sessions),
-  /// numérateur = ses absences. Périodes calendaires (hebdo lundi→samedi,
-  /// mensuel, annuel). Gardé par `bootstrapComplete` (invariant #7).
+  /// **en local** : dénominateur = jours appelés de sa classe COURANTE
+  /// (résolue en interne depuis `ref_classroom_members`, composition CF3/CF4 —
+  /// aucun classroomId requis de l'appelant), numérateur = ses absences
+  /// détaillées. Périodes calendaires (hebdo lundi→samedi, mensuel, annuel).
+  /// Gardé par `bootstrapComplete` (invariant #7).
   Future<Either<Failure, StudentAttendanceStats>> getStudentAttendanceStats({
     required String studentId,
-    required String classroomId,
     required String academicYearId,
     required StatsPeriod period,
     required DateTime reference,

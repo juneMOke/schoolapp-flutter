@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
-import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/student_attendance_summary.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_event.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_state.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/student_attendance_stats.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart'
+    show AttendanceErrorType;
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_absence_list.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_perfect_card.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_period_filter.dart';
@@ -19,55 +19,48 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/pre
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_summary_skeleton.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_summary_view_data.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Onglet « Presence » de la fiche eleve : synthese d'assiduite sur une periode.
-///
-/// Fournit son propre [StudentAttendanceSummaryBloc] (factory) et lance un
-/// premier chargement sur la periode par defaut (annee).
-class StudentAttendanceSummaryTab extends StatelessWidget {
+/// Onglet « Presence » de la fiche eleve : synthese d'assiduite sur une
+/// periode, calculee **100% en local** (AF-3 §5, dénominateur = jours
+/// réellement appelés via `attendance_sessions`). Consomme le
+/// [AttendanceOfflineBloc] déjà fourni par `AttendanceFeatureScope` — aucun
+/// bloc dédié, aucun appel réseau.
+class StudentAttendanceSummaryTab extends StatefulWidget {
   final String studentId;
+  final String academicYearId;
 
-  const StudentAttendanceSummaryTab({super.key, required this.studentId});
+  const StudentAttendanceSummaryTab({
+    super.key,
+    required this.studentId,
+    required this.academicYearId,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<StudentAttendanceSummaryBloc>(
-      create: (_) => GetIt.instance<StudentAttendanceSummaryBloc>()
-        ..add(
-          StudentAttendanceSummaryRequested(
-            studentId: studentId,
-            period: StatsPeriod.year,
-          ),
-        ),
-      child: _StudentAttendanceSummaryView(studentId: studentId),
-    );
-  }
+  State<StudentAttendanceSummaryTab> createState() =>
+      _StudentAttendanceSummaryTabState();
 }
 
-class _StudentAttendanceSummaryView extends StatefulWidget {
-  final String studentId;
-
-  const _StudentAttendanceSummaryView({required this.studentId});
-
-  @override
-  State<_StudentAttendanceSummaryView> createState() =>
-      _StudentAttendanceSummaryViewState();
-}
-
-class _StudentAttendanceSummaryViewState
-    extends State<_StudentAttendanceSummaryView> {
+class _StudentAttendanceSummaryTabState
+    extends State<StudentAttendanceSummaryTab> {
   StatsPeriod _period = StatsPeriod.year;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _request(_period);
+    });
+  }
+
   void _request(StatsPeriod period) {
-    context.read<StudentAttendanceSummaryBloc>().add(
-      StudentAttendanceSummaryRequested(
+    context.read<AttendanceOfflineBloc>().add(
+      LoadStudentStatsRequested(
         studentId: widget.studentId,
+        academicYearId: widget.academicYearId,
         period: period,
-        month: period == StatsPeriod.month ? _monthAnchor() : null,
-        week: period == StatsPeriod.week ? _weekAnchor() : null,
+        reference: DateTime.now(),
       ),
     );
   }
@@ -76,20 +69,6 @@ class _StudentAttendanceSummaryViewState
     if (period == _period) return;
     setState(() => _period = period);
     _request(period);
-  }
-
-  /// Ancre `YYYY-MM` sur le mois courant.
-  String _monthAnchor() {
-    final now = DateTime.now();
-    return '${now.year.toString().padLeft(4, '0')}-'
-        '${now.month.toString().padLeft(2, '0')}';
-  }
-
-  /// Ancre `YYYY-MM-DD` sur le jour courant (le backend resout la semaine).
-  String _weekAnchor() => DateOnlyJsonHelper.toJson(DateTime.now());
-
-  Future<void> _contactAdmin() async {
-    await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
   }
 
   @override
@@ -104,24 +83,27 @@ class _StudentAttendanceSummaryViewState
             onSelected: _onPeriodSelected,
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          BlocBuilder<
-            StudentAttendanceSummaryBloc,
-            StudentAttendanceSummaryState
-          >(
+          BlocBuilder<AttendanceOfflineBloc, AttendanceOfflineState>(
+            // Ce bloc porte aussi l'appel du jour / le taux dérivé (autres
+            // onglets du module Présence) : on ne reconstruit que sur les
+            // états pertinents à cette synthèse.
+            buildWhen: (prev, curr) =>
+                curr is AttendanceOfflineInitial ||
+                curr is AttendanceOfflineLoading ||
+                curr is AttendanceOfflineStatsLoaded ||
+                curr is AttendanceOfflineError,
             builder: (context, state) {
-              final child = switch (state.status) {
-                StudentAttendanceSummaryStatus.failure =>
-                  AttendanceResultsErrorState(
-                    type: state.errorType,
-                    onRetry: () => _request(_period),
-                    onReconnect: () => context.read<AuthBloc>().add(
-                      const AuthLogoutRequested(),
-                    ),
-                    onContactAdmin: _contactAdmin,
-                  ),
-                StudentAttendanceSummaryStatus.success
-                    when state.summary != null =>
-                  _buildSuccess(context, state.summary!),
+              final stats = state is AttendanceOfflineStatsLoaded
+                  ? state.stats
+                  : null;
+
+              final child = switch (state) {
+                AttendanceOfflineError() => AttendanceResultsErrorState(
+                  type: AttendanceErrorType.storage,
+                  onRetry: () => _request(_period),
+                ),
+                AttendanceOfflineStatsLoaded() when stats != null =>
+                  _buildLoaded(context, stats),
                 _ => const PresenceSummarySkeleton(),
               };
 
@@ -130,7 +112,7 @@ class _StudentAttendanceSummaryViewState
                 switchInCurve: AppMotion.outCurve,
                 switchOutCurve: AppMotion.inCurve,
                 child: KeyedSubtree(
-                  key: ValueKey('${state.status.name}-${_period.name}'),
+                  key: ValueKey('${state.runtimeType}-${_period.name}'),
                   child: child,
                 ),
               );
@@ -141,9 +123,28 @@ class _StudentAttendanceSummaryViewState
     );
   }
 
-  Widget _buildSuccess(BuildContext context, StudentAttendanceSummary summary) {
+  Widget _buildLoaded(BuildContext context, StudentAttendanceStats stats) {
     final l10n = AppLocalizations.of(context)!;
-    final vm = PresenceSummaryViewData(summary);
+
+    // Invariant #7 : chiffres pas encore fiables tant que le bootstrap local
+    // (appels + transferts) n'est pas complet — on ne les affiche jamais.
+    if (!stats.available) {
+      return EteeloEmptyResult(
+        medallionIcon: Icons.cloud_sync_outlined,
+        label: l10n.presenceOfflineSyncPendingTitle,
+        description: l10n.presenceOfflineSyncPendingMessage,
+        fullWidthCard: true,
+        minHeight: 260,
+        primaryAction: EteeloButton.primary(
+          label: l10n.attendanceErrorRetry,
+          icon: Icons.refresh_rounded,
+          onPressed: () => _request(_period),
+          fullWidth: false,
+        ),
+      );
+    }
+
+    final vm = PresenceSummaryViewData(stats);
 
     if (!vm.hasSchoolDays) {
       return EteeloEmptyResult(
@@ -158,7 +159,7 @@ class _StudentAttendanceSummaryViewState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PresenceSummaryCard(data: vm, rangeLabel: _rangeLabel(l10n, summary)),
+        PresenceSummaryCard(data: vm, rangeLabel: _rangeLabel(l10n, stats)),
         const SizedBox(height: AppDimensions.spacingM),
         if (vm.isPerfect)
           const PresencePerfectCard()
@@ -168,10 +169,19 @@ class _StudentAttendanceSummaryViewState
     );
   }
 
-  String _rangeLabel(AppLocalizations l10n, StudentAttendanceSummary s) =>
-      switch (s.period) {
-        StatsPeriod.year => l10n.presenceRangeYear(s.academicYearName),
-        StatsPeriod.month => l10n.presenceRangeMonth(s.windowStart),
-        StatsPeriod.week => l10n.presenceRangeWeek(s.windowStart),
+  String _rangeLabel(AppLocalizations l10n, StudentAttendanceStats stats) =>
+      switch (stats.period) {
+        StatsPeriod.year => l10n.presenceRangeYear(_academicYearName()),
+        StatsPeriod.month => l10n.presenceRangeMonth(stats.from!),
+        StatsPeriod.week => l10n.presenceRangeWeek(stats.from!),
       };
+
+  String _academicYearName() =>
+      context
+          .read<AcademicYearContextBloc>()
+          .state
+          .context
+          ?.academicYear
+          .name ??
+      '';
 }

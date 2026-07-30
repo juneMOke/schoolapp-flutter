@@ -14,13 +14,11 @@ class GetStudentAttendanceStatsUseCase {
 
   Future<Either<Failure, StudentAttendanceStats>> call({
     required String studentId,
-    required String classroomId,
     required String academicYearId,
     required StatsPeriod period,
     required DateTime reference,
   }) => _repository.getStudentAttendanceStats(
     studentId: studentId,
-    classroomId: classroomId,
     academicYearId: academicYearId,
     period: period,
     reference: reference,

@@ -1,8 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart'
+    show OutboxOperation;
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_dto.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
+import 'package:school_app_flutter/features/classes/data/models/offline/classroom_transfer_row.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
@@ -207,5 +211,91 @@ void main() {
     expect(loaded, isNotNull);
     expect(loaded!.updatedAt, 42);
     expect(loaded.femaleCount, 16);
+  });
+
+  group('getCurrentClassroomId', () {
+    test('null si l\'élève n\'a pas (encore) de ligne membre locale', () async {
+      final id = await dao.getCurrentClassroomId(
+        studentId: 'unknown-student',
+        academicYearId: yearId,
+      );
+      expect(id, isNull);
+    });
+
+    test('renvoie la classe du miroir en l\'absence de transfert', () async {
+      await upsertDelta(
+        members: [member(id: 'm1', first: 'A', last: 'A')],
+        syncedAt: 1000,
+      );
+      final id = await dao.getCurrentClassroomId(
+        studentId: 'stu-m1',
+        academicYearId: yearId,
+      );
+      expect(id, classroomId);
+    });
+
+    test(
+      'un transfert local non synchronisé compose la classe de destination',
+      () async {
+        await upsertDelta(
+          members: [member(id: 'm1', first: 'A', last: 'A')],
+          syncedAt: 1000,
+        );
+        await dao.recordTransferWithOutbox(
+          row: const ClassroomTransferRow(
+            id: 't1',
+            studentId: 'stu-m1',
+            fromClassroomId: classroomId,
+            toClassroomId: 'class-b',
+            schoolLevelId: 'level-1',
+            academicYearId: yearId,
+            transferredAt: 2000,
+            syncStatus: 'PENDING_SYNC',
+          ),
+          outboxEntry: const OutboxEntry(
+            id: 'CLASSROOM_TRANSFER:t1',
+            aggregateType: 'CLASSROOM_TRANSFER',
+            aggregateId: 't1',
+            operation: OutboxOperation.upsert,
+            payload: '{}',
+            createdAt: 2000,
+          ),
+        );
+
+        final id = await dao.getCurrentClassroomId(
+          studentId: 'stu-m1',
+          academicYearId: yearId,
+        );
+        expect(id, 'class-b');
+      },
+    );
+
+    test(
+      'un transfert SYNCED ne compose pas (vérité déjà dans le miroir)',
+      () async {
+        await upsertDelta(
+          members: [
+            member(id: 'm1', first: 'A', last: 'A', classroom: 'class-b'),
+          ],
+          syncedAt: 1000,
+        );
+        await db.insert('classroom_transfers', {
+          'id': 't1',
+          'student_id': 'stu-m1',
+          'from_classroom_id': classroomId,
+          'to_classroom_id': 'class-b',
+          'school_level_id': 'level-1',
+          'academic_year_id': yearId,
+          'transferred_at': 2000,
+          'sync_status': 'SYNCED',
+        });
+
+        final id = await dao.getCurrentClassroomId(
+          studentId: 'stu-m1',
+          academicYearId: yearId,
+        );
+        expect(id, 'class-b'); // vient du miroir, pas de la composition
+      },
+    );
   });
 }

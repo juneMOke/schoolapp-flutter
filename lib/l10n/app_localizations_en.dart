@@ -3862,6 +3862,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get presenceOfflineSyncPendingTitle => 'Sync in progress';
+
+  @override
+  String get presenceOfflineSyncPendingMessage =>
+      'Local attendance data isn\'t complete enough yet to compute a reliable statistic. Try again in a moment.';
+
+  @override
   String get disciplinaryUnknownValue => '-';
 
   @override

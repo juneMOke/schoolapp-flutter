@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/atte
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
@@ -18,6 +20,7 @@ import '../../../../../core/offline/offline_full_test_db.dart';
 void main() {
   late Database db;
   late AttendanceLocalDataSource local;
+  late ClassroomLocalDataSource roster;
   late SyncMetaDao syncMeta;
   late AttendanceOfflineRepositoryImpl repo;
 
@@ -27,10 +30,11 @@ void main() {
   setUp(() async {
     db = await openFullOfflineDb();
     local = AttendanceLocalDataSource(db);
+    roster = ClassroomLocalDataSource(db);
     syncMeta = SyncMetaDao(db);
     repo = AttendanceOfflineRepositoryImpl(
       localDataSource: local,
-      rosterDataSource: ClassroomLocalDataSource(db),
+      rosterDataSource: roster,
       syncMetaDao: syncMeta,
       idGenerator: const IdGenerator(Uuid()),
     );
@@ -38,11 +42,43 @@ void main() {
 
   tearDown(() async => db.close());
 
+  /// Ligne `ref_classroom_members` : la classe courante de [studentId] est
+  /// résolue par composition (CF3/CF4) depuis ce miroir. Marque aussi la
+  /// ressource `classroom_members` synchronisée dans `sync_meta` (requis par
+  /// le gate `bootstrapComplete` du chemin rapide, cf. repo impl).
+  Future<void> seedMembership({
+    required String studentId,
+    String classroom = classroomId,
+  }) async {
+    await roster.upsertMembers(
+      members: [
+        ClassroomMemberDto(
+          id: 'm-$studentId',
+          studentId: studentId,
+          classroomId: classroom,
+          academicYearId: yearId,
+          studentFirstName: 'F$studentId',
+          studentLastName: 'L$studentId',
+          studentGender: 'MALE',
+          status: 'ACTIVE',
+        ),
+      ],
+      syncedAt: 1,
+    );
+    await syncMeta.setCursor(
+      kClassroomMembersResource,
+      cursor: 'DONE',
+      syncedAt: 1,
+    );
+  }
+
   /// Injecte une session (via le pull, marquée SYNCED) + ses absents.
+  /// [reasons] permet de fixer un motif par élève absent (défaut : aucun).
   Future<void> seedSession(
     String date, {
     List<String> absents = const [],
     String classroom = classroomId,
+    Map<String, String?> reasons = const {},
   }) async {
     await local.applyPulledSessions([
       AttendanceSessionDeltaDto(
@@ -56,6 +92,7 @@ void main() {
               (sid) => AbsenceDeltaDto(
                 id: 'a-$classroom-$date-$sid',
                 studentId: sid,
+                absenceReason: reasons[sid],
                 updatedAt: '${date}T08:00:00.000Z',
               ),
             )
@@ -107,11 +144,11 @@ void main() {
       await seedSession('2026-05-06', absents: ['s2']);
       // Un appel hors période (juin) ne doit pas compter.
       await seedSession('2026-06-01', absents: ['s1']);
+      await seedMembership(studentId: 's1');
       await markBootstrapComplete();
 
       final res = (await repo.getStudentAttendanceStats(
         studentId: 's1',
-        classroomId: classroomId,
         academicYearId: yearId,
         period: StatsPeriod.month,
         reference: DateTime(2026, 5, 15),
@@ -126,6 +163,42 @@ void main() {
   );
 
   test(
+    'détail des absences : motif + split justifiée/injustifiée/sans motif',
+    () async {
+      await seedSession(
+        '2026-05-04',
+        absents: ['s1'],
+        reasons: {'s1': 'SICKNESS'},
+      ); // justifiée
+      await seedSession(
+        '2026-05-05',
+        absents: ['s1'],
+        reasons: {'s1': 'UNJUSTIFIED'},
+      ); // injustifiée
+      await seedSession('2026-05-06', absents: ['s1']); // sans motif
+      await seedMembership(studentId: 's1');
+      await markBootstrapComplete();
+
+      final res = (await repo.getStudentAttendanceStats(
+        studentId: 's1',
+        academicYearId: yearId,
+        period: StatsPeriod.month,
+        reference: DateTime(2026, 5, 15),
+      )).getOrElse(() => throw StateError('left'));
+
+      expect(res.absences, 3);
+      // Sans motif = justifiée par défaut (même règle que forAbsenceReason,
+      // cohérence avec le détail par ligne de PresenceAbsenceList).
+      expect(res.unjustifiedAbsences, 1);
+      expect(res.justifiedAbsences, 2);
+      expect(res.entries, hasLength(3));
+      // Trié par la couche appelante (le DAO renvoie déjà DESC) : le plus
+      // récent (06) en tête.
+      expect(res.entries.first.date, DateTime(2026, 5, 6));
+    },
+  );
+
+  test(
     'gate : pas de bootstrap ⇒ available=false (chiffre non fiable)',
     () async {
       await seedSession('2026-05-04', absents: ['s1']);
@@ -133,7 +206,6 @@ void main() {
 
       final res = (await repo.getStudentAttendanceStats(
         studentId: 's1',
-        classroomId: classroomId,
         academicYearId: yearId,
         period: StatsPeriod.month,
         reference: DateTime(2026, 5, 15),
@@ -150,10 +222,10 @@ void main() {
     await seedSession('2026-05-04'); // lundi
     await seedSession('2026-05-09'); // samedi
     await seedSession('2026-05-10'); // dimanche suivant (exclu)
+    await seedMembership(studentId: 's1');
 
     final res = (await repo.getStudentAttendanceStats(
       studentId: 's1',
-      classroomId: classroomId,
       academicYearId: yearId,
       period: StatsPeriod.week,
       reference: DateTime(2026, 5, 6), // un mercredi de la semaine
@@ -168,10 +240,10 @@ void main() {
       await seedSession('2026-05-04');
       await seedSession('2026-11-20');
       await seedSession('2027-01-15');
+      await seedMembership(studentId: 's1');
 
       final res = (await repo.getStudentAttendanceStats(
         studentId: 's1',
-        classroomId: classroomId,
         academicYearId: yearId,
         period: StatsPeriod.year,
         reference: DateTime(2026, 5, 15),
@@ -207,13 +279,16 @@ void main() {
 
       final res = (await repo.getStudentAttendanceStats(
         studentId: 's1',
-        classroomId: 'c2', // classe courante
         academicYearId: yearId,
         period: StatsPeriod.month,
         reference: DateTime(2026, 5, 15),
       )).getOrElse(() => throw StateError('left'));
 
-      // Sans intervalles, on aurait compté toutes les sessions de c2 (3) → faux.
+      // Sans intervalles, on aurait compté toutes les sessions de c2 (3) → faux
+      // — et comme aucune ligne ref_classroom_members n'est seedée dans ce
+      // test, le chemin rapide (getCurrentClassroomId) donnerait daysCalled=0
+      // s'il était pris par erreur : cette assertion prouve donc aussi que le
+      // bypass par intervalles a bien eu lieu, pas seulement par construction.
       expect(res.daysCalled, 4); // c1: 05-02,05-03 + c2: 05-06,05-07
       expect(res.absences, 1); // s1 absent le 06 (dans c2)
       expect(res.available, isTrue);
@@ -233,7 +308,6 @@ void main() {
 
       final res = (await repo.getStudentAttendanceStats(
         studentId: 's1',
-        classroomId: classroomId,
         academicYearId: yearId,
         period: StatsPeriod.month,
         reference: DateTime(2026, 5, 15),
@@ -243,4 +317,28 @@ void main() {
       expect(res.available, isFalse);
     },
   );
+
+  test('roster (ref_classroom_members) jamais synchronisé ⇒ available=false '
+      'et daysCalled=0 (chemin rapide, classe courante inconnue)', () async {
+    // Aucun seedMembership : le chemin rapide (pas de transfert) ne peut
+    // pas résoudre de classe courante pour l'élève.
+    await seedSession('2026-05-04', absents: ['s1']);
+    await markBootstrapComplete(); // appels + transferts seulement.
+
+    final res = (await repo.getStudentAttendanceStats(
+      studentId: 's1',
+      academicYearId: yearId,
+      period: StatsPeriod.month,
+      reference: DateTime(2026, 5, 15),
+    )).getOrElse(() => throw StateError('left'));
+
+    expect(res.daysCalled, 0);
+    // Des absences peuvent déjà exister localement (pas scopées classe) —
+    // elles ne doivent PAS se traduire par un faux « aucun jour scolaire » :
+    // le gate bootstrapComplete doit rester fermé tant que le roster n'a
+    // jamais synchronisé, précisément pour distinguer ce cas d'un élève
+    // réellement jamais appelé.
+    expect(res.bootstrapComplete, isFalse);
+    expect(res.available, isFalse);
+  });
 }

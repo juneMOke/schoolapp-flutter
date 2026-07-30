@@ -3901,6 +3901,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get presenceOfflineSyncPendingTitle => 'Synchronisation en cours';
+
+  @override
+  String get presenceOfflineSyncPendingMessage =>
+      'Les données locales de présence ne sont pas encore complètes pour calculer une statistique fiable. Réessayez dans un instant.';
+
+  @override
   String get disciplinaryUnknownValue => '-';
 
   @override

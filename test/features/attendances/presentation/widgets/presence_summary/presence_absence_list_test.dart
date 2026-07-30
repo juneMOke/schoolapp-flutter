@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/student_attendance_stats.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_absence_entry.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/student_attendance_summary.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_absence_list.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_summary_view_data.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -23,19 +23,12 @@ void main() {
   );
 
   PresenceSummaryViewData buildVm() => PresenceSummaryViewData(
-    StudentAttendanceSummary(
-      studentId: 's',
-      firstName: 'J',
-      lastName: 'D',
-      academicYearName: '2025-2026',
+    StudentAttendanceStats(
       period: StatsPeriod.year,
-      windowStart: DateTime(2025, 9, 1),
-      windowEnd: DateTime(2026, 6, 30),
-      presenceRate: 90,
-      presentDays: 80,
-      justifiedAbsenceDays: 1,
-      unjustifiedAbsenceDays: 1,
-      absences: [
+      from: DateTime(2025, 9, 1),
+      to: DateTime(2026, 6, 30),
+      daysCalled: 82,
+      entries: [
         StudentAbsenceEntry(
           date: DateTime(2026, 1, 14),
           reason: AbsenceReason.unjustified,
@@ -46,6 +39,7 @@ void main() {
           reason: AbsenceReason.sickness,
         ),
       ],
+      bootstrapComplete: true,
     ),
   );
 

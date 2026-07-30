@@ -300,6 +300,31 @@ class ClassroomLocalDataSource {
     });
   }
 
+  /// Classe courante **composée** d'un élève (CF3/CF4, cf. [_composedClassroomExpr])
+  /// pour une année : un transfert local non synchronisé gagne, sinon le
+  /// miroir. `null` si l'élève n'a pas (encore) de ligne membre locale pour
+  /// cette année (ex. roster pas encore pullé).
+  ///
+  /// Le modèle suppose une seule ligne `ref_classroom_members` par
+  /// `(student_id, academic_year_id)` (aucune contrainte SQL ne l'impose) —
+  /// `ORDER BY updated_at DESC` sert de filet déterministe (ligne la plus
+  /// récemment mutée) plutôt que l'ordre physique arbitraire de SQLite, si
+  /// cette hypothèse était un jour violée.
+  Future<String?> getCurrentClassroomId({
+    required String studentId,
+    required String academicYearId,
+  }) async {
+    final rows = await _db.rawQuery(
+      'SELECT $_composedClassroomExpr AS classroom_id '
+      'FROM $membersTable m '
+      'WHERE m.student_id = ? AND m.academic_year_id = ? '
+      'ORDER BY m.updated_at DESC LIMIT 1',
+      [studentId, academicYearId],
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['classroom_id'] as String?;
+  }
+
   /// Nombre d'élèves ACTIVE d'une classe (effectif pour le taux dérivé AF-3).
   Future<int> countActiveRoster(String classroomId) async {
     final rows = await _db.rawQuery(

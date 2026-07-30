@@ -3,10 +3,10 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Statuts d'un jour scolaire couverts par les donnees backend.
+/// Statuts d'un jour scolaire couverts par les donnees calculees en local.
 ///
-/// NB : la spec prevoit aussi un statut « retard », mais
-/// `StudentAttendanceSummary` ne le fournit pas (seulement present /
+/// NB : la spec prevoit aussi un statut « retard », mais le calcul local
+/// (`StudentAttendanceStats`) ne le distingue pas (seulement present /
 /// justifiee / injustifiee) — il est donc volontairement absent ici.
 enum AttendanceDayStatus { present, justified, unjustified }
 

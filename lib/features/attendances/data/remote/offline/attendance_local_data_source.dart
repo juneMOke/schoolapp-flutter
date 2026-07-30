@@ -329,9 +329,10 @@ class AttendanceLocalDataSource {
     return (rows.first['c'] as int?) ?? 0;
   }
 
-  /// **Absences d'un élève** sur une période (numérateur des stats AF-3).
+  /// **Absences d'un élève** sur une période, détail complet (numérateur +
+  /// motif/note des stats AF-3 §5), triées du plus récent au plus ancien.
   /// [fromStr]/[toStr] nuls = année entière.
-  Future<int> countStudentAbsences({
+  Future<List<AttendanceRecordRow>> getStudentAbsenceRecords({
     required String studentId,
     required String academicYearId,
     String? fromStr,
@@ -347,11 +348,13 @@ class AttendanceLocalDataSource {
         ..add(fromStr)
         ..add(toStr);
     }
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM $recordsTable WHERE $where',
-      args,
+    final rows = await _db.query(
+      recordsTable,
+      where: where.toString(),
+      whereArgs: args,
+      orderBy: 'attendance_date DESC',
     );
-    return (rows.first['c'] as int?) ?? 0;
+    return rows.map(AttendanceRecordRow.fromMap).toList(growable: false);
   }
 
   Future<AttendanceSessionRow?> _sessionByKey(

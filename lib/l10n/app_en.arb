@@ -1698,7 +1698,10 @@
   "presenceRangeWeek": "Week of {date}",
   "@presenceRangeWeek": {
     "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
-  },   "disciplinaryUnknownValue": "-",
+  },
+  "presenceOfflineSyncPendingTitle": "Sync in progress",
+  "presenceOfflineSyncPendingMessage": "Local attendance data isn't complete enough yet to compute a reliable statistic. Try again in a moment.",
+  "disciplinaryUnknownValue": "-",
    "disciplinaryCaseCreateAction": "New case",
    "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
    "disciplinaryCasesSummary": "{total} recorded cases - {open} open",

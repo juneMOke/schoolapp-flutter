@@ -29,8 +29,21 @@ class AttendanceOfflineBloc
     on<LoadDailyAttendanceRequested>(_onLoadDaily);
     on<RecordDailyAttendanceRequested>(_onRecordDaily);
     on<LoadLocalRateRequested>(_onLoadRate);
-    on<LoadStudentStatsRequested>(_onLoadStudentStats);
+    // Sérialisé (`sequential`) : le calcul enchaîne plusieurs await (lecture
+    // transferts, résolution classe, comptage sessions, absences détaillées) —
+    // sans ça, un changement rapide de période (double-tap) traiterait 2
+    // requêtes en concurrence et la plus lente pourrait écraser l'état avec un
+    // résultat périmé après la plus récente (pas de transformer par défaut =
+    // traitement concurrent, cf. package:bloc).
+    on<LoadStudentStatsRequested>(
+      _onLoadStudentStats,
+      transformer: _sequential(),
+    );
   }
+
+  /// Traite les événements un par un (asyncExpand) — pas de dépendance externe.
+  static EventTransformer<E> _sequential<E>() =>
+      (events, mapper) => events.asyncExpand(mapper);
 
   Future<void> _onLoadDaily(
     LoadDailyAttendanceRequested event,
@@ -95,7 +108,6 @@ class AttendanceOfflineBloc
     emit(const AttendanceOfflineLoading());
     final result = await _getStudentStats(
       studentId: event.studentId,
-      classroomId: event.classroomId,
       academicYearId: event.academicYearId,
       period: event.period,
       reference: event.reference,

@@ -151,7 +151,10 @@ class _DisciplinaryStudentDetailPageState
                         academicYearId: intent.academicYearId,
                         onCreateCase: () => _showCreateDialog(context),
                       ),
-                      StudentAttendanceSummaryTab(studentId: intent.studentId),
+                      StudentAttendanceSummaryTab(
+                        studentId: intent.studentId,
+                        academicYearId: intent.academicYearId,
+                      ),
                     ],
                   ),
                 ),

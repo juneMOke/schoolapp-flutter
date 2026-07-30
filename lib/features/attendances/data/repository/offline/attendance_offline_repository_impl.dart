@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/local_attendance_rate.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/student_attendance_stats.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/student_absence_entry.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
@@ -258,7 +259,6 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
   @override
   Future<Either<Failure, StudentAttendanceStats>> getStudentAttendanceStats({
     required String studentId,
-    required String classroomId,
     required String academicYearId,
     required StatsPeriod period,
     required DateTime reference,
@@ -271,25 +271,43 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
       // Dénominateur : jours appelés. Un élève transféré n'a PAS été appelé dans
       // sa classe courante depuis la rentrée → on somme sur ses intervalles
       // d'appartenance bornés par `transferred_at` (F6, ADR-004). Chemin rapide :
-      // aucun transfert (quasi-totalité) → une seule classe = comportement d'avant.
+      // aucun transfert (quasi-totalité) → sa classe courante composée
+      // (`ref_classroom_members`, CF3/CF4) = comportement d'avant.
       final transfers = await rosterDataSource.getStudentSyncedTransfers(
         studentId: studentId,
         academicYearId: academicYearId,
       );
-      final daysCalled = transfers.isEmpty
-          ? await localDataSource.countSessions(
-              classroomId: classroomId,
-              academicYearId: academicYearId,
-              fromStr: fromStr,
-              toStr: toStr,
-            )
-          : await _daysCalledByIntervals(
-              transfers: transfers,
-              academicYearId: academicYearId,
-              periodFrom: from,
-              periodTo: to,
-            );
-      final absences = await localDataSource.countStudentAbsences(
+      int daysCalled;
+      // Le chemin rapide (pas de transfert synchronisé) est le SEUL à dépendre
+      // de `ref_classroom_members` (résolution de la classe courante) : le
+      // chemin intervalles (F6) ne lit que `classroom_transfers` +
+      // `attendance_sessions`. Sert à ne gater le bootstrap roster ci-dessous
+      // que quand il est réellement dans la chaîne de calcul.
+      final requiresClassroomMembers = transfers.isEmpty;
+      if (requiresClassroomMembers) {
+        final classroomId = await rosterDataSource.getCurrentClassroomId(
+          studentId: studentId,
+          academicYearId: academicYearId,
+        );
+        // Pas (encore) de ligne membre locale pour cet élève cette année
+        // (roster pas encore pullé) : dénominateur inconnu, pas d'appel classe.
+        daysCalled = classroomId == null
+            ? 0
+            : await localDataSource.countSessions(
+                classroomId: classroomId,
+                academicYearId: academicYearId,
+                fromStr: fromStr,
+                toStr: toStr,
+              );
+      } else {
+        daysCalled = await _daysCalledByIntervals(
+          transfers: transfers,
+          academicYearId: academicYearId,
+          periodFrom: from,
+          periodTo: to,
+        );
+      }
+      final absenceRows = await localDataSource.getStudentAbsenceRecords(
         studentId: studentId,
         academicYearId: academicYearId,
         fromStr: fromStr,
@@ -298,10 +316,21 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
       // Invariant #7 : un chiffre n'est fiable qu'une fois l'année entière tirée
       // — côté appels ET côté transferts (un historique de transfert partiel
       // donnerait un dénominateur faux mais plausible, donc indétectable).
+      // Depuis la résolution interne de la classe courante (chemin rapide),
+      // `ref_classroom_members` entre aussi dans la chaîne : sans lui, un demi
+      // roster donnerait `classroomId == null` ⇒ daysCalled=0 alors que des
+      // absences réelles existent déjà → « aucun jour scolaire » trompeur au
+      // lieu d'un état « en attente de synchro ». Approximation assumée :
+      // `getSyncedAt` (≠ un vrai drapeau bootstrap dédié comme les 2 autres,
+      // qui n'existe pas encore côté roster) devient non-nul dès la 1ʳᵉ page
+      // reçue, pas seulement au roster complet — couvre le cas réaliste
+      // « jamais synchronisé du tout », pas un bootstrap partiel en cours.
       final bootstrapComplete =
           await syncMetaDao.getCursor(kAttendanceBootstrapResource) != null &&
           await syncMetaDao.getCursor(kClassroomTransfersBootstrapResource) !=
-              null;
+              null &&
+          (!requiresClassroomMembers ||
+              await syncMetaDao.getSyncedAt(kClassroomMembersResource) != null);
       final syncedAt = await syncMetaDao.getSyncedAt(kAttendanceResource);
 
       return Right(
@@ -310,7 +339,15 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
           from: from,
           to: to,
           daysCalled: daysCalled,
-          absences: absences,
+          entries: absenceRows
+              .map(
+                (r) => StudentAbsenceEntry(
+                  date: DateOnlyJsonHelper.fromJson(r.attendanceDate),
+                  reason: AbsenceReasonX.fromApiValue(r.absenceReason),
+                  reasonNote: r.absenceReasonNote,
+                ),
+              )
+              .toList(growable: false),
           bootstrapComplete: bootstrapComplete,
           syncedAt: syncedAt,
         ),

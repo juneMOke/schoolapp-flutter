@@ -6606,6 +6606,18 @@ abstract class AppLocalizations {
   /// **'Week of {date}'**
   String presenceRangeWeek(DateTime date);
 
+  /// No description provided for @presenceOfflineSyncPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync in progress'**
+  String get presenceOfflineSyncPendingTitle;
+
+  /// No description provided for @presenceOfflineSyncPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local attendance data isn\'t complete enough yet to compute a reliable statistic. Try again in a moment.'**
+  String get presenceOfflineSyncPendingMessage;
+
   /// No description provided for @disciplinaryUnknownValue.
   ///
   /// In en, this message translates to:
