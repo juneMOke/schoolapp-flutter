@@ -21,12 +21,10 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/get_atte
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_list_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/get_student_attendance_summary_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
@@ -803,7 +801,7 @@ Future<void> configureDependencies({
     ),
   );
 
-  // ── Attendance stats (résumé de présence par élève) ─────────────────────────
+  // ── Attendance stats (tableau de bord présence école-wide) ──────────────────
   getIt.registerLazySingleton<AttendanceStatsRemoteDataSource>(
     () => AttendanceStatsRemoteDataSource(getIt<Dio>()),
   );
@@ -812,18 +810,6 @@ Future<void> configureDependencies({
     () => AttendanceStatsRepositoryImpl(
       remoteDataSource: getIt<AttendanceStatsRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
-  );
-
-  getIt.registerFactory<GetStudentAttendanceSummaryUseCase>(
-    () =>
-        GetStudentAttendanceSummaryUseCase(getIt<AttendanceStatsRepository>()),
-  );
-
-  getIt.registerFactory<StudentAttendanceSummaryBloc>(
-    () => StudentAttendanceSummaryBloc(
-      getStudentAttendanceSummaryUseCase:
-          getIt<GetStudentAttendanceSummaryUseCase>(),
     ),
   );
 
