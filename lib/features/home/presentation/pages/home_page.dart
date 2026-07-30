@@ -273,30 +273,59 @@ class _HomePageView extends StatelessWidget {
         return const EnrollmentStatsDashboardScope(
           child: EnrollmentStatsDashboardPage(),
         );
+      // Key distinct par sous-menu : sans elle, Flutter réutilise le même
+      // Element `EnrollmentFeatureScope` (même type, même emplacement dans le
+      // switch) en basculant entre ces 3 pages — son State n'est alors jamais
+      // remonté, et le EnrollmentLocalListBloc qu'il fournit (résolu une
+      // seule fois dans initState) reste le MÊME pour les 3, faisant
+      // apparaître les résultats périmés d'une page sur les deux autres.
       case MenuConstants.preInscriptionsId:
-        return const EnrollmentFeatureScope(child: PreRegistrationsPage());
+        return const EnrollmentFeatureScope(
+          key: ValueKey(MenuConstants.preInscriptionsId),
+          child: PreRegistrationsPage(),
+        );
       case MenuConstants.reInscriptionsId:
-        return const EnrollmentFeatureScope(child: ReRegistrationsPage());
+        return const EnrollmentFeatureScope(
+          key: ValueKey(MenuConstants.reInscriptionsId),
+          child: ReRegistrationsPage(),
+        );
       case MenuConstants.premiereInscriptionId:
-        return const EnrollmentFeatureScope(child: FirstRegistrationPage());
+        return const EnrollmentFeatureScope(
+          key: ValueKey(MenuConstants.premiereInscriptionId),
+          child: FirstRegistrationPage(),
+        );
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(child: FacturationPage());
       case MenuConstants.financesDashboardId:
         return const FinanceStatsDashboardScope(
           child: FinanceStatsDashboardPage(),
         );
+      // Key distinct par sous-menu : même raison que pour EnrollmentFeatureScope
+      // ci-dessus — les 4 cas partagent ClassesFeatureScope (voire ClassesListPage,
+      // même type, seul l'intent diffère) au même emplacement du switch ; sans Key,
+      // Flutter réutiliserait le même State (donc les mêmes blocs, résultats de
+      // recherche et roster déjà chargé) en basculant entre Classes/Organisation/
+      // Liste classes/Liste disciplines.
       case MenuConstants.classesDashboardId:
-        return const ClassesFeatureScope(child: ClassesStatsDashboardPage());
+        return const ClassesFeatureScope(
+          key: ValueKey(MenuConstants.classesDashboardId),
+          child: ClassesStatsDashboardPage(),
+        );
       case MenuConstants.organisationId:
-        return const ClassesFeatureScope(child: ClassesOrganisationPage());
+        return const ClassesFeatureScope(
+          key: ValueKey(MenuConstants.organisationId),
+          child: ClassesOrganisationPage(),
+        );
       case MenuConstants.classesListId:
         return const ClassesFeatureScope(
+          key: ValueKey(MenuConstants.classesListId),
           child: ClassesListPage(intent: ClassesListIntent.classesList()),
         );
       case MenuConstants.presencesId:
         return const AttendanceFeatureScope(child: PresencesPage());
       case MenuConstants.disciplinesListId:
         return const ClassesFeatureScope(
+          key: ValueKey(MenuConstants.disciplinesListId),
           child: ClassesListPage(intent: ClassesListIntent.disciplinesList()),
         );
       case MenuConstants.disciplinesDashboardId:
