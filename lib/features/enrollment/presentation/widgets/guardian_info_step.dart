@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/relationship_type.dart';
@@ -44,12 +46,15 @@ class GuardianInfoStep extends StatefulWidget {
 }
 
 class GuardianInfoStepState extends State<GuardianInfoStep> {
-  static const String _draftParentIdPrefix = 'draft-parent-';
-
   late List<ParentSummary> _editableParentDetails;
   late Map<String, ParentItemValue> _currentValuesByParentId;
   late Map<String, ParentItemValue> _initialValuesByParentId;
   late Map<String, ParentItemFormState> _itemStatesByParentId;
+
+  /// Ids des tuteurs rattachés via "Rechercher un parent" cette session (id
+  /// RÉEL d'une fiche existante) — pilote le verrouillage identité (UI) et
+  /// `ConfirmParentDraft.isLinkedToExisting` (garde d'unicité téléphone).
+  final Set<String> _linkedFromSearchParentIds = <String>{};
 
   bool _isBatchSaving = false;
   bool _awaitingDraftSave = false;
@@ -87,8 +92,11 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   }
 
   ParentSummary _buildDraftParent() {
-    final draftId =
-        '$_draftParentIdPrefix${DateTime.now().microsecondsSinceEpoch}';
+    // Id RÉEL et STABLE (pas un timestamp) : reste identique à travers les
+    // re-sauvegardes de cette ligne UI, condition requise par la garde
+    // d'unicité téléphone (sinon un ré-envoi se comparerait à lui-même sous
+    // un id différent → faux conflit).
+    final draftId = getIt<IdGenerator>().newId();
     return ParentSummary(
       id: draftId,
       firstName: '',
@@ -327,8 +335,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       return;
     }
 
-    _awaitingDraftSave = true;
-    _isBatchSaving = true;
+    setState(() {
+      _awaitingDraftSave = true;
+      _isBatchSaving = true;
+    });
     _onSavingChanged(true);
     context.read<EnrollmentOfflineBloc>().add(
       SaveDraftGuardiansRequested(
@@ -338,12 +348,22 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     );
   }
 
+  /// Exclut les tuteurs incomplets (ex. la ligne vide auto-créée à l'ouverture
+  /// d'un wizard sans tuteur, jamais remplie) des écritures déclenchées SANS
+  /// passer par la garde `_isValid` de `_onSave()` — c'est le cas de
+  /// `_onSearchParent`/`_onRemoveGuardian`, qui sauvegardent immédiatement.
+  /// Sans ce filtre, une ligne vide (`phoneNumber: ''`) atteindrait la garde
+  /// d'unicité téléphone et soit polluerait `parents` d'une fiche vide, soit
+  /// ferait échouer un rattachement légitime avec un conflit incompréhensible
+  /// dès qu'une 2ᵉ ligne vide existe ailleurs en base.
   List<ConfirmParentDraft> _buildConfirmParentDrafts() {
     return _editableParentDetails
-        .map((parent) => _currentValuesByParentId[parent.id])
-        .whereType<ParentItemValue>()
-        .map(
-          (value) => ConfirmParentDraft(
+        .map((parent) {
+          final value = _currentValuesByParentId[parent.id];
+          if (value == null || !value.isValid) return null;
+          return ConfirmParentDraft(
+            id: parent.id,
+            isLinkedToExisting: _linkedFromSearchParentIds.contains(parent.id),
             firstName: value.firstName.trim(),
             lastName: value.lastName.trim(),
             surname: value.surname.trim().isEmpty ? null : value.surname.trim(),
@@ -352,18 +372,19 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
                 ? null
                 : _normalizeEmailForApi(value.email),
             relationshipType: value.relationshipType.name.toUpperCase(),
-          ),
-        )
+          );
+        })
+        .whereType<ConfirmParentDraft>()
         .toList(growable: false);
   }
 
   void _onDraftSaved() {
-    _awaitingDraftSave = false;
-    _isBatchSaving = false;
+    setState(() {
+      _awaitingDraftSave = false;
+      _isBatchSaving = false;
+      if (_showValidationHints) _showValidationHints = false;
+    });
     _onSavingChanged(false);
-    if (_showValidationHints) {
-      setState(() => _showValidationHints = false);
-    }
     AppSnackBar.showSuccess(
       context,
       AppLocalizations.of(context)!.academicInfoSaveSuccess,
@@ -371,17 +392,37 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     widget.onRefreshRequested?.call();
   }
 
+  // NB : les mutations de _isBatchSaving/_awaitingDraftSave DOIVENT passer par
+  // setState() ici — sans ça, GuardianInfoStepState.build() n'est jamais
+  // ré-invoqué après une erreur (contrairement au chemin succès ci-dessus, qui
+  // se "raccroche" au setState() déjà programmé par le flux qui a déclenché la
+  // sauvegarde) : l'AbsorbPointer + le spinner de GuardianInfoStepBody restent
+  // figés indéfiniment alors que la sauvegarde est en réalité terminée.
   void _onDraftError(String message) {
-    _awaitingDraftSave = false;
-    _isBatchSaving = false;
+    setState(() {
+      _awaitingDraftSave = false;
+      _isBatchSaving = false;
+    });
     _onSavingChanged(false);
+  }
+
+  /// Doublon de téléphone (garde d'unicité de l'étape Tuteurs) : seul cas où
+  /// cette étape affiche elle-même le message d'erreur — `_onDraftError`
+  /// reste muet pour les échecs génériques (déjà couverts par le toast
+  /// générique de `EnrollmentStepperScope`, en amont).
+  void _onGuardianPhoneConflict(String message) {
+    setState(() {
+      _awaitingDraftSave = false;
+      _isBatchSaving = false;
+    });
+    _onSavingChanged(false);
+    AppSnackBar.showError(context, message);
   }
 
   void _onAddGuardian() {
     if (!widget.isEditable || _isBatchSaving) return;
 
-    final draftId =
-        '$_draftParentIdPrefix${DateTime.now().microsecondsSinceEpoch}';
+    final draftId = getIt<IdGenerator>().newId();
     final draftParent = ParentSummary(
       id: draftId,
       firstName: '',
@@ -416,6 +457,62 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
+  Future<void> _onSearchParent() async {
+    if (!widget.isEditable || _isBatchSaving) return;
+
+    final found = await showParentSearchDialog(context: context);
+    if (!mounted || found == null) return;
+
+    final alreadyAdded = _editableParentDetails.any(
+      (parent) => parent.id == found.id,
+    );
+    if (alreadyAdded) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.guardianSearchAlreadyAddedError,
+      );
+      return;
+    }
+
+    final parentSummary = ParentSummary(
+      id: found.id, // id RÉEL (existant) ⇒ marque le lien explicite
+      firstName: found.firstName,
+      lastName: found.lastName,
+      surname: found.surname,
+      identificationNumber: found.identificationNumber ?? '',
+      phoneNumber: found.phoneNumber,
+      email: found.email ?? '',
+      relationshipType: RelationshipType.guardian,
+    );
+
+    setState(() {
+      _editableParentDetails = <ParentSummary>[
+        ..._editableParentDetails,
+        parentSummary,
+      ];
+      _currentValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
+        parentSummary,
+      );
+      _initialValuesByParentId[parentSummary.id] = ParentItemValue.fromParent(
+        parentSummary,
+      );
+      _itemStatesByParentId[parentSummary.id] = ParentItemFormState(
+        valid: ParentItemValue.fromParent(parentSummary).isValid,
+        dirty: false,
+        changedFields: const <String, bool>{},
+      );
+      _linkedFromSearchParentIds.add(parentSummary.id);
+      _expandedParentId = parentSummary.id;
+      _primaryParentId ??= parentSummary.id;
+    });
+
+    _recomputeFormState();
+    // Rattachement structurel (comme la suppression) : sauvegarde immédiate,
+    // sans attendre un clic « Enregistrer » qui resterait grisé (le nouveau
+    // tuteur est déjà valide mais pas "dirty" au sens d'une édition de champ).
+    _dispatchDraftGuardians();
+  }
+
   void _onRemoveGuardian(String parentId) {
     if (!widget.isEditable || _isBatchSaving) return;
 
@@ -431,6 +528,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       _currentValuesByParentId.remove(parentId);
       _initialValuesByParentId.remove(parentId);
       _itemStatesByParentId.remove(parentId);
+      _linkedFromSearchParentIds.remove(parentId);
 
       if (_expandedParentId == parentId) {
         _expandedParentId = _editableParentDetails.isNotEmpty
@@ -489,11 +587,13 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       isAwaiting: () => _awaitingDraftSave,
       onSaved: _onDraftSaved,
       onError: _onDraftError,
+      onGuardianPhoneConflict: _onGuardianPhoneConflict,
       child: GuardianInfoStepBody(
         parentDetails: _editableParentDetails,
         onItemStateChanged: _onParentItemStateChanged,
         onItemValueChanged: _onParentItemValueChanged,
         onAddParent: _onAddGuardian,
+        onSearchParent: _onSearchParent,
         onRemoveParent: _onRemoveGuardianRequested,
         onOpenParent: _onOpenParent,
         onPrimaryParentChanged: _onPrimaryParentChanged,
@@ -504,6 +604,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         showInlineSaveButton: widget.showInlineSaveButton,
         onSave: _onSave,
         isEditable: widget.isEditable,
+        identityLockedParentIds: _linkedFromSearchParentIds,
       ),
     );
   }

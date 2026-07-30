@@ -255,7 +255,11 @@ class AppConstants {
   // est réutilisée mais change de nature de curseur : purge du curseur hérité
   // (comme v11) pour repartir d'un bootstrap propre, sans dépendre d'un rejet
   // 400 serveur pour s'auto-guérir.
-  static const int offlineDbSchemaVersion = 16;
+  // v17 (2026-07-30) : Inscription — recherche de tuteur existant (étape
+  // Tuteurs). Index composé (nom, prénom) pour accélérer le LIKE de
+  // recherche. L'unicité du téléphone reste APPLICATIVE (DAO), pas de UNIQUE
+  // INDEX SQL (risque de casser la migration sur des doublons hérités).
+  static const int offlineDbSchemaVersion = 17;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

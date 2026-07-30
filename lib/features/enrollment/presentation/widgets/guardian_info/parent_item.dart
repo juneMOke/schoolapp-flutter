@@ -25,6 +25,10 @@ class ParentItem extends StatefulWidget {
   final VoidCallback? onRemoveRequested;
   final bool isEditable;
 
+  /// true si ce tuteur a été rattaché via "Rechercher un parent" cette
+  /// session — verrouille les champs d'identité (voir [GuardianFieldsGrid]).
+  final bool identityLocked;
+
   const ParentItem({
     super.key,
     required this.parent,
@@ -36,6 +40,7 @@ class ParentItem extends StatefulWidget {
     this.onValueChanged,
     this.onRemoveRequested,
     this.isEditable = true,
+    this.identityLocked = false,
   });
 
   @override
@@ -262,6 +267,7 @@ class _ParentItemState extends State<ParentItem> {
                 isEditable: widget.isEditable,
                 isPrimary: widget.isPrimary,
                 onPrimaryChanged: widget.onPrimaryChanged,
+                identityReadOnly: widget.identityLocked,
               ),
             ),
           ],

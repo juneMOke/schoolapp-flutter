@@ -142,7 +142,14 @@ class EnrollmentDraftDao {
         enrollment.toMap()..['sync_status'] = SyncState.draft.dbValue,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      await _replaceParentsIn(txn, student.id, parents);
+      // RE/PRE : dédup fratrie silencieuse par téléphone (chemin historique,
+      // délibérément non concerné par la garde d'unicité de l'étape Tuteurs).
+      await _replaceParentsIn(
+        txn,
+        student.id,
+        parents,
+        enforcePhoneUniqueness: false,
+      );
       return true;
     });
   }
@@ -181,35 +188,53 @@ class EnrollmentDraftDao {
   }
 
   /// Remplace les tuteurs d'un draft (étape Tuteurs) : réétablit les liens
-  /// `student_parent` de l'élève et upsert les parents (get-or-create par
-  /// téléphone). Un parent créé naît **DRAFT** ; un parent existant (fratrie,
-  /// éventuellement déjà synchro) voit ses champs mis à jour mais **n'est jamais
-  /// rétrogradé** en DRAFT.
+  /// `student_parent` de l'élève et upsert les parents. [enforcePhoneUniqueness]
+  /// (true depuis l'étape Tuteurs interactive) bascule sur
+  /// `upsertDraftGuardianParent` : téléphone en doublon avec un AUTRE parent
+  /// → `ParentPhoneConflictException` (propage hors de la transaction,
+  /// rollback automatique) ; tuteur explicitement lié via la recherche
+  /// (`ParentDraft.linkedToExisting`) → fiche existante jamais réécrite.
+  /// `false` (défaut, [seedDraft] RE/PRE) garde le comportement historique
+  /// `upsertParentByPhone` (get-or-create par téléphone, dédup fratrie
+  /// silencieuse). Un parent créé naît **DRAFT** ; un parent existant voit ses
+  /// champs mis à jour mais **n'est jamais rétrogradé** en DRAFT.
   Future<void> replaceDraftParents(
     String studentId,
     List<ParentDraft> parents, {
     required int nowMs,
+    bool enforcePhoneUniqueness = false,
   }) async {
-    await _db.transaction((txn) => _replaceParentsIn(txn, studentId, parents));
+    await _db.transaction(
+      (txn) => _replaceParentsIn(
+        txn,
+        studentId,
+        parents,
+        enforcePhoneUniqueness: enforcePhoneUniqueness,
+      ),
+    );
   }
 
   /// Corps partagé du remplacement des tuteurs (étape Tuteurs et [seedDraft]).
   Future<void> _replaceParentsIn(
     DatabaseExecutor txn,
     String studentId,
-    List<ParentDraft> parents,
-  ) async {
+    List<ParentDraft> parents, {
+    required bool enforcePhoneUniqueness,
+  }) async {
     await txn.delete(
       'student_parent',
       where: 'student_id = ?',
       whereArgs: [studentId],
     );
     for (final draft in parents) {
-      final resolvedId = await upsertParentByPhone(
-        txn,
-        draft.parent,
-        asDraft: true,
-      );
+      final resolvedId = enforcePhoneUniqueness
+          ? await upsertDraftGuardianParent(
+              txn,
+              draft.parent,
+              linkedToExisting: draft.linkedToExisting,
+              asDraft: true,
+            )
+          : await upsertParentByPhone(txn, draft.parent, asDraft: true);
       await txn.insert('student_parent', {
         'student_id': studentId,
         'parent_id': resolvedId,

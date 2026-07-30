@@ -2,8 +2,18 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 
-/// Draft d'un tuteur saisi (le repo générera l'uuid provisoire).
+/// Draft d'un tuteur saisi.
 class ConfirmParentDraft {
+  /// Id stable porté par l'UI (miné côté client à la création du tuteur, ou
+  /// id réel d'un parent existant choisi via "Rechercher un parent"). `null`
+  /// seulement pour les seeds RE/PRE (`EnrollmentConfirmDraftBuilder`) :
+  /// `seedDraft` l'ignore et garde son comportement historique (mint son
+  /// propre uuid, dédup par téléphone via `upsertParentByPhone`).
+  final String? id;
+
+  /// true si ce tuteur a été choisi via "Rechercher un parent" (l'id
+  /// référence une fiche RÉELLE déjà en base, jamais réécrite).
+  final bool isLinkedToExisting;
   final String firstName;
   final String lastName;
   final String? surname;
@@ -12,6 +22,8 @@ class ConfirmParentDraft {
   final String relationshipType; // valeur API SCREAMING_SNAKE
 
   const ConfirmParentDraft({
+    this.id,
+    this.isLinkedToExisting = false,
     required this.firstName,
     required this.lastName,
     this.surname,
@@ -194,6 +206,17 @@ abstract class EnrollmentOfflineRepository {
   Future<Either<Failure, Unit>> saveDraftGuardians({
     required String studentId,
     required List<ConfirmParentDraft> parents,
+  });
+
+  /// Recherche de tuteurs déjà connus en local (popin "Rechercher un
+  /// parent" de l'étape Tuteurs) : au moins un critère requis, sinon liste
+  /// vide sans requête SQL.
+  Future<Either<Failure, List<LocalParent>>> searchParents({
+    String? firstName,
+    String? lastName,
+    String? surname,
+    String? phoneNumber,
+    int limit = 20,
   });
 
   /// Détail du brouillon (élève + tuteurs + documents). NotFound si absent.

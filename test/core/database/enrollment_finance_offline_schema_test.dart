@@ -65,6 +65,7 @@ void main() {
         'idx_students_phone',
         'idx_enrollments_sync_status',
         'idx_parents_phone',
+        'idx_parents_names',
         'idx_student_charges_student_fee',
         'idx_payments_client_uuid',
         // Tables de référence Inscription (RE/PRE)

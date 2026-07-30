@@ -355,6 +355,21 @@ Future<void> migrateOfflineDatabase(
       await db.delete('sync_meta', where: "resource = 'classrooms'");
     }
   }
+  if (oldVersion < 17) {
+    // v17 — Inscription : recherche de tuteur existant (étape Tuteurs, popin
+    // "Rechercher un parent"). Index composé (nom, prénom) pour accélérer le
+    // LIKE de recherche. L'unicité du téléphone reste APPLICATIVE (DAO, cf.
+    // upsertDraftGuardianParent) — PAS de UNIQUE INDEX SQL, qui échouerait à
+    // la migration si des doublons hérités existent déjà (fratrie/pull
+    // serveur non garanti unique).
+    if (await _hasTable(db, 'parents')) {
+      await db.execute(
+        _indexAsIfNotExists(
+          'CREATE INDEX idx_parents_names ON parents(last_name, first_name)',
+        ),
+      );
+    }
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

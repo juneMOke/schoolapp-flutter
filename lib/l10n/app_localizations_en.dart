@@ -1691,6 +1691,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get guardianSearchAction => 'Search for a guardian';
+
+  @override
+  String get guardianSearchDialogTitle => 'Search for an existing guardian';
+
+  @override
+  String get guardianSearchHint =>
+      'Enter at least one criterion (name or phone number)';
+
+  @override
+  String get guardianSearchEmptyTitle => 'No guardian found';
+
+  @override
+  String get guardianSearchEmptyDescription =>
+      'No guardian matches these criteria. Check your input or add them as a new guardian.';
+
+  @override
+  String get guardianSearchAlreadyAddedError =>
+      'This guardian has already been added to this enrollment.';
+
+  @override
+  String get guardianSearchIdentityLockedHint =>
+      'Details from an existing record — not editable here.';
+
+  @override
+  String get guardianSearchErrorRetry => 'Retry';
+
+  @override
   String get schoolFees => 'School Fees';
 
   @override

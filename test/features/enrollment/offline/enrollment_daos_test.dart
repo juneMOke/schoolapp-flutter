@@ -641,6 +641,243 @@ void main() {
       expect(links.first['relationship_type'], 'FATHER');
     });
 
+    group(
+      'replaceDraftParents avec enforcePhoneUniqueness (étape Tuteurs)',
+      () {
+        test(
+          'téléphone en conflit avec un AUTRE parent (élève différent, saisie '
+          'non liée) → ParentPhoneConflictException, transaction annulée',
+          () async {
+            await draftDao.insertDraftStudent(
+              student(id: 's1', phone: '+243900'),
+            );
+            await draftDao.replaceDraftParents(
+              's1',
+              [parent(id: 'p1', phone: '+243111')],
+              nowMs: 200,
+              enforcePhoneUniqueness: true,
+            );
+
+            await draftDao.insertDraftStudent(
+              student(id: 's2', phone: '+243901'),
+            );
+            await expectLater(
+              () => draftDao.replaceDraftParents(
+                's2',
+                [
+                  parent(
+                    id: 'p2',
+                    phone: '+243111',
+                  ), // même téléphone, id différent
+                ],
+                nowMs: 300,
+                enforcePhoneUniqueness: true,
+              ),
+              throwsA(isA<ParentPhoneConflictException>()),
+            );
+
+            // Rollback : aucun lien créé pour s2, aucune 2e ligne `parents`.
+            expect(
+              await db.query(
+                'student_parent',
+                where: 'student_id = ?',
+                whereArgs: ['s2'],
+              ),
+              isEmpty,
+            );
+            expect(await db.query('parents'), hasLength(1));
+          },
+        );
+
+        test('linkedToExisting: true réutilise la fiche existante sans la '
+            'réécrire (rattachement explicite via la recherche)', () async {
+          await draftDao.insertDraftStudent(
+            student(id: 's1', phone: '+243900'),
+          );
+          await draftDao.replaceDraftParents(
+            's1',
+            [parent(id: 'p1', phone: '+243111')],
+            nowMs: 200,
+            enforcePhoneUniqueness: true,
+          );
+
+          await draftDao.insertDraftStudent(
+            student(id: 's2', phone: '+243901'),
+          );
+          await draftDao.replaceDraftParents(
+            's2',
+            [
+              const ParentDraft(
+                parent: ParentLocalModel(
+                  id: 'p1',
+                  firstName: 'Nom local non transmis',
+                  lastName: 'Ignoré',
+                  phoneNumber: '+243111',
+                  updatedAt: 300,
+                ),
+                relationshipType: 'FATHER',
+                linkedToExisting: true,
+              ),
+            ],
+            nowMs: 300,
+            enforcePhoneUniqueness: true,
+          );
+
+          final p = await db.query(
+            'parents',
+            where: 'id = ?',
+            whereArgs: ['p1'],
+          );
+          expect(p.single['first_name'], 'Sarah'); // fiche existante inchangée
+          expect(await db.query('student_parent'), hasLength(2));
+        });
+
+        test(
+          're-sauvegarde de la même ligne UI (même id, même téléphone) : pas '
+          'de conflit, upsert par id',
+          () async {
+            await draftDao.insertDraftStudent(
+              student(id: 's1', phone: '+243900'),
+            );
+            await draftDao.replaceDraftParents(
+              's1',
+              [parent(id: 'p1', phone: '+243111')],
+              nowMs: 200,
+              enforcePhoneUniqueness: true,
+            );
+
+            await draftDao.replaceDraftParents(
+              's1',
+              [
+                const ParentDraft(
+                  parent: ParentLocalModel(
+                    id: 'p1',
+                    firstName: 'Sarah2',
+                    lastName: 'Moke',
+                    phoneNumber: '+243111',
+                    updatedAt: 300,
+                  ),
+                  relationshipType: 'MOTHER',
+                ),
+              ],
+              nowMs: 300,
+              enforcePhoneUniqueness: true,
+            );
+
+            final p = await db.query('parents');
+            expect(p, hasLength(1));
+            expect(p.single['first_name'], 'Sarah2');
+          },
+        );
+
+        test(
+          'linkedToExisting: true MAIS la fiche a disparu (remap/suppression '
+          'concurrente) → auto-guérison : recrée la fiche au lieu de laisser '
+          'un lien orphelin silencieux',
+          () async {
+            await draftDao.insertDraftStudent(
+              student(id: 's1', phone: '+243900'),
+            );
+            // AUCUNE fiche 'p1' en base (simule une disparition entre la
+            // sélection dans la popin et cette écriture — ex. remap d'ACK).
+            await draftDao.replaceDraftParents(
+              's1',
+              [
+                const ParentDraft(
+                  parent: ParentLocalModel(
+                    id: 'p1',
+                    firstName: 'Sarah',
+                    lastName: 'Moke',
+                    phoneNumber: '+243111',
+                    updatedAt: 300,
+                  ),
+                  relationshipType: 'MOTHER',
+                  linkedToExisting: true,
+                ),
+              ],
+              nowMs: 300,
+              enforcePhoneUniqueness: true,
+            );
+
+            // La fiche est recréée (pas de perte silencieuse du tuteur) et le
+            // lien student_parent est bien posé.
+            final p = await db.query(
+              'parents',
+              where: 'id = ?',
+              whereArgs: ['p1'],
+            );
+            expect(p, hasLength(1));
+            expect(p.single['first_name'], 'Sarah');
+            expect(await db.query('student_parent'), hasLength(1));
+          },
+        );
+
+        test(
+          'comparaison de téléphone normalisée : espaces/tirets/parenthèses '
+          'ignorés (même numéro sous une autre mise en forme → conflit)',
+          () async {
+            await draftDao.insertDraftStudent(
+              student(id: 's1', phone: '+243900'),
+            );
+            await draftDao.replaceDraftParents(
+              's1',
+              [parent(id: 'p1', phone: '+243 111 222 333')],
+              nowMs: 200,
+              enforcePhoneUniqueness: true,
+            );
+
+            await draftDao.insertDraftStudent(
+              student(id: 's2', phone: '+243901'),
+            );
+            await expectLater(
+              () => draftDao.replaceDraftParents(
+                's2',
+                [
+                  parent(
+                    id: 'p2',
+                    phone: '+243-111-222-333',
+                  ), // même numéro, mise en forme différente
+                ],
+                nowMs: 300,
+                enforcePhoneUniqueness: true,
+              ),
+              throwsA(isA<ParentPhoneConflictException>()),
+            );
+
+            expect(await db.query('parents'), hasLength(1));
+          },
+        );
+
+        test(
+          'conflit INTRA-formulaire : deux tuteurs du MÊME appel partageant le '
+          'même téléphone → le second lève ParentPhoneConflictException '
+          '(lecture des propres écritures de la transaction)',
+          () async {
+            await draftDao.insertDraftStudent(
+              student(id: 's1', phone: '+243900'),
+            );
+
+            await expectLater(
+              () => draftDao.replaceDraftParents(
+                's1',
+                [
+                  parent(id: 'p1', phone: '+243111'),
+                  parent(id: 'p2', phone: '+243111'), // même téléphone que p1
+                ],
+                nowMs: 200,
+                enforcePhoneUniqueness: true,
+              ),
+              throwsA(isA<ParentPhoneConflictException>()),
+            );
+
+            // Transaction annulée : aucun des deux tuteurs n'est persisté.
+            expect(await db.query('parents'), isEmpty);
+            expect(await db.query('student_parent'), isEmpty);
+          },
+        );
+      },
+    );
+
     test(
       'finalizeDraft : DRAFT→PENDING_SYNC (élève+inscription+tuteurs), 1 '
       'outbox à id déterministe, apparaît dans les listes, idempotent',
@@ -781,6 +1018,52 @@ void main() {
       expect(listed, hasLength(1));
       expect(listed.first.syncState, SyncState.draft);
     });
+
+    test(
+      'NON affecté par la garde d\'unicité de l\'étape Tuteurs : deux seeds '
+      '(fratrie) partageant le même téléphone tuteur restent fusionnés '
+      'silencieusement (upsertParentByPhone, comportement historique)',
+      () async {
+        await draftDao.seedDraft(
+          student: seededStudent(),
+          enrollment: seededEnrollment(),
+          parents: [parent(id: 'p1', phone: '+243111')],
+          nowMs: 100,
+        );
+        await draftDao.seedDraft(
+          student: const StudentLocalModel(
+            id: 's2',
+            firstName: 'Awa',
+            lastName: 'Moke',
+            surname: 'Cadette',
+            gender: 'FEMALE',
+            dateOfBirth: '2017-04-02',
+            birthPlace: 'Kinshasa',
+            nationality: 'CD',
+            city: 'Kinshasa',
+            matriculationNumber: 'KIN-2025-0002',
+            updatedAt: 100,
+          ),
+          enrollment: const EnrollmentLocalModel(
+            id: 'e2',
+            studentId: 's2',
+            enrollmentType: 'RE_ENROLLMENT',
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2026',
+            schoolLevelId: 'lvl-1',
+            enrollmentDate: '2026-07-08',
+            sourceRef: 'KIN-2025-0002',
+            updatedAt: 100,
+          ),
+          parents: [parent(id: 'p2', phone: '+243111')], // même téléphone
+          nowMs: 200,
+        );
+
+        // Un seul parent en base : dédup fratrie silencieuse, aucune exception.
+        expect(await db.query('parents'), hasLength(1));
+        expect(await db.query('student_parent'), hasLength(2));
+      },
+    );
 
     test('re-save identité APRÈS seed : adresse, matricule, antécédents et '
         'source_ref conservés (sémantique préservante)', () async {

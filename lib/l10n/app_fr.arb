@@ -801,6 +801,14 @@
       }
     }
   },
+  "guardianSearchAction": "Rechercher un parent",
+  "guardianSearchDialogTitle": "Rechercher un parent existant",
+  "guardianSearchHint": "Renseignez au moins un critère (nom ou téléphone)",
+  "guardianSearchEmptyTitle": "Aucun parent trouvé",
+  "guardianSearchEmptyDescription": "Aucun parent ne correspond à ces critères. Vérifiez la saisie ou ajoutez-le comme nouveau tuteur.",
+  "guardianSearchAlreadyAddedError": "Ce parent est déjà ajouté à cette inscription.",
+  "guardianSearchIdentityLockedHint": "Informations issues d'une fiche existante — non modifiables ici.",
+  "guardianSearchErrorRetry": "Réessayer",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",

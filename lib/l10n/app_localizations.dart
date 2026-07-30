@@ -2840,6 +2840,54 @@ abstract class AppLocalizations {
   /// **'Failed to remove guardian: {message}'**
   String guardianUnlinkError(String message);
 
+  /// No description provided for @guardianSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a guardian'**
+  String get guardianSearchAction;
+
+  /// No description provided for @guardianSearchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for an existing guardian'**
+  String get guardianSearchDialogTitle;
+
+  /// No description provided for @guardianSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one criterion (name or phone number)'**
+  String get guardianSearchHint;
+
+  /// No description provided for @guardianSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No guardian found'**
+  String get guardianSearchEmptyTitle;
+
+  /// No description provided for @guardianSearchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No guardian matches these criteria. Check your input or add them as a new guardian.'**
+  String get guardianSearchEmptyDescription;
+
+  /// No description provided for @guardianSearchAlreadyAddedError.
+  ///
+  /// In en, this message translates to:
+  /// **'This guardian has already been added to this enrollment.'**
+  String get guardianSearchAlreadyAddedError;
+
+  /// No description provided for @guardianSearchIdentityLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Details from an existing record — not editable here.'**
+  String get guardianSearchIdentityLockedHint;
+
+  /// No description provided for @guardianSearchErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get guardianSearchErrorRetry;
+
   /// No description provided for @schoolFees.
   ///
   /// In en, this message translates to:

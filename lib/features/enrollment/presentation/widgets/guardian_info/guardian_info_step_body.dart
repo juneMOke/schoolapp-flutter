@@ -16,6 +16,7 @@ class GuardianInfoStepBody extends StatelessWidget {
   final ParentItemStateChanged onItemStateChanged;
   final ParentItemValueChanged onItemValueChanged;
   final VoidCallback? onAddParent;
+  final VoidCallback? onSearchParent;
   final ValueChanged<String>? onRemoveParent;
   final ValueChanged<String>? onOpenParent;
   final ValueChanged<String>? onPrimaryParentChanged;
@@ -27,12 +28,17 @@ class GuardianInfoStepBody extends StatelessWidget {
   final VoidCallback onSave;
   final bool isEditable;
 
+  /// Ids des tuteurs rattachés via "Rechercher un parent" cette session —
+  /// leurs champs d'identité s'affichent en lecture seule (voir [ParentItem]).
+  final Set<String> identityLockedParentIds;
+
   const GuardianInfoStepBody({
     super.key,
     required this.parentDetails,
     required this.onItemStateChanged,
     required this.onItemValueChanged,
     this.onAddParent,
+    this.onSearchParent,
     this.onRemoveParent,
     this.onOpenParent,
     this.onPrimaryParentChanged,
@@ -43,6 +49,7 @@ class GuardianInfoStepBody extends StatelessWidget {
     this.showInlineSaveButton = true,
     required this.onSave,
     this.isEditable = true,
+    this.identityLockedParentIds = const <String>{},
   });
 
   @override
@@ -109,6 +116,7 @@ class GuardianInfoStepBody extends StatelessWidget {
                         ? () => onRemoveParent?.call(parent.id)
                         : null,
                     isEditable: isEditable,
+                    identityLocked: identityLockedParentIds.contains(parent.id),
                   ),
                 );
               }),
@@ -186,21 +194,48 @@ class GuardianInfoStepBody extends StatelessWidget {
         );
 
         if (stack) {
-          // Téléphone : titre pleine largeur puis bouton dessous — le titre
-          // n'est plus écrasé par le bouton au long libellé.
+          // Téléphone : titre pleine largeur puis boutons empilés dessous —
+          // le titre n'est plus écrasé par les boutons au long libellé.
+          final searchButton = SecondaryButton(
+            onPressed: canAddParent ? onSearchParent : null,
+            icon: Icons.search_rounded,
+            label: l10n.guardianSearchAction,
+            fullWidth: true,
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               titleBlock,
               const SizedBox(height: AppSpacing.md),
+              searchButton,
+              const SizedBox(height: AppSpacing.sm),
               addButton,
             ],
           );
         }
 
+        // En ligne : le bouton de recherche reste compact (icône + tooltip)
+        // pour laisser la place au libellé complet du bouton d'ajout (action
+        // principale) sans faire déborder la ligne.
+        final searchIconButton = Tooltip(
+          message: l10n.guardianSearchAction,
+          child: IconButton.filledTonal(
+            onPressed: canAddParent ? onSearchParent : null,
+            icon: const Icon(Icons.search_rounded),
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.08),
+              foregroundColor: AppColors.bleuArdoise,
+              shape: const StadiumBorder(),
+              minimumSize: const Size.square(AppSpacing.xxxl),
+            ),
+          ),
+        );
+
         return Row(
           children: [
             Expanded(child: titleBlock),
+            const SizedBox(width: AppSpacing.sm),
+            searchIconButton,
             const SizedBox(width: AppSpacing.md),
             addButton,
           ],

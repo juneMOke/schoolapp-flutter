@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
 
@@ -20,6 +21,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   final EnrollmentReadDao _readDao;
   final EnrollmentDraftDao _draftDao;
   final EnrollmentSeedDao _seedDao;
+  final ParentSearchDao _parentSearchDao;
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
   final CurrentUserContext? _currentUser;
@@ -29,6 +31,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     required EnrollmentReadDao readDao,
     required EnrollmentDraftDao draftDao,
     required EnrollmentSeedDao seedDao,
+    required ParentSearchDao parentSearchDao,
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
     CurrentUserContext? currentUser,
@@ -36,6 +39,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   }) : _readDao = readDao,
        _draftDao = draftDao,
        _seedDao = seedDao,
+       _parentSearchDao = parentSearchDao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
        _currentUser = currentUser,
@@ -122,6 +126,10 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
           emitDocument: seed.emitDocument,
           updatedAt: now,
         ),
+        // RE/PRE : id/isLinkedToExisting du draft (portés uniquement par
+        // l'étape Tuteurs interactive) volontairement IGNORÉS ici — le seed
+        // mint toujours son propre uuid et garde la dédup fratrie silencieuse
+        // par téléphone (`enforcePhoneUniqueness: false` dans `seedDraft`).
         parents: seed.parents
             .map(
               (p) => ParentDraft(
@@ -261,30 +269,75 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
         }, nowMs: _now()),
   );
 
+  /// Étape Tuteurs : id porté par l'UI (jamais miné ici, contrairement à
+  /// [seedDraft]), garde d'unicité téléphone ACTIVE (`enforcePhoneUniqueness`)
+  /// — un doublon avec un autre parent devient un
+  /// [DuplicateParentPhoneFailure] au lieu d'une fusion silencieuse.
   @override
   Future<Either<Failure, Unit>> saveDraftGuardians({
     required String studentId,
     required List<ConfirmParentDraft> parents,
-  }) => _guardUnit(() {
+  }) async {
     final now = _now();
-    final drafts = parents
-        .map(
-          (p) => ParentDraft(
-            parent: ParentLocalModel(
-              id: _idGenerator.newId(),
-              firstName: p.firstName,
-              lastName: p.lastName,
-              surname: p.surname,
-              phoneNumber: p.phoneNumber,
-              email: p.email,
-              updatedAt: now,
-            ),
-            relationshipType: p.relationshipType,
-          ),
-        )
-        .toList();
-    return _draftDao.replaceDraftParents(studentId, drafts, nowMs: now);
-  });
+    final drafts = parents.map((p) {
+      // Fallback défensif : id toujours fourni en pratique depuis l'étape
+      // Tuteurs. S'il manquait, on mint un id NEUF — donc jamais lié à
+      // une fiche existante, quoi qu'ait dit isLinkedToExisting (sinon
+      // upsertDraftGuardianParent lui ferait confiance sans vérification
+      // et créerait un lien orphelin garanti vers un id qui n'a jamais
+      // existé dans `parents`).
+      final resolvedId = p.id;
+      final isFallbackId = resolvedId == null;
+      return ParentDraft(
+        parent: ParentLocalModel(
+          id: resolvedId ?? _idGenerator.newId(),
+          firstName: p.firstName,
+          lastName: p.lastName,
+          surname: p.surname,
+          phoneNumber: p.phoneNumber,
+          email: p.email,
+          updatedAt: now,
+        ),
+        relationshipType: p.relationshipType,
+        linkedToExisting: isFallbackId ? false : p.isLinkedToExisting,
+      );
+    }).toList();
+
+    try {
+      await _draftDao.replaceDraftParents(
+        studentId,
+        drafts,
+        nowMs: now,
+        enforcePhoneUniqueness: true,
+      );
+      return const Right(unit);
+    } on ParentPhoneConflictException catch (e) {
+      return Left(DuplicateParentPhoneFailure(e.phoneNumber));
+    } catch (e) {
+      return Left(
+        StorageFailure('Échec de l\'enregistrement du brouillon : $e'),
+      );
+    }
+  }
+
+  /// Recherche locale de tuteurs (popin "Rechercher un parent"), lecture
+  /// seule — voir [EnrollmentOfflineRepository.searchParents].
+  @override
+  Future<Either<Failure, List<LocalParent>>> searchParents({
+    String? firstName,
+    String? lastName,
+    String? surname,
+    String? phoneNumber,
+    int limit = 20,
+  }) => _guardRead(
+    () => _parentSearchDao.search(
+      firstName: firstName,
+      lastName: lastName,
+      surname: surname,
+      phoneNumber: phoneNumber,
+      limit: limit,
+    ),
+  );
 
   @override
   Future<Either<Failure, LocalEnrollmentDetail>> getDraftDetail(

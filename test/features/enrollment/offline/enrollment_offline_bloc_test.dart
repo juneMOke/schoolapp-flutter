@@ -314,6 +314,92 @@ void main() {
         EnrollmentDraftFinalizeError('Dossier introuvable en local.'),
       ],
     );
+
+    blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+      'SaveDraftGuardiansRequested succès → [Saving, StepSaved]',
+      setUp: () {
+        when(
+          () => saveGuardians(
+            studentId: any(named: 'studentId'),
+            parents: any(named: 'parents'),
+          ),
+        ).thenAnswer((_) async => const Right(unit));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const SaveDraftGuardiansRequested(
+          studentId: 's1',
+          parents: [
+            ConfirmParentDraft(
+              firstName: 'Sarah',
+              lastName: 'Moke',
+              phoneNumber: '+243111',
+            ),
+          ],
+        ),
+      ),
+      expect: () => const [EnrollmentDraftSaving(), EnrollmentDraftStepSaved()],
+    );
+
+    blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+      'SaveDraftGuardiansRequested échec générique → [Saving, Error]',
+      setUp: () {
+        when(
+          () => saveGuardians(
+            studentId: any(named: 'studentId'),
+            parents: any(named: 'parents'),
+          ),
+        ).thenAnswer((_) async => const Left(StorageFailure()));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const SaveDraftGuardiansRequested(studentId: 's1', parents: []),
+      ),
+      expect: () => const [
+        EnrollmentDraftSaving(),
+        EnrollmentDraftError('Erreur d\'accès à la base locale.'),
+      ],
+    );
+
+    blocTest<EnrollmentOfflineBloc, EnrollmentOfflineState>(
+      'SaveDraftGuardiansRequested doublon de téléphone → [Saving, '
+      'GuardianPhoneConflict] (PAS le EnrollmentDraftError générique)',
+      setUp: () {
+        when(
+          () => saveGuardians(
+            studentId: any(named: 'studentId'),
+            parents: any(named: 'parents'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left(DuplicateParentPhoneFailure('+243111')),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const SaveDraftGuardiansRequested(
+          studentId: 's1',
+          parents: [
+            ConfirmParentDraft(
+              firstName: 'Sarah',
+              lastName: 'Moke',
+              phoneNumber: '+243111',
+            ),
+          ],
+        ),
+      ),
+      expect: () => [
+        const EnrollmentDraftSaving(),
+        isA<EnrollmentDraftGuardianPhoneConflict>()
+            .having((s) => s.phoneNumber, 'phoneNumber', '+243111')
+            .having(
+              (s) => s.message,
+              'message',
+              'Un tuteur avec le numéro +243111 existe déjà. Modifiez ce '
+                  'numéro ou utilisez « Rechercher un parent » pour lier le '
+                  'tuteur existant.',
+            ),
+      ],
+    );
   });
 
   group('seed du brouillon (RE/PRE)', () {

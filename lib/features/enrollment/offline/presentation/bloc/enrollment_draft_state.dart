@@ -59,6 +59,20 @@ class EnrollmentDraftError extends EnrollmentOfflineState {
   List<Object?> get props => [message];
 }
 
+/// Doublon de téléphone détecté à l'enregistrement de l'étape Tuteurs —
+/// distinct de [EnrollmentDraftError] pour que seul `GuardianInfoStep` y
+/// réagisse (pas le toast générique du stepper), même patron que
+/// [EnrollmentDraftFinalizeError].
+class EnrollmentDraftGuardianPhoneConflict extends EnrollmentOfflineState {
+  final String phoneNumber;
+  final String message;
+
+  const EnrollmentDraftGuardianPhoneConflict(this.phoneNumber, this.message);
+
+  @override
+  List<Object?> get props => [phoneNumber, message];
+}
+
 /// Échec de la **finalisation** spécifiquement — distinct de
 /// [EnrollmentDraftError] (étape/seed) pour que la sur-couche de résultat de
 /// la validation finale (`EnrollmentFinalizeOverlay`) soit seule à réagir,

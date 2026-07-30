@@ -52,10 +52,17 @@ const TableSchema studentsTable = TableSchema(
   ],
 );
 
-/// `parents` — tuteurs. Clé naturelle = `phone_number` (get-or-create local pour
-/// la fratrie sur une même tablette). `identification_number` reste NULL en
-/// local (le serveur génère `PID-…`). L'`id` provisoire est remappé vers le
-/// canonique serveur à l'ACK.
+/// `parents` — tuteurs. DEUX chemins d'écriture coexistent (aucune contrainte
+/// SQL UNIQUE sur `phone_number` — unicité volontairement APPLICATIVE, DAO) :
+/// - RE/PRE (`seedDraft`) : `upsertParentByPhone`, `phone_number` reste la
+///   clé naturelle (get-or-create local pour la fratrie sur une même
+///   tablette) ;
+/// - étape Tuteurs interactive (wizard) : `upsertDraftGuardianParent`, upsert
+///   PAR ID stable + garde stricte (`ParentPhoneConflictException` si un
+///   AUTRE parent porte déjà ce téléphone) — la fusion silencieuse par
+///   téléphone n'existe PAS sur ce chemin.
+/// `identification_number` reste NULL en local (le serveur génère `PID-…`).
+/// L'`id` provisoire est remappé vers le canonique serveur à l'ACK.
 const TableSchema parentsTable = TableSchema(
   name: 'parents',
   createTableSql: '''
@@ -72,7 +79,10 @@ const TableSchema parentsTable = TableSchema(
       updated_at INTEGER NOT NULL DEFAULT 0
     )
   ''',
-  createIndexSql: ['CREATE INDEX idx_parents_phone ON parents(phone_number)'],
+  createIndexSql: [
+    'CREATE INDEX idx_parents_phone ON parents(phone_number)',
+    'CREATE INDEX idx_parents_names ON parents(last_name, first_name)',
+  ],
 );
 
 /// `student_parent` — lien N-N élève ↔ tuteur, porteur du `relationship_type`.

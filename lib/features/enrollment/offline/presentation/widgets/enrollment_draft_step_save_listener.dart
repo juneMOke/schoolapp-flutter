@@ -11,7 +11,13 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 /// Seuls les états terminaux d'une écriture initiée PAR l'étape courante sont
 /// pris en compte ([isAwaiting]) :
 ///  - [EnrollmentDraftStepSaved] → [onSaved] (dé-dirty + ré-hydratation locale) ;
-///  - [EnrollmentDraftError] → [onError] (toast d'échec + déverrouillage).
+///  - [EnrollmentDraftError] → [onError] (déverrouillage ; le toast générique
+///    est affiché par `EnrollmentStepperScope`, en amont — pas de doublon) ;
+///  - [EnrollmentDraftGuardianPhoneConflict] → [onGuardianPhoneConflict] si
+///    fourni (sinon [onError]) : n'est émis QUE par l'étape Tuteurs, jamais
+///    par `EnrollmentStepperScope` (qui ne réagit qu'à
+///    [EnrollmentDraftError]) — c'est donc le seul endroit où ce message doit
+///    être affiché explicitement.
 ///
 /// Les états transitoires de la ré-hydratation ([EnrollmentDraftSaving] /
 /// [EnrollmentDraftDetailLoaded]) sont ignorés (l'agrégat est reconstruit par la
@@ -21,6 +27,7 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
   final bool Function() isAwaiting;
   final VoidCallback onSaved;
   final ValueChanged<String> onError;
+  final ValueChanged<String>? onGuardianPhoneConflict;
   final Widget child;
 
   const EnrollmentDraftStepSaveListener({
@@ -29,6 +36,7 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
     required this.isAwaiting,
     required this.onSaved,
     required this.onError,
+    this.onGuardianPhoneConflict,
     required this.child,
   });
 
@@ -42,11 +50,14 @@ class EnrollmentDraftStepSaveListener extends StatelessWidget {
       listenWhen: (previous, current) =>
           previous != current &&
           (current is EnrollmentDraftStepSaved ||
-              current is EnrollmentDraftError),
+              current is EnrollmentDraftError ||
+              current is EnrollmentDraftGuardianPhoneConflict),
       listener: (context, state) {
         if (!isAwaiting()) return;
         if (state is EnrollmentDraftStepSaved) {
           onSaved();
+        } else if (state is EnrollmentDraftGuardianPhoneConflict) {
+          (onGuardianPhoneConflict ?? onError)(state.message);
         } else if (state is EnrollmentDraftError) {
           onError(state.message);
         }

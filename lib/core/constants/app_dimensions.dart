@@ -87,6 +87,10 @@ class AppDimensions {
   static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
 
+  // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
+  static const guardianSearchModalMaxWidth = 560.0;
+  static const guardianSearchResultsMinHeight = 200.0;
+
   // Connexion — panneau formulaire (spec §01).
   // Split : largeur = clamp(400, 38% conteneur, 460). Empilé : max 400.
   static const loginFormPanelMin = 400.0;

@@ -1700,6 +1700,34 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get guardianSearchAction => 'Rechercher un parent';
+
+  @override
+  String get guardianSearchDialogTitle => 'Rechercher un parent existant';
+
+  @override
+  String get guardianSearchHint =>
+      'Renseignez au moins un critère (nom ou téléphone)';
+
+  @override
+  String get guardianSearchEmptyTitle => 'Aucun parent trouvé';
+
+  @override
+  String get guardianSearchEmptyDescription =>
+      'Aucun parent ne correspond à ces critères. Vérifiez la saisie ou ajoutez-le comme nouveau tuteur.';
+
+  @override
+  String get guardianSearchAlreadyAddedError =>
+      'Ce parent est déjà ajouté à cette inscription.';
+
+  @override
+  String get guardianSearchIdentityLockedHint =>
+      'Informations issues d\'une fiche existante — non modifiables ici.';
+
+  @override
+  String get guardianSearchErrorRetry => 'Réessayer';
+
+  @override
   String get schoolFees => 'Frais Scolaires';
 
   @override

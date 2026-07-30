@@ -6,4 +6,5 @@ export 'guardian_phone_field.dart';
 export 'guardian_info_step_body.dart';
 export 'parent_item.dart';
 export 'parent_item_models.dart';
+export 'parent_search_dialog.dart';
 export 'relationship_chip.dart';

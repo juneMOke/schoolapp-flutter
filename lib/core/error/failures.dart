@@ -49,3 +49,15 @@ class AuthFailure extends Failure {
 class ConflictFailure extends Failure {
   const ConflictFailure([super.message = 'Conflict']);
 }
+
+/// Doublon de numéro de téléphone parent — contrainte APPLICATIVE (DAO),
+/// détectée avant toute écriture. Purement local, jamais de conflit réseau
+/// (distinct de [ConflictFailure], réservée aux 2 usages HTTP 409 ci-dessus).
+class DuplicateParentPhoneFailure extends Failure {
+  final String phoneNumber;
+  const DuplicateParentPhoneFailure(this.phoneNumber)
+    : super('Un tuteur avec le numéro $phoneNumber existe déjà.');
+
+  @override
+  List<Object?> get props => [message, phoneNumber];
+}

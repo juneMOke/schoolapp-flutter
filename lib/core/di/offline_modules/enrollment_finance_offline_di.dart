@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_reconciliation_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
@@ -34,11 +35,13 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/s
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_previous_academic_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_target_academic_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_parents_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/seed_draft_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/start_draft_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/sync_enrollment_pulls_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
@@ -98,6 +101,11 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<EnrollmentReconciliationDao>(
     () => EnrollmentReconciliationDao(getIt<Database>()),
   );
+  // Recherche de tuteur existant (popin "Rechercher un parent", étape
+  // Tuteurs) : lecture seule, DAO dédié (nouvelle responsabilité).
+  getIt.registerLazySingleton<ParentSearchDao>(
+    () => ParentSearchDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<FinanceLocalDao>(
     () => FinanceLocalDao(getIt<Database>(), getIt<IdGenerator>()),
   );
@@ -122,6 +130,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       readDao: getIt<EnrollmentReadDao>(),
       draftDao: getIt<EnrollmentDraftDao>(),
       seedDao: getIt<EnrollmentSeedDao>(),
+      parentSearchDao: getIt<ParentSearchDao>(),
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
       currentUser: getIt<CurrentUserContext>(),
@@ -267,6 +276,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<SaveDraftGuardiansUseCase>(
     () => SaveDraftGuardiansUseCase(getIt<EnrollmentOfflineRepository>()),
   );
+  getIt.registerFactory<SearchParentsUseCase>(
+    () => SearchParentsUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
   getIt.registerFactory<GetDraftDetailUseCase>(
     () => GetDraftDetailUseCase(getIt<EnrollmentOfflineRepository>()),
   );
@@ -318,6 +330,11 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       getEnrollments: getIt<GetLocalEnrollmentsUseCase>(),
       search: getIt<SearchLocalEnrollmentsUseCase>(),
     ),
+  );
+  // Bloc transitoire de la popin "Rechercher un parent" (étape Tuteurs) —
+  // créé/fermé avec la popin.
+  getIt.registerFactory<ParentSearchBloc>(
+    () => ParentSearchBloc(search: getIt<SearchParentsUseCase>()),
   );
   getIt.registerFactory<FinanceOfflineBloc>(
     () => FinanceOfflineBloc(

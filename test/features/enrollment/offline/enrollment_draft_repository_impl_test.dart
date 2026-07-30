@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_offline_repository.dart';
@@ -20,6 +21,8 @@ class MockEnrollmentDraftDao extends Mock implements EnrollmentDraftDao {}
 
 class MockEnrollmentSeedDao extends Mock implements EnrollmentSeedDao {}
 
+class MockParentSearchDao extends Mock implements ParentSearchDao {}
+
 class MockIdGenerator extends Mock implements IdGenerator {}
 
 class MockSyncEngine extends Mock implements SyncEngine {}
@@ -28,6 +31,7 @@ void main() {
   late MockEnrollmentReadDao readDao;
   late MockEnrollmentDraftDao draftDao;
   late MockEnrollmentSeedDao seedDao;
+  late MockParentSearchDao parentSearchDao;
   late MockIdGenerator idGen;
   late MockSyncEngine syncEngine;
   late EnrollmentOfflineRepositoryImpl repo;
@@ -69,12 +73,14 @@ void main() {
     readDao = MockEnrollmentReadDao();
     draftDao = MockEnrollmentDraftDao();
     seedDao = MockEnrollmentSeedDao();
+    parentSearchDao = MockParentSearchDao();
     idGen = MockIdGenerator();
     syncEngine = MockSyncEngine();
     repo = EnrollmentOfflineRepositoryImpl(
       readDao: readDao,
       draftDao: draftDao,
       seedDao: seedDao,
+      parentSearchDao: parentSearchDao,
       idGenerator: idGen,
       syncEngine: syncEngine,
       now: () => clock,
@@ -504,15 +510,57 @@ void main() {
   });
 
   group('saveDraftGuardians', () {
+    test('sans id fourni : fallback sur idGenerator (défensif) + '
+        'enforcePhoneUniqueness: true', () async {
+      when(() => idGen.newId()).thenReturn('p-uuid');
+      when(
+        () => draftDao.replaceDraftParents(
+          any(),
+          any(),
+          nowMs: any(named: 'nowMs'),
+          enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await repo.saveDraftGuardians(
+        studentId: 's1',
+        parents: const [
+          ConfirmParentDraft(
+            firstName: 'Sarah',
+            lastName: 'Moke',
+            phoneNumber: '+243111',
+            relationshipType: 'MOTHER',
+          ),
+        ],
+      );
+
+      final drafts =
+          verify(
+                () => draftDao.replaceDraftParents(
+                  's1',
+                  captureAny(),
+                  nowMs: clock,
+                  enforcePhoneUniqueness: true,
+                ),
+              ).captured.single
+              as List<ParentDraft>;
+      expect(drafts, hasLength(1));
+      expect(drafts.first.parent.id, 'p-uuid');
+      expect(drafts.first.parent.firstName, 'Sarah');
+      expect(drafts.first.relationshipType, 'MOTHER');
+      expect(drafts.first.linkedToExisting, isFalse);
+    });
+
     test(
-      'mappe ConfirmParentDraft → ParentDraft (id généré + relation)',
+      'id + isLinkedToExisting portés par le draft UI sont transmis tels '
+      'quels (recherche → rattachement explicite, idGenerator jamais appelé)',
       () async {
-        when(() => idGen.newId()).thenReturn('p-uuid');
         when(
           () => draftDao.replaceDraftParents(
             any(),
             any(),
             nowMs: any(named: 'nowMs'),
+            enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
           ),
         ).thenAnswer((_) async {});
 
@@ -520,6 +568,8 @@ void main() {
           studentId: 's1',
           parents: const [
             ConfirmParentDraft(
+              id: 'p-existing',
+              isLinkedToExisting: true,
               firstName: 'Sarah',
               lastName: 'Moke',
               phoneNumber: '+243111',
@@ -534,15 +584,110 @@ void main() {
                     's1',
                     captureAny(),
                     nowMs: clock,
+                    enforcePhoneUniqueness: true,
                   ),
                 ).captured.single
                 as List<ParentDraft>;
-        expect(drafts, hasLength(1));
-        expect(drafts.first.parent.id, 'p-uuid');
-        expect(drafts.first.parent.firstName, 'Sarah');
-        expect(drafts.first.relationshipType, 'MOTHER');
+        expect(drafts.first.parent.id, 'p-existing');
+        expect(drafts.first.linkedToExisting, isTrue);
+        verifyNever(() => idGen.newId());
       },
     );
+
+    test(
+      'ParentPhoneConflictException du DAO → Left(DuplicateParentPhoneFailure)',
+      () async {
+        when(
+          () => draftDao.replaceDraftParents(
+            any(),
+            any(),
+            nowMs: any(named: 'nowMs'),
+            enforcePhoneUniqueness: any(named: 'enforcePhoneUniqueness'),
+          ),
+        ).thenThrow(
+          const ParentPhoneConflictException('+243111', 'p-existing'),
+        );
+
+        final result = await repo.saveDraftGuardians(
+          studentId: 's1',
+          parents: const [
+            ConfirmParentDraft(
+              id: 'p-new',
+              firstName: 'Sarah',
+              lastName: 'Moke',
+              phoneNumber: '+243111',
+              relationshipType: 'MOTHER',
+            ),
+          ],
+        );
+
+        expect(result.isLeft(), isTrue);
+        result.fold((f) {
+          expect(f, isA<DuplicateParentPhoneFailure>());
+          expect((f as DuplicateParentPhoneFailure).phoneNumber, '+243111');
+        }, (_) => fail('devrait échouer'));
+      },
+    );
+  });
+
+  group('searchParents', () {
+    test('délègue au ParentSearchDao et enveloppe en Either', () async {
+      when(
+        () => parentSearchDao.search(
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+          surname: any(named: 'surname'),
+          phoneNumber: any(named: 'phoneNumber'),
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer(
+        (_) async => const [
+          LocalParent(
+            id: 'p1',
+            firstName: 'Sarah',
+            lastName: 'Moke',
+            phoneNumber: '+243111',
+          ),
+        ],
+      );
+
+      final result = await repo.searchParents(lastName: 'Moke');
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('devrait réussir'),
+        (parents) => expect(parents, hasLength(1)),
+      );
+      verify(
+        () => parentSearchDao.search(
+          firstName: null,
+          lastName: 'Moke',
+          surname: null,
+          phoneNumber: null,
+          limit: 20,
+        ),
+      ).called(1);
+    });
+
+    test('exception du DAO → Left(StorageFailure)', () async {
+      when(
+        () => parentSearchDao.search(
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+          surname: any(named: 'surname'),
+          phoneNumber: any(named: 'phoneNumber'),
+          limit: any(named: 'limit'),
+        ),
+      ).thenThrow(Exception('boom'));
+
+      final result = await repo.searchParents(phoneNumber: '+243111');
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (f) => expect(f, isA<StorageFailure>()),
+        (_) => fail('devrait échouer'),
+      );
+    });
   });
 
   group('getDraftDetail', () {

@@ -793,6 +793,14 @@
       "message": { "type": "String" }
     }
   },
+  "guardianSearchAction": "Search for a guardian",
+  "guardianSearchDialogTitle": "Search for an existing guardian",
+  "guardianSearchHint": "Enter at least one criterion (name or phone number)",
+  "guardianSearchEmptyTitle": "No guardian found",
+  "guardianSearchEmptyDescription": "No guardian matches these criteria. Check your input or add them as a new guardian.",
+  "guardianSearchAlreadyAddedError": "This guardian has already been added to this enrollment.",
+  "guardianSearchIdentityLockedHint": "Details from an existing record — not editable here.",
+  "guardianSearchErrorRetry": "Retry",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",

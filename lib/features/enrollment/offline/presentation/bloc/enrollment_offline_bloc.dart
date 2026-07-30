@@ -311,6 +311,10 @@ class EnrollmentOfflineBloc
     _emitStep(result, emit);
   }
 
+  /// Fold dédié (pas le `_emitStep` générique) : un doublon de téléphone émet
+  /// [EnrollmentDraftGuardianPhoneConflict] au lieu du générique
+  /// [EnrollmentDraftError], pour que seule l'étape Tuteurs y réagisse (pas
+  /// le toast générique du stepper) — même patron que `_onFinalize`.
   Future<void> _onSaveGuardians(
     SaveDraftGuardiansRequested event,
     Emitter<EnrollmentOfflineState> emit,
@@ -320,7 +324,14 @@ class EnrollmentOfflineBloc
       studentId: event.studentId,
       parents: event.parents,
     );
-    _emitStep(result, emit);
+    emit(
+      result.fold(
+        (f) => f is DuplicateParentPhoneFailure
+            ? EnrollmentDraftGuardianPhoneConflict(f.phoneNumber, _map(f))
+            : EnrollmentDraftError(_map(f)),
+        (_) => const EnrollmentDraftStepSaved(),
+      ),
+    );
   }
 
   Future<void> _onLoadDraftDetail(
@@ -379,6 +390,12 @@ class EnrollmentOfflineBloc
   String _map(Failure failure) => switch (failure) {
     NotFoundFailure() => 'Dossier introuvable en local.',
     ValidationFailure() => 'Brouillon déjà confirmé.',
+    // Réutilise failure.message (source unique du "existe déjà" — évite un
+    // 2e texte à maintenir en double avec le message par défaut de
+    // DuplicateParentPhoneFailure dans failures.dart) + l'invitation à agir.
+    DuplicateParentPhoneFailure() =>
+      '${failure.message} Modifiez ce numéro ou utilisez « Rechercher un '
+          'parent » pour lier le tuteur existant.',
     StorageFailure() => 'Erreur d\'accès à la base locale.',
     _ => 'Une erreur est survenue.',
   };
