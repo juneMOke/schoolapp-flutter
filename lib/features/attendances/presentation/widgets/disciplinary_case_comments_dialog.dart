@@ -210,6 +210,9 @@ class _AddField extends StatelessWidget {
           ),
           const SizedBox(width: AppDimensions.spacingS),
           FilledButton(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, AppDimensions.minTouchTarget),
+            ),
             onPressed: onSubmit,
             child: Text(l10n.disciplinaryCommentAddAction),
           ),
