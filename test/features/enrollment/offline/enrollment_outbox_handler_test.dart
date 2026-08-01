@@ -206,9 +206,31 @@ void main() {
     );
   });
 
-  // 4xx client-terminal (hors 401/408/429) : rejeu inutile → SYNC_ERROR immédiat
-  // au lieu de gaspiller maxAttempts avant un dead-letter générique.
-  for (final status in [400, 403, 404, 409]) {
+  // 409 : course d'insertion. Le back abandonne la transaction perdante et
+  // documente le rejeu comme obtenant un 200 canonique → TRANSITOIRE. Le classer
+  // terminal brûlait le dossier (aucun chemin de re-push : `finalizeDraft` exige
+  // `DRAFT`) et laissait paiements et cas disciplinaires de l'élève `blocked`
+  // à vie.
+  test(
+    '409 (course d\'insertion) → retry, le dossier reste poussable',
+    () async {
+      when(
+        () => api.submit(any(), any()),
+      ).thenThrow(_httpError(409, data: {'message': 'Conflit'}));
+
+      final result = await handler.dispatch(await pendingEntry());
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      expect(
+        (await db.query('enrollments')).first['sync_status'],
+        SyncState.pendingSync.dbValue,
+        reason: 'le dossier ne doit pas être brûlé par une course rejouable',
+      );
+    },
+  );
+
+  // 4xx client-terminal (hors 401/408/409/429) : rejeu inutile → SYNC_ERROR
+  // immédiat au lieu de gaspiller maxAttempts avant un dead-letter générique.
+  for (final status in [400, 403, 404]) {
     test('$status (client-terminal) → failed + SYNC_ERROR immédiat', () async {
       when(
         () => api.submit(any(), any()),
