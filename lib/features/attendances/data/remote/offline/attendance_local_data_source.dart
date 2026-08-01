@@ -65,12 +65,14 @@ class AttendanceLocalDataSource {
   /// [session] porte l'`id` client (transport) ; s'il existe déjà une session
   /// pour la clé naturelle, son `id` local est **conservé** (id = transport,
   /// clé naturelle = vérité). [absentRows] ne contient QUE les absents.
-  Future<void> confirmDailyAttendance({
+  /// Renvoie `false` si la garde LWW locale a fait barrage (rien n'a été écrit,
+  /// rien n'a été enfilé) — l'appelant ne doit alors PAS annoncer un succès.
+  Future<bool> confirmDailyAttendance({
     required AttendanceSessionRow session,
     required List<AttendanceRecordRow> absentRows,
     required OutboxEntry outboxEntry,
   }) async {
-    await _db.transaction((txn) async {
+    return await _db.transaction((txn) async {
       final existing = await _sessionByKey(
         txn,
         classroomId: session.classroomId,
@@ -78,11 +80,19 @@ class AttendanceLocalDataSource {
         academicYearId: session.academicYearId,
       );
 
-      // LWW à la granularité de l'agrégat : une session locale strictement plus
-      // récente conserve la main (filet ; ne se produit pas en mono-tablette).
-      if (existing != null && existing.updatedAt > session.updatedAt) {
-        await OutboxDao(txn).enqueue(outboxEntry);
-        return;
+      // LWW à la granularité de l'agrégat : une session locale au moins aussi
+      // récente conserve la main. Seuil `>=`, aligné sur celui des lignes
+      // (`_upsertAbsence`) — les deux divergeaient, ce qui laissait passer en
+      // base des écritures que le serveur, lui, arbitre en STRICT.
+      //
+      // Cette branche est normalement INATTEIGNABLE depuis le repository, qui
+      // calcule un `updated_at` monotone (> à celui en base). Elle ne se
+      // déclenche que sur une course réelle. Dans ce cas on n'enfile RIEN :
+      // enfiler un payload dont l'écriture vient d'être sautée poussait au
+      // serveur un état qui n'existe nulle part en local — c'est ce que faisait
+      // la version précédente.
+      if (existing != null && existing.updatedAt >= session.updatedAt) {
+        return false;
       }
 
       final sessionId = existing?.id ?? session.id;
@@ -117,6 +127,7 @@ class AttendanceLocalDataSource {
       // Coalescing : l'id déterministe de l'entrée fait qu'un ré-appel du même
       // jour REMPLACE l'entrée en attente (ConflictAlgorithm.replace).
       await OutboxDao(txn).enqueue(outboxEntry);
+      return true;
     });
   }
 
@@ -200,6 +211,89 @@ class AttendanceLocalDataSource {
             'classroom_id = ? AND attendance_date = ? AND academic_year_id = ?',
         whereArgs: [classroomId, dateStr, academicYearId],
       );
+    });
+  }
+
+  /// Adopte l'état **canonique du gagnant** après un arbitrage LWW perdu
+  /// (`SUPERSEDED`) : remplace les absences de la journée par celles renvoyées
+  /// par le serveur, réancre `updated_at` sur le jeton gagnant, et repasse la
+  /// journée SYNCED.
+  ///
+  /// Sans cette adoption, la session resterait `PENDING_SYNC` — donc **sautée
+  /// par `applyPulledSessions`** — pendant que le curseur keyset dépasse le
+  /// gagnant : la journée ne pourrait plus jamais être réalignée, ni par le
+  /// push (le payload gelé reperdrait à l'identique) ni par le pull. Réancrer
+  /// `updated_at` est tout aussi indispensable : rester sur le jeton perdant
+  /// ferait reperdre tous les arbitrages suivants.
+  /// [canonicalAbsences] : `studentId` → (motif, note, `updated_at` epoch ms).
+  /// Les libellés élève ne voyagent pas dans l'ACK : on met donc à jour les
+  /// lignes locales existantes et on supprime celles que le gagnant ne porte
+  /// plus, sans jamais fabriquer d'identité. Une absence que le serveur a et que
+  /// le local ignore sera matérialisée par le prochain pull — désormais possible,
+  /// puisque la session repasse SYNCED.
+  Future<void> adoptCanonicalDay({
+    required String classroomId,
+    required String dateStr,
+    required String academicYearId,
+    required Map<String, CanonicalAbsence> canonicalAbsences,
+    required int updatedAt,
+    required int syncedAt,
+    String? serverUpdatedAt,
+    int? expectedCount,
+  }) async {
+    await _db.transaction((txn) async {
+      final existing = await _sessionByKey(
+        txn,
+        classroomId: classroomId,
+        dateStr: dateStr,
+        academicYearId: academicYearId,
+      );
+      if (existing == null) return;
+
+      await txn.update(
+        sessionsTable,
+        {
+          'updated_at': updatedAt,
+          'sync_status': SyncState.synced.dbValue,
+          'synced_at': syncedAt,
+          'server_updated_at': ?serverUpdatedAt,
+          'expected_count': ?expectedCount,
+        },
+        where: 'id = ?',
+        whereArgs: [existing.id],
+      );
+
+      // La liste du gagnant fait autorité : tout élève absent en local mais
+      // absent de cette liste sort des exceptions, sans garde LWW — c'est
+      // précisément le point où l'état local perdant doit céder.
+      final rows = await txn.query(
+        recordsTable,
+        where:
+            'classroom_id = ? AND attendance_date = ? AND academic_year_id = ?',
+        whereArgs: [classroomId, dateStr, academicYearId],
+      );
+      for (final raw in rows) {
+        final row = AttendanceRecordRow.fromMap(raw);
+        final canonical = canonicalAbsences[row.studentId];
+        if (canonical == null) {
+          await txn.delete(recordsTable, where: 'id = ?', whereArgs: [row.id]);
+          continue;
+        }
+        await txn.update(
+          recordsTable,
+          {
+            'session_id': existing.id,
+            'present': 0,
+            'absence_reason': canonical.absenceReason,
+            'absence_reason_note': canonical.absenceReasonNote,
+            'updated_at': canonical.updatedAt,
+            'sync_status': SyncState.synced.dbValue,
+            'synced_at': syncedAt,
+          },
+          where: 'id = ?',
+          whereArgs: [row.id],
+        );
+      }
     });
   }
 
@@ -389,4 +483,19 @@ class AttendanceLocalDataSource {
     if (rows.isEmpty) return null;
     return AttendanceRecordRow.fromMap(rows.first);
   }
+}
+
+/// Absence canonique renvoyée par le serveur après arbitrage LWW : uniquement
+/// ce qui fait autorité (motif, note, jeton), jamais l'identité de l'élève —
+/// l'ACK ne la transporte pas et on ne l'invente pas.
+class CanonicalAbsence {
+  final String? absenceReason;
+  final String? absenceReasonNote;
+  final int updatedAt;
+
+  const CanonicalAbsence({
+    required this.updatedAt,
+    this.absenceReason,
+    this.absenceReasonNote,
+  });
 }

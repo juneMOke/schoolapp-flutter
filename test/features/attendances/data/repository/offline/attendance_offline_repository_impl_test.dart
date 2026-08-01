@@ -234,4 +234,161 @@ void main() {
     expect(rate.rate, closeTo(2 / 3, 0.0001));
     expect(rate.syncedAt, 9999);
   });
+
+  group('conformité régime C (payload exhaustif + horloge monotone)', () {
+    test(
+      'une absence NON AFFICHEE mais toujours au roster est PRESERVEE',
+      () async {
+        // s3 est absent le 15/06 : la ligne existe en base.
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [
+            update('s1', present: true),
+            update('s2', present: true),
+            update('s3', present: false),
+          ],
+        );
+
+        // L'enseignant corrige s1 depuis une vue qui n'affiche PAS s3 (filtre,
+        // pagination) : s3 est toujours membre actif, il n'a simplement jamais
+        // ete sous les yeux de l'utilisateur.
+        clock = 6000;
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: false), update('s2', present: true)],
+        );
+
+        // Omettre s3 du payload le ferait SUPPRIMER cote serveur par
+        // reconciliation par difference, alors que personne n'a voulu le retirer.
+        final rows = await db.query(
+          'attendance_records',
+          where: 'attendance_date = ?',
+          whereArgs: ['2026-06-15'],
+        );
+        expect(rows.map((r) => r['student_id']).toSet(), {'s1', 's3'});
+
+        final entry = (await outbox.pendingReady(999999)).single;
+        expect(entry.payload, contains('s3'));
+      },
+    );
+
+    test(
+      'un élève affiché et marqué présent est bien retiré (suppression voulue)',
+      () async {
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: false), update('s2', present: true)],
+        );
+        clock = 6000;
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: true), update('s2', present: true)],
+        );
+
+        final rows = await db.query('attendance_records');
+        expect(rows, isEmpty, reason: 'retard corrigé = non-ligne');
+      },
+    );
+
+    test(
+      'horloge monotone : correction non perdue quand updated_at vient du serveur',
+      () async {
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: false)],
+        );
+        // La session est réalignée sur un temps SERVEUR très en avance sur
+        // l'horloge du device (cas nominal : pull au temps serveur).
+        await db.update('attendance_sessions', {'updated_at': 900000});
+
+        clock = 6000; // device en retard
+        final result = await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: true)],
+        );
+
+        expect(result.isRight(), isTrue);
+        final session = (await db.query('attendance_sessions')).single;
+        expect(
+          session['updated_at'] as int,
+          greaterThan(900000),
+          reason:
+              'sans horloge monotone, la garde locale sauterait l\'écriture '
+              'et le serveur arbitrerait SUPERSEDED',
+        );
+      },
+    );
+
+    test('takenAt garde l\'heure du premier appel', () async {
+      await repo.recordDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+        updates: [update('s1', present: false)],
+      );
+      final firstTakenAt =
+          (await db.query('attendance_sessions')).single['taken_at'] as int;
+
+      clock = 88000;
+      await repo.recordDailyAttendance(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: yearId,
+        updates: [update('s2', present: false)],
+      );
+
+      expect(
+        (await db.query('attendance_sessions')).single['taken_at'],
+        firstTakenAt,
+        reason: 'une correction ne redate pas l\'appel d\'origine',
+      );
+    });
+
+    test(
+      'un eleve SORTI du roster n est PAS reinjecte (sinon 422 sans issue)',
+      () async {
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: true), update('s3', present: false)],
+        );
+
+        // s3 quitte la classe (transfert) : il sort du roster ACTIF.
+        await db.update(
+          'ref_classroom_members',
+          {'classroom_id': 'c2'},
+          where: 'student_id = ?',
+          whereArgs: ['s3'],
+        );
+
+        clock = 6000;
+        await repo.recordDailyAttendance(
+          classroomId: classroomId,
+          date: date,
+          academicYearId: yearId,
+          updates: [update('s1', present: false)],
+        );
+
+        // Le serveur valide requireAllInRoster sur son roster ACTIF courant et
+        // rejette l AGREGAT ENTIER en 422 s il voit s3. Comme ATTENDANCE n est
+        // pas rejouable et que la ligne survivrait a chaque revalidation, le
+        // 422 serait deterministe et sans aucune sortie depuis l application.
+        final entry = (await outbox.pendingReady(999999)).single;
+        expect(entry.payload, isNot(contains('s3')));
+      },
+    );
+  });
 }

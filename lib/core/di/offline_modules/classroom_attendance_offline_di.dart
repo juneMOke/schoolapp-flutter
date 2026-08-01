@@ -166,6 +166,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       syncMetaDao: getIt<SyncMetaDao>(),
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
   getIt.registerLazySingleton<AttendancePullRepository>(
@@ -181,6 +182,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       localDataSource: getIt<DisciplinaryLocalDataSource>(),
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
   getIt.registerLazySingleton<DisciplinaryPullRepository>(
@@ -346,6 +348,9 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
       syncApi: getIt<AttendanceSyncApi>(),
       localDataSource: getIt<AttendanceLocalDataSource>(),
       requiredAuth: requiredAuth,
+      // Pré-garde d'attribution : distingue un 403 « pas mon jeton » (blocked,
+      // repart à la reconnexion de l'auteur) d'un 403 réellement terminal.
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt<SyncEngine>().registerHandler(

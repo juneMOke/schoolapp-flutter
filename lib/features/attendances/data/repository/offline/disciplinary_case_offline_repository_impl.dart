@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
@@ -6,7 +8,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_case_aggregate_request_model.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/disciplinary_case_input_model.dart';
@@ -38,14 +40,27 @@ class DisciplinaryCaseOfflineRepositoryImpl
   final DisciplinaryLocalDataSource localDataSource;
   final IdGenerator idGenerator;
   final CurrentUserContext? _currentUser;
+  final SyncEngine? _syncEngine;
   final Clock now;
 
   const DisciplinaryCaseOfflineRepositoryImpl({
     required this.localDataSource,
     required this.idGenerator,
     CurrentUserContext? currentUser,
+    SyncEngine? syncEngine,
     this.now = systemClock,
-  }) : _currentUser = currentUser;
+  }) : _currentUser = currentUser,
+       _syncEngine = syncEngine;
+
+  /// Flush opportuniste après une écriture locale : si connecté, l'agrégat part
+  /// tout de suite ; sinon l'outbox le rejouera au retour online. Sans lui, une
+  /// évolution saisie EN LIGNE (statut, sanction, commentaire) attendrait un
+  /// déclencheur fortuit — coupure réseau ou écriture d'un autre module — pour
+  /// quitter la file. Même idiome que les repositories academics/classes.
+  void _flushOpportunistically() {
+    final engine = _syncEngine;
+    if (engine != null) unawaited(engine.flush());
+  }
 
   /// Id d'outbox déterministe **unique par cas** (coalescing des re-pushes).
   static String aggregateOutboxId(String caseId) =>
@@ -144,6 +159,7 @@ class DisciplinaryCaseOfflineRepositoryImpl
       );
 
       await localDataSource.createCaseWithOutbox(row: row, outboxEntry: entry);
+      _flushOpportunistically();
       return Right(row.toEntity());
     } catch (_) {
       return const Left(StorageFailure('Local disciplinary create failed'));
@@ -183,6 +199,7 @@ class DisciplinaryCaseOfflineRepositoryImpl
         updatedAt: effectiveMs,
         outboxEntry: entry,
       );
+      _flushOpportunistically();
       return const Right(null);
     } catch (_) {
       return const Left(StorageFailure('Local disciplinary update failed'));
@@ -230,6 +247,7 @@ class DisciplinaryCaseOfflineRepositoryImpl
         caseUpdatedAt: effectiveMs,
         outboxEntry: entry,
       );
+      _flushOpportunistically();
       return Right(comment.toEntity());
     } catch (_) {
       return const Left(StorageFailure('Local disciplinary comment failed'));

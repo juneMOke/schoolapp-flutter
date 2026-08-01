@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -6,7 +8,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
@@ -45,6 +47,7 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
   final SyncMetaDao syncMetaDao;
   final IdGenerator idGenerator;
   final CurrentUserContext? _currentUser;
+  final SyncEngine? _syncEngine;
   final Clock now;
 
   const AttendanceOfflineRepositoryImpl({
@@ -53,8 +56,10 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
     required this.syncMetaDao,
     required this.idGenerator,
     CurrentUserContext? currentUser,
+    SyncEngine? syncEngine,
     this.now = systemClock,
-  }) : _currentUser = currentUser;
+  }) : _currentUser = currentUser,
+       _syncEngine = syncEngine;
 
   /// Clé d'idempotence / id déterministe d'outbox pour un appel.
   static String outboxKey(
@@ -62,6 +67,18 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
     String dateStr,
     String academicYearId,
   ) => '$classroomId|$dateStr|$academicYearId';
+
+  /// Horloge **monotone** par session : `clientUpdatedAt` doit toujours être
+  /// strictement supérieur à l'`updated_at` déjà en base.
+  ///
+  /// Le serveur arbitre le régime C en STRICT (`isNewer` est faux à égalité
+  /// comme en retard) et il n'écrit RIEN quand il perd. Or l'`updated_at` local
+  /// vient souvent d'un pull au **temps serveur**, structurellement en avance
+  /// sur l'horloge d'une tablette qui retarde : sans cette garde, la correction
+  /// est sautée en local ET refusée au serveur, avec un « succès » à l'écran.
+  /// Même garde et même raison que la discipline (`_monotonic`).
+  int _monotonic(int nowMs, int localUpdatedAt) =>
+      nowMs > localUpdatedAt ? nowMs : localUpdatedAt + 1;
 
   @override
   Future<Either<Failure, DailyAttendance>> loadDailyAttendance({
@@ -129,11 +146,6 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
   }) async {
     try {
       final dateStr = DateOnlyJsonHelper.toJson(date);
-      final nowMs = now();
-      final nowIso = DateTime.fromMillisecondsSinceEpoch(
-        nowMs,
-        isUtc: true,
-      ).toIso8601String();
 
       // Id de session STABLE (id = transport, clé naturelle = vérité) : on
       // réutilise l'id local existant s'il y en a un, sinon on en forge un.
@@ -144,6 +156,18 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
       );
       final sessionId = existingSession?.id ?? idGenerator.newId();
 
+      final nowMs = _monotonic(now(), existingSession?.updatedAt ?? 0);
+      final nowIso = DateTime.fromMillisecondsSinceEpoch(
+        nowMs,
+        isUtc: true,
+      ).toIso8601String();
+
+      // `taken_at` = heure du PREMIER appel, pas de la dernière correction. Le
+      // serveur l'écrase inconditionnellement avec ce que porte le payload : y
+      // remettre `now` faisait glisser l'heure d'origine de l'appel à chaque
+      // correction, en local comme au serveur.
+      final takenAtMs = existingSession?.takenAt ?? nowMs;
+
       // Racine d'agrégat : la session porte l'`updated_at` arbitre, rebumpé à
       // chaque confirmation (invariant #4).
       final session = AttendanceSessionRow(
@@ -151,14 +175,62 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
         classroomId: classroomId,
         attendanceDate: dateStr,
         academicYearId: academicYearId,
-        takenAt: nowMs,
+        takenAt: takenAtMs,
+        // `taken_by` : on repousse la valeur déjà connue. Le serveur écrase ce
+        // champ sans condition — envoyer null l'effaçait à chaque push.
+        takenBy: existingSession?.takenBy,
         updatedAt: nowMs,
         syncStatus: SyncState.pendingSync.dbValue,
       );
 
+      // ── Exhaustivité du payload (contrat régime C) ───────────────────────
+      // Le serveur réconcilie PAR DIFFÉRENCE : toute absence en base et absente
+      // du payload est SUPPRIMÉE. Or `updates` est une projection de ce que
+      // l'UI avait sous les yeux, qui peut être un SOUS-ENSEMBLE du roster
+      // (filtre, pagination). Une absence dont l'élève n'a jamais été affiché
+      // serait alors détruite côté serveur sans que personne ne l'ait voulu.
+      //
+      // On réinjecte donc les lignes d'absence locales du jour que `updates`
+      // ne couvre pas — mais UNIQUEMENT pour les élèves encore membres ACTIFS
+      // de la classe.
+      //
+      // Cette restriction est essentielle et n'est pas une précaution de
+      // confort : le serveur valide `requireAllInRoster` contre son roster
+      // ACTIF courant AVANT tout arbitrage, et rejette l'agrégat ENTIER en 422.
+      // Réinjecter l'absence d'un élève sorti de la classe depuis (transfert,
+      // passage INACTIVE) condamnerait donc la journée à un 422 déterministe et
+      // AUTO-REPRODUCTIBLE — la ligne fautive étant conservée localement, chaque
+      // revalidation recomposerait le même payload rejeté, et la session restant
+      // `PENDING_SYNC` serait de surcroît sautée par le pull : divergence
+      // scellée dans les deux sens, sans aucune sortie depuis l'application.
+      //
+      // Reste donc non couvert le cas « élève sorti de la classe depuis le jour
+      // de l'appel » : son absence historique est bien supprimée au serveur par
+      // réconciliation. C'est un défaut PRÉEXISTANT dont le correctif propre est
+      // serveur (valider le roster à la DATE de l'appel, ce que le back sait
+      // déjà faire pour ses stats par intervalles d'appartenance).
+      final knownStudentIds = updates.map((u) => u.studentId).toSet();
+      final activeMemberIds = {
+        for (final m in await rosterDataSource.getRoster(classroomId))
+          m.studentId,
+      };
+      final localDayRecords = await localDataSource.getDayRecords(
+        classroomId: classroomId,
+        dateStr: dateStr,
+        academicYearId: academicYearId,
+      );
+      final preservedRows = localDayRecords
+          .where(
+            (r) =>
+                !r.present &&
+                !knownStudentIds.contains(r.studentId) &&
+                activeMemberIds.contains(r.studentId),
+          )
+          .toList(growable: false);
+
       // Écriture par exception : SEULS les absents portent une ligne. Les
       // présents redeviennent une non-ligne via la réconciliation par différence.
-      final absentRows = updates
+      final editedRows = updates
           .where((u) => !u.present)
           .map(
             (u) => AttendanceRecordRow(
@@ -181,6 +253,10 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
           )
           .toList(growable: false);
 
+      // Les lignes préservées gardent leur `updated_at` d'origine : elles ne
+      // sont pas rééditées, seulement re-transmises pour ne pas être détruites.
+      final absentRows = [...editedRows, ...preservedRows];
+
       // Payload d'outbox = agrégat exhaustif `{session, absences[]}` (contrat 1.2.0).
       final aggregate = AttendanceAggregateRequestModel(
         authorId: _currentUser?.uid, // estampillage authorId (ADR-010 D-05)
@@ -189,7 +265,11 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
           classroomId: classroomId,
           attendanceDate: dateStr,
           academicYearId: academicYearId,
-          takenAt: nowIso,
+          takenAt: DateTime.fromMillisecondsSinceEpoch(
+            takenAtMs,
+            isUtc: true,
+          ).toIso8601String(),
+          takenBy: existingSession?.takenBy,
           updatedAt: nowIso,
         ),
         absences: absentRows
@@ -199,7 +279,14 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
                 studentId: r.studentId,
                 absenceReason: r.absenceReason,
                 absenceReasonNote: r.absenceReasonNote,
-                updatedAt: nowIso,
+                // Horodatage PAR LIGNE : les lignes rééditées portent `nowMs`,
+                // les lignes seulement préservées gardent le leur. Estamper
+                // tout le lot à `now` ferait gagner à des lignes non touchées
+                // un arbitrage LWW qu'elles ne doivent pas gagner.
+                updatedAt: DateTime.fromMillisecondsSinceEpoch(
+                  r.updatedAt,
+                  isUtc: true,
+                ).toIso8601String(),
               ),
             )
             .toList(growable: false),
@@ -216,11 +303,28 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
         createdAt: nowMs,
       );
 
-      await localDataSource.confirmDailyAttendance(
+      final persisted = await localDataSource.confirmDailyAttendance(
         session: session,
         absentRows: absentRows,
         outboxEntry: entry,
       );
+      if (!persisted) {
+        // Course réelle : une écriture concurrente a pris la main entre la
+        // lecture de `existingSession` et la transaction. Rien n'a été écrit ni
+        // enfilé — surtout ne pas annoncer un succès.
+        return const Left(
+          StorageFailure(
+            'Cet appel vient d\'être modifié ailleurs — rouvrez la journée '
+            'pour repartir de l\'état à jour.',
+          ),
+        );
+      }
+      // Flush opportuniste au niveau repository : l'`AttendanceSaveOverlay`
+      // déclenche déjà `notifyLocalWrite()`, mais ce filet rend le push
+      // indépendant du widget appelant (même idiome qu'academics/classes).
+      // Un flush déjà en vol rend `skipped` — le verrou `_flushing` l'absorbe.
+      final engine = _syncEngine;
+      if (engine != null) unawaited(engine.flush());
       return const Right(null);
     } catch (_) {
       return const Left(StorageFailure('Local attendance write failed'));

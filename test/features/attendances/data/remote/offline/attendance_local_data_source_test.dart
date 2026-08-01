@@ -329,4 +329,85 @@ void main() {
     final rows = await dayRecords();
     expect(rows.single.syncStatus, SyncState.synced.dbValue);
   });
+
+  group('adoptCanonicalDay (sortie d un arbitrage LWW perdu)', () {
+    test(
+      'adopte les absences du gagnant, reancre updated_at et repasse SYNCED',
+      () async {
+        await dao.confirmDailyAttendance(
+          session: session(updatedAt: 100),
+          absentRows: [
+            absent('s1', updatedAt: 100),
+            absent('s2', updatedAt: 100),
+          ],
+          outboxEntry: outbox(),
+        );
+
+        // Le gagnant ne retient que s2, avec un motif different et un jeton
+        // strictement plus recent.
+        await dao.adoptCanonicalDay(
+          classroomId: classroomId,
+          dateStr: dateStr,
+          academicYearId: yearId,
+          canonicalAbsences: const {
+            's2': CanonicalAbsence(updatedAt: 900, absenceReason: 'LATE'),
+          },
+          updatedAt: 900,
+          syncedAt: 9999,
+          serverUpdatedAt: '2026-06-15T10:00:00.000Z',
+        );
+
+        final rows = await dayRecords();
+        expect(rows.map((r) => r.studentId), ['s2']);
+        expect(rows.single.absenceReason, 'LATE');
+
+        final s = await dao.getSession(
+          classroomId: classroomId,
+          dateStr: dateStr,
+          academicYearId: yearId,
+        );
+        // Reancrage indispensable : rester sur le jeton perdant ferait reperdre
+        // tous les arbitrages suivants.
+        expect(s!.updatedAt, 900);
+        expect(s.syncStatus, SyncState.synced.dbValue);
+      },
+    );
+
+    test(
+      'la journee redevient PULLABLE (c est tout l enjeu du reancrage)',
+      () async {
+        await dao.confirmDailyAttendance(
+          session: session(updatedAt: 100),
+          absentRows: [absent('s1', updatedAt: 100)],
+          outboxEntry: outbox(),
+        );
+        // Avant adoption : PENDING_SYNC, donc le pull la saute.
+        expect(
+          await dao.applyPulledSessions([
+            pulled(sessionId: 'srv-sess', absentIds: ['s2']),
+          ], 9999),
+          0,
+        );
+
+        await dao.adoptCanonicalDay(
+          classroomId: classroomId,
+          dateStr: dateStr,
+          academicYearId: yearId,
+          canonicalAbsences: const {'s1': CanonicalAbsence(updatedAt: 900)},
+          updatedAt: 900,
+          syncedAt: 9999,
+        );
+
+        // Apres adoption la session est SYNCED : le pull peut de nouveau la
+        // corriger. Sans cela elle serait gelee dans les deux sens.
+        expect(
+          await dao.applyPulledSessions([
+            pulled(sessionId: 'srv-sess', absentIds: ['s2']),
+          ], 10000),
+          1,
+        );
+        expect((await dayRecords()).map((r) => r.studentId), ['s2']);
+      },
+    );
+  });
 }
