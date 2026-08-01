@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -57,6 +59,14 @@ class SyncEngine {
   final OutboxDao _outbox;
   final ConnectivityService _connectivity;
   final SessionCredentialsProbe? _credentialsProbe;
+
+  /// Porteur courant, pour la garde d'attribution (cf. `outbox_author.dart`).
+  /// **Optionnel et permissif** par construction, comme [_credentialsProbe] :
+  /// non branché, la garde ne filtre rien et le moteur se comporte exactement
+  /// comme avant. Une garde qui se déclenche sur un contexte absent bloquerait
+  /// des écritures légitimes — le pire des deux mondes.
+  final CurrentUserContext? _currentUser;
+
   final Clock _now;
   final int _maxAttempts;
   final Map<String, OutboxSyncHandler> _handlers = {};
@@ -114,11 +124,13 @@ class SyncEngine {
     required OutboxDao outbox,
     required ConnectivityService connectivity,
     SessionCredentialsProbe? credentialsProbe,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
     int maxAttempts = _defaultMaxAttempts,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _credentialsProbe = credentialsProbe,
+       _currentUser = currentUser,
        _now = now,
        _maxAttempts = maxAttempts;
 
@@ -164,7 +176,29 @@ class SyncEngine {
       var acked = 0, retried = 0, failed = 0, noHandler = 0, poisoned = 0;
       var blocked = 0;
 
+      // Porteur figé pour tout le lot : une bascule de compte en cours de
+      // flush ne doit pas faire changer la garde d'une entrée à l'autre.
+      final currentUid = _currentUser?.uid;
+
       for (final entry in entries) {
+        // Garde d'attribution, AVANT tout décodage métier et tout appel
+        // réseau : une écriture appartenant à un autre compte identifié sera
+        // refusée par le serveur (il compare `authorId` au claim `uid`), et
+        // selon l'agrégat ce refus était soit un aller-retour réseau inutile,
+        // soit — pour l'inscription — un `SYNC_ERROR` TERMINAL qui détruisait
+        // le travail d'un collègue. On la met en attente PROPRE : même chemin
+        // que `blocked`, donc sans consommer de tentative ni poisonner, et
+        // elle repartira d'elle-même quand son auteur se reconnectera.
+        if (isForeignOutboxAuthor(entry.payload, currentUid)) {
+          await _outbox.defer(
+            entry.id,
+            nextAttemptAt: _now() + _blockedDelayMs,
+            reason: 'Écriture d\'un autre compte — attend sa reconnexion',
+          );
+          blocked++;
+          continue;
+        }
+
         final handler = _handlers[entry.aggregateType];
         if (handler == null) {
           // Aucun handler enregistré : on n'échoue pas l'entrée (une autre

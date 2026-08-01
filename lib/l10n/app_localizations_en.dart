@@ -5517,4 +5517,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get resultatsErrorUnknownMessage =>
       'An unexpected problem occurred. Please try again.';
+
+  @override
+  String get syncErrorsOtherAccountTitle => 'Waiting for another account';
+
+  @override
+  String syncErrorsOtherAccountNamed(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count writes waiting for $name',
+      one: '$count write waiting for $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountAnonymous(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count writes waiting for another account',
+      one: '$count write waiting for another account',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountOldest(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'oldest from $dateString';
+  }
+
+  @override
+  String get syncErrorsOtherAccountHint =>
+      'They will be sent when that account signs back in on this tablet.';
 }

@@ -28,7 +28,9 @@
   "@loginErrorRateLimited": {
     "description": "Bandeau d'erreur 429 — verrouillage temporaire avec compte à rebours",
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "loginContactAdmin": "Contacter l'administrateur",
@@ -66,8 +68,12 @@
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
     "placeholders": {
-      "version": { "type": "String" },
-      "build": { "type": "String" }
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
     }
   },
   "logout": "Déconnexion",
@@ -364,19 +370,31 @@
   "myCoursesCount": "{classCount, plural, =0{0 classe} =1{1 classe} other{{classCount} classes}} · {courseCount, plural, =0{0 cours} =1{1 cours} other{{courseCount} cours}}",
   "@myCoursesCount": {
     "placeholders": {
-      "classCount": { "type": "int" },
-      "courseCount": { "type": "int" }
+      "classCount": {
+        "type": "int"
+      },
+      "courseCount": {
+        "type": "int"
+      }
     }
   },
   "myCoursesExpandAll": "Tout déplier",
   "myCoursesCollapseAll": "Tout replier",
   "myCoursesClassCourseCount": "{count, plural, =0{0 cours} =1{1 cours} other{{count} cours}}",
   "@myCoursesClassCourseCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesStudentCount": "{count, plural, =0{Aucun élève} =1{1 élève} other{{count} élèves}}",
   "@myCoursesStudentCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesLoadingA11yLabel": "Chargement de vos cours",
   "myCoursesEmptyTitle": "Aucun cours affecté",
@@ -396,37 +414,78 @@
   "myCoursesErrorContactAdmin": "Contacter l'administrateur",
   "myCoursesErrorIncidentCode": "Code incident : {code}",
   "@myCoursesErrorIncidentCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailBackToCourses": "Mes cours",
   "courseDetailEvaluationCount": "{count, plural, =0{Aucune évaluation} =1{1 évaluation} other{{count} évaluations}}",
   "@courseDetailEvaluationCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailToGrade": "{count, plural, =0{0 à saisir} =1{1 à saisir} other{{count} à saisir}}",
   "@courseDetailToGrade": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNextEvalEyebrow": "Prochaine évaluation",
   "courseDetailEvalMetaShort": "{date} · /{max} pts",
   "@courseDetailEvalMetaShort": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailEvalMeta": "{date} · /{max} pts · poids {poids}",
   "@courseDetailEvalMeta": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailSemesterLabel": "Semestre {ordre}",
   "@courseDetailSemesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailTrimesterLabel": "Trimestre {ordre}",
   "@courseDetailTrimesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailPeriodLabel": "Période {ordre}",
   "@courseDetailPeriodLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailExamLabel": "Examen",
   "courseDetailStatutClosed": "Clôturée",
@@ -434,35 +493,71 @@
   "courseDetailStatutUpcoming": "À venir",
   "courseDetailBucketNotes": "{saisies}/{total} notes · {evals, plural, =0{0 éval.} =1{1 éval.} other{{evals} éval.}}",
   "@courseDetailBucketNotes": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "evals": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBucketNoEval": "Aucune évaluation",
   "courseDetailExamToPlan": "À planifier",
   "courseDetailNoteGlobaleTitle": "Note globale — {label}",
   "@courseDetailNoteGlobaleTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailProvisional": "provisoire",
   "courseDetailClassAverageLabel": "Moyenne de classe",
   "courseDetailAbove50": "{count}/{total} élèves ≥ 50 %",
   "@courseDetailAbove50": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNoAverage": "Pas encore de moyenne",
   "courseDetailByStudent": "Par élève",
   "courseDetailBadgeGraded": "Notée",
   "courseDetailBadgeInProgress": "En cours · {saisies}/{total}",
   "@courseDetailBadgeInProgress": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBadgeUpcoming": "À venir",
   "courseDetailEvalExpected": "{count, plural, =0{0 élève attendu} =1{1 élève attendu} other{{count} élèves attendus}}",
   "@courseDetailEvalExpected": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailReleveTitle": "Notes globales — {label}",
   "@courseDetailReleveTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailReleveKpiAverage": "Moyenne",
   "courseDetailReleveKpiAbove50": "≥ 50 %",
@@ -501,7 +596,14 @@
   "evalCreateSubmit": "Créer l'évaluation",
   "evalCreateHint": "{count, plural, =0{Aucun élève de {classroom} ne sera ajouté} =1{L'élève de {classroom} sera ajouté} other{Les {count} élèves de {classroom} seront ajoutés}} avec le statut « En attente ».",
   "@evalCreateHint": {
-    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
   },
   "evalCreateSuccessToast": "Évaluation créée",
   "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
@@ -520,34 +622,65 @@
   "evalBadgeComplete": "Clôturée",
   "evalBadgePartial": "Saisie en cours · {done}/{total}",
   "@evalBadgePartial": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalBadgeUpcoming": "À venir",
   "evalChipMax": "Maximum : {max} pts",
   "@evalChipMax": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalChipPoids": "Poids : {poids}",
   "@evalChipPoids": {
-    "placeholders": { "poids": { "type": "int" } }
+    "placeholders": {
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "evalModeTable": "Tableau",
   "evalModeFocus": "Focus",
   "evalCountNotee": "{count, plural, =0{{count} notées} =1{{count} notée} other{{count} notées}}",
   "@evalCountNotee": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountEnAttente": "{count} en attente",
   "@evalCountEnAttente": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsJust": "{count} abs. just.",
   "@evalCountAbsJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsNonJust": "{count} abs. non just.",
   "@evalCountAbsNonJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalStatutNotee": "Notée",
   "evalStatutEnAttente": "En attente",
@@ -555,7 +688,11 @@
   "evalStatutAbsNonJust": "Abs. non just.",
   "evalNoteMaxError": "max {max}",
   "@evalNoteMaxError": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalAbsenceJustifieTooltip": "Absence justifiée",
   "evalAbsenceNonJustifieTooltip": "Absence non justifiée",
@@ -565,21 +702,46 @@
   "evalFocusLast": "Dernier élève",
   "evalFocusPosition": "Élève {index} / {total}",
   "@evalFocusPosition": {
-    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveCounter": "{done} / {total} saisies",
   "@evalSaveCounter": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveErrorsAlert": "{count, plural, =0{0 note au-dessus du maximum} =1{1 note au-dessus du maximum} other{{count} notes au-dessus du maximum}}",
   "@evalSaveErrorsAlert": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveButton": "Enregistrer les notes",
   "evalSaveButtonSaving": "Enregistrement…",
   "evalSaveSuccessToast": "Notes enregistrées — {notees, plural, =0{{notees} notées} =1{{notees} notée} other{{notees} notées}} · {enAttente} en attente",
   "@evalSaveSuccessToast": {
-    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+    "placeholders": {
+      "notees": {
+        "type": "int"
+      },
+      "enAttente": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveErrorToast": "Échec de l'enregistrement. Vos saisies sont conservées.",
   "evalSaisieEmptyTitle": "Aucun élève",
@@ -674,24 +836,24 @@
   "dateOfBirth": "Date de Naissance",
   "search": "Rechercher",
   "clear": "Effacer",
-  "viewDetails": "Voir Détails",
+  "viewDetails": "Voir les détails",
   "editEnrollment": "Modifier",
   "exportData": "Exporter",
   "noResultsFound": "Aucun résultat trouvé",
   "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
   "enrollmentEmptyTitle": "Aucun résultat",
-  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\u0027élève n\u0027est pas encore enregistré.",
+  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l'élève n'est pas encore enregistré.",
   "enrollmentEmptyWithoutFilterDescription": "Aucune inscription pour le moment.",
   "enrollmentEmptyCreateAction": "Inscrire un nouvel élève",
   "enrollmentErrorRetry": "Réessayer",
   "enrollmentErrorReconnect": "Se reconnecter",
-  "enrollmentErrorContactAdmin": "Contacter l\u0027administrateur",
+  "enrollmentErrorContactAdmin": "Contacter l'administrateur",
   "enrollmentErrorNetworkTitle": "Pas de connexion",
   "enrollmentErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.",
   "enrollmentErrorUnauthorizedTitle": "Session expirée",
   "enrollmentErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
   "enrollmentErrorForbiddenTitle": "Accès refusé",
-  "enrollmentErrorForbiddenMessage": "Vous n\u0027avez pas les droits requis pour voir cette liste.",
+  "enrollmentErrorForbiddenMessage": "Vous n'avez pas les droits requis pour voir cette liste.",
   "enrollmentErrorServerTitle": "Erreur du serveur",
   "enrollmentErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
   "enrollmentErrorIncidentCode": "Code incident : {code}",
@@ -1126,7 +1288,12 @@
   "studentChargeFeeCodeOther": "Autre",
   "studentChargeDueAtLabel": "Échéance : {date}",
   "@studentChargeDueAtLabel": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMd" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
   },
   "studentChargeFeeCodeFallback": "Frais scolaire",
   "facturationSearchTitle": "Rechercher les élèves",
@@ -1150,7 +1317,11 @@
   "facturationBalanceDuePill": "{amount} dû",
   "@facturationBalanceDuePill": {
     "description": "Pastille AppBar facturation lorsque le solde est dû.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationBalanceUpToDatePill": "À jour",
   "financePendingSyncBadge": "En attente de synchro",
@@ -1160,7 +1331,11 @@
   "facturationFreshnessAt": "Grand-livre à jour à {time}",
   "@facturationFreshnessAt": {
     "description": "Fraîcheur (ADR-002) : horodatage du dernier rafraîchissement du grand-livre.",
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "facturationFreshnessNever": "Grand-livre non synchronisé",
   "@facturationFreshnessNever": {
@@ -1169,12 +1344,20 @@
   "facturationChargeLineRemainingSuffix": "{amount} restant",
   "@facturationChargeLineRemainingSuffix": {
     "description": "Pied de la ligne de frais : montant restant à payer.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationPaymentRecordedToast": "Paiement de {amount} enregistré",
   "@facturationPaymentRecordedToast": {
     "description": "Toast de confirmation après un encaissement réussi.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationChargeStatementCopied": "Relevé copié dans le presse-papiers",
   "facturationChargeStatementEmpty": "Aucun paiement à exporter pour ce frais.",
@@ -1205,8 +1388,12 @@
   "@facturationDetailPaymentsRecordedWithTotal": {
     "description": "Sous-titre de la section paiements : nombre de versements + total payé.",
     "placeholders": {
-      "count": { "type": "int" },
-      "total": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "facturationPaymentMethodCash": "Espèces",
@@ -1669,26 +1856,50 @@
   "presenceSummaryTitle": "Synthèse de présence",
   "presenceSummaryA11yLabel": "Synthèse de présence, taux {rate} %",
   "@presenceSummaryA11yLabel": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
   "presenceKpiRate": "Taux de présence",
   "presenceRateValue": "{rate} %",
   "@presenceRateValue": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
   "presenceSchoolDaysCount": "{count, plural, =0{0 jour scolaire} =1{1 jour scolaire} other{{count} jours scolaires}}",
   "@presenceSchoolDaysCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "presenceDistributionA11yLabel": "Répartition des jours par statut",
   "presencePresentOutOfTotal": "{present} jours présents sur {total}",
   "@presencePresentOutOfTotal": {
-    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "presenceAbsenceListTitle": "Détail des absences",
   "presenceAbsenceDate": "{date}",
   "@presenceAbsenceDate": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
   },
   "presencePerfectTitle": "Assiduité parfaite",
   "presencePerfectMessage": "Aucune absence sur cette période.",
@@ -1701,15 +1912,29 @@
   "presenceEmptyMessage": "Aucun jour scolaire sur cette période. Choisissez une autre période pour consulter l'assiduité.",
   "presenceRangeYear": "Année scolaire {name}",
   "@presenceRangeYear": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "presenceRangeMonth": "{date}",
   "@presenceRangeMonth": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
   },
   "presenceRangeWeek": "Semaine du {date}",
   "@presenceRangeWeek": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMd"
+      }
+    }
   },
   "presenceOfflineSyncPendingTitle": "Synchronisation en cours",
   "presenceOfflineSyncPendingMessage": "Les données locales de présence ne sont pas encore complètes pour calculer une statistique fiable. Réessayez dans un instant.",
@@ -1789,7 +2014,11 @@
   "disciplinarySanctionUnknown": "Aucune sanction",
   "disciplinaryCaseSeverityChip": "Gravité {severity}",
   "@disciplinaryCaseSeverityChip": {
-    "placeholders": { "severity": { "type": "String" } }
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
   },
   "disciplinaryAdvanceTakeCharge": "Prendre en charge",
   "disciplinaryAdvanceClose": "Clôturer",
@@ -1803,11 +2032,19 @@
   "disciplinaryCaseClosedLabel": "Dossier clôturé",
   "disciplinaryCasesCountPill": "{count, plural, =0{0 cas} =1{1 cas} other{{count} cas}}",
   "@disciplinaryCasesCountPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCommentsCountBadge": "{count, plural, =0{0 commentaire} =1{1 commentaire} other{{count} commentaires}}",
   "@disciplinaryCommentsCountBadge": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCommentsDialogTitle": "Commentaires",
   "disciplinaryCommentsEmpty": "Aucun commentaire pour l'instant.",
@@ -1818,11 +2055,19 @@
   "disciplinaryFreshnessLocal": "Poste local",
   "disciplinaryCasesOpenPill": "{count, plural, =0{0 ouvert} =1{1 ouvert} other{{count} ouverts}}",
   "@disciplinaryCasesOpenPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCasesGravePill": "{count, plural, =0{0 grave} =1{1 grave} other{{count} graves}}",
   "@disciplinaryCasesGravePill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCasesEmptyTitle": "Aucun cas de discipline",
   "disciplinaryCasesEmptyDescription": "Aucun incident enregistré pour cet élève. Tout va bien.",
@@ -1855,21 +2100,31 @@
   "@statusAuthRequired": {
     "description": "Pastille synchro : réseau présent mais session sans jetons (login offline) — un login online est requis pour synchroniser"
   },
-
   "syncLastSyncJustNow": "À l'instant",
   "syncLastSyncMinutesAgo": "{count, plural, =0{Il y a 0 min} =1{Il y a 1 min} other{Il y a {count} min}}",
   "@syncLastSyncMinutesAgo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "syncLastSyncHoursAgo": "{count, plural, =0{Il y a 0 h} =1{Il y a 1 h} other{Il y a {count} h}}",
   "@syncLastSyncHoursAgo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "syncLastSyncDaysAgo": "{count, plural, =0{Il y a 0 jour} =1{Il y a 1 jour} other{Il y a {count} jours}}",
   "@syncLastSyncDaysAgo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "syncErrorsTitle": "Écritures en échec",
   "syncErrorsSubtitle": "Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d'eux-mêmes.",
   "syncErrorsRetry": "Réessayer",
@@ -1883,8 +2138,14 @@
   "syncErrorsQueuedAt": "{date} à {time}",
   "@syncErrorsQueuedAt": {
     "placeholders": {
-      "date": { "type": "DateTime", "format": "yMd" },
-      "time": { "type": "DateTime", "format": "Hm" }
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
     }
   },
   "syncAggregateEnrollment": "Inscription",
@@ -1894,7 +2155,6 @@
   "syncAggregateNotesBatch": "Lot de notes",
   "syncAggregateEvaluation": "Évaluation",
   "syncAggregateClassroomTransfer": "Transfert de classe",
-
   "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",
   "offlinePaymentQueued": "Paiement enregistré — en attente de synchronisation",
   "offlineEnrollmentQueued": "Inscription enregistrée — en attente de synchronisation",
@@ -2130,8 +2390,6 @@
   "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
   "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques.",
   "enrollmentResults": "Résultats",
-  "viewDetails": "Voir les détails",
-  "refresh": "Actualiser",
   "sort": "Trier",
   "switchToTableView": "Passer à la vue tableau",
   "switchToGridView": "Passer à la vue grille",
@@ -2169,11 +2427,19 @@
   "attendanceOverviewKpiRecordedDays": "Jours enregistrés",
   "attendanceOverviewRateValue": "{rate} %",
   "@attendanceOverviewRateValue": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewStudentDays": "{count} élève-jours",
   "@attendanceOverviewStudentDays": {
-    "placeholders": { "count": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewKpiBandA11yLabel": "Indicateurs clés de présence",
   "attendanceOverviewSplitTitle": "Répartition présence / absences",
@@ -2184,9 +2450,15 @@
   "attendanceOverviewSplitA11yLabel": "Présence {presence} %, justifiées {justified} %, non justifiées {unjustified} %",
   "@attendanceOverviewSplitA11yLabel": {
     "placeholders": {
-      "presence": { "type": "String" },
-      "justified": { "type": "String" },
-      "unjustified": { "type": "String" }
+      "presence": {
+        "type": "String"
+      },
+      "justified": {
+        "type": "String"
+      },
+      "unjustified": {
+        "type": "String"
+      }
     }
   },
   "attendanceOverviewEvolutionTitle": "Évolution du taux de présence",
@@ -2195,7 +2467,11 @@
   "attendanceOverviewEvolutionHintDay": "par jour",
   "attendanceOverviewEvolutionTarget": "Objectif {rate} %",
   "@attendanceOverviewEvolutionTarget": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewReasonsTitle": "Motifs d'absence",
   "attendanceOverviewReasonsHint": "école",
@@ -2229,7 +2505,11 @@
   "dossierTabPresenceDescription": "Absences & retards",
   "dossierOpenCasesChip": "{count, plural, =0{0 cas ouvert} =1{1 cas ouvert} other{{count} cas ouverts}}",
   "@dossierOpenCasesChip": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dossierNoOpenCases": "Aucun cas ouvert",
   "genderOther": "Autre",
@@ -2247,8 +2527,13 @@
   "@scheduleLoadSummary": {
     "description": "Compteur de charge de la semaine : nombre de séances et heures de cours cumulées.",
     "placeholders": {
-      "count": { "type": "int" },
-      "hours": { "type": "double", "format": "decimalPattern" }
+      "count": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
     }
   },
   "scheduleToday": "auj.",
@@ -2261,7 +2546,9 @@
   "@scheduleEmptyDayDescription": {
     "description": "État vide de la vue Jour, avec le jour sélectionné.",
     "placeholders": {
-      "day": { "type": "String" }
+      "day": {
+        "type": "String"
+      }
     }
   },
   "scheduleWeekdayLongMon": "Lundi",
@@ -2293,12 +2580,13 @@
   "@scheduleErrorIncidentCode": {
     "description": "Code d'incident affiché sous une erreur serveur (500).",
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "menuResultats": "Résultats",
   "subMenuResultatsClasse": "Résultats par classe",
-
   "resultatsSearchEyebrow": "Résultats",
   "resultatsSearchTitle": "Rechercher des résultats",
   "resultatsSearchModeSemantics": "Mode de recherche",
@@ -2310,89 +2598,219 @@
   "resultatsFieldMiddleName": "Postnom",
   "resultatsFieldFirstName": "Prénom(s)",
   "resultatsFieldClassroom": "Classe",
-
   "resultatsDecoupageTrimestres": "Trimestres",
   "resultatsDecoupageSemestres": "Semestres",
   "resultatsDecoupagePeriodes": "Périodes",
   "resultatsPeriodShortTrimestre": "T{ordre}",
-  "@resultatsPeriodShortTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortSemestre": "S{ordre}",
-  "@resultatsPeriodShortSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortGeneric": "P{ordre}",
-  "@resultatsPeriodShortGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongTrimestre": "Trimestre {ordre}",
-  "@resultatsPeriodLongTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongSemestre": "Semestre {ordre}",
-  "@resultatsPeriodLongSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongGeneric": "Période {ordre}",
-  "@resultatsPeriodLongGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSubPeriodColumn": "P{ordre}",
-  "@resultatsSubPeriodColumn": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsSubPeriodColumn": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodsError": "Impossible de charger les périodes.",
   "resultatsPeriodsEmpty": "Aucune période disponible.",
-
   "resultatsGenderMale": "Garçon",
   "resultatsGenderFemale": "Fille",
   "resultatsGenderOther": "Autre",
   "resultatsDash": "—",
   "resultatsPercentValue": "{value} %",
-  "@resultatsPercentValue": { "placeholders": { "value": { "type": "int" } } },
+  "@resultatsPercentValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsNoteOverMax": "{note}/{max}",
-  "@resultatsNoteOverMax": { "placeholders": { "note": { "type": "String" }, "max": { "type": "String" } } },
+  "@resultatsNoteOverMax": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsPlaceValue": "{place} / {total}",
-  "@resultatsPlaceValue": { "placeholders": { "place": { "type": "int" }, "total": { "type": "int" } } },
+  "@resultatsPlaceValue": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsDeltaPts": "{value} pts",
-  "@resultatsDeltaPts": { "placeholders": { "value": { "type": "String" } } },
-
+  "@resultatsDeltaPts": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsColumnRank": "#",
   "resultatsColumnEleve": "Élève",
   "resultatsColumnMoyenne": "Moyenne {period}",
-  "@resultatsColumnMoyenne": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsColumnMoyenne": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsNonClasseBadge": "Non classé",
-
   "resultatsSummaryAverageCaption": "Moyenne · {period}",
-  "@resultatsSummaryAverageCaption": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsSummaryAverageCaption": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsSummaryReussites": "{count, plural, =0{0 réussite} =1{1 réussite} other{{count} réussites}}",
-  "@resultatsSummaryReussites": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryReussites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryEchecs": "{count, plural, =0{0 échec} =1{1 échec} other{{count} échecs}}",
-  "@resultatsSummaryEchecs": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryEchecs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryNonClasses": "{count, plural, =0{0 non classé} =1{1 non classé} other{{count} non classés}}",
-  "@resultatsSummaryNonClasses": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryNonClasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryFootnote": "{effectif} élèves · seuil de réussite {seuil} %",
-  "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
-
+  "@resultatsSummaryFootnote": {
+    "placeholders": {
+      "effectif": {
+        "type": "int"
+      },
+      "seuil": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsEleveResultsCount": "{count, plural, =0{0 élève trouvé} =1{1 élève trouvé} other{{count} élèves trouvés}}",
-  "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@resultatsEleveResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusClassroom": "Classe {classroom}",
-  "@resultatsFocusClassroom": { "placeholders": { "classroom": { "type": "String" } } },
+  "@resultatsFocusClassroom": {
+    "placeholders": {
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsFocusBack": "Retour à la vue classe",
   "resultatsFocusAnnualAverage": "Moyenne annuelle",
   "resultatsFocusRankOf": "sur {count} classés",
-  "@resultatsFocusRankOf": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsFocusRankOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusNoBulletin": "Élève non classé sur cette période : pas de bulletin détaillé.",
-
   "resultatsProgressionTitle": "Progression sur l'année",
   "resultatsProgressionPointLabel": "P{index}",
-  "@resultatsProgressionPointLabel": { "placeholders": { "index": { "type": "int" } } },
+  "@resultatsProgressionPointLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsStrengthsTitle": "Points forts",
   "resultatsWeaknessesTitle": "À renforcer",
-
   "resultatsOfficialBulletinTitle": "Bulletin officiel",
   "resultatsOfficialBulletinSubtitle": "Domaines & branches, notes journalières + examen, maxima, place — gabarit national imprimable.",
   "resultatsComingSoon": "Bientôt disponible",
-
   "resultatsBulletinTitle": "Bulletin par domaine · {period}",
-  "@resultatsBulletinTitle": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsBulletinTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsBulletinLegend": "note / maximum",
   "resultatsBulletinSubtotal": "Sous-total",
   "resultatsBulletinTotal": "Totaux obtenus",
-
   "resultatsSynthesePercent": "Pourcentage",
   "resultatsSynthesePlace": "Place",
   "resultatsSyntheseApplication": "Application",
   "resultatsSyntheseConduite": "Conduite",
-
   "resultatsIdleTitle": "Choisissez une classe ou un élève",
   "resultatsIdleDescription": "Sélectionnez un cycle, un niveau et une classe, puis une période pour afficher les résultats.",
   "resultatsLoadingSemantics": "Chargement des résultats",
@@ -2401,12 +2819,17 @@
   "resultatsEmptyEleveTitle": "Aucun élève trouvé",
   "resultatsEmptyEleveDescription": "Vérifiez l'orthographe du nom, du postnom ou du prénom, ou élargissez la recherche.",
   "resultatsEmptyAdjustAction": "Ajuster la recherche",
-
   "resultatsErrorRetry": "Réessayer",
   "resultatsErrorReconnect": "Se reconnecter",
   "resultatsErrorContactAdmin": "Contacter l'administrateur",
   "resultatsErrorIncidentCode": "Code incident : {code}",
-  "@resultatsErrorIncidentCode": { "placeholders": { "code": { "type": "String" } } },
+  "@resultatsErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsErrorNetworkTitle": "Connexion interrompue",
   "resultatsErrorNetworkMessage": "Vérifiez votre connexion internet puis réessayez.",
   "resultatsErrorUnauthorizedTitle": "Session expirée",
@@ -2416,5 +2839,35 @@
   "resultatsErrorServerTitle": "Erreur serveur",
   "resultatsErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
   "resultatsErrorUnknownTitle": "Une erreur est survenue",
-  "resultatsErrorUnknownMessage": "Un problème inattendu est survenu. Réessayez."
+  "resultatsErrorUnknownMessage": "Un problème inattendu est survenu. Réessayez.",
+  "syncErrorsOtherAccountTitle": "En attente d'un autre compte",
+  "syncErrorsOtherAccountNamed": "{count, plural, =1{{count} écriture en attente de {name}} other{{count} écritures en attente de {name}}}",
+  "@syncErrorsOtherAccountNamed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsOtherAccountAnonymous": "{count, plural, =1{{count} écriture en attente d'un autre compte} other{{count} écritures en attente d'un autre compte}}",
+  "@syncErrorsOtherAccountAnonymous": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncErrorsOtherAccountOldest": "la plus ancienne du {date}",
+  "@syncErrorsOtherAccountOldest": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "syncErrorsOtherAccountHint": "Elles repartiront à sa reconnexion sur cette tablette."
 }

@@ -9332,6 +9332,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected problem occurred. Please try again.'**
   String get resultatsErrorUnknownMessage;
+
+  /// No description provided for @syncErrorsOtherAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for another account'**
+  String get syncErrorsOtherAccountTitle;
+
+  /// No description provided for @syncErrorsOtherAccountNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} write waiting for {name}} other{{count} writes waiting for {name}}}'**
+  String syncErrorsOtherAccountNamed(int count, String name);
+
+  /// No description provided for @syncErrorsOtherAccountAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} write waiting for another account} other{{count} writes waiting for another account}}'**
+  String syncErrorsOtherAccountAnonymous(int count);
+
+  /// No description provided for @syncErrorsOtherAccountOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'oldest from {date}'**
+  String syncErrorsOtherAccountOldest(DateTime date);
+
+  /// No description provided for @syncErrorsOtherAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They will be sent when that account signs back in on this tablet.'**
+  String get syncErrorsOtherAccountHint;
 }
 
 class _AppLocalizationsDelegate

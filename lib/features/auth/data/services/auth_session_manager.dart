@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
+import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
@@ -30,7 +31,10 @@ int _systemWallClock() => DateTime.now().millisecondsSinceEpoch;
 ///   `now` sur la **même** horloge (device) pour éviter un faux « saut horloge » ;
 /// - seul un contact serveur peut *améliorer* le mode (D-08).
 class AuthSessionManager
-    implements RevocationEvaluator, SessionCredentialsProbe {
+    implements
+        RevocationEvaluator,
+        SessionCredentialsProbe,
+        OutboxAuthorDirectory {
   final TokenStorageService _tokenStorage;
   final AuthLocalDao _authLocalDao;
   final PasswordVerifierService _verifier;
@@ -514,6 +518,26 @@ class AuthSessionManager
 
   /// Vrai si la session peut authentifier des appels API : access non vide et
   /// NON EXPIRÉ, ou refresh actif non expiré (l'interceptor mintera). La
+  /// Identité locale d'un auteur d'écriture d'outbox ([OutboxAuthorDirectory]).
+  ///
+  /// Sert à nommer, sur une tablette partagée, le collègue dont les écritures
+  /// attendent sa reconnexion. Lecture pure de `auth_local_user`, jamais du
+  /// contenu des écritures. Défensif : base indisponible ou compte inconnu →
+  /// `null`, l'appelant retombe sur une formulation anonyme.
+  @override
+  Future<OutboxAuthorIdentity?> identityOf(String uid) async {
+    try {
+      final user = await _authLocalDao.getUser(uid);
+      if (user == null) return null;
+      return OutboxAuthorIdentity(
+        firstName: user.firstName,
+        lastName: user.lastName,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// consigne ne compte pas (verrouillée par mot de passe). Les bornes
   /// manquantes valent « valide » (backend qui ne les fournit pas).
   /// Défensif : storage indisponible → `false` (ne pas marteler le serveur).

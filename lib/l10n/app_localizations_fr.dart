@@ -5583,4 +5583,41 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get resultatsErrorUnknownMessage =>
       'Un problème inattendu est survenu. Réessayez.';
+
+  @override
+  String get syncErrorsOtherAccountTitle => 'En attente d\'un autre compte';
+
+  @override
+  String syncErrorsOtherAccountNamed(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count écritures en attente de $name',
+      one: '$count écriture en attente de $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountAnonymous(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count écritures en attente d\'un autre compte',
+      one: '$count écriture en attente d\'un autre compte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountOldest(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'la plus ancienne du $dateString';
+  }
+
+  @override
+  String get syncErrorsOtherAccountHint =>
+      'Elles repartiront à sa reconnexion sur cette tablette.';
 }

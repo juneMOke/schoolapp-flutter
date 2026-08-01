@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.da
 import 'package:school_app_flutter/core/components/status/outbox_errors_state.dart';
 import 'package:school_app_flutter/core/components/status/outbox_retry_policy.dart';
 import 'package:school_app_flutter/core/components/status/sync_error_tile.dart';
+import 'package:school_app_flutter/core/components/status/sync_other_account_band.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -124,6 +125,16 @@ class _SyncErrorsBody extends StatelessWidget {
                 },
               ),
             ),
+            // Explication de l'attente d'un autre compte, sous la liste : ce
+            // n'est pas une erreur de l'utilisateur courant, ça ne doit pas
+            // passer devant ses propres écritures à reprendre.
+            if (!state.others.isEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              SyncOtherAccountBand(
+                others: state.others,
+                authors: state.otherAuthors,
+              ),
+            ],
             // « Tout réessayer » n'apparaît que s'il y a effectivement quelque
             // chose à rejouer : sinon le bouton est actif et sans aucun effet.
             if (state.entries.any(

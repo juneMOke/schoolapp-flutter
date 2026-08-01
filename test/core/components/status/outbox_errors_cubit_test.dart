@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_state.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -182,4 +186,121 @@ void main() {
     expect(cubit.state.entries.map((e) => e.id), ['a1']);
     await cubit.close();
   });
+
+  group('écritures en attente d\'un autre compte', () {
+    OutboxEntry authored(String id, String? authorId, {int createdAt = 1000}) =>
+        OutboxEntry(
+          id: id,
+          aggregateType: 'PAYMENT',
+          aggregateId: 'agg-$id',
+          operation: OutboxOperation.create,
+          payload: jsonEncode({if (authorId != null) 'authorId': authorId}),
+          createdAt: createdAt,
+        );
+
+    OutboxErrorsCubit build({
+      String? me = 'uid-moi',
+      OutboxAuthorDirectory? directory,
+    }) => OutboxErrorsCubit(
+      outbox: dao,
+      syncEngine: engine,
+      currentUser: CurrentUserContext()..set(me),
+      authorDirectory: directory,
+    );
+
+    test('agrège le nombre, la plus ancienne et le nom du collègue', () async {
+      await dao.enqueue(authored('a1', 'uid-autre', createdAt: 5000));
+      await dao.enqueue(authored('a2', 'uid-autre', createdAt: 2000));
+      await dao.enqueue(authored('mine', 'uid-moi', createdAt: 1000));
+
+      final cubit = build(
+        directory: _Directory({
+          'uid-autre': const OutboxAuthorIdentity(
+            firstName: 'Marie',
+            lastName: 'Kabila',
+          ),
+        }),
+      );
+      await cubit.load();
+
+      expect(cubit.state.others.count, 2);
+      expect(cubit.state.others.oldestCreatedAt, 2000);
+      expect(cubit.state.otherAuthors.single?.firstName, 'Marie');
+    });
+
+    test('compte les entrées REPORTÉES par la garde : elles ont un '
+        'next_attempt_at futur, donc pendingReady ne les voit pas', () async {
+      await dao.enqueue(authored('a1', 'uid-autre'));
+      await dao.defer('a1', nextAttemptAt: 99999999999, reason: 'autre compte');
+
+      final cubit = build();
+      await cubit.load();
+
+      expect(
+        cubit.state.others.count,
+        1,
+        reason: 'pendingAll, pas pendingReady',
+      );
+    });
+
+    test(
+      'un annuaire qui lève dégrade en anonyme, sans perdre l\'information',
+      () async {
+        await dao.enqueue(authored('a1', 'uid-autre'));
+
+        final cubit = build(directory: _ThrowingDirectory());
+        await cubit.load();
+
+        expect(cubit.state.others.count, 1);
+        expect(cubit.state.otherAuthors, [null]);
+      },
+    );
+
+    test('les entrées sans auteur ne sont jamais comptées comme celles d\'un '
+        'autre compte', () async {
+      await dao.enqueue(authored('a1', null));
+
+      final cubit = build();
+      await cubit.load();
+
+      expect(cubit.state.others.isEmpty, isTrue);
+    });
+
+    test('porteur inconnu : aucun agrégat, pas de bande trompeuse', () async {
+      await dao.enqueue(authored('a1', 'uid-autre'));
+
+      final cubit = build(me: null);
+      await cubit.load();
+
+      expect(cubit.state.others.isEmpty, isTrue);
+    });
+
+    test('l\'agrégat ne fait JAMAIS basculer la feuille en échec : les erreurs '
+        'de l\'utilisateur restent la raison d\'être de l\'écran', () async {
+      await dao.enqueue(authored('ko', 'uid-moi'));
+      await dao.markSyncError('ko', 'rejet serveur');
+      await dao.enqueue(authored('a1', 'uid-autre'));
+
+      final cubit = build(directory: _ThrowingDirectory());
+      await cubit.load();
+
+      expect(cubit.state.status, OutboxErrorsStatus.loaded);
+      expect(cubit.state.entries.single.id, 'ko');
+    });
+  });
+}
+
+/// Annuaire de test.
+class _Directory implements OutboxAuthorDirectory {
+  final Map<String, OutboxAuthorIdentity> _byUid;
+  _Directory(this._byUid);
+
+  @override
+  Future<OutboxAuthorIdentity?> identityOf(String uid) async => _byUid[uid];
+}
+
+class _ThrowingDirectory implements OutboxAuthorDirectory {
+  @override
+  Future<OutboxAuthorIdentity?> identityOf(String uid) async =>
+      throw StateError('annuaire indisponible');
 }

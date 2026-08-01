@@ -137,6 +137,25 @@ class OutboxDao {
     return rows.map(OutboxEntry.fromMap).toList();
   }
 
+  /// TOUTES les entrées en attente, **barrière de backoff ignorée** — à ne pas
+  /// confondre avec [pendingReady], qui sélectionne ce qui doit partir MAINTENANT.
+  ///
+  /// Sert à expliquer une file qui ne se vide pas : les écritures d'un autre
+  /// compte sont reportées à `now + 5 s` par la garde d'attribution, donc
+  /// presque toujours absentes de [pendingReady] au moment où l'UI regarde.
+  /// Les compter avec [pendingReady] afficherait « 0 en attente » devant une
+  /// file qui en contient quatre.
+  Future<List<OutboxEntry>> pendingAll({int limit = 200}) async {
+    final rows = await _db.query(
+      table,
+      where: 'status = ?',
+      whereArgs: [OutboxStatus.pending.dbValue],
+      orderBy: 'created_at ASC, rowid ASC',
+      limit: limit,
+    );
+    return rows.map(OutboxEntry.fromMap).toList();
+  }
+
   /// Remet une entrée terminale (`SYNC_ERROR`) en file : `PENDING`, compteur de
   /// tentatives remis à zéro, barrière de backoff effacée, dernière erreur
   /// purgée. C'est le pendant explicite du re-enqueue implicite (réécriture du

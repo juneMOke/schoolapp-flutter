@@ -71,6 +71,9 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       // Lazy : AuthSessionManager est enregistré plus tard dans
       // `configureDependencies()`, résolu au premier flush.
       credentialsProbe: getIt<AuthSessionManager>(),
+      // Garde d'attribution (tablette partagée) : ne jamais pousser sous le
+      // jeton du porteur courant l'écriture hors ligne d'un autre compte.
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 

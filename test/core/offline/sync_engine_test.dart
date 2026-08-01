@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -77,11 +79,15 @@ void main() {
     attempts: attempts,
   );
 
-  SyncEngine buildEngine({int maxAttempts = 50}) => SyncEngine(
+  SyncEngine buildEngine({
+    int maxAttempts = 50,
+    CurrentUserContext? currentUser,
+  }) => SyncEngine(
     outbox: dao,
     connectivity: connectivityService,
     now: () => fixedNow,
     maxAttempts: maxAttempts,
+    currentUser: currentUser,
   );
 
   void goOnline() {
@@ -356,4 +362,172 @@ void main() {
       expect(SyncEngine.backoffMs(20), SyncEngine.backoffMs(8));
     });
   });
+
+  group('garde d\'attribution (tablette partagée)', () {
+    String payloadOf(String? authorId) =>
+        jsonEncode({if (authorId != null) 'authorId': authorId});
+
+    OutboxEntry authored(String id, String? authorId, {int createdAt = 1000}) =>
+        OutboxEntry(
+          id: id,
+          aggregateType: 'ENROLLMENT',
+          aggregateId: 'agg-$id',
+          operation: OutboxOperation.create,
+          payload: payloadOf(authorId),
+          createdAt: createdAt,
+        );
+
+    test(
+      'une écriture d\'un AUTRE compte n\'est jamais dispatchée : le handler '
+      'n\'est pas appelé du tout, donc aucun 403 ne peut la brûler',
+      () async {
+        goOnline();
+        await dao.enqueue(authored('e1', 'uid-autre'));
+        final handler = _RecordingHandler();
+        final engine = buildEngine(
+          currentUser: CurrentUserContext()..set('uid-moi'),
+        )..registerHandler(handler);
+
+        final report = await engine.flush();
+
+        expect(handler.dispatched, isEmpty, reason: 'aucun appel réseau');
+        expect(report.blocked, 1);
+        expect(report.acked, 0);
+        expect(report.failed, 0);
+      },
+    );
+
+    test('elle reste PENDING, sans consommer de tentative ni poisonner — elle '
+        'repartira à la reconnexion de son auteur', () async {
+      goOnline();
+      await dao.enqueue(authored('e1', 'uid-autre'));
+      final engine = buildEngine(
+        currentUser: CurrentUserContext()..set('uid-moi'),
+      )..registerHandler(_RecordingHandler());
+
+      await engine.flush();
+
+      final row = (await db.query(
+        'outbox',
+        where: 'id = ?',
+        whereArgs: ['e1'],
+      )).single;
+      expect(row['status'], 'PENDING');
+      expect(row['attempts'], 0);
+      expect(row['next_attempt_at'], fixedNow + 5000);
+    });
+
+    test('mes propres écritures partent normalement', () async {
+      goOnline();
+      await dao.enqueue(authored('e1', 'uid-moi'));
+      final handler = _RecordingHandler();
+      final engine = buildEngine(
+        currentUser: CurrentUserContext()..set('uid-moi'),
+      )..registerHandler(handler);
+
+      final report = await engine.flush();
+
+      expect(handler.dispatched, ['e1']);
+      expect(report.acked, 1);
+    });
+
+    test('une entrée SANS auteur reste poussable : la geler l\'orphelinerait, '
+        'aucun compte ne pourrait jamais la réclamer', () async {
+      goOnline();
+      await dao.enqueue(authored('e1', null));
+      final handler = _RecordingHandler();
+      final engine = buildEngine(
+        currentUser: CurrentUserContext()..set('uid-moi'),
+      )..registerHandler(handler);
+
+      final report = await engine.flush();
+
+      expect(handler.dispatched, ['e1']);
+      expect(report.acked, 1);
+    });
+
+    test('sans CurrentUserContext branché, la garde ne filtre rien : le moteur '
+        'se comporte exactement comme avant', () async {
+      goOnline();
+      await dao.enqueue(authored('e1', 'uid-autre'));
+      final handler = _RecordingHandler();
+      final engine = buildEngine()..registerHandler(handler);
+
+      final report = await engine.flush();
+
+      expect(handler.dispatched, ['e1']);
+      expect(report.blocked, 0);
+    });
+
+    test(
+      'porteur sans uid (backend hérité sans le claim) : aucun filtrage',
+      () async {
+        goOnline();
+        await dao.enqueue(authored('e1', 'uid-autre'));
+        final handler = _RecordingHandler();
+        final engine = buildEngine(currentUser: CurrentUserContext())
+          ..registerHandler(handler);
+
+        final report = await engine.flush();
+
+        expect(handler.dispatched, ['e1']);
+        expect(report.blocked, 0);
+      },
+    );
+
+    test('mélange : seules les étrangères sont mises en attente, les miennes '
+        'partent dans le même lot', () async {
+      goOnline();
+      await dao.enqueue(authored('e1', 'uid-autre', createdAt: 1000));
+      await dao.enqueue(authored('e2', 'uid-moi', createdAt: 2000));
+      await dao.enqueue(authored('e3', 'uid-autre', createdAt: 3000));
+      final handler = _RecordingHandler();
+      final engine = buildEngine(
+        currentUser: CurrentUserContext()..set('uid-moi'),
+      )..registerHandler(handler);
+
+      final report = await engine.flush();
+
+      expect(handler.dispatched, ['e2']);
+      expect(report.blocked, 2);
+      expect(report.acked, 1);
+    });
+
+    test('un payload corrompu n\'empêche pas le flush : il est traité comme '
+        'non attribué et part', () async {
+      goOnline();
+      await dao.enqueue(
+        OutboxEntry(
+          id: 'e1',
+          aggregateType: 'ENROLLMENT',
+          aggregateId: 'agg-e1',
+          operation: OutboxOperation.create,
+          payload: '{ pas du json',
+          createdAt: 1000,
+        ),
+      );
+      final handler = _RecordingHandler();
+      final engine = buildEngine(
+        currentUser: CurrentUserContext()..set('uid-moi'),
+      )..registerHandler(handler);
+
+      expect((await engine.flush()).acked, 1);
+      expect(handler.dispatched, ['e1']);
+    });
+  });
+}
+
+/// Handler qui acquitte tout et note ce qu'on lui a passé — sert à prouver
+/// qu'une entrée étrangère n'atteint JAMAIS la couche réseau.
+class _RecordingHandler implements OutboxSyncHandler {
+  final List<String> dispatched = [];
+
+  @override
+  String get aggregateType => 'ENROLLMENT';
+
+  @override
+  Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
+    dispatched.add(entry.id);
+    return const OutboxDispatchResult.acked();
+  }
 }
