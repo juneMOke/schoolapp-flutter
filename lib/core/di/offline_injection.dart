@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
@@ -103,6 +104,15 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       // Sonde de crédentiels (V1.1) : sans jetons utilisables, la boucle ne
       // flushe pas (zéro 401/attempt) et surface « Reconnexion requise ».
       credentialsProbe: getIt<AuthSessionManager>(),
+    ),
+  );
+
+  // Feuille de reprise des écritures terminales (`SYNC_ERROR`). En factory
+  // (règle #2) : une instance par ouverture de la feuille, fermée avec elle.
+  getIt.registerFactory<OutboxErrorsCubit>(
+    () => OutboxErrorsCubit(
+      outbox: getIt<OutboxDao>(),
+      syncEngine: getIt<SyncEngine>(),
     ),
   );
 }

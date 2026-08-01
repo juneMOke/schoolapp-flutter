@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_errors_sheet.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -24,6 +25,12 @@ class TopBarActions extends StatelessWidget {
           builder: (context, state) => SyncIndicator(
             status: state.status,
             lastSyncAtMs: state.lastSyncAtMs,
+            // Seul chemin de sortie de l'état terminal `SYNC_ERROR` : sans lui
+            // la pastille « Conflit » est un cul-de-sac, l'écriture rejetée
+            // étant invisible et non rejouable.
+            onTap: state.status == SyncStatus.syncConflict
+                ? () => showSyncErrorsSheet(context)
+                : null,
           ),
         ),
         const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),

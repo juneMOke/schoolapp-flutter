@@ -7338,6 +7338,114 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}'**
   String syncLastSyncDaysAgo(int count);
 
+  /// No description provided for @syncErrorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed writes'**
+  String get syncErrorsTitle;
+
+  /// No description provided for @syncErrorsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These records were rejected by the server. They will not be sent again on their own.'**
+  String get syncErrorsSubtitle;
+
+  /// No description provided for @syncErrorsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get syncErrorsRetry;
+
+  /// No description provided for @syncErrorsRetryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry all'**
+  String get syncErrorsRetryAll;
+
+  /// No description provided for @syncErrorsEmptyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No failed writes'**
+  String get syncErrorsEmptyLabel;
+
+  /// No description provided for @syncErrorsEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything entered has been sent or is waiting its turn.'**
+  String get syncErrorsEmptyDescription;
+
+  /// No description provided for @syncErrorsLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List unavailable'**
+  String get syncErrorsLoadFailedTitle;
+
+  /// No description provided for @syncErrorsLoadFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the local send queue.'**
+  String get syncErrorsLoadFailedMessage;
+
+  /// No description provided for @syncErrorsNotReplayable.
+  ///
+  /// In en, this message translates to:
+  /// **'This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.'**
+  String get syncErrorsNotReplayable;
+
+  /// No description provided for @syncErrorsClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get syncErrorsClose;
+
+  /// No description provided for @syncErrorsQueuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} at {time}'**
+  String syncErrorsQueuedAt(DateTime date, DateTime time);
+
+  /// No description provided for @syncAggregateEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment'**
+  String get syncAggregateEnrollment;
+
+  /// No description provided for @syncAggregatePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get syncAggregatePayment;
+
+  /// No description provided for @syncAggregateAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get syncAggregateAttendance;
+
+  /// No description provided for @syncAggregateDisciplinaryCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case'**
+  String get syncAggregateDisciplinaryCase;
+
+  /// No description provided for @syncAggregateNotesBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade batch'**
+  String get syncAggregateNotesBatch;
+
+  /// No description provided for @syncAggregateEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment'**
+  String get syncAggregateEvaluation;
+
+  /// No description provided for @syncAggregateClassroomTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Class transfer'**
+  String get syncAggregateClassroomTransfer;
+
   /// No description provided for @offlineQueuedGeneric.
   ///
   /// In en, this message translates to:

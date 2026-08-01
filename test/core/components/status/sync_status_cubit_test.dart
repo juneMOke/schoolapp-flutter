@@ -34,6 +34,11 @@ void main() {
     outbox = MockOutboxDao();
     connectivity = MockConnectivityService();
     syncEngine = MockSyncEngine();
+    // Le cubit s'abonne à la fin de flush : un flush déclenché AILLEURS (les
+    // repositories flushent en direct après chaque écriture) doit le faire
+    // recalculer son état, sinon la pastille reste figée sur `syncing` et
+    // masque le conflit qui vient d'apparaître.
+    when(() => syncEngine.addFlushCompleteListener(any())).thenReturn(() {});
     syncMetaDao = MockSyncMetaDao();
     statusController = StreamController<bool>.broadcast();
 

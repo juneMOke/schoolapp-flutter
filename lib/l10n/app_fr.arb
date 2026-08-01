@@ -1870,6 +1870,31 @@
     "placeholders": { "count": { "type": "int" } }
   },
 
+  "syncErrorsTitle": "Écritures en échec",
+  "syncErrorsSubtitle": "Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d'eux-mêmes.",
+  "syncErrorsRetry": "Réessayer",
+  "syncErrorsRetryAll": "Tout réessayer",
+  "syncErrorsEmptyLabel": "Aucune écriture en échec",
+  "syncErrorsEmptyDescription": "Tout ce qui a été saisi est parti ou attend son tour.",
+  "syncErrorsLoadFailedTitle": "Liste indisponible",
+  "syncErrorsLoadFailedMessage": "Impossible de lire la file d'envoi locale.",
+  "syncErrorsNotReplayable": "Cet appel ne peut pas être renvoyé tel quel : la liste des absences a pu changer depuis. Rouvrez la journée concernée et revalidez-la.",
+  "syncErrorsClose": "Fermer",
+  "syncErrorsQueuedAt": "{date} à {time}",
+  "@syncErrorsQueuedAt": {
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "yMd" },
+      "time": { "type": "DateTime", "format": "Hm" }
+    }
+  },
+  "syncAggregateEnrollment": "Inscription",
+  "syncAggregatePayment": "Paiement",
+  "syncAggregateAttendance": "Présence",
+  "syncAggregateDisciplinaryCase": "Cas disciplinaire",
+  "syncAggregateNotesBatch": "Lot de notes",
+  "syncAggregateEvaluation": "Évaluation",
+  "syncAggregateClassroomTransfer": "Transfert de classe",
+
   "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",
   "offlinePaymentQueued": "Paiement enregistré — en attente de synchronisation",
   "offlineEnrollmentQueued": "Inscription enregistrée — en attente de synchronisation",

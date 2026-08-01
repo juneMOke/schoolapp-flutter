@@ -71,8 +71,17 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
        _credentialsProbe = credentialsProbe,
        super(const SyncStatusState(status: SyncStatus.synced)) {
     _listenConnectivity();
+    // Un flush peut être déclenché AILLEURS qu'ici : les repositories offline
+    // flushent en direct après chaque écriture locale. Sans cet abonnement,
+    // l'état reste bloqué sur `syncing` jusqu'à un prochain événement réseau —
+    // et un conflit apparu pendant ce flush n'est jamais affiché.
+    _unsubscribeFlush = _syncEngine.addFlushCompleteListener(
+      () => unawaited(refresh()),
+    );
     unawaited(_hydrateThenRefresh());
   }
+
+  void Function()? _unsubscribeFlush;
 
   /// Restaure la date de dernière synchro persistée (survit au redémarrage)
   /// avant le premier calcul de statut — défensif : une base indisponible
@@ -249,6 +258,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   @override
   Future<void> close() {
     _connectivitySub?.cancel();
+    _unsubscribeFlush?.call();
     return super.close();
   }
 }

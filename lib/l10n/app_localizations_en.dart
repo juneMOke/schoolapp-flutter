@@ -4313,6 +4313,71 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get syncErrorsTitle => 'Failed writes';
+
+  @override
+  String get syncErrorsSubtitle =>
+      'These records were rejected by the server. They will not be sent again on their own.';
+
+  @override
+  String get syncErrorsRetry => 'Retry';
+
+  @override
+  String get syncErrorsRetryAll => 'Retry all';
+
+  @override
+  String get syncErrorsEmptyLabel => 'No failed writes';
+
+  @override
+  String get syncErrorsEmptyDescription =>
+      'Everything entered has been sent or is waiting its turn.';
+
+  @override
+  String get syncErrorsLoadFailedTitle => 'List unavailable';
+
+  @override
+  String get syncErrorsLoadFailedMessage =>
+      'Could not read the local send queue.';
+
+  @override
+  String get syncErrorsNotReplayable =>
+      'This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.';
+
+  @override
+  String get syncErrorsClose => 'Close';
+
+  @override
+  String syncErrorsQueuedAt(DateTime date, DateTime time) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+    final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$dateString at $timeString';
+  }
+
+  @override
+  String get syncAggregateEnrollment => 'Enrollment';
+
+  @override
+  String get syncAggregatePayment => 'Payment';
+
+  @override
+  String get syncAggregateAttendance => 'Attendance';
+
+  @override
+  String get syncAggregateDisciplinaryCase => 'Disciplinary case';
+
+  @override
+  String get syncAggregateNotesBatch => 'Grade batch';
+
+  @override
+  String get syncAggregateEvaluation => 'Assessment';
+
+  @override
+  String get syncAggregateClassroomTransfer => 'Class transfer';
+
+  @override
   String get offlineQueuedGeneric => 'Saved — pending synchronization';
 
   @override

@@ -1864,6 +1864,31 @@
       "placeholders": { "count": { "type": "int" } }
     },
 
+    "syncErrorsTitle": "Failed writes",
+    "syncErrorsSubtitle": "These records were rejected by the server. They will not be sent again on their own.",
+    "syncErrorsRetry": "Retry",
+    "syncErrorsRetryAll": "Retry all",
+    "syncErrorsEmptyLabel": "No failed writes",
+    "syncErrorsEmptyDescription": "Everything entered has been sent or is waiting its turn.",
+    "syncErrorsLoadFailedTitle": "List unavailable",
+    "syncErrorsLoadFailedMessage": "Could not read the local send queue.",
+    "syncErrorsNotReplayable": "This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.",
+    "syncErrorsClose": "Close",
+    "syncErrorsQueuedAt": "{date} at {time}",
+    "@syncErrorsQueuedAt": {
+      "placeholders": {
+        "date": { "type": "DateTime", "format": "yMd" },
+        "time": { "type": "DateTime", "format": "Hm" }
+      }
+    },
+    "syncAggregateEnrollment": "Enrollment",
+    "syncAggregatePayment": "Payment",
+    "syncAggregateAttendance": "Attendance",
+    "syncAggregateDisciplinaryCase": "Disciplinary case",
+    "syncAggregateNotesBatch": "Grade batch",
+    "syncAggregateEvaluation": "Assessment",
+    "syncAggregateClassroomTransfer": "Class transfer",
+
     "offlineQueuedGeneric": "Saved — pending synchronization",
     "offlinePaymentQueued": "Payment saved — pending synchronization",
     "offlineEnrollmentQueued": "Enrollment saved — pending synchronization",

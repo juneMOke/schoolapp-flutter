@@ -4357,6 +4357,71 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get syncErrorsTitle => 'Écritures en échec';
+
+  @override
+  String get syncErrorsSubtitle =>
+      'Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d\'eux-mêmes.';
+
+  @override
+  String get syncErrorsRetry => 'Réessayer';
+
+  @override
+  String get syncErrorsRetryAll => 'Tout réessayer';
+
+  @override
+  String get syncErrorsEmptyLabel => 'Aucune écriture en échec';
+
+  @override
+  String get syncErrorsEmptyDescription =>
+      'Tout ce qui a été saisi est parti ou attend son tour.';
+
+  @override
+  String get syncErrorsLoadFailedTitle => 'Liste indisponible';
+
+  @override
+  String get syncErrorsLoadFailedMessage =>
+      'Impossible de lire la file d\'envoi locale.';
+
+  @override
+  String get syncErrorsNotReplayable =>
+      'Cet appel ne peut pas être renvoyé tel quel : la liste des absences a pu changer depuis. Rouvrez la journée concernée et revalidez-la.';
+
+  @override
+  String get syncErrorsClose => 'Fermer';
+
+  @override
+  String syncErrorsQueuedAt(DateTime date, DateTime time) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+    final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$dateString à $timeString';
+  }
+
+  @override
+  String get syncAggregateEnrollment => 'Inscription';
+
+  @override
+  String get syncAggregatePayment => 'Paiement';
+
+  @override
+  String get syncAggregateAttendance => 'Présence';
+
+  @override
+  String get syncAggregateDisciplinaryCase => 'Cas disciplinaire';
+
+  @override
+  String get syncAggregateNotesBatch => 'Lot de notes';
+
+  @override
+  String get syncAggregateEvaluation => 'Évaluation';
+
+  @override
+  String get syncAggregateClassroomTransfer => 'Transfert de classe';
+
+  @override
   String get offlineQueuedGeneric =>
       'Enregistré — en attente de synchronisation';
 
