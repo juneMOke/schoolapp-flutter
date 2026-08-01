@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -75,8 +76,16 @@ Future<void> registerOfflineCore(GetIt getIt) async {
   // Orchestrateur de pull delta (SOC-1) — pendant *lecture* du SyncEngine. Les
   // branches enregistrent leurs `PullHandler` dessus dans
   // `registerOfflineModules()` ; déclenché au retour online par le cubit ci-dessous.
+  // Bus de fin de pull : réveille les écrans qui ont déjà lu un cache froid
+  // (l'hydratation réseau répond bien après la lecture locale). Enregistré
+  // AVANT le coordinateur, qui le consomme.
+  getIt.registerLazySingleton<PullCompletionBus>(() => PullCompletionBus());
+
   getIt.registerLazySingleton<PullCoordinator>(
-    () => PullCoordinator(connectivity: getIt<ConnectivityService>()),
+    () => PullCoordinator(
+      connectivity: getIt<ConnectivityService>(),
+      completionBus: getIt<PullCompletionBus>(),
+    ),
   );
 
   // Cubit global d'état de synchro : source de la pastille du top bar. En

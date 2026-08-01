@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart' hide Evaluation;
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
@@ -64,6 +66,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   final ClassroomLocalDataSource _classroomLocal;
   final EvaluationOfflineRepositoryImpl _evaluationRepo;
   final SyncMetaDao _syncMetaDao;
+  final CurrentUserContext? _currentUser;
 
   const CourseOfflineRepositoryImpl({
     required CourseRepository online,
@@ -72,22 +75,38 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     required ClassroomLocalDataSource classroomLocalDataSource,
     required EvaluationOfflineRepositoryImpl evaluationRepository,
     required SyncMetaDao syncMetaDao,
+    CurrentUserContext? currentUser,
   }) : _online = online,
        _academicsLocal = academicsLocalDataSource,
        _academicsRefLocal = academicsRefLocalDataSource,
        _classroomLocal = classroomLocalDataSource,
        _evaluationRepo = evaluationRepository,
-       _syncMetaDao = syncMetaDao;
+       _syncMetaDao = syncMetaDao,
+       _currentUser = currentUser;
+
+  /// Compte dont on lit le cache (partition tablette partagée, cf.
+  /// `core/offline/owner_scope.dart`).
+  String? get _ownerUid => _currentUser?.uid;
 
   // ── Mes cours (jointure locale ref_cours → ref_ligne_bareme → ref_branche) ──
 
   @override
   Future<Either<Failure, List<CourseSummary>>> getMyCourses() async {
     try {
+      final owner = _ownerUid;
+      // Drapeaux de bootstrap lus sous la MÊME clé scopée que celle écrite par
+      // le pull : une clé non scopée ne serait jamais posée, et « Mes cours »
+      // resterait en repli online à vie.
       final coursReady =
-          await _syncMetaDao.getCursor(kAcademicsCoursBootstrapPrefix) != null;
+          await _syncMetaDao.getCursor(
+            scopedResource(kAcademicsCoursBootstrapPrefix, owner),
+          ) !=
+          null;
       final referentialReady =
-          await _syncMetaDao.getCursor(kGradesReferentialResource) != null;
+          await _syncMetaDao.getCursor(
+            scopedResource(kGradesReferentialResource, owner),
+          ) !=
+          null;
       // Hydratation encore en cours (pull lancé en `unawaited` au montage du
       // scope) : un résultat local partiel serait un « aucun cours » trompeur
       // (guide §4). Repli online, cohérent avec getCoursNotationDetail.
@@ -95,7 +114,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
         return _online.getMyCourses();
       }
 
-      final rows = await _academicsRefLocal.getMyCoursesJoined();
+      final rows = await _academicsRefLocal.getMyCoursesJoined(ownerUid: owner);
       final coursesByClassroom = <String, List<CourseRef>>{};
       for (final row in rows) {
         final classroomId = row['classroom_id'] as String;
@@ -150,12 +169,14 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     String coursId,
   ) async {
     try {
+      final owner = _ownerUid;
       final cours = await _academicsRefLocal.getCours(coursId);
       // Cours pas encore pullé → repli online (best-effort).
       if (cours == null) return _online.getCoursNotationDetail(coursId);
 
       final ligneBareme = await _academicsRefLocal.getLigneBareme(
         cours.ligneBaremeId,
+        ownerUid: owner,
       );
       final classroom = await _classroomLocal.getClassroomById(
         cours.classroomId,
@@ -171,15 +192,18 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
 
       final branche = await _academicsRefLocal.getBranche(
         ligneBareme.brancheId,
+        ownerUid: owner,
       );
 
       final periodeRows = await _academicsRefLocal.getPeriodesForGroup(
         classroom.academicYearId,
         schoolLevelGroupId,
+        ownerUid: owner,
       );
       final sousPeriodeRows = await _academicsRefLocal
           .getSousPeriodesForPeriodes(
             periodeRows.map((p) => p.id).toList(growable: false),
+            ownerUid: owner,
           );
       final sousByPeriode = <String, List<RefSousPeriodeRow>>{};
       for (final sp in sousPeriodeRows) {
@@ -188,6 +212,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
 
       final chapitreRows = await _academicsRefLocal.getChapitresForCours(
         coursId,
+        ownerUid: owner,
       );
       final chapitreTitles = {for (final c in chapitreRows) c.id: c.titre};
       final chapitresDisponibles = chapitreRows

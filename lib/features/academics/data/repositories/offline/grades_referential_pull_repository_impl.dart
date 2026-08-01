@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -23,6 +25,7 @@ class GradesReferentialPullRepositoryImpl {
   final AcademicsRefLocalDataSource _refLocal;
   final SyncMetaDao _syncMetaDao;
   final Map<String, dynamic> _requiredAuth;
+  final CurrentUserContext? _currentUser;
   final Clock _now;
 
   GradesReferentialPullRepositoryImpl({
@@ -30,11 +33,13 @@ class GradesReferentialPullRepositoryImpl {
     required AcademicsRefLocalDataSource refLocalDataSource,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
   }) : _api = api,
        _refLocal = refLocalDataSource,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
+       _currentUser = currentUser,
        _now = now;
 
   Future<Either<Failure, CoursPullOutcome>>? _tail;
@@ -53,17 +58,22 @@ class GradesReferentialPullRepositoryImpl {
 
   Future<Either<Failure, CoursPullOutcome>> _pull() async {
     final syncedAt = _now();
-    final storedEtag = await _syncMetaDao.getCursor(kGradesReferentialResource);
+    // ETag scopé au compte : le bundle est cadré prof, deux comptes d'une même
+    // tablette n'ont ni le même contenu ni le même jeton. Un ETag partagé
+    // renverrait un `304` au second — et son cache resterait vide.
+    final owner = _currentUser?.uid;
+    final resource = scopedResource(kGradesReferentialResource, owner);
+    final storedEtag = await _syncMetaDao.getCursor(resource);
     try {
       final response = await _api.pullGradesReferential(
         _requiredAuth,
         storedEtag,
       );
       final bundle = response.data;
-      await _refLocal.replaceGradesReferential(bundle);
+      await _refLocal.replaceGradesReferential(bundle, ownerUid: owner);
       final newEtag = response.response.headers.value('etag') ?? storedEtag;
       await _syncMetaDao.setCursor(
-        kGradesReferentialResource,
+        resource,
         cursor: newEtag,
         syncedAt: syncedAt,
       );
@@ -86,7 +96,7 @@ class GradesReferentialPullRepositoryImpl {
       if (status == 304) {
         // Bundle inchangé : cache local conservé, seule la fraîcheur avance.
         await _syncMetaDao.setCursor(
-          kGradesReferentialResource,
+          resource,
           cursor: storedEtag,
           syncedAt: syncedAt,
         );

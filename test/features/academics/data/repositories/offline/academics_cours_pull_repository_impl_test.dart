@@ -189,7 +189,7 @@ void main() {
         // local, mais absent du snapshot serveur retourné par ce bootstrap.
         await refLocal.applyPulledCours([
           cours('co-stale', 'c1').toLocalRow(1),
-        ]);
+        ], ownerUid: null);
         await db.insert('evaluation', {
           'id': 'ev-stale',
           'cours_id': 'co-stale',
@@ -269,7 +269,7 @@ void main() {
           cours('co-page1', 'c1').toLocalRow(1),
           cours('co-page2', 'c1').toLocalRow(1),
           cours('co-stale', 'c1').toLocalRow(1),
-        ]);
+        ], ownerUid: null);
 
         when(() => api.pullCours(auth, null, 100)).thenAnswer(
           (_) async => httpOk(
@@ -305,7 +305,9 @@ void main() {
       'cycle REPRIS (curseur non null) : aucune éviction — un delta ne porte '
       'que des nouveautés, pas l\'univers complet',
       () async {
-        await refLocal.applyPulledCours([cours('co-old', 'c1').toLocalRow(1)]);
+        await refLocal.applyPulledCours([
+          cours('co-old', 'c1').toLocalRow(1),
+        ], ownerUid: null);
         await syncMeta.setCursor(
           kAcademicsCoursResourcePrefix,
           cursor: 'wm-prev',
@@ -332,7 +334,9 @@ void main() {
     );
 
     test('snapshot vide (0 cours pour ce prof) évince tout le local', () async {
-      await refLocal.applyPulledCours([cours('co-old', 'c1').toLocalRow(1)]);
+      await refLocal.applyPulledCours([
+        cours('co-old', 'c1').toLocalRow(1),
+      ], ownerUid: null);
 
       when(
         () => api.pullCours(auth, null, 100),

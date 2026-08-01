@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -51,6 +53,7 @@ class AcademicsCoursPullRepositoryImpl {
   final AcademicsLocalDataSource _academicsLocal;
   final SyncMetaDao _syncMetaDao;
   final Map<String, dynamic> _requiredAuth;
+  final CurrentUserContext? _currentUser;
   final Clock _now;
 
   static const int pageLimit = 100;
@@ -61,13 +64,25 @@ class AcademicsCoursPullRepositoryImpl {
     required AcademicsLocalDataSource academicsLocalDataSource,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
   }) : _api = api,
        _refLocal = localDataSource,
        _academicsLocal = academicsLocalDataSource,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
+       _currentUser = currentUser,
        _now = now;
+
+  /// Compte au nom duquel le cycle tire, figé au début de `_pull` et transporté
+  /// jusqu'à l'écriture et à l'éviction DF-L (cf. `owner_scope.dart`).
+  String? get _ownerUid => _currentUser?.uid;
+
+  String _resource(String? owner) =>
+      scopedResource(kAcademicsCoursResourcePrefix, owner);
+
+  String _bootstrapResource(String? owner) =>
+      scopedResource(kAcademicsCoursBootstrapPrefix, owner);
 
   Future<Either<Failure, CoursPullOutcome>>? _tail;
 
@@ -85,15 +100,16 @@ class AcademicsCoursPullRepositoryImpl {
 
   Future<Either<Failure, CoursPullOutcome>> _pull() async {
     final syncedAt = _now();
-    final stored = await _syncMetaDao.getCursor(kAcademicsCoursResourcePrefix);
-    final first = await _attemptCycle(syncedAt, from: stored);
+    final owner = _ownerUid;
+    final stored = await _syncMetaDao.getCursor(_resource(owner));
+    final first = await _attemptCycle(syncedAt, from: stored, owner: owner);
     if (first.rejectedCursor && stored != null) {
       await _syncMetaDao.setCursor(
-        kAcademicsCoursResourcePrefix,
+        _resource(owner),
         cursor: null,
         syncedAt: syncedAt,
       );
-      return (await _attemptCycle(syncedAt, from: null)).result;
+      return (await _attemptCycle(syncedAt, from: null, owner: owner)).result;
     }
     return first.result;
   }
@@ -101,20 +117,21 @@ class AcademicsCoursPullRepositoryImpl {
   Future<_CycleAttempt> _attemptCycle(
     int syncedAt, {
     required String? from,
+    required String? owner,
   }) async {
     try {
-      return _CycleAttempt(Right(await _runCycle(syncedAt, from: from)));
+      return _CycleAttempt(
+        Right(await _runCycle(syncedAt, from: from, owner: owner)),
+      );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       if (status == 304 || status == 404) {
         // 304 = cycle sans changement ; 404 = compte non lié à un enseignant
         // (spec §5 : traiter comme « offline notation indisponible pour ce
         // compte », jamais une erreur qui boucle).
-        final kept = await _syncMetaDao.getCursor(
-          kAcademicsCoursResourcePrefix,
-        );
+        final kept = await _syncMetaDao.getCursor(_resource(owner));
         await _syncMetaDao.setCursor(
-          kAcademicsCoursResourcePrefix,
+          _resource(owner),
           cursor: kept,
           syncedAt: syncedAt,
         );
@@ -123,7 +140,7 @@ class AcademicsCoursPullRepositoryImpl {
             CoursPullOutcome(
               upserted: 0,
               notModified: true,
-              bootstrapComplete: await _isBootstrapComplete(),
+              bootstrapComplete: await _isBootstrapComplete(owner),
               syncedAt: syncedAt,
             ),
           ),
@@ -151,6 +168,7 @@ class AcademicsCoursPullRepositoryImpl {
   Future<CoursPullOutcome> _runCycle(
     int syncedAt, {
     required String? from,
+    required String? owner,
   }) async {
     final bootstrapSweep = from == null;
     var cursor = from;
@@ -167,12 +185,13 @@ class AcademicsCoursPullRepositoryImpl {
       }
       upserted += await _refLocal.applyPulledCours(
         page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
+        ownerUid: owner,
       );
 
       final nextToken = page.page.cursorToPersist;
       if (nextToken != null) cursor = nextToken;
       await _syncMetaDao.setCursor(
-        kAcademicsCoursResourcePrefix,
+        _resource(owner),
         cursor: cursor,
         syncedAt: syncedAt,
       );
@@ -188,7 +207,7 @@ class AcademicsCoursPullRepositoryImpl {
 
     if (reachedEnd) {
       await _syncMetaDao.setCursor(
-        kAcademicsCoursBootstrapPrefix,
+        _bootstrapResource(owner),
         cursor: 'DONE',
         syncedAt: syncedAt,
       );
@@ -196,7 +215,8 @@ class AcademicsCoursPullRepositoryImpl {
       // un cycle repris (delta) ne porte que des nouveautés, y diffuser une
       // éviction évincerait à tort tout ce qui n'a pas changé depuis.
       if (bootstrapSweep) {
-        final stale = await _refLocal.evictCoursNotIn(seenIds);
+        // Éviction bornée au compte courant : le snapshot ne décrit que LUI.
+        final stale = await _refLocal.evictCoursNotIn(seenIds, ownerUid: owner);
         for (final coursId in stale) {
           await _academicsLocal.evictCoursData(coursId);
           // Purge les curseurs évaluations/notes de ce cours — sinon une
@@ -217,7 +237,7 @@ class AcademicsCoursPullRepositoryImpl {
     return CoursPullOutcome(
       upserted: upserted,
       notModified: upserted == 0,
-      bootstrapComplete: await _isBootstrapComplete(),
+      bootstrapComplete: await _isBootstrapComplete(owner),
       syncedAt: syncedAt,
       serverTimeMs: upserted == 0
           ? null
@@ -225,6 +245,6 @@ class AcademicsCoursPullRepositoryImpl {
     );
   }
 
-  Future<bool> _isBootstrapComplete() async =>
-      (await _syncMetaDao.getCursor(kAcademicsCoursBootstrapPrefix)) != null;
+  Future<bool> _isBootstrapComplete(String? owner) async =>
+      (await _syncMetaDao.getCursor(_bootstrapResource(owner))) != null;
 }

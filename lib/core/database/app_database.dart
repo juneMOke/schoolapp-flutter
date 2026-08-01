@@ -370,6 +370,87 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
+  if (oldVersion < 18) {
+    // v18 — Notes / Cours : partition par COMPTE des caches de référence cadrés
+    // enseignant (`owner_uid`, cf. `core/offline/owner_scope.dart`). Sur une
+    // tablette partagée, ces tables et leurs curseurs `sync_meta` étaient
+    // uniques alors que chaque prof reçoit un univers différent : le second
+    // compte reprenait le curseur du premier, recevait un `304` et ne voyait
+    // jamais ses propres séances/cours — tout en lisant ceux de l'autre.
+    await _addOwnerScopeToAcademicsRefTables(db, schema);
+  }
+}
+
+/// Étape v18 : `owner_uid` sur les tables de référence cadrées enseignant.
+///
+/// Deux traitements distincts, imposés par la nature des données :
+///
+/// - `ref_recurring_sessions` / `ref_cours` : simple `ALTER … ADD COLUMN`. Une
+///   séance ou un cours n'appartient qu'à un enseignant, donc l'id reste une
+///   clé primaire valide entre comptes.
+/// - les 5 tables du bundle `grades-referential` : **recréées** avec une clé
+///   primaire composite `(id, owner_uid)`. Ce sont des références d'ÉCOLE (les
+///   branches, plafonds et périodes ont les mêmes ids pour tous les profs
+///   d'un établissement) : avec l'id seul, le pull du second compte écraserait
+///   les lignes du premier et lui volerait son `owner_uid`. SQLite ne sait pas
+///   modifier une clé primaire — d'où le DROP/CREATE, sans risque : ces tables
+///   sont 100 % dérivées de la synchro, rejouées intégralement au prochain pull.
+///
+/// Les lignes héritées sont purgées et les curseurs correspondants supprimés :
+/// elles n'ont pas de propriétaire connaissable (la colonne n'existait pas), et
+/// les laisser sous le repli `''` les rendrait invisibles au compte courant tout
+/// en occupant leurs ids. Chaque device repart d'un bootstrap propre au prochain
+/// passage online — même parti pris que les migrations v11 et v16.
+Future<void> _addOwnerScopeToAcademicsRefTables(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  for (final name in const ['ref_recurring_sessions', 'ref_cours']) {
+    if (!await _hasTable(db, name)) continue;
+    if (!await _hasColumn(db, name, 'owner_uid')) {
+      await db.execute(
+        "ALTER TABLE $name ADD COLUMN owner_uid TEXT NOT NULL DEFAULT ''",
+      );
+    }
+    await db.delete(name);
+  }
+  // Index de lecture scopée, portés par la définition canonique des tables.
+  for (final name in const ['ref_recurring_sessions', 'ref_cours']) {
+    if (!await _hasTable(db, name)) continue;
+    final table = schema.firstWhere((t) => t.name == name);
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
+
+  for (final name in const [
+    'ref_branche',
+    'ref_ligne_bareme',
+    'ref_chapitre',
+    'ref_periode',
+    'ref_sous_periode',
+  ]) {
+    final table = schema.firstWhere((t) => t.name == name);
+    await db.execute('DROP TABLE IF EXISTS $name');
+    await db.execute(table.createTableSql);
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
+
+  // Curseurs des ressources repartitionnées : purgés sous leurs DEUX formes
+  // (clé héritée non scopée `academics_cours`, et clé scopée `…@<uid>` que la
+  // version précédente n'écrivait pas encore mais qu'un rejeu pourrait avoir
+  // posée). Sans cette purge, la base est vide ET le prochain pull répond 304.
+  if (await _hasTable(db, 'sync_meta')) {
+    await db.delete(
+      'sync_meta',
+      where:
+          "resource LIKE 'schedule_sessions%' "
+          "OR resource LIKE 'academics_cours%' "
+          "OR resource LIKE 'academics_grades_referential%'",
+    );
+  }
 }
 
 /// Migration v4 (Présence) : matérialise `attendance_sessions` + `session_id`,

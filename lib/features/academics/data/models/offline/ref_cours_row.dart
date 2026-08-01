@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 
 /// Ligne sqflite `ref_cours` — le cours au sens back : une **ligne de barème
 /// enseignée dans UNE classe** (clé serveur `(classroom_id, ligne_bareme_id)`).
@@ -7,6 +8,11 @@ import 'package:equatable/equatable.dart';
 /// `ligneBaremeId` est le pont vers le poste de bulletin (calcul serveur).
 class RefCoursRow extends Equatable {
   final String id;
+
+  /// Compte propriétaire de la ligne (partition tablette partagée, cf.
+  /// `core/offline/owner_scope.dart`), posé par le client au pull.
+  final String ownerUid;
+
   final String classroomId;
   final String ligneBaremeId;
   final String? teacherId;
@@ -15,6 +21,7 @@ class RefCoursRow extends Equatable {
 
   const RefCoursRow({
     required this.id,
+    this.ownerUid = kUnscopedOwnerUid,
     required this.classroomId,
     required this.ligneBaremeId,
     this.teacherId,
@@ -31,6 +38,7 @@ class RefCoursRow extends Equatable {
 
   factory RefCoursRow.fromMap(Map<String, Object?> map) => RefCoursRow(
     id: map['id'] as String,
+    ownerUid: (map['owner_uid'] as String?) ?? kUnscopedOwnerUid,
     classroomId: map['classroom_id'] as String,
     ligneBaremeId: map['ligne_bareme_id'] as String,
     teacherId: map['teacher_id'] as String?,
@@ -40,6 +48,7 @@ class RefCoursRow extends Equatable {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'id': id,
+    'owner_uid': ownerUid,
     'classroom_id': classroomId,
     'ligne_bareme_id': ligneBaremeId,
     'teacher_id': teacherId,
@@ -50,6 +59,7 @@ class RefCoursRow extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    ownerUid,
     classroomId,
     ligneBaremeId,
     teacherId,

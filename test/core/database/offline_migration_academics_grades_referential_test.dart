@@ -69,9 +69,12 @@ void main() {
         'cursor': null,
         'synced_at': 1,
       });
-      // Ressource sans rapport : ne doit pas être touchée.
+      // Ressource sans rapport : ne doit pas être touchée. Migrer une base
+      // aussi ancienne traverse TOUTES les étapes suivantes, dont plusieurs
+      // purgent légitimement des curseurs (v16 `classrooms`, v18 les ressources
+      // cadrées enseignant) — on choisit donc une ressource qu'aucune ne vise.
       await db.insert('sync_meta', {
-        'resource': 'academics_cours',
+        'resource': 'attendance',
         'cursor': 'wm-1',
         'synced_at': 1,
       });
@@ -105,7 +108,7 @@ void main() {
         await db.query(
           'sync_meta',
           where: 'resource = ?',
-          whereArgs: ['academics_cours'],
+          whereArgs: ['attendance'],
         ),
         hasLength(1),
       );

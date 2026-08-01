@@ -1,4 +1,7 @@
+import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
@@ -28,6 +31,11 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 ///
 /// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
 /// tablette hors-ligne taperait quand même le réseau à chaque montage.
+///
+/// **Réveil de l'UI** : les ressources effectivement rafraîchies sont diffusées
+/// en fin d'hydratation sur le [PullCompletionBus]. Sans ce signal, l'écran a
+/// déjà lu le cache local (froid, donc vide) bien avant que le réseau réponde,
+/// et rien ne le relit ensuite — cf. la doc du bus.
 class SyncAcademicsPullsUseCase {
   final SchedulePullRepositoryImpl _schedulePull;
   final AcademicsCoursPullRepositoryImpl _coursPull;
@@ -35,6 +43,7 @@ class SyncAcademicsPullsUseCase {
   final GradesReferentialPullRepositoryImpl _gradesReferentialPull;
   final SessionCredentialsProbe _credentialsProbe;
   final ConnectivityService _connectivity;
+  final PullCompletionBus? _completionBus;
 
   const SyncAcademicsPullsUseCase({
     required SchedulePullRepositoryImpl schedulePullRepository,
@@ -44,31 +53,75 @@ class SyncAcademicsPullsUseCase {
     gradesReferentialPullRepository,
     required SessionCredentialsProbe credentialsProbe,
     required ConnectivityService connectivity,
+    PullCompletionBus? completionBus,
   }) : _schedulePull = schedulePullRepository,
        _coursPull = coursPullRepository,
        _metierPull = metierPullRepository,
        _gradesReferentialPull = gradesReferentialPullRepository,
        _credentialsProbe = credentialsProbe,
-       _connectivity = connectivity;
+       _connectivity = connectivity,
+       _completionBus = completionBus;
 
   Future<void> call() async {
     if (!await _connectivity.isOnline()) return;
     if (!await _canAuthenticate()) return;
 
     // Réf emploi du temps (créneaux école + séances de l'enseignant connecté).
-    await _schedulePull.syncTimeSlots();
-    await _schedulePull.syncSessions();
+    _notify(
+      kScheduleTimeSlotsResource,
+      await _schedulePull.syncTimeSlots(),
+      (o) => o.upserted,
+    );
+    _notify(
+      kScheduleSessionsResource,
+      await _schedulePull.syncSessions(),
+      (o) => o.upserted,
+    );
 
     // Cours du prof connecté (scope token, aucun classroomId/année requis).
-    await _coursPull.syncCours();
+    _notify(
+      kAcademicsCoursResourcePrefix,
+      await _coursPull.syncCours(),
+      (o) => o.upserted,
+    );
 
     // Bundle grades-referential (ETag, cadré prof) — avant les lectures qui en
     // dépendent (prévention offline, composition du détail cours, MAJ-4).
-    await _gradesReferentialPull.syncGradesReferential();
+    _notify(
+      kGradesReferentialResource,
+      await _gradesReferentialPull.syncGradesReferential(),
+      (o) => o.upserted,
+    );
 
     // Métier (évaluations, notes) — itèrent ref_cours.
-    await _metierPull.syncEvaluations();
-    await _metierPull.syncNotes();
+    _notify(
+      kAcademicsEvaluationsResourcePrefix,
+      await _metierPull.syncEvaluations(),
+      (o) => o.upserted,
+    );
+    _notify(
+      kAcademicsNotesResourcePrefix,
+      await _metierPull.syncNotes(),
+      (o) => o.upserted,
+    );
+  }
+
+  /// Réveille les écrans dès que [resource] a réellement appliqué des lignes,
+  /// **sans attendre la fin de l'hydratation**. Grouper les six notifications à
+  /// la fin ferait patienter l'emploi du temps derrière la synchro des notes,
+  /// qui itère tous les cours et peut durer — l'écran resterait vide plusieurs
+  /// secondes de plus alors que ses séances sont déjà en base.
+  ///
+  /// Un `Left` (échec réseau) ou un cycle `304` ne réveille personne : rien n'a
+  /// changé en local, relire ne ferait que du bruit.
+  void _notify<T>(
+    String resource,
+    Either<Failure, T> result,
+    int Function(T) upsertedOf,
+  ) {
+    result.fold((_) {}, (outcome) {
+      if (upsertedOf(outcome) > 0) _completionBus?.notifyUpdated({resource});
+    });
   }
 
   /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —

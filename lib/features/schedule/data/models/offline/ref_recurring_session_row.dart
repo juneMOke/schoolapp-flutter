@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 
 /// Ligne sqflite `ref_recurring_sessions` — remplissage hebdomadaire récurrent
 /// de l'emploi du temps. **Référence pure, lecture seule** (peuplée par le pull).
@@ -6,6 +7,12 @@ import 'package:equatable/equatable.dart';
 /// pour un affichage sans jointure. `dayOfWeek` = MON…SAT.
 class RefRecurringSessionRow extends Equatable {
   final String id;
+
+  /// Compte propriétaire de la ligne (partition tablette partagée, cf.
+  /// `core/offline/owner_scope.dart`). Posé par le client à l'application du
+  /// delta — jamais par le serveur, dont l'endpoint est déjà cadré enseignant.
+  final String ownerUid;
+
   final String academicYearId;
   final String coursId;
   final String timeSlotId;
@@ -21,6 +28,7 @@ class RefRecurringSessionRow extends Equatable {
 
   const RefRecurringSessionRow({
     required this.id,
+    this.ownerUid = kUnscopedOwnerUid,
     required this.academicYearId,
     required this.coursId,
     required this.timeSlotId,
@@ -45,6 +53,7 @@ class RefRecurringSessionRow extends Equatable {
   factory RefRecurringSessionRow.fromMap(Map<String, Object?> map) =>
       RefRecurringSessionRow(
         id: map['id'] as String,
+        ownerUid: (map['owner_uid'] as String?) ?? kUnscopedOwnerUid,
         academicYearId: map['academic_year_id'] as String,
         coursId: map['cours_id'] as String,
         timeSlotId: map['time_slot_id'] as String,
@@ -61,6 +70,7 @@ class RefRecurringSessionRow extends Equatable {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'id': id,
+    'owner_uid': ownerUid,
     'academic_year_id': academicYearId,
     'cours_id': coursId,
     'time_slot_id': timeSlotId,
@@ -78,6 +88,7 @@ class RefRecurringSessionRow extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    ownerUid,
     academicYearId,
     coursId,
     timeSlotId,

@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/owner_scope.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -41,11 +43,18 @@ class _CycleAttempt {
 /// Money-grade : ne **lève jamais** (échec encodé en `Left`). Les deux
 /// ressources ont des curseurs et des drapeaux bootstrap **indépendants** et
 /// leurs cycles sont sérialisés séparément.
+///
+/// **Partition par compte** : les séances étant cadrées enseignant, leur
+/// curseur est scopé par `uid` (cf. `core/offline/owner_scope.dart`) — sans
+/// ça, le second prof d'une tablette partagée reprendrait le curseur du
+/// premier et recevrait un `304` au lieu de ses propres séances. Les créneaux,
+/// référentiel d'école, gardent un curseur unique.
 class SchedulePullRepositoryImpl {
   final SchedulePullApi _api;
   final ScheduleRefLocalDataSource _local;
   final SyncMetaDao _syncMetaDao;
   final Map<String, dynamic> _requiredAuth;
+  final CurrentUserContext? _currentUser;
   final Clock _now;
 
   static const int pageLimit = 100;
@@ -55,12 +64,19 @@ class SchedulePullRepositoryImpl {
     required ScheduleRefLocalDataSource localDataSource,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
   }) : _api = api,
        _local = localDataSource,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
+       _currentUser = currentUser,
        _now = now;
+
+  /// Compte au nom duquel le cycle courant tire — lu au DÉBUT de chaque cycle
+  /// et transporté jusqu'à l'écriture, pour qu'une déconnexion en cours de
+  /// pagination n'estampille pas la fin d'un delta sous un autre propriétaire.
+  String? get _ownerUid => _currentUser?.uid;
 
   Future<Either<Failure, RefPullOutcome>>? _timeSlotsTail;
   Future<Either<Failure, RefPullOutcome>>? _sessionsTail;
@@ -92,21 +108,26 @@ class SchedulePullRepositoryImpl {
   Future<Either<Failure, RefPullOutcome>> syncSessions() {
     late final Future<Either<Failure, RefPullOutcome>> scheduled;
     final prev = _sessionsTail;
-    Future<Either<Failure, RefPullOutcome>> run() =>
-        _pull<RecurringSessionDeltaDto>(
-          resource: kScheduleSessionsResource,
-          bootstrapResource: kScheduleSessionsBootstrap,
-          treat404AsNotModified: true,
-          fetchPage: (cursor) async => (await _api.pullSessions(
-            _requiredAuth,
-            cursor,
-            pageLimit,
-            null,
-          )).data,
-          apply: (page, syncedAt) => _local.applyPulledSessions(
-            page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
-          ),
-        );
+    Future<Either<Failure, RefPullOutcome>> run() {
+      // Propriétaire figé pour tout le cycle (cf. `_ownerUid`).
+      final owner = _ownerUid;
+      return _pull<RecurringSessionDeltaDto>(
+        resource: scopedResource(kScheduleSessionsResource, owner),
+        bootstrapResource: scopedResource(kScheduleSessionsBootstrap, owner),
+        treat404AsNotModified: true,
+        fetchPage: (cursor) async => (await _api.pullSessions(
+          _requiredAuth,
+          cursor,
+          pageLimit,
+          null,
+        )).data,
+        apply: (page, syncedAt) => _local.applyPulledSessions(
+          page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
+          ownerUid: owner,
+        ),
+      );
+    }
+
     final future = prev == null ? run() : prev.then((_) => run());
     scheduled = future.whenComplete(() {
       if (identical(_sessionsTail, scheduled)) _sessionsTail = null;

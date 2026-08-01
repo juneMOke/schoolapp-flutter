@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_api.dart';
@@ -59,6 +60,7 @@ class AcademicsMetierPullRepositoryImpl {
   final AcademicsRefLocalDataSource _refLocal;
   final SyncMetaDao _syncMetaDao;
   final Map<String, dynamic> _requiredAuth;
+  final CurrentUserContext? _currentUser;
   final Clock _now;
 
   static const int pageLimit = 100;
@@ -69,12 +71,14 @@ class AcademicsMetierPullRepositoryImpl {
     required AcademicsRefLocalDataSource refLocalDataSource,
     required SyncMetaDao syncMetaDao,
     required Map<String, dynamic> requiredAuth,
+    CurrentUserContext? currentUser,
     Clock now = systemClock,
   }) : _api = api,
        _local = localDataSource,
        _refLocal = refLocalDataSource,
        _syncMetaDao = syncMetaDao,
        _requiredAuth = requiredAuth,
+       _currentUser = currentUser,
        _now = now;
 
   Future<Either<Failure, AcademicsDeltaPullOutcome>>? _evaluationsTail;
@@ -139,9 +143,12 @@ class AcademicsMetierPullRepositoryImpl {
     final syncedAt = _now();
     final List<String> coursIds;
     try {
-      coursIds = (await _refLocal.getAllCours())
-          .map((c) => c.id)
-          .toList(growable: false);
+      // Itération bornée aux cours du compte connecté : ceux d'un collègue
+      // présent sur la même tablette ne sont pas les nôtres à tirer (403 en
+      // boucle au mieux, contenu d'autrui rapatrié au pire).
+      coursIds = (await _refLocal.getAllCours(
+        ownerUid: _currentUser?.uid,
+      )).map((c) => c.id).toList(growable: false);
     } catch (_) {
       return const Left(ServerFailure('Lecture des cours locaux échouée'));
     }

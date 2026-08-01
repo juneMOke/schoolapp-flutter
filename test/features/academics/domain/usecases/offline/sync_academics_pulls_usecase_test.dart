@@ -1,7 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
@@ -35,6 +37,8 @@ void main() {
   late MockGradesReferentialPullRepositoryImpl gradesReferentialPull;
   late MockCredentialsProbe credentialsProbe;
   late MockConnectivityService connectivity;
+  late PullCompletionBus completionBus;
+  late List<Set<String>> notified;
   late SyncAcademicsPullsUseCase useCase;
 
   const refOutcome = RefPullOutcome(
@@ -85,6 +89,9 @@ void main() {
     gradesReferentialPull = MockGradesReferentialPullRepositoryImpl();
     credentialsProbe = MockCredentialsProbe();
     connectivity = MockConnectivityService();
+    completionBus = PullCompletionBus();
+    notified = <Set<String>>[];
+    completionBus.stream.listen(notified.add);
     when(
       () => credentialsProbe.canAuthenticate(),
     ).thenAnswer((_) async => true);
@@ -96,8 +103,11 @@ void main() {
       gradesReferentialPullRepository: gradesReferentialPull,
       credentialsProbe: credentialsProbe,
       connectivity: connectivity,
+      completionBus: completionBus,
     );
   });
+
+  tearDown(() async => completionBus.dispose());
 
   test(
     'authentifié : les pulls partent dans l\'ordre PORTEUR (emploi du temps → '
@@ -159,5 +169,63 @@ void main() {
 
     verify(() => schedulePull.syncTimeSlots()).called(1);
     verify(() => metierPull.syncNotes()).called(1);
+  });
+
+  group('réveil de l\'UI (PullCompletionBus)', () {
+    test('chaque ressource appliquée est diffusée SÉPARÉMENT : l\'emploi du '
+        'temps ne patiente pas derrière la synchro des notes', () async {
+      stubAllPullsSucceed();
+
+      await useCase();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notified, [
+        {'schedule_time_slots'},
+        {'schedule_sessions'},
+        {'academics_cours'},
+        {'academics_grades_referential'},
+        {'academics_evaluations'},
+        {'academics_notes'},
+      ]);
+    });
+
+    test('un cycle 304 (rien appliqué) ne réveille personne', () async {
+      stubAllPullsSucceed();
+      when(() => schedulePull.syncSessions()).thenAnswer(
+        (_) async => Right(
+          RefPullOutcome.notModifiedAt(1, 'wm', bootstrapComplete: true),
+        ),
+      );
+
+      await useCase();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notified, isNot(contains({'schedule_sessions'})));
+    });
+
+    test(
+      'un pull en échec ne réveille personne (rien n\'a changé en local)',
+      () async {
+        stubAllPullsSucceed();
+        when(
+          () => schedulePull.syncSessions(),
+        ).thenAnswer((_) async => const Left(ServerFailure('réseau')));
+
+        await useCase();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notified, isNot(contains({'schedule_sessions'})));
+      },
+    );
+
+    test('hors-ligne : aucune diffusion', () async {
+      stubAllPullsSucceed();
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+
+      await useCase();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notified, isEmpty);
+    });
   });
 }

@@ -174,6 +174,7 @@ void main() {
       bundle(
         branches: const [BrancheDto(id: 'b1', nom: 'Maths')],
       ),
+      ownerUid: null,
     );
     when(
       () => api.pullGradesReferential(auth, '"prev"'),

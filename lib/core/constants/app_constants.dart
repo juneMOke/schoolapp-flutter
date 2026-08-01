@@ -255,7 +255,7 @@ class AppConstants {
   // Tuteurs). Index composé (nom, prénom) pour accélérer le LIKE de
   // recherche. L'unicité du téléphone reste APPLICATIVE (DAO), pas de UNIQUE
   // INDEX SQL (risque de casser la migration sur des doublons hérités).
-  static const int offlineDbSchemaVersion = 17;
+  static const int offlineDbSchemaVersion = 18;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

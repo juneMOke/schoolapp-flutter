@@ -160,4 +160,153 @@ void main() {
       },
     );
   });
+
+  group('TimetableRefreshRequested (relecture après pull)', () {
+    blocTest<TimetableBloc, TimetableState>(
+      'sans TimetableRequested préalable : sans effet (l\'année n\'est pas '
+      'connue du FeatureScope qui émet le rafraîchissement)',
+      build: buildBloc,
+      act: (bloc) => bloc.add(const TimetableRefreshRequested()),
+      expect: () => const <TimetableState>[],
+      verify: (_) => verifyNever(() => mockGetMyTimetable(any())),
+    );
+
+    blocTest<TimetableBloc, TimetableState>(
+      'relit SANS état de chargement : la grille affichée ne doit pas '
+      'clignoter pour un rafraîchissement que l\'utilisateur n\'a pas demandé',
+      setUp: () {
+        when(
+          () => mockGetMyTimetable(any()),
+        ).thenAnswer((_) async => const Right(tTimetable));
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const TimetableRequested(academicYearId: 'ay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const TimetableRefreshRequested());
+      },
+      expect: () => const [
+        TimetableState(status: TimetableStatus.loading),
+        TimetableState(status: TimetableStatus.success, timetable: tTimetable),
+      ],
+      verify: (_) => verify(() => mockGetMyTimetable('ay-1')).called(2),
+    );
+
+    blocTest<TimetableBloc, TimetableState>(
+      'cache froid : la grille vide affichée est remplacée dès que le pull a '
+      'rempli le cache local',
+      setUp: () {
+        var call = 0;
+        when(() => mockGetMyTimetable(any())).thenAnswer((_) async {
+          call++;
+          return call == 1
+              ? const Right(
+                  WeeklyTimetable(
+                    academicYearId: 'ay-1',
+                    teacherId: 'teacher-1',
+                    days: [],
+                    rows: [],
+                  ),
+                )
+              : const Right(tTimetable);
+        });
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const TimetableRequested(academicYearId: 'ay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const TimetableRefreshRequested());
+      },
+      skip: 2,
+      expect: () => const [
+        TimetableState(status: TimetableStatus.success, timetable: tTimetable),
+      ],
+    );
+
+    blocTest<TimetableBloc, TimetableState>(
+      'un échec de relecture ne transforme pas une grille correcte en écran '
+      'd\'erreur',
+      setUp: () {
+        var call = 0;
+        when(() => mockGetMyTimetable(any())).thenAnswer((_) async {
+          call++;
+          return call == 1
+              ? const Right(tTimetable)
+              : const Left(NetworkFailure('offline'));
+        });
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const TimetableRequested(academicYearId: 'ay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const TimetableRefreshRequested());
+      },
+      expect: () => const [
+        TimetableState(status: TimetableStatus.loading),
+        TimetableState(status: TimetableStatus.success, timetable: tTimetable),
+      ],
+    );
+
+    blocTest<TimetableBloc, TimetableState>(
+      'course : une lecture initiale LENTE partie sur un cache vide n\'écrase '
+      'pas la relecture fraîche arrivée avant elle',
+      setUp: () {
+        var call = 0;
+        when(() => mockGetMyTimetable(any())).thenAnswer((_) async {
+          call++;
+          if (call == 1) {
+            // Lecture initiale bloquée derrière les écritures du pull.
+            await Future<void>.delayed(const Duration(milliseconds: 40));
+            return const Right(
+              WeeklyTimetable(
+                academicYearId: 'ay-1',
+                teacherId: 'teacher-1',
+                days: [],
+                rows: [],
+              ),
+            );
+          }
+          return const Right(tTimetable);
+        });
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const TimetableRequested(academicYearId: 'ay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const TimetableRefreshRequested());
+      },
+      wait: const Duration(milliseconds: 80),
+      expect: () => const [
+        TimetableState(status: TimetableStatus.loading),
+        TimetableState(status: TimetableStatus.success, timetable: tTimetable),
+      ],
+    );
+
+    blocTest<TimetableBloc, TimetableState>(
+      'après une grille de classe, le rafraîchissement silencieux ne '
+      'réécrit pas l\'écran avec mon emploi du temps',
+      setUp: () {
+        when(
+          () => mockGetMyTimetable(any()),
+        ).thenAnswer((_) async => const Right(tTimetable));
+        when(
+          () => mockGetClassroomGrid(any()),
+        ).thenAnswer((_) async => const Right(tTimetable));
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(const TimetableRequested(academicYearId: 'ay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(
+          const ClassroomGridRequested(
+            classroomId: 'class-1',
+            academicYearId: 'ay-1',
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const TimetableRefreshRequested());
+      },
+      verify: (_) => verify(() => mockGetMyTimetable('ay-1')).called(1),
+    );
+  });
 }

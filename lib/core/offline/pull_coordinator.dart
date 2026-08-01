@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 
 /// Bilan d'un cycle de pull (diagnostic / UI).
@@ -48,12 +49,16 @@ class PullRunReport {
 /// `SyncEngine`, piloté par le même point de colle.
 class PullCoordinator {
   final ConnectivityService _connectivity;
+  final PullCompletionBus? _completionBus;
   final Map<String, PullHandler> _handlers = {};
 
   bool _pulling = false;
 
-  PullCoordinator({required ConnectivityService connectivity})
-    : _connectivity = connectivity;
+  PullCoordinator({
+    required ConnectivityService connectivity,
+    PullCompletionBus? completionBus,
+  }) : _connectivity = connectivity,
+       _completionBus = completionBus;
 
   /// Enregistre le handler d'une ressource (appelé par la DI des branches).
   void registerHandler(PullHandler handler) {
@@ -80,6 +85,11 @@ class PullCoordinator {
           switch (outcome.result) {
             case PullResult.updated:
               updated++;
+              // Réveil IMMÉDIAT des écrans qui lisent cette ressource : un
+              // cycle complet enchaîne des ressources lentes, attendre la fin
+              // laisserait un écran affiché vide alors que SES données sont
+              // déjà en base (cf. `PullCompletionBus`).
+              _completionBus?.notifyUpdated({handler.resource});
             case PullResult.notModified:
               notModified++;
             case PullResult.error:

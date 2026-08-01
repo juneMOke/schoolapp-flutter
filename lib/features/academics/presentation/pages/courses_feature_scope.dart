@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/course_event.dart';
 
 /// Scope du module Cours : fournit le [CourseBloc] au sous-arbre et le ferme
 /// à la sortie de la feature (cf. AGENTS.md §11 — FeatureScope).
@@ -25,16 +29,42 @@ class CoursesFeatureScope extends StatefulWidget {
 
 class _CoursesFeatureScopeState extends State<CoursesFeatureScope> {
   late final CourseBloc _courseBloc;
+  StreamSubscription<Set<String>>? _pullSub;
+
+  /// « Mes cours » est une jointure `ref_cours` × bundle `grades-referential`
+  /// (la branche vient du bundle) : un cours sans sa ligne de barème est exclu
+  /// de la liste. Les deux ressources doivent donc réveiller l'écran.
+  static const Set<String> _watched = {
+    kAcademicsCoursResourcePrefix,
+    kGradesReferentialResource,
+  };
 
   @override
   void initState() {
     super.initState();
     _courseBloc = GetIt.instance<CourseBloc>();
+    _listenPullCompletion();
     unawaited(GetIt.instance<SyncAcademicsPullsUseCase>()());
+  }
+
+  /// Abonnement défensif : bus optionnel dans la DI (tests, socle offline non
+  /// enregistré) — son absence laisse la feature fonctionnelle en lecture
+  /// locale.
+  void _listenPullCompletion() {
+    if (!GetIt.instance.isRegistered<PullCompletionBus>()) return;
+    _pullSub = GetIt.instance<PullCompletionBus>().stream.listen(
+      (resources) {
+        if (!mounted || resources.intersection(_watched).isEmpty) return;
+        _courseBloc.add(const MyCoursesRefreshRequested());
+      },
+      onError: (_) {},
+      cancelOnError: false,
+    );
   }
 
   @override
   void dispose() {
+    unawaited(_pullSub?.cancel());
     _courseBloc.close();
     super.dispose();
   }

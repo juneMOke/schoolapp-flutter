@@ -210,7 +210,7 @@ void main() {
       // La clé time-slots n'est pas touchée (curseurs indépendants).
       expect(await syncMeta.getCursor(kScheduleTimeSlotsResource), isNull);
       expect(
-        (await local.getSessionsForYear('ay-1')).single.coursId,
+        (await local.getSessionsForYear('ay-1', ownerUid: null)).single.coursId,
         'cours-1',
       );
     });

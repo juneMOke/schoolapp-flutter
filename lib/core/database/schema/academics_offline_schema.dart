@@ -60,11 +60,17 @@ const TableSchema refTimeSlotsTable = TableSchema(
 /// `ref_recurring_sessions` — remplissage hebdomadaire récurrent de l'emploi du
 /// temps. Labels **dénormalisés** (`teacher_label`, `classroom_label`,
 /// `subject_label`) pour un affichage sans jointure. `day_of_week` = MON…SAT.
+/// `owner_uid` : compte propriétaire de la ligne (`CurrentUserContext.uid` au
+/// moment du pull), cf. `core/offline/owner_scope.dart`. La table est cadrée
+/// enseignant côté serveur mais partagée entre les comptes d'une même
+/// tablette — sans cette colonne, le prof B lirait les séances de A. L'id d'une
+/// séance restant propre à un enseignant, la clé primaire ne change pas.
 const TableSchema refRecurringSessionsTable = TableSchema(
   name: 'ref_recurring_sessions',
   createTableSql: '''
     CREATE TABLE ref_recurring_sessions (
       id TEXT PRIMARY KEY,
+      owner_uid TEXT NOT NULL DEFAULT '',
       academic_year_id TEXT NOT NULL,
       cours_id TEXT NOT NULL,
       time_slot_id TEXT NOT NULL,
@@ -85,6 +91,8 @@ const TableSchema refRecurringSessionsTable = TableSchema(
     'CREATE INDEX idx_sessions_teacher ON ref_recurring_sessions(teacher_id)',
     'CREATE INDEX idx_sessions_day_slot '
         'ON ref_recurring_sessions(day_of_week, time_slot_id)',
+    'CREATE INDEX idx_sessions_owner_year '
+        'ON ref_recurring_sessions(owner_uid, academic_year_id)',
   ],
 );
 
@@ -93,11 +101,15 @@ const TableSchema refRecurringSessionsTable = TableSchema(
 /// donne le roster (via `ref_classroom_members`, module Classe) ; `ligne_bareme_id`
 /// est le pont vers le poste de bulletin (calcul serveur, pas la saisie offline).
 /// Réf, lecture seule.
+/// `owner_uid` : même rôle que sur `ref_recurring_sessions` (partition par
+/// compte sur tablette partagée). Un cours appartenant à un seul enseignant,
+/// la clé primaire reste l'id.
 const TableSchema refCoursTable = TableSchema(
   name: 'ref_cours',
   createTableSql: '''
     CREATE TABLE ref_cours (
       id TEXT PRIMARY KEY,
+      owner_uid TEXT NOT NULL DEFAULT '',
       classroom_id TEXT NOT NULL,
       ligne_bareme_id TEXT NOT NULL,
       teacher_id TEXT,
@@ -107,6 +119,7 @@ const TableSchema refCoursTable = TableSchema(
   ''',
   createIndexSql: [
     'CREATE INDEX idx_cours_classroom ON ref_cours(classroom_id)',
+    'CREATE INDEX idx_cours_owner ON ref_cours(owner_uid)',
   ],
 );
 
@@ -193,14 +206,24 @@ const TableSchema refCoursNotationTable = TableSchema(
 );
 
 /// `ref_branche` — branche académique (bundle `grades-referential`, réf,
-/// lecture seule). Remplacement d'ensemble à chaque pull (pas de delta).
+/// lecture seule). Remplacement d'ensemble à chaque pull (pas de delta), **par
+/// propriétaire** (`owner_uid`).
+///
+/// Clé primaire **composite** `(id, owner_uid)`, contrairement aux tables de
+/// séances/cours : le bundle livre des références d'ÉCOLE (branches, plafonds,
+/// périodes), donc deux enseignants de la même école reçoivent exactement les
+/// mêmes ids. Avec l'id seul en clé, le pull du second écraserait la ligne du
+/// premier — en lui volant son `owner_uid` au passage, rendant tout son cache
+/// invisible.
 const TableSchema refBrancheTable = TableSchema(
   name: 'ref_branche',
   createTableSql: '''
     CREATE TABLE ref_branche (
-      id TEXT PRIMARY KEY,
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
       nom TEXT NOT NULL,
-      code TEXT
+      code TEXT,
+      PRIMARY KEY (id, owner_uid)
     )
   ''',
 );
@@ -209,17 +232,20 @@ const TableSchema refBrancheTable = TableSchema(
 /// `max_examen_par_periode_scolaire` **NULLABLE** = branche sans examen, jamais
 /// traité comme 0) + pont vers la branche. Bundle `grades-referential`, réf,
 /// lecture seule.
+/// Clé composite `(id, owner_uid)` — même raison que [refBrancheTable].
 const TableSchema refLigneBaremeTable = TableSchema(
   name: 'ref_ligne_bareme',
   createTableSql: '''
     CREATE TABLE ref_ligne_bareme (
-      id TEXT PRIMARY KEY,
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
       grille_id TEXT NOT NULL,
       rubrique_id TEXT NOT NULL,
       branche_id TEXT NOT NULL,
       ordre INTEGER NOT NULL DEFAULT 0,
       max_journalier_par_sous_periode INTEGER NOT NULL,
-      max_examen_par_periode_scolaire INTEGER
+      max_examen_par_periode_scolaire INTEGER,
+      PRIMARY KEY (id, owner_uid)
     )
   ''',
   createIndexSql: [
@@ -234,10 +260,12 @@ const TableSchema refChapitreTable = TableSchema(
   name: 'ref_chapitre',
   createTableSql: '''
     CREATE TABLE ref_chapitre (
-      id TEXT PRIMARY KEY,
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
       cours_id TEXT NOT NULL,
       titre TEXT NOT NULL,
-      ordre INTEGER NOT NULL DEFAULT 0
+      ordre INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (id, owner_uid)
     )
   ''',
   createIndexSql: [
@@ -253,13 +281,15 @@ const TableSchema refPeriodeTable = TableSchema(
   name: 'ref_periode',
   createTableSql: '''
     CREATE TABLE ref_periode (
-      id TEXT PRIMARY KEY,
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
       academic_year_id TEXT NOT NULL,
       school_level_group_id TEXT NOT NULL,
       ordre INTEGER NOT NULL DEFAULT 0,
       statut TEXT NOT NULL,
       start_date TEXT,
-      end_date TEXT
+      end_date TEXT,
+      PRIMARY KEY (id, owner_uid)
     )
   ''',
   createIndexSql: [
@@ -274,12 +304,14 @@ const TableSchema refSousPeriodeTable = TableSchema(
   name: 'ref_sous_periode',
   createTableSql: '''
     CREATE TABLE ref_sous_periode (
-      id TEXT PRIMARY KEY,
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
       periode_scolaire_id TEXT NOT NULL,
       ordre INTEGER NOT NULL DEFAULT 0,
       statut TEXT NOT NULL,
       start_date TEXT,
-      end_date TEXT
+      end_date TEXT,
+      PRIMARY KEY (id, owner_uid)
     )
   ''',
   createIndexSql: [

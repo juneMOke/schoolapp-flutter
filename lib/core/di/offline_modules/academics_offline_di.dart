@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -88,6 +89,8 @@ void registerAcademicsOffline(GetIt getIt) {
       localDataSource: getIt<ScheduleRefLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
+      // Partition par compte des caches cadrés prof (owner_scope.dart).
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<AcademicsCoursPullRepositoryImpl>(
@@ -97,6 +100,7 @@ void registerAcademicsOffline(GetIt getIt) {
       academicsLocalDataSource: getIt<AcademicsLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<AcademicsMetierPullRepositoryImpl>(
@@ -106,6 +110,7 @@ void registerAcademicsOffline(GetIt getIt) {
       refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<EvaluationOfflineRepositoryImpl>(
@@ -143,6 +148,7 @@ void registerAcademicsOffline(GetIt getIt) {
       classroomLocalDataSource: getIt<ClassroomLocalDataSource>(),
       evaluationRepository: getIt<EvaluationOfflineRepositoryImpl>(),
       syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   // Impl offline-first de NotationRepository (lecture composée notes+roster,
@@ -166,6 +172,7 @@ void registerAcademicsOffline(GetIt getIt) {
       refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: requiredAuth,
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 
@@ -182,6 +189,9 @@ void registerAcademicsOffline(GetIt getIt) {
           getIt<GradesReferentialPullRepositoryImpl>(),
       credentialsProbe: getIt<AuthSessionManager>(),
       connectivity: getIt<ConnectivityService>(),
+      // Réveille l'emploi du temps / « Mes cours » quand l'hydratation a
+      // effectivement rempli le cache (la lecture locale l'a précédée).
+      completionBus: getIt<PullCompletionBus>(),
     ),
   );
 

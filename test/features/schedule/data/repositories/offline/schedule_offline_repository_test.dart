@@ -40,9 +40,11 @@ void main() {
     String coursId,
     String slotId,
     String day,
-    String teacher,
-  ) => db.insert('ref_recurring_sessions', {
+    String teacher, {
+    String ownerUid = 'me',
+  }) => db.insert('ref_recurring_sessions', {
     'id': id,
+    'owner_uid': ownerUid,
     'academic_year_id': 'ay-1',
     'cours_id': coursId,
     'time_slot_id': slotId,
@@ -55,8 +57,8 @@ void main() {
     'synced_at': 1,
   });
 
-  test('getMyTimetable : grille créneau×jour, sans filtre d\'identité côté '
-      'client (DF-K, séances déjà scopées enseignant par le pull)', () async {
+  test('getMyTimetable : grille créneau×jour composée depuis le cache local, '
+      'scopée au compte connecté (owner_uid)', () async {
     await insertSlot('t1', 1, '08:00');
     await insertSlot('t2', 2, '09:00');
     await insertSession('s1', 'co1', 't1', 'MON', 'me');
@@ -77,5 +79,44 @@ void main() {
     final row2 = tt.rows.firstWhere((r) => r.timeSlot.id == 't2');
     expect(row2.cells[Weekday.tue]!.coursId, 'co2');
     expect(row2.cells[Weekday.mon], isNull);
+  });
+
+  test('tablette partagée : les séances d\'un AUTRE compte ne fuient jamais '
+      'dans ma grille', () async {
+    await insertSlot('t1', 1, '08:00');
+    await insertSession('s1', 'co1', 't1', 'MON', 'me');
+    // Séance du collègue, tirée par SON pull sur la même tablette : même
+    // créneau, même jour — sans le filtre `owner_uid` elle écraserait la
+    // mienne dans l'index (créneau, jour) de la grille.
+    await insertSession(
+      's2',
+      'co-autre',
+      't1',
+      'MON',
+      'collegue',
+      ownerUid: 'autre-compte',
+    );
+
+    final tt = (await repo.getMyTimetable(
+      'ay-1',
+    )).getOrElse(() => fail('Left'));
+
+    expect(tt.rows.single.cells[Weekday.mon]!.coursId, 'co1');
+  });
+
+  test('base héritée (lignes sans propriétaire) : un compte identifié ne lit '
+      'rien plutôt que les séances d\'autrui', () async {
+    // Sécurité du repli : avant la migration v18 les lignes n'avaient pas de
+    // propriétaire. Elles restent invisibles au compte courant — la purge de
+    // la migration les efface de toute façon, et le pull les réécrira
+    // estampillées.
+    await insertSlot('t1', 1, '08:00');
+    await insertSession('s1', 'co1', 't1', 'MON', 'me', ownerUid: '');
+
+    final tt = (await repo.getMyTimetable(
+      'ay-1',
+    )).getOrElse(() => fail('Left'));
+
+    expect(tt.days, isEmpty);
   });
 }
