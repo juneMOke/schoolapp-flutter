@@ -15,15 +15,30 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// destiné à être lu au guichet ou recopié au support, pas un message d'UI à
 /// reformuler — le traduire ferait perdre l'information utile.
 class SyncErrorTile extends StatelessWidget {
+  /// Nom court de l'auteur quand l'entrée appartient à un AUTRE compte
+  /// (`null` = elle est à moi, ou l'auteur est inconnu).
+  final String? foreignAuthorName;
+
   final OutboxEntry entry;
   final bool busy;
   final VoidCallback onRetry;
+
+  /// Vrai si le porteur courant peut réellement rejouer cette entrée
+  /// ([canRetryEntry]). Faux → aucun bouton, une explication à la place.
+  final bool canRetry;
+
+  /// Vrai si l'entrée appartient à un autre compte — départage les deux motifs
+  /// de refus du rejeu.
+  final bool isForeign;
 
   const SyncErrorTile({
     super.key,
     required this.entry,
     required this.busy,
     required this.onRetry,
+    required this.canRetry,
+    required this.isForeign,
+    this.foreignAuthorName,
   });
 
   @override
@@ -81,11 +96,18 @@ class SyncErrorTile extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          if (!canRequeueFrozenPayload(entry.aggregateType))
-            // Pas de bouton du tout : republier le payload gelé d'un appel
-            // effacerait côté serveur les absences ajoutées depuis.
+          if (!canRetry)
+            // Deux raisons de ne pas offrir le bouton, deux messages :
+            //  - payload gelé non rejouable (présence : republier effacerait
+            //    côté serveur les absences ajoutées depuis) ;
+            //  - écriture d'un AUTRE compte : le serveur la refuserait, et le
+            //    rejeu la ferait seulement disparaître de cette liste.
             Text(
-              l10n.syncErrorsNotReplayable,
+              isForeign
+                  ? (foreignAuthorName == null
+                        ? l10n.syncErrorsForeignEntryAnonymous
+                        : l10n.syncErrorsForeignEntry(foreignAuthorName!))
+                  : l10n.syncErrorsNotReplayable,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textMuted,
                 fontStyle: FontStyle.italic,

@@ -2869,5 +2869,16 @@
       }
     }
   },
-  "syncErrorsOtherAccountHint": "Elles repartiront à sa reconnexion sur cette tablette."
+  "syncErrorsOtherAccountHint": "Elles repartiront à sa reconnexion sur cette tablette.",
+  "syncErrorsForeignEntry": "Écriture de {name} — elle devra la reprendre depuis cette liste, sur sa propre session.",
+  "@syncErrorsForeignEntry": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsForeignEntryAnonymous": "Écriture d'un autre compte — elle devra être reprise depuis sa propre session.",
+  "syncErrorsHeldTitle": "En attente",
+  "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée."
 }

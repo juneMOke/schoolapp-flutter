@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
+
 /// Le rejeu manuel republie le payload **gelé à l'enfilage**, tel quel.
 ///
 /// Pour six des sept agrégats c'est sans danger : le serveur est idempotent par
@@ -17,3 +19,24 @@
 /// le geste plutôt que de proposer un bouton qui détruit des données.
 bool canRequeueFrozenPayload(String aggregateType) =>
     aggregateType != 'ATTENDANCE';
+
+/// Vrai si le porteur courant peut réellement rejouer [entry] LUI-MÊME.
+///
+/// Deux conditions, et la seconde vient d'un geste qui se retournait contre
+/// l'utilisateur : rejouer l'écriture d'un AUTRE compte la fait repasser
+/// `PENDING`, ce qui vide `errorCount`, fait quitter `syncConflict` à la
+/// pastille — et, avant que la file retenue ne devienne atteignable, rendait
+/// la feuille elle-même inaccessible. Un clic bien intentionné faisait passer
+/// l'état de « bloqué et visible » à « bloqué et invisible ». Et il ne pouvait
+/// rien débloquer : la garde d'attribution du moteur reporte immédiatement
+/// l'entrée, puisque le serveur refuserait l'écriture d'autrui.
+///
+/// L'entrée reste AFFICHÉE — c'est son bouton qui disparaît, remplacé par
+/// l'explication de qui doit la reprendre.
+bool canRetryEntry({
+  required String aggregateType,
+  required String payload,
+  required String? currentUid,
+}) =>
+    canRequeueFrozenPayload(aggregateType) &&
+    !isForeignOutboxAuthor(payload, currentUid);

@@ -156,6 +156,25 @@ class OutboxDao {
     return rows.map(OutboxEntry.fromMap).toList();
   }
 
+  /// Nombre d'entrées en attente qui portent un MOTIF de retenue.
+  ///
+  /// `defer` (attente d'une dépendance, ou écriture d'un autre compte) écrit sa
+  /// raison dans `last_error` sans toucher `attempts` : une entrée PENDING qui
+  /// porte un motif est donc une entrée que le moteur a rencontrée et
+  /// délibérément retenue, pas une entrée fraîche qui n'a jamais été tentée.
+  ///
+  /// Sert à rendre la file retenue ATTEIGNABLE : sans ce compteur, la pastille
+  /// n'est cliquable que sur `syncConflict`, donc une file entièrement retenue
+  /// — sans aucune erreur terminale — n'ouvre aucun écran et n'explique rien.
+  Future<int> heldCount() async {
+    final rows = await _db.rawQuery(
+      'SELECT COUNT(*) AS c FROM $table '
+      "WHERE status = ? AND last_error IS NOT NULL AND last_error <> ''",
+      [OutboxStatus.pending.dbValue],
+    );
+    return (rows.first['c'] as int?) ?? 0;
+  }
+
   /// Remet une entrée terminale (`SYNC_ERROR`) en file : `PENDING`, compteur de
   /// tentatives remis à zéro, barrière de backoff effacée, dernière erreur
   /// purgée. C'est le pendant explicite du re-enqueue implicite (réécriture du

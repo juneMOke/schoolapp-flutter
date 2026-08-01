@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 
 /// Pilote la feuille de reprise des écritures en échec.
@@ -64,11 +65,25 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
       final me = _currentUser?.uid;
       if (me == null || me.isEmpty) return;
 
-      final summary = summarizeOtherAuthors(await _outbox.pendingAll(), me);
+      final pending = await _outbox.pendingAll();
+      final summary = summarizeOtherAuthors(pending, me);
+
+      // MES entrées retenues : le moteur les a rencontrées et a écrit pourquoi
+      // il ne les a pas poussées. Les entrées d'autrui sont exclues, elles ont
+      // leur propre bande — et leur motif ne regarde pas le porteur courant.
+      final held = pending
+          .where(
+            (e) =>
+                !isForeignOutboxAuthor(e.payload, me) &&
+                (e.lastError?.isNotEmpty ?? false),
+          )
+          .toList(growable: false);
+
       if (summary.isEmpty) {
         _safeEmit(
           state.copyWith(
             others: OtherAuthorsPending.none,
+            held: held,
             otherAuthors: const <OutboxAuthorIdentity?>[],
           ),
         );
@@ -90,7 +105,9 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
           identities.add(null);
         }
       }
-      _safeEmit(state.copyWith(others: summary, otherAuthors: identities));
+      _safeEmit(
+        state.copyWith(others: summary, held: held, otherAuthors: identities),
+      );
     } catch (_) {
       // Idem : l'agrégat est optionnel, son échec est silencieux.
     }
@@ -103,7 +120,7 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
   /// ferme le chemin programmatique.
   Future<void> retry(String id) {
     final entry = state.entries.where((e) => e.id == id).firstOrNull;
-    if (entry == null || !canRequeueFrozenPayload(entry.aggregateType)) {
+    if (entry == null || !_canRetry(entry)) {
       return Future<void>.value();
     }
     return _runAction(() => _outbox.requeue(id));
@@ -114,11 +131,15 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
   /// geste qu'on refuse à l'unité.
   Future<void> retryAll() => _runAction(() async {
     for (final entry in state.entries) {
-      if (canRequeueFrozenPayload(entry.aggregateType)) {
-        await _outbox.requeue(entry.id);
-      }
+      if (_canRetry(entry)) await _outbox.requeue(entry.id);
     }
   });
+
+  bool _canRetry(OutboxEntry entry) => canRetryEntry(
+    aggregateType: entry.aggregateType,
+    payload: entry.payload,
+    currentUid: _currentUser?.uid,
+  );
 
   /// Verrou d'action + rechargement systématique : quel que soit le sort du
   /// flush, la liste affichée redevient le reflet exact de la base.

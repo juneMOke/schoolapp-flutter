@@ -25,6 +25,12 @@ class OutboxErrorsState extends Equatable {
   /// et personne ne saurait pourquoi.
   final OtherAuthorsPending others;
 
+  /// MES écritures en attente que le moteur a délibérément RETENUES, avec leur
+  /// motif (`lastError`, écrit par `defer`). Typiquement un paiement qui attend
+  /// l'inscription de son élève : sans cette liste, une écriture d'argent reste
+  /// en file sans que rien ne dise pourquoi.
+  final List<OutboxEntry> held;
+
   /// Identités résolues des comptes de [others], dans le même ordre que
   /// `others.authorUids`. Une entrée peut manquer (compte jamais vu sur cette
   /// tablette) : l'affichage retombe alors sur une formulation anonyme.
@@ -35,24 +41,30 @@ class OutboxErrorsState extends Equatable {
     this.entries = const <OutboxEntry>[],
     this.busy = false,
     this.others = OtherAuthorsPending.none,
+    this.held = const <OutboxEntry>[],
     this.otherAuthors = const <OutboxAuthorIdentity?>[],
   });
 
   /// Vrai quand il n'y a RIEN à montrer : ni erreur à soi, ni attente d'autrui.
   bool get isEmpty =>
-      status == OutboxErrorsStatus.loaded && entries.isEmpty && others.isEmpty;
+      status == OutboxErrorsStatus.loaded &&
+      entries.isEmpty &&
+      others.isEmpty &&
+      held.isEmpty;
 
   OutboxErrorsState copyWith({
     OutboxErrorsStatus? status,
     List<OutboxEntry>? entries,
     bool? busy,
     OtherAuthorsPending? others,
+    List<OutboxEntry>? held,
     List<OutboxAuthorIdentity?>? otherAuthors,
   }) => OutboxErrorsState(
     status: status ?? this.status,
     entries: entries ?? this.entries,
     busy: busy ?? this.busy,
     others: others ?? this.others,
+    held: held ?? this.held,
     otherAuthors: otherAuthors ?? this.otherAuthors,
   );
 
@@ -61,6 +73,7 @@ class OutboxErrorsState extends Equatable {
     status,
     entries,
     busy,
+    held,
     others.count,
     others.oldestCreatedAt,
     others.authorUids,

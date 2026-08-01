@@ -28,7 +28,12 @@ class TopBarActions extends StatelessWidget {
             // Seul chemin de sortie de l'état terminal `SYNC_ERROR` : sans lui
             // la pastille « Conflit » est un cul-de-sac, l'écriture rejetée
             // étant invisible et non rejouable.
-            onTap: state.status == SyncStatus.syncConflict
+            //
+            // Ouvrable AUSSI quand la file est retenue sans être en erreur
+            // (dépendance non satisfaite, écriture d'un autre compte) : sinon
+            // « À envoyer » est un cul-de-sac symétrique, où l'explication de
+            // l'attente existe en base mais n'est atteignable par aucun geste.
+            onTap: state.status == SyncStatus.syncConflict || state.hasHeldWork
                 ? () => showSyncErrorsSheet(context)
                 : null,
           ),

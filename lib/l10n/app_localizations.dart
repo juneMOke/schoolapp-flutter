@@ -9362,6 +9362,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'They will be sent when that account signs back in on this tablet.'**
   String get syncErrorsOtherAccountHint;
+
+  /// No description provided for @syncErrorsForeignEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by {name} — it has to be retried from their own session.'**
+  String syncErrorsForeignEntry(String name);
+
+  /// No description provided for @syncErrorsForeignEntryAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by another account — it has to be retried from that session.'**
+  String get syncErrorsForeignEntryAnonymous;
+
+  /// No description provided for @syncErrorsHeldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get syncErrorsHeldTitle;
+
+  /// No description provided for @syncErrorsHeldSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These writes are kept and will be sent as soon as their condition clears.'**
+  String get syncErrorsHeldSubtitle;
 }
 
 class _AppLocalizationsDelegate

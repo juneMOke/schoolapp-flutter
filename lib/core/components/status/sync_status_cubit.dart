@@ -52,6 +52,12 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// données (jamais régressé par un simple changement de [SyncStatus]).
   int? _lastSyncAtMs;
 
+  /// Dernier relevé de « la file contient des écritures retenues ». Mémorisé
+  /// comme [_lastSyncAtMs] : `_safeEmit` est appelé depuis des chemins qui ne
+  /// relisent pas la file (offline, syncing), et le drapeau ne doit pas
+  /// clignoter à chaque transition d'état.
+  bool _hasHeldWork = false;
+
   StreamSubscription<bool>? _connectivitySub;
 
   SyncStatusCubit({
@@ -205,6 +211,22 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
         _safeEmit(SyncStatus.authRequired);
         return;
       }
+      // Écritures retenues par le moteur (dépendance non satisfaite, ou
+      // écriture d'un autre compte) : ne change AUCUN statut — c'est une
+      // attente, pas une erreur — mais rend la feuille atteignable, seul
+      // endroit qui explique pourquoi la file ne se vide pas.
+      //
+      // Isolé dans son propre `try` : c'est un confort d'accessibilité, il ne
+      // doit pas pouvoir empêcher le CALCUL DU STATUT. Sans cette isolation,
+      // son échec tomberait dans le `catch` global ci-dessous, qui conserve le
+      // dernier état connu — la pastille se figerait sur une valeur périmée
+      // pour une raison sans rapport avec la synchro.
+      try {
+        _hasHeldWork = await _outbox.heldCount() > 0;
+      } catch (_) {
+        _hasHeldWork = false;
+      }
+
       if (await _outbox.errorCount() > 0) {
         _safeEmit(SyncStatus.syncConflict);
         return;
@@ -251,7 +273,11 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   void _safeEmit(SyncStatus status) {
     if (isClosed) return;
-    final next = SyncStatusState(status: status, lastSyncAtMs: _lastSyncAtMs);
+    final next = SyncStatusState(
+      status: status,
+      lastSyncAtMs: _lastSyncAtMs,
+      hasHeldWork: _hasHeldWork,
+    );
     if (state != next) emit(next);
   }
 

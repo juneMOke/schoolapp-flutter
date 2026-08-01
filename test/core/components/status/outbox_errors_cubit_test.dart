@@ -288,6 +288,122 @@ void main() {
       expect(cubit.state.entries.single.id, 'ko');
     });
   });
+
+  group('rejeu impossible et retenue visible', () {
+    OutboxEntry authored(
+      String id,
+      String? authorId, {
+      String type = 'PAYMENT',
+    }) => OutboxEntry(
+      id: id,
+      aggregateType: type,
+      aggregateId: 'agg-$id',
+      operation: OutboxOperation.create,
+      payload: jsonEncode({if (authorId != null) 'authorId': authorId}),
+      createdAt: 1000,
+    );
+
+    OutboxErrorsCubit build({String? me = 'uid-moi'}) => OutboxErrorsCubit(
+      outbox: dao,
+      syncEngine: engine,
+      currentUser: CurrentUserContext()..set(me),
+    );
+
+    test(
+      'retry sur une entrée d\'un AUTRE compte est refusé : la rejouer la '
+      'ferait quitter SYNC_ERROR et disparaître de la liste sans partir',
+      () async {
+        await dao.enqueue(authored('a1', 'uid-autre'));
+        await dao.markSyncError('a1', 'rejet');
+
+        final cubit = build();
+        await cubit.load();
+        await cubit.retry('a1');
+
+        final row = (await db.query(
+          'outbox',
+          where: 'id = ?',
+          whereArgs: ['a1'],
+        )).single;
+        expect(row['status'], 'SYNC_ERROR', reason: 'toujours visible');
+      },
+    );
+
+    test('retry sur MON entrée fonctionne toujours', () async {
+      await dao.enqueue(authored('m1', 'uid-moi'));
+      await dao.markSyncError('m1', 'rejet');
+
+      final cubit = build();
+      await cubit.load();
+      await cubit.retry('m1');
+
+      final row = (await db.query(
+        'outbox',
+        where: 'id = ?',
+        whereArgs: ['m1'],
+      )).single;
+      expect(row['status'], 'PENDING');
+    });
+
+    test('retryAll saute les entrées d\'un autre compte', () async {
+      await dao.enqueue(authored('a1', 'uid-autre'));
+      await dao.markSyncError('a1', 'rejet');
+      await dao.enqueue(authored('m1', 'uid-moi'));
+      await dao.markSyncError('m1', 'rejet');
+
+      final cubit = build();
+      await cubit.load();
+      await cubit.retryAll();
+
+      Future<Object?> statusOf(String id) async => (await db.query(
+        'outbox',
+        where: 'id = ?',
+        whereArgs: [id],
+      )).single['status'];
+      expect(await statusOf('a1'), 'SYNC_ERROR');
+      expect(await statusOf('m1'), 'PENDING');
+    });
+
+    test('mes écritures RETENUES sont exposées avec leur motif — sans ça un '
+        'paiement bloqué n\'existe nulle part à l\'écran', () async {
+      await dao.enqueue(authored('m1', 'uid-moi'));
+      await dao.defer(
+        'm1',
+        nextAttemptAt: 99999999999,
+        reason: 'Inscription de l\'élève non synchronisée (dépendance)',
+      );
+
+      final cubit = build();
+      await cubit.load();
+
+      expect(cubit.state.held.single.id, 'm1');
+      expect(cubit.state.held.single.lastError, contains('Inscription'));
+      expect(cubit.state.isEmpty, isFalse, reason: 'pas d\'écran vide menteur');
+    });
+
+    test('les entrées retenues d\'un AUTRE compte ne polluent pas ma section '
+        '« En attente » : elles ont leur propre bande', () async {
+      await dao.enqueue(authored('a1', 'uid-autre'));
+      await dao.defer('a1', nextAttemptAt: 99999999999, reason: 'autre compte');
+
+      final cubit = build();
+      await cubit.load();
+
+      expect(cubit.state.held, isEmpty);
+      expect(cubit.state.others.count, 1);
+    });
+
+    test('une entrée en attente JAMAIS tentée (aucun motif) n\'est pas '
+        'présentée comme retenue', () async {
+      await dao.enqueue(authored('m1', 'uid-moi'));
+
+      final cubit = build();
+      await cubit.load();
+
+      expect(cubit.state.held, isEmpty);
+      expect(cubit.state.isEmpty, isTrue);
+    });
+  });
 }
 
 /// Annuaire de test.

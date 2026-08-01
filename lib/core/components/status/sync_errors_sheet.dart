@@ -5,9 +5,12 @@ import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.da
 import 'package:school_app_flutter/core/components/status/outbox_errors_state.dart';
 import 'package:school_app_flutter/core/components/status/outbox_retry_policy.dart';
 import 'package:school_app_flutter/core/components/status/sync_error_tile.dart';
+import 'package:school_app_flutter/core/components/status/sync_held_tile.dart';
 import 'package:school_app_flutter/core/components/status/sync_other_account_band.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -89,6 +92,10 @@ class _SyncErrorsBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<OutboxErrorsCubit, OutboxErrorsState>(
       builder: (context, state) {
+        final me = getIt<CurrentUserContext>().uid;
+        final otherName = state.otherAuthors.length == 1
+            ? SyncOtherAccountBand.shortNameOf(state.otherAuthors.first)
+            : null;
         if (state.status == OutboxErrorsStatus.loading) {
           return const EteeloListSkeleton(rowCount: 3, showAvatar: false);
         }
@@ -116,15 +123,40 @@ class _SyncErrorsBody extends StatelessWidget {
                 itemCount: state.entries.length,
                 itemBuilder: (context, index) {
                   final entry = state.entries[index];
+                  final foreign = isForeignOutboxAuthor(entry.payload, me);
                   return SyncErrorTile(
                     entry: entry,
                     busy: state.busy,
+                    canRetry: canRetryEntry(
+                      aggregateType: entry.aggregateType,
+                      payload: entry.payload,
+                      currentUid: me,
+                    ),
+                    isForeign: foreign,
+                    foreignAuthorName: foreign ? otherName : null,
                     onRetry: () =>
                         context.read<OutboxErrorsCubit>().retry(entry.id),
                   );
                 },
               ),
             ),
+            // MES écritures retenues, avec leur motif. Sans cette section, un
+            // paiement qui attend l'inscription de son élève n'existe nulle
+            // part à l'écran : ni erreur (il n'en est pas une), ni bande
+            // « autre compte » (il est à moi) — juste un « à envoyer » muet.
+            if (state.held.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.syncErrorsHeldTitle, style: AppTypography.titleSmall),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.syncErrorsHeldSubtitle,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ...state.held.map((e) => SyncHeldTile(entry: e)),
+            ],
             // Explication de l'attente d'un autre compte, sous la liste : ce
             // n'est pas une erreur de l'utilisateur courant, ça ne doit pas
             // passer devant ses propres écritures à reprendre.
@@ -136,9 +168,16 @@ class _SyncErrorsBody extends StatelessWidget {
               ),
             ],
             // « Tout réessayer » n'apparaît que s'il y a effectivement quelque
-            // chose à rejouer : sinon le bouton est actif et sans aucun effet.
+            // chose à rejouer PAR MOI : le prédicat porte sur `canRetryEntry`,
+            // pas sur le seul type — sinon une liste entièrement composée
+            // d'écritures d'un autre compte afficherait un bouton actif dont le
+            // clic ne fait strictement rien.
             if (state.entries.any(
-              (e) => canRequeueFrozenPayload(e.aggregateType),
+              (e) => canRetryEntry(
+                aggregateType: e.aggregateType,
+                payload: e.payload,
+                currentUid: me,
+              ),
             )) ...[
               const SizedBox(height: AppSpacing.sm),
               SizedBox(

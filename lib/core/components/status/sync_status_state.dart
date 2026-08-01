@@ -13,14 +13,31 @@ class SyncStatusState extends Equatable {
   /// [status] ne le régresse jamais.
   final int? lastSyncAtMs;
 
-  const SyncStatusState({required this.status, this.lastSyncAtMs});
+  /// Vrai si la file contient des écritures que le moteur RETIENT (attente
+  /// d'une dépendance, ou écriture d'un autre compte de la tablette).
+  ///
+  /// Sert uniquement à rendre la feuille ATTEIGNABLE. Sans ce drapeau, elle ne
+  /// s'ouvre que sur `syncConflict` : une file entièrement retenue affiche « à
+  /// envoyer », n'est pas cliquable, et l'explication de l'attente — pourtant
+  /// écrite en base — n'est visible nulle part.
+  final bool hasHeldWork;
 
-  SyncStatusState copyWith({SyncStatus? status, int? lastSyncAtMs}) =>
-      SyncStatusState(
-        status: status ?? this.status,
-        lastSyncAtMs: lastSyncAtMs ?? this.lastSyncAtMs,
-      );
+  const SyncStatusState({
+    required this.status,
+    this.lastSyncAtMs,
+    this.hasHeldWork = false,
+  });
+
+  SyncStatusState copyWith({
+    SyncStatus? status,
+    int? lastSyncAtMs,
+    bool? hasHeldWork,
+  }) => SyncStatusState(
+    status: status ?? this.status,
+    lastSyncAtMs: lastSyncAtMs ?? this.lastSyncAtMs,
+    hasHeldWork: hasHeldWork ?? this.hasHeldWork,
+  );
 
   @override
-  List<Object?> get props => [status, lastSyncAtMs];
+  List<Object?> get props => [status, lastSyncAtMs, hasHeldWork];
 }

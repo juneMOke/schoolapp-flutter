@@ -2911,5 +2911,16 @@
       }
     }
   },
-  "syncErrorsOtherAccountHint": "They will be sent when that account signs back in on this tablet."
+  "syncErrorsOtherAccountHint": "They will be sent when that account signs back in on this tablet.",
+  "syncErrorsForeignEntry": "Written by {name} — it has to be retried from their own session.",
+  "@syncErrorsForeignEntry": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsForeignEntryAnonymous": "Written by another account — it has to be retried from that session.",
+  "syncErrorsHeldTitle": "Waiting",
+  "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears."
 }

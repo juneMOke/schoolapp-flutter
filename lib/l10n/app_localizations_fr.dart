@@ -5620,4 +5620,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get syncErrorsOtherAccountHint =>
       'Elles repartiront à sa reconnexion sur cette tablette.';
+
+  @override
+  String syncErrorsForeignEntry(String name) {
+    return 'Écriture de $name — elle devra la reprendre depuis cette liste, sur sa propre session.';
+  }
+
+  @override
+  String get syncErrorsForeignEntryAnonymous =>
+      'Écriture d\'un autre compte — elle devra être reprise depuis sa propre session.';
+
+  @override
+  String get syncErrorsHeldTitle => 'En attente';
+
+  @override
+  String get syncErrorsHeldSubtitle =>
+      'Ces écritures sont conservées et repartiront dès que leur condition sera levée.';
 }

@@ -5554,4 +5554,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncErrorsOtherAccountHint =>
       'They will be sent when that account signs back in on this tablet.';
+
+  @override
+  String syncErrorsForeignEntry(String name) {
+    return 'Written by $name — it has to be retried from their own session.';
+  }
+
+  @override
+  String get syncErrorsForeignEntryAnonymous =>
+      'Written by another account — it has to be retried from that session.';
+
+  @override
+  String get syncErrorsHeldTitle => 'Waiting';
+
+  @override
+  String get syncErrorsHeldSubtitle =>
+      'These writes are kept and will be sent as soon as their condition clears.';
 }
