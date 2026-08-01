@@ -103,11 +103,29 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, bool>> isAuthenticated() async {
     try {
       final session = await localDataSource.getSession();
-      return Right(
-        session != null &&
-            session.accessToken.isNotEmpty &&
-            isTokenValid(session.accessToken),
-      );
+      if (session == null) return const Right(false);
+      if (session.accessToken.isNotEmpty && isTokenValid(session.accessToken)) {
+        return const Right(true);
+      }
+      // Access vide (session ouverte offline par déconsignation) ou périmé (le
+      // TTL access se compte en heures) : la session reste exploitable tant
+      // qu'un refresh token VIVANT permet de minter — c'est exactement ce que
+      // fait l'interceptor au premier appel. Sans cette branche, une session
+      // ouverte hors ligne ne survivait pas au redémarrage de l'app : l'agent
+      // était renvoyé sur l'écran de connexion alors que ses jetons étaient là.
+      //
+      // L'invariant ADR-010 « unauthenticated ⇒ zéro jeton vivant » tient
+      // toujours : un logout, une révocation ou un refresh rejeté effacent les
+      // jetons (le refresh consigné, lui, reste verrouillé par mot de passe et
+      // n'est PAS lu ici) — il n'y a donc plus rien à minter dans ces cas.
+      final refreshToken = session.refreshToken;
+      if (refreshToken == null || refreshToken.isEmpty) {
+        return const Right(false);
+      }
+      final bound = session.refreshExpiresAt;
+      // Borne absente (backend qui ne la fournit pas) : le refresh fait foi.
+      if (bound == null) return const Right(true);
+      return Right(DateTime.now().millisecondsSinceEpoch < bound);
     } catch (_) {
       return const Left(StorageFailure('Failed to read session'));
     }
