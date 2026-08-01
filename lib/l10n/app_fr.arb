@@ -2913,5 +2913,12 @@
   "editiqueErrorServerTitle": "Erreur du serveur",
   "editiqueErrorServerMessage": "La pièce n'a pas pu être produite. Réessayez dans un instant.",
   "editiqueErrorRetryLabel": "Réessayer",
-  "editiqueErrorReconnectLabel": "Se reconnecter"
+  "editiqueErrorReconnectLabel": "Se reconnecter",
+  "editiqueViewerStatementTitle": "Relevé de compte",
+  "facturationDetailStatementLabel": "Relevé de compte",
+  "facturationDetailStatementNoChargesHint": "Aucun frais sur l'année : le relevé ne peut pas être produit.",
+  "facturationDetailStatementConfirmTitle": "Générer un relevé de compte ?",
+  "facturationDetailStatementConfirmMessage": "Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les relevés déjà remis restent valides — ils ne sont pas remplacés.",
+  "facturationDetailStatementConfirmAction": "Générer",
+  "facturationDetailStatementConfirmCancel": "Annuler"
 }

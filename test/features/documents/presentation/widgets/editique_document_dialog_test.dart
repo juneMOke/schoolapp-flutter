@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
@@ -14,6 +15,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class MockEmitPaymentReceiptUseCase extends Mock
     implements EmitPaymentReceiptUseCase {}
+
+class MockEmitAccountStatementUseCase extends Mock
+    implements EmitAccountStatementUseCase {}
 
 /// Tailles réelles de la cible : tablette Android paysage, puis un téléphone
 /// bas de gamme en paysage — les deux hauteurs où la modale est la plus serrée.
@@ -39,10 +43,14 @@ Future<void> _pumpLoading(WidgetTester tester, {required Size size}) async {
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: BlocProvider<EditiqueDocumentBloc>(
-          create: (_) =>
-              EditiqueDocumentBloc(emitPaymentReceiptUseCase: useCase)
-                ..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
-          child: EditiqueDocumentDialogView(onRetry: (_) {}),
+          create: (_) => EditiqueDocumentBloc(
+            emitPaymentReceiptUseCase: useCase,
+            emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
+          )..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
+          child: const EditiqueDocumentDialogView(
+            title: 'Reçu de paiement',
+            onRetry: _noopRetry,
+          ),
         ),
       ),
     ),
@@ -198,11 +206,15 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
       home: Scaffold(
         body: BlocProvider<EditiqueDocumentBloc>(
           create: (_) {
-            bloc = EditiqueDocumentBloc(emitPaymentReceiptUseCase: useCase);
+            bloc = EditiqueDocumentBloc(
+              emitPaymentReceiptUseCase: useCase,
+              emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
+            );
             return bloc
               ..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1'));
           },
           child: EditiqueDocumentDialogView(
+            title: 'Reçu de paiement',
             onRetry: (_) => bloc.add(
               const EditiquePaymentReceiptRequested(paymentId: 'p-1'),
             ),
@@ -215,3 +227,5 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
   await tester.pumpAndSettle();
   return useCase;
 }
+
+void _noopRetry(BuildContext _) {}

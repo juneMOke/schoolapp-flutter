@@ -21,3 +21,22 @@ class EditiquePaymentReceiptRequested extends EditiqueDocumentEvent {
   @override
   List<Object?> get props => [paymentId];
 }
+
+/// Demande le relevé de compte (RL) d'un élève sur une année.
+///
+/// ⚠️ **Non idempotent.** Le serveur horodate la pièce, ne l'archive jamais, et
+/// consomme un numéro de séquence à chaque appel. L'appelant doit donc avoir
+/// obtenu une confirmation explicite avant de poster cet événement — deux
+/// envois produisent deux pièces numérotées distinctes pour le même élève.
+class EditiqueAccountStatementRequested extends EditiqueDocumentEvent {
+  final String studentId;
+  final String academicYearId;
+
+  const EditiqueAccountStatementRequested({
+    required this.studentId,
+    required this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [studentId, academicYearId];
+}

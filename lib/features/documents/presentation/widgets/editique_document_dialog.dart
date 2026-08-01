@@ -19,27 +19,63 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ouvre la visionneuse sur le reçu (RC) d'un paiement.
 ///
-/// L'émission est déclenchée à l'ouverture : le BLoC est créé pour cette modale
-/// et fermé avec elle, donc une seule pièce est vivante en mémoire à la fois.
-///
-/// L'appelant reste responsable des gardes en amont — un paiement pas encore
-/// synchronisé porte un uuid inconnu du serveur et produirait un 404, et hors
-/// ligne aucune pièce ne peut être produite.
+/// L'appelant reste responsable des gardes en amont : un paiement pas encore
+/// synchronisé porte un uuid inconnu du serveur et produirait un 404.
 Future<void> showEditiquePaymentReceiptDialog(
   BuildContext context, {
   required String paymentId,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
+    request: EditiquePaymentReceiptRequested(paymentId: paymentId),
+  );
+}
+
+/// Ouvre la visionneuse sur le relevé de compte (RL) d'un élève.
+///
+/// ⚠️ L'appelant doit avoir confirmé l'intention **avant** d'appeler : le
+/// serveur consomme un numéro de séquence à chaque émission et n'archive pas la
+/// pièce. Ouvrir cette modale, c'est déjà en produire une.
+Future<void> showEditiqueAccountStatementDialog(
+  BuildContext context, {
+  required String studentId,
+  required String academicYearId,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerStatementTitle,
+    request: EditiqueAccountStatementRequested(
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+  );
+}
+
+/// Socle commun des visionneuses.
+///
+/// L'émission est déclenchée à l'ouverture : le BLoC est créé pour cette modale
+/// et fermé avec elle, donc une seule pièce est vivante en mémoire à la fois.
+///
+/// Hors ligne, aucune pièce ne peut être produite — le repository le tranche en
+/// pré-garde et la modale affiche l'anatomie réseau sans attente.
+Future<void> _showEditiqueDocumentDialog(
+  BuildContext context, {
+  required String title,
+  required EditiqueDocumentEvent request,
 }) {
   return showDialog<void>(
     context: context,
     barrierDismissible: true,
     builder: (dialogContext) => BlocProvider<EditiqueDocumentBloc>(
-      create: (_) =>
-          getIt<EditiqueDocumentBloc>()
-            ..add(EditiquePaymentReceiptRequested(paymentId: paymentId)),
+      create: (_) => getIt<EditiqueDocumentBloc>()..add(request),
       child: EditiqueDocumentDialogView(
-        onRetry: (blocContext) => blocContext.read<EditiqueDocumentBloc>().add(
-          EditiquePaymentReceiptRequested(paymentId: paymentId),
-        ),
+        title: title,
+        // Rejoue le MÊME événement. N'est atteignable que si `state.canRetry`
+        // l'autorise : sur une pièce horodatée, seule une panne réseau — donc
+        // une requête jamais partie — ouvre cette porte.
+        onRetry: (blocContext) =>
+            blocContext.read<EditiqueDocumentBloc>().add(request),
         // Fermer la visionneuse AVANT de déconnecter : sans quoi la route de
         // dialogue resterait empilée au-dessus de la redirection vers l'écran
         // de connexion. `AuthBloc` vit au-dessus du routeur, il est donc lu
@@ -55,6 +91,9 @@ Future<void> showEditiquePaymentReceiptDialog(
 
 /// Contenu de la visionneuse : en-tête, corps piloté par l'état, pied d'actions.
 class EditiqueDocumentDialogView extends StatelessWidget {
+  /// Intitulé de la pièce affichée (« Reçu de paiement », « Relevé de compte »).
+  final String title;
+
   /// Rejoue l'émission. Reçoit le contexte porteur du BLoC.
   ///
   /// N'est appelé que lorsque `state.canRetry` l'autorise : sur une pièce
@@ -70,6 +109,7 @@ class EditiqueDocumentDialogView extends StatelessWidget {
 
   const EditiqueDocumentDialogView({
     super.key,
+    required this.title,
     required this.onRetry,
     this.onReconnect,
   });
@@ -140,7 +180,7 @@ class EditiqueDocumentDialogView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Header(
-                  title: l10n.editiqueViewerReceiptTitle,
+                  title: title,
                   subtitle: document?.documentNumber == null
                       ? null
                       : l10n.editiqueViewerDocumentNumberLabel(

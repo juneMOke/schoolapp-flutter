@@ -2955,5 +2955,12 @@
   "editiqueErrorServerTitle": "Server error",
   "editiqueErrorServerMessage": "The document could not be produced. Try again shortly.",
   "editiqueErrorRetryLabel": "Try again",
-  "editiqueErrorReconnectLabel": "Sign in again"
+  "editiqueErrorReconnectLabel": "Sign in again",
+  "editiqueViewerStatementTitle": "Account statement",
+  "facturationDetailStatementLabel": "Account statement",
+  "facturationDetailStatementNoChargesHint": "No fee for the year: the statement cannot be produced.",
+  "facturationDetailStatementConfirmTitle": "Generate an account statement?",
+  "facturationDetailStatementConfirmMessage": "The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.",
+  "facturationDetailStatementConfirmAction": "Generate",
+  "facturationDetailStatementConfirmCancel": "Cancel"
 }

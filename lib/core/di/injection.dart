@@ -840,6 +840,7 @@ Future<void> configureDependencies({
   getIt.registerFactory<EditiqueDocumentBloc>(
     () => EditiqueDocumentBloc(
       emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
+      emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),
     ),
   );
 

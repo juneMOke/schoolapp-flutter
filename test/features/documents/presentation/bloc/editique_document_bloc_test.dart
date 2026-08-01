@@ -7,12 +7,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
 
 class MockEmitPaymentReceiptUseCase extends Mock
     implements EmitPaymentReceiptUseCase {}
+
+class MockEmitAccountStatementUseCase extends Mock
+    implements EmitAccountStatementUseCase {}
 
 final _receipt = EditiqueDocument(
   type: EditiqueDocumentType.paymentReceipt,
@@ -26,12 +31,22 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const EmitPaymentReceiptParams(paymentId: 'x'));
+    registerFallbackValue(
+      const StudentYearDocumentParams(studentId: 'x', academicYearId: 'y'),
+    );
   });
 
-  setUp(() => useCase = MockEmitPaymentReceiptUseCase());
+  late MockEmitAccountStatementUseCase statementUseCase;
 
-  EditiqueDocumentBloc build() =>
-      EditiqueDocumentBloc(emitPaymentReceiptUseCase: useCase);
+  setUp(() {
+    useCase = MockEmitPaymentReceiptUseCase();
+    statementUseCase = MockEmitAccountStatementUseCase();
+  });
+
+  EditiqueDocumentBloc build() => EditiqueDocumentBloc(
+    emitPaymentReceiptUseCase: useCase,
+    emitAccountStatementUseCase: statementUseCase,
+  );
 
   blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
     'émet chargement puis succès et porte le document',
@@ -126,6 +141,97 @@ void main() {
       expect(bloc.state.document, isNull);
     },
   );
+
+  group('relevé de compte', () {
+    final statement = EditiqueDocument(
+      type: EditiqueDocumentType.accountStatement,
+      bytes: Uint8List.fromList(<int>[0x25, 0x50, 0x44, 0x46]),
+      fileName: 'ETL-RL-2526-000009.pdf',
+      documentNumber: 'ETL-RL-2526-000009',
+    );
+
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'transmet élève et année, et porte le type horodaté',
+      setUp: () => when(
+        () => statementUseCase(any()),
+      ).thenAnswer((_) async => Right(statement)),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueAccountStatementRequested(
+          studentId: 's-7',
+          academicYearId: 'y-9',
+        ),
+      ),
+      expect: () => [
+        isA<EditiqueDocumentState>()
+            .having((s) => s.status, 'status', EditiqueDocumentStatus.loading)
+            .having(
+              (s) => s.type,
+              'type',
+              EditiqueDocumentType.accountStatement,
+            ),
+        isA<EditiqueDocumentState>()
+            .having((s) => s.status, 'status', EditiqueDocumentStatus.success)
+            .having((s) => s.document?.isReplayable, 'isReplayable', isFalse),
+      ],
+      verify: (_) => verify(
+        () => statementUseCase(
+          const StudentYearDocumentParams(
+            studentId: 's-7',
+            academicYearId: 'y-9',
+          ),
+        ),
+      ).called(1),
+    );
+
+    // Le point money-grade du relevé : chaque appel brûle un numéro de
+    // séquence. Deux envois rapprochés ne doivent jamais produire deux pièces.
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'ignore un second envoi tant que le premier est en vol',
+      setUp: () => when(() => statementUseCase(any())).thenAnswer(
+        (_) => Future.delayed(
+          const Duration(milliseconds: 40),
+          () => Right(statement),
+        ),
+      ),
+      build: build,
+      act: (bloc) => bloc
+        ..add(
+          const EditiqueAccountStatementRequested(
+            studentId: 's-7',
+            academicYearId: 'y-9',
+          ),
+        )
+        ..add(
+          const EditiqueAccountStatementRequested(
+            studentId: 's-7',
+            academicYearId: 'y-9',
+          ),
+        ),
+      wait: const Duration(milliseconds: 120),
+      verify: (_) => verify(() => statementUseCase(any())).called(1),
+    );
+
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'un 404 « aucune créance » reste sans reprise possible',
+      setUp: () => when(
+        () => statementUseCase(any()),
+      ).thenAnswer((_) async => const Left(NotFoundFailure())),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueAccountStatementRequested(
+          studentId: 's-7',
+          academicYearId: 'y-9',
+        ),
+      ),
+      skip: 1,
+      expect: () => [
+        isA<EditiqueDocumentState>()
+            .having((s) => s.errorType, 'errorType', EditiqueErrorType.notFound)
+            .having((s) => s.canRetry, 'canRetry', isFalse),
+      ],
+    );
+  });
 
   group('canRetry', () {
     test('autorise la reprise sur une pièce archivée, même issue inconnue', () {

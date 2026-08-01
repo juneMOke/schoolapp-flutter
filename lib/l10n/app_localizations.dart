@@ -9542,6 +9542,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in again'**
   String get editiqueErrorReconnectLabel;
+
+  /// No description provided for @editiqueViewerStatementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account statement'**
+  String get editiqueViewerStatementTitle;
+
+  /// No description provided for @facturationDetailStatementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account statement'**
+  String get facturationDetailStatementLabel;
+
+  /// No description provided for @facturationDetailStatementNoChargesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee for the year: the statement cannot be produced.'**
+  String get facturationDetailStatementNoChargesHint;
+
+  /// No description provided for @facturationDetailStatementConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate an account statement?'**
+  String get facturationDetailStatementConfirmTitle;
+
+  /// No description provided for @facturationDetailStatementConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.'**
+  String get facturationDetailStatementConfirmMessage;
+
+  /// No description provided for @facturationDetailStatementConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get facturationDetailStatementConfirmAction;
+
+  /// No description provided for @facturationDetailStatementConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get facturationDetailStatementConfirmCancel;
 }
 
 class _AppLocalizationsDelegate

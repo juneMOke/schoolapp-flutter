@@ -19,7 +19,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ledger_freshness_caption.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
@@ -253,8 +253,9 @@ class FacturationDetailPage extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: AppDimensions.spacingS),
-                        FacturationLedgerFreshnessCaption(
+                        FacturationDetailStatementBar(
                           studentId: intent.studentId,
+                          academicYearId: intent.academicYearId,
                         ),
                         SizedBox(height: blockSpacing),
                         if (!intent.hasDisplayContext)

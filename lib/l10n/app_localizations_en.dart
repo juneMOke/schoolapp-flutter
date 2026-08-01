@@ -5661,4 +5661,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editiqueErrorReconnectLabel => 'Sign in again';
+
+  @override
+  String get editiqueViewerStatementTitle => 'Account statement';
+
+  @override
+  String get facturationDetailStatementLabel => 'Account statement';
+
+  @override
+  String get facturationDetailStatementNoChargesHint =>
+      'No fee for the year: the statement cannot be produced.';
+
+  @override
+  String get facturationDetailStatementConfirmTitle =>
+      'Generate an account statement?';
+
+  @override
+  String get facturationDetailStatementConfirmMessage =>
+      'The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.';
+
+  @override
+  String get facturationDetailStatementConfirmAction => 'Generate';
+
+  @override
+  String get facturationDetailStatementConfirmCancel => 'Cancel';
 }

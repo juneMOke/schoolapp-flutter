@@ -5727,4 +5727,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get editiqueErrorReconnectLabel => 'Se reconnecter';
+
+  @override
+  String get editiqueViewerStatementTitle => 'Relevé de compte';
+
+  @override
+  String get facturationDetailStatementLabel => 'Relevé de compte';
+
+  @override
+  String get facturationDetailStatementNoChargesHint =>
+      'Aucun frais sur l\'année : le relevé ne peut pas être produit.';
+
+  @override
+  String get facturationDetailStatementConfirmTitle =>
+      'Générer un relevé de compte ?';
+
+  @override
+  String get facturationDetailStatementConfirmMessage =>
+      'Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les relevés déjà remis restent valides — ils ne sont pas remplacés.';
+
+  @override
+  String get facturationDetailStatementConfirmAction => 'Générer';
+
+  @override
+  String get facturationDetailStatementConfirmCancel => 'Annuler';
 }
