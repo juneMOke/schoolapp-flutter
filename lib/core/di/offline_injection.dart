@@ -13,6 +13,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
@@ -107,6 +108,11 @@ Future<void> registerOfflineCore(GetIt getIt) async {
       // Sonde de crédentiels (V1.1) : sans jetons utilisables, la boucle ne
       // flushe pas (zéro 401/attempt) et surface « Reconnexion requise ».
       credentialsProbe: getIt<AuthSessionManager>(),
+      // Ré-authentification silencieuse : une session ouverte offline revient
+      // avec un access vide ou périmé — on mint AVANT de flusher/puller plutôt
+      // que de laisser la première écriture métier découvrir le jeton mort.
+      // Lazy comme ci-dessus : enregistré plus loin dans `configureDependencies`.
+      reauthenticator: getIt<SessionReauthenticator>(),
     ),
   );
 

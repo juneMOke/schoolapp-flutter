@@ -87,6 +87,8 @@ import 'package:school_app_flutter/features/auth/data/services/password_verifier
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/auth/data/interceptors/server_contact_interceptor.dart';
 import 'package:school_app_flutter/features/auth/data/interceptors/auth_refresh_interceptor.dart';
+import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
+import 'package:school_app_flutter/features/auth/data/services/token_refresh_reauthenticator.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_refresher.dart';
 import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
@@ -165,6 +167,10 @@ import 'package:school_app_flutter/features/student/presentation/bloc/student_bl
 
 final GetIt getIt = GetIt.instance;
 
+/// Nom d'instance du `Dio` **nu** (sans intercepteur d'auth/refresh) : partagé
+/// par le refresher et par le rejeu de requête, pour éviter toute ré-entrance.
+const String _bareDioInstanceName = 'bareDio';
+
 Future<void> configureDependencies({
   EnvConfig? envConfig,
   Database? offlineDatabase,
@@ -182,19 +188,42 @@ Future<void> configureDependencies({
   final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
   getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
 
-  getIt.registerLazySingleton<Dio>(() {
-    final envConfig = getIt<EnvConfig>();
-    final dio = createDioClient(envConfig);
+  // Dio **nu** (aucun intercepteur d'auth/refresh) : sert au refresh token et
+  // au rejeu de la requête d'origine, sans ré-entrance (ADR-010 §7.2).
+  getIt.registerLazySingleton<Dio>(
+    () => createDioClient(getIt<EnvConfig>()),
+    instanceName: _bareDioInstanceName,
+  );
 
-    // Dio **nu** (aucun intercepteur d'auth/refresh) : sert au refresh token et
-    // au rejeu de la requête d'origine, sans ré-entrance (ADR-010 §7.2).
-    final bareDio = createDioClient(envConfig);
-    final refresher = TokenRefresher(
-      bareDio: bareDio,
+  // Rotation du refresh token : instance **unique**. Le single-flight n'a de
+  // sens que partagé — l'intercepteur 401, le mint proactif et la
+  // ré-authentification de la boucle de synchro doivent coalescer sur le même
+  // appel `/auth/refresh`, sinon une rafale de flush émet autant de rotations
+  // concurrentes que de requêtes (et le serveur révoque le jeton présenté à
+  // chaque rotation : toutes échouent sauf une).
+  getIt.registerLazySingleton<TokenRefresher>(
+    () => TokenRefresher(
+      bareDio: getIt<Dio>(instanceName: _bareDioInstanceName),
       tokenStorage: getIt<TokenStorageService>(),
       sessionManager: getIt<AuthSessionManager>(),
       revocationBus: getIt<SessionRevocationBus>(),
-    );
+    ),
+  );
+
+  // Ré-authentification silencieuse au retour réseau : consommée par la boucle
+  // de synchro (`core/offline`) AVANT tout appel authentifié.
+  getIt.registerLazySingleton<SessionReauthenticator>(
+    () => TokenRefreshReauthenticator(
+      tokenStorage: getIt<TokenStorageService>(),
+      refresher: getIt<TokenRefresher>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<Dio>(() {
+    final envConfig = getIt<EnvConfig>();
+    final dio = createDioClient(envConfig);
+    final bareDio = getIt<Dio>(instanceName: _bareDioInstanceName);
+    final refresher = getIt<TokenRefresher>();
 
     if (envConfig.enableVerboseNetworkLogging) {
       dio.interceptors.add(

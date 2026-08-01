@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
+import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 
@@ -20,6 +21,8 @@ class MockSyncEngine extends Mock implements SyncEngine {}
 class MockPullCoordinator extends Mock implements PullCoordinator {}
 
 class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
+
+class MockReauthenticator extends Mock implements SessionReauthenticator {}
 
 class MockSyncMetaDao extends Mock implements SyncMetaDao {}
 
@@ -392,6 +395,98 @@ void main() {
       await pumpEventQueue();
 
       verify(() => syncEngine.flush()).called(1);
+      await cubit.close();
+    });
+  });
+
+  group('ré-authentification silencieuse au retour réseau', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+    late MockPullCoordinator pull;
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      pull = MockPullCoordinator();
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    });
+
+    SyncStatusCubit buildReauth() => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+    );
+
+    test('mint réussi → le cycle flush/pull se déroule', () async {
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+
+      final cubit = buildReauth();
+      await pumpEventQueue();
+      statusController.add(true); // retour réseau
+      await pumpEventQueue();
+
+      // La ré-auth précède le trafic : le flush part avec un jeton frais.
+      verifyInOrder([
+        () => reauth.ensureFreshAccess(),
+        () => syncEngine.flush(),
+        () => pull.pullAll(),
+      ]);
+      await cubit.close();
+    });
+
+    test(
+      'mint impossible → AUCUN flush ni pull, la session reste ouverte',
+      () async {
+        when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => false);
+        when(() => outbox.pendingCount()).thenAnswer((_) async => 2);
+
+        final cubit = buildReauth();
+        await pumpEventQueue();
+        statusController.add(true);
+        await pumpEventQueue();
+
+        // Régression du bug terrain : sans cette garde, chaque entrée partait
+        // avec un jeton mort (attempts++ jusqu'au poison SYNC_ERROR) et le
+        // rejet ramené par la première requête éjectait l'agent de son écran.
+        verifyNever(() => syncEngine.flush());
+        verifyNever(() => pull.pullAll());
+        // Les écritures restent en file, à repousser au prochain cycle.
+        expect(cubit.state.status, SyncStatus.pendingUpload);
+        await cubit.close();
+      },
+    );
+
+    test('ré-authentificateur défaillant → ne gèle pas la synchro', () async {
+      when(() => reauth.ensureFreshAccess()).thenThrow(Exception('keystore'));
+
+      final cubit = buildReauth();
+      await pumpEventQueue();
+      statusController.add(true);
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      await cubit.close();
+    });
+
+    test('push opportuniste post-écriture : mint d\'abord', () async {
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+
+      final cubit = buildReauth();
+      await pumpEventQueue();
+      await cubit.notifyLocalWrite();
+      await pumpEventQueue();
+
+      // Chemin emprunté par `main.dart` à la transition `authenticated` — donc
+      // celui d'un login offline, typiquement avec un access vide à renouveler.
+      verifyInOrder([
+        () => reauth.ensureFreshAccess(),
+        () => syncEngine.flush(),
+      ]);
       await cubit.close();
     });
   });

@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
+import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 
@@ -41,6 +42,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   final PullCoordinator? _pullCoordinator;
   final RevocationEvaluator? _revocationEvaluator;
   final SessionCredentialsProbe? _credentialsProbe;
+  final SessionReauthenticator? _reauthenticator;
   final SyncMetaDao _syncMetaDao;
 
   /// Clé `sync_meta` sentinelle (ne correspond à aucune ressource métier) où
@@ -68,6 +70,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     PullCoordinator? pullCoordinator,
     RevocationEvaluator? revocationEvaluator,
     SessionCredentialsProbe? credentialsProbe,
+    SessionReauthenticator? reauthenticator,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
@@ -75,6 +78,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
        _pullCoordinator = pullCoordinator,
        _revocationEvaluator = revocationEvaluator,
        _credentialsProbe = credentialsProbe,
+       _reauthenticator = reauthenticator,
        super(const SyncStatusState(status: SyncStatus.synced)) {
     _listenConnectivity();
     // Un flush peut être déclenché AILLEURS qu'ici : les repositories offline
@@ -146,6 +150,18 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     // On ne tente donc RIEN (ni flush, ni pull — tous deux authentifiés) et
     // `refresh()` surfacera « Reconnexion requise » à la place.
     if (!await _canAuthenticate()) {
+      await refresh();
+      return;
+    }
+    // Ré-authentification silencieuse AVANT tout appel authentifié (ADR-010) :
+    // une session ouverte offline revient avec un access vide (déconsignation)
+    // ou périmé (TTL en heures, coupure en jours). Laisser la première requête
+    // métier porter le renouvellement, c'est consommer une tentative d'outbox
+    // par entrée pour un jeton mort — et dépendre d'un 401 propre du serveur.
+    // Mint impossible (infra, proxy, portail) → on ne tente RIEN : la session
+    // reste ouverte, l'utilisateur reste sur son écran, la file reste intacte,
+    // le prochain cycle retentera.
+    if (!await _ensureFreshAccess()) {
       await refresh();
       return;
     }
@@ -248,6 +264,18 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     }
   }
 
+  /// Sans ré-authentificateur branché (tests, plateformes partielles) : on
+  /// laisse passer — l'intercepteur de refresh reste le filet de rattrapage.
+  Future<bool> _ensureFreshAccess() async {
+    final reauth = _reauthenticator;
+    if (reauth == null) return true;
+    try {
+      return await reauth.ensureFreshAccess();
+    } catch (_) {
+      return true; // ne pas geler la synchro sur une défaillance de la sonde
+    }
+  }
+
   /// À appeler après une écriture locale (write-path) réussie : reflète
   /// immédiatement la file d'attente, puis tente un push opportuniste en fond.
   Future<void> notifyLocalWrite() async {
@@ -257,8 +285,22 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   Future<void> _flushAndRefresh() async {
     // Même gate que le reconnect : sans crédentiels, le push opportuniste
-    // post-écriture ne ferait que consommer des tentatives en 401.
+    // post-écriture ne ferait que consommer des tentatives en 401. Et même
+    // ré-authentification préalable : ce chemin est celui du login offline
+    // (main.dart appelle `notifyLocalWrite` à la transition `authenticated`),
+    // donc typiquement celui d'un access vide à renouveler.
+    // Hors ligne, ni le mint ni le flush n'ont de sens (le moteur no-ope de
+    // toute façon) — et tenter le mint imposerait un timeout réseau à CHAQUE
+    // écriture locale, soit exactement le régime de travail hors connexion.
+    if (!await _isOnline()) {
+      await refresh();
+      return;
+    }
     if (!await _canAuthenticate()) {
+      await refresh();
+      return;
+    }
+    if (!await _ensureFreshAccess()) {
       await refresh();
       return;
     }
@@ -269,6 +311,16 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       // flush() encapsule déjà ses erreurs ; garde-fou par prudence.
     }
     await refresh();
+  }
+
+  /// Défensif comme le reste du cubit : une plateforme sans `connectivity_plus`
+  /// (tests) ne doit pas geler la synchro — on suppose alors « en ligne ».
+  Future<bool> _isOnline() async {
+    try {
+      return await _connectivity.isOnline();
+    } catch (_) {
+      return true;
+    }
   }
 
   void _safeEmit(SyncStatus status) {
