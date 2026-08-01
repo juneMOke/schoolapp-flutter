@@ -257,17 +257,23 @@ class ClassroomLocalDataSource {
     required int nowMs,
   }) async {
     await _db.transaction((txn) async {
+      // `membership` absente (rejeu d'un transfert dont l'appartenance serveur
+      // n'existe plus) : rien à repositionner. On retombe sur le même sens de
+      // panne conservateur qu'un update à 0 ligne — le transfert reste pending,
+      // la vérité viendra du prochain pull du roster.
       final m = ack.membership;
-      final updated = await txn.update(
-        membersTable,
-        {
-          'classroom_id': m.classroomId,
-          if (m.status != null) 'status': m.status,
-          'synced_at': nowMs,
-        },
-        where: 'student_id = ? AND academic_year_id = ?',
-        whereArgs: [m.studentId, m.academicYearId],
-      );
+      final updated = m == null
+          ? 0
+          : await txn.update(
+              membersTable,
+              {
+                'classroom_id': m.classroomId,
+                if (m.status != null) 'status': m.status,
+                'synced_at': nowMs,
+              },
+              where: 'student_id = ? AND academic_year_id = ?',
+              whereArgs: [m.studentId, m.academicYearId],
+            );
 
       // Compteurs recalculés, autoritaires (ADR-002) — on remplace le miroir,
       // on ne dérive jamais un compteur local.

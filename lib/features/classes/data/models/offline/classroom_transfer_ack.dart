@@ -6,7 +6,13 @@
 class ClassroomTransferAck {
   final String transferId;
   final int? serverUpdatedAt;
-  final ClassroomMembershipAck membership;
+
+  /// **Nullable par contrat** : sur un rejeu idempotent d'un transfert dont la
+  /// ligne d'appartenance serveur a disparu, le serveur répond 200 avec
+  /// `membership: null`. L'exiger non-nul faisait lever un `TypeError` au
+  /// parsing → l'échec local était classé transitoire → 50 rejeux du même 200
+  /// puis poison en `SYNC_ERROR`, sur une réponse pourtant valide.
+  final ClassroomMembershipAck? membership;
 
   /// Les DEUX classes touchées (origine + destination), compteurs recalculés,
   /// autoritaires. Peut être vide sur un contrat dégradé → sens de panne géré
@@ -15,7 +21,7 @@ class ClassroomTransferAck {
 
   const ClassroomTransferAck({
     required this.transferId,
-    required this.membership,
+    this.membership,
     this.serverUpdatedAt,
     this.classrooms = const [],
   });
@@ -31,9 +37,12 @@ class ClassroomTransferAck {
     return ClassroomTransferAck(
       transferId: transfer['id'] as String,
       serverUpdatedAt: _isoToEpochMs(transfer['serverUpdatedAt']),
-      membership: ClassroomMembershipAck.fromJson(
-        (json['membership'] as Map).cast<String, dynamic>(),
-      ),
+      membership: switch (json['membership']) {
+        final Map m => ClassroomMembershipAck.fromJson(
+          m.cast<String, dynamic>(),
+        ),
+        _ => null,
+      },
       classrooms: classrooms
           .map(
             (e) =>
