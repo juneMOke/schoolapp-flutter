@@ -19,11 +19,15 @@ class MockAuthSessionManager extends Mock implements AuthSessionManager {}
 class _FakeAdapter implements HttpClientAdapter {
   int calls = 0;
   final bool failWith401;
+  final bool failWith401SpringError;
   final bool failWith403Html;
+  final bool failWith403Json;
   final bool failWithNetwork;
   _FakeAdapter({
     this.failWith401 = false,
+    this.failWith401SpringError = false,
     this.failWith403Html = false,
+    this.failWith403Json = false,
     this.failWithNetwork = false,
   });
 
@@ -51,9 +55,34 @@ class _FakeAdapter implements HttpClientAdapter {
         },
       );
     }
+    if (failWith401SpringError) {
+      // Corps `/error` par défaut de Spring : une Map, mais avec `path` et sans
+      // `message` — signature d'une couche intermédiaire, pas de notre API.
+      return ResponseBody.fromString(
+        '{"timestamp":"2026-01-01T00:00:00Z","status":401,'
+        '"error":"Unauthorized","path":"/api/v1/auth/refresh"}',
+        401,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     if (failWith403Html) {
       // Portail captif / proxy : 403 en HTML — PAS une réponse de notre API.
       return ResponseBody.fromString('<html>hotspot login</html>', 403);
+    }
+    if (failWith403Json) {
+      // Chaîne de sécurité mal ouverte (endpoint /refresh non déclaré public) :
+      // 403 + corps JSON `/error`. Indiscernable d'une vraie erreur métier par
+      // la seule forme du corps — d'où la règle « seul le 401 fait verdict ».
+      return ResponseBody.fromString(
+        '{"timestamp":"2026-01-01T00:00:00Z","status":403,'
+        '"error":"Forbidden","path":"/api/v1/auth/refresh"}',
+        403,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
     }
     final body = jsonEncode({
       'accessToken': 'new_access',
@@ -173,7 +202,22 @@ void main() {
   });
 
   test(
-    'refresh 403 de portail captif (HTML) → wipe SANS brûler la fenêtre',
+    '401 au corps `/error` de Spring (path, pas de message) → wipe SANS brûler',
+    () async {
+      final adapter = _FakeAdapter(failWith401SpringError: true);
+      final refresher = build(adapter);
+
+      expect(await refresher.refresh(), isNull);
+      // Le corps est bien une Map, mais pas celui de NOTRE contrat d'erreur :
+      // la fenêtre offline (m4) — irrécupérable — n'est pas brûlée.
+      verify(
+        () => sessionManager.wipeSession(revokeOfflineWindow: false),
+      ).called(1);
+    },
+  );
+
+  test(
+    'refresh 403 de portail captif (HTML) → AUCUN wipe (rejet non contractuel)',
     () async {
       final adapter = _FakeAdapter(failWith403Html: true);
       final refresher = build(adapter);
@@ -181,11 +225,31 @@ void main() {
       final token = await refresher.refresh();
 
       expect(token, isNull);
-      // Le rejet ne vient pas de notre API : la fenêtre offline (m4) survit —
-      // l'agent pourra se reconnecter offline malgré le Wi-Fi sans backhaul.
-      verify(
-        () => sessionManager.wipeSession(revokeOfflineWindow: false),
-      ).called(1);
+      // `/auth/refresh` ne déclare que 200/400/401 : un 403 ne dit rien de la
+      // validité du jeton, seulement que la requête n'a pas atteint l'API.
+      verifyNever(
+        () => sessionManager.wipeSession(
+          revokeOfflineWindow: any(named: 'revokeOfflineWindow'),
+        ),
+      );
+    },
+  );
+
+  test(
+    'refresh 403 JSON (chaîne de sécurité fermée) → AUCUN wipe, session intacte',
+    () async {
+      final adapter = _FakeAdapter(failWith403Json: true);
+      final refresher = build(adapter);
+
+      expect(await refresher.refresh(), isNull);
+      // Régression du bug terrain : ce 403 détruisait la session ET brûlait la
+      // fenêtre offline → agent éjecté vers /login au retour réseau, puis login
+      // offline refusé. Il doit rester sans effet de bord.
+      verifyNever(
+        () => sessionManager.wipeSession(
+          revokeOfflineWindow: any(named: 'revokeOfflineWindow'),
+        ),
+      );
     },
   );
 

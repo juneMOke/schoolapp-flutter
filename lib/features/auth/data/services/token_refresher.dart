@@ -62,20 +62,29 @@ class TokenRefresher {
       await _sessionManager.applyRefresh(session);
       return session.accessToken;
     } on DioException catch (e) {
-      // Distinguer un refresh **définitivement rejeté** (rejeu détecté / refresh
-      // expiré → 401/403) d'un **échec transitoire** (réseau, timeout, serveur
-      // momentanément injoignable). Ne détruire la session QUE dans le 1er cas :
-      // sinon un simple blip réseau éjecterait un utilisateur au refresh valide.
+      // Distinguer un refresh **définitivement rejeté** d'un **échec
+      // transitoire** (réseau, timeout, proxy, serveur momentanément
+      // injoignable). Ne détruire la session QUE dans le 1er cas : sinon un
+      // simple blip réseau éjecterait un utilisateur au refresh parfaitement
+      // valide, depuis n'importe quel écran.
+      //
+      // **Seul le 401 est un verdict du contrat** : `/auth/refresh` ne déclare
+      // que 200/400/401 (openApi). Un 403 sur cette route ne dit RIEN de la
+      // validité du jeton — il dit que la requête n'a pas atteint le
+      // contrôleur (chaîne de sécurité mal ouverte, ingress, WAF, portail
+      // Wi-Fi). Le traiter comme un refus définitif détruisait la session ET
+      // brûlait la fenêtre offline sur un incident d'infrastructure.
       final status = e.response?.statusCode;
-      if (status == 401 || status == 403) {
+      if (status == 401) {
         // Refus définitif du refresh → wipe. La fenêtre offline (m4) n'est
-        // brûlée QUE si le rejet vient bien de NOTRE API (corps d'erreur JSON
-        // structuré) : un portail captif / proxy Wi-Fi sans backhaul répond
-        // souvent 401/403 en HTML — brûler là-dessus enverrait l'agent en zone
-        // blanche (login offline refusé) sur un simple incident réseau, soit
-        // exactement ce que l'amendement m4 doit empêcher.
-        final apiShaped = e.response?.data is Map;
-        await _sessionManager.wipeSession(revokeOfflineWindow: apiShaped);
+        // brûlée QUE si le rejet porte la signature de NOTRE API (corps JSON
+        // structuré avec un `message`, cf. ApiErrorResponse) : un portail
+        // captif répond souvent 401 en HTML — ou en JSON générique — et brûler
+        // là-dessus enverrait l'agent en zone blanche (login offline refusé),
+        // soit exactement ce que l'amendement m4 doit empêcher.
+        await _sessionManager.wipeSession(
+          revokeOfflineWindow: _looksLikeApiRejection(e.response?.data),
+        );
         _revocationBus?.notifyRevoked();
       }
       return null;
@@ -84,5 +93,22 @@ class TokenRefresher {
       // au prochain 401. La requête d'origine échouera, la session survit.
       return null;
     }
+  }
+
+  /// Vrai si le corps d'erreur porte la signature de **notre** API
+  /// (`ApiErrorResponse` = `{timestamp,status,error,message}`) et non celle
+  /// d'une couche intermédiaire.
+  ///
+  /// Le simple `data is Map` ne discrimine pas : le corps `/error` par défaut
+  /// de Spring est lui aussi une Map (`{timestamp,status,error,path}`), tout
+  /// comme la page JSON d'un proxy. On exige donc un `message` non vide **et**
+  /// l'absence de `path` — la clé que le gestionnaire d'erreurs par défaut
+  /// ajoute et que notre contrat n'a pas. Dans le doute : pas de brûlure (la
+  /// fenêtre offline est irrécupérable, la session non).
+  bool _looksLikeApiRejection(Object? data) {
+    if (data is! Map) return false;
+    if (data.containsKey('path')) return false;
+    final message = data['message'];
+    return message is String && message.trim().isNotEmpty;
   }
 }
