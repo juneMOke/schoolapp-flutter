@@ -169,6 +169,33 @@ void main() {
     );
 
     blocTest<AcademicYearContextBloc, AcademicYearContextState>(
+      'échec auth APRÈS une résolution réussie → sessionExpired reste false '
+      '(pas de logout : le contexte local suffit)',
+      build: () {
+        var callCount = 0;
+        when(() => repository.loadCurrentContext()).thenAnswer((_) async {
+          callCount++;
+          return callCount == 1
+              ? const Right(context)
+              : const Left(UnauthorizedFailure('forbidden'));
+        });
+        return AcademicYearContextBloc(repository: repository);
+      },
+      act: (bloc) async {
+        bloc.add(const AcademicYearContextRequested());
+        await Future<void>.delayed(Duration.zero);
+        // Rafraîchissement au retour réseau (main.dart, transition
+        // offline→online) : c'est ce chemin qui éjectait l'agent de son écran
+        // sur un 401/403 isolé, alors que la session était intacte.
+        bloc.add(const AcademicYearContextRetryRequested());
+      },
+      verify: (bloc) {
+        expect(bloc.state.sessionExpired, isFalse);
+        expect(bloc.state.context, isNotNull);
+      },
+    );
+
+    blocTest<AcademicYearContextBloc, AcademicYearContextState>(
       'un succès qui suit un échec auth redescend sessionExpired à false',
       build: () {
         var callCount = 0;

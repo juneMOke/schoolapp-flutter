@@ -60,7 +60,15 @@ class AcademicYearContextBloc
         state.copyWith(
           status: AcademicYearContextLoadStatus.failure,
           errorMessage: failure.message,
-          sessionExpired: _isAuthFailure(failure),
+          // Le logout n'est prononcé QUE si l'échec d'auth bloque réellement :
+          // sans contexte en main, l'utilisateur resterait coincé sur le splash.
+          // Avec des données locales déjà résolues (cas du rafraîchissement au
+          // retour réseau), un 401/403 isolé ne prouve rien sur la session : il
+          // peut venir d'un jeton pas encore renouvelé ou d'une couche
+          // intermédiaire. Le verdict de session appartient à la chaîne d'auth
+          // (refresh du contrat + révocation `userVersion`), pas à un pull de
+          // référentiel — sinon un incident réseau éjecte l'agent de son écran.
+          sessionExpired: _isAuthFailure(failure) && state.context == null,
         ),
       ),
       (context) => emit(
