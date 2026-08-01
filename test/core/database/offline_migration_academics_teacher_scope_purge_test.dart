@@ -7,8 +7,14 @@ import 'package:school_app_flutter/core/database/offline_schema.dart';
 /// Notes/Cours après le passage au contrat back scopé enseignant (commit
 /// `1ec6be3`, DF-K/DF-L). Une base v10 peut porter des cours/évaluations/notes/
 /// séances d'AUTRES enseignants (pulls antérieurs non scopés) — la migration
-/// doit tout vider (données + curseurs `sync_meta` + outbox académique) sans
-/// toucher aux données d'autres modules (auth, outbox non-académique).
+/// doit vider le MIROIR SERVEUR (lignes `SYNCED`, tables de référence, curseurs
+/// `sync_meta`) sans toucher aux données d'autres modules.
+///
+/// Elle ne doit en revanche JAMAIS détruire de saisie non acquittée : les
+/// lignes `PENDING_SYNC`/`SYNC_ERROR` et **toutes** les entrées d'outbox
+/// survivent. L'invariant « le wipe ne touche jamais l'outbox » vaut aussi pour
+/// les migrations — sans quoi une simple mise à jour de l'app effacerait des
+/// notes saisies hors ligne, en local comme en file, sans aucun signal.
 bool _ffiInitialized = false;
 
 Future<Database> _openV10Db() async {
@@ -47,8 +53,8 @@ Future<Database> _openV10Db() async {
 
 void main() {
   test(
-    'v10→v11 : purge ref_cours/evaluation/note_evaluation/'
-    'ref_recurring_sessions + curseurs sync_meta + outbox académique',
+    'v10→v11 : purge ref_cours/evaluation SYNCED/note_evaluation SYNCED/'
+    'ref_recurring_sessions + curseurs sync_meta, outbox préservée',
     () async {
       final db = await _openV10Db();
       addTearDown(db.close);
@@ -163,12 +169,15 @@ void main() {
         ),
         isEmpty,
       );
+      // L'entrée d'outbox académique SURVIT : la migration ne détruit jamais
+      // une écriture en file (le rejeu est idempotent côté serveur, et un rejet
+      // éventuel est un échec visible — préférable à une destruction muette).
       expect(
         await db.query(
           'outbox',
           where: "aggregate_type = 'ACADEMICS_EVALUATION'",
         ),
-        isEmpty,
+        hasLength(1),
       );
 
       // Rien d'autre n'est touché.
@@ -183,6 +192,89 @@ void main() {
         whereArgs: ['schedule_time_slots'],
       );
       expect(otherSyncMeta.length, 1);
+    },
+  );
+
+  test(
+    'v10→v11 : la saisie non acquittée survit (PENDING_SYNC et SYNC_ERROR)',
+    () async {
+      final db = await _openV10Db();
+      addTearDown(db.close);
+      await migrateOfflineDatabase(db, 7, buildOfflineSchema());
+
+      // Évaluation + notes saisies hors ligne sur un cours légitime du prof,
+      // jamais acquittées : c'est exactement ce que l'ancienne étape détruisait.
+      await db.insert('evaluation', {
+        'id': 'ev-pending',
+        'cours_id': 'co-mine',
+        'type': 'INTERRO',
+        'eval_date': 1,
+        'max_points': 20.0,
+        'poids': 1,
+        'updated_at': 1,
+        'sync_status': 'PENDING_SYNC',
+      });
+      await db.insert('note_evaluation', {
+        'id': 'n-pending',
+        'evaluation_id': 'ev-pending',
+        'student_id': 's1',
+        'points_obtenus': 14.0,
+        'statut': 'NOTEE',
+        'updated_at': 1,
+        'sync_status': 'PENDING_SYNC',
+      });
+      // Un lot rejeté (état terminal) doit lui aussi survivre : il est
+      // rejouable par un requeue explicite, pas à jeter en silence.
+      await db.insert('note_evaluation', {
+        'id': 'n-error',
+        'evaluation_id': 'ev-pending',
+        'student_id': 's2',
+        'points_obtenus': 9.0,
+        'statut': 'NOTEE',
+        'updated_at': 1,
+        'sync_status': 'SYNC_ERROR',
+      });
+      // Et une note déjà acquittée, elle, doit bien partir (miroir serveur).
+      await db.insert('note_evaluation', {
+        'id': 'n-synced',
+        'evaluation_id': 'ev-pending',
+        'student_id': 's3',
+        'points_obtenus': 11.0,
+        'statut': 'NOTEE',
+        'updated_at': 1,
+        'sync_status': 'SYNCED',
+      });
+      await db.insert('outbox', {
+        'id': 'ACADEMICS_NOTES_BATCH:ev-pending',
+        'aggregate_type': 'ACADEMICS_NOTES_BATCH',
+        'aggregate_id': 'ev-pending',
+        'operation': 'upsert',
+        'payload': '{}',
+        'status': 'PENDING',
+        'created_at': 1,
+      });
+
+      await migrateOfflineDatabase(db, 10, buildOfflineSchema());
+
+      expect(
+        await db.query('evaluation', where: "id = 'ev-pending'"),
+        hasLength(1),
+        reason: 'une évaluation non acquittée ne doit jamais être purgée',
+      );
+      final notes = await db.query('note_evaluation', orderBy: 'id');
+      expect(
+        notes.map((r) => r['id']),
+        ['n-error', 'n-pending'],
+        reason: 'seule la note SYNCED (miroir serveur) est purgée',
+      );
+      expect(
+        await db.query(
+          'outbox',
+          where: "aggregate_type = 'ACADEMICS_NOTES_BATCH'",
+        ),
+        hasLength(1),
+        reason: 'le lot en file doit rester poussable après migration',
+      );
     },
   );
 

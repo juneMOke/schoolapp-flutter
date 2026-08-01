@@ -186,29 +186,38 @@ Future<void> migrateOfflineDatabase(
     // automatique. On purge donc ici les données ET les curseurs `sync_meta`
     // des ressources concernées : chaque compte qui migre repart d'un
     // bootstrap propre au prochain pull, déjà scopé enseignant côté serveur.
-    // Tables 100% référence/dérivées de la synchro (aucune saisie utilisateur
-    // ne se perd : `evaluation`/`note_evaluation` sont recomposées par le pull
-    // métier, qui ne réitère que sur les cours qui reviendront correctement
-    // scopés — un travail `PENDING_SYNC` sur un cours qui n'était pas vraiment
-    // celui du prof n'aurait de toute façon jamais pu être poussé, DF-L §5.2).
+    // Tables 100% référence (rejouées intégralement par le prochain pull) :
+    // purge sans condition, aucune saisie utilisateur n'y vit.
     for (final table in const [
       'ref_cours',
       'ref_cours_notation',
-      'evaluation',
-      'note_evaluation',
       'ref_recurring_sessions',
     ]) {
       if (await _hasTable(db, table)) {
         await db.delete(table);
       }
     }
-    if (await _hasTable(db, 'outbox') &&
-        await _hasColumn(db, 'outbox', 'aggregate_type')) {
-      await db.delete(
-        'outbox',
-        where:
-            "aggregate_type IN ('ACADEMICS_EVALUATION', 'ACADEMICS_NOTES_BATCH')",
-      );
+    // `evaluation` / `note_evaluation` portent, elles, de la SAISIE. La version
+    // initiale de cette étape les purgeait entièrement et supprimait au passage
+    // leurs entrées d'outbox, au motif qu'un travail sur un cours mal scopé
+    // « n'aurait de toute façon jamais pu être poussé » (DF-L §5.2). Ce motif ne
+    // couvre que les cours d'AUTRES enseignants : pour les cours légitimes du
+    // prof connecté, une évaluation ou un lot de notes saisis hors ligne et non
+    // encore acquittés étaient détruits — en local ET en file — par une simple
+    // mise à jour de l'app. Perte silencieuse, sans aucun signal.
+    //
+    // On ne purge donc que les lignes SYNCED (miroir serveur, recomposé par le
+    // pull métier) et on laisse intact tout ce qui n'est pas acquitté
+    // (`PENDING_SYNC`, `SYNC_ERROR`), avec ses entrées d'outbox. Coût du choix
+    // inverse : au pire, une entrée portant un cours qui n'est pas celui du prof
+    // part et se fait rejeter — un échec VISIBLE, préférable à une destruction
+    // muette. L'invariant « le wipe ne touche jamais l'outbox » vaut désormais
+    // aussi pour les migrations.
+    for (final table in const ['evaluation', 'note_evaluation']) {
+      if (await _hasTable(db, table) &&
+          await _hasColumn(db, table, 'sync_status')) {
+        await db.delete(table, where: "sync_status = 'SYNCED'");
+      }
     }
     if (await _hasTable(db, 'sync_meta')) {
       await db.delete(
