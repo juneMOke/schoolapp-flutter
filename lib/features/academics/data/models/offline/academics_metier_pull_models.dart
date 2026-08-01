@@ -157,7 +157,17 @@ class NoteDeltaDto {
     studentId: j['studentId'] as String,
     pointsObtenus: (j['pointsObtenus'] as num?)?.toDouble(),
     statut: (j['statut'] as String?) ?? 'EN_ATTENTE',
-    clientUpdatedAt: j['clientUpdatedAt'] as String?,
+    // Le jeton LWW voyage sous la clé `updatedAt` dans la vue de synchro des
+    // notes — et le contrat l'impose explicitement : « `updatedAt` porte le
+    // jeton LWW `client_updated_at` […] PAS l'audit ni le curseur
+    // `server_updated_at`, sinon le client arbitrerait son LWW sur une autre
+    // horloge que le serveur (édits perdus / flip-flop entre appareils) ».
+    // Lire `clientUpdatedAt` (clé qui n'existe pas dans cette réponse) rendait
+    // toujours null et faisait retomber `updated_at` sur `serverUpdatedAt`,
+    // c'est-à-dire sur un jeton gonflé de l'écart saisie-offline → push.
+    // Le chemin d'ACK, lui, lisait déjà la bonne clé.
+    clientUpdatedAt:
+        (j['updatedAt'] as String?) ?? (j['clientUpdatedAt'] as String?),
     serverUpdatedAt: j['serverUpdatedAt'] as String,
   );
 
