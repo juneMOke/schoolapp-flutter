@@ -2889,6 +2889,7 @@
   "editiqueViewerPrintLabel": "Imprimer",
   "editiqueViewerShareLabel": "Partager",
   "editiqueViewerCloseLabel": "Fermer",
+  "editiqueViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
   "editiqueViewerDocumentNumberLabel": "Pièce n° {number}",
   "@editiqueViewerDocumentNumberLabel": {
     "placeholders": {

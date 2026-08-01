@@ -76,18 +76,43 @@ class EditiqueDocumentDialogView extends StatelessWidget {
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
 
-  Future<void> _print(EditiqueDocument document) {
-    return Printing.layoutPdf(
-      onLayout: (_) => document.bytes,
-      name: document.fileName,
+  Future<void> _print(BuildContext context, EditiqueDocument document) {
+    return _runPlatformAction(
+      context,
+      () => Printing.layoutPdf(
+        onLayout: (_) => document.bytes,
+        name: document.fileName,
+      ),
     );
   }
 
-  Future<void> _share(EditiqueDocument document) {
-    return Printing.sharePdf(
-      bytes: document.bytes,
-      filename: document.fileName,
+  Future<void> _share(BuildContext context, EditiqueDocument document) {
+    return _runPlatformAction(
+      context,
+      () =>
+          Printing.sharePdf(bytes: document.bytes, filename: document.fileName),
     );
+  }
+
+  /// Exécute une action de plateforme en rendant son échec visible.
+  ///
+  /// Imprimer et partager passent par le canal natif du plugin, qui peut ne pas
+  /// répondre — binaire installé antérieur à l'ajout de la dépendance, ou
+  /// plateforme sans service d'impression. Sans cette prise en charge, l'appui
+  /// ne produit **rien du tout** : ni action, ni message, et l'exception part en
+  /// erreur asynchrone non capturée.
+  Future<void> _runPlatformAction(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    final message = AppLocalizations.of(context)!.editiqueViewerActionFailed;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    try {
+      await action();
+    } catch (_) {
+      // La pièce est intacte et toujours à l'écran : seul le geste a échoué.
+      messenger?.showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   @override
@@ -225,8 +250,10 @@ class _LoadingBody extends StatelessWidget {
 
 class _Footer extends StatelessWidget {
   final EditiqueDocument? document;
-  final Future<void> Function(EditiqueDocument document) onPrint;
-  final Future<void> Function(EditiqueDocument document) onShare;
+  final Future<void> Function(BuildContext context, EditiqueDocument document)
+  onPrint;
+  final Future<void> Function(BuildContext context, EditiqueDocument document)
+  onShare;
   final VoidCallback onClose;
 
   const _Footer({
@@ -253,13 +280,13 @@ class _Footer extends StatelessWidget {
           EteeloButton.secondary(
             label: l10n.editiqueViewerPrintLabel,
             icon: Icons.print_outlined,
-            onPressed: ready == null ? null : () => onPrint(ready),
+            onPressed: ready == null ? null : () => onPrint(context, ready),
             fullWidth: false,
           ),
           EteeloButton.secondary(
             label: l10n.editiqueViewerShareLabel,
             icon: Icons.share_outlined,
-            onPressed: ready == null ? null : () => onShare(ready),
+            onPressed: ready == null ? null : () => onShare(context, ready),
             fullWidth: false,
           ),
           EteeloButton.primary(

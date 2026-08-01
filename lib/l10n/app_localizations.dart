@@ -9435,6 +9435,12 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get editiqueViewerCloseLabel;
 
+  /// No description provided for @editiqueViewerActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This action could not be completed on this device.'**
+  String get editiqueViewerActionFailed;
+
   /// No description provided for @editiqueViewerDocumentNumberLabel.
   ///
   /// In en, this message translates to:

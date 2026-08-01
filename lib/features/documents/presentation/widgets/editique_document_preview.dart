@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
+import 'package:school_app_flutter/features/documents/presentation/widgets/states/editique_results_error_state.dart';
 
 /// Rendu des pages d'une pièce reçue.
 ///
@@ -30,7 +33,28 @@ class EditiqueDocumentPreview extends StatelessWidget {
       maxPageWidth: AppDimensions.editiqueViewerMaxWidth,
       pdfFileName: document.fileName,
       scrollViewDecoration: const BoxDecoration(color: AppColors.surfaceAlt),
-      loadingWidget: const Center(child: CircularProgressIndicator()),
+      // Le rendu des pages passe par le canal natif du plugin. Il échoue si le
+      // binaire installé précède l'ajout de la dépendance (le classique
+      // `MissingPluginException` après un simple hot restart), ou si la
+      // rastérisation refuse le document. Sans ce repli, Flutter affiche son
+      // `ErrorWidget` rouge, en anglais et hors charte.
+      //
+      // La pièce est bien arrivée : c'est un incident d'affichage, pas
+      // d'émission. Aucune reprise n'est donc proposée — la redemander ne
+      // changerait rien, et sur une pièce horodatée en brûlerait le numéro.
+      onError: (_, _) => const Padding(
+        padding: EdgeInsets.all(AppDimensions.spacingM),
+        child: EditiqueResultsErrorState(
+          type: EditiqueErrorType.server,
+          canRetry: false,
+        ),
+      ),
+      loadingWidget: const Padding(
+        padding: EdgeInsets.all(AppDimensions.spacingM),
+        child: EteeloSkeletonBox(
+          height: AppDimensions.editiqueViewerSkeletonHeight,
+        ),
+      ),
     );
   }
 }

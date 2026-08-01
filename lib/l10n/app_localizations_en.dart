@@ -5599,6 +5599,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editiqueViewerCloseLabel => 'Close';
 
   @override
+  String get editiqueViewerActionFailed =>
+      'This action could not be completed on this device.';
+
+  @override
   String editiqueViewerDocumentNumberLabel(String number) {
     return 'Document no. $number';
   }
