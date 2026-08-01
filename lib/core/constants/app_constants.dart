@@ -85,6 +85,47 @@ class AppConstants {
       '/api/v1/finance/student-charges/{studentChargeId}';
   static const String financeStatsEndpoint = '/api/v1/finance-stats';
 
+  // ── Éditique (documents PDF scellés) ──────────────────────────────────────
+  // Toutes ces routes répondent `application/pdf` en corps binaire, sans body
+  // de requête, et posent un `Content-Disposition: attachment; filename="<n°>.pdf"`
+  // (non contractualisé dans le swagger — il est lu en best-effort, cf.
+  // `ContentDispositionParser`).
+  //
+  // ⚠️ Deux régimes très différents côté serveur, portés par
+  // `EditiqueDocumentType.isReplayable` :
+  //  - AI / NP / RC sont **archivés et idempotents** : réémettre re-sert les
+  //    mêmes octets sous le même numéro ;
+  //  - RL / QT ne sont **jamais archivés** et consomment un numéro de séquence
+  //    à CHAQUE appel. Un rejeu après échec crée une seconde pièce numérotée.
+  static const String emitEnrollmentAttestationEndpoint =
+      '/api/v1/enrollments/{enrollmentId}/attestation';
+  static const String emitNotePerceptionEndpoint =
+      '/api/v1/finance/students/{studentId}/note-perception';
+  static const String emitPaymentReceiptEndpoint =
+      '/api/v1/finance/payments/{paymentId}/receipt';
+  static const String emitAccountStatementEndpoint =
+      '/api/v1/finance/students/{studentId}/releve';
+  static const String emitFinancialClearanceEndpoint =
+      '/api/v1/finance/students/{studentId}/quitus';
+
+  /// Type MIME attendu en réponse des routes d'éditique. Sert de **garde de
+  /// contenu** : un corps qui n'est pas un PDF ne doit jamais être présenté
+  /// comme un document.
+  static const String pdfContentType = 'application/pdf';
+
+  /// En-tête `Accept` des routes d'éditique — volontairement **plus large** que
+  /// [pdfContentType].
+  ///
+  /// Le succès est un PDF, mais le corps d'erreur du serveur est en JSON
+  /// (schéma `ApiError`). Avec `application/pdf` seul, Spring ne trouve plus de
+  /// converter capable d'écrire `ApiError` dans un type acceptable et lève
+  /// `HttpMediaTypeNotAcceptableException` : le 404 « Aucune charge pour
+  /// l'élève » ressort en 500 au corps vide, et tout le décodage d'erreur du
+  /// module devient inopérant. Le chemin nominal n'est pas affecté — les
+  /// contrôleurs posent explicitement `contentType(APPLICATION_PDF)`, ce qui
+  /// court-circuite la négociation de contenu.
+  static const String pdfAcceptHeader = '$pdfContentType, application/json';
+
   static const String bootstrapPayloadKey = 'bootstrap_payload';
   static const String bootstrapSchemaVersionKey =
       'bootstrap_local_schema_version';

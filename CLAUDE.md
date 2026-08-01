@@ -52,6 +52,7 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 | `attendances` | Présences | pattern standard |
 | `academic_year` | Contexte académique (année courante/précédente + cycles/niveaux) | remplace l'ex-module `bootstrap` — lecture 100% locale du référentiel Inscription (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`), scopée par école (`CurrentUserContext`) ; `AcademicYearContextBloc` sert aussi de gate de navigation |
 | `finance` | Paiements et frais scolaires | voir aussi `FINANCE_MOTION_MAP.md` |
+| `documents` | Éditique — émission des pièces PDF scellées (attestation, note de perception, reçu, relevé, quitus) | **socle only, aucune UI** · 100% online (pas d'outbox) · seul module à réponses binaires · RL/QT NON idempotents : jamais de rejeu automatique (cf. `UncertainOutcomeFailure`) · bulletin hors périmètre |
 
 ## Fichiers où atterrir en premier
 

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_stats_remote_data_source.dart';
@@ -113,6 +114,14 @@ import 'package:school_app_flutter/features/classes/domain/usecases/get_classroo
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
+import 'package:school_app_flutter/features/documents/data/datasources/editique_remote_data_source.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
@@ -226,16 +235,10 @@ Future<void> configureDependencies({
     final refresher = getIt<TokenRefresher>();
 
     if (envConfig.enableVerboseNetworkLogging) {
-      dio.interceptors.add(
-        LogInterceptor(
-          request: true,
-          requestBody: true,
-          requestHeader: true,
-          responseBody: true,
-          responseHeader: true,
-          error: true,
-        ),
-      );
+      // `BinarySafeLogInterceptor` et non `LogInterceptor` : les routes
+      // d'éditique rendent des PDF, et `Uint8List.toString()` déverserait des
+      // dizaines de milliers d'entiers sur une seule ligne de console.
+      dio.interceptors.add(BinarySafeLogInterceptor());
     }
 
     // Refresh transparent AVANT le mapping d'erreurs : sur 401 authentifié,
@@ -795,6 +798,42 @@ Future<void> configureDependencies({
       createPaymentUseCase: getIt<CreatePaymentUseCase>(),
       getPaymentAllocationsUseCase: getIt<GetPaymentAllocationsUseCase>(),
     ),
+  );
+
+  // ── Documents (éditique) ──────────────────────────────────────────────────
+  // Socle d'émission des pièces PDF. Aucune présentation à ce stade : les
+  // consommateurs (détail Facturation, détail Inscription, module Documents)
+  // viendront dans un lot suivant.
+  getIt.registerLazySingleton<EditiqueRemoteDataSource>(
+    () => EditiqueRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<EditiqueRepository>(
+    () => EditiqueRepositoryImpl(
+      remoteDataSource: getIt<EditiqueRemoteDataSource>(),
+      connectivityService: getIt<ConnectivityService>(),
+      requiredAuth: RequestOptionsExtra.auth(),
+    ),
+  );
+
+  getIt.registerFactory<EmitEnrollmentAttestationUseCase>(
+    () => EmitEnrollmentAttestationUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitNotePerceptionUseCase>(
+    () => EmitNotePerceptionUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitPaymentReceiptUseCase>(
+    () => EmitPaymentReceiptUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitAccountStatementUseCase>(
+    () => EmitAccountStatementUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitFinancialClearanceUseCase>(
+    () => EmitFinancialClearanceUseCase(getIt<EditiqueRepository>()),
   );
 
   // ── Attendance ────────────────────────────────────────────────────────────

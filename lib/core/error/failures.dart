@@ -34,6 +34,24 @@ class NetworkFailure extends Failure {
   const NetworkFailure([super.message = 'Network error occurred']);
 }
 
+/// La requête est partie mais son sort est **inconnu** : dépassement de délai
+/// de réception, ou connexion rompue après l'envoi. Le serveur peut l'avoir
+/// exécutée intégralement.
+///
+/// Distincte de [NetworkFailure], qui signale une absence de réseau — donc une
+/// requête qui n'a rien pu produire. La différence n'est pas cosmétique : sur
+/// une opération **non idempotente**, rejouer une [NetworkFailure] est sans
+/// risque, rejouer une [UncertainOutcomeFailure] duplique l'effet.
+///
+/// Cas concret de l'éditique : le relevé (RL) et le quitus (QT) consomment un
+/// numéro de séquence **avant** que le serveur ne rende le PDF, et ne sont
+/// jamais archivés. Le rendu peut dépasser le `receiveTimeout` de 12 s alors
+/// que la pièce a bien été produite et son numéro brûlé. Proposer « Réessayer »
+/// là-dessus fabrique un doublon numéroté, invisible côté client.
+class UncertainOutcomeFailure extends Failure {
+  const UncertainOutcomeFailure([super.message = 'Request outcome is unknown']);
+}
+
 class StorageFailure extends Failure {
   const StorageFailure([super.message = 'Storage error occurred']);
 }
