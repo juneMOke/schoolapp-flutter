@@ -122,6 +122,67 @@ class OutboxDao {
     );
   }
 
+  /// Entrées en erreur de synchro, plus récentes d'abord — alimente la feuille
+  /// de reprise (diagnostic + requeue manuel). `SYNC_ERROR` étant terminal, ces
+  /// entrées ne repartent JAMAIS d'elles-mêmes : sans cette lecture, elles sont
+  /// invisibles et l'écriture est perdue sans que personne ne le sache.
+  Future<List<OutboxEntry>> errors({int limit = 100}) async {
+    final rows = await _db.query(
+      table,
+      where: 'status = ?',
+      whereArgs: [OutboxStatus.syncError.dbValue],
+      orderBy: 'created_at DESC, rowid DESC',
+      limit: limit,
+    );
+    return rows.map(OutboxEntry.fromMap).toList();
+  }
+
+  /// Remet une entrée terminale (`SYNC_ERROR`) en file : `PENDING`, compteur de
+  /// tentatives remis à zéro, barrière de backoff effacée, dernière erreur
+  /// purgée. C'est le pendant explicite du re-enqueue implicite (réécriture du
+  /// même id) — seule sortie de l'état terminal pour les agrégats-**événements**
+  /// (`PAYMENT`, `CLASSROOM_TRANSFER`), dont l'id d'entrée est aléatoire et donc
+  /// jamais réécrit par un nouveau geste utilisateur.
+  ///
+  /// Sûr par construction : le push est idempotent par clé métier (`aggregateId`)
+  /// — un rejeu ne duplique pas, il ré-obtient l'agrégat existant.
+  ///
+  /// Ne touche QUE les entrées en `SYNC_ERROR` : requeue d'une entrée déjà
+  /// `PENDING` (double tap, course avec un flush en vol) est un no-op, jamais une
+  /// remise à zéro d'un backoff légitime.
+  Future<int> requeue(String id) {
+    return _db.update(
+      table,
+      {
+        'status': OutboxStatus.pending.dbValue,
+        'attempts': 0,
+        'next_attempt_at': 0,
+        'last_error': null,
+      },
+      where: 'id = ? AND status = ?',
+      whereArgs: [id, OutboxStatus.syncError.dbValue],
+    );
+  }
+
+  // PAS de `discard(id)` / `delete(id)` ici, et c'est délibéré.
+  //
+  // Supprimer une entrée d'outbox détruit son `aggregateId` — la SEULE clé
+  // d'idempotence du contrat (`PaymentInput` : « sans identifiant stable, aucune
+  // idempotence n'est possible » ; le back dédoublonne par id, jamais par clé
+  // métier). Deux dégâts s'ensuivent, tous deux muets :
+  //  - l'agrégat local reste dans son état non-acquitté et continue d'être
+  //    composé comme abouti à l'écran (un paiement reste déduit du solde) ;
+  //  - pire, `PENDING_SYNC` **immunise contre le pull** (les applicateurs sautent
+  //    les lignes non acquittées pour ne pas écraser une écriture locale) : la
+  //    divergence devient permanente et auto-scellée, plus rien ne peut la
+  //    corriger, ni le push ni le serveur.
+  //
+  // Un abandon sûr doit donc, dans la MÊME transaction, sortir l'agrégat métier
+  // de `PENDING_SYNC` vers un état « abandonné » visible — ce qui est un travail
+  // par module, pas une méthode de socle. Tant qu'il n'existe pas, ne rien
+  // supprimer : une entrée qui reste en erreur est réparable, une entrée
+  // supprimée ne l'est plus.
+
   /// Nombre d'entrées encore en attente (badge « en attente de synchro »).
   Future<int> pendingCount() async {
     final rows = await _db.rawQuery(

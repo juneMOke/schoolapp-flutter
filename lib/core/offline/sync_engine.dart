@@ -81,6 +81,34 @@ class SyncEngine {
   static const int _defaultMaxAttempts = 50;
 
   bool _flushing = false;
+  final List<void Function()> _flushCompleteListeners = [];
+
+  /// S'abonne à la **fin** de chaque flush, quelle qu'en soit l'issue.
+  ///
+  /// Indispensable parce que le flush n'est pas toujours déclenché par l'UI :
+  /// les repositories flushent en direct après une écriture, et `flush()` pose
+  /// `_flushing = true` de façon SYNCHRONE. Un rafraîchissement d'état déclenché
+  /// juste après l'écriture observe donc « synchronisation en cours » et, sans
+  /// ce signal, personne ne le rappelle quand le flush se termine : la pastille
+  /// reste figée sur `syncing` et n'affiche jamais le conflit qui vient
+  /// d'apparaître — rendant la feuille de reprise inatteignable.
+  ///
+  /// Renvoie la fonction de désabonnement.
+  void Function() addFlushCompleteListener(void Function() listener) {
+    _flushCompleteListeners.add(listener);
+    return () => _flushCompleteListeners.remove(listener);
+  }
+
+  void _notifyFlushComplete() {
+    // Copie défensive : un listener peut se désabonner pendant la notification.
+    for (final listener in List.of(_flushCompleteListeners)) {
+      try {
+        listener();
+      } catch (_) {
+        // Un abonné défaillant ne doit jamais faire échouer un flush réussi.
+      }
+    }
+  }
 
   SyncEngine({
     required OutboxDao outbox,
@@ -203,6 +231,7 @@ class SyncEngine {
       );
     } finally {
       _flushing = false;
+      _notifyFlushComplete();
     }
   }
 
