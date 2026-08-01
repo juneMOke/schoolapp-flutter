@@ -1423,6 +1423,8 @@
   "facturationPaymentReceiptLabel": "Reçu n°",
   "facturationPaymentStudentLabel": "Élève",
   "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",
+  "facturationPaymentReceiptPendingSyncHint": "Le reçu sera disponible une fois le paiement synchronisé.",
+  "facturationPaymentReceiptNumberPending": "En attente de synchronisation",
   "facturationPaymentCloseLabel": "Fermer",
   "facturationPaymentAllocationsSectionTitle": "Répartition par frais",
   "facturationPaymentAllocationsSectionSubtitle": "Liste des charges couvertes par ce paiement.",
@@ -2880,5 +2882,35 @@
   },
   "syncErrorsForeignEntryAnonymous": "Écriture d'un autre compte — elle devra être reprise depuis sa propre session.",
   "syncErrorsHeldTitle": "En attente",
-  "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée."
+  "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
+  "editiqueViewerReceiptTitle": "Reçu de paiement",
+  "editiqueViewerLoadingTitle": "Préparation du document…",
+  "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",
+  "editiqueViewerPrintLabel": "Imprimer",
+  "editiqueViewerShareLabel": "Partager",
+  "editiqueViewerCloseLabel": "Fermer",
+  "editiqueViewerDocumentNumberLabel": "Pièce n° {number}",
+  "@editiqueViewerDocumentNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "editiqueErrorNetworkTitle": "Pas de connexion",
+  "editiqueErrorNetworkMessage": "Le document est produit par le serveur. Reconnectez-vous puis réessayez — rien n'a été émis.",
+  "editiqueErrorUncertainTitle": "Résultat indéterminé",
+  "editiqueErrorUncertainMessage": "Le serveur n'a pas répondu à temps. La pièce a peut-être été émise : vérifiez avant d'en générer une nouvelle.",
+  "editiqueErrorSessionExpiredTitle": "Session expirée",
+  "editiqueErrorSessionExpiredMessage": "Reconnectez-vous pour reprendre l'émission du document.",
+  "editiqueErrorForbiddenTitle": "Accès refusé",
+  "editiqueErrorForbiddenMessage": "Vous n'avez pas les droits nécessaires pour éditer cette pièce.",
+  "editiqueErrorNotFoundTitle": "Document indisponible",
+  "editiqueErrorNotFoundMessage": "Le serveur ne trouve pas les éléments nécessaires à cette pièce.",
+  "editiqueErrorInvalidTitle": "Émission impossible",
+  "editiqueErrorInvalidMessage": "Le serveur a refusé la demande. Vérifiez le dossier avant de réessayer.",
+  "editiqueErrorServerTitle": "Erreur du serveur",
+  "editiqueErrorServerMessage": "La pièce n'a pas pu être produite. Réessayez dans un instant.",
+  "editiqueErrorRetryLabel": "Réessayer",
+  "editiqueErrorReconnectLabel": "Se reconnecter"
 }

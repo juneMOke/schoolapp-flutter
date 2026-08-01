@@ -2749,6 +2749,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentDownloadReceiptLabel => 'Download receipt';
 
   @override
+  String get facturationPaymentReceiptPendingSyncHint =>
+      'The receipt will be available once the payment has been synchronised.';
+
+  @override
+  String get facturationPaymentReceiptNumberPending =>
+      'Awaiting synchronisation';
+
+  @override
   String get facturationPaymentCloseLabel => 'Close';
 
   @override
@@ -5570,4 +5578,83 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncErrorsHeldSubtitle =>
       'These writes are kept and will be sent as soon as their condition clears.';
+
+  @override
+  String get editiqueViewerReceiptTitle => 'Payment receipt';
+
+  @override
+  String get editiqueViewerLoadingTitle => 'Preparing the document…';
+
+  @override
+  String get editiqueViewerLoadingMessage =>
+      'The server is producing the document. This may take a few seconds.';
+
+  @override
+  String get editiqueViewerPrintLabel => 'Print';
+
+  @override
+  String get editiqueViewerShareLabel => 'Share';
+
+  @override
+  String get editiqueViewerCloseLabel => 'Close';
+
+  @override
+  String editiqueViewerDocumentNumberLabel(String number) {
+    return 'Document no. $number';
+  }
+
+  @override
+  String get editiqueErrorNetworkTitle => 'No connection';
+
+  @override
+  String get editiqueErrorNetworkMessage =>
+      'The document is produced by the server. Reconnect and try again — nothing was issued.';
+
+  @override
+  String get editiqueErrorUncertainTitle => 'Undetermined outcome';
+
+  @override
+  String get editiqueErrorUncertainMessage =>
+      'The server did not answer in time. The document may have been issued: check before generating a new one.';
+
+  @override
+  String get editiqueErrorSessionExpiredTitle => 'Session expired';
+
+  @override
+  String get editiqueErrorSessionExpiredMessage =>
+      'Sign in again to resume issuing the document.';
+
+  @override
+  String get editiqueErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get editiqueErrorForbiddenMessage =>
+      'You do not have the rights required to issue this document.';
+
+  @override
+  String get editiqueErrorNotFoundTitle => 'Document unavailable';
+
+  @override
+  String get editiqueErrorNotFoundMessage =>
+      'The server cannot find the elements required for this document.';
+
+  @override
+  String get editiqueErrorInvalidTitle => 'Cannot be issued';
+
+  @override
+  String get editiqueErrorInvalidMessage =>
+      'The server rejected the request. Check the file before trying again.';
+
+  @override
+  String get editiqueErrorServerTitle => 'Server error';
+
+  @override
+  String get editiqueErrorServerMessage =>
+      'The document could not be produced. Try again shortly.';
+
+  @override
+  String get editiqueErrorRetryLabel => 'Try again';
+
+  @override
+  String get editiqueErrorReconnectLabel => 'Sign in again';
 }

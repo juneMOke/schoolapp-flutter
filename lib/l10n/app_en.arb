@@ -1463,6 +1463,8 @@
   "facturationPaymentReceiptLabel": "Receipt no.",
   "facturationPaymentStudentLabel": "Student",
   "facturationPaymentDownloadReceiptLabel": "Download receipt",
+  "facturationPaymentReceiptPendingSyncHint": "The receipt will be available once the payment has been synchronised.",
+  "facturationPaymentReceiptNumberPending": "Awaiting synchronisation",
   "facturationPaymentCloseLabel": "Close",
   "facturationPaymentAllocationsSectionTitle": "Breakdown by fee",
   "facturationPaymentAllocationsSectionSubtitle": "List of charges covered by this payment.",
@@ -2922,5 +2924,35 @@
   },
   "syncErrorsForeignEntryAnonymous": "Written by another account — it has to be retried from that session.",
   "syncErrorsHeldTitle": "Waiting",
-  "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears."
+  "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears.",
+  "editiqueViewerReceiptTitle": "Payment receipt",
+  "editiqueViewerLoadingTitle": "Preparing the document…",
+  "editiqueViewerLoadingMessage": "The server is producing the document. This may take a few seconds.",
+  "editiqueViewerPrintLabel": "Print",
+  "editiqueViewerShareLabel": "Share",
+  "editiqueViewerCloseLabel": "Close",
+  "editiqueViewerDocumentNumberLabel": "Document no. {number}",
+  "@editiqueViewerDocumentNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "editiqueErrorNetworkTitle": "No connection",
+  "editiqueErrorNetworkMessage": "The document is produced by the server. Reconnect and try again — nothing was issued.",
+  "editiqueErrorUncertainTitle": "Undetermined outcome",
+  "editiqueErrorUncertainMessage": "The server did not answer in time. The document may have been issued: check before generating a new one.",
+  "editiqueErrorSessionExpiredTitle": "Session expired",
+  "editiqueErrorSessionExpiredMessage": "Sign in again to resume issuing the document.",
+  "editiqueErrorForbiddenTitle": "Access denied",
+  "editiqueErrorForbiddenMessage": "You do not have the rights required to issue this document.",
+  "editiqueErrorNotFoundTitle": "Document unavailable",
+  "editiqueErrorNotFoundMessage": "The server cannot find the elements required for this document.",
+  "editiqueErrorInvalidTitle": "Cannot be issued",
+  "editiqueErrorInvalidMessage": "The server rejected the request. Check the file before trying again.",
+  "editiqueErrorServerTitle": "Server error",
+  "editiqueErrorServerMessage": "The document could not be produced. Try again shortly.",
+  "editiqueErrorRetryLabel": "Try again",
+  "editiqueErrorReconnectLabel": "Sign in again"
 }

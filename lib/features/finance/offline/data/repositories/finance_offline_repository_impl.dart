@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/models
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 
@@ -150,9 +151,12 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     String paymentId,
   ) => _guard(() => _dao.getAllocationsByPayment(paymentId));
 
-  Future<Either<Failure, List<T>>> _guard<T>(
-    Future<List<T>> Function() run,
-  ) async {
+  @override
+  Future<Either<Failure, LocalGeneratedDocument?>> getPaymentReceipt(
+    String paymentId,
+  ) => _guard(() => _dao.getPaymentReceipt(paymentId));
+
+  Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {
       return Right(await run());
     } catch (e) {

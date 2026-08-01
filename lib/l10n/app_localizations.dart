@@ -4748,6 +4748,18 @@ abstract class AppLocalizations {
   /// **'Download receipt'**
   String get facturationPaymentDownloadReceiptLabel;
 
+  /// No description provided for @facturationPaymentReceiptPendingSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt will be available once the payment has been synchronised.'**
+  String get facturationPaymentReceiptPendingSyncHint;
+
+  /// No description provided for @facturationPaymentReceiptNumberPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting synchronisation'**
+  String get facturationPaymentReceiptNumberPending;
+
   /// No description provided for @facturationPaymentCloseLabel.
   ///
   /// In en, this message translates to:
@@ -9386,6 +9398,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These writes are kept and will be sent as soon as their condition clears.'**
   String get syncErrorsHeldSubtitle;
+
+  /// No description provided for @editiqueViewerReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment receipt'**
+  String get editiqueViewerReceiptTitle;
+
+  /// No description provided for @editiqueViewerLoadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the document…'**
+  String get editiqueViewerLoadingTitle;
+
+  /// No description provided for @editiqueViewerLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is producing the document. This may take a few seconds.'**
+  String get editiqueViewerLoadingMessage;
+
+  /// No description provided for @editiqueViewerPrintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get editiqueViewerPrintLabel;
+
+  /// No description provided for @editiqueViewerShareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get editiqueViewerShareLabel;
+
+  /// No description provided for @editiqueViewerCloseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get editiqueViewerCloseLabel;
+
+  /// No description provided for @editiqueViewerDocumentNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Document no. {number}'**
+  String editiqueViewerDocumentNumberLabel(String number);
+
+  /// No description provided for @editiqueErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get editiqueErrorNetworkTitle;
+
+  /// No description provided for @editiqueErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is produced by the server. Reconnect and try again — nothing was issued.'**
+  String get editiqueErrorNetworkMessage;
+
+  /// No description provided for @editiqueErrorUncertainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undetermined outcome'**
+  String get editiqueErrorUncertainTitle;
+
+  /// No description provided for @editiqueErrorUncertainMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not answer in time. The document may have been issued: check before generating a new one.'**
+  String get editiqueErrorUncertainMessage;
+
+  /// No description provided for @editiqueErrorSessionExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get editiqueErrorSessionExpiredTitle;
+
+  /// No description provided for @editiqueErrorSessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to resume issuing the document.'**
+  String get editiqueErrorSessionExpiredMessage;
+
+  /// No description provided for @editiqueErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get editiqueErrorForbiddenTitle;
+
+  /// No description provided for @editiqueErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the rights required to issue this document.'**
+  String get editiqueErrorForbiddenMessage;
+
+  /// No description provided for @editiqueErrorNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document unavailable'**
+  String get editiqueErrorNotFoundTitle;
+
+  /// No description provided for @editiqueErrorNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot find the elements required for this document.'**
+  String get editiqueErrorNotFoundMessage;
+
+  /// No description provided for @editiqueErrorInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be issued'**
+  String get editiqueErrorInvalidTitle;
+
+  /// No description provided for @editiqueErrorInvalidMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the request. Check the file before trying again.'**
+  String get editiqueErrorInvalidMessage;
+
+  /// No description provided for @editiqueErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get editiqueErrorServerTitle;
+
+  /// No description provided for @editiqueErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be produced. Try again shortly.'**
+  String get editiqueErrorServerMessage;
+
+  /// No description provided for @editiqueErrorRetryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get editiqueErrorRetryLabel;
+
+  /// No description provided for @editiqueErrorReconnectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get editiqueErrorReconnectLabel;
 }
 
 class _AppLocalizationsDelegate

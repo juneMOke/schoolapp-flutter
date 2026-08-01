@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
@@ -67,6 +68,14 @@ abstract class FinanceOfflineRepository {
   Future<Either<Failure, List<LocalPayment>>> getPayments(String studentId);
 
   Future<Either<Failure, List<LocalPaymentAllocation>>> getAllocations(
+    String paymentId,
+  );
+
+  /// Reçu (RC) d'un paiement connu localement, ou `null` s'il n'y en a pas.
+  ///
+  /// `Right(null)` est le cas normal quand aucune pièce n'a été produite pour
+  /// ce paiement — un `Left` ne signale qu'une base illisible.
+  Future<Either<Failure, LocalGeneratedDocument?>> getPaymentReceipt(
     String paymentId,
   );
 }

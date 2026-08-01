@@ -2767,6 +2767,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentDownloadReceiptLabel => 'Télécharger le reçu';
 
   @override
+  String get facturationPaymentReceiptPendingSyncHint =>
+      'Le reçu sera disponible une fois le paiement synchronisé.';
+
+  @override
+  String get facturationPaymentReceiptNumberPending =>
+      'En attente de synchronisation';
+
+  @override
   String get facturationPaymentCloseLabel => 'Fermer';
 
   @override
@@ -5636,4 +5644,83 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get syncErrorsHeldSubtitle =>
       'Ces écritures sont conservées et repartiront dès que leur condition sera levée.';
+
+  @override
+  String get editiqueViewerReceiptTitle => 'Reçu de paiement';
+
+  @override
+  String get editiqueViewerLoadingTitle => 'Préparation du document…';
+
+  @override
+  String get editiqueViewerLoadingMessage =>
+      'Le serveur produit la pièce. Cela peut prendre quelques secondes.';
+
+  @override
+  String get editiqueViewerPrintLabel => 'Imprimer';
+
+  @override
+  String get editiqueViewerShareLabel => 'Partager';
+
+  @override
+  String get editiqueViewerCloseLabel => 'Fermer';
+
+  @override
+  String editiqueViewerDocumentNumberLabel(String number) {
+    return 'Pièce n° $number';
+  }
+
+  @override
+  String get editiqueErrorNetworkTitle => 'Pas de connexion';
+
+  @override
+  String get editiqueErrorNetworkMessage =>
+      'Le document est produit par le serveur. Reconnectez-vous puis réessayez — rien n\'a été émis.';
+
+  @override
+  String get editiqueErrorUncertainTitle => 'Résultat indéterminé';
+
+  @override
+  String get editiqueErrorUncertainMessage =>
+      'Le serveur n\'a pas répondu à temps. La pièce a peut-être été émise : vérifiez avant d\'en générer une nouvelle.';
+
+  @override
+  String get editiqueErrorSessionExpiredTitle => 'Session expirée';
+
+  @override
+  String get editiqueErrorSessionExpiredMessage =>
+      'Reconnectez-vous pour reprendre l\'émission du document.';
+
+  @override
+  String get editiqueErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get editiqueErrorForbiddenMessage =>
+      'Vous n\'avez pas les droits nécessaires pour éditer cette pièce.';
+
+  @override
+  String get editiqueErrorNotFoundTitle => 'Document indisponible';
+
+  @override
+  String get editiqueErrorNotFoundMessage =>
+      'Le serveur ne trouve pas les éléments nécessaires à cette pièce.';
+
+  @override
+  String get editiqueErrorInvalidTitle => 'Émission impossible';
+
+  @override
+  String get editiqueErrorInvalidMessage =>
+      'Le serveur a refusé la demande. Vérifiez le dossier avant de réessayer.';
+
+  @override
+  String get editiqueErrorServerTitle => 'Erreur du serveur';
+
+  @override
+  String get editiqueErrorServerMessage =>
+      'La pièce n\'a pas pu être produite. Réessayez dans un instant.';
+
+  @override
+  String get editiqueErrorRetryLabel => 'Réessayer';
+
+  @override
+  String get editiqueErrorReconnectLabel => 'Se reconnecter';
 }

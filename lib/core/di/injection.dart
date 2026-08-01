@@ -122,6 +122,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
@@ -834,6 +835,12 @@ Future<void> configureDependencies({
 
   getIt.registerFactory<EmitFinancialClearanceUseCase>(
     () => EmitFinancialClearanceUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EditiqueDocumentBloc>(
+    () => EditiqueDocumentBloc(
+      emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
+    ),
   );
 
   // ── Attendance ────────────────────────────────────────────────────────────

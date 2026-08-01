@@ -30,6 +30,13 @@ class AppDimensions {
   static const facturationCreatePaymentModalMaxWidth = 560.0;
   // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
   static const facturationCollectModalMaxWidth = 440.0;
+  // Visionneuse de pièce d'éditique : plus large que les modales de saisie —
+  // une page A4 portrait doit rester lisible sans zoom sur tablette paysage
+  // (1280×800 dp de référence).
+  static const editiqueViewerMaxWidth = 760.0;
+  // Hauteur du gabarit de page pendant la production du document par le
+  // serveur : proportion A4 approchée à la largeur de la visionneuse.
+  static const editiqueViewerSkeletonHeight = 420.0;
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
   static const searchFieldGap = 10.0;

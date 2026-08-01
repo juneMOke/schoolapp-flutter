@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
@@ -20,19 +22,44 @@ Future<void> showFacturationPaymentDetailDialog(
   return showDialog<void>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => BlocProvider<PaymentsBloc>(
-      create: (_) {
-        final bloc = getIt<PaymentsBloc>();
-        if (intent.paymentId.trim().isNotEmpty) {
-          bloc.add(PaymentsAllocationsRequested(paymentId: intent.paymentId));
-        }
-        return bloc;
-      },
-      child: FacturationPaymentDetailDialogView(
-        intent: intent,
-        allocations: FacturationPaymentAllocationsSection(
-          paymentId: intent.paymentId,
-          currency: intent.currency,
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider<PaymentsBloc>(
+          create: (_) {
+            final bloc = getIt<PaymentsBloc>();
+            if (intent.paymentId.trim().isNotEmpty) {
+              bloc.add(
+                PaymentsAllocationsRequested(paymentId: intent.paymentId),
+              );
+            }
+            return bloc;
+          },
+        ),
+        // Numéro de pièce lu en local (table `generated_documents`) : le
+        // serveur ne l'expose sur aucune lecture REST, seule la synchro l'a
+        // scellé. Aucun téléchargement n'est nécessaire pour l'afficher.
+        BlocProvider<PaymentReceiptCubit>(
+          create: (_) => getIt<PaymentReceiptCubit>()..load(intent.paymentId),
+        ),
+      ],
+      child: BlocBuilder<PaymentReceiptCubit, PaymentReceiptState>(
+        builder: (_, receipt) => FacturationPaymentDetailDialogView(
+          intent: intent,
+          allocations: FacturationPaymentAllocationsSection(
+            paymentId: intent.paymentId,
+            currency: intent.currency,
+          ),
+          receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
+          receiptPending: intent.isPendingSync || receipt.isProvisional,
+          // Le reçu est produit par le serveur à partir de l'identifiant du
+          // paiement : il n'est demandable que pour un encaissement déjà
+          // remonté, sans quoi l'uuid client donnerait un 404.
+          onDownloadReceipt: intent.isPendingSync
+              ? null
+              : () => showEditiquePaymentReceiptDialog(
+                  context,
+                  paymentId: intent.paymentId,
+                ),
         ),
       ),
     ),
@@ -43,12 +70,26 @@ Future<void> showFacturationPaymentDetailDialog(
 class FacturationPaymentDetailDialogView extends StatelessWidget {
   final FacturationPaymentDetailIntent intent;
   final Widget allocations;
+
+  /// Numéro **définitif** de la pièce, ou `null` s'il n'est pas connu.
+  ///
+  /// Ne transite jamais un `PROV-…` : un numéro provisoire n'est pas un numéro
+  /// de pièce, il se signale par [receiptPending].
+  final String? receiptNumber;
+
+  /// La pièce existe mais son numéro n'est pas encore scellé par le serveur.
+  final bool receiptPending;
+
+  /// `null` désactive le téléchargement — cas d'un encaissement pas encore
+  /// remonté, dont l'identifiant est inconnu du serveur.
   final VoidCallback? onDownloadReceipt;
 
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
     required this.allocations,
+    this.receiptNumber,
+    this.receiptPending = false,
     this.onDownloadReceipt,
   });
 
@@ -61,6 +102,19 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
   }
 
+  /// Numéro de pièce affichable, ou un libellé neutre.
+  ///
+  /// Trois cas : numéro définitif scellé par la synchro → affiché tel quel ;
+  /// pièce en attente de scellement → mention d'attente, car un `PROV-…` n'est
+  /// pas un numéro de pièce officiel ; rien de connu → chaîne vide, comme
+  /// avant (le rendu clé/valeur affiche alors un tiret).
+  String _receiptNumberValue(AppLocalizations l10n) {
+    final number = receiptNumber?.trim();
+    if (number != null && number.isNotEmpty) return number;
+    if (receiptPending) return l10n.facturationPaymentReceiptNumberPending;
+    return '';
+  }
+
   String _studentFullName(AppLocalizations l10n) {
     final fullName = [
       intent.lastName,
@@ -71,18 +125,6 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   }
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
-
-  void _onDownload(BuildContext context) {
-    if (onDownloadReceipt != null) {
-      onDownloadReceipt!();
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.pageUnderConstruction),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +200,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                         FinanceKeyValueRow(
                           icon: Icons.receipt_long_outlined,
                           label: l10n.facturationPaymentReceiptLabel,
-                          value: '',
+                          value: _receiptNumberValue(l10n),
                         ),
                       ],
                     ),
@@ -172,7 +214,8 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
             FinanceModalFooter(
               secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
               secondaryIcon: Icons.download_outlined,
-              onSecondary: () => _onDownload(context),
+              onSecondary: onDownloadReceipt,
+              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => _close(context),

@@ -1,5 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/models/generated_document_local_model.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
@@ -51,6 +53,28 @@ class FinanceLedgerReadDao {
       orderBy: 'paid_at DESC',
     );
     return rows.map((r) => PaymentLocalModel.fromMap(r).toEntity()).toList();
+  }
+
+  /// Reçu (RC) d'un paiement, tel qu'il est connu **localement**.
+  ///
+  /// Le numéro vaut `PROV-…` tant que l'encaissement n'est pas synchronisé,
+  /// puis le scellement à l'ACK le remplace par le `ETL-RC-…` définitif — d'où
+  /// [LocalGeneratedDocument.isProvisional], qui dit à l'UI si le numéro
+  /// affichable fait foi.
+  ///
+  /// `null` est un cas NORMAL et non une erreur : le scellement serveur est
+  /// best-effort et hors transaction, et un paiement arrivé par pull depuis
+  /// l'autre poste n'a jamais eu de ligne locale.
+  Future<LocalGeneratedDocument?> getPaymentReceipt(String paymentId) async {
+    final rows = await _db.query(
+      'generated_documents',
+      where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
+      whereArgs: [paymentId, 'PAYMENT', 'RC'],
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return GeneratedDocumentLocalModel.fromMap(rows.first).toEntity();
   }
 
   /// Imputations d'un paiement. Joint le paiement porteur pour replier **payeur**

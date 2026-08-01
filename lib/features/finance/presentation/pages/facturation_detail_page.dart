@@ -139,6 +139,9 @@ class FacturationDetailPage extends StatelessWidget {
         amountInCents: payment.amountInCents,
         currency: payment.currency,
         paidAt: payment.paidAt,
+        // Garde du reçu : tant que l'encaissement n'est pas remonté, son uuid
+        // est inconnu du serveur et la demande de pièce répondrait 404.
+        isPendingSync: payment.isPendingSync,
       ),
     );
   }

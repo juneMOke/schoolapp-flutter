@@ -64,6 +64,22 @@ dependencies:
   # en isolate. Ne chiffre rien — valide seulement « ce mot de passe est-il correct ? ».
   cryptography: ^2.7.0
 
+  # ── Éditique (module documents) ──────────────────────────────────────────
+  # Visionneuse PDF + impression + partage des pièces scellées rendues par le
+  # serveur. Retenu parce qu'il couvre les trois gestes à lui seul, sans aucune
+  # permission Android ni ligne à ajouter au manifeste de l'app : le plugin
+  # déclare son propre `<provider>` (`PrintFileProvider`), fusionné au build.
+  #
+  # ⚠️ À savoir : `Printing.sharePdf` n'est PAS un partage en mémoire. Il écrit
+  # d'abord la pièce en clair dans `cacheDir/share/<nom>.pdf` et ne la supprime
+  # jamais (PrintingJob.java:322-337). Le répertoire est privé à l'application
+  # (effacé par « vider le cache » et par la pression mémoire d'Android), mais
+  # un reçu financier y séjourne. L'affichage et l'impression, eux, restent
+  # bien en mémoire.
+  #
+  # Enregistrer volontairement une pièce sur l'appareil reste hors périmètre.
+  printing: ^5.14.3
+
 
 dev_dependencies:
   flutter_test:

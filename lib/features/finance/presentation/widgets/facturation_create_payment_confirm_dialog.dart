@@ -135,18 +135,6 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   String _generateIncidentCode() =>
       'INC-${DateTime.now().millisecondsSinceEpoch.remainder(1000000)}';
 
-  void _onDownloadReceipt() {
-    if (widget.onDownloadReceipt != null) {
-      widget.onDownloadReceipt!();
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.pageUnderConstruction),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -260,7 +248,15 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
             FinanceModalFooter(
               secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
               secondaryIcon: Icons.download_outlined,
-              onSecondary: _onDownloadReceipt,
+              // Inerte par construction : on vient d'atteindre
+              // `FinanceOfflinePaymentPendingSync`. L'encaissement est écrit en
+              // local et mis en file, donc son uuid est encore inconnu du
+              // serveur et la demande de reçu répondrait 404. La pièce se
+              // récupère depuis le détail du paiement, une fois la synchro
+              // passée. Le bouton reste visible pour signaler qu'un reçu existe
+              // bien pour cet encaissement.
+              onSecondary: widget.onDownloadReceipt,
+              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => Navigator.of(

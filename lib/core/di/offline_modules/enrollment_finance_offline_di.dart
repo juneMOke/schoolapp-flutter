@@ -68,6 +68,8 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 
@@ -300,6 +302,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetLedgerFreshnessUseCase>(
     () => GetLedgerFreshnessUseCase(getIt<FinanceLedgerRefresher>()),
   );
+  getIt.registerFactory<GetPaymentReceiptDocumentUseCase>(
+    () => GetPaymentReceiptDocumentUseCase(getIt<FinanceOfflineRepository>()),
+  );
 
   // ── BLoCs (registerFactory) ─────────────────────────────────────────────────
   // Bloc offline UNIQUE du module Inscription (convergence lecture + brouillon
@@ -345,6 +350,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<LedgerFreshnessCubit>(
     () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),
+  );
+  getIt.registerFactory<PaymentReceiptCubit>(
+    () => PaymentReceiptCubit(getIt<GetPaymentReceiptDocumentUseCase>()),
   );
 
   // ── Handlers d'outbox → SyncEngine ──────────────────────────────────────────

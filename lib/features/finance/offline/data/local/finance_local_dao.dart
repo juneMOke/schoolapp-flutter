@@ -2,6 +2,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
+import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_charge_seed_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_read_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_ledger_sync_dao.dart';
@@ -107,6 +108,9 @@ class FinanceLocalDao {
 
   Future<List<LocalPayment>> getPaymentsByStudent(String studentId) =>
       _read.getPaymentsByStudent(studentId);
+
+  Future<LocalGeneratedDocument?> getPaymentReceipt(String paymentId) =>
+      _read.getPaymentReceipt(paymentId);
 
   Future<List<LocalPaymentAllocation>> getAllocationsByPayment(
     String paymentId,
