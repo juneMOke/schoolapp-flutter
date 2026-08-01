@@ -116,6 +116,10 @@ Future<void> registerOfflineCore(GetIt getIt) async {
     () => OutboxErrorsCubit(
       outbox: getIt<OutboxDao>(),
       syncEngine: getIt<SyncEngine>(),
+      // Explication de l'attente d'un autre compte (tablette partagée) :
+      // nombre, ancienneté et nom, jamais le contenu.
+      currentUser: getIt<CurrentUserContext>(),
+      authorDirectory: getIt<AuthSessionManager>(),
     ),
   );
 }
