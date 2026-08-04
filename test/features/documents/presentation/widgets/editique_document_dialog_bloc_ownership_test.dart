@@ -105,19 +105,58 @@ void main() {
     expect(bloc.isClosed, isFalse);
   });
 
-  // L'émission part une fois à l'ouverture, et une seule : le `builder` de
-  // `showDialog` peut être rappelé, et un second envoi brûlerait un second
-  // numéro de séquence sur une pièce non archivée.
-  testWidgets('ne déclenche l émission qu une seule fois', (tester) async {
+  // L'émission part une fois à l'ouverture, et une seule : poster l'événement
+  // depuis un `build` le relancerait à chaque reconstruction du sous-arbre, et
+  // un second envoi brûlerait un second numéro de séquence sur une pièce non
+  // archivée.
+  //
+  // Le test PROVOQUE une reconstruction réelle et le VÉRIFIE. Pomper des images
+  // ne suffit pas : sans invalidation, l'arbre du dialogue n'est pas reconstruit
+  // et l'assertion passerait quelle que soit l'implémentation. On change donc la
+  // taille de la vue — un `MediaQuery` dont la hauteur pilote la contrainte de
+  // la modale — et on contrôle que cette contrainte a bougé avant de conclure.
+  testWidgets('ne déclenche l émission qu une seule fois, même reconstruit', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     final bloc = buildBloc();
     addTearDown(bloc.close);
 
     await pumpOpener(tester, bloc);
     await tester.tap(find.text('ouvrir'));
     await tester.pump();
-    // Reconstructions successives de la route de dialogue.
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // La modale se plafonne à 88 % de la hauteur d'écran : c'est la SEULE
+    // contrainte finie de son sous-arbre, et elle suit donc le MediaQuery.
+    // `Dialog` en insère d'autres, non bornées — d'où la sélection explicite.
+    double dialogMaxHeight() => tester
+        .widgetList<ConstrainedBox>(
+          find.descendant(
+            of: find.byType(EditiqueDocumentDialogView),
+            matching: find.byType(ConstrainedBox),
+          ),
+        )
+        .map((box) => box.constraints.maxHeight)
+        .firstWhere((height) => height.isFinite);
+
+    final before = dialogMaxHeight();
+
+    // Invalide le MediaQuery : tout le sous-arbre du dialogue est reconstruit.
+    tester.view.physicalSize = const Size(1280, 600);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Garde-fou du test lui-même : sans reconstruction avérée, il ne prouverait
+    // rien.
+    expect(
+      dialogMaxHeight(),
+      isNot(before),
+      reason: 'le sous-arbre du dialogue n a pas été reconstruit',
+    );
 
     verify(() => receiptUseCase(any())).called(1);
   });
