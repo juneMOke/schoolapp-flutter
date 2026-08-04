@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -27,7 +28,14 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/g
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_pre_enrollment_use_case.dart';
+import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_reenrollment_candidate_use_case.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/is_student_known_to_server_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/probe_reenrollment_dossier_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_address_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/save_draft_guardians_use_case.dart';
@@ -42,7 +50,9 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/s
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_anomaly_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sync_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_outbox_handler.dart';
@@ -144,6 +154,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       idGenerator: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
       currentUser: getIt<CurrentUserContext>(),
+      // Caissier et appareil stampés sur la ligne de paiement : le ticket
+      // provisoire est une projection de `payments` (ADR-012 D-3/RG-012-11).
+      authorDirectory: getIt<AuthSessionManager>(),
+      deviceIdentity: getIt<DeviceIdentityService>(),
     ),
   );
 
@@ -244,6 +258,55 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<ProbeReenrollmentDossierUseCase>(
     () => ProbeReenrollmentDossierUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  // Garde d'éditique : le serveur connaît-il déjà cet élève ? Lue par le module
+  // documents (pièces scopées élève), d'où sa place ici plutôt qu'en DI online.
+  getIt.registerFactory<IsStudentKnownToServerUseCase>(
+    () => IsStudentKnownToServerUseCase(getIt<EnrollmentOfflineRepository>()),
+  );
+  // ── Anomalies d'encaissement (ADR-012 D-5, amendé) ─────────────────────────
+  // Hors de l'outbox et hors de la pastille de synchro : une anomalie survit à
+  // la synchro réussie qui l'a révélée, et ne s'éteint que sur accusé explicite.
+  getIt.registerLazySingleton<PaymentAnomalyDao>(
+    () => PaymentAnomalyDao(getIt<Database>()),
+  );
+  // `registerFactory`, comme TOUS les BLoCs du projet (règle non-négociable #2)
+  // et comme `SyncStatusCubit` : l'instance unique app-lifetime est tenue par
+  // `main.dart`, qui la fournit à l'arbre par `.value`. Un lazySingleton en DI
+  // survivrait à un `getIt.reset()` de test et interdirait toute instance
+  // isolée.
+  getIt.registerFactory<PaymentAnomaliesCubit>(
+    () => PaymentAnomaliesCubit(
+      getIt<PaymentAnomalyDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+
+  // ── Éditique : ticket provisoire (ADR-012 D-3) ─────────────────────────────
+  // Lectures dédiées + composition 100 % locale : aucun appel réseau, c'est
+  // toute la raison d'être du ticket.
+  getIt.registerLazySingleton<ProvisionalTicketDao>(
+    () => ProvisionalTicketDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ProvisionalTicketRepository>(
+    () => ProvisionalTicketRepositoryImpl(
+      dao: getIt<ProvisionalTicketDao>(),
+      // Le solde vient du domaine Facturation, seul détenteur de la sémantique
+      // money-grade du reste à payer — jamais recomposé ici.
+      finance: getIt<FinanceOfflineRepository>(),
+    ),
+  );
+  getIt.registerFactory<BuildProvisionalTicketUseCase>(
+    () => BuildProvisionalTicketUseCase(getIt<ProvisionalTicketRepository>()),
+  );
+
+  getIt.registerFactory<EditiqueEligibilityCubit>(
+    () => EditiqueEligibilityCubit(getIt<IsStudentKnownToServerUseCase>()),
+  );
+  // Ce que la tablette sait du dossier : axe de synchro + pièces déjà scellées.
+  getIt.registerFactory<DocumentsLocalDossierCubit>(
+    () => DocumentsLocalDossierCubit(getIt<GetLocalEnrollmentDetailUseCase>()),
   );
   getIt.registerFactory<GetPreEnrollmentUseCase>(
     () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),

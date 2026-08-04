@@ -83,6 +83,7 @@ import 'package:school_app_flutter/features/auth/data/repositories/forgot_passwo
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -376,7 +377,12 @@ Future<void> configureDependencies({
       verifier: getIt<PasswordVerifierService>(),
       revocationBus: getIt<SessionRevocationBus>(),
       currentUser: getIt<CurrentUserContext>(),
+      sharedDocumentCache: getIt<SharedDocumentCache>(),
     ),
+  );
+
+  getIt.registerLazySingleton<SharedDocumentCache>(
+    () => const SharedDocumentCache(),
   );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -839,8 +845,12 @@ Future<void> configureDependencies({
 
   getIt.registerFactory<EditiqueDocumentBloc>(
     () => EditiqueDocumentBloc(
+      emitEnrollmentAttestationUseCase:
+          getIt<EmitEnrollmentAttestationUseCase>(),
+      emitNotePerceptionUseCase: getIt<EmitNotePerceptionUseCase>(),
       emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
       emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),
+      emitFinancialClearanceUseCase: getIt<EmitFinancialClearanceUseCase>(),
     ),
   );
 

@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -53,6 +55,7 @@ class _MyAppState extends State<MyApp> {
   late final AcademicYearContextBloc _academicYearContextBloc;
   late final ForgotPasswordBloc _forgotPasswordBloc;
   late final SyncStatusCubit _syncStatusCubit;
+  late final PaymentAnomaliesCubit _paymentAnomaliesCubit;
   late final GoRouter _router;
 
   @override
@@ -69,6 +72,7 @@ class _MyAppState extends State<MyApp> {
     // Cubit global de synchro : instance unique app-lifetime, fournie à tout
     // l'arbre via `.value` (top bar + écrans write-path la lisent par contexte).
     _syncStatusCubit = getIt<SyncStatusCubit>();
+    _paymentAnomaliesCubit = getIt<PaymentAnomaliesCubit>()..refresh();
     _router = AppRouter.createRouter(_authBloc, _academicYearContextBloc);
   }
 
@@ -78,6 +82,7 @@ class _MyAppState extends State<MyApp> {
     _forgotPasswordBloc.close();
     _authBloc.close();
     _syncStatusCubit.close();
+    _paymentAnomaliesCubit.close();
     super.dispose();
   }
 
@@ -91,6 +96,13 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<ForgotPasswordBloc>.value(value: _forgotPasswordBloc),
         BlocProvider<SyncStatusCubit>.value(value: _syncStatusCubit),
+        // Anomalies d'encaissement (ADR-012 D-5, amendé). La relecture est
+        // pilotée par le cubit lui-même, abonné à la FIN de chaque flush :
+        // c'est la transaction d'ACK qui écrit l'anomalie, et aucune transition
+        // de connectivité n'encadre correctement ce moment.
+        BlocProvider<PaymentAnomaliesCubit>.value(
+          value: _paymentAnomaliesCubit,
+        ),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -164,8 +176,14 @@ class _MyAppState extends State<MyApp> {
           // de l'ex-bootstrap est retiré (plus de distinction local/distant
           // séparée à ce niveau) — le statut réseau global reste signalé par
           // le `SyncIndicator` de la top bar.
-          builder: (context, child) =>
-              SessionDegradationBanner(child: child ?? const SizedBox.shrink()),
+          // Deux bandeaux globaux, empilés du plus contraignant au moins :
+          // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
+          // dégradation de session (informative, ADR-010).
+          builder: (context, child) => PaymentAnomalyBanner(
+            child: SessionDegradationBanner(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
       ),
     );

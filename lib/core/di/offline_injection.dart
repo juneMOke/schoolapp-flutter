@@ -5,7 +5,9 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
+import 'package:school_app_flutter/core/di/offline_modules/enrollment_finance_offline_di.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
+import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -30,7 +32,12 @@ import 'package:uuid/uuid.dart';
 ///
 /// Ouvre la base chiffrée de façon eager (await) car la clé et le schéma
 /// doivent être prêts avant toute lecture/écriture métier.
-Future<void> registerOfflineCore(GetIt getIt) async {
+///
+/// [database] : base pré-ouverte injectée (tests). Fournie, on saute la
+/// génération de clé et l'ouverture SQLCipher (canal plateforme indisponible
+/// hors device) et on l'enregistre telle quelle — les tests passent une base
+/// sqflite en mémoire (ffi) construite depuis `buildOfflineSchema()`.
+Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 
   getIt.registerLazySingleton<IdGenerator>(() => IdGenerator(getIt<Uuid>()));
@@ -39,12 +46,24 @@ Future<void> registerOfflineCore(GetIt getIt) async {
     () => DatabaseKeyService(getIt<FlutterSecureStorage>(), getIt<Uuid>()),
   );
 
-  final dbKey = await getIt<DatabaseKeyService>().getOrCreateKey();
-  final database = await openOfflineDatabase(
-    dbKey: dbKey,
-    schema: buildOfflineSchema(),
+  // Identifiant d'installation (ADR-012 zone Z3) — même patron que la clé
+  // SQLCipher : généré une fois, persisté en secure storage, jamais relevé
+  // depuis la plateforme.
+  getIt.registerLazySingleton<DeviceIdentityService>(
+    () => DeviceIdentityService(getIt<FlutterSecureStorage>(), getIt<Uuid>()),
   );
-  getIt.registerLazySingleton<Database>(() => database);
+
+  final Database resolvedDatabase;
+  if (database != null) {
+    resolvedDatabase = database;
+  } else {
+    final dbKey = await getIt<DatabaseKeyService>().getOrCreateKey();
+    resolvedDatabase = await openOfflineDatabase(
+      dbKey: dbKey,
+      schema: buildOfflineSchema(),
+    );
+  }
+  getIt.registerLazySingleton<Database>(() => resolvedDatabase);
 
   getIt.registerLazySingleton<OutboxDao>(() => OutboxDao(getIt<Database>()));
   getIt.registerLazySingleton<SyncMetaDao>(
@@ -140,7 +159,7 @@ Future<void> registerOfflineCore(GetIt getIt) async {
 /// Appelé en fin de `configureDependencies()` (après les features online, dont
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
-  // registerEnrollmentFinanceOffline(getIt);     // branche A
+  registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
 }
