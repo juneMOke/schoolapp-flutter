@@ -359,6 +359,17 @@ const TableSchema studentChargesTable = TableSchema(
 /// `payments` — événements de paiement append-only (money-grade). `id` = uuid
 /// client honoré serveur ; `client_uuid` = même valeur (clé d'idempotence).
 /// `paid_at` = date terrain honorée. Montants en centimes.
+///
+/// **Caissier et appareil (v19, ADR-012 RG-012-7/11)** : le ticket provisoire
+/// est une projection déterministe de cette ligne, il doit donc pouvoir nommer
+/// qui a encaissé, même des mois plus tard et sur une tablette partagée. Le nom
+/// est DÉNORMALISÉ à côté de l'uid : `OutboxAuthorDirectory.identityOf` peut
+/// rendre `null`, et l'entrée d'outbox qui portait l'auteur est supprimée dès
+/// l'ACK — l'uid seul ne suffirait pas à réimprimer un ticket à l'identique.
+///
+/// **`receipt_id` (v19)** : UUID de la pièce scellée, renvoyé par le serveur
+/// dans l'ACK de push ET dans le delta de pull. Seule clé permettant de
+/// re-télécharger un reçu définitif par `GET /editique/documents/{id}`.
 const TableSchema paymentsTable = TableSchema(
   name: 'payments',
   createTableSql: '''
@@ -375,6 +386,11 @@ const TableSchema paymentsTable = TableSchema(
       payer_last_name TEXT NOT NULL,
       payer_middle_name TEXT,
       status TEXT,
+      cashier_uid TEXT,
+      cashier_first_name TEXT,
+      cashier_last_name TEXT,
+      device_id TEXT,
+      receipt_id TEXT,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       sync_error TEXT,
       synced_at INTEGER,
@@ -428,6 +444,7 @@ const TableSchema generatedDocumentsTable = TableSchema(
       student_id TEXT,
       doc_type TEXT NOT NULL,
       number TEXT NOT NULL,
+      provisional_number TEXT,
       status TEXT NOT NULL DEFAULT 'PROVISIONAL',
       verification_token TEXT,
       pdf_blob BLOB,
@@ -443,6 +460,53 @@ const TableSchema generatedDocumentsTable = TableSchema(
 );
 
 /// Toutes les tables de la branche offline Inscription + Facturation.
+/// `payment_anomalies` — anomalies de synchro d'un encaissement (ADR-012 D-5,
+/// **amendé**).
+///
+/// L'ADR parlait d'un état `REJETÉ`. Le contrat de synchro garantit l'inverse :
+/// « le serveur ne rejette JAMAIS un paiement pour un motif métier — l'argent a
+/// été physiquement reçu au guichet ». Un trop-perçu est ACCEPTÉ, le reçu
+/// définitif est scellé, et seul un `overpayment` est signalé pour arbitrage.
+/// L'issue terminale n'est donc pas un rejet mais une **anomalie**, et le ticket
+/// remis au parent reste valide.
+///
+/// Table DÉDIÉE, et surtout **pas** l'outbox : une entrée d'outbox acquittée est
+/// physiquement supprimée à la fin du flush (`deleteAcked`), et son motif
+/// d'erreur est effacé par un simple clic sur « Réessayer » (`requeue`). Une
+/// anomalie doit survivre aux deux et ne disparaître que sur un accusé explicite
+/// — d'où `acknowledged_at` / `acknowledged_by`.
+///
+/// Montants en centimes. `device_id` et le caissier sont recopiés depuis le
+/// paiement : l'anomalie doit rester lisible même si la ligne source évolue, et
+/// RG-012-16 exige de savoir QUELLE tablette a encaissé.
+const TableSchema paymentAnomaliesTable = TableSchema(
+  name: 'payment_anomalies',
+  createTableSql: '''
+    CREATE TABLE payment_anomalies (
+      id TEXT PRIMARY KEY,
+      payment_id TEXT NOT NULL,
+      student_id TEXT,
+      kind TEXT NOT NULL,
+      excess_in_cents INTEGER,
+      currency TEXT,
+      fee_code TEXT,
+      reason TEXT,
+      cashier_first_name TEXT,
+      cashier_last_name TEXT,
+      device_id TEXT,
+      detected_at INTEGER NOT NULL,
+      acknowledged_at INTEGER,
+      acknowledged_by TEXT
+    )
+  ''',
+  createIndexSql: [
+    'CREATE UNIQUE INDEX idx_payment_anomalies_payment '
+        'ON payment_anomalies(payment_id, kind)',
+    'CREATE INDEX idx_payment_anomalies_open '
+        'ON payment_anomalies(acknowledged_at)',
+  ],
+);
+
 const List<TableSchema> enrollmentFinanceOfflineTables = [
   studentsTable,
   parentsTable,
@@ -460,5 +524,6 @@ const List<TableSchema> enrollmentFinanceOfflineTables = [
   studentChargesTable,
   paymentsTable,
   paymentAllocationsTable,
+  paymentAnomaliesTable,
   generatedDocumentsTable,
 ];

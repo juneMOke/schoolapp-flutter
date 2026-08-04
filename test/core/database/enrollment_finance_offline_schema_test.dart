@@ -45,13 +45,14 @@ void main() {
         'student_charges',
         'payments',
         'payment_allocations',
+        'payment_anomalies',
         'generated_documents',
       ]),
     );
   });
 
-  test('la liste exportée contient exactement 15 tables', () {
-    expect(enrollmentFinanceOfflineTables, hasLength(15));
+  test('la liste exportée contient exactement 16 tables', () {
+    expect(enrollmentFinanceOfflineTables, hasLength(16));
   });
 
   test('index F2/FF1 présents (phone, sync_status, client_uuid…)', () async {

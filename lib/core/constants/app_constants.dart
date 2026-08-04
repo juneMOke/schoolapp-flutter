@@ -296,11 +296,31 @@ class AppConstants {
   // Tuteurs). Index composé (nom, prénom) pour accélérer le LIKE de
   // recherche. L'unicité du téléphone reste APPLICATIVE (DAO), pas de UNIQUE
   // INDEX SQL (risque de casser la migration sur des doublons hérités).
-  static const int offlineDbSchemaVersion = 18;
+  // v19 (2026-08-04) : Éditique offline (ADR-012 D-3) — le reçu provisoire est
+  // une PROJECTION de lignes locales, il faut donc que ces lignes portent tout
+  // ce que le ticket imprime. `payments` gagne le caissier (uid + nom
+  // dénormalisé : `OutboxAuthorDirectory.identityOf` peut rendre null, et
+  // l'entrée d'outbox qui portait l'auteur est supprimée à l'ACK) et
+  // l'identifiant d'appareil. `generated_documents` gagne `provisional_number`,
+  // conservé après scellement : c'est le seul lien entre le papier détenu par
+  // un parent et le reçu définitif. `payments.receipt_id` capte l'UUID que le
+  // serveur envoie déjà (ACK et delta) et que le client jetait.
+  // v20 (2026-08-04) : Éditique offline (ADR-012 D-5, amendé) — table
+  // `payment_anomalies`. L'issue terminale d'un encaissement offline n'est pas
+  // un REJET (le contrat garantit qu'un paiement n'est jamais rejeté pour motif
+  // métier) mais une ANOMALIE de trop-perçu, à arbitrer. Table dédiée et non
+  // l'outbox : une entrée acquittée y est supprimée au flush, et son motif
+  // effacé par un clic sur « Réessayer ».
+  static const int offlineDbSchemaVersion = 20;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
   static const String sqlCipherKeyStorageKey = 'sqlcipher_db_key';
+
+  /// Clé du secure storage hébergeant l'identifiant d'installation, généré au
+  /// premier besoin (cf. DeviceIdentityService). Imprimé sur le ticket
+  /// provisoire et porté par les anomalies de synchro.
+  static const String deviceIdStorageKey = 'device_installation_id';
 
   // ─── Auth/session offline — dégradation graduée (ADR-010 D-08) ────────────────
   /// Seuil J7 : au-delà de `now − last_server_seen_at`, la session passe en

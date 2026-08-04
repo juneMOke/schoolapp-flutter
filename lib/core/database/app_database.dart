@@ -388,6 +388,66 @@ Future<void> migrateOfflineDatabase(
     // jamais ses propres séances/cours — tout en lisant ceux de l'autre.
     await _addOwnerScopeToAcademicsRefTables(db, schema);
   }
+  if (oldVersion < 19) {
+    // v19 — Éditique offline (ADR-012 D-3) : le reçu provisoire est une
+    // PROJECTION de lignes locales. Ces lignes doivent donc porter tout ce que
+    // le ticket imprime, sans quoi une réimpression ne peut pas être identique
+    // au premier tirage.
+    //
+    // `payments` : caissier (uid + nom **dénormalisé**) et appareil. La
+    // dénormalisation n'est pas de la redondance — `identityOf` peut rendre
+    // `null`, et l'entrée d'outbox qui portait l'auteur est supprimée dès
+    // l'ACK ; l'uid seul laisserait un ticket anonyme quelques heures après
+    // l'encaissement. `receipt_id` capte l'UUID que le serveur envoie déjà.
+    //
+    // `generated_documents.provisional_number` : conservé APRÈS scellement. Le
+    // scellement écrase `number` (`PROV-…` → `ETL-…`) ; sans cette colonne, le
+    // ticket papier détenu par un parent n'a plus aucun lien avec le reçu
+    // définitif — ce que RG-012-12 suppose pourtant possible.
+    //
+    // Aucun backfill : les paiements déjà encaissés n'ont jamais connu leur
+    // caissier, et les inventer serait pire que de les laisser vides. Les
+    // colonnes sont donc toutes NULLABLE, et le ticket sait déjà taire ce
+    // qu'il ne connaît pas.
+    for (final column in const [
+      'cashier_uid',
+      'cashier_first_name',
+      'cashier_last_name',
+      'device_id',
+      'receipt_id',
+    ]) {
+      if (await _hasTable(db, 'payments') &&
+          !await _hasColumn(db, 'payments', column)) {
+        await db.execute('ALTER TABLE payments ADD COLUMN $column TEXT');
+      }
+    }
+    if (await _hasTable(db, 'generated_documents') &&
+        !await _hasColumn(db, 'generated_documents', 'provisional_number')) {
+      await db.execute(
+        'ALTER TABLE generated_documents ADD COLUMN provisional_number TEXT',
+      );
+      // Les lignes encore PROVISOIRES portent leur numéro provisoire dans
+      // `number` : on le recopie, ce qui le préservera de l'écrasement au
+      // prochain scellement. Les lignes déjà DÉFINITIVES ont perdu le leur —
+      // rien à récupérer, la colonne reste NULL.
+      await db.execute('''
+        UPDATE generated_documents
+        SET provisional_number = number
+        WHERE status = 'PROVISIONAL'
+      ''');
+    }
+  }
+  if (oldVersion < 20) {
+    // v20 — Éditique offline (ADR-012 D-5, amendé) : table `payment_anomalies`.
+    // Table neuve, aucun backfill — les trop-perçus déjà survenus n'ont laissé
+    // aucune trace exploitable (`OverpaymentSignal` était désérialisé puis
+    // jeté), et en inventer serait pire que de repartir d'une ardoise propre.
+    final table = schema.firstWhere((t) => t.name == 'payment_anomalies');
+    await db.execute(_asIfNotExists(table.createTableSql));
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
 }
 
 /// Étape v18 : `owner_uid` sur les tables de référence cadrées enseignant.
@@ -561,5 +621,11 @@ String _asIfNotExists(String createTableSql) =>
     createTableSql.replaceFirst('CREATE TABLE ', 'CREATE TABLE IF NOT EXISTS ');
 
 /// Rend un `CREATE INDEX …` idempotent (`IF NOT EXISTS`) pour les migrations.
-String _indexAsIfNotExists(String createIndexSql) =>
-    createIndexSql.replaceFirst('CREATE INDEX ', 'CREATE INDEX IF NOT EXISTS ');
+/// Couvre les DEUX formes, `CREATE INDEX` et `CREATE UNIQUE INDEX`.
+///
+/// La seconde a été introduite par la table des anomalies (v20). Ne traiter que
+/// la première faisait lever le rejeu de **toutes** les migrations — la garde
+/// d'idempotence sautait sur un seul index, et avec elle l'escalier entier.
+String _indexAsIfNotExists(String createIndexSql) => createIndexSql
+    .replaceFirst('CREATE UNIQUE INDEX ', 'CREATE UNIQUE INDEX IF NOT EXISTS ')
+    .replaceFirst('CREATE INDEX ', 'CREATE INDEX IF NOT EXISTS ');
