@@ -1,4 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_anomaly_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_anomaly.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 
@@ -33,6 +35,8 @@ class FinancePaymentAckDao {
       await _applyAllocationRemaps(txn, ack);
       await _applyAuthoritativeCharges(txn, ack, nowMs);
       await _sealDocuments(txn, ack);
+      await _captureReceiptId(txn, ack);
+      await _recordOverpaymentAnomaly(txn, ack, nowMs);
 
       // SYNCED **seulement si** le miroir autoritaire a été intégré. C'est le
       // sens exact du drapeau : `paid_pending` (FRONT §5) déduit les allocations
@@ -131,6 +135,11 @@ class FinancePaymentAckDao {
   /// `PROV-…` local. `documents` **vide** est un cas NORMAL (scellement
   /// best-effort hors transaction serveur, décision G) : le reçu provisoire est
   /// alors conservé tel quel — l'encaissement reste acquis.
+  ///
+  /// `provisional_number` n'est **jamais** touché ici (v19) : il garde la trace
+  /// du numéro imprimé sur le ticket déjà remis au parent. Sans lui, le
+  /// scellement rendrait ce papier orphelin — or RG-012-12 fait de sa
+  /// conservation par le parent le levier de rapprochement de l'établissement.
   Future<void> _sealDocuments(
     DatabaseExecutor txn,
     PaymentAggregateResponse ack,
@@ -143,6 +152,83 @@ class FinancePaymentAckDao {
         whereArgs: [ack.paymentId, 'PAYMENT', doc.localDocType],
       );
     }
+  }
+
+  /// Capte l'UUID de la pièce scellée (v19).
+  ///
+  /// Le serveur le renvoie depuis toujours — il était parsé puis jeté. C'est le
+  /// SEUL identifiant permettant de re-télécharger un reçu définitif par
+  /// `GET /editique/documents/{id}` : sans lui, la seule voie est de rejouer le
+  /// POST d'émission. `null` est un cas normal, pour la même raison que
+  /// `documents` vide : le scellement serveur est hors transaction.
+  Future<void> _captureReceiptId(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack,
+  ) async {
+    final receiptId = ack.receiptId;
+    if (receiptId == null || receiptId.isEmpty) return;
+
+    await txn.update(
+      'payments',
+      {'receipt_id': receiptId},
+      where: 'id = ?',
+      whereArgs: [ack.paymentId],
+    );
+  }
+
+  /// Ouvre une anomalie de trop-perçu (ADR-012 D-5, amendé).
+  ///
+  /// Le signal existait depuis toujours et n'était consommé par personne. Il
+  /// n'annule RIEN : le paiement est enregistré, le reçu scellé, le ticket du
+  /// parent reste valide. Il ouvre une anomalie à arbitrer — et c'est pour cela
+  /// qu'elle est écrite DANS la transaction d'ACK : l'entrée d'outbox
+  /// correspondante sera supprimée à la fin du même flush, emportant avec elle
+  /// la seule autre trace du signal.
+  ///
+  /// L'élève, le caissier et l'appareil sont recopiés depuis le paiement :
+  /// l'alerte doit pouvoir nommer QUI a encaissé et sur QUELLE tablette, des
+  /// jours plus tard, sans dépendre d'une jointure.
+  Future<void> _recordOverpaymentAnomaly(
+    DatabaseExecutor txn,
+    PaymentAggregateResponse ack,
+    int nowMs,
+  ) async {
+    final signal = ack.overpayment;
+    if (signal == null || !signal.detected) return;
+
+    final rows = await txn.query(
+      'payments',
+      columns: const [
+        'student_id',
+        'cashier_first_name',
+        'cashier_last_name',
+        'device_id',
+      ],
+      where: 'id = ?',
+      whereArgs: [ack.paymentId],
+      limit: 1,
+    );
+    final source = rows.isEmpty ? const <String, Object?>{} : rows.first;
+
+    await PaymentAnomalyDao(txn).record(
+      PaymentAnomaly(
+        // Déterministe : un rejeu de l'ACK retombe sur la même clé, que l'index
+        // unique (payment_id, kind) neutralise — sans jamais rouvrir une
+        // anomalie déjà accusée.
+        id: 'anomaly-${ack.paymentId}-${PaymentAnomalyKind.overpayment.dbValue}',
+        paymentId: ack.paymentId,
+        studentId: source['student_id'] as String?,
+        kind: PaymentAnomalyKind.overpayment,
+        excessInCents: signal.excessInCents,
+        currency: signal.currency,
+        feeCode: signal.feeCode,
+        reason: signal.reason,
+        cashierFirstName: source['cashier_first_name'] as String?,
+        cashierLastName: source['cashier_last_name'] as String?,
+        deviceId: source['device_id'] as String?,
+        detectedAt: nowMs,
+      ),
+    );
   }
 
   /// (élève, année) du paiement — le scope de résolution des créances.
