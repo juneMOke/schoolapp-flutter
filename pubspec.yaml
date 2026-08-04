@@ -79,6 +79,16 @@ dependencies:
   #
   # Enregistrer volontairement une pièce sur l'appareil reste hors périmètre.
   printing: ^5.14.3
+  # Résolution du répertoire de cache, pour PURGER le dossier de partage laissé
+  # en clair par `Printing.sharePdf` à chaque fin de session (ADR-012 D-7/PO-5).
+  # Déjà présent en transitif (flutter_secure_storage_windows) — déclaré en
+  # direct parce qu'il est désormais importé par du code de l'application.
+  path_provider: ^2.1.5
+  # Rendu du ticket provisoire 80 mm (ADR-012 D-4). Déjà tiré en transitif par
+  # `printing` — déclaré en direct parce que du code de l'application l'importe
+  # désormais (`depend_on_referenced_packages`), et PINÉ sur la version résolue
+  # par `printing` pour que les deux ne divergent jamais.
+  pdf: 3.12.0
 
 
 dev_dependencies:
