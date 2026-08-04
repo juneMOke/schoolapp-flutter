@@ -5,8 +5,11 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ledger_freshness_caption.dart';
@@ -106,43 +109,77 @@ class _StatementAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<StudentChargesBloc, StudentChargesState>(
-      buildWhen: (prev, curr) =>
-          prev.status != curr.status ||
-          prev.studentCharges.length != curr.studentCharges.length,
-      builder: (context, state) {
-        final enabled = _hasCharges(state);
+    // Trois gardes indépendantes, dans l'ordre où elles s'expliquent à
+    // l'utilisateur. Chacune a un motif distinct et un message distinct :
+    //  1. l'élève n'est pas encore connu du serveur → l'appel donnerait un 404 ;
+    //  2. la radio est coupée → le relevé est une émission serveur, point ;
+    //  3. l'élève n'a aucune créance → le serveur répond 404 « rien à relever ».
+    // La quatrième (session en lecture seule) reste portée par SessionWriteGate.
+    final isOffline =
+        context.watch<SyncStatusCubit>().state.status == SyncStatus.offline;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Émettre une pièce numérotée avance une séquence comptable côté
-            // serveur : c'est une écriture, elle est gelée en session
-            // lecture seule au même titre qu'un encaissement.
-            SessionWriteGate(
-              child: EteeloButton.secondary(
-                label: l10n.facturationDetailStatementLabel,
-                icon: Icons.description_outlined,
-                onPressed: enabled ? () => _onPressed(context) : null,
-                // Hors colonne pleine largeur : sans cela le thème étirerait le
-                // bouton sur toute la ligne.
-                fullWidth: false,
-              ),
-            ),
-            if (!enabled && state.status == StudentChargesStatus.success) ...[
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                l10n.facturationDetailStatementNoChargesHint,
-                textAlign: TextAlign.end,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
+    return BlocBuilder<EditiqueEligibilityCubit, EditiqueEligibilityState>(
+      builder: (context, eligibility) {
+        return BlocBuilder<StudentChargesBloc, StudentChargesState>(
+          buildWhen: (prev, curr) =>
+              prev.status != curr.status ||
+              prev.studentCharges.length != curr.studentCharges.length,
+          builder: (context, state) {
+            final hasCharges = _hasCharges(state);
+            final enabled = eligibility.isEligible && !isOffline && hasCharges;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Émettre une pièce numérotée avance une séquence comptable côté
+                // serveur : c'est une écriture, elle est gelée en session
+                // lecture seule au même titre qu'un encaissement.
+                SessionWriteGate(
+                  child: EteeloButton.secondary(
+                    label: l10n.facturationDetailStatementLabel,
+                    icon: Icons.description_outlined,
+                    onPressed: enabled ? () => _onPressed(context) : null,
+                    // Hors colonne pleine largeur : sans cela le thème étirerait
+                    // le bouton sur toute la ligne.
+                    fullWidth: false,
+                  ),
                 ),
-              ),
-            ],
-          ],
+                if (_hint(l10n, eligibility, isOffline, state)
+                    case final hint?) ...[
+                  const SizedBox(height: AppDimensions.spacingXS),
+                  Text(
+                    hint,
+                    textAlign: TextAlign.end,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
         );
       },
     );
+  }
+
+  /// Message d'accompagnement du bouton éteint, `null` quand il est actif ou
+  /// quand la cause n'est pas encore établie (résolution en cours, créances non
+  /// chargées) — on n'annonce jamais une raison qu'on ne connaît pas.
+  String? _hint(
+    AppLocalizations l10n,
+    EditiqueEligibilityState eligibility,
+    bool isOffline,
+    StudentChargesState state,
+  ) {
+    if (eligibility.isBlocked) {
+      return l10n.facturationDetailStatementPendingSyncHint;
+    }
+    if (isOffline) return l10n.facturationDetailStatementOfflineHint;
+    if (!_hasCharges(state) && state.status == StudentChargesStatus.success) {
+      return l10n.facturationDetailStatementNoChargesHint;
+    }
+    return null;
   }
 }

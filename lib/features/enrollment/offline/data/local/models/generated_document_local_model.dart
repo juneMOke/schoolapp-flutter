@@ -9,6 +9,13 @@ class GeneratedDocumentLocalModel {
   final String? studentId;
   final String docType;
   final String number;
+
+  /// Numéro provisoire d'origine, CONSERVÉ après scellement (v19).
+  /// Le scellement écrase `number` (`PROV-…` → `ETL-…`) : sans cette copie, le
+  /// ticket papier détenu par un parent n'a plus aucun lien avec le reçu
+  /// définitif — ce que RG-012-12 suppose pourtant possible.
+  final String? provisionalNumber;
+
   final String status;
   final String? verificationToken;
   final int createdAt;
@@ -21,6 +28,7 @@ class GeneratedDocumentLocalModel {
     this.studentId,
     required this.docType,
     required this.number,
+    this.provisionalNumber,
     this.status = 'PROVISIONAL',
     this.verificationToken,
     this.createdAt = 0,
@@ -34,6 +42,7 @@ class GeneratedDocumentLocalModel {
     'student_id': studentId,
     'doc_type': docType,
     'number': number,
+    'provisional_number': provisionalNumber,
     'status': status,
     'verification_token': verificationToken,
     'created_at': createdAt,
@@ -48,6 +57,7 @@ class GeneratedDocumentLocalModel {
         studentId: m['student_id'] as String?,
         docType: m['doc_type'] as String,
         number: m['number'] as String,
+        provisionalNumber: m['provisional_number'] as String?,
         status: (m['status'] as String?) ?? 'PROVISIONAL',
         verificationToken: m['verification_token'] as String?,
         createdAt: (m['created_at'] as int?) ?? 0,
@@ -61,7 +71,9 @@ class GeneratedDocumentLocalModel {
     studentId: studentId,
     docType: docType,
     number: number,
+    provisionalNumber: provisionalNumber,
     status: status,
     verificationToken: verificationToken,
+    createdAt: createdAt,
   );
 }

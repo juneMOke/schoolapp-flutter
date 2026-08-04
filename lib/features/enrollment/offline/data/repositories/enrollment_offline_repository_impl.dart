@@ -457,6 +457,10 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
   );
 
   @override
+  Future<Either<Failure, bool>> isStudentKnownToServer(String studentId) =>
+      _guardRead(() => _readDao.isStudentKnownToServer(studentId));
+
+  @override
   Future<Either<Failure, ReenrollmentSearchResult>> searchReenrollmentCohort({
     String? schoolLevelId,
     String? schoolLevelGroupId,

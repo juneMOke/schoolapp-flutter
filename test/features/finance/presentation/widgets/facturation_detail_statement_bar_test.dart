@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
@@ -24,6 +28,22 @@ class _FakeLedgerFreshnessCubit extends Cubit<int?>
   Future<void> load(String studentId) async {}
 }
 
+class _FakeEditiqueEligibilityCubit extends Cubit<EditiqueEligibilityState>
+    implements EditiqueEligibilityCubit {
+  _FakeEditiqueEligibilityCubit(super.initialState);
+
+  @override
+  Future<void> resolveForStudent(String studentId) async {}
+}
+
+class _FakeSyncStatusCubit extends Cubit<SyncStatusState>
+    implements SyncStatusCubit {
+  _FakeSyncStatusCubit(super.initialState);
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 StudentCharge _charge() => const StudentCharge(
   id: 'c-1',
   studentId: 's-1',
@@ -42,6 +62,8 @@ StudentCharge _charge() => const StudentCharge(
 Future<void> _pump(
   WidgetTester tester, {
   required StudentChargesState chargesState,
+  EditiqueEligibilityStatus eligibility = EditiqueEligibilityStatus.eligible,
+  SyncStatus syncStatus = SyncStatus.synced,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -56,6 +78,15 @@ Future<void> _pump(
             ),
             BlocProvider<LedgerFreshnessCubit>(
               create: (_) => _FakeLedgerFreshnessCubit(),
+            ),
+            BlocProvider<EditiqueEligibilityCubit>(
+              create: (_) => _FakeEditiqueEligibilityCubit(
+                EditiqueEligibilityState(status: eligibility),
+              ),
+            ),
+            BlocProvider<SyncStatusCubit>(
+              create: (_) =>
+                  _FakeSyncStatusCubit(SyncStatusState(status: syncStatus)),
             ),
           ],
           child: const FacturationDetailStatementBar(
@@ -174,6 +205,103 @@ void main() {
     // Aucune visionneuse n'a été ouverte.
     expect(find.text('Préparation du document…'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  // La garde qui motive tout le lot : un élève encore en attente de synchro
+  // porte un uuid client que le serveur ignore — l'appel donnerait un 404.
+  testWidgets('éteint l action pour un élève non synchronisé', (tester) async {
+    await _pump(
+      tester,
+      chargesState: StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [_charge()],
+      ),
+      eligibility: EditiqueEligibilityStatus.blocked,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<OutlinedButton>(_statementButton()).onPressed, isNull);
+    expect(find.textContaining('pas encore synchronisé'), findsOneWidget);
+
+    await tester.tap(_statementButton(), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('Générer un relevé de compte ?'), findsNothing);
+  });
+
+  // Tant que la garde n'a pas tranché, on n'ouvre rien et on n'explique rien :
+  // annoncer une raison qu'on ne connaît pas serait pire que de se taire.
+  testWidgets('reste éteinte et muette pendant la résolution', (tester) async {
+    await _pump(
+      tester,
+      chargesState: StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [_charge()],
+      ),
+      eligibility: EditiqueEligibilityStatus.resolving,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<OutlinedButton>(_statementButton()).onPressed, isNull);
+    expect(find.textContaining('pas encore synchronisé'), findsNothing);
+    expect(find.textContaining('Hors connexion'), findsNothing);
+  });
+
+  // B-2 (ADR-012) : le relevé est une émission serveur, elle n'a aucun sens
+  // radio coupée.
+  testWidgets('éteint l action hors ligne et l explique', (tester) async {
+    await _pump(
+      tester,
+      chargesState: StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [_charge()],
+      ),
+      syncStatus: SyncStatus.offline,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<OutlinedButton>(_statementButton()).onPressed, isNull);
+    expect(find.textContaining('Hors connexion'), findsOneWidget);
+  });
+
+  // Décision D-9 : `authRequired` reste ACTIF. Une émission en 401 est une
+  // erreur traitée par l'anatomie d'erreur ; un grisage muet cacherait une
+  // session à rouvrir.
+  testWidgets('laisse l action active en session à ré-authentifier', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      chargesState: StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [_charge()],
+      ),
+      syncStatus: SyncStatus.authRequired,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<OutlinedButton>(_statementButton()).onPressed,
+      isNotNull,
+    );
+  });
+
+  // Ordre des messages : l'ineligibilité prime sur le hors-ligne, qui prime sur
+  // l'absence de frais — on nomme la cause la plus fondamentale.
+  testWidgets('nomme la synchro d abord quand tout est bloqué', (tester) async {
+    await _pump(
+      tester,
+      chargesState: const StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [],
+      ),
+      eligibility: EditiqueEligibilityStatus.blocked,
+      syncStatus: SyncStatus.offline,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('pas encore synchronisé'), findsOneWidget);
+    expect(find.textContaining('Hors connexion'), findsNothing);
+    expect(find.textContaining('Aucun frais'), findsNothing);
   });
 
   testWidgets('reste lisible en largeur compacte', (tester) async {

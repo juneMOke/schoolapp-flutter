@@ -289,6 +289,12 @@ abstract class EnrollmentOfflineRepository {
     required String academicYearId,
   });
 
+  /// Vrai si `studentId` est **déjà connu du serveur** (ligne `students` passée
+  /// `SYNCED`, ou id canonique issu de la cohorte N-1). C'est la garde des
+  /// pièces d'éditique scopées élève : un uuid client encore en attente de
+  /// synchro produit un 404. **Fail-closed** — inconnu vaut « non ».
+  Future<Either<Failure, bool>> isStudentKnownToServer(String studentId);
+
   Future<Either<Failure, LocalEnrollmentDetail>> getDetail(String enrollmentId);
 
   /// Candidat de réinscription (cohorte N-1 locale) par `student_id` — photo de

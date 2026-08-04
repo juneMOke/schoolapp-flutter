@@ -50,7 +50,7 @@ Future<void> showFacturationPaymentDetailDialog(
             currency: intent.currency,
           ),
           receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
-          receiptPending: intent.isPendingSync || receipt.isProvisional,
+          receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
           // Le reçu est produit par le serveur à partir de l'identifiant du
           // paiement : il n'est demandable que pour un encaissement déjà
           // remonté, sans quoi l'uuid client donnerait un 404.

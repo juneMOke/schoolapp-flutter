@@ -167,6 +167,43 @@ class EnrollmentReadDao {
     return rows.map(_listItem).toList();
   }
 
+  /// Vrai si le **serveur connaît déjà** `studentId` — seule condition pour
+  /// qu'une pièce d'éditique scopée élève (note de perception, relevé, quitus)
+  /// aboutisse : ces endpoints prennent le `studentId` dans leur chemin, et un
+  /// uuid **client** encore en attente de synchro produit un 404.
+  ///
+  /// Deux origines suffisent, et l'une des deux suffit :
+  /// - la ligne `students` est passée `SYNCED` — l'uuid client a été honoré à
+  ///   l'ACK, ou l'élève est descendu par pull avec son id serveur ;
+  /// - l'élève vient de la **cohorte N-1** (`ref_previous_year_students`), dont
+  ///   le `student_id` est l'id **canonique** réutilisé tel quel par le dossier
+  ///   de réinscription. Il est connu du serveur avant même que ce dossier ne
+  ///   parte — d'où le second test, sans lequel tout candidat RE serait bloqué
+  ///   à tort tant que sa réinscription n'est pas acquittée.
+  ///
+  /// **Fail-closed** : un élève absent des deux tables est déclaré inconnu. On
+  /// préfère éteindre une action légitime que d'envoyer l'utilisateur vers un
+  /// 404 — et, sur une pièce non archivée, vers un numéro de séquence brûlé.
+  Future<bool> isStudentKnownToServer(String studentId) async {
+    final synced = await _db.query(
+      'students',
+      columns: ['id'],
+      where: 'id = ? AND sync_status = ?',
+      whereArgs: [studentId, SyncState.synced.dbValue],
+      limit: 1,
+    );
+    if (synced.isNotEmpty) return true;
+
+    final cohort = await _db.query(
+      'ref_previous_year_students',
+      columns: ['student_id'],
+      where: 'student_id = ?',
+      whereArgs: [studentId],
+      limit: 1,
+    );
+    return cohort.isNotEmpty;
+  }
+
   /// Référence (`id` + axe synchro) d'un dossier local **déjà existant** pour un
   /// élève sur une année donnée. `null` si aucun. Sert à la fois à la garde anti
   /// double-réinscription (présence) et à la **sonde au tap** RE (le `syncState`

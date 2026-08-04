@@ -20,10 +20,11 @@ class PaymentReceiptCubit extends Cubit<PaymentReceiptState> {
       PaymentReceiptState(
         loaded: true,
         number: document?.number,
-        // `PROV-…` tant que l'encaissement n'a pas été acquitté par le serveur.
-        // Ce n'est pas un numéro de pièce officiel : l'UI doit le dire plutôt
-        // que de l'afficher comme un numéro définitif.
-        isProvisional: document?.isProvisional ?? false,
+        // Affirmation POSITIVE, jamais déduite d'une négation : le numéro ne
+        // fait foi que sur un statut `DEFINITIVE` scellé par l'ACK. Tant que
+        // l'encaissement n'est pas acquitté, `number` vaut `PROV-…` — et tout
+        // statut inconnu retombe ici du bon côté (non définitif).
+        isDefinitive: document?.isDefinitive ?? false,
       ),
     );
   }
@@ -32,18 +33,30 @@ class PaymentReceiptCubit extends Cubit<PaymentReceiptState> {
 class PaymentReceiptState extends Equatable {
   final bool loaded;
   final String? number;
-  final bool isProvisional;
+
+  /// Le numéro porté par [number] est scellé côté serveur. `false` par défaut :
+  /// tant qu'on ne sait pas, on ne prétend pas.
+  final bool isDefinitive;
 
   const PaymentReceiptState({
     this.loaded = false,
     this.number,
-    this.isProvisional = false,
+    this.isDefinitive = false,
   });
 
   /// Vrai quand un numéro **définitif** est connu et affichable tel quel.
   bool get hasDefinitiveNumber =>
-      !isProvisional && (number?.trim().isNotEmpty ?? false);
+      isDefinitive && (number?.trim().isNotEmpty ?? false);
+
+  /// Vrai quand un numéro PROVISOIRE est effectivement connu localement.
+  ///
+  /// Affirmation positive, et c'est essentiel : `!isDefinitive` serait vrai
+  /// aussi quand aucune ligne locale n'existe — cas NORMAL d'un paiement
+  /// encaissé sur un AUTRE poste et descendu par pull. Un versement pourtant
+  /// synchronisé serait alors annoncé « en attente de synchronisation ».
+  bool get hasProvisionalNumber =>
+      loaded && !isDefinitive && (number?.trim().isNotEmpty ?? false);
 
   @override
-  List<Object?> get props => [loaded, number, isProvisional];
+  List<Object?> get props => [loaded, number, isDefinitive];
 }

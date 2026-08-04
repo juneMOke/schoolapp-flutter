@@ -36,7 +36,7 @@ void main() {
     expect: () => [
       isA<PaymentReceiptState>()
           .having((s) => s.number, 'number', 'ETL-RC-2526-000212')
-          .having((s) => s.isProvisional, 'isProvisional', isFalse)
+          .having((s) => s.isDefinitive, 'isDefinitive', isTrue)
           .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isTrue),
     ],
   );
@@ -52,7 +52,26 @@ void main() {
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
-          .having((s) => s.isProvisional, 'isProvisional', isTrue)
+          .having((s) => s.isDefinitive, 'isDefinitive', isFalse)
+          .having((s) => s.hasProvisionalNumber, 'hasProvisionalNumber', isTrue)
+          .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isFalse),
+    ],
+  );
+
+  // Régression : le prédicat doit être une affirmation POSITIVE. Avec l'ancien
+  // `!isProvisional`, tout statut hors des deux connus rendait `true` et faisait
+  // passer un `PROV-…` pour un numéro qui fait foi.
+  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+    'traite un statut inconnu comme non définitif',
+    setUp: () => when(() => useCase(any())).thenAnswer(
+      (_) async => _document(number: 'PROV-ABCD1234', status: 'REJECTED'),
+    ),
+    build: () => PaymentReceiptCubit(useCase),
+    act: (cubit) => cubit.load('pay-1'),
+    expect: () => [
+      isA<PaymentReceiptState>()
+          .having((s) => s.isDefinitive, 'isDefinitive', isFalse)
+          .having((s) => s.hasProvisionalNumber, 'hasProvisionalNumber', isTrue)
           .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isFalse),
     ],
   );
@@ -72,6 +91,34 @@ void main() {
 
   test('un numéro blanc ne compte pas comme définitif', () {
     const state = PaymentReceiptState(loaded: true, number: '   ');
+    expect(state.hasDefinitiveNumber, isFalse);
+  });
+
+  // Régression : un versement encaissé sur un AUTRE poste et descendu par pull
+  // n'a jamais eu de ligne `generated_documents` locale. Le déduire d'un
+  // `!isDefinitive` le ferait annoncer « en attente de synchronisation » alors
+  // qu'il est parfaitement synchronisé.
+  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+    'n annonce aucune attente quand aucun reçu local n existe',
+    setUp: () => when(() => useCase(any())).thenAnswer((_) async => null),
+    build: () => PaymentReceiptCubit(useCase),
+    act: (cubit) => cubit.load('pay-1'),
+    expect: () => [
+      isA<PaymentReceiptState>()
+          .having((s) => s.loaded, 'loaded', isTrue)
+          .having(
+            (s) => s.hasProvisionalNumber,
+            'hasProvisionalNumber',
+            isFalse,
+          )
+          .having((s) => s.hasDefinitiveNumber, 'hasDefinitiveNumber', isFalse),
+    ],
+  );
+
+  test('n annonce aucune attente avant le chargement', () {
+    const state = PaymentReceiptState();
+
+    expect(state.hasProvisionalNumber, isFalse);
     expect(state.hasDefinitiveNumber, isFalse);
   });
 }

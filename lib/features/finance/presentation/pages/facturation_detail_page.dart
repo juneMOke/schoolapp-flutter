@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
@@ -166,6 +167,14 @@ class FacturationDetailPage extends StatelessWidget {
         // Fraîcheur du grand-livre (ADR-002) affichée sous les totaux.
         BlocProvider<LedgerFreshnessCubit>(
           create: (_) => getIt<LedgerFreshnessCubit>(),
+        ),
+        // Garde d'éditique : le relevé prend le studentId dans son URL, or un
+        // élève saisi hors ligne porte un uuid client que le serveur ignore.
+        // Résolu une fois au montage — l'id de l'élève ne change pas ici.
+        BlocProvider<EditiqueEligibilityCubit>(
+          create: (_) =>
+              getIt<EditiqueEligibilityCubit>()
+                ..resolveForStudent(intent.studentId),
         ),
       ],
       child: AppPageBackground(
