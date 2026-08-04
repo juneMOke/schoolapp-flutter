@@ -5732,11 +5732,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get editiqueViewerStatementTitle => 'Relevé de compte';
 
   @override
+  String get editiqueViewerAttestationTitle => 'Attestation d\'inscription';
+
+  @override
+  String get editiqueViewerNotePerceptionTitle => 'Note de perception';
+
+  @override
+  String get editiqueViewerClearanceTitle => 'Quitus financier';
+
+  @override
+  String editiqueErrorServerDetailLabel(String detail) {
+    return 'Motif renvoyé par le serveur : $detail';
+  }
+
+  @override
   String get facturationDetailStatementLabel => 'Relevé de compte';
 
   @override
   String get facturationDetailStatementNoChargesHint =>
       'Aucun frais sur l\'année : le relevé ne peut pas être produit.';
+
+  @override
+  String get facturationDetailStatementPendingSyncHint =>
+      'Élève pas encore synchronisé : le relevé sera disponible après la prochaine synchronisation.';
+
+  @override
+  String get facturationDetailStatementOfflineHint =>
+      'Hors connexion : le relevé est produit par le serveur.';
 
   @override
   String get facturationDetailStatementConfirmTitle =>
@@ -5751,4 +5773,223 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationDetailStatementConfirmCancel => 'Annuler';
+
+  @override
+  String get menuDocuments => 'Documents';
+
+  @override
+  String get subMenuDocumentsStudent => 'Documents de l\'élève';
+
+  @override
+  String get documentsSearchTitle => 'Documents de l\'élève';
+
+  @override
+  String get documentsSearchHelpBanner =>
+      'Recherchez un élève précis, ou toute une classe, puis ouvrez son catalogue de pièces.';
+
+  @override
+  String get documentsSearchByStudentGroup => 'Par élève';
+
+  @override
+  String get documentsSearchByClassGroup => 'Par classe';
+
+  @override
+  String get documentsSearchOrSeparator => 'OU';
+
+  @override
+  String get documentsSearchActiveModeLabel => 'Mode actif';
+
+  @override
+  String get documentsSearchModeStudentBadge => 'Élève';
+
+  @override
+  String get documentsSearchModeClassBadge => 'Classe';
+
+  @override
+  String get documentsSearchCycleLabel => 'Cycle';
+
+  @override
+  String get documentsSearchLevelLabel => 'Niveau';
+
+  @override
+  String get documentsSearchLevelPlaceholder => 'Choisissez d\'abord un cycle';
+
+  @override
+  String get documentsSearchInvitationTitle =>
+      'Trouvez l\'élève, ouvrez ses documents';
+
+  @override
+  String get documentsSearchInvitationMessage =>
+      'Attestation d\'inscription, note de perception, reçu de paiement, relevé de compte et quitus financier : les pièces émissibles pour un élève.';
+
+  @override
+  String get documentsEmptyTitle => 'Aucun élève trouvé';
+
+  @override
+  String get documentsNoResultsDescription =>
+      'Aucun élève inscrit cette année ne correspond à ces critères.';
+
+  @override
+  String get documentsOpenCatalogLabel => 'Ouvrir les documents';
+
+  @override
+  String get documentsCatalogEyebrow => 'Documents';
+
+  @override
+  String get documentsCatalogUnknownStudent => 'Élève';
+
+  @override
+  String get documentsGroupScolariteTitle => 'Scolarité';
+
+  @override
+  String get documentsGroupScolariteSubtitle => 'Dossier d\'inscription';
+
+  @override
+  String get documentsGroupFinancesTitle => 'Finances';
+
+  @override
+  String get documentsGroupFinancesSubtitle =>
+      'Perception, reçus et attestations de règlement';
+
+  @override
+  String get documentsNatureArchivedLabel => 'Figé';
+
+  @override
+  String get documentsNatureTimestampedLabel => 'Horodaté';
+
+  @override
+  String get documentsHintAttestation =>
+      'Pièce archivée : la redemander re-sert exactement le même document, sous le même numéro.';
+
+  @override
+  String get documentsHintNotePerception =>
+      'Document comptable immuable, émis une seule fois par élève et par année.';
+
+  @override
+  String get documentsHintReceipt =>
+      'Un reçu par versement. Il s\'émet depuis la Facturation, au moment de l\'encaissement.';
+
+  @override
+  String get documentsHintStatement =>
+      'Photo du compte à l\'instant de la demande : chaque émission produit une nouvelle pièce numérotée.';
+
+  @override
+  String get documentsHintClearance =>
+      'Atteste que l\'élève est en règle à la date de la demande. Non archivé, renuméroté à chaque émission.';
+
+  @override
+  String get documentsActionEmitLabel => 'Émettre';
+
+  @override
+  String get documentsActionConsultLabel => 'Consulter';
+
+  @override
+  String get documentsActionGenerateLabel => 'Générer maintenant';
+
+  @override
+  String get documentsActionBusyLabel => 'Génération…';
+
+  @override
+  String get documentsActionFailedNotice =>
+      'La génération a échoué. Le document n\'a pas été produit.';
+
+  @override
+  String get documentsBlockedPendingSyncNotice =>
+      'Élève pas encore synchronisé : la pièce sera disponible après la prochaine synchronisation.';
+
+  @override
+  String get documentsBlockedEnrollmentPendingSyncNotice =>
+      'Dossier pas encore synchronisé : l\'attestation sera disponible après la prochaine synchronisation.';
+
+  @override
+  String get documentsBlockedMissingEnrollmentNotice =>
+      'Dossier introuvable depuis ce lien : rouvrez la fiche depuis la liste des élèves.';
+
+  @override
+  String get documentsBlockedOfflineNotice =>
+      'Hors connexion : cette pièce est produite par le serveur.';
+
+  @override
+  String documentsConfirmGenerateTitle(String document) {
+    return 'Générer : $document ?';
+  }
+
+  @override
+  String get documentsConfirmGenerateMessage =>
+      'Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les pièces déjà remises restent valides — elles ne sont pas remplacées.';
+
+  @override
+  String get documentsConfirmClearanceWarning =>
+      'Le quitus est émis quel que soit le solde : un élève qui n\'est pas en règle recevra une pièce portant la mention « NON EN RÈGLE ».';
+
+  @override
+  String get documentsConfirmGenerateAction => 'Générer';
+
+  @override
+  String get documentsConfirmGenerateCancel => 'Annuler';
+
+  @override
+  String documentsLastIssueSubtitle(String date, String reference) {
+    return 'Dernière émission $date · réf. $reference';
+  }
+
+  @override
+  String get ticketProvisionalBanner => 'Provisoire';
+
+  @override
+  String get ticketReferenceLabel => 'Réf.';
+
+  @override
+  String get ticketCashierLabel => 'Caissier :';
+
+  @override
+  String get ticketStudentLabel => 'Élève :';
+
+  @override
+  String get ticketMatriculationLabel => 'Matricule :';
+
+  @override
+  String get ticketClassroomLabel => 'Classe :';
+
+  @override
+  String get ticketAmountReceivedLabel => 'Montant reçu';
+
+  @override
+  String get ticketAllocationsLabel => 'Répartition';
+
+  @override
+  String get ticketBalanceLabel => 'Solde';
+
+  @override
+  String get ticketBalanceReservation => 'sous réserve de synchronisation';
+
+  @override
+  String get ticketKeepNotice =>
+      'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.';
+
+  @override
+  String get ticketPrintLabel => 'Imprimer le ticket';
+
+  @override
+  String get ticketPrintFailed =>
+      'Impression indisponible : le ticket n\'a pas pu être produit.';
+
+  @override
+  String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
+
+  @override
+  String get paymentAnomalyBannerFallback =>
+      'Un encaissement dépasse le reste dû.';
+
+  @override
+  String get paymentAnomalyAcknowledgeLabel => 'Traité';
+
+  @override
+  String paymentAnomalyOthersPending(int count) {
+    return '$count autre(s) en attente';
+  }
+
+  @override
+  String get documentsBlockedEnrollmentUnreadableNotice =>
+      'Dossier illisible sur cette tablette : l\'attestation n\'est pas disponible ici.';
 }

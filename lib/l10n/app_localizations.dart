@@ -9549,6 +9549,30 @@ abstract class AppLocalizations {
   /// **'Account statement'**
   String get editiqueViewerStatementTitle;
 
+  /// No description provided for @editiqueViewerAttestationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment certificate'**
+  String get editiqueViewerAttestationTitle;
+
+  /// No description provided for @editiqueViewerNotePerceptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee notice'**
+  String get editiqueViewerNotePerceptionTitle;
+
+  /// No description provided for @editiqueViewerClearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial clearance'**
+  String get editiqueViewerClearanceTitle;
+
+  /// No description provided for @editiqueErrorServerDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason returned by the server: {detail}'**
+  String editiqueErrorServerDetailLabel(String detail);
+
   /// No description provided for @facturationDetailStatementLabel.
   ///
   /// In en, this message translates to:
@@ -9560,6 +9584,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No fee for the year: the statement cannot be produced.'**
   String get facturationDetailStatementNoChargesHint;
+
+  /// No description provided for @facturationDetailStatementPendingSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not synced yet: the statement will be available after the next sync.'**
+  String get facturationDetailStatementPendingSyncHint;
+
+  /// No description provided for @facturationDetailStatementOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: the statement is produced by the server.'**
+  String get facturationDetailStatementOfflineHint;
 
   /// No description provided for @facturationDetailStatementConfirmTitle.
   ///
@@ -9584,6 +9620,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get facturationDetailStatementConfirmCancel;
+
+  /// No description provided for @menuDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get menuDocuments;
+
+  /// No description provided for @subMenuDocumentsStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student documents'**
+  String get subMenuDocumentsStudent;
+
+  /// No description provided for @documentsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student documents'**
+  String get documentsSearchTitle;
+
+  /// No description provided for @documentsSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for one student, or a whole class, then open their document catalogue.'**
+  String get documentsSearchHelpBanner;
+
+  /// No description provided for @documentsSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get documentsSearchByStudentGroup;
+
+  /// No description provided for @documentsSearchByClassGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get documentsSearchByClassGroup;
+
+  /// No description provided for @documentsSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get documentsSearchOrSeparator;
+
+  /// No description provided for @documentsSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active mode'**
+  String get documentsSearchActiveModeLabel;
+
+  /// No description provided for @documentsSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get documentsSearchModeStudentBadge;
+
+  /// No description provided for @documentsSearchModeClassBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get documentsSearchModeClassBadge;
+
+  /// No description provided for @documentsSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get documentsSearchCycleLabel;
+
+  /// No description provided for @documentsSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get documentsSearchLevelLabel;
+
+  /// No description provided for @documentsSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get documentsSearchLevelPlaceholder;
+
+  /// No description provided for @documentsSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the student, open their documents'**
+  String get documentsSearchInvitationTitle;
+
+  /// No description provided for @documentsSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment certificate, fee notice, payment receipt, account statement and financial clearance: the documents issuable for a student.'**
+  String get documentsSearchInvitationMessage;
+
+  /// No description provided for @documentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get documentsEmptyTitle;
+
+  /// No description provided for @documentsNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled this year matches these criteria.'**
+  String get documentsNoResultsDescription;
+
+  /// No description provided for @documentsOpenCatalogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open documents'**
+  String get documentsOpenCatalogLabel;
+
+  /// No description provided for @documentsCatalogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsCatalogEyebrow;
+
+  /// No description provided for @documentsCatalogUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get documentsCatalogUnknownStudent;
+
+  /// No description provided for @documentsGroupScolariteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schooling'**
+  String get documentsGroupScolariteTitle;
+
+  /// No description provided for @documentsGroupScolariteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment file'**
+  String get documentsGroupScolariteSubtitle;
+
+  /// No description provided for @documentsGroupFinancesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get documentsGroupFinancesTitle;
+
+  /// No description provided for @documentsGroupFinancesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee notices, receipts and settlement certificates'**
+  String get documentsGroupFinancesSubtitle;
+
+  /// No description provided for @documentsNatureArchivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get documentsNatureArchivedLabel;
+
+  /// No description provided for @documentsNatureTimestampedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Timestamped'**
+  String get documentsNatureTimestampedLabel;
+
+  /// No description provided for @documentsHintAttestation.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived document: asking again serves exactly the same file, under the same number.'**
+  String get documentsHintAttestation;
+
+  /// No description provided for @documentsHintNotePerception.
+  ///
+  /// In en, this message translates to:
+  /// **'Immutable accounting document, issued once per student and per year.'**
+  String get documentsHintNotePerception;
+
+  /// No description provided for @documentsHintReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'One receipt per payment. It is issued from Billing, when the cash is taken in.'**
+  String get documentsHintReceipt;
+
+  /// No description provided for @documentsHintStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot of the account at the time of the request: every issue produces a new numbered document.'**
+  String get documentsHintStatement;
+
+  /// No description provided for @documentsHintClearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifies the student is settled as of the request date. Not archived, renumbered on every issue.'**
+  String get documentsHintClearance;
+
+  /// No description provided for @documentsActionEmitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue'**
+  String get documentsActionEmitLabel;
+
+  /// No description provided for @documentsActionConsultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get documentsActionConsultLabel;
+
+  /// No description provided for @documentsActionGenerateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate now'**
+  String get documentsActionGenerateLabel;
+
+  /// No description provided for @documentsActionBusyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get documentsActionBusyLabel;
+
+  /// No description provided for @documentsActionFailedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed. The document was not produced.'**
+  String get documentsActionFailedNotice;
+
+  /// No description provided for @documentsBlockedPendingSyncNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not synced yet: the document will be available after the next sync.'**
+  String get documentsBlockedPendingSyncNotice;
+
+  /// No description provided for @documentsBlockedEnrollmentPendingSyncNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not synced yet: the certificate will be available after the next sync.'**
+  String get documentsBlockedEnrollmentPendingSyncNotice;
+
+  /// No description provided for @documentsBlockedMissingEnrollmentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not reachable from this link: reopen the student from the list.'**
+  String get documentsBlockedMissingEnrollmentNotice;
+
+  /// No description provided for @documentsBlockedOfflineNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: this document is produced by the server.'**
+  String get documentsBlockedOfflineNotice;
+
+  /// No description provided for @documentsConfirmGenerateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate: {document}?'**
+  String documentsConfirmGenerateTitle(String document);
+
+  /// No description provided for @documentsConfirmGenerateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.'**
+  String get documentsConfirmGenerateMessage;
+
+  /// No description provided for @documentsConfirmClearanceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.'**
+  String get documentsConfirmClearanceWarning;
+
+  /// No description provided for @documentsConfirmGenerateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get documentsConfirmGenerateAction;
+
+  /// No description provided for @documentsConfirmGenerateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get documentsConfirmGenerateCancel;
+
+  /// No description provided for @documentsLastIssueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last issued {date} · ref. {reference}'**
+  String documentsLastIssueSubtitle(String date, String reference);
+
+  /// No description provided for @ticketProvisionalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get ticketProvisionalBanner;
+
+  /// No description provided for @ticketReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ref.'**
+  String get ticketReferenceLabel;
+
+  /// No description provided for @ticketCashierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier:'**
+  String get ticketCashierLabel;
+
+  /// No description provided for @ticketStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student:'**
+  String get ticketStudentLabel;
+
+  /// No description provided for @ticketMatriculationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student no.:'**
+  String get ticketMatriculationLabel;
+
+  /// No description provided for @ticketClassroomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class:'**
+  String get ticketClassroomLabel;
+
+  /// No description provided for @ticketAmountReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get ticketAmountReceivedLabel;
+
+  /// No description provided for @ticketAllocationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get ticketAllocationsLabel;
+
+  /// No description provided for @ticketBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get ticketBalanceLabel;
+
+  /// No description provided for @ticketBalanceReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'subject to synchronisation'**
+  String get ticketBalanceReservation;
+
+  /// No description provided for @ticketKeepNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this ticket until you receive your final receipt.'**
+  String get ticketKeepNotice;
+
+  /// No description provided for @ticketPrintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print ticket'**
+  String get ticketPrintLabel;
+
+  /// No description provided for @ticketPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing unavailable: the ticket could not be produced.'**
+  String get ticketPrintFailed;
+
+  /// No description provided for @paymentAnomalyBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overpayment to arbitrate'**
+  String get paymentAnomalyBannerTitle;
+
+  /// No description provided for @paymentAnomalyBannerFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment exceeds the amount still due.'**
+  String get paymentAnomalyBannerFallback;
+
+  /// No description provided for @paymentAnomalyAcknowledgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Handled'**
+  String get paymentAnomalyAcknowledgeLabel;
+
+  /// No description provided for @paymentAnomalyOthersPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more pending'**
+  String paymentAnomalyOthersPending(int count);
+
+  /// No description provided for @documentsBlockedEnrollmentUnreadableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not readable on this tablet: the certificate is unavailable here.'**
+  String get documentsBlockedEnrollmentUnreadableNotice;
 }
 
 class _AppLocalizationsDelegate

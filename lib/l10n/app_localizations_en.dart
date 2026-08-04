@@ -5666,11 +5666,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editiqueViewerStatementTitle => 'Account statement';
 
   @override
+  String get editiqueViewerAttestationTitle => 'Enrolment certificate';
+
+  @override
+  String get editiqueViewerNotePerceptionTitle => 'Fee notice';
+
+  @override
+  String get editiqueViewerClearanceTitle => 'Financial clearance';
+
+  @override
+  String editiqueErrorServerDetailLabel(String detail) {
+    return 'Reason returned by the server: $detail';
+  }
+
+  @override
   String get facturationDetailStatementLabel => 'Account statement';
 
   @override
   String get facturationDetailStatementNoChargesHint =>
       'No fee for the year: the statement cannot be produced.';
+
+  @override
+  String get facturationDetailStatementPendingSyncHint =>
+      'Student not synced yet: the statement will be available after the next sync.';
+
+  @override
+  String get facturationDetailStatementOfflineHint =>
+      'Offline: the statement is produced by the server.';
 
   @override
   String get facturationDetailStatementConfirmTitle =>
@@ -5685,4 +5707,223 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationDetailStatementConfirmCancel => 'Cancel';
+
+  @override
+  String get menuDocuments => 'Documents';
+
+  @override
+  String get subMenuDocumentsStudent => 'Student documents';
+
+  @override
+  String get documentsSearchTitle => 'Student documents';
+
+  @override
+  String get documentsSearchHelpBanner =>
+      'Search for one student, or a whole class, then open their document catalogue.';
+
+  @override
+  String get documentsSearchByStudentGroup => 'By student';
+
+  @override
+  String get documentsSearchByClassGroup => 'By class';
+
+  @override
+  String get documentsSearchOrSeparator => 'OR';
+
+  @override
+  String get documentsSearchActiveModeLabel => 'Active mode';
+
+  @override
+  String get documentsSearchModeStudentBadge => 'Student';
+
+  @override
+  String get documentsSearchModeClassBadge => 'Class';
+
+  @override
+  String get documentsSearchCycleLabel => 'Cycle';
+
+  @override
+  String get documentsSearchLevelLabel => 'Level';
+
+  @override
+  String get documentsSearchLevelPlaceholder => 'Pick a cycle first';
+
+  @override
+  String get documentsSearchInvitationTitle =>
+      'Find the student, open their documents';
+
+  @override
+  String get documentsSearchInvitationMessage =>
+      'Enrolment certificate, fee notice, payment receipt, account statement and financial clearance: the documents issuable for a student.';
+
+  @override
+  String get documentsEmptyTitle => 'No student found';
+
+  @override
+  String get documentsNoResultsDescription =>
+      'No student enrolled this year matches these criteria.';
+
+  @override
+  String get documentsOpenCatalogLabel => 'Open documents';
+
+  @override
+  String get documentsCatalogEyebrow => 'Documents';
+
+  @override
+  String get documentsCatalogUnknownStudent => 'Student';
+
+  @override
+  String get documentsGroupScolariteTitle => 'Schooling';
+
+  @override
+  String get documentsGroupScolariteSubtitle => 'Enrolment file';
+
+  @override
+  String get documentsGroupFinancesTitle => 'Finance';
+
+  @override
+  String get documentsGroupFinancesSubtitle =>
+      'Fee notices, receipts and settlement certificates';
+
+  @override
+  String get documentsNatureArchivedLabel => 'Archived';
+
+  @override
+  String get documentsNatureTimestampedLabel => 'Timestamped';
+
+  @override
+  String get documentsHintAttestation =>
+      'Archived document: asking again serves exactly the same file, under the same number.';
+
+  @override
+  String get documentsHintNotePerception =>
+      'Immutable accounting document, issued once per student and per year.';
+
+  @override
+  String get documentsHintReceipt =>
+      'One receipt per payment. It is issued from Billing, when the cash is taken in.';
+
+  @override
+  String get documentsHintStatement =>
+      'Snapshot of the account at the time of the request: every issue produces a new numbered document.';
+
+  @override
+  String get documentsHintClearance =>
+      'Certifies the student is settled as of the request date. Not archived, renumbered on every issue.';
+
+  @override
+  String get documentsActionEmitLabel => 'Issue';
+
+  @override
+  String get documentsActionConsultLabel => 'View';
+
+  @override
+  String get documentsActionGenerateLabel => 'Generate now';
+
+  @override
+  String get documentsActionBusyLabel => 'Generating…';
+
+  @override
+  String get documentsActionFailedNotice =>
+      'Generation failed. The document was not produced.';
+
+  @override
+  String get documentsBlockedPendingSyncNotice =>
+      'Student not synced yet: the document will be available after the next sync.';
+
+  @override
+  String get documentsBlockedEnrollmentPendingSyncNotice =>
+      'Enrolment not synced yet: the certificate will be available after the next sync.';
+
+  @override
+  String get documentsBlockedMissingEnrollmentNotice =>
+      'Enrolment not reachable from this link: reopen the student from the list.';
+
+  @override
+  String get documentsBlockedOfflineNotice =>
+      'Offline: this document is produced by the server.';
+
+  @override
+  String documentsConfirmGenerateTitle(String document) {
+    return 'Generate: $document?';
+  }
+
+  @override
+  String get documentsConfirmGenerateMessage =>
+      'The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.';
+
+  @override
+  String get documentsConfirmClearanceWarning =>
+      'The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.';
+
+  @override
+  String get documentsConfirmGenerateAction => 'Generate';
+
+  @override
+  String get documentsConfirmGenerateCancel => 'Cancel';
+
+  @override
+  String documentsLastIssueSubtitle(String date, String reference) {
+    return 'Last issued $date · ref. $reference';
+  }
+
+  @override
+  String get ticketProvisionalBanner => 'Provisional';
+
+  @override
+  String get ticketReferenceLabel => 'Ref.';
+
+  @override
+  String get ticketCashierLabel => 'Cashier:';
+
+  @override
+  String get ticketStudentLabel => 'Student:';
+
+  @override
+  String get ticketMatriculationLabel => 'Student no.:';
+
+  @override
+  String get ticketClassroomLabel => 'Class:';
+
+  @override
+  String get ticketAmountReceivedLabel => 'Amount received';
+
+  @override
+  String get ticketAllocationsLabel => 'Breakdown';
+
+  @override
+  String get ticketBalanceLabel => 'Balance';
+
+  @override
+  String get ticketBalanceReservation => 'subject to synchronisation';
+
+  @override
+  String get ticketKeepNotice =>
+      'Keep this ticket until you receive your final receipt.';
+
+  @override
+  String get ticketPrintLabel => 'Print ticket';
+
+  @override
+  String get ticketPrintFailed =>
+      'Printing unavailable: the ticket could not be produced.';
+
+  @override
+  String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
+
+  @override
+  String get paymentAnomalyBannerFallback =>
+      'A payment exceeds the amount still due.';
+
+  @override
+  String get paymentAnomalyAcknowledgeLabel => 'Handled';
+
+  @override
+  String paymentAnomalyOthersPending(int count) {
+    return '$count more pending';
+  }
+
+  @override
+  String get documentsBlockedEnrollmentUnreadableNotice =>
+      'Enrolment not readable on this tablet: the certificate is unavailable here.';
 }
