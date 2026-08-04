@@ -190,6 +190,20 @@ class LocalPayment extends Equatable {
   final String payerLastName;
   final String? payerMiddleName;
   final String? status;
+
+  /// Caissier ayant encaissé — uid et nom dénormalisé (v19). Alimentent la
+  /// zone Z3 du ticket provisoire : sur une pièce non scellée, l'imputabilité
+  /// humaine se substitue à l'imputabilité cryptographique (RG-012-11).
+  final String? cashierUid;
+  final String? cashierFirstName;
+  final String? cashierLastName;
+
+  /// Appareil ayant encaissé (préfixe du numéro provisoire, traçabilité).
+  final String? deviceId;
+
+  /// UUID de la pièce scellée côté serveur, quand il est connu.
+  final String? receiptId;
+
   final SyncState syncState;
 
   const LocalPayment({
@@ -205,6 +219,11 @@ class LocalPayment extends Equatable {
     required this.payerLastName,
     this.payerMiddleName,
     this.status,
+    this.cashierUid,
+    this.cashierFirstName,
+    this.cashierLastName,
+    this.deviceId,
+    this.receiptId,
     this.syncState = SyncState.pendingSync,
   });
 
@@ -222,6 +241,11 @@ class LocalPayment extends Equatable {
     payerLastName,
     payerMiddleName,
     status,
+    cashierUid,
+    cashierFirstName,
+    cashierLastName,
+    deviceId,
+    receiptId,
     syncState,
   ];
 }

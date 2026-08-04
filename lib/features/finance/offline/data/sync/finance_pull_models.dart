@@ -168,6 +168,12 @@ class PaymentDto {
   final String? payerMiddleName;
   final String? status;
 
+  /// UUID du reçu scellé, porté par `PaymentDelta` (v19). Le serveur l'envoyait
+  /// déjà ; le client ne le lisait pas. C'est le seul chemin vers le reçu
+  /// définitif d'un versement encaissé sur un AUTRE poste — celui-ci n'a jamais
+  /// eu de ligne `generated_documents` locale.
+  final String? receiptId;
+
   const PaymentDto({
     required this.id,
     required this.studentId,
@@ -180,6 +186,7 @@ class PaymentDto {
     required this.payerLastName,
     this.payerMiddleName,
     this.status,
+    this.receiptId,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> j) => PaymentDto(
@@ -194,6 +201,7 @@ class PaymentDto {
     payerLastName: (j['payerLastName'] as String?) ?? '',
     payerMiddleName: j['payerMiddleName'] as String?,
     status: j['status'] as String?,
+    receiptId: j['receiptId'] as String?,
   );
 
   PaymentLocalModel toLocalModel(int now) => PaymentLocalModel(
@@ -209,6 +217,7 @@ class PaymentDto {
     payerLastName: payerLastName,
     payerMiddleName: payerMiddleName,
     status: status,
+    receiptId: receiptId,
     syncStatus: 'SYNCED',
     syncedAt: now,
     updatedAt: now,

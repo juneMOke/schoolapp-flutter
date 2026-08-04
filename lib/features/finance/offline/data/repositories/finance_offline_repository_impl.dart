@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
@@ -20,6 +22,14 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   final IdGenerator _idGenerator;
   final SyncEngine _syncEngine;
   final CurrentUserContext? _currentUser;
+
+  /// Résout le NOM du caissier depuis son uid (implémenté par
+  /// `AuthSessionManager`). Optionnel : sans lui, la ligne porte l'uid seul.
+  final OutboxAuthorDirectory? _authorDirectory;
+
+  /// Identifiant d'installation, préfixe du numéro provisoire.
+  final DeviceIdentityService? _deviceIdentity;
+
   final int Function() _now;
 
   FinanceOfflineRepositoryImpl({
@@ -27,11 +37,15 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     required IdGenerator idGenerator,
     required SyncEngine syncEngine,
     CurrentUserContext? currentUser,
+    OutboxAuthorDirectory? authorDirectory,
+    DeviceIdentityService? deviceIdentity,
     int Function()? now,
   }) : _dao = dao,
        _idGenerator = idGenerator,
        _syncEngine = syncEngine,
        _currentUser = currentUser,
+       _authorDirectory = authorDirectory,
+       _deviceIdentity = deviceIdentity,
        _now = now ?? systemClock;
 
   @override
@@ -40,6 +54,17 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   ) async {
     try {
       final now = _now();
+      // Caissier et appareil sont résolus AVANT la transaction et STAMPÉS sur
+      // la ligne : le ticket provisoire est une projection de `payments`, et il
+      // doit pouvoir nommer qui a encaissé des mois plus tard, sur une tablette
+      // partagée, alors que l'entrée d'outbox qui portait l'auteur aura été
+      // supprimée à l'ACK (RG-012-7/11). Best-effort : une identité indisponible
+      // laisse les colonnes vides, jamais un encaissement en échec.
+      final cashierUid = _currentUser?.uid;
+      final cashier = cashierUid == null
+          ? null
+          : await _resolveCashier(cashierUid);
+      final deviceId = await _resolveDeviceId();
       final paymentId = _idGenerator.newId();
       final allocationsTotal = draft.allocations.fold<int>(
         0,
@@ -70,6 +95,10 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         payerFirstName: draft.payerFirstName,
         payerLastName: draft.payerLastName,
         payerMiddleName: draft.payerMiddleName,
+        cashierUid: cashierUid,
+        cashierFirstName: cashier?.firstName,
+        cashierLastName: cashier?.lastName,
+        deviceId: deviceId,
         updatedAt: now,
       );
 
@@ -94,7 +123,8 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         paymentId: paymentId,
         studentId: draft.studentId,
         docType: 'RC',
-        number: 'PROV-${paymentId.substring(0, 8).toUpperCase()}',
+        number: _provisionalNumber(paymentId, deviceId),
+        provisionalNumber: _provisionalNumber(paymentId, deviceId),
         createdAt: now,
       );
 
@@ -103,6 +133,10 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
         allocations: allocations,
         receipt: receipt,
         outboxEntryId: _idGenerator.newId(),
+        // Garde-fou tenant de l'outbox : sans lui la colonne reste NULL et
+        // l'entrée devient inéligible au flush scopé école, seul rempart
+        // contre un rejeu inter-établissement après reconnexion.
+        schoolId: _currentUser?.schoolId,
         authorId: _currentUser?.uid,
         nowMs: now,
       );
@@ -162,5 +196,38 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
     } catch (e) {
       return Left(StorageFailure('Lecture locale impossible : $e'));
     }
+  }
+
+  /// Identité affichable du caissier. `null` si l'annuaire ne sait pas répondre
+  /// — auquel cas le ticket taira le nom plutôt que d'inventer.
+  Future<OutboxAuthorIdentity?> _resolveCashier(String uid) async {
+    try {
+      return await _authorDirectory?.identityOf(uid);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Identifiant d'installation, généré au premier besoin. `null` si le secure
+  /// storage est indisponible : l'encaissement prime sur la traçabilité.
+  Future<String?> _resolveDeviceId() async {
+    try {
+      return await _deviceIdentity?.getOrCreateDeviceId();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// `PROV-<idAppareil>-<8 hex du paiement>` (RG-012-10, zone Z3).
+  ///
+  /// Le segment appareil est OMIS quand l'identifiant n'a pas pu être résolu :
+  /// le format dégradé `PROV-<8 hex>` reste celui déjà produit sur le terrain
+  /// avant la v19, donc lisible par tout ce qui existe. Deux formats coexistent
+  /// délibérément — aucune migration ne réécrit les numéros déjà remis à des
+  /// parents sur du papier.
+  static String _provisionalNumber(String paymentId, String? deviceId) {
+    final suffix = paymentId.substring(0, 8).toUpperCase();
+    if (deviceId == null || deviceId.isEmpty) return 'PROV-$suffix';
+    return 'PROV-${DeviceIdentityService.shorten(deviceId)}-$suffix';
   }
 }

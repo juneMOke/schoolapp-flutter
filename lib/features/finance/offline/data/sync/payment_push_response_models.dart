@@ -161,6 +161,11 @@ class PaymentAggregateResponse {
   /// Id du paiement acquitté (= uuid client honoré).
   String get paymentId => payment.id;
 
+  /// UUID de la pièce scellée, seule clé de re-téléchargement du reçu définitif
+  /// (`GET /editique/documents/{id}`). `null` est un cas NORMAL : le scellement
+  /// serveur est best-effort et hors transaction.
+  String? get receiptId => payment.receiptId;
+
   factory PaymentAggregateResponse.fromJson(
     Map<String, dynamic> j,
   ) => PaymentAggregateResponse(
