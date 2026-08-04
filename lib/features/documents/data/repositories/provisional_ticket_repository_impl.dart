@@ -1,0 +1,131 @@
+import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
+
+/// Assemble le ticket depuis les lignes locales.
+///
+/// Le **solde** n'est pas recalculé ici : il est demandé au domaine Facturation
+/// (`getCharges`), seul détenteur de la sémantique money-grade du reste à payer
+/// — lequel compose le miroir autoritaire et les encaissements pas encore
+/// remontés. Répliquer ce SQL ici ferait diverger deux vérités sur l'argent.
+class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
+  final ProvisionalTicketDao _dao;
+  final FinanceOfflineRepository _finance;
+
+  const ProvisionalTicketRepositoryImpl({
+    required ProvisionalTicketDao dao,
+    required FinanceOfflineRepository finance,
+  }) : _dao = dao,
+       _finance = finance;
+
+  @override
+  Future<Either<Failure, TicketReceiptModel>> buildForPayment({
+    required String paymentId,
+    required TicketLabels labels,
+  }) async {
+    try {
+      final payment = await _dao.findPayment(paymentId);
+      if (payment == null) {
+        return const Left(
+          NotFoundFailure('Encaissement introuvable en local.'),
+        );
+      }
+
+      final student = await _dao.findStudent(payment.studentId);
+      final school = await _dao.findSchool();
+      final classroomName = await _dao.findClassroomName(
+        studentId: payment.studentId,
+        academicYearId: payment.academicYearId,
+      );
+      final allocations = await _dao.findAllocations(paymentId);
+      final reference = await _dao.findProvisionalNumber(paymentId);
+
+      return Right(
+        TicketReceiptModel(
+          // Une école inconnue n'empêche pas d'imprimer : le ticket vaut par son
+          // montant et son caissier, pas par son en-tête.
+          schoolName: school?.name ?? '',
+          schoolMunicipality: school?.locality,
+          studentFullName: student?.fullName ?? '',
+          matriculationNumber: student?.matriculationNumber,
+          classroomName: classroomName,
+          // Sans ligne documentaire (cas anormal mais non bloquant), on retombe
+          // sur l'identifiant du paiement : un ticket sans aucune référence
+          // serait irrapprochable.
+          provisionalReference: reference ?? paymentId,
+          paidAt: _parsePaidAt(payment.paidAt),
+          cashierFullName: payment.cashierFullName,
+          amountReceivedInCents: payment.amountInCents,
+          allocations: allocations
+              .map(
+                (a) => TicketAllocationLine(
+                  label: a.label,
+                  amountInCents: a.amountInCents,
+                ),
+              )
+              .toList(growable: false),
+          remainingBalanceInCents: await _remainingBalance(
+            studentId: payment.studentId,
+            academicYearId: payment.academicYearId,
+            currency: payment.currency,
+          ),
+          currency: payment.currency,
+          labels: labels,
+        ),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Ticket illisible en local : $e'));
+    }
+  }
+
+  /// Reste à payer de l'élève, **dans l'année ET la devise du versement**.
+  ///
+  /// Les deux filtres sont indispensables, pour deux raisons distinctes :
+  ///
+  /// - **l'année** : `getCharges` ne filtre que sur l'élève, alors que toute
+  ///   l'UI Facturation lit les créances scopées à l'année. Sans ce filtre, un
+  ///   élève réinscrit verrait son arriéré N-1 additionné au reste dû N, et le
+  ///   ticket imprimerait un solde différent de celui affiché à l'écran au même
+  ///   instant — sur un papier remis à un parent ;
+  /// - **la devise**, libre par ligne dans ce modèle : additionner des devises
+  ///   différentes produirait un chiffre faux.
+  ///
+  /// `null` dès que la lecture échoue, que l'année est inconnue, ou qu'aucune
+  /// créance ne correspond : le ticket omet alors la ligne, ce qu'il sait faire.
+  Future<int?> _remainingBalance({
+    required String studentId,
+    required String? academicYearId,
+    required String currency,
+  }) async {
+    if (academicYearId == null || academicYearId.isEmpty) return null;
+
+    final charges = await _finance.getCharges(studentId);
+
+    return charges.fold<int?>((_) => null, (list) {
+      final matching = list
+          .where(
+            (c) => c.currency == currency && c.academicYearId == academicYearId,
+          )
+          .toList(growable: false);
+      if (matching.isEmpty) return null;
+
+      return matching.fold<int>(
+        0,
+        (sum, c) => sum + c.optimisticRemainingInCents,
+      );
+    });
+  }
+
+  /// `paid_at` est une date terrain ISO-8601, écrite en **UTC** à
+  /// l'encaissement. Le ticket doit porter l'heure du GUICHET : sans
+  /// `toLocal()`, un versement pris à 00 h 30 à Kinshasa (UTC+1) s'imprimerait
+  /// daté de la veille, irrapprochable de la caisse du jour.
+  ///
+  /// Une valeur illisible ne doit pas empêcher l'impression : on retombe sur
+  /// l'instant courant, seconde meilleure approximation du geste de caisse.
+  static DateTime _parsePaidAt(String raw) =>
+      (DateTime.tryParse(raw) ?? DateTime.now()).toLocal();
+}

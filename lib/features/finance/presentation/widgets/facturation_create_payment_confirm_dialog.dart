@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -114,10 +115,16 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     );
   }
 
+  /// Encaissement écrit en local — clé du reçu provisoire à imprimer.
+  String? _paymentId;
+
   void _onBlocState(FinanceOfflineState state) {
     if (!mounted || !_awaitingBloc) return;
     if (state is FinanceOfflinePaymentPendingSync) {
       _awaitingBloc = false;
+      // Retenu pour le ticket : c'est la seule clé disponible à cet instant, et
+      // l'écran de succès était jusqu'ici un cul-de-sac (ADR-012 D-3).
+      _paymentId = state.paymentId;
       // Encaissement écrit localement (en attente de synchro) : on allume la
       // pastille globale et le rafraîchissement du détail est déclenché APRÈS
       // fermeture de la popin (cf. _onCollect).
@@ -130,6 +137,22 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
         _incidentCode = _generateIncidentCode();
       });
     }
+  }
+
+  /// Imprime le ticket provisoire. Un échec est DIT — jamais avalé : sans
+  /// message, l'appui ne produirait rien du tout et le caissier croirait le
+  /// papier parti.
+  Future<void> _printTicket() async {
+    final paymentId = _paymentId;
+    if (paymentId == null) return;
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final message = AppLocalizations.of(context)!.ticketPrintFailed;
+
+    final printed = await printProvisionalTicket(context, paymentId: paymentId);
+    if (!mounted || printed) return;
+
+    messenger?.showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _generateIncidentCode() =>
@@ -246,16 +269,15 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
           children: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
-              secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
-              secondaryIcon: Icons.download_outlined,
-              // Inerte par construction : on vient d'atteindre
-              // `FinanceOfflinePaymentPendingSync`. L'encaissement est écrit en
-              // local et mis en file, donc son uuid est encore inconnu du
-              // serveur et la demande de reçu répondrait 404. La pièce se
-              // récupère depuis le détail du paiement, une fois la synchro
-              // passée. Le bouton reste visible pour signaler qu'un reçu existe
-              // bien pour cet encaissement.
-              onSecondary: widget.onDownloadReceipt,
+              // Le reçu DÉFINITIF est inatteignable ici : on vient d'atteindre
+              // `FinanceOfflinePaymentPendingSync`, l'uuid du paiement est
+              // encore inconnu du serveur et la demande répondrait 404. Ce que
+              // le guichet peut remettre tout de suite, c'est le ticket
+              // PROVISOIRE — une projection des lignes qui viennent d'être
+              // écrites, sans le moindre appel réseau (ADR-012 D-3).
+              secondaryLabel: l10n.ticketPrintLabel,
+              secondaryIcon: Icons.print_outlined,
+              onSecondary: _paymentId == null ? null : _printTicket,
               secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
