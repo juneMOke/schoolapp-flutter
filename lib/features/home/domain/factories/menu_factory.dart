@@ -18,7 +18,25 @@ class MenuFactory {
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
       _createResultatsMenu(l10n),
+      _createDocumentsMenu(l10n),
     ];
+  }
+
+  /// Menu Documents — l'éditique couvre trois domaines (Scolarité, Finances,
+  /// Académique), d'où un menu propre plutôt qu'un sous-menu de Finances.
+  static MenuItem _createDocumentsMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.documentsMenuId,
+      title: l10n.menuDocuments,
+      icon: Icons.folder_shared_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.documentsStudentId,
+          title: l10n.subMenuDocumentsStudent,
+          route: AppRoutesNames.documentsStudents,
+        ),
+      ],
+    );
   }
 
   /// Entrée « Accueil » : item feuille (sans sous-menu), premier de la liste.

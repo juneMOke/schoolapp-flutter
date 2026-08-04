@@ -221,4 +221,18 @@ class AppColors {
   static const academicsScoreWeakSoft = Color(0xFFFBF1DF);
   static const academicsScoreGood = vertSavane;
   static const academicsScoreGoodSoft = Color(0xFFEBF2ED);
+
+  // Éditique — badges de NATURE d'une pièce (§08 de la spec Documents).
+  // « Figé » reprend le bleu-ardoise de marque ; « horodaté » introduit l'ambre
+  // du module, distinct du `warning` sémantique : il ne signale pas un problème
+  // mais une pièce volatile, recalculée à chaque demande.
+  static const documentsFigeBorder = Color(0xFFCFE0EA);
+  static const documentsHorodateText = Color(0xFF8A6A1F);
+  static const documentsHorodateSoft = Color(0xFFFBF4E4);
+  static const documentsHorodateBorder = Color(0xFFEAD7A8);
+  // Ligne de document en échec : l'erreur reste DANS la ligne, elle ne fait pas
+  // basculer la page entière (§18 — « un service peut tomber pour un document
+  // sans que la page entière bascule en erreur »).
+  static const documentsRowErrorSoft = Color(0xFFFCF2F0);
+  static const documentsRowErrorBorder = Color(0xFFE4B9B3);
 }

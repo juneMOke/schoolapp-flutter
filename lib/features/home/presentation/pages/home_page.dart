@@ -17,6 +17,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/re_registrations_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
@@ -169,7 +171,8 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.disciplinesDashboardId ||
         state.selectedSubMenuId == MenuConstants.myCoursesId ||
         state.selectedSubMenuId == MenuConstants.timetableId ||
-        state.selectedSubMenuId == MenuConstants.resultatsClasseId;
+        state.selectedSubMenuId == MenuConstants.resultatsClasseId ||
+        state.selectedSubMenuId == MenuConstants.documentsStudentId;
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -296,6 +299,11 @@ class _HomePageView extends StatelessWidget {
         );
       case MenuConstants.facturationsId:
         return const FinanceFeatureScope(child: FacturationPage());
+      case MenuConstants.documentsStudentId:
+        return const DocumentsFeatureScope(
+          key: ValueKey(MenuConstants.documentsStudentId),
+          child: DocumentsPage(),
+        );
       case MenuConstants.financesDashboardId:
         return const FinanceStatsDashboardScope(
           child: FinanceStatsDashboardPage(),

@@ -17,6 +17,10 @@ import 'package:school_app_flutter/features/auth/presentation/pages/reset_passwo
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_catalog_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
@@ -321,6 +325,40 @@ class AppRouter {
 
                 return DisciplinaryStudentDetailPage(intent: intent);
               },
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) =>
+              DocumentsFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.documentsStudents,
+              builder: (context, state) => const DocumentsPage(),
+              routes: [
+                GoRoute(
+                  path: 'catalogue/:studentId/:academicYearId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                    ])) {
+                      return AppRoutesNames.documentsStudents;
+                    }
+                    return null;
+                  },
+                  builder: (context, state) {
+                    final intent = DocumentsCatalogIntent.fromRouteContext(
+                      studentId: state.pathParameters['studentId'] ?? '',
+                      academicYearId:
+                          state.pathParameters['academicYearId'] ?? '',
+                      extra: state.extra,
+                    );
+
+                    return DocumentsCatalogPage(intent: intent);
+                  },
+                ),
+              ],
             ),
           ],
         ),

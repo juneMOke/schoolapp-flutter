@@ -14,6 +14,11 @@ class MenuConstants {
   static const String coursesMenuId = 'courses';
   static const String resultatsMenuId = 'resultats';
 
+  // Éditique — le catalogue des pièces d'un élève couvre trois domaines
+  // (Scolarité, Finances, Académique), d'où un menu propre plutôt qu'un
+  // sous-menu de Finances qui en mentirait sur la portée.
+  static const String documentsMenuId = 'documents';
+
   // Sub-menu IDs
   static const String inscriptionsDashboardId = 'inscriptions-dashboard';
   static const String preInscriptionsId = 'pre-inscriptions';
@@ -35,4 +40,6 @@ class MenuConstants {
   static const String timetableId = 'timetable';
 
   static const String resultatsClasseId = 'resultats-classe';
+
+  static const String documentsStudentId = 'documents-eleve';
 }
