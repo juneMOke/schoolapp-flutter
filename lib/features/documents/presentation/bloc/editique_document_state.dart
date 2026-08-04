@@ -14,11 +14,20 @@ class EditiqueDocumentState extends Equatable {
   final EditiqueDocument? document;
   final EditiqueErrorType? errorType;
 
+  /// Message renvoyé par le serveur pour cet échec, quand il en a renvoyé un.
+  ///
+  /// Complète l'anatomie sans la remplacer : celle-ci dit la famille (réseau,
+  /// 401, 403, 500), celui-ci dit le motif (« Aucune charge pour l'élève »).
+  /// `null` sur un échec de transport — sans réponse HTTP, il n'y a pas de
+  /// corps à décoder.
+  final String? serverDetail;
+
   const EditiqueDocumentState({
     this.status = EditiqueDocumentStatus.initial,
     this.type,
     this.document,
     this.errorType,
+    this.serverDetail,
   });
 
   /// Vrai quand une reprise après échec est sûre.
@@ -48,6 +57,7 @@ class EditiqueDocumentState extends Equatable {
     EditiqueDocumentType? type,
     EditiqueDocument? document,
     EditiqueErrorType? errorType,
+    String? serverDetail,
     bool clearDocument = false,
     bool clearError = false,
   }) {
@@ -56,9 +66,13 @@ class EditiqueDocumentState extends Equatable {
       type: type ?? this.type,
       document: clearDocument ? null : (document ?? this.document),
       errorType: clearError ? null : (errorType ?? this.errorType),
+      // Suit le sort de `errorType` : le détail n'a de sens qu'attaché à son
+      // erreur, et un détail survivant à un nouvel essai décrirait l'échec
+      // précédent.
+      serverDetail: clearError ? null : (serverDetail ?? this.serverDetail),
     );
   }
 
   @override
-  List<Object?> get props => [status, type, document, errorType];
+  List<Object?> get props => [status, type, document, errorType, serverDetail];
 }

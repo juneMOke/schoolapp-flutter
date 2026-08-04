@@ -8,6 +8,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
@@ -15,6 +18,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class MockEmitPaymentReceiptUseCase extends Mock
     implements EmitPaymentReceiptUseCase {}
+
+class MockEmitEnrollmentAttestationUseCase extends Mock
+    implements EmitEnrollmentAttestationUseCase {}
+
+class MockEmitNotePerceptionUseCase extends Mock
+    implements EmitNotePerceptionUseCase {}
+
+class MockEmitFinancialClearanceUseCase extends Mock
+    implements EmitFinancialClearanceUseCase {}
 
 class MockEmitAccountStatementUseCase extends Mock
     implements EmitAccountStatementUseCase {}
@@ -44,8 +56,12 @@ Future<void> _pumpLoading(WidgetTester tester, {required Size size}) async {
       home: Scaffold(
         body: BlocProvider<EditiqueDocumentBloc>(
           create: (_) => EditiqueDocumentBloc(
+            emitEnrollmentAttestationUseCase:
+                MockEmitEnrollmentAttestationUseCase(),
+            emitNotePerceptionUseCase: MockEmitNotePerceptionUseCase(),
             emitPaymentReceiptUseCase: useCase,
             emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
+            emitFinancialClearanceUseCase: MockEmitFinancialClearanceUseCase(),
           )..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
           child: const EditiqueDocumentDialogView(
             title: 'Reçu de paiement',
@@ -207,8 +223,13 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
         body: BlocProvider<EditiqueDocumentBloc>(
           create: (_) {
             bloc = EditiqueDocumentBloc(
+              emitEnrollmentAttestationUseCase:
+                  MockEmitEnrollmentAttestationUseCase(),
+              emitNotePerceptionUseCase: MockEmitNotePerceptionUseCase(),
               emitPaymentReceiptUseCase: useCase,
               emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
+              emitFinancialClearanceUseCase:
+                  MockEmitFinancialClearanceUseCase(),
             );
             return bloc
               ..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1'));

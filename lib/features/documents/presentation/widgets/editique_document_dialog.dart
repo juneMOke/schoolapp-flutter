@@ -17,6 +17,48 @@ import 'package:school_app_flutter/features/documents/presentation/widgets/editi
 import 'package:school_app_flutter/features/documents/presentation/widgets/states/editique_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Ouvre la visionneuse sur l'attestation d'inscription (AI) d'un dossier.
+///
+/// Pièce archivée et idempotente : le serveur re-sert les mêmes octets sous le
+/// même numéro, donc rouvrir cette modale ne produit jamais de doublon.
+Future<void> showEditiqueEnrollmentAttestationDialog(
+  BuildContext context, {
+  required String enrollmentId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerAttestationTitle,
+    request: EditiqueEnrollmentAttestationRequested(enrollmentId: enrollmentId),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
+  );
+}
+
+/// Ouvre la visionneuse sur la note de perception (NP) d'un élève.
+///
+/// Pièce archivée et idempotente. Le serveur répond 404 quand l'élève n'a
+/// aucune charge sur l'année — motif que la modale affiche tel quel.
+Future<void> showEditiqueNotePerceptionDialog(
+  BuildContext context, {
+  required String studentId,
+  required String academicYearId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerNotePerceptionTitle,
+    request: EditiqueNotePerceptionRequested(
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
+  );
+}
+
 /// Ouvre la visionneuse sur le reçu (RC) d'un paiement.
 ///
 /// L'appelant reste responsable des gardes en amont : un paiement pas encore
@@ -24,11 +66,40 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 Future<void> showEditiquePaymentReceiptDialog(
   BuildContext context, {
   required String paymentId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
 }) {
   return _showEditiqueDocumentDialog(
     context,
     title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
     request: EditiquePaymentReceiptRequested(paymentId: paymentId),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
+  );
+}
+
+/// Ouvre la visionneuse sur le quitus financier (QT) d'un élève.
+///
+/// ⚠️ Mêmes précautions que le relevé : numéro de séquence consommé à chaque
+/// appel, pièce jamais archivée. L'appelant doit avoir confirmé l'intention —
+/// et, si l'élève n'est pas en règle, l'avoir annoncé : le serveur émettra la
+/// pièce quand même, avec la mention « NON EN RÈGLE ».
+Future<void> showEditiqueFinancialClearanceDialog(
+  BuildContext context, {
+  required String studentId,
+  required String academicYearId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerClearanceTitle,
+    request: EditiqueFinancialClearanceRequested(
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
   );
 }
 
@@ -41,6 +112,8 @@ Future<void> showEditiqueAccountStatementDialog(
   BuildContext context, {
   required String studentId,
   required String academicYearId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
 }) {
   return _showEditiqueDocumentDialog(
     context,
@@ -49,13 +122,22 @@ Future<void> showEditiqueAccountStatementDialog(
       studentId: studentId,
       academicYearId: academicYearId,
     ),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
   );
 }
 
 /// Socle commun des visionneuses.
 ///
-/// L'émission est déclenchée à l'ouverture : le BLoC est créé pour cette modale
-/// et fermé avec elle, donc une seule pièce est vivante en mémoire à la fois.
+/// L'émission est déclenchée à l'ouverture. Deux régimes de propriété :
+///
+/// - **sans [bloc]** — la modale crée le sien et le ferme avec elle : une seule
+///   pièce vivante en mémoire, régime des appels ponctuels depuis la Facturation ;
+/// - **avec [bloc]** — la modale se greffe sur une instance possédée par un
+///   écran (`BlocProvider.value`, qui ne ferme pas ce qu'il n'a pas créé). C'est
+///   ce que réclame le catalogue de l'élève : chaque ligne possède son BLoC pour
+///   garder son état `idle | busy | error`, et la visionneuse n'est qu'une vue
+///   de plus sur cet état — fermer la modale ne doit pas l'effacer.
 ///
 /// Hors ligne, aucune pièce ne peut être produite — le repository le tranche en
 /// pré-garde et la modale affiche l'anatomie réseau sans attente.
@@ -63,12 +145,16 @@ Future<void> _showEditiqueDocumentDialog(
   BuildContext context, {
   required String title,
   required EditiqueDocumentEvent request,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
 }) {
   return showDialog<void>(
     context: context,
     barrierDismissible: true,
-    builder: (dialogContext) => BlocProvider<EditiqueDocumentBloc>(
-      create: (_) => getIt<EditiqueDocumentBloc>()..add(request),
+    builder: (dialogContext) => _EditiqueDocumentBlocScope(
+      bloc: bloc,
+      request: request,
+      dispatchOnOpen: dispatchOnOpen,
       child: EditiqueDocumentDialogView(
         title: title,
         // Rejoue le MÊME événement. N'est atteignable que si `state.canRetry`
@@ -87,6 +173,71 @@ Future<void> _showEditiqueDocumentDialog(
       ),
     ),
   );
+}
+
+/// Fournit le BLoC de la visionneuse selon le régime de propriété (cf.
+/// [_showEditiqueDocumentDialog]), et poste la demande d'émission une seule fois.
+///
+/// `StatefulWidget` et non un simple `BlocProvider` : le `builder` de
+/// `showDialog` peut être rappelé, et poster l'événement dans un `build`
+/// relancerait l'émission — ce qui, sur une pièce non archivée, brûlerait un
+/// second numéro de séquence.
+class _EditiqueDocumentBlocScope extends StatefulWidget {
+  final EditiqueDocumentBloc? bloc;
+  final EditiqueDocumentEvent request;
+
+  /// `false` pour ROUVRIR une pièce déjà produite sans la redemander.
+  ///
+  /// Indispensable sur une pièce horodatée : le serveur consomme un numéro de
+  /// séquence AVANT de rendre le PDF et n'archive rien. Redéclencher pour
+  /// simplement réafficher ce que le BLoC détient déjà brûlerait un second
+  /// numéro, et le premier serait définitivement perdu.
+  final bool dispatchOnOpen;
+
+  final Widget child;
+
+  const _EditiqueDocumentBlocScope({
+    required this.bloc,
+    required this.request,
+    required this.child,
+    this.dispatchOnOpen = true,
+  });
+
+  @override
+  State<_EditiqueDocumentBlocScope> createState() =>
+      _EditiqueDocumentBlocScopeState();
+}
+
+class _EditiqueDocumentBlocScopeState
+    extends State<_EditiqueDocumentBlocScope> {
+  late final EditiqueDocumentBloc _bloc;
+
+  /// Vrai quand ce widget a créé le BLoC — et doit donc le fermer. Un BLoC
+  /// confié par un écran lui appartient : le fermer ici couperait la ligne du
+  /// catalogue qui l'observe encore.
+  late final bool _owned;
+
+  @override
+  void initState() {
+    super.initState();
+    _owned = widget.bloc == null;
+    _bloc = widget.bloc ?? getIt<EditiqueDocumentBloc>();
+    if (widget.dispatchOnOpen) _bloc.add(widget.request);
+  }
+
+  @override
+  void dispose() {
+    if (_owned) _bloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<EditiqueDocumentBloc>.value(
+      value: _bloc,
+      child: widget.child,
+    );
+  }
 }
 
 /// Contenu de la visionneuse : en-tête, corps piloté par l'état, pied d'actions.
@@ -233,6 +384,7 @@ class _Body extends StatelessWidget {
             canRetry: state.canRetry,
             onRetry: () => onRetry(context),
             onReconnect: onReconnect,
+            serverDetail: state.serverDetail,
           ),
         );
       case EditiqueDocumentStatus.success:

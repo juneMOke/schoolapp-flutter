@@ -22,12 +22,20 @@ class EditiqueResultsErrorState extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onReconnect;
 
+  /// Motif renvoyé par le serveur, en complément du message de famille.
+  ///
+  /// Ajouté **après** le message d'anatomie, jamais à sa place : la charte
+  /// garantit un texte compréhensible dans la langue de l'utilisateur, ce que le
+  /// serveur ne garantit pas.
+  final String? serverDetail;
+
   const EditiqueResultsErrorState({
     super.key,
     required this.type,
     required this.canRetry,
     this.onRetry,
     this.onReconnect,
+    this.serverDetail,
   });
 
   @override
@@ -38,7 +46,7 @@ class EditiqueResultsErrorState extends StatelessWidget {
     return EteeloErrorResult(
       type: _viewType,
       title: _title(l10n),
-      message: _message(l10n),
+      message: _messageWithDetail(l10n),
       primaryAction: action == null
           ? null
           : EteeloButton.primary(
@@ -74,6 +82,14 @@ class EditiqueResultsErrorState extends StatelessWidget {
     EditiqueErrorType.invalid => l10n.editiqueErrorInvalidTitle,
     EditiqueErrorType.server => l10n.editiqueErrorServerTitle,
   };
+
+  /// Message de famille, suivi du motif serveur quand il existe.
+  String _messageWithDetail(AppLocalizations l10n) {
+    final base = _message(l10n);
+    final detail = serverDetail?.trim();
+    if (detail == null || detail.isEmpty) return base;
+    return '$base\n\n${l10n.editiqueErrorServerDetailLabel(detail)}';
+  }
 
   String _message(AppLocalizations l10n) => switch (type) {
     EditiqueErrorType.network => l10n.editiqueErrorNetworkMessage,

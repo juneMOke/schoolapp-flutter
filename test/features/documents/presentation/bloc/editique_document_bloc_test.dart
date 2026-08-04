@@ -8,6 +8,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
@@ -19,11 +22,29 @@ class MockEmitPaymentReceiptUseCase extends Mock
 class MockEmitAccountStatementUseCase extends Mock
     implements EmitAccountStatementUseCase {}
 
+class MockEmitEnrollmentAttestationUseCase extends Mock
+    implements EmitEnrollmentAttestationUseCase {}
+
+class MockEmitNotePerceptionUseCase extends Mock
+    implements EmitNotePerceptionUseCase {}
+
+class MockEmitFinancialClearanceUseCase extends Mock
+    implements EmitFinancialClearanceUseCase {}
+
 final _receipt = EditiqueDocument(
   type: EditiqueDocumentType.paymentReceipt,
   bytes: Uint8List.fromList(<int>[0x25, 0x50, 0x44, 0x46]),
   fileName: 'ETL-RC-2526-000212.pdf',
   documentNumber: 'ETL-RC-2526-000212',
+);
+
+/// Pièce minimale d'un type donné — les octets n'ont pas d'importance ici, seul
+/// le routage du BLoC est sous test.
+EditiqueDocument _documentOf(EditiqueDocumentType type) => EditiqueDocument(
+  type: type,
+  bytes: Uint8List.fromList(<int>[0x25, 0x50, 0x44, 0x46]),
+  fileName: 'ETL-${type.code}-2526-000001.pdf',
+  documentNumber: 'ETL-${type.code}-2526-000001',
 );
 
 void main() {
@@ -34,18 +55,30 @@ void main() {
     registerFallbackValue(
       const StudentYearDocumentParams(studentId: 'x', academicYearId: 'y'),
     );
+    registerFallbackValue(
+      const EmitEnrollmentAttestationParams(enrollmentId: 'x'),
+    );
   });
 
   late MockEmitAccountStatementUseCase statementUseCase;
+  late MockEmitEnrollmentAttestationUseCase attestationUseCase;
+  late MockEmitNotePerceptionUseCase notePerceptionUseCase;
+  late MockEmitFinancialClearanceUseCase clearanceUseCase;
 
   setUp(() {
     useCase = MockEmitPaymentReceiptUseCase();
     statementUseCase = MockEmitAccountStatementUseCase();
+    attestationUseCase = MockEmitEnrollmentAttestationUseCase();
+    notePerceptionUseCase = MockEmitNotePerceptionUseCase();
+    clearanceUseCase = MockEmitFinancialClearanceUseCase();
   });
 
   EditiqueDocumentBloc build() => EditiqueDocumentBloc(
+    emitEnrollmentAttestationUseCase: attestationUseCase,
+    emitNotePerceptionUseCase: notePerceptionUseCase,
     emitPaymentReceiptUseCase: useCase,
     emitAccountStatementUseCase: statementUseCase,
+    emitFinancialClearanceUseCase: clearanceUseCase,
   );
 
   blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
@@ -323,5 +356,212 @@ void main() {
       );
       expect(state.canRetry, isFalse);
     });
+  });
+
+  group('les cinq pièces sont câblées', () {
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'attestation d inscription : route vers son use case et porte son type',
+      setUp: () => when(() => attestationUseCase(any())).thenAnswer(
+        (_) async =>
+            Right(_documentOf(EditiqueDocumentType.enrollmentAttestation)),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueEnrollmentAttestationRequested(enrollmentId: 'e-1'),
+      ),
+      verify: (_) {
+        verify(
+          () => attestationUseCase(
+            const EmitEnrollmentAttestationParams(enrollmentId: 'e-1'),
+          ),
+        ).called(1);
+        verifyNever(() => useCase(any()));
+      },
+      expect: () => [
+        isA<EditiqueDocumentState>().having(
+          (s) => s.type,
+          'type',
+          EditiqueDocumentType.enrollmentAttestation,
+        ),
+        isA<EditiqueDocumentState>()
+            .having((s) => s.status, 'status', EditiqueDocumentStatus.success)
+            .having((s) => s.canRetry, 'canRetry', isFalse),
+      ],
+    );
+
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'note de perception : route vers son use case avec l élève et l année',
+      setUp: () => when(() => notePerceptionUseCase(any())).thenAnswer(
+        (_) async => Right(_documentOf(EditiqueDocumentType.notePerception)),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueNotePerceptionRequested(
+          studentId: 's-1',
+          academicYearId: 'y-1',
+        ),
+      ),
+      verify: (_) => verify(
+        () => notePerceptionUseCase(
+          const StudentYearDocumentParams(
+            studentId: 's-1',
+            academicYearId: 'y-1',
+          ),
+        ),
+      ).called(1),
+      expect: () => [
+        isA<EditiqueDocumentState>().having(
+          (s) => s.type,
+          'type',
+          EditiqueDocumentType.notePerception,
+        ),
+        isA<EditiqueDocumentState>().having(
+          (s) => s.status,
+          'status',
+          EditiqueDocumentStatus.success,
+        ),
+      ],
+    );
+
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'quitus : route vers son use case et reste non rejouable après un 500',
+      setUp: () => when(
+        () => clearanceUseCase(any()),
+      ).thenAnswer((_) async => const Left(ServerFailure())),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueFinancialClearanceRequested(
+          studentId: 's-1',
+          academicYearId: 'y-1',
+        ),
+      ),
+      verify: (_) => verify(() => clearanceUseCase(any())).called(1),
+      expect: () => [
+        isA<EditiqueDocumentState>().having(
+          (s) => s.type,
+          'type',
+          EditiqueDocumentType.financialClearance,
+        ),
+        // Pièce non archivée : le numéro de séquence a pu être brûlé avant
+        // l'échec, donc aucune reprise n'est offerte.
+        isA<EditiqueDocumentState>()
+            .having((s) => s.status, 'status', EditiqueDocumentStatus.failure)
+            .having((s) => s.canRetry, 'canRetry', isFalse),
+      ],
+    );
+  });
+
+  group('détail serveur', () {
+    // Le motif décodé en couche data était jusqu'ici jeté au seuil de la
+    // présentation : c'est pourtant la seule information utile ici.
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'remonte le motif renvoyé par le serveur',
+      setUp: () => when(() => notePerceptionUseCase(any())).thenAnswer(
+        (_) async => const Left(NotFoundFailure('Aucune charge pour l élève')),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueNotePerceptionRequested(
+          studentId: 's-1',
+          academicYearId: 'y-1',
+        ),
+      ),
+      skip: 1,
+      expect: () => [
+        isA<EditiqueDocumentState>().having(
+          (s) => s.serverDetail,
+          'serverDetail',
+          'Aucune charge pour l élève',
+        ),
+      ],
+    );
+
+    // Le message par défaut de la classe n'est pas un motif serveur : c'est une
+    // constante technique en anglais que l'anatomie dit déjà mieux.
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'n expose aucun détail quand le serveur n a rien dit',
+      setUp: () => when(
+        () => notePerceptionUseCase(any()),
+      ).thenAnswer((_) async => const Left(NotFoundFailure())),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueNotePerceptionRequested(
+          studentId: 's-1',
+          academicYearId: 'y-1',
+        ),
+      ),
+      skip: 1,
+      expect: () => [
+        isA<EditiqueDocumentState>().having(
+          (s) => s.serverDetail,
+          'serverDetail',
+          isNull,
+        ),
+      ],
+    );
+
+    // Sans réponse HTTP, il n'y a pas de corps à décoder : la pré-garde de
+    // connectivité du repository ne doit pas ressortir comme un motif serveur.
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'n expose aucun détail sur un échec de transport',
+      setUp: () => when(() => notePerceptionUseCase(any())).thenAnswer(
+        (_) async => const Left(
+          NetworkFailure(
+            'Aucune connexion : le document ne peut pas être émis.',
+          ),
+        ),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(
+        const EditiqueNotePerceptionRequested(
+          studentId: 's-1',
+          academicYearId: 'y-1',
+        ),
+      ),
+      skip: 1,
+      expect: () => [
+        isA<EditiqueDocumentState>()
+            .having((s) => s.serverDetail, 'serverDetail', isNull)
+            .having((s) => s.errorType, 'errorType', EditiqueErrorType.network),
+      ],
+    );
+
+    // Un détail survivant à une reprise décrirait l'échec précédent.
+    blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+      'efface le détail au déclenchement suivant',
+      setUp: () {
+        when(
+          () => notePerceptionUseCase(any()),
+        ).thenAnswer((_) async => const Left(NotFoundFailure('Aucune charge')));
+        when(() => attestationUseCase(any())).thenAnswer(
+          (_) async =>
+              Right(_documentOf(EditiqueDocumentType.enrollmentAttestation)),
+        );
+      },
+      build: build,
+      act: (bloc) async {
+        bloc.add(
+          const EditiqueNotePerceptionRequested(
+            studentId: 's-1',
+            academicYearId: 'y-1',
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(
+          const EditiqueEnrollmentAttestationRequested(enrollmentId: 'e-1'),
+        );
+      },
+      skip: 2,
+      expect: () => [
+        isA<EditiqueDocumentState>()
+            .having((s) => s.status, 'status', EditiqueDocumentStatus.loading)
+            .having((s) => s.serverDetail, 'serverDetail', isNull),
+        isA<EditiqueDocumentState>().having(
+          (s) => s.status,
+          'status',
+          EditiqueDocumentStatus.success,
+        ),
+      ],
+    );
   });
 }

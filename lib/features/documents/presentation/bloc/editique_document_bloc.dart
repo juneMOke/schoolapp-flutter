@@ -4,7 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_server_detail.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
@@ -14,20 +18,58 @@ part 'editique_document_state.dart';
 
 /// Émission d'une pièce d'éditique, une à la fois.
 ///
-/// Portée volontairement étroite : une instance sert **une** visionneuse. Les
-/// pièces restantes (attestation, note de perception, quitus) rejoindront ce
-/// BLoC quand leurs écrans existeront — rien n'est câblé d'avance.
+/// Portée volontairement étroite : une instance ne porte **qu'une** pièce
+/// vivante. Le catalogue de l'élève en instancie donc une par ligne — c'est ce
+/// qui donne à chaque ligne son état local `idle | busy | error` indépendant,
+/// et qui garantit qu'un échec sur le quitus ne balaie pas l'attestation
+/// affichée à côté.
+///
+/// Les cinq pièces que le front sait émettre y sont câblées. Le bulletin (BU)
+/// reste hors périmètre : il exige `classroomId` + `periodeScolaireId`,
+/// inatteignables depuis un élève, et son émission n'est pas idempotente.
 class EditiqueDocumentBloc
     extends Bloc<EditiqueDocumentEvent, EditiqueDocumentState> {
+  final EmitEnrollmentAttestationUseCase _emitEnrollmentAttestationUseCase;
+  final EmitNotePerceptionUseCase _emitNotePerceptionUseCase;
   final EmitPaymentReceiptUseCase _emitPaymentReceiptUseCase;
   final EmitAccountStatementUseCase _emitAccountStatementUseCase;
+  final EmitFinancialClearanceUseCase _emitFinancialClearanceUseCase;
 
   EditiqueDocumentBloc({
+    required EmitEnrollmentAttestationUseCase emitEnrollmentAttestationUseCase,
+    required EmitNotePerceptionUseCase emitNotePerceptionUseCase,
     required EmitPaymentReceiptUseCase emitPaymentReceiptUseCase,
     required EmitAccountStatementUseCase emitAccountStatementUseCase,
-  }) : _emitPaymentReceiptUseCase = emitPaymentReceiptUseCase,
+    required EmitFinancialClearanceUseCase emitFinancialClearanceUseCase,
+  }) : _emitEnrollmentAttestationUseCase = emitEnrollmentAttestationUseCase,
+       _emitNotePerceptionUseCase = emitNotePerceptionUseCase,
+       _emitPaymentReceiptUseCase = emitPaymentReceiptUseCase,
        _emitAccountStatementUseCase = emitAccountStatementUseCase,
+       _emitFinancialClearanceUseCase = emitFinancialClearanceUseCase,
        super(const EditiqueDocumentState()) {
+    on<EditiqueEnrollmentAttestationRequested>(
+      (event, emit) => _emit(
+        emit,
+        EditiqueDocumentType.enrollmentAttestation,
+        () => _emitEnrollmentAttestationUseCase(
+          EmitEnrollmentAttestationParams(enrollmentId: event.enrollmentId),
+        ),
+      ),
+    );
+
+    on<EditiqueNotePerceptionRequested>(
+      (event, emit) => _emit(
+        emit,
+        EditiqueDocumentType.notePerception,
+        () => _emitNotePerceptionUseCase(
+          StudentYearDocumentParams(
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
+        ),
+      ),
+    );
+
     on<EditiquePaymentReceiptRequested>(
       (event, emit) => _emit(
         emit,
@@ -43,6 +85,19 @@ class EditiqueDocumentBloc
         emit,
         EditiqueDocumentType.accountStatement,
         () => _emitAccountStatementUseCase(
+          StudentYearDocumentParams(
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
+        ),
+      ),
+    );
+
+    on<EditiqueFinancialClearanceRequested>(
+      (event, emit) => _emit(
+        emit,
+        EditiqueDocumentType.financialClearance,
+        () => _emitFinancialClearanceUseCase(
           StudentYearDocumentParams(
             studentId: event.studentId,
             academicYearId: event.academicYearId,
@@ -78,6 +133,10 @@ class EditiqueDocumentBloc
         state.copyWith(
           status: EditiqueDocumentStatus.failure,
           errorType: _mapFailureToErrorType(failure),
+          // Le message du serveur est souvent la seule information exploitable
+          // (« Aucune charge pour l'élève ») ; l'anatomie, elle, ne sait dire
+          // que la famille d'erreur. `null` quand le serveur n'a rien dit.
+          serverDetail: EditiqueServerDetail.of(failure),
         ),
       ),
       (document) => emit(
