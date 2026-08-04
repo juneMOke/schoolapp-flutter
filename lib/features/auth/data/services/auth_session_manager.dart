@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
@@ -42,6 +43,10 @@ class AuthSessionManager
   final CurrentUserContext? _currentUser;
   final WallClock _now;
 
+  /// Purge des pièces déposées en clair par le partage système. Optionnel : sans
+  /// lui, la fin de session se comporte exactement comme avant.
+  final SharedDocumentCache? _sharedDocumentCache;
+
   /// Dernier `userVersion` **observé** sur une réponse serveur (header
   /// `X-User-Version`). En mémoire : re-observé au prochain contact si perdu.
   int? _observedUserVersion;
@@ -60,12 +65,14 @@ class AuthSessionManager
     required PasswordVerifierService verifier,
     SessionRevocationBus? revocationBus,
     CurrentUserContext? currentUser,
+    SharedDocumentCache? sharedDocumentCache,
     WallClock now = _systemWallClock,
   }) : _tokenStorage = tokenStorage,
        _authLocalDao = authLocalDao,
        _verifier = verifier,
        _revocationBus = revocationBus,
        _currentUser = currentUser,
+       _sharedDocumentCache = sharedDocumentCache,
        _now = now;
 
   /// TTL de refresh par défaut si le serveur ne fournit pas `refreshExpiresIn`
@@ -512,6 +519,12 @@ class AuthSessionManager
     }
     _observedUserVersion = null;
     _currentUser?.clear();
+
+    // Les pièces partagées vivent EN CLAIR dans le cache de l'application, hors
+    // de la base chiffrée : elles doivent partir avec la session (ADR-012 D-7).
+    // En dernier, et sans jamais faire échouer le wipe — fermer la session
+    // prime sur nettoyer un cache.
+    await _sharedDocumentCache?.purge();
   }
 
   // ── Sonde de crédentiels (boucle de synchro, V1.1) ──────────────────────────

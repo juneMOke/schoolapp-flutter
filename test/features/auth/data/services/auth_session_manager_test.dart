@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
@@ -708,5 +711,49 @@ void main() {
     clock += const Duration(days: 15).inMilliseconds;
     final ro = await manager.evaluateFreshness();
     expect(ro!.mode, SessionMode.readOnly);
+  });
+
+  // ADR-012 D-7 : les pièces partagées vivent EN CLAIR dans le cache de l'app,
+  // hors de la base chiffrée. Elles doivent partir avec la session.
+  test('le wipe purge les pièces partagées en clair', () async {
+    final tmp = await Directory.systemTemp.createTemp('eteelo-wipe-share-');
+    addTearDown(() async {
+      if (await tmp.exists()) await tmp.delete(recursive: true);
+    });
+    final shareDir = Directory('${tmp.path}/share');
+    await shareDir.create(recursive: true);
+    final receipt = File('${shareDir.path}/ETL-RC-2526-000212.pdf');
+    await receipt.writeAsString('%PDF');
+
+    final manager = AuthSessionManager(
+      tokenStorage: tokenStorage,
+      authLocalDao: dao,
+      verifier: const PasswordVerifierService(),
+      sharedDocumentCache: SharedDocumentCache(
+        temporaryDirectory: () async => tmp,
+      ),
+      now: () => clock,
+    );
+
+    await manager.wipeSession();
+
+    expect(await receipt.exists(), isFalse);
+  });
+
+  // Fermer la session prime sur nettoyer un cache : un échec d'entrée-sortie ne
+  // doit jamais empêcher une déconnexion ou une révocation d'aboutir.
+  test('le wipe aboutit même si la purge du cache échoue', () async {
+    final manager = AuthSessionManager(
+      tokenStorage: tokenStorage,
+      authLocalDao: dao,
+      verifier: const PasswordVerifierService(),
+      sharedDocumentCache: SharedDocumentCache(
+        temporaryDirectory: () async =>
+            throw const FileSystemException('cache indisponible'),
+      ),
+      now: () => clock,
+    );
+
+    await expectLater(manager.wipeSession(), completes);
   });
 }
