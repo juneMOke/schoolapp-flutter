@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
@@ -204,5 +205,56 @@ void main() {
     final joined = _flat(lines).replaceAll('\n', '').replaceAll(' ', '');
 
     expect(joined, contains('PROV-A1B2C3-9F8E7D6C'));
+  });
+
+  // La police du ticket est une base-14 Latin-1 : tout ce qui en sort est
+  // SUPPRIMÉ sans erreur. Le gabarit doit donc rendre le texte imprimable —
+  // et le faire AVANT de mesurer, sinon `œ` → `oe` décale les colonnes.
+  group('jeu de caractères', () {
+    TicketReceiptModel exotic() => TicketReceiptModel(
+      schoolName: 'Institut Sacré-Cœur d’Élite',
+      schoolMunicipality: 'Kinshasa — Ngaliema',
+      studentFullName: 'Lɔkɔ Ngɛlɛ Мбала',
+      matriculationNumber: 'MAT—0042',
+      classroomName: '5ᵉ primaire A',
+      provisionalReference: 'PROV-A1B2C3',
+      paidAt: DateTime(2026, 8, 4, 14, 7),
+      cashierFullName: 'Ĳsselmeer Ǎmba',
+      amountReceivedInCents: 150000,
+      allocations: const [
+        TicketAllocationLine(label: 'Frais “scolaires”', amountInCents: 120000),
+      ],
+      remainingBalanceInCents: 250000,
+      currency: 'CDF',
+      labels: _labels,
+    );
+
+    test('aucune ligne ne sort du Latin-1', () {
+      for (final line in TicketTextLayout.render(exotic())) {
+        expect(
+          TicketCharset.isPrintable(line),
+          isTrue,
+          reason: 'ligne non imprimable : $line',
+        );
+      }
+    });
+
+    test('translittère au lieu de perdre le glyphe', () {
+      final rendu = _flat(TicketTextLayout.render(exotic()));
+
+      expect(rendu, contains('SACRÉ-COEUR'));
+      expect(rendu, contains("D'ÉLITE"));
+      expect(rendu, contains('LOKO NGELE'));
+      // Ce qui n'a pas de translittération reste VISIBLE.
+      expect(rendu, contains('?????'));
+    });
+
+    // L'invariant que la translittération pourrait casser : elle rallonge le
+    // texte, donc elle doit précéder toute mesure de largeur.
+    test('l\'alignement à 48 colonnes tient malgré l\'allongement', () {
+      for (final line in TicketTextLayout.render(exotic())) {
+        expect(line.length, lessThanOrEqualTo(48), reason: line);
+      }
+    });
   });
 }

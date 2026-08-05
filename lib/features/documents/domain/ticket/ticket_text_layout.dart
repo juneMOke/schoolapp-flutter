@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_charset.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 
 /// Met le reçu provisoire en **lignes de caractères**.
@@ -91,7 +92,7 @@ abstract final class TicketTextLayout {
 
     if (model.allocations.isNotEmpty) {
       lines.add('');
-      lines.add(model.labels.allocationsLabel);
+      lines.add(TicketCharset.printable(model.labels.allocationsLabel));
       for (final allocation in model.allocations) {
         _addPair(
           lines,
@@ -161,7 +162,8 @@ abstract final class TicketTextLayout {
   static String _rule(int width) => _separator * width;
 
   /// Bandeau pleine largeur, encadré d'espaces pour rester lisible.
-  static String _banner(String text, int width) {
+  static String _banner(String rawText, int width) {
+    final text = TicketCharset.printable(rawText);
     final label = ' ${text.toUpperCase()} ';
     if (label.length >= width) return label.trim();
     final total = width - label.length;
@@ -190,10 +192,14 @@ abstract final class TicketTextLayout {
   /// sur lequel repose tout le gabarit.
   static void _addPair(
     List<String> lines,
-    String label,
-    String value,
+    String rawLabel,
+    String rawValue,
     int width,
   ) {
+    // Translittération AVANT toute mesure : `œ` → `oe` gagne un caractère, et
+    // mesurer d'abord décalerait la colonne des montants.
+    final label = TicketCharset.printable(rawLabel);
+    final value = TicketCharset.printable(rawValue);
     final space = width - label.length - value.length;
     if (space >= 1) {
       lines.add('$label${' ' * space}$value');
@@ -218,7 +224,7 @@ abstract final class TicketTextLayout {
   /// Découpe sur les espaces, sans jamais couper un mot au milieu — sauf s'il
   /// dépasse à lui seul la largeur (une référence, typiquement).
   static List<String> _wrapped(String text, int width) {
-    final source = text.trim();
+    final source = TicketCharset.printable(text).trim();
     if (source.isEmpty) return const <String>[];
 
     final lines = <String>[];

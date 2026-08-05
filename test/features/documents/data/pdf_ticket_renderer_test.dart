@@ -327,6 +327,21 @@ void main() {
       },
     );
 
+    // Bouclage de bout en bout du jeu de caractères : la police du ticket est
+    // une base-14 Latin-1 qui SUPPRIME sans erreur ce qu'elle ne couvre pas.
+    // « Institut Sacré-Cœur » — un nom d'établissement banal en RDC —
+    // s'imprimait « Sacré-Cur ».
+    test('la ligature arrive jusque dans le PDF, translittérée', () async {
+      final bytes = await PdfTicketRenderer.render(
+        _modelWithSingleLine('Sacré-Cœur'),
+        format: PdfPageFormat.a4,
+      );
+
+      final peint = _visibleText(bytes);
+      expect(peint, contains('SACR'));
+      expect(peint, contains('COEUR'));
+    });
+
     test('le rouleau reste rendu sans pagination', () async {
       final bytes = await PdfTicketRenderer.render(
         _model(allocationCount: 120),
