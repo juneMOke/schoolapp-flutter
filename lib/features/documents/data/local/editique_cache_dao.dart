@@ -182,7 +182,7 @@ class EditiqueCacheDao {
       ..['document_id'] = documentId
       ..['document_number'] = documentNumber;
 
-    final existing = await _findIdentity(entry);
+    final existing = await findIdentity(entry);
     if (existing == null) {
       await _db.insert(kEditiqueCacheTable, payload);
       return;
@@ -229,7 +229,13 @@ class EditiqueCacheDao {
 
   /// Ligne existante correspondant à l'identité de [entry] : d'abord
   /// l'identifiant serveur, puis le numéro dans l'école.
-  Future<EditiqueCacheEntry?> _findIdentity(EditiqueCacheEntry entry) async {
+  ///
+  /// Publique parce que le magasin d'octets doit poser **exactement** la même
+  /// question avant d'écrire un fichier : c'est la clé locale de la ligne
+  /// existante qui nomme ce fichier, et [upsert] la conserve. Écrire sous une
+  /// clé fraîche laisserait le fichier de la version précédente sur le disque,
+  /// orphelin, pendant que la ligne continuerait de désigner son ancien nom.
+  Future<EditiqueCacheEntry?> findIdentity(EditiqueCacheEntry entry) async {
     final documentId = entry.documentId;
     if (documentId != null && documentId.isNotEmpty) {
       final byId = await findByDocumentId(documentId);

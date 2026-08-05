@@ -16,8 +16,14 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 /// ligne survivant à son fichier est un simple défaut de cache : la relecture
 /// ne trouve rien, la pièce se retélécharge. Un fichier survivant à sa ligne
 /// est un octet orphelin, invisible à la comptabilité de budget, que plus rien
-/// ne réclamera. C'est pour cela que les purges rendent les entrées
-/// supprimées : leurs identifiants nomment les fichiers à effacer.
+/// ne réclamera.
+///
+/// C'est pourquoi la réaffectation d'école se lit ici en deux gestes —
+/// [foreignSchoolEntries] désigne, l'appelant efface, puis [deleteEntries]
+/// retire les lignes de ce qui est réellement parti. [purgeAll] fait
+/// exception : il rend les entrées après les avoir supprimées, parce que son
+/// appelant efface le répertoire **entier** et détruit la clé, geste qui ne
+/// laisse rien à réclamer même interrompu.
 class EditiqueCacheMaintenanceDao {
   /// Découpage des `IN (…)` : SQLite plafonne le nombre de paramètres liés
   /// (999 sur les moteurs les plus anciens encore rencontrés).
@@ -79,19 +85,22 @@ class EditiqueCacheMaintenanceDao {
     return deleted;
   }
 
-  /// Efface tout ce qui n'appartient pas à l'école courante (D-7, RG-012-21) et
-  /// rend les entrées supprimées, pour que leurs fichiers le soient aussi.
+  /// Entrées qui n'appartiennent pas à l'école courante — la tablette vient
+  /// d'être réaffectée (D-7, RG-012-21).
   ///
-  /// Sélection **avant** suppression, délibérément : un arrêt entre les deux
-  /// laisse des fichiers à réclamer, ce qu'un balayage ultérieur sait faire ;
-  /// l'ordre inverse laisserait des octets orphelins que plus rien ne désigne.
+  /// **Désigne, n'efface pas.** L'appelant retire les fichiers d'abord et les
+  /// lignes ensuite, jamais l'inverse : supprimer les lignes en premier
+  /// laisserait, si l'application s'arrête entre les deux, des pièces d'un
+  /// autre établissement sur le disque — déchiffrables, invisibles à la
+  /// comptabilité de budget, et que plus aucune ligne ne désignerait pour les
+  /// réclamer. C'est exactement ce que D-7 interdit.
   ///
   /// Refuse une école vide plutôt que de l'interpréter. `CurrentUserContext`
   /// rend `null` avant l'authentification — la DI offline est câblée avant elle
   /// —, et « aucune école courante » signifierait ici « toutes les écoles sont
   /// étrangères », donc un cache vidé à chaque démarrage à froid. Tout vider
   /// reste possible, mais alors explicitement, par [purgeAll].
-  Future<List<EditiqueCacheEntry>> purgeForeignSchools(
+  Future<List<EditiqueCacheEntry>> foreignSchoolEntries(
     String currentSchoolId,
   ) async {
     if (currentSchoolId.isEmpty) {
@@ -108,17 +117,7 @@ class EditiqueCacheMaintenanceDao {
       where: 'school_id <> ?',
       whereArgs: [currentSchoolId],
     );
-    final removed = rows
-        .map(EditiqueCacheEntry.fromMap)
-        .toList(growable: false);
-    if (removed.isEmpty) return removed;
-
-    await _db.delete(
-      kEditiqueCacheTable,
-      where: 'school_id <> ?',
-      whereArgs: [currentSchoolId],
-    );
-    return removed;
+    return rows.map(EditiqueCacheEntry.fromMap).toList(growable: false);
   }
 
   /// Efface tout le cache et rend les entrées supprimées. Primitive de

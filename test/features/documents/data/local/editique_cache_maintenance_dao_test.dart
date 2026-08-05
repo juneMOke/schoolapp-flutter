@@ -122,7 +122,7 @@ void main() {
   });
 
   group('effacement de D-7', () {
-    test('la purge d\'école rend les entrées supprimées', () async {
+    test('la réaffectation désigne les entrées étrangères', () async {
       await dao.upsert(cacheEntry(id: 'c-1', documentId: 'doc-1'));
       await dao.upsert(
         cacheEntry(
@@ -133,20 +133,21 @@ void main() {
         ),
       );
 
-      // Les identifiants rendus sont ce qui permettra d'aller effacer les
-      // fichiers correspondants : sans eux, ils deviendraient orphelins.
-      final removed = await maintenance.purgeForeignSchools('school-1');
-      expect(removed.map((e) => e.id), ['c-2']);
-      expect(await dao.count(), 1);
-      expect((await dao.findByDocumentId('doc-1'))?.id, 'c-1');
+      final foreign = await maintenance.foreignSchoolEntries('school-1');
+
+      expect(foreign.map((e) => e.id), ['c-2']);
+      // Désigner n'efface pas : les fichiers partent d'abord, les lignes
+      // ensuite, sinon un arrêt entre les deux laisse des pièces d'un autre
+      // établissement que plus rien ne désigne.
+      expect(await dao.count(), 2);
     });
 
     test(
-      'la purge d\'école ne rend rien quand tout appartient à l\'école',
+      'la réaffectation ne désigne rien quand tout appartient à l\'école',
       () async {
         await dao.upsert(cacheEntry(id: 'c-1', documentId: 'doc-1'));
 
-        expect(await maintenance.purgeForeignSchools('school-1'), isEmpty);
+        expect(await maintenance.foreignSchoolEntries('school-1'), isEmpty);
         expect(await dao.count(), 1);
       },
     );
@@ -154,11 +155,11 @@ void main() {
     // `CurrentUserContext` rend null avant l'authentification : interpréter
     // « aucune école » comme « toutes sont étrangères » viderait le cache à
     // chaque démarrage à froid.
-    test('la purge d\'école refuse une école inconnue', () async {
+    test('la réaffectation refuse une école inconnue', () async {
       await dao.upsert(cacheEntry(id: 'c-1', documentId: 'doc-1'));
 
       await expectLater(
-        maintenance.purgeForeignSchools(''),
+        maintenance.foreignSchoolEntries(''),
         throwsA(isA<ArgumentError>()),
       );
       expect(await dao.count(), 1);

@@ -331,4 +331,42 @@ void main() {
       });
     });
   });
+
+  // La question que le magasin d'octets doit poser AVANT d'écrire un fichier :
+  // c'est la clé locale de la ligne existante qui le nomme, et `upsert` la
+  // conserve. Écrire sous une clé fraîche laisserait un fichier orphelin.
+  group('identité d une entrée', () {
+    test('reconnaît une entrée par son identifiant serveur', () async {
+      await dao.upsert(cacheEntry());
+
+      final found = await dao.findIdentity(
+        cacheEntry(id: 'peu-importe', documentNumber: 'ETL-RC-inconnu'),
+      );
+
+      expect(found?.id, 'c-1');
+    });
+
+    test('reconnaît une entrée par son numéro, dans son école', () async {
+      await dao.upsert(cacheEntry());
+
+      final trouvee = await dao.findIdentity(
+        cacheEntry(id: 'peu-importe', documentId: null),
+      );
+      final ailleurs = await dao.findIdentity(
+        cacheEntry(id: 'peu-importe', documentId: null, schoolId: 'school-2'),
+      );
+
+      expect(trouvee?.id, 'c-1');
+      expect(ailleurs, isNull);
+    });
+
+    test('une pièce jamais vue n a pas d identité locale', () async {
+      expect(
+        await dao.findIdentity(
+          cacheEntry(documentId: 'doc-9', documentNumber: 'ETL-RC-9'),
+        ),
+        isNull,
+      );
+    });
+  });
 }
