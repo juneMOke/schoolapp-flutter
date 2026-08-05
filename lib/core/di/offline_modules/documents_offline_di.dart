@@ -1,9 +1,15 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
+import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
@@ -30,6 +36,8 @@ import 'package:school_app_flutter/features/documents/domain/usecases/list_cache
 /// (RG-012-4) sans que la tablette d'un enseignant se soit déjà vu fabriquer
 /// une clé de cache.
 void registerDocumentsOffline(GetIt getIt) {
+  final requiredAuth = getIt<Map<String, dynamic>>();
+
   // ── Clé du magasin ──
   // Distincte de celle de SQLCipher : la détruire rend les pièces illisibles
   // sans rien toucher de la base, ce qui est la primitive d'effacement de D-7.
@@ -84,5 +92,24 @@ void registerDocumentsOffline(GetIt getIt) {
       store: getIt<EditiqueBlobStore>(),
       ids: getIt<IdGenerator>(),
     ),
+  );
+
+  // ── Handlers de pull delta ──
+  // Le catalogue des pièces scellées : ce qui existe ailleurs. Les octets
+  // continuent d'être tirés un par un — jamais dans une page de delta.
+  getIt.registerLazySingleton<EditiqueDocumentPullApi>(
+    () => EditiqueDocumentPullApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<EditiqueDocumentPullRepositoryImpl>(
+    () => EditiqueDocumentPullRepositoryImpl(
+      api: getIt<EditiqueDocumentPullApi>(),
+      cache: getIt<EditiqueDocumentCache>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: requiredAuth,
+    ),
+  );
+  getIt<PullCoordinator>().registerHandler(
+    EditiqueDocumentPullHandler(getIt<EditiqueDocumentPullRepositoryImpl>()),
   );
 }
