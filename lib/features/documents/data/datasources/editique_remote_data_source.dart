@@ -70,4 +70,16 @@ abstract class EditiqueRemoteDataSource {
     @Path('studentId') String studentId,
     @Query('academicYearId') String academicYearId,
   );
+
+  /// Re-télécharge une pièce archivée par son identifiant. **Seul `GET` de ce
+  /// contrat** : il ne produit rien, ne consomme aucun numéro de séquence, et
+  /// se rejoue librement — c'est ce qui autorise la restitution à réessayer là
+  /// où l'émission d'une pièce horodatée ne le peut jamais.
+  @GET(AppConstants.downloadEditiqueDocumentEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> downloadDocument(
+    @Extras() Map<String, dynamic> extras,
+    @Path('documentId') String documentId,
+  );
 }

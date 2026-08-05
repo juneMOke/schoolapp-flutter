@@ -108,6 +108,18 @@ class AppConstants {
   static const String emitFinancialClearanceEndpoint =
       '/api/v1/finance/students/{studentId}/quitus';
 
+  /// Re-téléchargement d'une pièce **archivée**, par son identifiant d'archive.
+  ///
+  /// Ressert les octets gelés à l'identique (RG-012-3 : un reçu retéléchargé six
+  /// mois plus tard est identique au bit près). C'est un `GET` : il ne produit
+  /// rien, ne consomme aucun numéro de séquence, et se rejoue librement — à
+  /// l'inverse des cinq routes d'émission ci-dessus.
+  ///
+  /// N'existe que pour les pièces que le serveur conserve : un relevé ou un
+  /// quitus n'a pas d'identifiant à désigner.
+  static const String downloadEditiqueDocumentEndpoint =
+      '/api/v1/editique/documents/{documentId}';
+
   /// Type MIME attendu en réponse des routes d'éditique. Sert de **garde de
   /// contenu** : un corps qui n'est pas un PDF ne doit jamais être présenté
   /// comme un document.
