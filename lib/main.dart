@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +11,7 @@ import 'package:school_app_flutter/features/finance/offline/presentation/bloc/pa
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -76,6 +79,22 @@ class _MyAppState extends State<MyApp> {
     _router = AppRouter.createRouter(_authBloc, _academicYearContextBloc);
   }
 
+  /// Balaie les fichiers du cache éditique que l'index ne désigne plus.
+  ///
+  /// Volontairement **muet et sans effet visible** : c'est de l'hygiène de
+  /// disque, jamais une raison de retarder une ouverture de session ni
+  /// d'afficher quoi que ce soit. Passe par le cache et non par le magasin,
+  /// seul moyen d'être sûr qu'aucune écriture n'est en cours — un fichier tout
+  /// juste scellé, ligne pas encore insérée, serait sinon pris pour un
+  /// orphelin.
+  Future<void> _reclaimEditiqueCacheOrphans() async {
+    try {
+      await getIt<EditiqueDocumentCache>().reclaimOrphans();
+    } catch (_) {
+      // Cache indisponible, plateforme absente : sans conséquence.
+    }
+  }
+
   @override
   void dispose() {
     _academicYearContextBloc.close();
@@ -123,6 +142,16 @@ class _MyAppState extends State<MyApp> {
                 // (D-05, réconciliation silencieuse au retour réseau si
                 // offline).
                 _syncStatusCubit.notifyLocalWrite();
+                // Entretien du cache de restitution éditique (ADR-012 D-7) :
+                // réclame les fichiers chiffrés qu'aucune ligne d'index ne
+                // désigne plus. Une purge d'école interrompue en laisse — des
+                // octets invisibles à la comptabilité de budget, que plus rien
+                // ne réclamerait. Ici plutôt qu'au démarrage : c'est le premier
+                // instant où l'identité est connue, donc le seul endroit où la
+                // garde de rôle du lot L3.6 pourra s'interposer sans que ce
+                // crochet ait à être déplacé. Ni clé ni répertoire ne sont
+                // touchés par ce balayage.
+                unawaited(_reclaimEditiqueCacheOrphans());
                 return;
               }
 
