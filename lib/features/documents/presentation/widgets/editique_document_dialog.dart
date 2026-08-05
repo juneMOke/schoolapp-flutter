@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_preview.dart';
@@ -24,13 +25,19 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 Future<void> showEditiqueEnrollmentAttestationDialog(
   BuildContext context, {
   required String enrollmentId,
+  String? studentId,
+  String? academicYearId,
   EditiqueDocumentBloc? bloc,
   bool dispatchOnOpen = true,
 }) {
   return _showEditiqueDocumentDialog(
     context,
     title: AppLocalizations.of(context)!.editiqueViewerAttestationTitle,
-    request: EditiqueEnrollmentAttestationRequested(enrollmentId: enrollmentId),
+    request: EditiqueEnrollmentAttestationRequested(
+      enrollmentId: enrollmentId,
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
     bloc: bloc,
     dispatchOnOpen: dispatchOnOpen,
   );
@@ -66,13 +73,19 @@ Future<void> showEditiqueNotePerceptionDialog(
 Future<void> showEditiquePaymentReceiptDialog(
   BuildContext context, {
   required String paymentId,
+  String? studentId,
+  String? academicYearId,
   EditiqueDocumentBloc? bloc,
   bool dispatchOnOpen = true,
 }) {
   return _showEditiqueDocumentDialog(
     context,
     title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
-    request: EditiquePaymentReceiptRequested(paymentId: paymentId),
+    request: EditiquePaymentReceiptRequested(
+      paymentId: paymentId,
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
     bloc: bloc,
     dispatchOnOpen: dispatchOnOpen,
   );
@@ -119,6 +132,40 @@ Future<void> showEditiqueAccountStatementDialog(
     context,
     title: AppLocalizations.of(context)!.editiqueViewerStatementTitle,
     request: EditiqueAccountStatementRequested(
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
+  );
+}
+
+/// Ouvre la visionneuse sur une pièce **déjà scellée**, sans rien produire.
+///
+/// C'est l'autre verbe de D-1 : la copie locale d'abord, le re-téléchargement
+/// ensuite. Rien n'est émis, aucun numéro n'est consommé, et l'ouverture
+/// fonctionne **hors ligne** quand la tablette détient la pièce.
+///
+/// Réservé aux pièces que le serveur archive : un relevé ou un quitus est
+/// recalculé à chaque demande et n'a pas de version à ressortir.
+Future<void> showEditiqueRestitutionDialog(
+  BuildContext context, {
+  required EditiqueDocumentType type,
+  required String title,
+  String? documentId,
+  String? documentNumber,
+  String? studentId,
+  String? academicYearId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: title,
+    request: EditiqueDocumentRestitutionRequested(
+      type: type,
+      documentId: documentId,
+      documentNumber: documentNumber,
       studentId: studentId,
       academicYearId: academicYearId,
     ),

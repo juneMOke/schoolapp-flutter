@@ -33,6 +33,8 @@ import 'package:school_app_flutter/features/documents/data/repositories/provisio
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/get_reenrollment_candidate_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/is_student_known_to_server_use_case.dart';
@@ -304,9 +306,14 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<EditiqueEligibilityCubit>(
     () => EditiqueEligibilityCubit(getIt<IsStudentKnownToServerUseCase>()),
   );
-  // Ce que la tablette sait du dossier : axe de synchro + pièces déjà scellées.
+  // Ce que la tablette sait du dossier : axe de synchro, pièces déjà scellées,
+  // et — depuis L3.5 — celles dont elle détient réellement les octets, seule
+  // source de ce qui est consultable hors ligne.
   getIt.registerFactory<DocumentsLocalDossierCubit>(
-    () => DocumentsLocalDossierCubit(getIt<GetLocalEnrollmentDetailUseCase>()),
+    () => DocumentsLocalDossierCubit(
+      getIt<GetLocalEnrollmentDetailUseCase>(),
+      getIt<ListCachedDocumentsUseCase>(),
+    ),
   );
   getIt.registerFactory<GetPreEnrollmentUseCase>(
     () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
@@ -415,7 +422,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),
   );
   getIt.registerFactory<PaymentReceiptCubit>(
-    () => PaymentReceiptCubit(getIt<GetPaymentReceiptDocumentUseCase>()),
+    () => PaymentReceiptCubit(
+      getIt<GetPaymentReceiptDocumentUseCase>(),
+      getIt<FindCachedDocumentUseCase>(),
+    ),
   );
 
   // ── Handlers d'outbox → SyncEngine ──────────────────────────────────────────

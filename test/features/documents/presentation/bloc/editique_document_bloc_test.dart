@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
@@ -30,6 +31,9 @@ class MockEmitNotePerceptionUseCase extends Mock
 
 class MockEmitFinancialClearanceUseCase extends Mock
     implements EmitFinancialClearanceUseCase {}
+
+class MockRestituteDocumentUseCase extends Mock
+    implements RestituteDocumentUseCase {}
 
 final _receipt = EditiqueDocument(
   type: EditiqueDocumentType.paymentReceipt,
@@ -79,6 +83,7 @@ void main() {
     emitPaymentReceiptUseCase: useCase,
     emitAccountStatementUseCase: statementUseCase,
     emitFinancialClearanceUseCase: clearanceUseCase,
+    restituteDocumentUseCase: MockRestituteDocumentUseCase(),
   );
 
   blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(

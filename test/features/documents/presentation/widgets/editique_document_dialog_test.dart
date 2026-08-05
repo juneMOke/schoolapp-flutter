@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -30,6 +31,9 @@ class MockEmitFinancialClearanceUseCase extends Mock
 
 class MockEmitAccountStatementUseCase extends Mock
     implements EmitAccountStatementUseCase {}
+
+class MockRestituteDocumentUseCase extends Mock
+    implements RestituteDocumentUseCase {}
 
 /// Tailles réelles de la cible : tablette Android paysage, puis un téléphone
 /// bas de gamme en paysage — les deux hauteurs où la modale est la plus serrée.
@@ -62,6 +66,7 @@ Future<void> _pumpLoading(WidgetTester tester, {required Size size}) async {
             emitPaymentReceiptUseCase: useCase,
             emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
             emitFinancialClearanceUseCase: MockEmitFinancialClearanceUseCase(),
+            restituteDocumentUseCase: MockRestituteDocumentUseCase(),
           )..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
           child: const EditiqueDocumentDialogView(
             title: 'Reçu de paiement',
@@ -230,6 +235,7 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
               emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
               emitFinancialClearanceUseCase:
                   MockEmitFinancialClearanceUseCase(),
+              restituteDocumentUseCase: MockRestituteDocumentUseCase(),
             );
             return bloc
               ..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1'));

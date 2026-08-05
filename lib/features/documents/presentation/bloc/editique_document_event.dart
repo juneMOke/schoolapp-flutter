@@ -16,10 +16,20 @@ sealed class EditiqueDocumentEvent extends Equatable {
 class EditiqueEnrollmentAttestationRequested extends EditiqueDocumentEvent {
   final String enrollmentId;
 
-  const EditiqueEnrollmentAttestationRequested({required this.enrollmentId});
+  /// Attribuent la copie locale, pas l'appel : le serveur ne connaît que le
+  /// dossier. Sans eux, la pièce est mise en cache sans élève et le catalogue
+  /// ne la retrouve jamais.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EditiqueEnrollmentAttestationRequested({
+    required this.enrollmentId,
+    this.studentId,
+    this.academicYearId,
+  });
 
   @override
-  List<Object?> get props => [enrollmentId];
+  List<Object?> get props => [enrollmentId, studentId, academicYearId];
 }
 
 /// Demande la note de perception annuelle (NP) d'un élève.
@@ -48,10 +58,18 @@ class EditiqueNotePerceptionRequested extends EditiqueDocumentEvent {
 class EditiquePaymentReceiptRequested extends EditiqueDocumentEvent {
   final String paymentId;
 
-  const EditiquePaymentReceiptRequested({required this.paymentId});
+  /// Attribuent la copie locale ; le serveur ne connaît que le versement.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EditiquePaymentReceiptRequested({
+    required this.paymentId,
+    this.studentId,
+    this.academicYearId,
+  });
 
   @override
-  List<Object?> get props => [paymentId];
+  List<Object?> get props => [paymentId, studentId, academicYearId];
 }
 
 /// Demande le relevé de compte (RL) d'un élève sur une année.
@@ -93,4 +111,46 @@ class EditiqueFinancialClearanceRequested extends EditiqueDocumentEvent {
 
   @override
   List<Object?> get props => [studentId, academicYearId];
+}
+
+/// Demande la **restitution** d'une pièce déjà scellée : la copie locale
+/// d'abord, le re-téléchargement ensuite (ADR-012 D-1).
+///
+/// Tout la sépare des cinq événements ci-dessus. Elle ne produit rien, ne
+/// consomme aucun numéro, fonctionne **hors ligne** quand la tablette détient
+/// la pièce, et se rejoue librement en cas d'échec.
+///
+/// Elle ne s'applique qu'aux pièces que le serveur archive : demander la
+/// restitution d'un relevé ou d'un quitus est une faute d'appelant, pas un cas
+/// d'échec — ces pièces sont recalculées à chaque demande.
+class EditiqueDocumentRestitutionRequested extends EditiqueDocumentEvent {
+  final EditiqueDocumentType type;
+
+  /// Référence d'archive du serveur. Seule clé qui autorise un
+  /// re-téléchargement ; le numéro seul ne fait qu'interroger le cache.
+  final String? documentId;
+
+  /// Numéro imprimé sur la pièce, unique par école.
+  final String? documentNumber;
+
+  /// Attribuent la copie qu'un re-téléchargement déposerait.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EditiqueDocumentRestitutionRequested({
+    required this.type,
+    this.documentId,
+    this.documentNumber,
+    this.studentId,
+    this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [
+    type,
+    documentId,
+    documentNumber,
+    studentId,
+    academicYearId,
+  ];
 }

@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 
@@ -20,7 +21,22 @@ LocalGeneratedDocument _document({
   status: status,
 );
 
+class _MockFindCachedDocumentUseCase extends Mock
+    implements FindCachedDocumentUseCase {}
+
 void main() {
+  final cachedUseCase = _MockFindCachedDocumentUseCase();
+  setUp(() {
+    // Aucune copie locale par défaut : le cubit se comporte comme avant le
+    // cache de restitution.
+    when(
+      () => cachedUseCase(
+        documentId: any(named: 'documentId'),
+        documentNumber: any(named: 'documentNumber'),
+      ),
+    ).thenAnswer((_) async => null);
+  });
+
   late MockGetPaymentReceiptDocumentUseCase useCase;
 
   setUp(() => useCase = MockGetPaymentReceiptDocumentUseCase());
@@ -31,7 +47,7 @@ void main() {
       (_) async =>
           _document(number: 'ETL-RC-2526-000212', status: 'DEFINITIVE'),
     ),
-    build: () => PaymentReceiptCubit(useCase),
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -48,7 +64,7 @@ void main() {
     setUp: () => when(() => useCase(any())).thenAnswer(
       (_) async => _document(number: 'PROV-ABCD1234', status: 'PROVISIONAL'),
     ),
-    build: () => PaymentReceiptCubit(useCase),
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -66,7 +82,7 @@ void main() {
     setUp: () => when(() => useCase(any())).thenAnswer(
       (_) async => _document(number: 'PROV-ABCD1234', status: 'REJECTED'),
     ),
-    build: () => PaymentReceiptCubit(useCase),
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -79,7 +95,7 @@ void main() {
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
     'reste neutre quand aucun reçu local n existe',
     setUp: () => when(() => useCase(any())).thenAnswer((_) async => null),
-    build: () => PaymentReceiptCubit(useCase),
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()
@@ -101,7 +117,7 @@ void main() {
   blocTest<PaymentReceiptCubit, PaymentReceiptState>(
     'n annonce aucune attente quand aucun reçu local n existe',
     setUp: () => when(() => useCase(any())).thenAnswer((_) async => null),
-    build: () => PaymentReceiptCubit(useCase),
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
     act: (cubit) => cubit.load('pay-1'),
     expect: () => [
       isA<PaymentReceiptState>()

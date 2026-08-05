@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
 
@@ -34,6 +35,7 @@ class EditiqueDocumentBloc
   final EmitPaymentReceiptUseCase _emitPaymentReceiptUseCase;
   final EmitAccountStatementUseCase _emitAccountStatementUseCase;
   final EmitFinancialClearanceUseCase _emitFinancialClearanceUseCase;
+  final RestituteDocumentUseCase _restituteDocumentUseCase;
 
   EditiqueDocumentBloc({
     required EmitEnrollmentAttestationUseCase emitEnrollmentAttestationUseCase,
@@ -41,24 +43,30 @@ class EditiqueDocumentBloc
     required EmitPaymentReceiptUseCase emitPaymentReceiptUseCase,
     required EmitAccountStatementUseCase emitAccountStatementUseCase,
     required EmitFinancialClearanceUseCase emitFinancialClearanceUseCase,
+    required RestituteDocumentUseCase restituteDocumentUseCase,
   }) : _emitEnrollmentAttestationUseCase = emitEnrollmentAttestationUseCase,
        _emitNotePerceptionUseCase = emitNotePerceptionUseCase,
        _emitPaymentReceiptUseCase = emitPaymentReceiptUseCase,
        _emitAccountStatementUseCase = emitAccountStatementUseCase,
        _emitFinancialClearanceUseCase = emitFinancialClearanceUseCase,
+       _restituteDocumentUseCase = restituteDocumentUseCase,
        super(const EditiqueDocumentState()) {
     on<EditiqueEnrollmentAttestationRequested>(
-      (event, emit) => _emit(
+      (event, emit) => _run(
         emit,
         EditiqueDocumentType.enrollmentAttestation,
         () => _emitEnrollmentAttestationUseCase(
-          EmitEnrollmentAttestationParams(enrollmentId: event.enrollmentId),
+          EmitEnrollmentAttestationParams(
+            enrollmentId: event.enrollmentId,
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
         ),
       ),
     );
 
     on<EditiqueNotePerceptionRequested>(
-      (event, emit) => _emit(
+      (event, emit) => _run(
         emit,
         EditiqueDocumentType.notePerception,
         () => _emitNotePerceptionUseCase(
@@ -71,17 +79,21 @@ class EditiqueDocumentBloc
     );
 
     on<EditiquePaymentReceiptRequested>(
-      (event, emit) => _emit(
+      (event, emit) => _run(
         emit,
         EditiqueDocumentType.paymentReceipt,
         () => _emitPaymentReceiptUseCase(
-          EmitPaymentReceiptParams(paymentId: event.paymentId),
+          EmitPaymentReceiptParams(
+            paymentId: event.paymentId,
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
         ),
       ),
     );
 
     on<EditiqueAccountStatementRequested>(
-      (event, emit) => _emit(
+      (event, emit) => _run(
         emit,
         EditiqueDocumentType.accountStatement,
         () => _emitAccountStatementUseCase(
@@ -94,7 +106,7 @@ class EditiqueDocumentBloc
     );
 
     on<EditiqueFinancialClearanceRequested>(
-      (event, emit) => _emit(
+      (event, emit) => _run(
         emit,
         EditiqueDocumentType.financialClearance,
         () => _emitFinancialClearanceUseCase(
@@ -105,14 +117,34 @@ class EditiqueDocumentBloc
         ),
       ),
     );
+
+    on<EditiqueDocumentRestitutionRequested>(
+      (event, emit) => _run(
+        emit,
+        event.type,
+        () => _restituteDocumentUseCase(
+          RestituteDocumentParams(
+            type: event.type,
+            documentId: event.documentId,
+            documentNumber: event.documentNumber,
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
+        ),
+      ),
+    );
   }
 
-  Future<void> _emit(
+  /// Corps commun à l'émission et à la restitution : même verrou, même état,
+  /// même traduction d'échec. Ce qui les distingue — un aller-retour serveur
+  /// obligatoire d'un côté, une copie locale de l'autre — a été tranché plus
+  /// bas, dans le repository.
+  Future<void> _run(
     Emitter<EditiqueDocumentState> emit,
     EditiqueDocumentType type,
     Future<Either<Failure, EditiqueDocument>> Function() request,
   ) async {
-    // Verrou anti-double-envoi : une émission déjà en vol ne doit jamais être
+    // Verrou anti-double-envoi : une demande déjà en vol ne doit jamais être
     // doublée. Sur une pièce non archivée, un second appel brûlerait un second
     // numéro de séquence côté serveur.
     if (state.status == EditiqueDocumentStatus.loading) return;

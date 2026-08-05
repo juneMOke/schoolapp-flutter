@@ -1,12 +1,15 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
 
 /// Registrar de la branche offline **Éditique** — le cache de restitution des
 /// pièces scellées (ADR-012 D-2/D-7, AM-10). Appelé depuis
@@ -53,6 +56,23 @@ void registerDocumentsOffline(GetIt getIt) {
     () => EditiqueBlobStore(
       keyService: getIt<EditiqueCacheKeyService>(),
       onKeyRotated: () => getIt<EditiqueCacheMaintenanceDao>().purgeAll(),
+    ),
+  );
+
+  // ── Ce que la tablette peut ressortir hors ligne ──
+  // Lit l'index seul : la question « qu'ai-je déjà ? » ne doit jamais ouvrir un
+  // fichier ni résoudre une clé.
+  getIt.registerFactory<FindCachedDocumentUseCase>(
+    () => FindCachedDocumentUseCase(
+      getIt<EditiqueCacheDao>(),
+      getIt<CurrentUserContext>(),
+    ),
+  );
+
+  getIt.registerFactory<ListCachedDocumentsUseCase>(
+    () => ListCachedDocumentsUseCase(
+      getIt<EditiqueCacheDao>(),
+      getIt<CurrentUserContext>(),
     ),
   );
 

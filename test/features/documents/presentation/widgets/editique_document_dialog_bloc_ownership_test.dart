@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -26,6 +27,9 @@ class _MockEmitNotePerceptionUseCase extends Mock
 
 class _MockEmitFinancialClearanceUseCase extends Mock
     implements EmitFinancialClearanceUseCase {}
+
+class MockRestituteDocumentUseCase extends Mock
+    implements RestituteDocumentUseCase {}
 
 void main() {
   late _MockEmitPaymentReceiptUseCase receiptUseCase;
@@ -52,6 +56,7 @@ void main() {
     emitPaymentReceiptUseCase: receiptUseCase,
     emitAccountStatementUseCase: _MockEmitAccountStatementUseCase(),
     emitFinancialClearanceUseCase: _MockEmitFinancialClearanceUseCase(),
+    restituteDocumentUseCase: MockRestituteDocumentUseCase(),
   );
 
   Future<void> pumpOpener(

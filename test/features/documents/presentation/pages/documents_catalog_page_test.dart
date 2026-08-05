@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -14,6 +16,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
@@ -134,8 +137,15 @@ LocalGeneratedDocument _definitiveAttestation() => const LocalGeneratedDocument(
   createdAt: 1735689600000,
 );
 
+class MockRestituteDocumentUseCase extends Mock
+    implements RestituteDocumentUseCase {}
+
+class _MockListCachedDocumentsUseCase extends Mock
+    implements ListCachedDocumentsUseCase {}
+
 void main() {
   late _MockGetLocalEnrollmentDetailUseCase detailUseCase;
+  late _MockListCachedDocumentsUseCase cachedUseCase;
 
   setUpAll(() {
     registerFallbackValue(
@@ -145,6 +155,15 @@ void main() {
 
   setUp(() {
     detailUseCase = _MockGetLocalEnrollmentDetailUseCase();
+    // Aucune copie locale par défaut : les lignes se résolvent comme avant le
+    // cache de restitution.
+    cachedUseCase = _MockListCachedDocumentsUseCase();
+    when(
+      () => cachedUseCase(
+        studentId: any(named: 'studentId'),
+        academicYearId: any(named: 'academicYearId'),
+      ),
+    ).thenAnswer((_) async => const <EditiqueCacheEntry>[]);
     // Aucun dossier local lisible par défaut : l'attestation reste éteinte,
     // les autres pièces dépendent de la seule éligibilité.
     when(
@@ -152,7 +171,7 @@ void main() {
     ).thenAnswer((_) async => const Left(NotFoundFailure()));
 
     _getIt.registerFactory<DocumentsLocalDossierCubit>(
-      () => DocumentsLocalDossierCubit(detailUseCase),
+      () => DocumentsLocalDossierCubit(detailUseCase, cachedUseCase),
     );
     _getIt.registerFactory<EditiqueDocumentBloc>(
       () => EditiqueDocumentBloc(
@@ -162,6 +181,7 @@ void main() {
         emitPaymentReceiptUseCase: _MockEmitPaymentReceiptUseCase(),
         emitAccountStatementUseCase: _MockEmitAccountStatementUseCase(),
         emitFinancialClearanceUseCase: _MockEmitFinancialClearanceUseCase(),
+        restituteDocumentUseCase: MockRestituteDocumentUseCase(),
       ),
     );
   });
