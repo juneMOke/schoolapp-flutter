@@ -9975,6 +9975,12 @@ abstract class AppLocalizations {
   /// **'Printing unavailable: the ticket could not be produced.'**
   String get ticketPrintFailed;
 
+  /// No description provided for @ticketCutNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut along the frame.'**
+  String get ticketCutNotice;
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

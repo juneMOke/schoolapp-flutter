@@ -5909,6 +5909,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Printing unavailable: the ticket could not be produced.';
 
   @override
+  String get ticketCutNotice => 'Cut along the frame.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

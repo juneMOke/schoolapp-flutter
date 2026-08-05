@@ -2995,6 +2995,7 @@
   "ticketKeepNotice": "Conservez ce ticket jusqu'à la remise de votre reçu définitif.",
   "ticketPrintLabel": "Imprimer le ticket",
   "ticketPrintFailed": "Impression indisponible : le ticket n'a pas pu être produit.",
+  "ticketCutNotice": "Découpez le long du cadre.",
   "paymentAnomalyBannerTitle": "Trop-perçu à arbitrer",
   "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
   "paymentAnomalyAcknowledgeLabel": "Traité",

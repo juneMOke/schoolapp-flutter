@@ -5975,6 +5975,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impression indisponible : le ticket n\'a pas pu être produit.';
 
   @override
+  String get ticketCutNotice => 'Découpez le long du cadre.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override

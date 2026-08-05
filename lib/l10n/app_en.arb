@@ -3037,6 +3037,7 @@
   "ticketKeepNotice": "Keep this ticket until you receive your final receipt.",
   "ticketPrintLabel": "Print ticket",
   "ticketPrintFailed": "Printing unavailable: the ticket could not be produced.",
+  "ticketCutNotice": "Cut along the frame.",
   "paymentAnomalyBannerTitle": "Overpayment to arbitrate",
   "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
   "paymentAnomalyAcknowledgeLabel": "Handled",
