@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart'
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
 import 'package:uuid/uuid.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
@@ -162,4 +163,5 @@ void registerOfflineModules(GetIt getIt) {
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
+  registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
 }
