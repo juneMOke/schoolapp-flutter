@@ -311,7 +311,13 @@ class AppConstants {
   // métier) mais une ANOMALIE de trop-perçu, à arbitrer. Table dédiée et non
   // l'outbox : une entrée acquittée y est supprimée au flush, et son motif
   // effacé par un clic sur « Réessayer ».
-  static const int offlineDbSchemaVersion = 20;
+  // v21 (2026-08-05) : Éditique offline (ADR-012 D-2/D-7, AM-10) — table
+  // `editique_cache_entries`, INDEX du cache de restitution. Aucun octet n'y
+  // entre : les PDF scellés vivront dans des fichiers chiffrés hors base (le
+  // `CursorWindow` de 16 Ko d'Android fait lever la RELECTURE d'un blob, et le
+  // défaut est invisible en CI qui tourne en ffi). Index seul d'abord, pour
+  // éprouver éviction LRU, mesure et purge avant toute volumétrie.
+  static const int offlineDbSchemaVersion = 21;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -321,6 +327,28 @@ class AppConstants {
   /// premier besoin (cf. DeviceIdentityService). Imprimé sur le ticket
   /// provisoire et porté par les anomalies de synchro.
   static const String deviceIdStorageKey = 'device_installation_id';
+
+  // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
+  /// Budget disque du cache éditique, en octets (2 Gio).
+  ///
+  /// Dimensionnement de référence : une école de 500 élèves produit ~1 `AI` +
+  /// 1 `NP` + ~5 `RC` + 3 `BU` par élève et par an, soit ~5 000 pièces de
+  /// ~120 Ko ≈ 600 Mo par année scolaire. Deux années tiennent donc largement,
+  /// sur des tablettes d'administration de 128 Go.
+  ///
+  /// Budget du **disque de l'appareil**, pas d'un établissement : il ne se
+  /// divise pas par école, il se partage.
+  static const int editiqueCacheBudgetBytes = 2 * 1024 * 1024 * 1024;
+
+  /// Part du budget visée **après** un balayage d'éviction.
+  ///
+  /// Redescendre exactement au seuil ferait rebalayer à chaque écriture
+  /// suivante ; libérer 2 % (~40 Mo, ~340 pièces) laisse de quoi encaisser
+  /// plusieurs centaines d'émissions avant le balayage suivant. Volontairement
+  /// proche de 1 : une pièce évincée n'est récupérable qu'**en ligne**, ce qui
+  /// est précisément ce qui manque à ces écoles, donc on évince le moins
+  /// possible à la fois.
+  static const double editiqueCacheEvictionTargetRatio = 0.98;
 
   // ─── Auth/session offline — dégradation graduée (ADR-010 D-08) ────────────────
   /// Seuil J7 : au-delà de `now − last_server_seen_at`, la session passe en

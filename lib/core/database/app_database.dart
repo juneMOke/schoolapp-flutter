@@ -448,6 +448,24 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
+  if (oldVersion < 21) {
+    // v21 — Éditique offline (ADR-012 D-2/D-7, AM-10) : `editique_cache_entries`,
+    // l'INDEX du cache de restitution. Table neuve, aucun backfill — et surtout
+    // aucune reprise depuis `generated_documents.pdf_blob` : cette colonne est
+    // vide par construction (son `toMap()` ne l'émet pas, et ses deux écritures
+    // sont en `ConflictAlgorithm.replace`, qui aurait de toute façon remis à
+    // NULL tout octet stocké).
+    //
+    // Les octets ne rejoignent PAS la base : ils vivront dans des fichiers
+    // chiffrés hors base (lot L3.3). Cette étape ne crée donc qu'un index —
+    // ce qui permet d'éprouver éviction, mesure et purge avant d'introduire le
+    // moindre risque de volumétrie.
+    final table = schema.firstWhere((t) => t.name == 'editique_cache_entries');
+    await db.execute(_asIfNotExists(table.createTableSql));
+    for (final indexSql in table.createIndexSql) {
+      await db.execute(_indexAsIfNotExists(indexSql));
+    }
+  }
 }
 
 /// Étape v18 : `owner_uid` sur les tables de référence cadrées enseignant.
