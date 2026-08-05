@@ -191,16 +191,28 @@ class EditiqueCacheDao {
     final values = payload
       ..remove('id')
       ..remove('created_at');
-    // Ne jamais effacer un identifiant serveur déjà connu avec un `null`
-    // provenant d'une source qui, elle, ne le connaît pas.
-    if (documentId == null && existing.documentId != null) {
-      values['document_id'] = existing.documentId;
+
+    // **Ne jamais effacer une métadonnée connue avec une inconnue.** Les deux
+    // sources qui alimentent cet index n'en savent pas les mêmes choses : une
+    // émission ne connaît souvent que l'objet qu'elle vient de produire — une
+    // attestation est demandée par dossier, un reçu par versement, ni l'un ni
+    // l'autre ne nomme l'élève ni l'année — là où le listing serveur les
+    // connaît tous les deux. Écrire aveuglément ferait donc perdre, à chaque
+    // ré-émission, l'attribution qu'un pull avait renseignée.
+    final known = existing.toMap();
+    for (final field in const [
+      'document_id',
+      'document_number',
+      'student_id',
+      'academic_year_id',
+      'emitted_at',
+    ]) {
+      values[field] ??= known[field];
     }
-    if (documentNumber == null && existing.documentNumber != null) {
-      values['document_number'] = existing.documentNumber;
-    }
-    if (entry.emittedAt == null && existing.emittedAt != null) {
-      values['emitted_at'] = existing.emittedAt;
+    // `owner_uid` suit la même règle, à ceci près que son « inconnu » s'écrit
+    // chaîne vide : la colonne est NOT NULL.
+    if (entry.ownerUid.isEmpty && existing.ownerUid.isNotEmpty) {
+      values['owner_uid'] = existing.ownerUid;
     }
     await _db.update(
       kEditiqueCacheTable,

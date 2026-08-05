@@ -16,7 +16,11 @@ class EmitEnrollmentAttestationUseCase {
 
   Future<Either<Failure, EditiqueDocument>> call(
     EmitEnrollmentAttestationParams params,
-  ) => _repository.emitEnrollmentAttestation(enrollmentId: params.enrollmentId);
+  ) => _repository.emitEnrollmentAttestation(
+    enrollmentId: params.enrollmentId,
+    studentId: params.studentId,
+    academicYearId: params.academicYearId,
+  );
 }
 
 class EmitEnrollmentAttestationParams extends Equatable {
@@ -25,8 +29,19 @@ class EmitEnrollmentAttestationParams extends Equatable {
   /// candidat de réinscription n'en a aucun : les deux produisent un 404.
   final String enrollmentId;
 
-  const EmitEnrollmentAttestationParams({required this.enrollmentId});
+  /// Attribuent la **copie locale**, pas l'appel serveur : le serveur ne
+  /// connaît que le dossier. Sans eux, la pièce est mise en cache sans élève,
+  /// et le catalogue — qui lit « les pièces de cet élève » — ne la retrouve
+  /// jamais.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EmitEnrollmentAttestationParams({
+    required this.enrollmentId,
+    this.studentId,
+    this.academicYearId,
+  });
 
   @override
-  List<Object?> get props => [enrollmentId];
+  List<Object?> get props => [enrollmentId, studentId, academicYearId];
 }

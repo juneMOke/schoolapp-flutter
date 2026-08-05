@@ -332,6 +332,35 @@ void main() {
     });
   });
 
+  // Les deux sources qui alimentent cet index n'en savent pas les mêmes
+  // choses : une émission ne connaît souvent que l'objet qu'elle vient de
+  // produire (un dossier, un versement), là où le listing serveur nomme l'élève
+  // et l'année. Écrire aveuglément perdrait l'attribution à chaque ré-émission.
+  group('métadonnées connues', () {
+    test('une réécriture qui ignore l élève ne l efface pas', () async {
+      await dao.upsert(cacheEntry(studentId: 's-1', academicYearId: 'y-1'));
+
+      await dao.upsert(
+        cacheEntry(studentId: null, academicYearId: null, ownerUid: ''),
+      );
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry!.studentId, 's-1');
+      expect(entry.academicYearId, 'y-1');
+      expect(entry.ownerUid, 'u-1');
+    });
+
+    test('mais une valeur connue en remplace une autre', () async {
+      await dao.upsert(cacheEntry(studentId: 's-1', academicYearId: 'y-1'));
+
+      await dao.upsert(cacheEntry(studentId: 's-2', academicYearId: 'y-2'));
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry!.studentId, 's-2');
+      expect(entry.academicYearId, 'y-2');
+    });
+  });
+
   // La question que le magasin d'octets doit poser AVANT d'écrire un fichier :
   // c'est la clé locale de la ligne existante qui le nomme, et `upsert` la
   // conserve. Écrire sous une clé fraîche laisserait un fichier orphelin.

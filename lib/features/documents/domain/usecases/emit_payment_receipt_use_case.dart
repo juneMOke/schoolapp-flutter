@@ -12,7 +12,11 @@ class EmitPaymentReceiptUseCase {
 
   Future<Either<Failure, EditiqueDocument>> call(
     EmitPaymentReceiptParams params,
-  ) => _repository.emitPaymentReceipt(paymentId: params.paymentId);
+  ) => _repository.emitPaymentReceipt(
+    paymentId: params.paymentId,
+    studentId: params.studentId,
+    academicYearId: params.academicYearId,
+  );
 }
 
 class EmitPaymentReceiptParams extends Equatable {
@@ -21,8 +25,16 @@ class EmitPaymentReceiptParams extends Equatable {
   /// demander leur reçu avant l'ACK produit un 404.
   final String paymentId;
 
-  const EmitPaymentReceiptParams({required this.paymentId});
+  /// Attribuent la copie locale ; le serveur, lui, ne connaît que le versement.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EmitPaymentReceiptParams({
+    required this.paymentId,
+    this.studentId,
+    this.academicYearId,
+  });
 
   @override
-  List<Object?> get props => [paymentId];
+  List<Object?> get props => [paymentId, studentId, academicYearId];
 }

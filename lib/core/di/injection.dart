@@ -117,6 +117,8 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/editique_remote_data_source.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
@@ -820,6 +822,12 @@ Future<void> configureDependencies({
       remoteDataSource: getIt<EditiqueRemoteDataSource>(),
       connectivityService: getIt<ConnectivityService>(),
       requiredAuth: RequestOptionsExtra.auth(),
+      // Enregistré plus bas, par le registrar offline Documents : la résolution
+      // est paresseuse, donc l'ordre ne pose pas de problème. C'est ce cache
+      // qui rend une pièce consultable hors ligne — et ce repository est le
+      // seul à l'alimenter tant que le pull de métadonnées n'existe pas.
+      cache: getIt<EditiqueDocumentCache>(),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 
@@ -843,6 +851,10 @@ Future<void> configureDependencies({
     () => EmitFinancialClearanceUseCase(getIt<EditiqueRepository>()),
   );
 
+  getIt.registerFactory<RestituteDocumentUseCase>(
+    () => RestituteDocumentUseCase(getIt<EditiqueRepository>()),
+  );
+
   getIt.registerFactory<EditiqueDocumentBloc>(
     () => EditiqueDocumentBloc(
       emitEnrollmentAttestationUseCase:
@@ -851,6 +863,7 @@ Future<void> configureDependencies({
       emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
       emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),
       emitFinancialClearanceUseCase: getIt<EmitFinancialClearanceUseCase>(),
+      restituteDocumentUseCase: getIt<RestituteDocumentUseCase>(),
     ),
   );
 
