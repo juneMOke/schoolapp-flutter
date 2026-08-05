@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_catalog_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/models/documents_catalog_action.dart';
@@ -16,6 +17,7 @@ DocumentsCatalogAction _resolve(
   SyncState? enrollmentSyncState = SyncState.synced,
   bool isDossierLoaded = true,
   List<LocalGeneratedDocument> knownPieces = const <LocalGeneratedDocument>[],
+  List<EditiqueCacheEntry> cachedPieces = const <EditiqueCacheEntry>[],
 }) => DocumentsCatalogAction.resolve(
   entry: _entry(type),
   isStudentKnownToServer: studentKnown,
@@ -24,6 +26,24 @@ DocumentsCatalogAction _resolve(
   enrollmentSyncState: enrollmentSyncState,
   isDossierLoaded: isDossierLoaded,
   knownPieces: knownPieces,
+  cachedPieces: cachedPieces,
+);
+
+/// Copie scellée détenue par la tablette.
+EditiqueCacheEntry _cached({
+  required String docType,
+  String documentId = 'doc-cache-1',
+  String documentNumber = 'ETL-AI-2526-000431',
+}) => EditiqueCacheEntry(
+  id: 'c-1',
+  documentId: documentId,
+  documentNumber: documentNumber,
+  docType: docType,
+  schoolId: 'school-1',
+  sizeBytes: 1024,
+  contentSha256: 'abc',
+  createdAt: 1000,
+  lastAccessedAt: 1000,
 );
 
 LocalGeneratedDocument _piece({
@@ -41,6 +61,97 @@ LocalGeneratedDocument _piece({
 );
 
 void main() {
+  // L3.5 — ce que la tablette détient réellement, par opposition à ce que le
+  // barème autorise.
+  group('copie locale', () {
+    // C'est l'objet même du cache : hors ligne, une pièce dont on a les octets
+    // se consulte. La garde de connectivité ne doit donc PAS la précéder.
+    test('se consulte hors ligne', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        isOffline: true,
+        cachedPieces: [_cached(docType: 'AI')],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.isRestitution, isTrue);
+      expect(action.cachedPiece?.documentId, 'doc-cache-1');
+    });
+
+    // Sans copie, la ligne retombe sur la règle d'avant : produire une pièce
+    // reste une opération serveur.
+    test('sans copie, le hors-ligne éteint la ligne', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        isOffline: true,
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.offline);
+      expect(action.isRestitution, isFalse);
+    });
+
+    // La note de perception n'a AUCUN écrivain dans `generated_documents` :
+    // sans le cache, sa ligne dirait « Émettre » à perpétuité.
+    test('ouvre « Consulter » sur une pièce que la trace locale ignore', () {
+      final action = _resolve(
+        EditiqueDocumentType.notePerception,
+        cachedPieces: [_cached(docType: 'NP')],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.cachedPiece, isNotNull);
+    });
+
+    // La copie d'un autre type ne dit rien de celle-ci.
+    test('ne confond pas les types', () {
+      final action = _resolve(
+        EditiqueDocumentType.notePerception,
+        isOffline: true,
+        cachedPieces: [_cached(docType: 'AI')],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.offline);
+    });
+
+    // Les gardes structurelles priment toujours : un dossier non acquitté n'a
+    // rien pu produire, et le reçu ne s'émet pas depuis le catalogue.
+    test('ne contourne pas les gardes de synchro', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        enrollmentSyncState: SyncState.pendingSync,
+        cachedPieces: [_cached(docType: 'AI')],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.enrollmentPendingSync);
+    });
+
+    test('ne rouvre pas la ligne du reçu', () {
+      final action = _resolve(
+        EditiqueDocumentType.paymentReceipt,
+        cachedPieces: [_cached(docType: 'RC')],
+      );
+
+      expect(action.reason, DocumentsCatalogBlockReason.issuedFromBilling);
+    });
+
+    // Le sous-titre « Dernière émission » vient de la trace locale ; la copie
+    // vient du cache. Les deux coexistent sans se remplacer.
+    test('garde la trace locale à côté de la copie', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        knownPieces: [_piece(docType: 'AI')],
+        cachedPieces: [_cached(docType: 'AI')],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.knownPiece, isNotNull);
+      expect(action.cachedPiece, isNotNull);
+    });
+  });
+
   group('matrice des actions', () {
     // Le reçu est le seul document PAR VERSEMENT : le catalogue raisonne par
     // élève et n'a aucun versement à désigner.

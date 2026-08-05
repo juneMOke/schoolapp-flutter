@@ -49,10 +49,15 @@ class DocumentsCatalogPage extends StatelessWidget {
                 ..resolveForStudent(intent.studentId),
         ),
         // Ce que cette tablette sait du dossier : axe de synchro (garde de
-        // l'attestation) et pièces déjà scellées localement.
+        // l'attestation), pièces déjà scellées localement, et celles dont elle
+        // détient les octets — les seules consultables hors ligne.
         BlocProvider<DocumentsLocalDossierCubit>(
-          create: (_) =>
-              getIt<DocumentsLocalDossierCubit>()..load(intent.enrollmentId),
+          create: (_) => getIt<DocumentsLocalDossierCubit>()
+            ..load(
+              intent.enrollmentId,
+              studentId: intent.studentId,
+              academicYearId: intent.academicYearId,
+            ),
         ),
       ],
       child: AppPageBackground(
@@ -112,6 +117,7 @@ class _CatalogGroups extends StatelessWidget {
                   enrollmentSyncState: dossier.enrollmentSyncState,
                   isDossierLoaded: dossier.loaded,
                   knownPieces: dossier.knownPieces,
+                  cachedPieces: dossier.cachedPieces,
                 );
 
             return Column(

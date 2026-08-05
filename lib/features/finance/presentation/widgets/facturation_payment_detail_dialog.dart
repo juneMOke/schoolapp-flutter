@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -51,15 +53,31 @@ Future<void> showFacturationPaymentDetailDialog(
           ),
           receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
           receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
-          // Le reçu est produit par le serveur à partir de l'identifiant du
-          // paiement : il n'est demandable que pour un encaissement déjà
-          // remonté, sans quoi l'uuid client donnerait un 404.
-          onDownloadReceipt: intent.isPendingSync
-              ? null
-              : () => showEditiquePaymentReceiptDialog(
-                  context,
-                  paymentId: intent.paymentId,
-                ),
+          // Deux gestes derrière un même bouton, et c'est la présence d'une
+          // copie locale qui tranche — pas la connectivité.
+          //
+          // Copie locale : on la ressort telle quelle, ce qui fonctionne hors
+          // ligne. Sinon, le reçu est produit par le serveur à partir de
+          // l'identifiant du paiement, et n'est donc demandable que pour un
+          // encaissement déjà remonté — sans quoi l'uuid client donnerait un
+          // 404.
+          onDownloadReceipt: switch (receipt.cached) {
+            final EditiqueCacheEntry cached =>
+              () => showEditiqueRestitutionDialog(
+                context,
+                type: EditiqueDocumentType.paymentReceipt,
+                title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
+                documentId: cached.documentId,
+                documentNumber: cached.documentNumber,
+              ),
+            _ =>
+              intent.isPendingSync
+                  ? null
+                  : () => showEditiquePaymentReceiptDialog(
+                      context,
+                      paymentId: intent.paymentId,
+                    ),
+          },
         ),
       ),
     ),

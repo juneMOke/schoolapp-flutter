@@ -37,14 +37,19 @@ class DocumentsCatalogActionButton extends StatelessWidget {
       builder: (context, state) {
         final isBusy = state.status == EditiqueDocumentStatus.loading;
 
-        return SessionWriteGate(
-          child: EteeloButton.primary(
-            label: isBusy ? l10n.documentsActionBusyLabel : _label(l10n),
-            icon: isBusy ? null : _icon,
-            onPressed: (action.isEnabled && !isBusy) ? onPressed : null,
-            fullWidth: false,
-          ),
+        final button = EteeloButton.primary(
+          label: isBusy ? l10n.documentsActionBusyLabel : _label(l10n),
+          icon: isBusy ? null : _icon,
+          onPressed: (action.isEnabled && !isBusy) ? onPressed : null,
+          fullWidth: false,
         );
+
+        // La garde de session gèle ce qui **produit** une pièce côté serveur.
+        // Ressortir une copie locale n'écrit rien, ne consomme aucun numéro et
+        // n'exige aucun jeton : la geler priverait le guichet de ses documents
+        // au moment précis où il en a le plus besoin — une session en lecture
+        // seule est une session hors ligne depuis trois semaines.
+        return action.isRestitution ? button : SessionWriteGate(child: button);
       },
     );
   }

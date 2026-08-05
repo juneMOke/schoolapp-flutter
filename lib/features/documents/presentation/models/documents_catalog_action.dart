@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_catalog_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
 
 /// Ce que propose la ligne de document.
@@ -66,11 +67,21 @@ class DocumentsCatalogAction extends Equatable {
   /// trace. Alimente le sous-titre « Dernière émission … ».
   final LocalGeneratedDocument? knownPiece;
 
+  /// Copie scellée détenue localement, quand il y en a une. C'est elle qui
+  /// porte de quoi la ressortir — identifiant d'archive ou numéro — et sa
+  /// présence est ce qui autorise « Consulter » hors ligne.
+  final EditiqueCacheEntry? cachedPiece;
+
   const DocumentsCatalogAction._({
     required this.kind,
     this.reason,
     this.knownPiece,
+    this.cachedPiece,
   });
+
+  /// Vrai quand l'action ressort une copie locale au lieu de demander une
+  /// production au serveur.
+  bool get isRestitution => cachedPiece != null;
 
   bool get isEnabled => kind != DocumentsCatalogActionKind.disabled;
 
@@ -94,6 +105,7 @@ class DocumentsCatalogAction extends Equatable {
     required SyncState? enrollmentSyncState,
     required bool isDossierLoaded,
     required List<LocalGeneratedDocument> knownPieces,
+    List<EditiqueCacheEntry> cachedPieces = const <EditiqueCacheEntry>[],
   }) {
     // Le reçu est le seul document par VERSEMENT : le catalogue, qui raisonne
     // par élève, n'a aucun versement à désigner.
@@ -148,6 +160,26 @@ class DocumentsCatalogAction extends Equatable {
       }
     }
 
+    final known = _findDefinitive(knownPieces, entry.code);
+
+    // Une pièce dont la tablette détient les OCTETS se consulte, en ligne comme
+    // hors ligne : c'est une copie locale qu'on ressort, pas une production
+    // qu'on demande au serveur. Cette porte s'ouvre donc AVANT la garde de
+    // connectivité — sinon la restitution hors ligne, qui est l'objet même du
+    // cache, resterait inatteignable.
+    //
+    // Elle s'ouvre sur un FAIT (une entrée d'index pour cette pièce), jamais
+    // sur le barème : « restitution offline ✅ » dit ce que le type autorise,
+    // pas ce qui est déjà là.
+    final cached = _findCached(cachedPieces, entry.code);
+    if (cached != null) {
+      return DocumentsCatalogAction._(
+        kind: DocumentsCatalogActionKind.consult,
+        knownPiece: known,
+        cachedPiece: cached,
+      );
+    }
+
     if (isOffline) {
       return const DocumentsCatalogAction._(
         kind: DocumentsCatalogActionKind.disabled,
@@ -161,13 +193,28 @@ class DocumentsCatalogAction extends Equatable {
       );
     }
 
-    final known = _findDefinitive(knownPieces, entry.code);
     return DocumentsCatalogAction._(
       kind: known == null
           ? DocumentsCatalogActionKind.emit
           : DocumentsCatalogActionKind.consult,
       knownPiece: known,
     );
+  }
+
+  /// Copie scellée de ce type détenue par la tablette, la plus récemment émise
+  /// d'abord — l'ordre que rend déjà l'index.
+  ///
+  /// Ne cherche que parmi les types **archivés** : le cache n'admet pas les
+  /// autres, et une entrée qui y figurerait quand même ne doit pas devenir un
+  /// bouton.
+  static EditiqueCacheEntry? _findCached(
+    List<EditiqueCacheEntry> cached,
+    String code,
+  ) {
+    for (final entry in cached) {
+      if (entry.docType.toUpperCase() == code.toUpperCase()) return entry;
+    }
+    return null;
   }
 
   /// Pièce **définitive** de ce type dont la tablette a la trace.
@@ -185,5 +232,5 @@ class DocumentsCatalogAction extends Equatable {
   }
 
   @override
-  List<Object?> get props => [kind, reason, knownPiece];
+  List<Object?> get props => [kind, reason, knownPiece, cachedPiece];
 }

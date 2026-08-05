@@ -69,12 +69,35 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
     if (!reopen && widget.action.needsConfirmation && !await _confirm()) return;
     if (!mounted) return;
 
+    // La tablette détient les octets : on les ressort, sans rien demander au
+    // serveur. C'est ce qui fait fonctionner ce bouton hors ligne — et ce qui
+    // évite, en ligne, un aller-retour pour une pièce qu'on a déjà.
+    final cached = widget.action.cachedPiece;
+    if (cached != null) {
+      await showEditiqueRestitutionDialog(
+        context,
+        type: widget.entry.type,
+        title: _viewerTitle(AppLocalizations.of(context)!),
+        documentId: cached.documentId,
+        documentNumber: cached.documentNumber,
+        studentId: widget.intent.studentId,
+        academicYearId: widget.intent.academicYearId,
+        bloc: _bloc,
+        dispatchOnOpen: !reopen,
+      );
+      return;
+    }
+
     final intent = widget.intent;
     switch (widget.entry.type) {
       case EditiqueDocumentType.enrollmentAttestation:
         await showEditiqueEnrollmentAttestationDialog(
           context,
           enrollmentId: intent.enrollmentId,
+          // Attribue la copie locale : sans l'élève, la pièce mise en cache
+          // n'est retrouvée par aucun écran.
+          studentId: intent.studentId,
+          academicYearId: intent.academicYearId,
           bloc: _bloc,
           dispatchOnOpen: !reopen,
         );
@@ -107,6 +130,19 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
         break;
     }
   }
+
+  /// Titre de la visionneuse pour ce type. Les cinq entrées d'émission le
+  /// posent chacune ; la restitution, qui les traverse toutes, doit le choisir.
+  String _viewerTitle(AppLocalizations l10n) => switch (widget.entry.type) {
+    EditiqueDocumentType.enrollmentAttestation =>
+      l10n.editiqueViewerAttestationTitle,
+    EditiqueDocumentType.notePerception =>
+      l10n.editiqueViewerNotePerceptionTitle,
+    EditiqueDocumentType.paymentReceipt => l10n.editiqueViewerReceiptTitle,
+    EditiqueDocumentType.accountStatement => l10n.editiqueViewerStatementTitle,
+    EditiqueDocumentType.financialClearance =>
+      l10n.editiqueViewerClearanceTitle,
+  };
 
   Future<bool> _confirm() async {
     final l10n = AppLocalizations.of(context)!;
