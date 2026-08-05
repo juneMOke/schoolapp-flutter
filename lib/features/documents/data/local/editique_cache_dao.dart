@@ -91,13 +91,19 @@ class EditiqueCacheDao {
 
   /// Poids total du cache, en octets, **sans lire un seul fichier**.
   ///
+  /// Ne compte que les pièces réellement **détenues** : une ligne apprise par
+  /// le delta décrit une pièce qui n'occupe rien sur ce disque. La compter
+  /// ferait balayer l'éviction pour libérer une place déjà libre, et évincer de
+  /// vraies pièces pour rien.
+  ///
   /// Non scopé par défaut : le budget est une propriété du disque de la
   /// tablette. [schoolId] ne sert qu'à mesurer ce que coûterait une purge.
   Future<int> totalSizeBytes({String? schoolId}) async {
     final scoped = schoolId != null && schoolId.isNotEmpty;
     final rows = await _db.rawQuery(
-      'SELECT COALESCE(SUM(size_bytes), 0) AS total FROM $kEditiqueCacheTable'
-      '${scoped ? ' WHERE school_id = ?' : ''}',
+      'SELECT COALESCE(SUM(size_bytes), 0) AS total FROM $kEditiqueCacheTable '
+      'WHERE content_sha256 IS NOT NULL'
+      '${scoped ? ' AND school_id = ?' : ''}',
       scoped ? [schoolId] : null,
     );
     return (rows.first['total'] as num?)?.toInt() ?? 0;
@@ -206,8 +212,20 @@ class EditiqueCacheDao {
       'student_id',
       'academic_year_id',
       'emitted_at',
+      // `content_sha256` est dans cette liste pour une raison qui vaut des
+      // documents : le delta de synchronisation ne connaît QUE des métadonnées.
+      // S'il écrasait l'empreinte d'une pièce détenue, la relecture suivante
+      // comparerait le fichier à une empreinte absente, conclurait à une pièce
+      // corrompue, et effacerait le fichier ET sa ligne. Un cycle de pull
+      // viderait le cache de ce que la tablette possède vraiment.
+      'content_sha256',
     ]) {
       values[field] ??= known[field];
+    }
+    // Même règle pour le poids : « 0 » est l'inconnu de cette colonne, et une
+    // pièce détenue en pèse toujours plus.
+    if (entry.sizeBytes <= 0 && existing.sizeBytes > 0) {
+      values['size_bytes'] = existing.sizeBytes;
     }
     // `owner_uid` suit la même règle, à ceci près que son « inconnu » s'écrit
     // chaîne vide : la colonne est NOT NULL.

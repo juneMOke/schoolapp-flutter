@@ -65,6 +65,24 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 ///   falaise tomberait au 1er septembre, pendant les réinscriptions, seul
 ///   moment où l'établissement ressort massivement les pièces N-1.
 ///
+/// ## Deux natures de ligne, une seule table
+///
+/// `content_sha256` **nullable** est ce qui les distingue, et c'est le seul
+/// endroit où la différence est écrite :
+///
+/// - **renseigné** — la tablette détient les octets. La ligne pèse au budget,
+///   elle est candidate à l'éviction, et sa relecture vérifie l'empreinte ;
+/// - **`NULL`** — la tablette sait seulement que la pièce existe : elle l'a
+///   apprise par le delta de synchronisation, sans en tirer les octets. Une
+///   telle ligne ne pèse rien, ne s'évince pas, et une lecture qui tombe dessus
+///   est un défaut de cache **qui ne la supprime pas** — la connaissance
+///   survit, seuls les octets manquent.
+///
+/// Sans cette distinction, un cycle de pull ferait compter au budget des octets
+/// absents et l'éviction évincerait du vide. `size_bytes` reste renseigné dans
+/// les deux cas : le serveur annonce le poids, ce qui permet de savoir ce qu'un
+/// téléchargement coûtera avant de le lancer.
+///
 /// ## Trois dates, qui ne disent pas la même chose
 ///
 /// `emitted_at` est la date d'émission côté serveur, `created_at` celle de la
@@ -91,7 +109,9 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
       school_id TEXT NOT NULL,
       owner_uid TEXT NOT NULL DEFAULT '',
       size_bytes INTEGER NOT NULL,
-      content_sha256 TEXT NOT NULL,
+      -- NULL = la pièce est connue, ses octets ne sont pas là (cf. « Deux
+      -- natures de ligne » ci-dessus).
+      content_sha256 TEXT,
       emitted_at INTEGER,
       created_at INTEGER NOT NULL,
       last_accessed_at INTEGER NOT NULL,
@@ -118,8 +138,13 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
         'doc_type)',
     // Balayage d'éviction. Volontairement NON scopé par école : le budget est
     // une propriété du **disque de la tablette**, pas d'un établissement.
+    //
+    // Partiel depuis la v22 : une ligne sans octets n'occupe rien et n'a rien à
+    // libérer. L'exclure de l'index évite au balayage de parcourir un catalogue
+    // qui peut être bien plus gros que ce que la tablette détient réellement.
     'CREATE INDEX idx_editique_cache_lru '
-        'ON editique_cache_entries(last_accessed_at)',
+        'ON editique_cache_entries(last_accessed_at) '
+        'WHERE content_sha256 IS NOT NULL',
   ],
 );
 

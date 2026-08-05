@@ -66,9 +66,15 @@ class EditiqueCacheEntry extends Equatable {
   /// un budget exprimé en gigaoctets.
   final int sizeBytes;
 
-  /// Empreinte des octets scellés. Vérifie l'intégrité à la relecture et
-  /// détecte un fichier altéré, tronqué ou orphelin.
-  final String contentSha256;
+  /// Empreinte des octets scellés, ou `null` quand la tablette **n'a pas** les
+  /// octets — elle sait seulement que la pièce existe, l'ayant apprise par le
+  /// delta de synchronisation.
+  ///
+  /// C'est la seule chose qui distingue les deux natures de ligne, et tout en
+  /// dépend : une ligne sans empreinte ne pèse pas au budget, ne s'évince pas,
+  /// et une lecture qui tombe dessus ne la supprime pas — la connaissance
+  /// survit, seuls les octets manquent.
+  final String? contentSha256;
 
   /// Époch ms de l'émission côté serveur, `null` si elle n'est pas connue —
   /// seul le listing serveur la rend. C'est elle, et non [createdAt], qui
@@ -92,7 +98,7 @@ class EditiqueCacheEntry extends Equatable {
     required this.schoolId,
     this.ownerUid = '',
     required this.sizeBytes,
-    required this.contentSha256,
+    this.contentSha256,
     this.emittedAt,
     required this.createdAt,
     required this.lastAccessedAt,
@@ -102,6 +108,13 @@ class EditiqueCacheEntry extends Equatable {
   /// éviction.
   static bool isCacheableDocType(String? docType) =>
       docType != null && cacheableDocTypes.contains(docType.toUpperCase());
+
+  /// Vrai quand la tablette détient réellement les octets de cette pièce.
+  ///
+  /// Affirmation positive, jamais déduite d'une négation : « pas de
+  /// connaissance » et « connaissance sans octets » ne doivent pas se
+  /// confondre.
+  bool get hasBytes => contentSha256 != null && contentSha256!.isNotEmpty;
 
   /// Vrai si l'entrée porte de quoi être retrouvée. Une entrée sans aucun des
   /// deux identifiants est irrécupérable : son fichier occuperait le budget
@@ -137,7 +150,7 @@ class EditiqueCacheEntry extends Equatable {
         schoolId: (map['school_id'] as String?) ?? '',
         ownerUid: (map['owner_uid'] as String?) ?? '',
         sizeBytes: (map['size_bytes'] as int?) ?? 0,
-        contentSha256: (map['content_sha256'] as String?) ?? '',
+        contentSha256: map['content_sha256'] as String?,
         emittedAt: map['emitted_at'] as int?,
         createdAt: (map['created_at'] as int?) ?? 0,
         lastAccessedAt: (map['last_accessed_at'] as int?) ?? 0,

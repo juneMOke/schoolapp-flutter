@@ -440,11 +440,14 @@ void main() {
       File(p.join(cacheDir.path, 'gen-1.enc')).deleteSync();
 
       expect(await cache.readByDocumentId('doc-1'), isNull);
-      expect(
-        await EditiqueCacheDao(db).count(),
-        0,
-        reason: 'la ligne suit son fichier, sinon elle ment au budget',
-      );
+      // La LIGNE survit à ses octets — elle est rétrogradée, pas supprimée.
+      // Le curseur du delta étant monotone, l'effacer retirerait la pièce du
+      // catalogue pour toujours ; ce qu'on retire, ce sont les octets, et donc
+      // le poids compté au budget.
+      final entry = await EditiqueCacheDao(db).findByDocumentId('doc-1');
+      expect(entry, isNotNull);
+      expect(entry!.hasBytes, isFalse);
+      expect(await EditiqueCacheDao(db).totalSizeBytes(), 0);
     });
 
     test('un fichier corrompu est retiré du cache', () async {
@@ -454,7 +457,11 @@ void main() {
       file.writeAsBytesSync(file.readAsBytesSync()..[30] ^= 0xFF);
 
       expect(await cache.readByDocumentId('doc-1'), isNull);
-      expect(await EditiqueCacheDao(db).count(), 0);
+      expect(
+        (await EditiqueCacheDao(db).findByDocumentId('doc-1'))?.hasBytes,
+        isFalse,
+        reason: 'les octets partent, la connaissance reste',
+      );
       expect(filesOnDisk(), isEmpty);
     });
 
@@ -515,7 +522,10 @@ void main() {
 
       expect(await cache.readByDocumentId('doc-1'), isNull);
       expect(filesOnDisk(), isEmpty);
-      expect(await EditiqueCacheDao(db).count(), 0);
+      expect(
+        (await EditiqueCacheDao(db).findByDocumentId('doc-1'))?.hasBytes,
+        isFalse,
+      );
     });
   });
 
@@ -554,10 +564,15 @@ void main() {
         taille: 300,
       );
 
-      // La plus ancienne part, avec son fichier.
+      // La plus ancienne perd ses octets — sa ligne, elle, reste : elle dit
+      // toujours que la pièce existe et reste re-téléchargeable.
       expect(await cache.readByDocumentId('a'), isNull);
       expect(await cache.readByDocumentId('c'), isNotNull);
-      expect(await EditiqueCacheDao(db).count(), 2);
+      expect(await EditiqueCacheDao(db).count(), 3);
+      expect(
+        (await EditiqueCacheDao(db).findByDocumentId('a'))?.hasBytes,
+        isFalse,
+      );
       expect(filesOnDisk(), ['gen-2.enc', 'gen-3.enc']);
     });
 

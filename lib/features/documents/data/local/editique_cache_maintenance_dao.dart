@@ -43,6 +43,10 @@ class EditiqueCacheMaintenanceDao {
     final rows = await _db.query(
       kEditiqueCacheTable,
       columns: const ['id', 'size_bytes'],
+      // Seules les pièces réellement détenues : une ligne apprise par le delta
+      // n'occupe rien, donc l'évincer ne libère rien — et lui retirer sa ligne
+      // ferait perdre une connaissance que le prochain cycle devrait racheter.
+      where: 'content_sha256 IS NOT NULL',
       // `created_at` puis `id` départagent les égalités d'accès : sans eux,
       // deux balayages successifs pourraient évincer des entrées différentes
       // pour un même état de cache.
@@ -83,6 +87,45 @@ class EditiqueCacheMaintenanceDao {
       );
     }
     return deleted;
+  }
+
+  /// Retire les **octets** d'une pièce, sans retirer ce qu'on sait d'elle. Rend
+  /// le nombre de lignes rétrogradées.
+  ///
+  /// C'est ce qu'« évincer » veut dire, et la nuance vaut des documents : le
+  /// curseur du delta est monotone, donc une pièce déjà descendue ne redescend
+  /// jamais. Supprimer sa ligne à l'éviction la ferait disparaître du catalogue
+  /// **pour toujours** — l'agent ne saurait même plus qu'elle existe, alors que
+  /// le serveur la conserve et qu'elle reste re-téléchargeable. Rétrograder
+  /// libère la place sans effacer la connaissance.
+  ///
+  /// L'appelant a supprimé le fichier AVANT : c'est ce qui rend ce geste sûr.
+  Future<int> downgradeToKnown(List<String> ids) async {
+    final targets = ids.where((id) => id.isNotEmpty).toList(growable: false);
+    if (targets.isEmpty) return 0;
+
+    var downgraded = 0;
+    for (
+      var start = 0;
+      start < targets.length;
+      start += _maxParametersPerStatement
+    ) {
+      final end = start + _maxParametersPerStatement < targets.length
+          ? start + _maxParametersPerStatement
+          : targets.length;
+      final chunk = targets.sublist(start, end);
+      final placeholders = List.filled(chunk.length, '?').join(', ');
+      downgraded += await _db.update(
+        kEditiqueCacheTable,
+        // Le poids retombe à zéro avec l'empreinte : la colonne mesure les
+        // octets détenus, et il n'y en a plus. Le delta le renseignera à
+        // nouveau s'il repasse.
+        {'content_sha256': null, 'size_bytes': 0},
+        where: 'id IN ($placeholders)',
+        whereArgs: chunk,
+      );
+    }
+    return downgraded;
   }
 
   /// Entrées qui n'appartiennent pas à l'école courante — la tablette vient

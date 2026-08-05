@@ -33,11 +33,18 @@ class ListCachedDocumentsUseCase {
     if (studentId.trim().isEmpty) return const [];
 
     try {
-      return await _dao.listForStudent(
+      final indexed = await _dao.listForStudent(
         schoolId: schoolId,
         studentId: studentId,
         academicYearId: academicYearId,
       );
+      // **Détenues seulement.** L'index décrit deux choses depuis le delta de
+      // synchronisation : les pièces dont la tablette a les octets, et celles
+      // dont elle sait seulement qu'elles existent. Rendre les secondes ferait
+      // allumer « Consulter » sur une pièce absente — un bouton qui échoue à
+      // tous les coups hors ligne, c'est-à-dire précisément là où il est censé
+      // servir.
+      return indexed.where((entry) => entry.hasBytes).toList(growable: false);
     } catch (_) {
       return const [];
     }

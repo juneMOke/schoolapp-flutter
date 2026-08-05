@@ -466,6 +466,61 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
+  if (oldVersion < 22) {
+    // v22 — Éditique offline (ADR-012 RG-012-6/18, lot L3.4) : l'index du cache
+    // doit pouvoir décrire une pièce dont la tablette n'a PAS les octets.
+    //
+    // Le delta de synchronisation apprend à la tablette ce qui existe ailleurs ;
+    // les octets, eux, restent tirés un par un, à la demande. Une ligne peut
+    // donc n'être qu'une connaissance. `content_sha256` devient nullable pour
+    // porter cette différence — c'est elle qui empêche le budget de compter des
+    // octets absents et l'éviction d'évincer du vide.
+    await _relaxEditiqueCacheContentHash(db, schema);
+  }
+}
+
+/// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.
+///
+/// SQLite ne sait pas relâcher un `NOT NULL` : il faut reconstruire la table.
+/// On la reconstruit **avec copie**, jamais en la vidant — chaque ligne perdue
+/// serait un fichier chiffré devenu introuvable, donc une pièce qu'un guichet
+/// hors ligne ne pourrait plus ressortir. C'est exactement ce qu'un cache de
+/// restitution existe pour éviter.
+///
+/// L'étape est rejouable : elle se garde sur la **forme réelle** de la colonne
+/// (`PRAGMA table_info`) plutôt que sur un drapeau, et ne fait rien si le
+/// relâchement est déjà en place.
+Future<void> _relaxEditiqueCacheContentHash(
+  DatabaseExecutor db,
+  List<TableSchema> schema,
+) async {
+  const name = 'editique_cache_entries';
+  if (!await _hasTable(db, name)) return;
+
+  final columns = await db.rawQuery('PRAGMA table_info($name)');
+  final hash = columns.where((c) => c['name'] == 'content_sha256');
+  // Colonne absente (table d'une forme inattendue) ou déjà nullable : rien à
+  // faire. `notnull` vaut 1 tant que la contrainte tient.
+  if (hash.isEmpty || (hash.first['notnull'] as int? ?? 0) == 0) return;
+
+  final table = schema.firstWhere((t) => t.name == name);
+  const columnList =
+      'id, document_id, document_number, doc_type, student_id, '
+      'academic_year_id, school_id, owner_uid, size_bytes, content_sha256, '
+      'emitted_at, created_at, last_accessed_at';
+
+  // L'ancienne table emporte ses index en changeant de nom ; ils disparaissent
+  // avec elle au DROP, ce qui laisse les noms libres pour les index canoniques
+  // recréés en dernier.
+  await db.execute('ALTER TABLE $name RENAME TO ${name}_v21');
+  await db.execute(table.createTableSql);
+  await db.execute(
+    'INSERT INTO $name ($columnList) SELECT $columnList FROM ${name}_v21',
+  );
+  await db.execute('DROP TABLE ${name}_v21');
+  for (final indexSql in table.createIndexSql) {
+    await db.execute(_indexAsIfNotExists(indexSql));
+  }
 }
 
 /// Étape v18 : `owner_uid` sur les tables de référence cadrées enseignant.

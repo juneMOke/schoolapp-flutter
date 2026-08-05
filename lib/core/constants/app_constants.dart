@@ -120,6 +120,16 @@ class AppConstants {
   static const String downloadEditiqueDocumentEndpoint =
       '/api/v1/editique/documents/{documentId}';
 
+  /// Delta de synchronisation des pièces scellées — **métadonnées seules**.
+  ///
+  /// Apprend à la tablette ce qui existe ailleurs (une pièce émise depuis un
+  /// autre poste, ou scellée par la clôture d'une période) ; les octets restent
+  /// tirés un par un par [downloadEditiqueDocumentEndpoint]. Cadré par école,
+  /// pas par année : l'année est nullable sur ces pièces, la demander laisserait
+  /// ces lignes hors de portée.
+  static const String syncEditiqueDocumentsEndpoint =
+      '/api/v1/sync/editique-documents';
+
   /// Type MIME attendu en réponse des routes d'éditique. Sert de **garde de
   /// contenu** : un corps qui n'est pas un PDF ne doit jamais être présenté
   /// comme un document.
@@ -329,7 +339,16 @@ class AppConstants {
   // `CursorWindow` de 16 Ko d'Android fait lever la RELECTURE d'un blob, et le
   // défaut est invisible en CI qui tourne en ffi). Index seul d'abord, pour
   // éprouver éviction LRU, mesure et purge avant toute volumétrie.
-  static const int offlineDbSchemaVersion = 21;
+  // v22 (2026-08-05) : Éditique offline (ADR-012 RG-012-6/18) — l'index du cache
+  // doit pouvoir décrire une pièce dont la tablette n'a PAS les octets. Le delta
+  // de synchronisation lui apprend ce qui existe ailleurs ; les octets restent
+  // tirés à la demande. `content_sha256` devient nullable et porte cette
+  // différence : renseigné = octets détenus, NULL = connaissance seule. Sans
+  // elle, le budget compterait des octets absents et l'éviction évincerait du
+  // vide. Reconstruction AVEC copie — vider la table ferait perdre l'accès aux
+  // fichiers chiffrés déjà détenus, donc des pièces qu'un guichet hors ligne ne
+  // pourrait plus ressortir.
+  static const int offlineDbSchemaVersion = 22;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

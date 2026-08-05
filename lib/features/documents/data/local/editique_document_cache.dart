@@ -189,6 +189,68 @@ class EditiqueDocumentCache {
     });
   }
 
+  /// Enregistre ce qu'un delta de synchronisation a appris : une pièce existe,
+  /// **sans ses octets**.
+  ///
+  /// Rend le nombre de lignes retenues. Ce qui est refusé l'est en silence — un
+  /// cycle de synchronisation n'a pas à échouer parce qu'une ligne ne
+  /// l'intéresse pas : un type que le serveur n'archive pas, une pièce
+  /// qu'aucun identifiant ne désigne, une école inconnue.
+  ///
+  /// Aucune de ces lignes ne pèse au budget ni n'entre dans l'éviction :
+  /// [EditiqueCacheEntry.contentSha256] reste nul jusqu'à ce que les octets
+  /// arrivent. Et une pièce **déjà détenue** n'est jamais dégradée par un
+  /// passage du delta — l'index préserve l'empreinte et le poids qu'il connaît
+  /// déjà, sans quoi le premier cycle viderait le cache de ce que la tablette
+  /// possède vraiment.
+  ///
+  /// Ne déclenche aucun balayage : rien n'a été ajouté au disque.
+  Future<int> recordKnownDocuments(List<EditiqueCacheEntry> documents) {
+    if (documents.isEmpty) return Future.value(0);
+    return _exclusive(() async {
+      final now = _now();
+      var retained = 0;
+      for (final document in documents) {
+        try {
+          final existing = await _index.findIdentity(document);
+          await _index.upsert(
+            EditiqueCacheEntry(
+              // L'identité locale appartient à ce cache, jamais à l'appelant :
+              // une pièce déjà connue garde la sienne — c'est elle qui nomme
+              // son fichier chiffré — et une pièce nouvelle en reçoit une.
+              id: existing?.id ?? _ids.newId(),
+              documentId: document.documentId,
+              documentNumber: document.documentNumber,
+              docType: document.docType,
+              studentId: document.studentId,
+              academicYearId: document.academicYearId,
+              schoolId: document.schoolId,
+              ownerUid: existing?.ownerUid ?? '',
+              // Un poids MESURÉ prime sur un poids annoncé : quand la tablette
+              // détient les octets, elle sait ce qu'ils pèsent sur SON disque,
+              // et c'est cela que le budget compte.
+              sizeBytes: (existing?.hasBytes ?? false)
+                  ? existing!.sizeBytes
+                  : document.sizeBytes,
+              // Jamais l'empreinte du serveur : cette colonne dit « la tablette
+              // détient ces octets-là ». La renseigner sans les octets ferait
+              // croire à une pièce présente, et la première relecture
+              // conclurait à un fichier corrompu.
+              contentSha256: existing?.contentSha256,
+              emittedAt: document.emittedAt,
+              createdAt: existing?.createdAt ?? now,
+              lastAccessedAt: existing?.lastAccessedAt ?? now,
+            ),
+          );
+          retained++;
+        } catch (_) {
+          // Ligne refusée par l'index : elle ne concerne pas ce cache.
+        }
+      }
+      return retained;
+    });
+  }
+
   // ── Lecture ────────────────────────────────────────────────────────────────
 
   /// Octets de la pièce portant cet identifiant serveur, `null` si elle n'est
@@ -215,6 +277,12 @@ class EditiqueDocumentCache {
     try {
       final entry = await locate();
       if (entry == null) return null;
+
+      // Ligne apprise par le delta : la pièce existe, ses octets ne sont pas
+      // là. C'est un défaut de cache, jamais une incohérence — et surtout la
+      // ligne se garde : l'effacer perdrait une connaissance que le prochain
+      // cycle de synchronisation devrait racheter.
+      if (!entry.hasBytes) return null;
 
       final read = await _store.read(entry.id);
       switch (read) {
@@ -272,12 +340,16 @@ class EditiqueDocumentCache {
           return blob.bytes;
         case EditiqueBlobFound():
         case EditiqueBlobGone():
-          // Fichier d'abord, ligne ensuite : une ligne sans fichier se
-          // retélécharge, un fichier sans ligne n'est réclamé par personne. Et
-          // si le fichier résiste, la ligne reste — elle est ce qui le compte
-          // au budget.
+          // Fichier d'abord, octets de l'index ensuite : une ligne sans
+          // fichier se retélécharge, un fichier sans ligne n'est réclamé par
+          // personne. Et si le fichier résiste, l'index garde ses octets — ils
+          // sont ce qui le compte au budget.
+          //
+          // La LIGNE, elle, survit : ce qu'on a appris de la pièce reste vrai
+          // même quand ses octets se sont avérés illisibles, et l'effacer la
+          // retirerait d'un catalogue que le delta ne repeuplera pas.
           if (await _store.delete(entry.id)) {
-            await _maintenance.deleteEntries([entry.id]);
+            await _maintenance.downgradeToKnown([entry.id]);
           }
           return null;
       }
@@ -319,14 +391,19 @@ class EditiqueDocumentCache {
     if (victims.isEmpty) return 0;
 
     // Ne retirer de l'index que ce qui a réellement quitté le disque. Un
-    // fichier qui refuse de partir doit **garder** sa ligne : elle est la seule
-    // chose qui le compte au budget et qui le désignera au prochain balayage.
+    // fichier qui refuse de partir doit **garder** ses octets à l'index : ils
+    // sont la seule chose qui le compte au budget et qui le désignera au
+    // prochain balayage.
     final freed = <String>[];
     for (final id in victims) {
       if (await _store.delete(id)) freed.add(id);
     }
     if (freed.isEmpty) return 0;
-    return _maintenance.deleteEntries(freed);
+    // Rétrogradées, jamais supprimées : évincer retire des octets, pas une
+    // connaissance. Le curseur du delta étant monotone, une ligne effacée ne
+    // redescendrait jamais et la pièce disparaîtrait du catalogue pour
+    // toujours — alors que le serveur la conserve.
+    return _maintenance.downgradeToKnown(freed);
   }
 
   /// Efface tout ce qui n'appartient pas à l'école courante — la tablette vient
