@@ -96,6 +96,7 @@ class _CollectFlowDialog extends StatefulWidget {
 class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   _Phase _phase = _Phase.confirm;
   bool _awaitingBloc = false;
+  bool _printing = false;
   String? _incidentCode;
 
   void _confirm() {
@@ -144,13 +145,21 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   /// papier parti.
   Future<void> _printTicket() async {
     final paymentId = _paymentId;
-    if (paymentId == null) return;
+    // Même invariant « un seul geste en vol » que `_confirm` : le rendu puis
+    // l'ouverture de l'interface système ne rendent pas la main tout de suite,
+    // et deux appuis lançaient deux tâches d'impression — donc deux tickets
+    // pour un seul versement.
+    if (paymentId == null || _printing) return;
 
     final messenger = ScaffoldMessenger.maybeOf(context);
     final message = AppLocalizations.of(context)!.ticketPrintFailed;
 
+    setState(() => _printing = true);
     final printed = await printProvisionalTicket(context, paymentId: paymentId);
-    if (!mounted || printed) return;
+    if (!mounted) return;
+
+    setState(() => _printing = false);
+    if (printed) return;
 
     messenger?.showSnackBar(SnackBar(content: Text(message)));
   }
@@ -277,7 +286,12 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
               // écrites, sans le moindre appel réseau (ADR-012 D-3).
               secondaryLabel: l10n.ticketPrintLabel,
               secondaryIcon: Icons.print_outlined,
-              onSecondary: _paymentId == null ? null : _printTicket,
+              // Éteint tant qu'une impression est en vol : un `VoidCallback`
+              // n'a aucun anti-rebond, et rien ne bouge à l'écran entre l'appui
+              // et l'apparition de l'interface système.
+              onSecondary: _paymentId == null || _printing
+                  ? null
+                  : _printTicket,
               secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
