@@ -24,6 +24,10 @@ class EditiqueDocumentMapper {
   /// Signature d'un fichier PDF (`%PDF`).
   static const List<int> _pdfMagic = <int>[0x25, 0x50, 0x44, 0x46];
 
+  /// En-tête portant l'identifiant d'archive de la pièce rendue. Les en-têtes
+  /// dio sont normalisés en minuscules.
+  static const String _documentIdHeader = 'x-document-id';
+
   static Either<Failure, EditiqueDocument> map(
     HttpResponse<Uint8List> response,
     EditiqueDocumentType type,
@@ -61,8 +65,23 @@ class EditiqueDocumentMapper {
         bytes: bytes,
         fileName: headerFileName ?? _fallbackFileName(type),
         documentNumber: documentNumber,
+        documentId: _documentId(headers),
       ),
     );
+  }
+
+  /// Identifiant d'archive annoncé par le serveur, `null` s'il ne l'annonce pas.
+  ///
+  /// Absent par construction sur un relevé ou un quitus : le serveur ne les
+  /// conserve pas, donc il n'a rien à désigner. Absent aussi face à un serveur
+  /// antérieur à cet en-tête — d'où la nullabilité, qui n'est pas un cas
+  /// dégradé mais le régime normal de la moitié des pièces.
+  ///
+  /// Une valeur vide vaut une absence : « inconnu » ne doit jamais s'écrire
+  /// autrement que `null`, sous peine d'indexer un cache sur une chaîne vide.
+  static String? _documentId(Headers headers) {
+    final value = _firstHeader(headers, _documentIdHeader)?.trim();
+    return (value == null || value.isEmpty) ? null : value;
   }
 
   /// Lit le premier exemplaire d'un en-tête, sans jamais lever.
