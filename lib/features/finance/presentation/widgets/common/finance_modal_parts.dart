@@ -129,10 +129,18 @@ class FinanceKeyValueRow {
   final String label;
   final String value;
 
+  /// Barre la valeur : ce qu'elle désigne n'a plus cours — un numéro de pièce
+  /// que l'établissement a retiré, par exemple.
+  ///
+  /// La rature ne porte jamais l'information seule : l'appelant doit doubler
+  /// d'une phrase qui dit ce qui a été retiré, et pourquoi.
+  final bool isStruckThrough;
+
   const FinanceKeyValueRow({
     required this.icon,
     required this.label,
     required this.value,
+    this.isStruckThrough = false,
   });
 }
 
@@ -199,7 +207,13 @@ class _KeyValueRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
               style: AppTextStyles.bodyStrong.copyWith(
-                color: isEmpty ? AppColors.textMuted : AppColors.textPrimary,
+                color: isEmpty || data.isStruckThrough
+                    ? AppColors.textMuted
+                    : AppColors.textPrimary,
+                decoration: data.isStruckThrough
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationColor: AppColors.textMuted,
               ),
             ),
           ),

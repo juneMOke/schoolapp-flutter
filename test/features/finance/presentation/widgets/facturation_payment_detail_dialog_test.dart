@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -29,6 +30,7 @@ Future<void> _pump(
   bool isPendingSync = false,
   String? receiptNumber,
   bool receiptPending = false,
+  EditiqueCacheEntry? cancelledReceipt,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -43,6 +45,7 @@ Future<void> _pump(
             receiptNumber: receiptNumber,
             receiptPending: receiptPending,
             onDownloadReceipt: onDownload,
+            cancelledReceipt: cancelledReceipt,
           ),
         ),
       ),
@@ -167,6 +170,85 @@ void main() {
 
       expect(find.text('En attente de synchronisation'), findsNothing);
       expect(find.text('—'), findsNWidgets(2));
+    });
+  });
+
+  // Un reçu que l'établissement a retiré : le numéro barré ne dit pas
+  // grand-chose seul, c'est la phrase qui explique. La rature la rend
+  // seulement impossible à manquer.
+  group('reçu annulé', () {
+    EditiqueCacheEntry cancelled({String? reason = 'Erreur de montant'}) =>
+        EditiqueCacheEntry(
+          id: 'c-1',
+          documentId: 'doc-1',
+          documentNumber: 'ETL-RC-2526-000212',
+          docType: 'RC',
+          schoolId: 'school-1',
+          sizeBytes: 1024,
+          contentSha256: 'abc',
+          cancelledAt: DateTime.utc(2026, 8, 6).millisecondsSinceEpoch,
+          cancellationReason: reason,
+          createdAt: 1000,
+          lastAccessedAt: 1000,
+        );
+
+    testWidgets('barre le numéro et dit le motif', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(),
+      );
+      await tester.pumpAndSettle();
+
+      final number = tester.widget<Text>(find.text('ETL-RC-2526-000212'));
+      expect(number.style?.decoration, TextDecoration.lineThrough);
+      expect(find.textContaining('Erreur de montant'), findsOneWidget);
+      expect(find.textContaining('annulé'), findsOneWidget);
+    });
+
+    // Arbitrage du 2026-08-06 : la copie annulée se ressort quand même — la
+    // rature et le motif sont à l'écran, la pièce ne trompe personne.
+    testWidgets('laisse le téléchargement offert', (tester) async {
+      var tapped = 0;
+      await _pump(
+        tester,
+        onDownload: () => tapped++,
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Télécharger le reçu'));
+      expect(tapped, 1);
+    });
+
+    // Le motif vient du serveur : il peut manquer, et l'écran n'invente pas la
+    // phrase absente.
+    testWidgets('dit le retrait même sans motif', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(reason: null),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('annulé'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('un reçu qui tient n est ni barré ni commenté', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+      );
+      await tester.pumpAndSettle();
+
+      final number = tester.widget<Text>(find.text('ETL-RC-2526-000212'));
+      expect(number.style?.decoration, isNot(TextDecoration.lineThrough));
+      expect(find.textContaining('annulé'), findsNothing);
     });
   });
 

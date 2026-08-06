@@ -53,6 +53,12 @@ Future<void> showFacturationPaymentDetailDialog(
           ),
           receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
           receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
+          // Le retrait se dit toujours, quel que soit le geste offert : c'est
+          // ce que le guichet doit pouvoir expliquer à la famille qui présente
+          // le papier.
+          cancelledReceipt: receipt.cached?.isCancelled ?? false
+              ? receipt.cached
+              : null,
           // Deux gestes derrière un même bouton, et c'est la présence d'une
           // copie locale qui tranche — pas la connectivité.
           //
@@ -61,8 +67,19 @@ Future<void> showFacturationPaymentDetailDialog(
           // l'identifiant du paiement, et n'est donc demandable que pour un
           // encaissement déjà remonté — sans quoi l'uuid client donnerait un
           // 404.
+          //
+          // Une copie annulée se ressort quand même (arbitrage du 2026-08-06) :
+          // un guichet doit pouvoir remettre sous les yeux d'une famille le
+          // papier qu'elle présente pour lui expliquer pourquoi il n'a plus
+          // cours. La rature et le motif sont à l'écran, la pièce ne trompe
+          // donc personne.
+          //
+          // Encore faut-il l'avoir : l'éviction a pu emporter ses octets, et
+          // c'est irréversible pour une pièce annulée — le serveur ne la sert
+          // plus. La ligne retombe alors sur le chemin serveur, qui rescelle
+          // l'instantané archivé sous un lien « annule et remplace ».
           onDownloadReceipt: switch (receipt.cached) {
-            final EditiqueCacheEntry cached =>
+            final EditiqueCacheEntry cached when cached.hasBytes =>
               () => showEditiqueRestitutionDialog(
                 context,
                 type: EditiqueDocumentType.paymentReceipt,
@@ -102,6 +119,13 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   /// remonté, dont l'identifiant est inconnu du serveur.
   final VoidCallback? onDownloadReceipt;
 
+  /// Reçu que l'établissement a **retiré**, `null` tant qu'il tient.
+  ///
+  /// Barre son numéro et porte le motif. Un numéro barré seul ne dirait pas
+  /// grand-chose : c'est la phrase qui explique, la rature ne fait que la
+  /// rendre impossible à manquer.
+  final EditiqueCacheEntry? cancelledReceipt;
+
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
@@ -109,7 +133,26 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     this.receiptNumber,
     this.receiptPending = false,
     this.onDownloadReceipt,
+    this.cancelledReceipt,
   });
+
+  /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
+  ///
+  /// Le motif vient du serveur — texte libre saisi par un agent. Affiché tel
+  /// quel, sans traduction ; son absence ne se comble pas.
+  String? _cancellationNotice(BuildContext context, AppLocalizations l10n) {
+    final cancelledAt = cancelledReceipt?.cancelledAt;
+    if (cancelledAt == null) return null;
+
+    final date = MaterialLocalizations.of(
+      context,
+    ).formatMediumDate(DateTime.fromMillisecondsSinceEpoch(cancelledAt));
+    final reason = cancelledReceipt?.cancellationReason?.trim();
+
+    return (reason == null || reason.isEmpty)
+        ? l10n.facturationReceiptCancelledNotice(date)
+        : l10n.facturationReceiptCancelledWithReasonNotice(date, reason);
+  }
 
   String _payerFullName(AppLocalizations l10n) {
     final fullName = [
@@ -219,9 +262,37 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                           icon: Icons.receipt_long_outlined,
                           label: l10n.facturationPaymentReceiptLabel,
                           value: _receiptNumberValue(l10n),
+                          isStruckThrough: cancelledReceipt != null,
                         ),
                       ],
                     ),
+                    if (_cancellationNotice(context, l10n) case final notice?)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: AppDimensions.spacingS,
+                        ),
+                        // Jamais la seule rature ni la seule couleur : l'icône
+                        // et la phrase disent ce que le trait ne peut pas dire.
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.cancel_outlined,
+                              size: 16,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: AppDimensions.spacingXS),
+                            Expanded(
+                              child: Text(
+                                notice,
+                                style: AppTextStyles.body.copyWith(
+                                  color: AppColors.warning,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: AppDimensions.spacingM),
                     allocations,
                   ],

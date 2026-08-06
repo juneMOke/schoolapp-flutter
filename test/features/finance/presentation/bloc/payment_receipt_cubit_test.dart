@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
@@ -137,4 +138,51 @@ void main() {
     expect(state.hasProvisionalNumber, isFalse);
     expect(state.hasDefinitiveNumber, isFalse);
   });
+
+  // Un reçu que l'établissement a retiré doit atteindre l'état : c'est lui qui
+  // porte le motif que le guichet affichera. Le filtrer en chemin rendrait le
+  // retrait invisible ici, et le numéro s'afficherait comme s'il tenait
+  // toujours.
+  blocTest<PaymentReceiptCubit, PaymentReceiptState>(
+    'porte jusqu à l état le reçu que l établissement a retiré',
+    setUp: () {
+      when(() => useCase(any())).thenAnswer(
+        (_) async =>
+            _document(number: 'ETL-RC-2526-000212', status: 'DEFINITIVE'),
+      );
+      when(
+        () => cachedUseCase(
+          documentId: any(named: 'documentId'),
+          documentNumber: any(named: 'documentNumber'),
+        ),
+      ).thenAnswer(
+        (_) async => EditiqueCacheEntry(
+          id: 'c-1',
+          documentId: 'doc-1',
+          documentNumber: 'ETL-RC-2526-000212',
+          docType: 'RC',
+          schoolId: 'school-1',
+          sizeBytes: 1024,
+          contentSha256: 'abc',
+          cancelledAt: 1786013000000,
+          cancellationReason: 'Erreur de montant',
+          createdAt: 1000,
+          lastAccessedAt: 1000,
+        ),
+      );
+    },
+    build: () => PaymentReceiptCubit(useCase, cachedUseCase),
+    act: (cubit) => cubit.load('pay-1'),
+    expect: () => [
+      isA<PaymentReceiptState>()
+          .having((s) => s.cached?.isCancelled, 'cached.isCancelled', isTrue)
+          .having(
+            (s) => s.cached?.cancellationReason,
+            'cached.cancellationReason',
+            'Erreur de montant',
+          )
+          // Les octets restent : la copie annulée se ressort quand même.
+          .having((s) => s.cached?.hasBytes, 'cached.hasBytes', isTrue),
+    ],
+  );
 }
