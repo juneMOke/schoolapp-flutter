@@ -1,12 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
+
+class _FixedAccess implements EditiqueCacheAccess {
+  final bool entitled;
+
+  const _FixedAccess(this.entitled);
+
+  @override
+  Future<bool> isEntitled() async => entitled;
+}
+
+const _entitled = _FixedAccess(true);
 
 /// « Cette pièce est-elle SUR cette tablette ? » — la seule question que ces
 /// deux lectures posent, et la seule à laquelle elles ont le droit de répondre.
@@ -60,7 +72,7 @@ void main() {
     );
     await seed(id: 'connue', documentId: 'doc-2', docType: 'NP');
 
-    final held = await ListCachedDocumentsUseCase(dao, currentUser)(
+    final held = await ListCachedDocumentsUseCase(dao, currentUser, _entitled)(
       studentId: 's-1',
       academicYearId: 'y-1',
     );
@@ -87,9 +99,11 @@ void main() {
         emittedAt: 9000, // plus récente, donc en tête du tri
       );
 
-      final held = await ListCachedDocumentsUseCase(dao, currentUser)(
-        studentId: 's-1',
-      );
+      final held = await ListCachedDocumentsUseCase(
+        dao,
+        currentUser,
+        _entitled,
+      )(studentId: 's-1');
 
       expect(held.map((e) => e.id), ['tenue']);
     },
@@ -97,7 +111,7 @@ void main() {
 
   test('la recherche unitaire ignore une pièce sans octets', () async {
     await seed(id: 'connue', documentId: 'doc-2', docType: 'RC');
-    final find = FindCachedDocumentUseCase(dao, currentUser);
+    final find = FindCachedDocumentUseCase(dao, currentUser, _entitled);
 
     expect(await find(documentId: 'doc-2'), isNull);
     expect(await find(documentNumber: 'ETL-RC-connue'), isNull);
@@ -110,11 +124,38 @@ void main() {
       docType: 'RC',
       contentSha256: 'a' * 64,
     );
-    final find = FindCachedDocumentUseCase(dao, currentUser);
+    final find = FindCachedDocumentUseCase(dao, currentUser, _entitled);
 
     expect((await find(documentId: 'doc-1'))?.id, 'tenue');
     expect((await find(documentNumber: 'ETL-RC-tenue'))?.id, 'tenue');
   });
+
+  // RG-012-4 : l'effacement d'ouverture de session traite le cas ordinaire,
+  // mais entre deux ouvertures — un rôle rétrogradé par le serveur, une session
+  // déjà ouverte — l'index survivrait à la perte du droit. Ces deux lectures
+  // alimentent l'UI : elles doivent refuser d'elles-mêmes.
+  test(
+    'un profil sans droit ne voit rien de ce qui reste sur le disque',
+    () async {
+      await seed(
+        id: 'tenue',
+        documentId: 'doc-1',
+        docType: 'RC',
+        contentSha256: 'a' * 64,
+      );
+      const refused = _FixedAccess(false);
+
+      expect(
+        await ListCachedDocumentsUseCase(dao, currentUser, refused)(
+          studentId: 's-1',
+        ),
+        isEmpty,
+      );
+      final find = FindCachedDocumentUseCase(dao, currentUser, refused);
+      expect(await find(documentId: 'doc-1'), isNull);
+      expect(await find(documentNumber: 'ETL-RC-tenue'), isNull);
+    },
+  );
 
   // La portée de lecture est l'école : sans elle, on ne lit rien plutôt que de
   // rendre la pièce d'un autre établissement.
@@ -128,11 +169,13 @@ void main() {
     currentUser.clear();
 
     expect(
-      await ListCachedDocumentsUseCase(dao, currentUser)(studentId: 's-1'),
+      await ListCachedDocumentsUseCase(dao, currentUser, _entitled)(
+        studentId: 's-1',
+      ),
       isEmpty,
     );
     expect(
-      await FindCachedDocumentUseCase(dao, currentUser)(
+      await FindCachedDocumentUseCase(dao, currentUser, _entitled)(
         documentNumber: 'ETL-RC-tenue',
       ),
       isNull,

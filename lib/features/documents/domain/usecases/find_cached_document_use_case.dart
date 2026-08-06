@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 
 /// Répond à une seule question : **cette pièce-là est-elle sur cette
@@ -14,17 +15,26 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 /// rendre la pièce d'un autre établissement.
 ///
 /// Ne remonte jamais d'erreur : ne pas savoir revient à ne pas avoir.
+///
+/// La garde de profil (RG-012-4) est vérifiée **ici aussi**, et pas seulement à
+/// l'écriture : l'effacement d'ouverture de session traite le cas ordinaire,
+/// mais entre deux ouvertures — un rôle rétrogradé par le serveur, une session
+/// déjà ouverte — l'index survivrait à la perte du droit. Pour un profil sans
+/// droit, ne pas avoir le droit revient à ne pas avoir la pièce.
 class FindCachedDocumentUseCase {
   final EditiqueCacheDao _dao;
   final CurrentUserContext _currentUser;
+  final EditiqueCacheAccess _access;
 
-  const FindCachedDocumentUseCase(this._dao, this._currentUser);
+  const FindCachedDocumentUseCase(this._dao, this._currentUser, this._access);
 
   Future<EditiqueCacheEntry?> call({
     String? documentId,
     String? documentNumber,
   }) async {
     try {
+      if (!await _access.isEntitled()) return null;
+
       if (documentId != null && documentId.isNotEmpty) {
         final byId = await _dao.findByDocumentId(documentId);
         if (byId != null) return _heldOnly(byId);

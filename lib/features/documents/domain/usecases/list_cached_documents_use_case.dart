@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 
 /// Les pièces d'un élève dont **cette tablette** détient une copie scellée.
@@ -16,11 +17,18 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 /// Ne remonte jamais d'erreur : une lecture qui échoue rend une liste vide, et
 /// la ligne retombe sur « Émettre » — ce qui ne coûte rien sur une pièce
 /// idempotente.
+///
+/// La garde de profil (RG-012-4) est vérifiée **ici aussi**, et pas seulement à
+/// l'écriture : l'effacement d'ouverture de session traite le cas ordinaire,
+/// mais entre deux ouvertures — un rôle rétrogradé par le serveur, une session
+/// déjà ouverte — l'index survivrait à la perte du droit. Un profil sans droit
+/// ne doit rien voir, même de ce qui reste sur le disque.
 class ListCachedDocumentsUseCase {
   final EditiqueCacheDao _dao;
   final CurrentUserContext _currentUser;
+  final EditiqueCacheAccess _access;
 
-  const ListCachedDocumentsUseCase(this._dao, this._currentUser);
+  const ListCachedDocumentsUseCase(this._dao, this._currentUser, this._access);
 
   Future<List<EditiqueCacheEntry>> call({
     required String studentId,
@@ -33,6 +41,8 @@ class ListCachedDocumentsUseCase {
     if (studentId.trim().isEmpty) return const [];
 
     try {
+      if (!await _access.isEntitled()) return const [];
+
       final indexed = await _dao.listForStudent(
         schoolId: schoolId,
         studentId: studentId,

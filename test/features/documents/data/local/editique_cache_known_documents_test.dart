@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_eviction_policy.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -29,6 +30,13 @@ class _FakeKeyService implements EditiqueCacheKeyService {
   Future<void> destroy() async {}
 }
 
+/// Profil autorisé : la garde de profil est éprouvée ailleurs, ce fichier
+/// s'intéresse à ce que le delta apporte.
+class _FakeAccess implements EditiqueCacheAccess {
+  @override
+  Future<bool> isEntitled() async => true;
+}
+
 class _FakeIds implements IdGenerator {
   int _next = 0;
 
@@ -44,6 +52,7 @@ void main() {
   late Directory cacheDir;
   late EditiqueDocumentCache cache;
   late EditiqueCacheDao index;
+  late _FakeAccess access;
 
   Uint8List pdf(String marque) => Uint8List.fromList(
     [
@@ -57,6 +66,7 @@ void main() {
     base = await Directory.systemTemp.createTemp('eteelo-editique-pull-');
     cacheDir = Directory(p.join(base.path, 'editique_cache'));
     index = EditiqueCacheDao(db);
+    access = _FakeAccess();
     cache = EditiqueDocumentCache(
       index: index,
       maintenance: EditiqueCacheMaintenanceDao(db),
@@ -66,6 +76,7 @@ void main() {
         baseDirectory: () async => base,
       ),
       ids: _FakeIds(),
+      access: access,
       now: () => 1000,
     );
   });
@@ -185,6 +196,7 @@ void main() {
           baseDirectory: () async => base,
         ),
         ids: _FakeIds(),
+        access: access,
         policy: const EditiqueCacheEvictionPolicy(
           budgetBytes: 1000,
           targetRatio: 0.5,
@@ -215,6 +227,7 @@ void main() {
           baseDirectory: () async => base,
         ),
         ids: _FakeIds(),
+        access: access,
         policy: const EditiqueCacheEvictionPolicy(
           budgetBytes: 300,
           targetRatio: 0.5,

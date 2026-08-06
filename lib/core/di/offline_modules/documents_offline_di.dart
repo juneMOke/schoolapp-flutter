@@ -8,7 +8,9 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
@@ -74,6 +76,7 @@ void registerDocumentsOffline(GetIt getIt) {
     () => FindCachedDocumentUseCase(
       getIt<EditiqueCacheDao>(),
       getIt<CurrentUserContext>(),
+      getIt<EditiqueCacheAccess>(),
     ),
   );
 
@@ -81,7 +84,17 @@ void registerDocumentsOffline(GetIt getIt) {
     () => ListCachedDocumentsUseCase(
       getIt<EditiqueCacheDao>(),
       getIt<CurrentUserContext>(),
+      getIt<EditiqueCacheAccess>(),
     ),
+  );
+
+  // ── Garde de profil (RG-012-4) ──
+  // Fail-closed par construction : `auth_local_user` n'est écrit que par un
+  // login online réussi, donc son absence se lit « pas de droit ». Le secure
+  // storage, lui, rend une chaîne vide au démarrage à froid — une valeur qu'une
+  // garde écrite en négatif aurait prise pour une autorisation.
+  getIt.registerLazySingleton<EditiqueCacheAccess>(
+    () => LocalEditiqueCacheAccess(getIt<AuthLocalDao>()),
   );
 
   // ── Le cache composé : le seul point d'entrée légitime des deux ──
@@ -91,6 +104,7 @@ void registerDocumentsOffline(GetIt getIt) {
       maintenance: getIt<EditiqueCacheMaintenanceDao>(),
       store: getIt<EditiqueBlobStore>(),
       ids: getIt<IdGenerator>(),
+      access: getIt<EditiqueCacheAccess>(),
     ),
   );
 

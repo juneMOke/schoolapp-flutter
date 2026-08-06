@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_eviction_policy.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 
@@ -63,6 +64,7 @@ class EditiqueDocumentCache {
   final EditiqueBlobStore _store;
   final EditiqueCacheEvictionPolicy _policy;
   final IdGenerator _ids;
+  final EditiqueCacheAccess _access;
   final Clock _now;
 
   /// Chaîne de sérialisation des écritures. Voir « Une seule pièce à la fois ».
@@ -73,6 +75,7 @@ class EditiqueDocumentCache {
     required EditiqueCacheMaintenanceDao maintenance,
     required EditiqueBlobStore store,
     required IdGenerator ids,
+    required EditiqueCacheAccess access,
     EditiqueCacheEvictionPolicy policy = const EditiqueCacheEvictionPolicy(),
     Clock now = systemClock,
   }) : _index = index,
@@ -80,6 +83,7 @@ class EditiqueDocumentCache {
        _store = store,
        _policy = policy,
        _ids = ids,
+       _access = access,
        _now = now;
 
   // ── Écriture ───────────────────────────────────────────────────────────────
@@ -113,6 +117,12 @@ class EditiqueDocumentCache {
       // Les deux refus se prononcent AVANT le moindre octet écrit : un fichier
       // scellé pour une pièce que l'index refusera ensuite serait orphelin dès
       // sa naissance.
+      // Garde de profil (RG-012-4). Le cache réside sur les tablettes
+      // d'administration : un profil qui n'y a pas droit ne doit pas commencer
+      // à accumuler des pièces scellées sur son disque. Le refus est silencieux
+      // — la pièce vient d'être servie à l'écran, seule sa conservation est
+      // refusée.
+      if (!await _access.isEntitled()) return null;
       if (!EditiqueCacheEntry.isCacheableDocType(docType)) return null;
       final resolvedId = _blankToNull(documentId);
       final resolvedNumber = _blankToNull(documentNumber);
@@ -208,6 +218,9 @@ class EditiqueDocumentCache {
   Future<int> recordKnownDocuments(List<EditiqueCacheEntry> documents) {
     if (documents.isEmpty) return Future.value(0);
     return _exclusive(() async {
+      // Même garde qu'à l'écriture d'une pièce : un profil sans droit n'a pas
+      // à connaître l'inventaire des pièces de l'établissement.
+      if (!await _access.isEntitled()) return 0;
       final now = _now();
       var retained = 0;
       for (final document in documents) {
@@ -275,6 +288,11 @@ class EditiqueDocumentCache {
     Future<EditiqueCacheEntry?> Function() locate,
   ) async {
     try {
+      // Les octets restent sur le disque jusqu'à la purge d'ouverture de
+      // session : la garde doit donc valoir aussi en lecture, sans quoi un
+      // profil sans droit ressortirait les pièces de celui qui l'a précédé.
+      if (!await _access.isEntitled()) return null;
+
       final entry = await locate();
       if (entry == null) return null;
 

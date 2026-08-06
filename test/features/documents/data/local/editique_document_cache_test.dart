@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_key_service.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_maintenance_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_eviction_policy.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -32,6 +33,17 @@ class _FakeKeyService implements EditiqueCacheKeyService {
 
   @override
   Future<void> destroy() async => destructions++;
+}
+
+/// Droit d'accès piloté par le test : la garde de profil est un invariant du
+/// lot, elle doit pouvoir être ouverte ET fermée.
+class _FakeAccess implements EditiqueCacheAccess {
+  /// Ouvert par défaut, refermable par un test : la garde de profil est un
+  /// invariant du lot, elle doit être éprouvée dans les deux sens.
+  bool entitled = true;
+
+  @override
+  Future<bool> isEntitled() async => entitled;
 }
 
 /// Identifiants prévisibles : le nom des fichiers sur le disque est une
@@ -112,6 +124,7 @@ void main() {
   late Directory cacheDir;
   late _FakeKeyService keys;
   late _FakeIds ids;
+  late _FakeAccess access;
   late int clock;
 
   Uint8List pdf(String marque, {int taille = 200}) => Uint8List.fromList([
@@ -125,6 +138,7 @@ void main() {
     cacheDir = Directory(p.join(base.path, 'editique_cache'));
     keys = _FakeKeyService();
     ids = _FakeIds();
+    access = _FakeAccess();
     clock = 1000;
   });
 
@@ -149,6 +163,7 @@ void main() {
           baseDirectory: () async => base,
         ),
     ids: ids,
+    access: access,
     policy: policy ?? const EditiqueCacheEvictionPolicy(),
     now: () => clock,
   );
@@ -731,6 +746,62 @@ void main() {
 
       expect(await cache.reclaimOrphans(), 0);
       expect(filesOnDisk(), ['gen-1.enc']);
+    });
+  });
+
+  // Garde de profil (RG-012-4) : le cache réside sur les tablettes
+  // d'administration. Un profil qui n'y a pas droit ne doit ni en accumuler, ni
+  // ressortir ce que son prédécesseur y a laissé — les octets restent sur le
+  // disque jusqu'à la purge d'ouverture de session.
+  group('profil sans droit', () {
+    test('n écrit aucune pièce, et ne laisse aucun fichier', () async {
+      final cache = cacheWith();
+      access.entitled = false;
+
+      expect(await putReceipt(cache), isNull);
+      expect(await EditiqueCacheDao(db).count(), 0);
+      expect(filesOnDisk(), isEmpty);
+    });
+
+    test('ne ressort pas ce qu un autre profil détenait', () async {
+      final cache = cacheWith();
+      await putReceipt(cache);
+      expect(await cache.readByDocumentId('doc-1'), isNotNull);
+
+      access.entitled = false;
+
+      expect(await cache.readByDocumentId('doc-1'), isNull);
+      expect(
+        await cache.readByDocumentNumber(
+          schoolId: 'school-1',
+          documentNumber: 'ETL-RC-2526-000001',
+        ),
+        isNull,
+      );
+      // Les octets sont toujours là : c'est la purge d'ouverture de session qui
+      // les efface, pas la lecture. La garde interdit d'y accéder entre-temps.
+      expect(filesOnDisk(), ['gen-1.enc']);
+    });
+
+    test('n indexe pas non plus le catalogue du delta', () async {
+      final cache = cacheWith();
+      access.entitled = false;
+
+      final retained = await cache.recordKnownDocuments([
+        EditiqueCacheEntry(
+          id: 'ignoré',
+          documentId: 'doc-9',
+          documentNumber: 'ETL-NP-9',
+          docType: 'NP',
+          schoolId: 'school-1',
+          sizeBytes: 4096,
+          createdAt: 1000,
+          lastAccessedAt: 1000,
+        ),
+      ]);
+
+      expect(retained, 0);
+      expect(await EditiqueCacheDao(db).count(), 0);
     });
   });
 
