@@ -477,6 +477,37 @@ Future<void> migrateOfflineDatabase(
     // octets absents et l'éviction d'évincer du vide.
     await _relaxEditiqueCacheContentHash(db, schema);
   }
+  if (oldVersion < 23) {
+    // v23 — Éditique offline (ADR-012, lot back B5) : l'index du cache doit
+    // pouvoir dire qu'une pièce a été RETIRÉE par le serveur.
+    //
+    // Le delta descend `cancelledAt` et son motif depuis B5 ; sans ces colonnes
+    // le front les jetait, et une pièce annulée continuait d'être proposée hors
+    // ligne avec un bouton qui ressort un document sans valeur.
+    //
+    // Deux colonnes nullables, ajoutées par `ALTER` — aucun backfill possible :
+    // les pièces déjà en cache n'ont jamais connu leur annulation, et le
+    // prochain cycle de delta la leur apprendra si elle existe.
+    //
+    // Aucun index neuf, et c'est voulu : `ALTER` ne rejoue pas `createIndexSql`,
+    // donc un index posé ici n'existerait que sur les installations neuves. Les
+    // deux lectures concernées sont déjà servies — l'index d'éviction reste
+    // partiel sur `content_sha256` (une pièce annulée garde ses octets et reste
+    // évinçable), et le catalogue passe par `idx_editique_cache_subject`.
+    for (final column in const ['cancelled_at', 'cancellation_reason']) {
+      // La garde n'est pas cosmétique : une base v≤20 traverse d'abord le
+      // palier v21, qui crée la table depuis le DDL **canonique** — donc avec
+      // ces deux colonnes. Sans elle, `duplicate column name` ferait échouer
+      // toute migration venue d'avant la v21.
+      if (await _hasTable(db, 'editique_cache_entries') &&
+          !await _hasColumn(db, 'editique_cache_entries', column)) {
+        await db.execute(
+          'ALTER TABLE editique_cache_entries ADD COLUMN $column '
+          '${column == 'cancelled_at' ? 'INTEGER' : 'TEXT'}',
+        );
+      }
+    }
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.
@@ -504,6 +535,13 @@ Future<void> _relaxEditiqueCacheContentHash(
   if (hash.isEmpty || (hash.first['notnull'] as int? ?? 0) == 0) return;
 
   final table = schema.firstWhere((t) => t.name == name);
+  // **Les 13 colonnes de la forme v21, et elles seules.** Ne jamais y ajouter
+  // une colonne postérieure : la table source porte la forme d'AVANT cette
+  // étape, et un `SELECT` d'une colonne qu'elle n'a pas ferait lever la
+  // migration. Les colonnes plus récentes — `cancelled_at`,
+  // `cancellation_reason` en v23 — existent bien dans la table reconstruite,
+  // puisqu'elle naît du DDL canonique, et y restent simplement NULL : l'état
+  // correct pour une pièce dont on ignore encore si elle a été retirée.
   const columnList =
       'id, document_id, document_number, doc_type, student_id, '
       'academic_year_id, school_id, owner_uid, size_bytes, content_sha256, '

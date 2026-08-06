@@ -83,6 +83,34 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// les deux cas : le serveur annonce le poids, ce qui permet de savoir ce qu'un
 /// téléchargement coûtera avant de le lancer.
 ///
+/// ## L'annulation, un axe ORTHOGONAL au précédent
+///
+/// `cancelled_at` dit que le serveur a retiré la pièce (lot back B5). C'est une
+/// question **différente** de « la tablette a-t-elle les octets ? », et les deux
+/// se croisent librement : une pièce annulée peut être détenue, une pièce en
+/// vigueur peut n'être qu'une connaissance. Les confondre — en lisant
+/// l'annulation dans l'absence d'empreinte — ferait passer pour retirée toute
+/// ligne apprise par le delta.
+///
+/// **Une pièce annulée garde ses octets** (arbitrage du 2026-08-06, qui renverse
+/// la première rédaction) : le guichet doit pouvoir ressortir le papier qu'une
+/// famille lui présente pour lui expliquer pourquoi il n'a plus cours. Elle pèse
+/// donc au budget et reste évinçable comme les autres — avec ceci d'assumé
+/// qu'une annulée évincée est **définitivement** perdue, le serveur ne la
+/// rendant plus. Le motif, lui, survit à l'éviction : il est dans cette table.
+///
+/// `cancellation_reason` est du **texte libre saisi par un agent** de l'école,
+/// descendu tel quel sur toutes les tablettes. Il ne se traduit pas et ne se
+/// reformule pas — on l'affiche comme un détail serveur, jamais comme une
+/// phrase de l'application.
+///
+/// Aucun `CHECK` ne lie les deux colonnes, contrairement au serveur qui en pose
+/// un. Deux raisons : le serveur fait déjà foi, et un `CHECK` ferait échouer
+/// l'écriture d'un delta sur une donnée que le front ne contrôle pas. Il serait
+/// de surcroît **invérifiable** — SQLite ne sait pas ajouter un `CHECK` par
+/// `ALTER`, donc un parc migré ne l'aurait pas là où une installation neuve
+/// l'aurait.
+///
 /// ## Trois dates, qui ne disent pas la même chose
 ///
 /// `emitted_at` est la date d'émission côté serveur, `created_at` celle de la
@@ -113,6 +141,12 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
       -- natures de ligne » ci-dessus).
       content_sha256 TEXT,
       emitted_at INTEGER,
+      -- Époch ms du retrait côté serveur, NULL tant que la pièce est en
+      -- vigueur. Orthogonal à `content_sha256` (cf. ci-dessus) : une pièce
+      -- annulée garde ses octets.
+      cancelled_at INTEGER,
+      -- Texte libre saisi par un agent de l'école. Ne se traduit pas.
+      cancellation_reason TEXT,
       created_at INTEGER NOT NULL,
       last_accessed_at INTEGER NOT NULL,
       CHECK (

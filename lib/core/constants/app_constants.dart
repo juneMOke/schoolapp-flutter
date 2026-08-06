@@ -348,7 +348,16 @@ class AppConstants {
   // vide. Reconstruction AVEC copie — vider la table ferait perdre l'accès aux
   // fichiers chiffrés déjà détenus, donc des pièces qu'un guichet hors ligne ne
   // pourrait plus ressortir.
-  static const int offlineDbSchemaVersion = 22;
+  // v23 (2026-08-06) : Éditique offline (ADR-012, lot back B5) — `cancelled_at`
+  // et `cancellation_reason` sur `editique_cache_entries`. Le delta descend
+  // l'annulation depuis B5 ; le front la jetait, et une pièce retirée par le
+  // serveur continuait d'être proposée hors ligne. L'axe est ORTHOGONAL à
+  // `content_sha256` : une pièce annulée garde ses octets, parce qu'un guichet
+  // doit pouvoir ressortir le papier qu'une famille lui présente pour lui
+  // expliquer pourquoi il n'a plus cours. Deux `ALTER` nullables, sans backfill
+  // — une pièce déjà en cache n'a jamais connu son annulation, et le prochain
+  // cycle la lui apprendra.
+  static const int offlineDbSchemaVersion = 23;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
