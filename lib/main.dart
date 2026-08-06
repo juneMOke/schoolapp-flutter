@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/finance/offline/presentation/bloc/pa
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
@@ -89,6 +90,11 @@ class _MyAppState extends State<MyApp> {
   /// orphelin.
   Future<void> _reclaimEditiqueCacheOrphans() async {
     try {
+      // D'ABORD ce qu'une ouverture de session décide du cache : un profil sans
+      // droit ou une école qui a changé l'effacent entièrement (ADR-012 D-7,
+      // RG-012-4/21). Réclamer des orphelins avant cette décision les aurait
+      // épargnés le temps d'un cycle.
+      await getIt<EditiqueCacheSessionGuard>().onSessionOpened();
       await getIt<EditiqueDocumentCache>().reclaimOrphans();
     } catch (_) {
       // Cache indisponible, plateforme absente : sans conséquence.

@@ -63,4 +63,21 @@ class SyncMetaDao {
   Future<void> deleteCursor(String resource) async {
     await _db.delete(table, where: 'resource = ?', whereArgs: [resource]);
   }
+
+  /// Rembobine au bootstrap une ressource **et toutes ses variantes scopées**
+  /// (`<prefix>`, `<prefix>@…`, `<prefix>:…`).
+  ///
+  /// Une ressource peut porter plusieurs curseurs — un par école, un par
+  /// enseignant — et les effacer un par un supposerait de savoir lesquels
+  /// existent. Quand la donnée locale d'une ressource est détruite, ses curseurs
+  /// doivent l'être **tous** : un curseur laissé en avance ferait répondre
+  /// « rien de neuf » au cycle suivant, sur une base vide, jusqu'à la prochaine
+  /// écriture serveur.
+  Future<void> deleteCursorsOf(String resourcePrefix) async {
+    await _db.delete(
+      table,
+      where: 'resource = ? OR resource LIKE ? OR resource LIKE ?',
+      whereArgs: [resourcePrefix, '$resourcePrefix@%', '$resourcePrefix:%'],
+    );
+  }
 }

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/documents/data/datasources/offline/e
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_blob_store.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
@@ -62,10 +63,18 @@ void registerDocumentsOffline(GetIt getIt) {
   // efface — et l'index doit les oublier au même instant, sinon il continue
   // d'annoncer au budget des pièces qui n'existent plus. La résolution est
   // paresseuse : rien n'est touché tant que le magasin lui-même dort.
+  //
+  // Et le curseur avec, pour la même raison qu'à l'ouverture de session : vider
+  // l'index sans rembobiner le delta laisserait un curseur en avance sur une
+  // base vide, et le catalogue ne se repeuplerait plus jamais de ce qui a été
+  // scellé avant.
   getIt.registerLazySingleton<EditiqueBlobStore>(
     () => EditiqueBlobStore(
       keyService: getIt<EditiqueCacheKeyService>(),
-      onKeyRotated: () => getIt<EditiqueCacheMaintenanceDao>().purgeAll(),
+      onKeyRotated: () async {
+        await getIt<EditiqueCacheMaintenanceDao>().purgeAll();
+        await getIt<SyncMetaDao>().deleteCursorsOf(kEditiqueDocumentsResource);
+      },
     ),
   );
 
@@ -105,6 +114,15 @@ void registerDocumentsOffline(GetIt getIt) {
       store: getIt<EditiqueBlobStore>(),
       ids: getIt<IdGenerator>(),
       access: getIt<EditiqueCacheAccess>(),
+    ),
+  );
+
+  // ── Ce qu'une ouverture de session décide du cache (D-7, RG-012-21) ──
+  getIt.registerLazySingleton<EditiqueCacheSessionGuard>(
+    () => EditiqueCacheSessionGuard(
+      cache: getIt<EditiqueDocumentCache>(),
+      authLocalDao: getIt<AuthLocalDao>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
     ),
   );
 
