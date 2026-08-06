@@ -479,6 +479,78 @@ void main() {
       expect(action.cancelledPiece, isNull);
     });
 
+    // LE défaut trouvé par la revue adversariale. Annuler puis réémettre est le
+    // flux NOMINAL — la migration back V74 est bâtie pour lui —, et les deux
+    // lignes descendent par le delta sans octets. Parcourir jusqu'à trouver une
+    // annulée faisait annoncer « Pièce annulée » alors qu'une remplaçante en
+    // vigueur existait, et d'autant plus longtemps qu'on était hors ligne — au
+    // seul moment où rien ne peut détromper l'agent.
+    test('ne s annonce plus dès qu une pièce lui a succédé', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [
+          // Ordre de l'index : la plus récemment émise d'abord.
+          _cached(
+            docType: 'AI',
+            id: 'c-remplacante',
+            documentId: 'doc-remplacante',
+            documentNumber: 'ETL-AI-2526-000432',
+            contentSha256: null, // apprise par le delta, sans octets
+          ),
+          cancelled(),
+        ],
+      );
+
+      expect(action.cancelledPiece, isNull);
+    });
+
+    // Symétrique : tant que rien n'a succédé à la pièce retirée, elle reste la
+    // dernière nouvelle du type et doit se dire.
+    test('s annonce quand rien ne lui a succédé', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [
+          cancelled(),
+          _cached(
+            docType: 'AI',
+            id: 'c-ancienne',
+            documentId: 'doc-ancienne',
+            documentNumber: 'ETL-AI-2526-000100',
+            contentSha256: null,
+          ),
+        ],
+      );
+
+      expect(action.cancelledPiece?.documentId, 'doc-annule');
+    });
+
+    // La garantie qui vivait dans le filtre du use case avant qu'il ne soit
+    // retiré : c'est ici, et nulle part ailleurs, qu'on empêche « Consulter »
+    // de s'allumer sur des octets absents.
+    test('une pièce sans octets ne masque pas une copie détenue', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [
+          _cached(
+            docType: 'AI',
+            id: 'c-connue',
+            documentId: 'doc-connue',
+            documentNumber: 'ETL-AI-2526-000500',
+            contentSha256: null,
+          ),
+          _cached(
+            docType: 'AI',
+            id: 'c-tenue',
+            documentId: 'doc-tenue',
+            documentNumber: 'ETL-AI-2526-000200',
+          ),
+        ],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.cachedPiece?.documentId, 'doc-tenue');
+    });
+
     // Le retrait sans motif reste un retrait : le serveur descend une donnée
     // que le front ne contrôle pas.
     test('se signale même sans motif', () {

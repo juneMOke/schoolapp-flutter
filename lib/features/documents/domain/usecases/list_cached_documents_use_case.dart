@@ -3,9 +3,9 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 
-/// Ce que **cette tablette** sait des pièces d'un élève quand ce savoir change
-/// le geste à lui offrir : une copie scellée qu'elle détient, ou une pièce que
-/// l'école a retirée.
+/// Tout ce que **cette tablette** sait des pièces d'un élève : celles dont elle
+/// détient une copie scellée, celles que l'école a retirées, et celles dont le
+/// delta lui a seulement appris l'existence.
 ///
 /// C'est la seule source qui dit ce qui est consultable hors ligne. La nuance
 /// est essentielle : le barème du catalogue dit ce qu'une pièce **autorise**
@@ -13,10 +13,12 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 /// « Consulter » sur un type plutôt que sur un fait produirait un bouton qui
 /// échoue une fois sur deux.
 ///
-/// Une pièce annulée en fait partie, et n'en sort jamais : elle ne se consulte
-/// pas, mais la taire ferait retomber la ligne sur « Émettre » sans dire
-/// pourquoi la pièce d'hier n'a plus cours — or c'est exactement ce qu'un
-/// guichet doit pouvoir expliquer à la famille qui la lui présente.
+/// Mais c'est une **lecture**, pas un arbitre : elle rend ce qu'elle sait et
+/// laisse le résolveur d'actions choisir le geste. Trier ici avait paru
+/// prudent ; ça revenait à décider deux fois, et la seconde décision, aveugle
+/// au contexte de la première, se trompait — une pièce de remplacement
+/// disparaissait, et sa devancière annulée s'annonçait comme la dernière
+/// nouvelle de ce type.
 ///
 /// Distincte de la trace locale de `generated_documents`, qui n'enregistre que
 /// ce que cette tablette a elle-même produit et n'a jamais d'octets à servir.
@@ -50,32 +52,27 @@ class ListCachedDocumentsUseCase {
     try {
       if (!await _access.isEntitled()) return const [];
 
-      final indexed = await _dao.listForStudent(
+      // **Aucun filtre.** Ce que l'index sait des pièces de cet élève est rendu
+      // tel quel, dans l'ordre du serveur — la plus récemment émise d'abord.
+      //
+      // Un filtre a bien vécu ici : il ne gardait que les pièces détenues, pour
+      // empêcher « Consulter » de s'allumer sur des octets absents. Cette garde
+      // existe désormais là où la décision se prend (`_findCached` du
+      // résolveur, qui exige `hasBytes && !isCancelled`), et la doubler ici
+      // coûtait plus qu'elle ne protégeait : elle **cachait au résolveur les
+      // pièces de remplacement**. Annuler puis réémettre est le flux nominal —
+      // la migration back V74 est bâtie pour lui — et les deux lignes
+      // descendent par le delta sans octets. En taisant la remplaçante, la
+      // ligne annonçait « Pièce annulée » alors qu'une pièce en vigueur
+      // existait, et le disait d'autant plus longtemps qu'on était hors ligne.
+      //
+      // Une lecture ne doit pas trancher à la place de qui décide : elle rend
+      // ce qu'elle sait, le résolveur choisit le geste.
+      return _dao.listForStudent(
         schoolId: schoolId,
         studentId: studentId,
         academicYearId: academicYearId,
       );
-      // **Ce qui change le geste à offrir**, et rien d'autre. L'index décrit
-      // trois sortes de lignes depuis le delta de synchronisation, et deux
-      // seulement méritent de remonter :
-      //
-      // - **détenue** — la tablette a les octets. Elle se consulte ;
-      // - **annulée** — l'école a retiré la pièce. Elle ne se consulte pas au
-      //   catalogue, mais elle doit remonter quand même : c'est ce qui permet
-      //   d'afficher le motif plutôt que de laisser la ligne retomber en
-      //   silence sur « Émettre », comme si de rien n'était. Le motif vit dans
-      //   l'index, donc il survit même à l'éviction des octets ;
-      // - **connue seulement** — la pièce existe ailleurs, la tablette n'en a
-      //   rien. Rendre celle-là ferait allumer « Consulter » sur une pièce
-      //   absente : un bouton qui échoue à tous les coups hors ligne,
-      //   c'est-à-dire précisément là où il est censé servir.
-      //
-      // Le critère n'est donc PAS « pas d'octets ⇒ masquer ». Les deux axes
-      // sont indépendants, et une pièce annulée peut être dans l'un ou l'autre
-      // état d'octets.
-      return indexed
-          .where((entry) => entry.hasBytes || entry.isCancelled)
-          .toList(growable: false);
     } catch (_) {
       return const [];
     }

@@ -257,15 +257,28 @@ class DocumentsCatalogAction extends Equatable {
     return null;
   }
 
-  /// Pièce retirée la plus récente de ce type, qu'on en détienne les octets ou
-  /// non — le motif vit dans l'index, donc il survit à leur éviction.
+  /// La **dernière** pièce de ce type, si elle a été retirée — et rien sinon.
+  ///
+  /// S'arrête à la première ligne du type, jamais plus loin : l'index rend par
+  /// date d'émission décroissante, donc c'est elle la dernière nouvelle. Une
+  /// annulation plus ancienne ne dit plus rien d'utile dès qu'une pièce lui a
+  /// succédé.
+  ///
+  /// La distinction vaut le détour, parce qu'annuler puis réémettre est le flux
+  /// **nominal** : parcourir jusqu'à trouver une annulée faisait annoncer
+  /// « Pièce annulée le … » alors qu'une remplaçante en vigueur existait, et
+  /// d'autant plus longtemps qu'on était hors ligne — au seul moment où rien ne
+  /// peut détromper l'agent.
+  ///
+  /// Les octets ne comptent pas ici : le motif vit dans l'index, donc il
+  /// survit à leur éviction.
   static EditiqueCacheEntry? _findCancelled(
     List<EditiqueCacheEntry> cached,
     String code,
   ) {
     for (final entry in cached) {
       if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
-      if (entry.isCancelled) return entry;
+      return entry.isCancelled ? entry : null;
     }
     return null;
   }

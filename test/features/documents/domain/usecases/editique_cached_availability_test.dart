@@ -20,21 +20,20 @@ class _FixedAccess implements EditiqueCacheAccess {
 
 const _entitled = _FixedAccess(true);
 
-/// « Que sait cette tablette de cette pièce, qui puisse changer le geste ? » —
-/// la seule question que ces deux lectures posent, et la seule à laquelle elles
-/// ont le droit de répondre.
+/// Ce que ces deux lectures rendent, et ce qu'elles refusent de trancher.
 ///
-/// Deux faits la changent, et deux seulement : détenir les octets, ou savoir
-/// que l'école a retiré la pièce. Tout le reste est bruit.
+/// La liste rend **tout** ce que l'index sait de l'élève : trier à sa place
+/// reviendrait à décider deux fois, et la seconde décision — aveugle au
+/// contexte de la première — se trompait. Le geste appartient au résolveur
+/// d'actions, dont `_findCached` exige déjà `hasBytes && !isCancelled` : c'est
+/// LÀ qu'on empêche « Consulter » de s'allumer sur des octets absents.
 ///
-/// Depuis le delta de synchronisation, l'index sait aussi répondre à
-/// « existe-t-elle quelque part ? ». Confondre les deux allume « Consulter » sur
-/// une pièce absente : un bouton qui échoue à tous les coups hors ligne,
-/// c'est-à-dire précisément là où il est censé servir.
+/// La recherche unitaire, elle, garde un filtre : elle répond à une question
+/// fermée (« que sait-on de CETTE pièce, qui change le geste ? »), et son
+/// appelant n'a pas de liste où retrouver le contexte.
 ///
-/// Une pièce annulée, elle, remonte toujours — même sans octets. La taire
-/// ferait retomber la ligne sur « Émettre » sans dire pourquoi la pièce d'hier
-/// n'a plus cours.
+/// Les deux refusent en revanche la même chose : un profil sans droit, et une
+/// école courante inconnue.
 void main() {
   late Database db;
   late EditiqueCacheDao dao;
@@ -75,7 +74,7 @@ void main() {
     ),
   );
 
-  test('la liste écarte une pièce dont la tablette n a rien', () async {
+  test('la liste rend tout ce que l index sait de l élève', () async {
     await seed(
       id: 'tenue',
       documentId: 'doc-1',
@@ -84,42 +83,43 @@ void main() {
     );
     await seed(id: 'connue', documentId: 'doc-2', docType: 'NP');
 
-    final held = await ListCachedDocumentsUseCase(dao, currentUser, _entitled)(
-      studentId: 's-1',
-      academicYearId: 'y-1',
-    );
+    final visible = await ListCachedDocumentsUseCase(
+      dao,
+      currentUser,
+      _entitled,
+    )(studentId: 's-1', academicYearId: 'y-1');
 
-    expect(held.map((e) => e.id), ['tenue']);
+    // Y COMPRIS la pièce dont la tablette n'a que la connaissance : sans elle,
+    // une pièce de remplacement resterait invisible au résolveur, et sa
+    // devancière annulée s'annoncerait comme la dernière nouvelle du type.
+    expect(visible.map((e) => e.id), containsAll(['tenue', 'connue']));
   });
 
-  // Le cas qui masquait une pièce détenue derrière une pièce seulement connue :
-  // le catalogue prend la PREMIÈRE ligne du type, et l'index trie par date
-  // d'émission décroissante.
-  test(
-    'une pièce connue ne masque pas une pièce détenue du même type',
-    () async {
-      await seed(
-        id: 'tenue',
-        documentId: 'doc-1',
-        docType: 'RC',
-        contentSha256: 'a' * 64,
-      );
-      await seed(
-        id: 'plus-recente',
-        documentId: 'doc-2',
-        docType: 'RC',
-        emittedAt: 9000, // plus récente, donc en tête du tri
-      );
+  // L'ordre est celui du serveur — la plus récemment émise d'abord —, et c'est
+  // ce sur quoi le résolveur s'appuie pour savoir laquelle est la dernière
+  // nouvelle d'un type.
+  test('la liste rend l ordre d émission décroissant', () async {
+    await seed(
+      id: 'ancienne',
+      documentId: 'doc-1',
+      docType: 'RC',
+      contentSha256: 'a' * 64,
+    );
+    await seed(
+      id: 'recente',
+      documentId: 'doc-2',
+      docType: 'RC',
+      emittedAt: 9000,
+    );
 
-      final held = await ListCachedDocumentsUseCase(
-        dao,
-        currentUser,
-        _entitled,
-      )(studentId: 's-1');
+    final visible = await ListCachedDocumentsUseCase(
+      dao,
+      currentUser,
+      _entitled,
+    )(studentId: 's-1');
 
-      expect(held.map((e) => e.id), ['tenue']);
-    },
-  );
+    expect(visible.map((e) => e.id), ['recente', 'ancienne']);
+  });
 
   test('la recherche unitaire ignore une pièce seulement connue', () async {
     await seed(id: 'connue', documentId: 'doc-2', docType: 'RC');
@@ -168,8 +168,8 @@ void main() {
     });
 
     // Le motif vit dans l'index, pas dans le fichier : il survit donc à
-    // l'éviction des octets, et c'est ce qui permet d'expliquer une pièce que
-    // la tablette ne peut plus ressortir.
+    // l'éviction des octets, et c'est ce qui permet d'expliquer une pièce dont
+    // la tablette n'a plus la copie.
     test('remonte encore une fois ses octets évincés', () async {
       await seed(
         id: 'annulee',
