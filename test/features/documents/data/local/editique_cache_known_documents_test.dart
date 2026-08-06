@@ -92,6 +92,8 @@ void main() {
     String docType = 'NP',
     String? studentId = 's-1',
     int sizeBytes = 4096,
+    int? cancelledAt,
+    String? cancellationReason,
   }) => EditiqueCacheEntry(
     id: 'ignoré',
     documentId: documentId,
@@ -102,6 +104,8 @@ void main() {
     schoolId: 'school-1',
     sizeBytes: sizeBytes,
     emittedAt: 500,
+    cancelledAt: cancelledAt,
+    cancellationReason: cancellationReason,
     createdAt: 1000,
     lastAccessedAt: 1000,
   );
@@ -284,6 +288,94 @@ void main() {
 
       expect(await cache.reclaimOrphans(), 0);
       expect(cacheDir.listSync(), hasLength(1));
+    });
+  });
+
+  // L'annulation n'atteint la tablette QUE par ce chemin. Elle entre en tension
+  // apparente avec le groupe ci-dessus — « ne dégrade jamais une pièce
+  // détenue » —, et c'est voulu : le delta ne retire toujours rien. Une pièce
+  // retirée par l'école GARDE ses octets, parce qu'un guichet doit pouvoir
+  // ressortir le papier qu'une famille lui présente pour lui expliquer qu'il
+  // n'a plus cours. Le delta ajoute une information ; il n'en soustrait aucune.
+  group('ce que le delta apprend d une annulation', () {
+    test('marque une pièce détenue sans lui retirer ses octets', () async {
+      await cache.put(
+        docType: 'NP',
+        documentId: 'doc-1',
+        documentNumber: 'ETL-NP-2526-000001',
+        studentId: 's-1',
+        schoolId: 'school-1',
+        bytes: pdf('note'),
+      );
+      final avant = await index.findByDocumentId('doc-1');
+      expect(avant!.isCancelled, isFalse);
+
+      await cache.recordKnownDocuments([
+        known(cancelledAt: 1786013000000, cancellationReason: 'Doublon'),
+      ]);
+
+      final apres = await index.findByDocumentId('doc-1');
+      expect(apres!.isCancelled, isTrue);
+      expect(apres.cancellationReason, 'Doublon');
+      // Les octets restent, et le fichier avec.
+      expect(apres.hasBytes, isTrue);
+      expect(apres.contentSha256, avant.contentSha256);
+      expect(await cache.readByDocumentId('doc-1'), equals(pdf('note')));
+      expect(cacheDir.listSync(), hasLength(1));
+    });
+
+    test('une pièce annulée pèse toujours au budget', () async {
+      await cache.put(
+        docType: 'NP',
+        documentId: 'doc-1',
+        documentNumber: 'ETL-NP-2526-000001',
+        schoolId: 'school-1',
+        bytes: pdf('note'),
+      );
+      final avant = await index.totalSizeBytes();
+
+      await cache.recordKnownDocuments([known(cancelledAt: 1786013000000)]);
+
+      expect(await index.totalSizeBytes(), avant);
+      expect(avant, greaterThan(0));
+    });
+
+    test('apprend une pièce annulée jamais détenue', () async {
+      await cache.recordKnownDocuments([
+        known(cancelledAt: 1786013000000, cancellationReason: 'Erreur'),
+      ]);
+
+      final entry = await index.findByDocumentId('doc-1');
+      expect(entry!.isCancelled, isTrue);
+      expect(entry.cancellationReason, 'Erreur');
+      expect(entry.hasBytes, isFalse);
+    });
+
+    // Côté serveur l'annulation est définitive : rien ne la lève. Un cycle
+    // ultérieur qui redescendrait la pièce sans son retrait — champ omis,
+    // ligne partiellement lue — ne doit donc pas la remettre en vigueur.
+    test('un cycle ultérieur muet ne lève pas l annulation', () async {
+      await cache.recordKnownDocuments([
+        known(cancelledAt: 1786013000000, cancellationReason: 'Doublon'),
+      ]);
+
+      await cache.recordKnownDocuments([known()]);
+
+      final entry = await index.findByDocumentId('doc-1');
+      expect(entry!.isCancelled, isTrue);
+      expect(entry.cancellationReason, 'Doublon');
+    });
+
+    // Une pièce en vigueur ne doit pas hériter du retrait d'une autre : la
+    // préservation se fait ligne à ligne, jamais globalement.
+    test('n annule pas les pièces voisines', () async {
+      await cache.recordKnownDocuments([
+        known(cancelledAt: 1786013000000),
+        known(documentId: 'doc-2', documentNumber: 'ETL-NP-2', docType: 'AI'),
+      ]);
+
+      expect((await index.findByDocumentId('doc-1'))!.isCancelled, isTrue);
+      expect((await index.findByDocumentId('doc-2'))!.isCancelled, isFalse);
     });
   });
 }

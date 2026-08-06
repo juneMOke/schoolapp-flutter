@@ -27,6 +27,18 @@ class PulledEditiqueDocument {
 
   final String? supersedesNumber;
 
+  /// Époch ms du retrait de la pièce, `null` tant qu'elle est en vigueur.
+  ///
+  /// Une annulation est un `UPDATE` côté serveur : le déclencheur de visibilité
+  /// relève `serverUpdatedAt`, qui EST le curseur du delta, donc la ligne
+  /// redescend d'elle-même. Sans ce champ elle redescendrait **identique**, et
+  /// la tablette continuerait de proposer une pièce retirée.
+  final int? cancelledAtMs;
+
+  /// Motif du retrait. Texte libre d'un agent, descendu tel quel — il ne se
+  /// traduit ni ne se reformule.
+  final String? cancellationReason;
+
   const PulledEditiqueDocument({
     required this.id,
     required this.docType,
@@ -37,6 +49,8 @@ class PulledEditiqueDocument {
     required this.sizeBytes,
     this.contentSha256,
     this.supersedesNumber,
+    this.cancelledAtMs,
+    this.cancellationReason,
   });
 
   factory PulledEditiqueDocument.fromJson(Map<String, dynamic> j) =>
@@ -50,6 +64,8 @@ class PulledEditiqueDocument {
         sizeBytes: (j['sizeBytes'] as num?)?.toInt() ?? 0,
         contentSha256: j['contentSha256'] as String?,
         supersedesNumber: j['supersedesNumber'] as String?,
+        cancelledAtMs: _isoToMs(j['cancelledAt'] as String?),
+        cancellationReason: j['cancellationReason'] as String?,
       );
 
   /// Entrée d'index **sans octets** : `contentSha256` reste nul, c'est ce qui
@@ -71,6 +87,11 @@ class PulledEditiqueDocument {
     schoolId: schoolId,
     sizeBytes: sizeBytes,
     emittedAt: emittedAtMs,
+    // Le retrait, lui, se propage jusqu'à l'index : c'est la seule voie par
+    // laquelle la tablette peut l'apprendre. Le jeter ici le rendrait invisible
+    // partout en aval, sans qu'aucun test ne rougisse.
+    cancelledAt: cancelledAtMs,
+    cancellationReason: cancellationReason,
     createdAt: nowMs,
     lastAccessedAt: nowMs,
   );

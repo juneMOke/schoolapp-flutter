@@ -214,6 +214,14 @@ class EditiqueDocumentCache {
   /// déjà, sans quoi le premier cycle viderait le cache de ce que la tablette
   /// possède vraiment.
   ///
+  /// C'est aussi la **seule voie** par laquelle une annulation atteint cette
+  /// tablette. Une pièce retirée ne perd pas ses octets pour autant : le
+  /// guichet doit pouvoir ressortir le papier qu'une famille lui présente pour
+  /// lui expliquer qu'il n'a plus cours. Elle continue donc de peser au budget
+  /// et reste évinçable — avec ceci d'assumé qu'une annulée évincée est
+  /// définitivement perdue, le serveur ne la servant plus. Le motif, lui,
+  /// survit à l'éviction : il est dans l'index, pas dans le fichier.
+  ///
   /// Ne déclenche aucun balayage : rien n'a été ajouté au disque.
   Future<int> recordKnownDocuments(List<EditiqueCacheEntry> documents) {
     if (documents.isEmpty) return Future.value(0);
@@ -251,6 +259,15 @@ class EditiqueDocumentCache {
               // conclurait à un fichier corrompu.
               contentSha256: existing?.contentSha256,
               emittedAt: document.emittedAt,
+              // Le delta est la SEULE voie par laquelle une annulation atteint
+              // la tablette. Le repli sur ce qu'on savait déjà n'est pas de la
+              // prudence de façade : une page qui redescendrait la pièce sans
+              // son retrait — champ omis, ligne partiellement lue — lèverait
+              // une annulation que rien n'a levée côté serveur, où elle est
+              // définitive. On n'annule jamais une annulation par omission.
+              cancelledAt: document.cancelledAt ?? existing?.cancelledAt,
+              cancellationReason:
+                  document.cancellationReason ?? existing?.cancellationReason,
               createdAt: existing?.createdAt ?? now,
               lastAccessedAt: existing?.lastAccessedAt ?? now,
             ),
