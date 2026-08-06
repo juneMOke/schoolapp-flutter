@@ -9897,6 +9897,33 @@ abstract class AppLocalizations {
   /// **'Last issued {date} · ref. {reference}'**
   String documentsLastIssueSubtitle(String date, String reference);
 
+  /// No description provided for @documentsCancelledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Document cancelled by the school on {date}.'**
+  String documentsCancelledNotice(String date);
+
+  /// No description provided for @documentsCancelledWithReasonNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Document cancelled by the school on {date} — {reason}'**
+  String documentsCancelledWithReasonNotice(String date, String reason);
+
+  /// No description provided for @facturationReceiptCancelledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt cancelled by the school on {date}.'**
+  String facturationReceiptCancelledNotice(String date);
+
+  /// No description provided for @facturationReceiptCancelledWithReasonNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt cancelled by the school on {date} — {reason}'**
+  String facturationReceiptCancelledWithReasonNotice(
+    String date,
+    String reason,
+  );
+
   /// No description provided for @ticketProvisionalBanner.
   ///
   /// In en, this message translates to:

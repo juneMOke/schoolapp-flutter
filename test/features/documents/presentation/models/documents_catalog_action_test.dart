@@ -32,16 +32,22 @@ DocumentsCatalogAction _resolve(
 /// Copie scellée détenue par la tablette.
 EditiqueCacheEntry _cached({
   required String docType,
+  String id = 'c-1',
   String documentId = 'doc-cache-1',
   String documentNumber = 'ETL-AI-2526-000431',
+  String? contentSha256 = 'abc',
+  int? cancelledAt,
+  String? cancellationReason,
 }) => EditiqueCacheEntry(
-  id: 'c-1',
+  id: id,
   documentId: documentId,
   documentNumber: documentNumber,
   docType: docType,
   schoolId: 'school-1',
   sizeBytes: 1024,
-  contentSha256: 'abc',
+  contentSha256: contentSha256,
+  cancelledAt: cancelledAt,
+  cancellationReason: cancellationReason,
   createdAt: 1000,
   lastAccessedAt: 1000,
 );
@@ -352,6 +358,137 @@ void main() {
 
       expect(enabled.isEnabled, isTrue);
       expect(enabled.reason, isNull);
+    });
+  });
+
+  // Une pièce que l'école a retirée n'est plus une copie qu'on ressort : c'est
+  // un fait qu'on explique. Elle ne porte donc aucun geste, mais elle ne
+  // disparaît pas pour autant — la taire ferait retomber la ligne sur
+  // « Émettre » sans jamais dire pourquoi le papier d'hier n'a plus cours.
+  group('pièce annulée', () {
+    EditiqueCacheEntry cancelled({
+      String docType = 'AI',
+      String id = 'c-annulee',
+      String documentId = 'doc-annule',
+      String documentNumber = 'ETL-AI-2526-000431',
+      String? contentSha256 = 'abc',
+      String? reason = 'Erreur de classe',
+    }) => _cached(
+      docType: docType,
+      id: id,
+      documentId: documentId,
+      documentNumber: documentNumber,
+      contentSha256: contentSha256,
+      cancelledAt: 1786013000000,
+      cancellationReason: reason,
+    );
+
+    test('n ouvre jamais « Consulter », même avec ses octets', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [cancelled()],
+      );
+
+      expect(action.kind, isNot(DocumentsCatalogActionKind.consult));
+      expect(action.cachedPiece, isNull);
+      expect(action.isRestitution, isFalse);
+    });
+
+    // Le geste que le user a tranché : la pièce se réémet. Le serveur traite
+    // une pièce annulée comme absente et en scellera une neuve.
+    test('laisse « Émettre » possible en ligne', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [cancelled()],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.emit);
+      expect(action.isEnabled, isTrue);
+      expect(action.cancelledPiece?.cancellationReason, 'Erreur de classe');
+    });
+
+    // La trace locale porte encore le numéro de la pièce retirée, mais le
+    // serveur ne le re-servira plus : annoncer « Consulter » dirait le
+    // contraire de ce qui va se passer.
+    test('force « Émettre » malgré une trace locale définitive', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        knownPieces: [_piece(docType: 'AI')],
+        cachedPieces: [cancelled()],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.emit);
+      expect(action.knownPiece, isNotNull);
+    });
+
+    // Hors ligne, la ligne s'éteint comme sans copie — mais elle DIT le
+    // retrait, qui est justement ce que le guichet a besoin d'expliquer quand
+    // il n'a plus le serveur pour le faire.
+    test('éteint la ligne hors ligne, sans taire le retrait', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        isOffline: true,
+        cachedPieces: [cancelled()],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.offline);
+      expect(action.cancelledPiece, isNotNull);
+    });
+
+    // Le motif vit dans l'index, donc il survit à l'éviction des octets.
+    test('se signale encore une fois ses octets évincés', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [cancelled(contentSha256: null)],
+      );
+
+      expect(action.cancelledPiece?.hasBytes, isFalse);
+      expect(action.cancelledPiece?.cancellationReason, 'Erreur de classe');
+    });
+
+    // Une pièce retirée ne masque pas une pièce plus ancienne qui, elle, tient
+    // toujours : le sélecteur ne s'arrête pas à la première ligne du type.
+    test('ne masque pas une copie plus ancienne restée valable', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [
+          cancelled(),
+          _cached(
+            docType: 'AI',
+            id: 'c-valide',
+            documentId: 'doc-valide',
+            documentNumber: 'ETL-AI-2526-000200',
+          ),
+        ],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.cachedPiece?.documentId, 'doc-valide');
+      // Et rien n'est annoncé : la ligne dit ce qu'elle propose, et ce
+      // qu'elle propose n'a pas été retiré.
+      expect(action.cancelledPiece, isNull);
+    });
+
+    test('ne confond pas les types', () {
+      final action = _resolve(
+        EditiqueDocumentType.notePerception,
+        cachedPieces: [cancelled()],
+      );
+
+      expect(action.cancelledPiece, isNull);
+    });
+
+    // Le retrait sans motif reste un retrait : le serveur descend une donnée
+    // que le front ne contrôle pas.
+    test('se signale même sans motif', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [cancelled(reason: null)],
+      );
+
+      expect(action.cancelledPiece?.isCancelled, isTrue);
+      expect(action.cancelledPiece?.cancellationReason, isNull);
     });
   });
 }

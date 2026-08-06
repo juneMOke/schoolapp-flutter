@@ -321,4 +321,76 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text("Attestation d'inscription"), findsOneWidget);
   });
+
+  // Le seul endroit qui prouve ce qu'un agent voit vraiment d'une pièce que
+  // l'école a retirée : le motif à l'écran, et pas de « Consulter ».
+  group('pièce annulée', () {
+    EditiqueCacheEntry cancelledAttestation({String? reason}) =>
+        EditiqueCacheEntry(
+          id: 'c-annulee',
+          documentId: 'doc-annule',
+          documentNumber: 'ETL-AI-2526-000431',
+          docType: 'AI',
+          schoolId: 'school-1',
+          sizeBytes: 1024,
+          contentSha256: 'abc',
+          cancelledAt: DateTime.utc(2026, 8, 6).millisecondsSinceEpoch,
+          cancellationReason: reason,
+          createdAt: 1000,
+          lastAccessedAt: 1000,
+        );
+
+    void seedCancelled({String? reason = 'Erreur de classe'}) {
+      when(
+        () => cachedUseCase(
+          studentId: any(named: 'studentId'),
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer((_) async => [cancelledAttestation(reason: reason)]);
+    }
+
+    testWidgets('affiche le motif rendu par le serveur', (tester) async {
+      seedCancelled();
+
+      await _pump(tester);
+      await tester.pump();
+
+      expect(find.textContaining('Erreur de classe'), findsOneWidget);
+      expect(find.textContaining('annulée'), findsOneWidget);
+    });
+
+    // Le geste tranché : la pièce se réémet, elle ne se consulte pas.
+    testWidgets('n offre pas « Consulter » mais « Émettre »', (tester) async {
+      seedCancelled();
+
+      await _pump(tester);
+      await tester.pump();
+
+      expect(find.text('Consulter'), findsNothing);
+      expect(find.text('Émettre'), findsWidgets);
+    });
+
+    // Le retrait est une donnée serveur : son motif peut manquer, et l'écran
+    // ne doit pas inventer la phrase absente.
+    testWidgets('dit le retrait même sans motif', (tester) async {
+      seedCancelled(reason: null);
+
+      await _pump(tester);
+      await tester.pump();
+
+      expect(find.textContaining('annulée'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    // Hors ligne, la ligne s'éteint — mais c'est justement là que le guichet a
+    // le plus besoin de pouvoir expliquer le papier qu'on lui présente.
+    testWidgets('dit le retrait hors ligne aussi', (tester) async {
+      seedCancelled();
+
+      await _pump(tester, syncStatus: SyncStatus.offline);
+      await tester.pump();
+
+      expect(find.textContaining('Erreur de classe'), findsOneWidget);
+    });
+  });
 }

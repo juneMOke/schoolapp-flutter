@@ -5868,6 +5868,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String documentsCancelledNotice(String date) {
+    return 'Document cancelled by the school on $date.';
+  }
+
+  @override
+  String documentsCancelledWithReasonNotice(String date, String reason) {
+    return 'Document cancelled by the school on $date — $reason';
+  }
+
+  @override
+  String facturationReceiptCancelledNotice(String date) {
+    return 'Receipt cancelled by the school on $date.';
+  }
+
+  @override
+  String facturationReceiptCancelledWithReasonNotice(
+    String date,
+    String reason,
+  ) {
+    return 'Receipt cancelled by the school on $date — $reason';
+  }
+
+  @override
   String get ticketProvisionalBanner => 'Provisional';
 
   @override

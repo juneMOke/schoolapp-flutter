@@ -70,13 +70,28 @@ class DocumentsCatalogAction extends Equatable {
   /// Copie scellée détenue localement, quand il y en a une. C'est elle qui
   /// porte de quoi la ressortir — identifiant d'archive ou numéro — et sa
   /// présence est ce qui autorise « Consulter » hors ligne.
+  ///
+  /// **Jamais une pièce annulée** : voir [cancelledPiece]. C'est ce qui garde
+  /// vraies les deux choses qui en dépendent — le geste de restitution, et le
+  /// contournement de la garde de session.
   final EditiqueCacheEntry? cachedPiece;
+
+  /// Pièce que l'école a **retirée**, quand elle est la dernière que la tablette
+  /// connaisse de ce type. Ne porte aucun geste : elle explique.
+  ///
+  /// Jamais renseignée quand la ligne propose « Consulter » : une pièce plus
+  /// ancienne et toujours valable reste consultable, et annoncer alors le
+  /// retrait d'une autre ne ferait que brouiller ce que la ligne propose. Sur
+  /// toutes les autres issues — y compris les lignes éteintes par une garde —
+  /// elle est portée, parce qu'alors la ligne n'a rien d'autre à dire.
+  final EditiqueCacheEntry? cancelledPiece;
 
   const DocumentsCatalogAction._({
     required this.kind,
     this.reason,
     this.knownPiece,
     this.cachedPiece,
+    this.cancelledPiece,
   });
 
   /// Vrai quand l'action ressort une copie locale au lieu de demander une
@@ -121,11 +136,22 @@ class DocumentsCatalogAction extends Equatable {
     final isAttestation =
         entry.type == EditiqueDocumentType.enrollmentAttestation;
 
+    // Le retrait d'une pièce se constate AVANT toute garde, et se porte sur
+    // toutes les issues. Les gardes qui suivent disent si l'on peut ÉMETTRE —
+    // dossier adressable, élève connu du serveur, radio allumée — ce qui est
+    // une autre question : une pièce déjà remise à une famille a pu être
+    // retirée depuis, et cela reste vrai quand le dossier n'est pas lisible ou
+    // quand l'élève attend sa synchronisation. Le taire dans ces cas-là
+    // priverait le guichet de la réponse précisément quand il n'a pas le
+    // serveur pour la lui donner.
+    final cancelled = _findCancelled(cachedPieces, entry.code);
+
     if (isAttestation) {
       if (enrollmentId.trim().isEmpty) {
-        return const DocumentsCatalogAction._(
+        return DocumentsCatalogAction._(
           kind: DocumentsCatalogActionKind.disabled,
           reason: DocumentsCatalogBlockReason.missingEnrollmentRef,
+          cancelledPiece: cancelled,
         );
       }
       if (enrollmentSyncState == null) {
@@ -137,25 +163,29 @@ class DocumentsCatalogAction extends Equatable {
           reason: isDossierLoaded
               ? DocumentsCatalogBlockReason.enrollmentUnreadable
               : DocumentsCatalogBlockReason.resolving,
+          cancelledPiece: cancelled,
         );
       }
       if (!enrollmentSyncState.isSynced) {
-        return const DocumentsCatalogAction._(
+        return DocumentsCatalogAction._(
           kind: DocumentsCatalogActionKind.disabled,
           reason: DocumentsCatalogBlockReason.enrollmentPendingSync,
+          cancelledPiece: cancelled,
         );
       }
     } else {
       if (isStudentKnownToServer == null) {
-        return const DocumentsCatalogAction._(
+        return DocumentsCatalogAction._(
           kind: DocumentsCatalogActionKind.disabled,
           reason: DocumentsCatalogBlockReason.resolving,
+          cancelledPiece: cancelled,
         );
       }
       if (!isStudentKnownToServer) {
-        return const DocumentsCatalogAction._(
+        return DocumentsCatalogAction._(
           kind: DocumentsCatalogActionKind.disabled,
           reason: DocumentsCatalogBlockReason.pendingSync,
+          cancelledPiece: cancelled,
         );
       }
     }
@@ -181,38 +211,61 @@ class DocumentsCatalogAction extends Equatable {
     }
 
     if (isOffline) {
-      return const DocumentsCatalogAction._(
+      return DocumentsCatalogAction._(
         kind: DocumentsCatalogActionKind.disabled,
         reason: DocumentsCatalogBlockReason.offline,
+        cancelledPiece: cancelled,
       );
     }
 
     if (!entry.isArchived) {
-      return const DocumentsCatalogAction._(
+      return DocumentsCatalogAction._(
         kind: DocumentsCatalogActionKind.generate,
+        cancelledPiece: cancelled,
       );
     }
 
     return DocumentsCatalogAction._(
-      kind: known == null
+      // Une pièce retirée fait retomber la ligne sur « Émettre », jamais sur
+      // « Consulter ». La trace locale porte encore son numéro, mais le serveur
+      // ne le re-servira plus : il traite une pièce annulée comme absente et en
+      // scellera une NEUVE. Promettre « Consulter » annoncerait donc le
+      // contraire de ce qui va se passer.
+      kind: (known == null || cancelled != null)
           ? DocumentsCatalogActionKind.emit
           : DocumentsCatalogActionKind.consult,
       knownPiece: known,
+      cancelledPiece: cancelled,
     );
   }
 
-  /// Copie scellée de ce type détenue par la tablette, la plus récemment émise
-  /// d'abord — l'ordre que rend déjà l'index.
+  /// Copie scellée de ce type **en vigueur et détenue**, la plus récemment
+  /// émise d'abord — l'ordre que rend déjà l'index.
   ///
-  /// Ne cherche que parmi les types **archivés** : le cache n'admet pas les
-  /// autres, et une entrée qui y figurerait quand même ne doit pas devenir un
-  /// bouton.
+  /// Les deux conditions comptent séparément. Sans octets, « Consulter »
+  /// échouerait ; annulée, il ressortirait un document sans valeur. Et la
+  /// recherche ne s'arrête pas à la première ligne du type : une pièce retirée
+  /// ne doit pas masquer une pièce plus ancienne qui, elle, tient toujours.
   static EditiqueCacheEntry? _findCached(
     List<EditiqueCacheEntry> cached,
     String code,
   ) {
     for (final entry in cached) {
-      if (entry.docType.toUpperCase() == code.toUpperCase()) return entry;
+      if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
+      if (entry.hasBytes && !entry.isCancelled) return entry;
+    }
+    return null;
+  }
+
+  /// Pièce retirée la plus récente de ce type, qu'on en détienne les octets ou
+  /// non — le motif vit dans l'index, donc il survit à leur éviction.
+  static EditiqueCacheEntry? _findCancelled(
+    List<EditiqueCacheEntry> cached,
+    String code,
+  ) {
+    for (final entry in cached) {
+      if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
+      if (entry.isCancelled) return entry;
     }
     return null;
   }
@@ -232,5 +285,11 @@ class DocumentsCatalogAction extends Equatable {
   }
 
   @override
-  List<Object?> get props => [kind, reason, knownPiece, cachedPiece];
+  List<Object?> get props => [
+    kind,
+    reason,
+    knownPiece,
+    cachedPiece,
+    cancelledPiece,
+  ];
 }
