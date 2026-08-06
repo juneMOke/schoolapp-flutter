@@ -252,6 +252,94 @@ void main() {
     });
   });
 
+  // Le geste que porte « Télécharger le reçu ». Éprouvé ici parce qu'une revue
+  // adversariale a montré ce que coûtait la mauvaise garde — et parce que la
+  // décision vivait jusque-là dans l'arbre de widgets, hors de portée de tout
+  // test.
+  group('facturationReceiptGesture', () {
+    EditiqueCacheEntry entry({
+      String? documentId = 'doc-1',
+      String? contentSha256 = 'abc',
+      int? cancelledAt,
+    }) => EditiqueCacheEntry(
+      id: 'c-1',
+      documentId: documentId,
+      documentNumber: 'ETL-RC-2526-000212',
+      docType: 'RC',
+      schoolId: 'school-1',
+      sizeBytes: 1024,
+      contentSha256: contentSha256,
+      cancelledAt: cancelledAt,
+      createdAt: 1000,
+      lastAccessedAt: 1000,
+    );
+
+    test('restitue une copie détenue', () {
+      expect(
+        facturationReceiptGesture(cached: entry(), isPendingSync: false),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    // LA régression trouvée par la revue adversariale. Garder sur les octets
+    // faisait retomber ce cas sur l'ÉMISSION, qui rescelle l'instantané, brûle
+    // un numéro d'une séquence auditée sans trou et repointe
+    // `payment.receiptId` — alors que la route de téléchargement du serveur ne
+    // filtre pas l'annulation et rendait la pièce gratuitement. Un reçu retiré
+    // pour erreur de montant redevenait le reçu officiel du versement.
+    test('restitue encore une pièce annulée dont les octets sont partis', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(contentSha256: null, cancelledAt: 1786013000000),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    test('restitue une pièce en vigueur dont les octets sont partis', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(contentSha256: null),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    // Le serveur n'expose aucune recherche par numéro : sans identifiant
+    // d'archive, la restitution rendrait `NotFoundFailure`.
+    test('émet quand aucun identifiant d archive ne désigne la pièce', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(documentId: null),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.emit,
+      );
+      expect(
+        facturationReceiptGesture(cached: null, isPendingSync: false),
+        FacturationReceiptGesture.emit,
+      );
+    });
+
+    test('n offre rien sur un encaissement pas encore remonté', () {
+      expect(
+        facturationReceiptGesture(cached: null, isPendingSync: true),
+        FacturationReceiptGesture.none,
+      );
+    });
+
+    // Une pièce adressable se restitue même hors synchro du versement : la
+    // lecture n'a besoin que de l'identifiant de la PIÈCE.
+    test('restitue malgré un versement non synchronisé', () {
+      expect(
+        facturationReceiptGesture(cached: entry(), isPendingSync: true),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+  });
+
   testWidgets('rendu sans débordement en largeur mobile (320 dp)', (
     tester,
   ) async {

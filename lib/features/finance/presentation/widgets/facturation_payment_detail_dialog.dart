@@ -16,6 +16,58 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Ce que « Télécharger le reçu » fait réellement quand on appuie dessus.
+///
+/// Deux gestes derrière un même bouton, et ils n'ont pas du tout le même poids —
+/// d'où ce type, et d'où le fait que la décision soit une fonction pure
+/// éprouvable plutôt qu'une clause noyée dans un arbre de widgets.
+enum FacturationReceiptGesture {
+  /// **Lecture.** La copie locale si elle est là — ce qui fonctionne hors
+  /// ligne —, sinon un `GET` qui rend exactement cette pièce-là. Rien n'est
+  /// écrit, aucun numéro n'est consommé.
+  restitute,
+
+  /// **Écriture.** Le serveur produit le reçu à partir de l'identifiant du
+  /// paiement. Sur un reçu annulé, cela rescelle son instantané, consomme un
+  /// numéro d'une séquence auditée sans trou et repointe `payment.receiptId`.
+  emit,
+
+  /// Rien à offrir : l'encaissement n'est pas remonté, son uuid est client.
+  none,
+}
+
+/// Décide du geste, sur l'**adressabilité** de la pièce — jamais sur ses octets.
+///
+/// C'est tout l'objet de cette fonction, et une revue adversariale a montré ce
+/// que coûtait l'autre garde. Une pièce annulée dont l'éviction a emporté les
+/// octets reste parfaitement lisible : la route de téléchargement du serveur ne
+/// filtre PAS l'annulation (`DocumentStoreService.getArchived` charge par
+/// identifiant ; le filtre d'annulation vit sur `EditiquePortImpl
+/// .findDocumentById`, qui est un autre chemin). Garder sur « a-t-on les
+/// octets ? » retombait donc sur l'ÉMISSION pour une pièce que le serveur
+/// rendait gratuitement — et un reçu retiré pour erreur de montant redevenait
+/// le reçu officiel du versement, avec le même montant erroné.
+///
+/// L'identifiant d'archive, lui, survit à l'éviction : `downgradeToKnown` ne
+/// remet à null que l'empreinte et le poids.
+///
+/// [FacturationReceiptGesture.restitute] exige `documentId` et non
+/// [EditiqueCacheEntry.isAddressable] : le serveur n'expose aucune recherche
+/// par numéro, et la restitution rend `NotFoundFailure` sans identifiant. Un
+/// numéro seul ne désigne rien.
+@visibleForTesting
+FacturationReceiptGesture facturationReceiptGesture({
+  required EditiqueCacheEntry? cached,
+  required bool isPendingSync,
+}) {
+  if (cached?.documentId?.isNotEmpty ?? false) {
+    return FacturationReceiptGesture.restitute;
+  }
+  return isPendingSync
+      ? FacturationReceiptGesture.none
+      : FacturationReceiptGesture.emit;
+}
+
 /// Ouvre le détail d'un paiement en popin (spec §15).
 Future<void> showFacturationPaymentDetailDialog(
   BuildContext context, {
@@ -59,41 +111,30 @@ Future<void> showFacturationPaymentDetailDialog(
           cancelledReceipt: receipt.cached?.isCancelled ?? false
               ? receipt.cached
               : null,
-          // Deux gestes derrière un même bouton, et c'est la présence d'une
-          // copie locale qui tranche — pas la connectivité.
-          //
-          // Copie locale : on la ressort telle quelle, ce qui fonctionne hors
-          // ligne. Sinon, le reçu est produit par le serveur à partir de
-          // l'identifiant du paiement, et n'est donc demandable que pour un
-          // encaissement déjà remonté — sans quoi l'uuid client donnerait un
-          // 404.
-          //
-          // Une copie annulée se ressort quand même (arbitrage du 2026-08-06) :
-          // un guichet doit pouvoir remettre sous les yeux d'une famille le
-          // papier qu'elle présente pour lui expliquer pourquoi il n'a plus
-          // cours. La rature et le motif sont à l'écran, la pièce ne trompe
-          // donc personne.
-          //
-          // Encore faut-il l'avoir : l'éviction a pu emporter ses octets, et
-          // c'est irréversible pour une pièce annulée — le serveur ne la sert
-          // plus. La ligne retombe alors sur le chemin serveur, qui rescelle
-          // l'instantané archivé sous un lien « annule et remplace ».
-          onDownloadReceipt: switch (receipt.cached) {
-            final EditiqueCacheEntry cached when cached.hasBytes =>
+          // Le geste est décidé par `facturationReceiptGesture`, qui porte la
+          // règle et son pourquoi. La copie annulée est bien servie (arbitrage
+          // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
+          // d'une famille le papier qu'elle présente pour lui expliquer
+          // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
+          // la pièce ne trompe personne.
+          onDownloadReceipt: switch (facturationReceiptGesture(
+            cached: receipt.cached,
+            isPendingSync: intent.isPendingSync,
+          )) {
+            FacturationReceiptGesture.restitute =>
               () => showEditiqueRestitutionDialog(
                 context,
                 type: EditiqueDocumentType.paymentReceipt,
                 title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
-                documentId: cached.documentId,
-                documentNumber: cached.documentNumber,
+                documentId: receipt.cached?.documentId,
+                documentNumber: receipt.cached?.documentNumber,
               ),
-            _ =>
-              intent.isPendingSync
-                  ? null
-                  : () => showEditiquePaymentReceiptDialog(
-                      context,
-                      paymentId: intent.paymentId,
-                    ),
+            FacturationReceiptGesture.emit =>
+              () => showEditiquePaymentReceiptDialog(
+                context,
+                paymentId: intent.paymentId,
+              ),
+            FacturationReceiptGesture.none => null,
           },
         ),
       ),

@@ -94,7 +94,13 @@ class AppConstants {
   // ⚠️ Deux régimes très différents côté serveur, portés par
   // `EditiqueDocumentType.isReplayable` :
   //  - AI / NP / RC sont **archivés et idempotents** : réémettre re-sert les
-  //    mêmes octets sous le même numéro ;
+  //    mêmes octets sous le même numéro — **tant que la pièce est en vigueur**.
+  //    Depuis le lot back B5, une pièce ANNULÉE ne satisfait plus cette
+  //    promesse : le serveur la traite comme absente et en scelle une neuve,
+  //    donc un nouveau numéro est consommé et, pour le reçu, `payment.receiptId`
+  //    est repointé. Pour ressortir une pièce annulée il faut la RESTITUTION
+  //    (`GET .../editique/documents/{id}`), qui ne filtre pas l'annulation et
+  //    n'écrit rien — jamais une réémission ;
   //  - RL / QT ne sont **jamais archivés** et consomment un numéro de séquence
   //    à CHAQUE appel. Un rejeu après échec crée une seconde pièce numérotée.
   static const String emitEnrollmentAttestationEndpoint =
