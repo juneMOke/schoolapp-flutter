@@ -20,13 +20,21 @@ class _FixedAccess implements EditiqueCacheAccess {
 
 const _entitled = _FixedAccess(true);
 
-/// « Cette pièce est-elle SUR cette tablette ? » — la seule question que ces
-/// deux lectures posent, et la seule à laquelle elles ont le droit de répondre.
+/// « Que sait cette tablette de cette pièce, qui puisse changer le geste ? » —
+/// la seule question que ces deux lectures posent, et la seule à laquelle elles
+/// ont le droit de répondre.
+///
+/// Deux faits la changent, et deux seulement : détenir les octets, ou savoir
+/// que l'école a retiré la pièce. Tout le reste est bruit.
 ///
 /// Depuis le delta de synchronisation, l'index sait aussi répondre à
 /// « existe-t-elle quelque part ? ». Confondre les deux allume « Consulter » sur
 /// une pièce absente : un bouton qui échoue à tous les coups hors ligne,
 /// c'est-à-dire précisément là où il est censé servir.
+///
+/// Une pièce annulée, elle, remonte toujours — même sans octets. La taire
+/// ferait retomber la ligne sur « Émettre » sans dire pourquoi la pièce d'hier
+/// n'a plus cours.
 void main() {
   late Database db;
   late EditiqueCacheDao dao;
@@ -46,6 +54,8 @@ void main() {
     required String docType,
     String? contentSha256,
     int emittedAt = 500,
+    int? cancelledAt,
+    String? cancellationReason,
   }) => dao.upsert(
     EditiqueCacheEntry(
       id: id,
@@ -58,12 +68,14 @@ void main() {
       sizeBytes: 1024,
       contentSha256: contentSha256,
       emittedAt: emittedAt,
+      cancelledAt: cancelledAt,
+      cancellationReason: cancellationReason,
       createdAt: 1000,
       lastAccessedAt: 1000,
     ),
   );
 
-  test('la liste ne rend que les pièces réellement détenues', () async {
+  test('la liste écarte une pièce dont la tablette n a rien', () async {
     await seed(
       id: 'tenue',
       documentId: 'doc-1',
@@ -109,7 +121,7 @@ void main() {
     },
   );
 
-  test('la recherche unitaire ignore une pièce sans octets', () async {
+  test('la recherche unitaire ignore une pièce seulement connue', () async {
     await seed(id: 'connue', documentId: 'doc-2', docType: 'RC');
     final find = FindCachedDocumentUseCase(dao, currentUser, _entitled);
 
@@ -128,6 +140,94 @@ void main() {
 
     expect((await find(documentId: 'doc-1'))?.id, 'tenue');
     expect((await find(documentNumber: 'ETL-RC-tenue'))?.id, 'tenue');
+  });
+
+  // Le cœur de la dette : une pièce retirée par l'école ne disparaît pas de ce
+  // que la tablette sait. La masquer ferait retomber la ligne sur « Émettre »
+  // sans jamais dire pourquoi la pièce d'hier n'a plus cours.
+  group('une pièce annulée', () {
+    test('remonte dans la liste, avec ses octets', () async {
+      await seed(
+        id: 'annulee',
+        documentId: 'doc-1',
+        docType: 'RC',
+        contentSha256: 'a' * 64,
+        cancelledAt: 1786013000000,
+        cancellationReason: 'Erreur de montant',
+      );
+
+      final visible = await ListCachedDocumentsUseCase(
+        dao,
+        currentUser,
+        _entitled,
+      )(studentId: 's-1');
+
+      expect(visible.map((e) => e.id), ['annulee']);
+      expect(visible.single.isCancelled, isTrue);
+      expect(visible.single.cancellationReason, 'Erreur de montant');
+    });
+
+    // Le motif vit dans l'index, pas dans le fichier : il survit donc à
+    // l'éviction des octets, et c'est ce qui permet d'expliquer une pièce que
+    // la tablette ne peut plus ressortir.
+    test('remonte encore une fois ses octets évincés', () async {
+      await seed(
+        id: 'annulee',
+        documentId: 'doc-1',
+        docType: 'RC',
+        cancelledAt: 1786013000000,
+        cancellationReason: 'Doublon',
+      );
+
+      final visible = await ListCachedDocumentsUseCase(
+        dao,
+        currentUser,
+        _entitled,
+      )(studentId: 's-1');
+
+      expect(visible.map((e) => e.id), ['annulee']);
+      expect(visible.single.hasBytes, isFalse);
+      expect(visible.single.cancellationReason, 'Doublon');
+    });
+
+    test('remonte aussi à la recherche unitaire', () async {
+      await seed(
+        id: 'annulee',
+        documentId: 'doc-1',
+        docType: 'RC',
+        cancelledAt: 1786013000000,
+      );
+      final find = FindCachedDocumentUseCase(dao, currentUser, _entitled);
+
+      expect((await find(documentId: 'doc-1'))?.isCancelled, isTrue);
+      expect((await find(documentNumber: 'ETL-RC-annulee'))?.isCancelled, true);
+    });
+
+    // La garde de profil ne se contourne pas par la porte de l'annulation : un
+    // profil sans droit n'a pas à connaître l'inventaire, retiré ou non.
+    test('reste invisible à un profil sans droit', () async {
+      await seed(
+        id: 'annulee',
+        documentId: 'doc-1',
+        docType: 'RC',
+        contentSha256: 'a' * 64,
+        cancelledAt: 1786013000000,
+      );
+      const refused = _FixedAccess(false);
+
+      expect(
+        await ListCachedDocumentsUseCase(dao, currentUser, refused)(
+          studentId: 's-1',
+        ),
+        isEmpty,
+      );
+      expect(
+        await FindCachedDocumentUseCase(dao, currentUser, refused)(
+          documentId: 'doc-1',
+        ),
+        isNull,
+      );
+    });
   });
 
   // RG-012-4 : l'effacement d'ouverture de session traite le cas ordinaire,
