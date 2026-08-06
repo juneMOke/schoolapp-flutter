@@ -219,6 +219,20 @@ class EditiqueCacheDao {
       // corrompue, et effacerait le fichier ET sa ligne. Un cycle de pull
       // viderait le cache de ce que la tablette possède vraiment.
       'content_sha256',
+      // L'annulation ne se perd JAMAIS par une écriture qui l'ignore, et c'est
+      // la garde la plus importante de cette liste. Une émission et un
+      // re-téléchargement ne savent rien du retrait d'une pièce : ils envoient
+      // `null`, et sans cette préservation le premier d'entre eux
+      // **ressusciterait** une pièce que l'école a retirée — rendue à nouveau
+      // consultable, sans motif, avec toutes les apparences d'une pièce valide.
+      //
+      // Corollaire assumé : `??=` rend une **dés-annulation** impropageable. Ce
+      // n'est pas un oubli. Côté serveur l'annulation est définitive et
+      // idempotente — un rejeu ne réécrit ni sa date ni son auteur —, donc rien
+      // ne la lève jamais. Le jour où quelque chose le ferait, il faudra un
+      // geste explicite, pas un effet de bord d'upsert.
+      'cancelled_at',
+      'cancellation_reason',
     ]) {
       values[field] ??= known[field];
     }

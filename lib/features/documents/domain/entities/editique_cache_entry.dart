@@ -82,6 +82,24 @@ class EditiqueCacheEntry extends Equatable {
   /// de septembre n'est pas la pièce la plus récente de l'élève.
   final int? emittedAt;
 
+  /// Époch ms auquel le serveur a **retiré** la pièce, `null` tant qu'elle est
+  /// en vigueur (lot back B5).
+  ///
+  /// Axe **orthogonal** à [contentSha256], et les confondre serait une faute :
+  /// « retirée » et « pas d'octets ici » sont deux questions différentes, qui se
+  /// croisent librement. Une pièce annulée garde d'ailleurs ses octets — un
+  /// guichet doit pouvoir ressortir le papier qu'une famille lui présente pour
+  /// lui expliquer pourquoi il n'a plus cours.
+  final int? cancelledAt;
+
+  /// Motif du retrait, tel que le serveur le descend.
+  ///
+  /// **Texte libre saisi par un agent** de l'école : il ne se traduit pas, ne se
+  /// reformule pas, et s'affiche comme un détail serveur — jamais comme une
+  /// phrase de l'application. Peut manquer alors même que [cancelledAt] est
+  /// renseigné : le front reçoit ici une donnée qu'il ne contrôle pas.
+  final String? cancellationReason;
+
   /// Époch ms de la mise en cache.
   final int createdAt;
 
@@ -100,6 +118,8 @@ class EditiqueCacheEntry extends Equatable {
     required this.sizeBytes,
     this.contentSha256,
     this.emittedAt,
+    this.cancelledAt,
+    this.cancellationReason,
     required this.createdAt,
     required this.lastAccessedAt,
   });
@@ -115,6 +135,16 @@ class EditiqueCacheEntry extends Equatable {
   /// connaissance » et « connaissance sans octets » ne doivent pas se
   /// confondre.
   bool get hasBytes => contentSha256 != null && contentSha256!.isNotEmpty;
+
+  /// Vrai quand le serveur a retiré cette pièce.
+  ///
+  /// Affirmation positive, comme [hasBytes], et surtout **jamais** déduite de
+  /// `!hasBytes` : une ligne sans octets est le cas ORDINAIRE d'une pièce
+  /// apprise par le delta, et la lire « annulée » barrerait tout le catalogue.
+  ///
+  /// Se lit sur la seule date : le motif peut manquer sur une pièce pourtant
+  /// bien retirée.
+  bool get isCancelled => cancelledAt != null;
 
   /// Vrai si l'entrée porte de quoi être retrouvée. Une entrée sans aucun des
   /// deux identifiants est irrécupérable : son fichier occuperait le budget
@@ -135,6 +165,8 @@ class EditiqueCacheEntry extends Equatable {
     'size_bytes': sizeBytes,
     'content_sha256': contentSha256,
     'emitted_at': emittedAt,
+    'cancelled_at': cancelledAt,
+    'cancellation_reason': cancellationReason,
     'created_at': createdAt,
     'last_accessed_at': lastAccessedAt,
   };
@@ -152,6 +184,8 @@ class EditiqueCacheEntry extends Equatable {
         sizeBytes: (map['size_bytes'] as int?) ?? 0,
         contentSha256: map['content_sha256'] as String?,
         emittedAt: map['emitted_at'] as int?,
+        cancelledAt: map['cancelled_at'] as int?,
+        cancellationReason: map['cancellation_reason'] as String?,
         createdAt: (map['created_at'] as int?) ?? 0,
         lastAccessedAt: (map['last_accessed_at'] as int?) ?? 0,
       );
@@ -169,6 +203,11 @@ class EditiqueCacheEntry extends Equatable {
     sizeBytes,
     contentSha256,
     emittedAt,
+    // Sans ces deux-là, les états qui portent une entrée — le dossier local, le
+    // reçu de la Facturation — n'émettraient aucun rebuild le jour où une pièce
+    // devient annulée : l'égalité de valeur les déclarerait identiques.
+    cancelledAt,
+    cancellationReason,
     createdAt,
     lastAccessedAt,
   ];

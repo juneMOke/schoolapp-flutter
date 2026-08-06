@@ -19,6 +19,8 @@ EditiqueCacheEntry cacheEntry({
   int sizeBytes = 1024,
   String contentSha256 = 'abc',
   int? emittedAt = 1000,
+  int? cancelledAt,
+  String? cancellationReason,
   int createdAt = 2000,
   int lastAccessedAt = 3000,
 }) => EditiqueCacheEntry(
@@ -33,6 +35,8 @@ EditiqueCacheEntry cacheEntry({
   sizeBytes: sizeBytes,
   contentSha256: contentSha256,
   emittedAt: emittedAt,
+  cancelledAt: cancelledAt,
+  cancellationReason: cancellationReason,
   createdAt: createdAt,
   lastAccessedAt: lastAccessedAt,
 );

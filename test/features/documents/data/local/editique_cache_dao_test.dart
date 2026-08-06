@@ -351,13 +351,61 @@ void main() {
     });
 
     test('mais une valeur connue en remplace une autre', () async {
-      await dao.upsert(cacheEntry(studentId: 's-1', academicYearId: 'y-1'));
-
       await dao.upsert(cacheEntry(studentId: 's-2', academicYearId: 'y-2'));
 
+      await dao.upsert(cacheEntry(studentId: 's-3', academicYearId: 'y-3'));
+
       final entry = await dao.findByDocumentId('doc-1');
-      expect(entry!.studentId, 's-2');
-      expect(entry.academicYearId, 'y-2');
+      expect(entry!.studentId, 's-3');
+      expect(entry.academicYearId, 'y-3');
+    });
+
+    // La régression la plus grave que cette liste prévient : une pièce que
+    // l'école a retirée redevenue consultable, sans motif, avec toutes les
+    // apparences d'une pièce valide.
+    test('une réécriture qui ignore l annulation ne la lève pas', () async {
+      await dao.upsert(
+        cacheEntry(cancelledAt: 1786013000000, cancellationReason: 'Doublon'),
+      );
+
+      // Ce qu'écrit une ré-émission ou un re-téléchargement : ils ne savent
+      // rien du retrait de la pièce, et envoient donc `null`.
+      await dao.upsert(cacheEntry());
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry!.cancelledAt, 1786013000000);
+      expect(entry.cancellationReason, 'Doublon');
+      expect(entry.isCancelled, isTrue);
+    });
+
+    test('une annulation entre sur une pièce jusque-là en vigueur', () async {
+      await dao.upsert(cacheEntry());
+      expect((await dao.findByDocumentId('doc-1'))!.isCancelled, isFalse);
+
+      await dao.upsert(
+        cacheEntry(
+          cancelledAt: 1786013000000,
+          cancellationReason: 'Erreur de montant',
+        ),
+      );
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry!.isCancelled, isTrue);
+      expect(entry.cancellationReason, 'Erreur de montant');
+      // Les octets restent : un guichet doit pouvoir ressortir le papier
+      // qu'une famille lui présente pour lui expliquer qu'il n'a plus cours.
+      expect(entry.hasBytes, isTrue);
+      expect(entry.sizeBytes, 1024);
+    });
+
+    // Le motif peut manquer là où la date est là — le front reçoit ici une
+    // donnée qu'il ne contrôle pas.
+    test('une pièce retirée sans motif est retirée quand même', () async {
+      await dao.upsert(cacheEntry(cancelledAt: 1786013000000));
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry!.isCancelled, isTrue);
+      expect(entry.cancellationReason, isNull);
     });
   });
 
