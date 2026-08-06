@@ -25,8 +25,10 @@ void main() {
     'emittedAt': emittedAt,
     'sizeBytes': 120000,
     'contentSha256': 'a' * 64,
-    if (cancelledAt != null) 'cancelledAt': cancelledAt,
-    if (cancellationReason != null) 'cancellationReason': cancellationReason,
+    // Clés absentes quand la valeur l'est : c'est ce que le serveur envoie
+    // pour une pièce qui tient toujours.
+    'cancelledAt': ?cancelledAt,
+    'cancellationReason': ?cancellationReason,
   };
 
   group('PulledEditiqueDocument.fromJson', () {

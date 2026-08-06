@@ -156,7 +156,7 @@ void main() {
           documentNumber: any(named: 'documentNumber'),
         ),
       ).thenAnswer(
-        (_) async => EditiqueCacheEntry(
+        (_) async => const EditiqueCacheEntry(
           id: 'c-1',
           documentId: 'doc-1',
           documentNumber: 'ETL-RC-2526-000212',
