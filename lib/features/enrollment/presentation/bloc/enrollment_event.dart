@@ -173,61 +173,11 @@ class EnrollmentDetailRequested extends EnrollmentEvent {
   List<Object?> get props => [enrollmentId, silent];
 }
 
-class EnrollmentNewDetailInitialized extends EnrollmentEvent {
-  const EnrollmentNewDetailInitialized();
-}
-
-class EnrollmentCreateRequested extends EnrollmentEvent {
-  final String firstName;
-  final String lastName;
-  final String surname;
-  final String dateOfBirth;
-  final String birthPlace;
-  final String nationality;
-  final String gender;
-
-  const EnrollmentCreateRequested({
-    required this.firstName,
-    required this.lastName,
-    required this.surname,
-    required this.dateOfBirth,
-    required this.birthPlace,
-    required this.nationality,
-    required this.gender,
-  });
-
-  @override
-  List<Object?> get props => [
-    firstName,
-    lastName,
-    surname,
-    dateOfBirth,
-    birthPlace,
-    nationality,
-    gender,
-  ];
-}
-
-class EnrollmentCreateResultConsumed extends EnrollmentEvent {
-  const EnrollmentCreateResultConsumed();
-}
-
-class EnrollmentStatusUpdateRequested extends EnrollmentEvent {
-  final String enrollmentId;
-  final String status;
-
-  const EnrollmentStatusUpdateRequested({
-    required this.enrollmentId,
-    required this.status,
-  });
-
-  @override
-  List<Object?> get props => [enrollmentId, status];
-}
-
-class EnrollmentStatusUpdateResultConsumed extends EnrollmentEvent {
-  const EnrollmentStatusUpdateResultConsumed();
-}
+// NB : les événements d'ÉCRITURE online (création, avancement de statut) ont
+// été retirés avec la convergence offline-first — toute écriture passe par le
+// brouillon local (EnrollmentOfflineBloc) puis un agrégat outbox. Ce bloc ne
+// sert plus que les LECTURES online (listes, détail, preview) en attendant le
+// pull delta (bascule des lectures en local, étape c).
 
 class EnrollmentPreviewByStudentIdRequested extends EnrollmentEvent {
   final String studentId;

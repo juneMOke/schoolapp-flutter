@@ -4,11 +4,12 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/offline_disciplinary_case.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_card.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 enum DisciplinaryCasesBodyStatus { loading, empty, error, success }
 
@@ -16,26 +17,38 @@ enum DisciplinaryCasesBodyStatus { loading, empty, error, success }
 /// partagés) ou liste de [DisciplinaryCaseCard].
 class DisciplinaryCasesStateBody extends StatelessWidget {
   final DisciplinaryCasesBodyStatus status;
-  final List<DisciplinaryCaseSummary> cases;
+  final List<OfflineDisciplinaryCase> cases;
   final DisciplinaryCaseErrorType errorType;
+
+  /// Nombre de commentaires par id de cas (badge de la carte).
+  final Map<String, int> commentCounts;
   final VoidCallback? onRetry;
   final VoidCallback? onReconnect;
   final VoidCallback? onContactAdmin;
   final VoidCallback? onCreateCase;
 
-  /// Avancement de statut (dormant pour l'instant).
-  final void Function(DisciplinaryCaseSummary caseData)? onAdvance;
+  /// Avance un cas au statut suivant (Ouvert→Pris en charge→Résolu).
+  final void Function(OfflineDisciplinaryCase caseData)? onAdvance;
+
+  /// Classe un cas sans suite (DISMISSED).
+  final void Function(OfflineDisciplinaryCase caseData)? onDismiss;
+
+  /// Ouvre le fil de commentaires d'un cas.
+  final void Function(OfflineDisciplinaryCase caseData)? onOpenComments;
 
   const DisciplinaryCasesStateBody({
     super.key,
     required this.status,
     required this.cases,
     required this.errorType,
+    this.commentCounts = const {},
     this.onRetry,
     this.onReconnect,
     this.onContactAdmin,
     this.onCreateCase,
     this.onAdvance,
+    this.onDismiss,
+    this.onOpenComments,
   });
 
   @override
@@ -74,10 +87,12 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
       description: l10n.disciplinaryCasesEmptyDescription,
       secondaryAction: onCreateCase == null
           ? null
-          : OutlinedButton.icon(
-              onPressed: onCreateCase,
-              icon: const Icon(Icons.add_rounded, size: 16),
-              label: Text(l10n.disciplinaryCaseCreateAction),
+          : SessionWriteGate(
+              child: OutlinedButton.icon(
+                onPressed: onCreateCase,
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: Text(l10n.disciplinaryCaseCreateAction),
+              ),
             ),
       fullWidthCard: true,
       minHeight: 280,
@@ -95,7 +110,12 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
             ),
             child: DisciplinaryCaseCard(
               caseData: cases[i],
+              commentCount: commentCounts[cases[i].id] ?? 0,
               onAdvance: onAdvance == null ? null : () => onAdvance!(cases[i]),
+              onDismiss: onDismiss == null ? null : () => onDismiss!(cases[i]),
+              onOpenComments: onOpenComments == null
+                  ? null
+                  : () => onOpenComments!(cases[i]),
             ),
           ),
       ],

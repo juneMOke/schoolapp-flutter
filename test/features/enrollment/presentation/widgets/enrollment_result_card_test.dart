@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_chip.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_result_card.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_result_card.dart';
@@ -53,6 +54,156 @@ void main() {
     final badge = tester.widget<StatusBadge>(find.byType(StatusBadge));
     expect(badge.style, StatusBadgeStyle.filled);
   });
+
+  testWidgets('dossier RE avec brouillon local affiche « En cours » (pas « '
+      'Pré-inscrit »), quel que soit le statut brut porté', (tester) async {
+    const reDraft = EnrollmentSummary(
+      enrollmentId: 'enr-re',
+      enrollmentCode: 'RE-001',
+      status: 'PRE_REGISTERED',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.draft,
+      student: StudentSummary(
+        id: 'stu-2',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(EnrollmentResultCard(enrollment: reDraft, onTap: () {})),
+    );
+
+    // Pastille pilotée par le TYPE + l'axe syncState (isLocalDraft), jamais
+    // par le statut métier brut : « En cours » remplace « Pré-inscrit ».
+    expect(find.text('En cours'), findsOneWidget);
+    expect(find.text('Pré-inscrit'), findsNothing);
+  });
+
+  testWidgets(
+    'dossier RE finalisé/synchronisé (pas de brouillon local) affiche « '
+    'Réinscrit », quel que soit le statut brut porté',
+    (tester) async {
+      const reFinalized = EnrollmentSummary(
+        enrollmentId: 'enr-re-2',
+        enrollmentCode: 'RE-002',
+        status: 'IN_PROGRESS',
+        enrollmentType: 'RE_ENROLLMENT',
+        syncState: SyncState.synced,
+        student: StudentSummary(
+          id: 'stu-4',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          EnrollmentResultCard(enrollment: reFinalized, onTap: () {}),
+        ),
+      );
+
+      expect(find.text('Réinscrit'), findsOneWidget);
+      expect(find.text('En cours'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'candidat de réinscription (enrollmentId vide, PENDING) affiche « À '
+    'réinscrire », pas « En Attente »',
+    (tester) async {
+      const candidate = EnrollmentSummary(
+        enrollmentId: '',
+        enrollmentCode: 'KIN-2025-0001',
+        status: 'PENDING',
+        student: StudentSummary(
+          id: 'stu-3',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(EnrollmentResultCard(enrollment: candidate, onTap: () {})),
+      );
+
+      // Candidat non commencé : « À réinscrire » remplace le statut brut
+      // PENDING (« En Attente »).
+      expect(find.text('À réinscrire'), findsOneWidget);
+      expect(find.text('En Attente'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'candidat de pré-inscription (enrollmentId vide) affiche « En cours », '
+    'PAS « À réinscrire » (pas de 3e état candidat comme RE)',
+    (tester) async {
+      const preCandidate = EnrollmentSummary(
+        enrollmentId: '',
+        enrollmentCode: '',
+        status: 'IN_PROGRESS',
+        enrollmentType: 'PRE_ENROLLMENT',
+        student: StudentSummary(
+          id: 'pre-1',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          EnrollmentResultCard(enrollment: preCandidate, onTap: () {}),
+        ),
+      );
+
+      expect(find.text('En cours'), findsOneWidget);
+      expect(find.text('À réinscrire'), findsNothing);
+      expect(find.text('Pré-inscrit'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'dossier PRE COMPLETED affiche « Pré-inscrit », pas le libellé générique '
+    '« Terminé »',
+    (tester) async {
+      const preCompleted = EnrollmentSummary(
+        enrollmentId: 'pre-2',
+        enrollmentCode: '',
+        status: 'COMPLETED',
+        enrollmentType: 'PRE_ENROLLMENT',
+        syncState: SyncState.pendingSync,
+        student: StudentSummary(
+          id: 'stu-pre-2',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          EnrollmentResultCard(enrollment: preCompleted, onTap: () {}),
+        ),
+      );
+
+      expect(find.text('Pré-inscrit'), findsOneWidget);
+      expect(find.text('En cours'), findsNothing);
+    },
+  );
 
   testWidgets('expose un libellé sémantique localisé et déclenche onTap', (
     tester,

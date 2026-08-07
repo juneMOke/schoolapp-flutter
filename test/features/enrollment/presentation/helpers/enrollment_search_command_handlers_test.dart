@@ -2,32 +2,270 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_search_command_handlers.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 
-class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
+class _MockEnrollmentLocalListBloc extends Mock
+    implements EnrollmentLocalListBloc {}
 
 void main() {
-  group('EnrollmentSearchCommandHandlers', () {
+  group('EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc', () {
+    late _MockEnrollmentLocalListBloc bloc;
+
+    setUp(() {
+      bloc = _MockEnrollmentLocalListBloc();
+      when(
+        () => bloc.stream,
+      ).thenAnswer((_) => const Stream<EnrollmentLocalListState>.empty());
+      when(
+        () => bloc.state,
+      ).thenReturn(const EnrollmentLocalListState.initial());
+    });
+
+    Future<void> dispatch(
+      WidgetTester tester,
+      EnrollmentSearchCommand command, {
+      String? enrollmentType,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider<EnrollmentLocalListBloc>.value(
+            value: bloc,
+            child: Builder(
+              builder: (context) {
+                EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc(
+                  context,
+                  command,
+                  EnrollmentScreenContext(
+                    schoolId: 'school-1',
+                    academicYearId: 'ay-2025',
+                    isLoading: false,
+                    enrollmentType: enrollmentType,
+                  ),
+                );
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('status sans critère → liste locale par statut', (
+      tester,
+    ) async {
+      await dispatch(tester, const StandardSearchCommand(status: 'COMPLETED'));
+
+      verify(
+        () => bloc.add(
+          const LocalListByStatusRequested(
+            status: 'COMPLETED',
+            academicYearId: 'ay-2025',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('noms complets → recherche locale par nom', (tester) async {
+      await dispatch(
+        tester,
+        const StandardSearchCommand(
+          status: 'IN_PROGRESS',
+          firstName: 'Awa',
+          lastName: 'Ndiaye',
+          surname: 'Fatou',
+        ),
+      );
+
+      verify(
+        () => bloc.add(
+          const LocalListByStudentNameRequested(
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2025',
+            firstName: 'Awa',
+            lastName: 'Ndiaye',
+            surname: 'Fatou',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('date de naissance seule → recherche locale par DOB', (
+      tester,
+    ) async {
+      await dispatch(
+        tester,
+        const StandardSearchCommand(
+          status: 'IN_PROGRESS',
+          dateOfBirth: '2012-05-01',
+        ),
+      );
+
+      verify(
+        () => bloc.add(
+          const LocalListByDateOfBirthRequested(
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2025',
+            dateOfBirth: '2012-05-01',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('noms + date de naissance → recherche locale combinée', (
+      tester,
+    ) async {
+      await dispatch(
+        tester,
+        const StandardSearchCommand(
+          status: 'IN_PROGRESS',
+          firstName: 'Awa',
+          lastName: 'Ndiaye',
+          surname: 'Fatou',
+          dateOfBirth: '2012-05-01',
+        ),
+      );
+
+      verify(
+        () => bloc.add(
+          const LocalListByStudentNamesAndDateOfBirthRequested(
+            status: 'IN_PROGRESS',
+            academicYearId: 'ay-2025',
+            firstName: 'Awa',
+            lastName: 'Ndiaye',
+            surname: 'Fatou',
+            dateOfBirth: '2012-05-01',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
     testWidgets(
-      'dispatches a fresh summaries request when status changes without criteria',
+      'page Pré-inscriptions : le type PRE_ENROLLMENT du screenCtx est porté '
+      'sur la recherche par nom (borne le scope, exclut les réinscriptions)',
       (tester) async {
-        final bloc = _MockEnrollmentBloc();
+        await dispatch(
+          tester,
+          const StandardSearchCommand(
+            status: 'PRE_REGISTERED',
+            firstName: 'Awa',
+            lastName: 'Ndiaye',
+            surname: 'Fatou',
+          ),
+          enrollmentType: 'PRE_ENROLLMENT',
+        );
+
+        verify(
+          () => bloc.add(
+            const LocalListByStudentNameRequested(
+              status: 'PRE_REGISTERED',
+              academicYearId: 'ay-2025',
+              enrollmentType: 'PRE_ENROLLMENT',
+              firstName: 'Awa',
+              lastName: 'Ndiaye',
+              surname: 'Fatou',
+              page: 0,
+            ),
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets('info académique → recherche locale par niveaux', (
+      tester,
+    ) async {
+      await dispatch(
+        tester,
+        const AcademicInfoSearchCommand(
+          firstName: '',
+          lastName: '',
+          surname: '',
+          schoolLevelGroupId: 'grp-1',
+          schoolLevelId: 'lvl-2',
+        ),
+      );
+
+      verify(
+        () => bloc.add(
+          const LocalListByAcademicInfoRequested(
+            firstName: '',
+            lastName: '',
+            surname: '',
+            schoolLevelGroupId: 'grp-1',
+            schoolLevelId: 'lvl-2',
+            page: 0,
+          ),
+        ),
+      ).called(1);
+    });
+
+    testWidgets(
+      'info académique + statut (Première inscription) → recherche locale par '
+      'niveau, bornée statut/type',
+      (tester) async {
+        await dispatch(
+          tester,
+          const AcademicInfoSearchCommand(
+            firstName: '',
+            lastName: '',
+            surname: '',
+            schoolLevelGroupId: 'grp-1',
+            schoolLevelId: 'lvl-2',
+            status: 'IN_PROGRESS',
+          ),
+        );
+
+        verify(
+          () => bloc.add(
+            const LocalListByAcademicInfoAndStatusRequested(
+              status: 'IN_PROGRESS',
+              academicYearId: 'ay-2025',
+              firstName: '',
+              lastName: '',
+              surname: '',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-2',
+              page: 0,
+            ),
+          ),
+        ).called(1);
+      },
+    );
+  });
+
+  group(
+    'EnrollmentSearchCommandHandlers.dispatchPreEnrollmentThroughLocalListBloc',
+    () {
+      late _MockEnrollmentLocalListBloc bloc;
+
+      setUp(() {
+        bloc = _MockEnrollmentLocalListBloc();
         when(
           () => bloc.stream,
-        ).thenAnswer((_) => const Stream<EnrollmentState>.empty());
-        when(() => bloc.state).thenReturn(const EnrollmentState.initial());
+        ).thenAnswer((_) => const Stream<EnrollmentLocalListState>.empty());
+        when(
+          () => bloc.state,
+        ).thenReturn(const EnrollmentLocalListState.initial());
+      });
 
+      Future<void> dispatch(
+        WidgetTester tester,
+        EnrollmentSearchCommand command,
+      ) async {
         await tester.pumpWidget(
           MaterialApp(
-            home: BlocProvider<EnrollmentBloc>.value(
+            home: BlocProvider<EnrollmentLocalListBloc>.value(
               value: bloc,
               child: Builder(
                 builder: (context) {
-                  EnrollmentSearchCommandHandlers.dispatchThroughEnrollmentBloc(
+                  EnrollmentSearchCommandHandlers.dispatchPreEnrollmentThroughLocalListBloc(
                     context,
-                    const StandardSearchCommand(status: 'COMPLETED'),
+                    command,
                     const EnrollmentScreenContext(
                       schoolId: 'school-1',
                       academicYearId: 'ay-2025',
@@ -40,17 +278,37 @@ void main() {
             ),
           ),
         );
+      }
 
-        verify(
-          () => bloc.add(
-            const EnrollmentSummariesRequested(
-              status: 'COMPLETED',
-              academicYearId: 'ay-2025',
-              page: 0,
+      testWidgets(
+        'info académique (bi-mode, sans status) → vivier PRE, PAS le vivier '
+        'RE (contrairement à dispatchThroughLocalListBloc)',
+        (tester) async {
+          await dispatch(
+            tester,
+            const AcademicInfoSearchCommand(
+              firstName: 'Awa',
+              lastName: 'Ndiaye',
+              surname: '',
+              schoolLevelGroupId: 'grp-1',
+              schoolLevelId: 'lvl-2',
             ),
-          ),
-        ).called(1);
-      },
-    );
-  });
+          );
+
+          verify(
+            () => bloc.add(
+              const LocalListByPreEnrollmentAcademicInfoRequested(
+                firstName: 'Awa',
+                lastName: 'Ndiaye',
+                surname: '',
+                schoolLevelGroupId: 'grp-1',
+                schoolLevelId: 'lvl-2',
+                page: 0,
+              ),
+            ),
+          ).called(1);
+        },
+      );
+    },
+  );
 }

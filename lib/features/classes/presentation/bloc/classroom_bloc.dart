@@ -4,34 +4,34 @@ import 'package:school_app_flutter/features/classes/domain/usecases/distribute_s
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 
 class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final GetClassroomsUseCase _getClassroomsUseCase;
   final GetClassroomMembersUseCase _getClassroomMembersUseCase;
+  final GetOfflineRosterUseCase _getOfflineRosterUseCase;
   final DistributeStudentsToClassroomsUseCase
   _distributeStudentsToClassroomsUseCase;
   final GetLevelDistributionOverviewUseCase
   _getLevelDistributionOverviewUseCase;
-  final ReassignClassroomMemberUseCase _reassignClassroomMemberUseCase;
 
   ClassroomBloc({
     required GetClassroomsUseCase getClassroomsUseCase,
     required GetClassroomMembersUseCase getClassroomMembersUseCase,
+    required GetOfflineRosterUseCase getOfflineRosterUseCase,
     required DistributeStudentsToClassroomsUseCase
     distributeStudentsToClassroomsUseCase,
     required GetLevelDistributionOverviewUseCase
     getLevelDistributionOverviewUseCase,
-    required ReassignClassroomMemberUseCase reassignClassroomMemberUseCase,
   }) : _getClassroomsUseCase = getClassroomsUseCase,
        _getClassroomMembersUseCase = getClassroomMembersUseCase,
+       _getOfflineRosterUseCase = getOfflineRosterUseCase,
        _distributeStudentsToClassroomsUseCase =
            distributeStudentsToClassroomsUseCase,
        _getLevelDistributionOverviewUseCase =
            getLevelDistributionOverviewUseCase,
-       _reassignClassroomMemberUseCase = reassignClassroomMemberUseCase,
        super(const ClassroomState()) {
     on<ClassroomRequested>(_onClassroomRequested);
     on<ClassroomMembersRequested>(_onClassroomMembersRequested);
@@ -40,7 +40,6 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
     );
     on<ClassroomMembersBatchRequested>(_onClassroomMembersBatchRequested);
     on<ClassroomDistributionRequested>(_onClassroomDistributionRequested);
-    on<ClassroomMemberReassignRequested>(_onClassroomMemberReassignRequested);
     on<ClassroomResetRequested>(_onClassroomResetRequested);
   }
 
@@ -93,6 +92,7 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
       state.copyWith(
         distributionStatus: ClassroomStatus.loading,
         distributionErrorType: ClassroomErrorType.none,
+        distributionRePullFailed: false,
       ),
     );
 
@@ -110,10 +110,13 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
           distributionErrorType: _mapFailureToErrorType(failure),
         ),
       ),
-      (_) => emit(
+      // Right(true) → répartition + re-pull local OK ; Right(false) → répartition
+      // serveur acquise, re-pull local KO (succès partiel à retenter, PAS un échec).
+      (rePullOk) => emit(
         state.copyWith(
           distributionStatus: ClassroomStatus.success,
           distributionErrorType: ClassroomErrorType.none,
+          distributionRePullFailed: !rePullOk,
         ),
       ),
     );
@@ -164,9 +167,11 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
       ),
     );
 
-    final result = await _getClassroomMembersUseCase(
+    // Lecture offline-first (CF3, Phase 2) : le roster d'une classe vient du
+    // cache LOCAL (`ref_classroom_members`), peuplé par le pull Classe. Le
+    // handler batch (organisation / distribution) reste online.
+    final result = await _getOfflineRosterUseCase(
       classroomId: event.classroomId,
-      academicYearId: event.academicYearId,
     );
 
     result.fold(
@@ -246,41 +251,6 @@ class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
         membersByClassroom: buckets,
         membersLoadingCount: 0,
         membersErrorType: ClassroomErrorType.none,
-      ),
-    );
-  }
-
-  Future<void> _onClassroomMemberReassignRequested(
-    ClassroomMemberReassignRequested event,
-    Emitter<ClassroomState> emit,
-  ) async {
-    emit(
-      state.copyWith(
-        reassignStatus: ClassroomStatus.loading,
-        reassignErrorType: ClassroomErrorType.none,
-        reassigningMemberId: event.classroomMemberId,
-      ),
-    );
-
-    final result = await _reassignClassroomMemberUseCase(
-      classroomMemberId: event.classroomMemberId,
-      targetClassroomId: event.targetClassroomId,
-    );
-
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          reassignStatus: ClassroomStatus.failure,
-          reassignErrorType: _mapFailureToErrorType(failure),
-          reassigningMemberId: '',
-        ),
-      ),
-      (_) => emit(
-        state.copyWith(
-          reassignStatus: ClassroomStatus.success,
-          reassignErrorType: ClassroomErrorType.none,
-          reassigningMemberId: '',
-        ),
       ),
     );
   }

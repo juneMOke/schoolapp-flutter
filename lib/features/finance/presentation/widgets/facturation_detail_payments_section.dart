@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class FacturationDetailPaymentsSection extends StatelessWidget {
   final String studentId;
@@ -174,11 +175,14 @@ class _SectionHeader extends StatelessWidget {
         // qu'il y a la place (desktop, 2 colonnes, tablette) ; il ne passe sous
         // le titre que sur petit téléphone.
         final compact = constraints.maxWidth < AppBreakpoints.dataTablePhoneMax;
-        final button = EteeloButton.primary(
-          label: actionLabel,
-          icon: Icons.add,
-          onPressed: onActionPressed,
-          fullWidth: false,
+        // Gel READ_ONLY (ADR-010) : l'encaissement est une écriture métier.
+        final button = SessionWriteGate(
+          child: EteeloButton.primary(
+            label: actionLabel,
+            icon: Icons.add,
+            onPressed: onActionPressed,
+            fullWidth: false,
+          ),
         );
 
         final titleBlock = Row(

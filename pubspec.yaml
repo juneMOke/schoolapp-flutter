@@ -43,7 +43,6 @@ dependencies:
   retrofit: ^4.9.2
   go_router: ^17.1.0
   flutter_secure_storage: ^10.0.0
-  hive_flutter: ^1.1.0
   equatable: ^2.0.8
   dartz: ^0.10.1
   json_annotation: ^4.11.0
@@ -52,6 +51,44 @@ dependencies:
   flutter_svg: ^2.2.3
   fl_chart: ^0.69.0
   package_info_plus: ^8.1.0
+
+  # ── Offline-first (socle) ────────────────────────────────────────────────
+  # Base locale chiffrée (SQLCipher), génération d'UUID client (idempotence),
+  # détection de connectivité pour le vidage opportuniste de l'outbox.
+  sqflite_sqlcipher: ^3.1.0+1
+  sqflite_common: ^2.5.4+6
+  path: ^1.9.0
+  uuid: ^4.5.1
+  connectivity_plus: ^6.1.0
+  # Vérificateur de mot de passe offline (ADR-010 D-02) : Argon2id local calculé
+  # en isolate. Ne chiffre rien — valide seulement « ce mot de passe est-il correct ? ».
+  cryptography: ^2.7.0
+
+  # ── Éditique (module documents) ──────────────────────────────────────────
+  # Visionneuse PDF + impression + partage des pièces scellées rendues par le
+  # serveur. Retenu parce qu'il couvre les trois gestes à lui seul, sans aucune
+  # permission Android ni ligne à ajouter au manifeste de l'app : le plugin
+  # déclare son propre `<provider>` (`PrintFileProvider`), fusionné au build.
+  #
+  # ⚠️ À savoir : `Printing.sharePdf` n'est PAS un partage en mémoire. Il écrit
+  # d'abord la pièce en clair dans `cacheDir/share/<nom>.pdf` et ne la supprime
+  # jamais (PrintingJob.java:322-337). Le répertoire est privé à l'application
+  # (effacé par « vider le cache » et par la pression mémoire d'Android), mais
+  # un reçu financier y séjourne. L'affichage et l'impression, eux, restent
+  # bien en mémoire.
+  #
+  # Enregistrer volontairement une pièce sur l'appareil reste hors périmètre.
+  printing: ^5.14.3
+  # Résolution du répertoire de cache, pour PURGER le dossier de partage laissé
+  # en clair par `Printing.sharePdf` à chaque fin de session (ADR-012 D-7/PO-5).
+  # Déjà présent en transitif (flutter_secure_storage_windows) — déclaré en
+  # direct parce qu'il est désormais importé par du code de l'application.
+  path_provider: ^2.1.5
+  # Rendu du ticket provisoire 80 mm (ADR-012 D-4). Déjà tiré en transitif par
+  # `printing` — déclaré en direct parce que du code de l'application l'importe
+  # désormais (`depend_on_referenced_packages`), et PINÉ sur la version résolue
+  # par `printing` pour que les deux ne divergent jamais.
+  pdf: 3.12.0
 
 
 dev_dependencies:
@@ -72,6 +109,8 @@ dev_dependencies:
   retrofit_generator: ^10.2.3
   flutter_gen_runner: ^5.13.0+1
   flutter_launcher_icons: ^0.14.1
+  # Base sqflite en mémoire pour les tests unitaires des DAO/outbox (hors device).
+  sqflite_common_ffi: ^2.3.4
 
 
 # For information on the generic Dart part of this file, see the

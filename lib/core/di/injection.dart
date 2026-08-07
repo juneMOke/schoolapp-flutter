@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
+import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/di/request_options_extra.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/binary_safe_log_interceptor.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/attendance_stats_remote_data_source.dart';
@@ -20,15 +22,14 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/get_atte
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_list_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/get_student_attendance_summary_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/update_attendance_usecase.dart';
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/student_attendance_summary_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/course_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/notation_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/notation_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/create_evaluation_usecase.dart';
@@ -54,6 +55,7 @@ import 'package:school_app_flutter/features/resultats/presentation/bloc/resultat
 import 'package:school_app_flutter/features/resultats/presentation/bloc/resultats_classe_bloc.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
+import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/create_session_usecase.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/create_time_slot_usecase.dart';
@@ -63,16 +65,37 @@ import 'package:school_app_flutter/features/schedule/domain/usecases/get_my_time
 import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_edit_bloc.dart';
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
+import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
+import 'package:school_app_flutter/features/school/data/repositories/school_repository_impl.dart';
+import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
+import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/usecases/update_enrollment_academic_info_use_case.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_previous_context_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/enrollment_academic_info_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/datasources/forgot_password_remote_data_source.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/auth/data/interceptors/server_contact_interceptor.dart';
+import 'package:school_app_flutter/features/auth/data/interceptors/auth_refresh_interceptor.dart';
+import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
+import 'package:school_app_flutter/features/auth/data/services/token_refresh_reauthenticator.dart';
+import 'package:school_app_flutter/features/auth/data/services/token_refresher.dart';
+import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/auth_repository.dart';
 import 'package:school_app_flutter/features/auth/domain/repositories/forgot_password_repository.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
@@ -83,39 +106,34 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_local_data_source.dart';
-import 'package:school_app_flutter/features/bootstrap/data/datasources/bootstrap_remote_data_source.dart';
-import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_local_repository_impl.dart';
-import 'package:school_app_flutter/features/bootstrap/data/repositories/bootstrap_remote_repository_impl.dart';
-import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_local_migration_service.dart';
-import 'package:school_app_flutter/features/bootstrap/data/services/bootstrap_storage_service.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_local_repository.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/repositories/bootstrap_remote_repository.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/clear_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_current_year_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/get_remote_bootstrap_previous_year_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/usecases/save_local_bootstrap_use_case.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_previous_year_bloc.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/distribute_students_to_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_members_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classrooms_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_level_distribution_overview_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/get_classroom_stats_usecase.dart';
-import 'package:school_app_flutter/features/classes/domain/usecases/reassign_classroom_member_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_stats_bloc.dart';
+import 'package:school_app_flutter/features/documents/data/datasources/editique_remote_data_source.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/data/repositories/enrollment_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/create_enrollment_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_detail_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_preview_by_student_id_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/get_enrollment_stats_use_case.dart';
@@ -124,7 +142,6 @@ import 'package:school_app_flutter/features/enrollment/domain/usecases/search_en
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_date_of_birth_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_name_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/domain/usecases/search_enrollment_summary_by_status_and_academic_year_and_student_names_and_date_of_birth_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/domain/usecases/update_enrollment_status_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/data/datasources/finance_remote_data_source.dart';
@@ -144,6 +161,7 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payments_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_stats_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
@@ -165,41 +183,76 @@ import 'package:school_app_flutter/features/student/presentation/bloc/student_bl
 
 final GetIt getIt = GetIt.instance;
 
+/// Nom d'instance du `Dio` **nu** (sans intercepteur d'auth/refresh) : partagé
+/// par le refresher et par le rejeu de requête, pour éviter toute ré-entrance.
+const String _bareDioInstanceName = 'bareDio';
+
 Future<void> configureDependencies({
   EnvConfig? envConfig,
-  String bootstrapBoxName = 'bootstrap_box',
+  Database? offlineDatabase,
 }) async {
-  await Hive.initFlutter();
-  final bootstrapBox = await Hive.openBox<String>(bootstrapBoxName);
-
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
   );
 
-  getIt.registerLazySingleton<Box<String>>(
-    () => bootstrapBox,
-    instanceName: 'bootstrapBox',
-  );
+  // ── Socle offline (base chiffrée + outbox + moteur de synchro) ──────────────
+  // Ouvre la base SQLCipher et enregistre DAOs/moteur/connectivité. Doit
+  // précéder les features (qui liront le cache / écriront dans l'outbox).
+  // `offlineDatabase` permet aux tests d'injecter une base ffi en mémoire.
+  await registerOfflineCore(getIt, database: offlineDatabase);
 
   final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
   getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
 
+  // Dio **nu** (aucun intercepteur d'auth/refresh) : sert au refresh token et
+  // au rejeu de la requête d'origine, sans ré-entrance (ADR-010 §7.2).
+  getIt.registerLazySingleton<Dio>(
+    () => createDioClient(getIt<EnvConfig>()),
+    instanceName: _bareDioInstanceName,
+  );
+
+  // Rotation du refresh token : instance **unique**. Le single-flight n'a de
+  // sens que partagé — l'intercepteur 401, le mint proactif et la
+  // ré-authentification de la boucle de synchro doivent coalescer sur le même
+  // appel `/auth/refresh`, sinon une rafale de flush émet autant de rotations
+  // concurrentes que de requêtes (et le serveur révoque le jeton présenté à
+  // chaque rotation : toutes échouent sauf une).
+  getIt.registerLazySingleton<TokenRefresher>(
+    () => TokenRefresher(
+      bareDio: getIt<Dio>(instanceName: _bareDioInstanceName),
+      tokenStorage: getIt<TokenStorageService>(),
+      sessionManager: getIt<AuthSessionManager>(),
+      revocationBus: getIt<SessionRevocationBus>(),
+    ),
+  );
+
+  // Ré-authentification silencieuse au retour réseau : consommée par la boucle
+  // de synchro (`core/offline`) AVANT tout appel authentifié.
+  getIt.registerLazySingleton<SessionReauthenticator>(
+    () => TokenRefreshReauthenticator(
+      tokenStorage: getIt<TokenStorageService>(),
+      refresher: getIt<TokenRefresher>(),
+    ),
+  );
+
   getIt.registerLazySingleton<Dio>(() {
     final envConfig = getIt<EnvConfig>();
     final dio = createDioClient(envConfig);
+    final bareDio = getIt<Dio>(instanceName: _bareDioInstanceName);
+    final refresher = getIt<TokenRefresher>();
 
     if (envConfig.enableVerboseNetworkLogging) {
-      dio.interceptors.add(
-        LogInterceptor(
-          request: true,
-          requestBody: true,
-          requestHeader: true,
-          responseBody: true,
-          responseHeader: true,
-          error: true,
-        ),
-      );
+      // `BinarySafeLogInterceptor` et non `LogInterceptor` : les routes
+      // d'éditique rendent des PDF, et `Uint8List.toString()` déverserait des
+      // dizaines de milliers d'entiers sur une seule ligne de console.
+      dio.interceptors.add(BinarySafeLogInterceptor());
     }
+
+    // Refresh transparent AVANT le mapping d'erreurs : sur 401 authentifié,
+    // refresh + rejeu ; sinon laisse le 401 suivre vers le mapping ci-dessous.
+    dio.interceptors.add(
+      AuthRefreshInterceptor(refresher: refresher, retryDio: bareDio),
+    );
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -207,10 +260,30 @@ Future<void> configureDependencies({
           final requiresAuth = options.extra['requiresAuth'] ?? false;
           if (requiresAuth) {
             final tokenStorage = getIt<TokenStorageService>();
-            final session = await tokenStorage.readAuthSession();
+            var session = await tokenStorage.readAuthSession();
+            if (session == null || session.accessToken.isEmpty) {
+              // Mint PROACTIF (V1.1, revue adversariale) : après une
+              // déconsignation, l'access est vide. Ne pas compter sur un 401
+              // « header absent » du serveur — certaines configs Spring
+              // répondent 403, que les handlers d'outbox classent TERMINAL
+              // (SYNC_ERROR immédiat, argent compris). Single-flight : les
+              // rafales d'un flush ne mintent qu'une fois ; sans refresh
+              // token, `refresh()` retourne null sans effet.
+              final minted = await refresher.refresh();
+              if (minted != null) {
+                session = await tokenStorage.readAuthSession();
+              }
+            }
             if (session != null && session.accessToken.isNotEmpty) {
               options.headers['Authorization'] =
                   'Bearer ${session.accessToken}';
+              // Trace l'identité du JWT attaché : le ServerContactInterceptor
+              // ne doit créditer un contact serveur qu'à l'utilisateur sous le
+              // JWT duquel la requête est réellement partie (ADR-010, filtre
+              // d'identité — une réponse tardive d'un autre compte ne doit ni
+              // ré-ancrer la fraîcheur ni alimenter la révocation).
+              options.extra[ServerContactInterceptor.authUidExtra] =
+                  session.user.id;
             }
           }
           return handler.next(options);
@@ -248,7 +321,7 @@ Future<void> configureDependencies({
               DioException(
                 requestOptions: e.requestOptions,
                 response: e.response,
-                error: const ConflictFailure('Conflict'),
+                error: const ConflictFailure('Conflict — stale version'),
                 type: e.type,
               ),
             );
@@ -278,6 +351,11 @@ Future<void> configureDependencies({
       ),
     );
 
+    // Observateur de contact serveur (ADR-010 §7.3) : capte `X-User-Version` +
+    // header `Date` sur chaque réponse authentifiée pour alimenter l'ancre
+    // temporelle et la révocation offline. Ne wipe ni ne rejette jamais.
+    dio.interceptors.add(ServerContactInterceptor(getIt<AuthSessionManager>()));
+
     return dio;
   });
 
@@ -287,6 +365,29 @@ Future<void> configureDependencies({
 
   getIt.registerLazySingleton<TokenStorageService>(
     () => TokenStorageService(getIt<FlutterSecureStorage>()),
+  );
+
+  // Session offline (ADR-010) : vérificateur Argon2id + manager central
+  // (auth_local + secure storage + fraîcheur/révocation/wipe) + bus de révocation.
+  getIt.registerLazySingleton<PasswordVerifierService>(
+    () => const PasswordVerifierService(),
+  );
+  getIt.registerLazySingleton<SessionRevocationBus>(
+    () => SessionRevocationBus(),
+  );
+  getIt.registerLazySingleton<AuthSessionManager>(
+    () => AuthSessionManager(
+      tokenStorage: getIt<TokenStorageService>(),
+      authLocalDao: getIt<AuthLocalDao>(),
+      verifier: getIt<PasswordVerifierService>(),
+      revocationBus: getIt<SessionRevocationBus>(),
+      currentUser: getIt<CurrentUserContext>(),
+      sharedDocumentCache: getIt<SharedDocumentCache>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<SharedDocumentCache>(
+    () => const SharedDocumentCache(),
   );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -305,6 +406,7 @@ Future<void> configureDependencies({
     () => AuthRepositoryImpl(
       remoteDataSource: getIt<AuthRemoteDataSource>(),
       localDataSource: getIt<AuthLocalDataSource>(),
+      sessionManager: getIt<AuthSessionManager>(),
     ),
   );
 
@@ -344,6 +446,9 @@ Future<void> configureDependencies({
       checkAuthStatusUseCase: getIt<CheckAuthStatusUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
       resetPasswordUseCase: getIt<ResetPasswordUseCase>(),
+      repository: getIt<AuthRepository>(),
+      sessionManager: getIt<AuthSessionManager>(),
+      revocationBus: getIt<SessionRevocationBus>(),
     ),
   );
 
@@ -351,97 +456,6 @@ Future<void> configureDependencies({
     () => ForgotPasswordBloc(
       generateOtpUseCase: getIt<GenerateOtpUseCase>(),
       validateOtpUseCase: getIt<ValidateOtpUseCase>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapStorageService>(
-    () => BootstrapStorageService(
-      getIt<Box<String>>(instanceName: 'bootstrapBox'),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalMigrationService>(
-    () => BootstrapLocalMigrationService(
-      legacyStorage: getIt<FlutterSecureStorage>(),
-      bootstrapBox: getIt<Box<String>>(instanceName: 'bootstrapBox'),
-    ),
-  );
-
-  await getIt<BootstrapLocalMigrationService>().migrateIfNeeded();
-
-  getIt.registerLazySingleton<BootstrapRemoteDataSource>(
-    () => BootstrapRemoteDataSource(getIt<Dio>()),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalDataSource>(
-    () => BootstrapLocalDataSourceImpl(getIt<BootstrapStorageService>()),
-  );
-
-  getIt.registerLazySingleton<BootstrapRemoteRepository>(
-    () => BootstrapRemoteRepositoryImpl(
-      remoteDataSource: getIt<BootstrapRemoteDataSource>(),
-      requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<BootstrapLocalRepository>(
-    () => BootstrapLocalRepositoryImpl(
-      localDataSource: getIt<BootstrapLocalDataSource>(),
-    ),
-  );
-
-  getIt.registerFactory<GetRemoteBootstrapCurrentYearUseCase>(
-    () => GetRemoteBootstrapCurrentYearUseCase(
-      getIt<BootstrapRemoteRepository>(),
-    ),
-  );
-
-  getIt.registerFactory<GetRemoteBootstrapPreviousYearUseCase>(
-    () => GetRemoteBootstrapPreviousYearUseCase(
-      getIt<BootstrapRemoteRepository>(),
-    ),
-  );
-
-  getIt.registerFactory<GetLocalBootstrapUseCase>(
-    () => GetLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<SaveLocalBootstrapUseCase>(
-    () => SaveLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<ClearLocalBootstrapUseCase>(
-    () => ClearLocalBootstrapUseCase(getIt<BootstrapLocalRepository>()),
-  );
-
-  getIt.registerFactory<BootstrapBloc>(
-    () => BootstrapBloc(
-      getRemoteBootstrapUseCase: getIt<GetRemoteBootstrapCurrentYearUseCase>(),
-      getRemoteBootstrapPreviousYearUseCase:
-          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<BootstrapCurrentYearBloc>(
-    () => BootstrapCurrentYearBloc(
-      getRemoteBootstrapCurrentYearUseCase:
-          getIt<GetRemoteBootstrapCurrentYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<BootstrapPreviousYearBloc>(
-    () => BootstrapPreviousYearBloc(
-      getRemoteBootstrapPreviousYearUseCase:
-          getIt<GetRemoteBootstrapPreviousYearUseCase>(),
-      getLocalBootstrapUseCase: getIt<GetLocalBootstrapUseCase>(),
-      saveLocalBootstrapUseCase: getIt<SaveLocalBootstrapUseCase>(),
-      clearLocalBootstrapUseCase: getIt<ClearLocalBootstrapUseCase>(),
     ),
   );
 
@@ -476,10 +490,6 @@ Future<void> configureDependencies({
     () => GetEnrollmentPreviewByStudentIdUseCase(getIt<EnrollmentRepository>()),
   );
 
-  getIt.registerFactory<CreateEnrollmentUseCase>(
-    () => CreateEnrollmentUseCase(getIt<EnrollmentRepository>()),
-  );
-
   getIt.registerFactory<
     SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
   >(
@@ -511,10 +521,6 @@ Future<void> configureDependencies({
     ),
   );
 
-  getIt.registerFactory<UpdateEnrollmentStatusUseCase>(
-    () => UpdateEnrollmentStatusUseCase(getIt<EnrollmentRepository>()),
-  );
-
   getIt.registerFactory<GetEnrollmentStatsUseCase>(
     () => GetEnrollmentStatsUseCase(getIt<EnrollmentStatsRepository>()),
   );
@@ -526,7 +532,6 @@ Future<void> configureDependencies({
       getEnrollmentDetailUseCase: getIt<GetEnrollmentDetailUseCase>(),
       getEnrollmentPreviewByStudentIdUseCase:
           getIt<GetEnrollmentPreviewByStudentIdUseCase>(),
-      createEnrollmentUseCase: getIt<CreateEnrollmentUseCase>(),
       searchByStudentNameUseCase:
           getIt<
             SearchEnrollmentSummaryByStatusAndAcademicYearAndStudentNameUseCase
@@ -541,7 +546,6 @@ Future<void> configureDependencies({
           >(),
       searchByAcademicInfoUseCase:
           getIt<SearchEnrollmentSummaryByAcademicInfoUseCase>(),
-      updateEnrollmentStatusUseCase: getIt<UpdateEnrollmentStatusUseCase>(),
     ),
   );
 
@@ -572,7 +576,12 @@ Future<void> configureDependencies({
   );
 
   getIt.registerFactory<DistributeStudentsToClassroomsUseCase>(
-    () => DistributeStudentsToClassroomsUseCase(getIt<ClassroomRepository>()),
+    // offlineRepository résolu paresseusement (registerOfflineModules) : repull
+    // local du miroir des classes après une répartition serveur réussie.
+    () => DistributeStudentsToClassroomsUseCase(
+      repository: getIt<ClassroomRepository>(),
+      offlineRepository: getIt<ClassroomOfflineRepository>(),
+    ),
   );
 
   getIt.registerFactory<GetLevelDistributionOverviewUseCase>(
@@ -583,19 +592,18 @@ Future<void> configureDependencies({
     () => GetClassroomStatsUseCase(getIt<ClassroomRepository>()),
   );
 
-  getIt.registerFactory<ReassignClassroomMemberUseCase>(
-    () => ReassignClassroomMemberUseCase(getIt<ClassroomRepository>()),
-  );
-
   getIt.registerFactory<ClassroomBloc>(
     () => ClassroomBloc(
       getClassroomsUseCase: getIt<GetClassroomsUseCase>(),
       getClassroomMembersUseCase: getIt<GetClassroomMembersUseCase>(),
+      // Roster consultation offline-first (CF3) : lecture locale
+      // (ref_classroom_members). GetClassroomMembersUseCase reste utilisé par le
+      // handler batch (organisation). Résolu paresseusement (registerOfflineModules).
+      getOfflineRosterUseCase: getIt<GetOfflineRosterUseCase>(),
       distributeStudentsToClassroomsUseCase:
           getIt<DistributeStudentsToClassroomsUseCase>(),
       getLevelDistributionOverviewUseCase:
           getIt<GetLevelDistributionOverviewUseCase>(),
-      reassignClassroomMemberUseCase: getIt<ReassignClassroomMemberUseCase>(),
     ),
   );
 
@@ -789,6 +797,10 @@ Future<void> configureDependencies({
           getIt<GetPaymentAllocationsFromStudentChargesUseCase>(),
       updateStudentChargeExpectedAmountUseCase:
           getIt<UpdateStudentChargeExpectedAmountUseCase>(),
+      // FF5 (module offline) : génération des créances provisoires à l'étape
+      // Frais du wizard — résolu paresseusement, enregistré par
+      // registerOfflineModules avant toute création de bloc.
+      initializeChargesUseCase: getIt<InitializeChargesUseCase>(),
     ),
   );
 
@@ -797,6 +809,64 @@ Future<void> configureDependencies({
       getPaymentsUseCase: getIt<GetPaymentsUseCase>(),
       createPaymentUseCase: getIt<CreatePaymentUseCase>(),
       getPaymentAllocationsUseCase: getIt<GetPaymentAllocationsUseCase>(),
+    ),
+  );
+
+  // ── Documents (éditique) ──────────────────────────────────────────────────
+  // Socle d'émission des pièces PDF. Aucune présentation à ce stade : les
+  // consommateurs (détail Facturation, détail Inscription, module Documents)
+  // viendront dans un lot suivant.
+  getIt.registerLazySingleton<EditiqueRemoteDataSource>(
+    () => EditiqueRemoteDataSource(getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<EditiqueRepository>(
+    () => EditiqueRepositoryImpl(
+      remoteDataSource: getIt<EditiqueRemoteDataSource>(),
+      connectivityService: getIt<ConnectivityService>(),
+      requiredAuth: RequestOptionsExtra.auth(),
+      // Enregistré plus bas, par le registrar offline Documents : la résolution
+      // est paresseuse, donc l'ordre ne pose pas de problème. C'est ce cache
+      // qui rend une pièce consultable hors ligne — et ce repository est le
+      // seul à l'alimenter tant que le pull de métadonnées n'existe pas.
+      cache: getIt<EditiqueDocumentCache>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+
+  getIt.registerFactory<EmitEnrollmentAttestationUseCase>(
+    () => EmitEnrollmentAttestationUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitNotePerceptionUseCase>(
+    () => EmitNotePerceptionUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitPaymentReceiptUseCase>(
+    () => EmitPaymentReceiptUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitAccountStatementUseCase>(
+    () => EmitAccountStatementUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EmitFinancialClearanceUseCase>(
+    () => EmitFinancialClearanceUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<RestituteDocumentUseCase>(
+    () => RestituteDocumentUseCase(getIt<EditiqueRepository>()),
+  );
+
+  getIt.registerFactory<EditiqueDocumentBloc>(
+    () => EditiqueDocumentBloc(
+      emitEnrollmentAttestationUseCase:
+          getIt<EmitEnrollmentAttestationUseCase>(),
+      emitNotePerceptionUseCase: getIt<EmitNotePerceptionUseCase>(),
+      emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
+      emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),
+      emitFinancialClearanceUseCase: getIt<EmitFinancialClearanceUseCase>(),
+      restituteDocumentUseCase: getIt<RestituteDocumentUseCase>(),
     ),
   );
 
@@ -816,18 +886,18 @@ Future<void> configureDependencies({
     () => GetAttendanceUseCase(getIt<AttendanceRepository>()),
   );
 
-  getIt.registerFactory<UpdateAttendanceUseCase>(
-    () => UpdateAttendanceUseCase(getIt<AttendanceRepository>()),
-  );
-
   getIt.registerFactory<AttendanceBloc>(
     () => AttendanceBloc(
-      getAttendanceUseCase: getIt<GetAttendanceUseCase>(),
-      updateAttendanceUseCase: getIt<UpdateAttendanceUseCase>(),
+      // Lecture offline-first (Phase 2) : l'appel du jour vient du cache local
+      // (LoadDailyAttendanceUseCase). L'écriture est dispatchée séparément vers
+      // AttendanceOfflineBloc (overlay) — l'ancien chemin online
+      // (UpdateAttendanceUseCase) a été retiré. GetAttendanceUseCase reste
+      // enregistré mais dormant (lecture online conservée, non branchée).
+      loadDailyAttendance: getIt<LoadDailyAttendanceUseCase>(),
     ),
   );
 
-  // ── Attendance stats (résumé de présence par élève) ─────────────────────────
+  // ── Attendance stats (tableau de bord présence école-wide) ──────────────────
   getIt.registerLazySingleton<AttendanceStatsRemoteDataSource>(
     () => AttendanceStatsRemoteDataSource(getIt<Dio>()),
   );
@@ -836,18 +906,6 @@ Future<void> configureDependencies({
     () => AttendanceStatsRepositoryImpl(
       remoteDataSource: getIt<AttendanceStatsRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
-  );
-
-  getIt.registerFactory<GetStudentAttendanceSummaryUseCase>(
-    () =>
-        GetStudentAttendanceSummaryUseCase(getIt<AttendanceStatsRepository>()),
-  );
-
-  getIt.registerFactory<StudentAttendanceSummaryBloc>(
-    () => StudentAttendanceSummaryBloc(
-      getStudentAttendanceSummaryUseCase:
-          getIt<GetStudentAttendanceSummaryUseCase>(),
     ),
   );
 
@@ -898,11 +956,18 @@ Future<void> configureDependencies({
     () => CourseRemoteDataSource(getIt<Dio>()),
   );
 
-  getIt.registerLazySingleton<CourseRepository>(
+  // Online concret (conservé pour la délégation détail/création par l'impl
+  // offline tant que NF-7b (c)/(d) ne sont pas faits).
+  getIt.registerLazySingleton<CourseRepositoryImpl>(
     () => CourseRepositoryImpl(
       remoteDataSource: getIt<CourseRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
+  );
+  // OFFLINE-FIRST (NF-7b a) : getMyCourses lu en LOCAL ; détail/création encore
+  // délégués online. Impl offline enregistrée dans registerAcademicsOffline.
+  getIt.registerLazySingleton<CourseRepository>(
+    () => getIt<CourseOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetMyCoursesUseCase>(
@@ -933,13 +998,13 @@ Future<void> configureDependencies({
     ),
   );
 
-  // ── Academics — Notation : saisie des notes (grille + PUT par élève) ────────
-  // Réutilise le CourseRemoteDataSource déjà enregistré ci-dessus.
+  // ── Academics — Notation : saisie des notes (grille + saisie par élève) ─────
+  // OFFLINE-FIRST (NF-7b) : la grille se lit en LOCAL (notes locales + roster) et
+  // la saisie passe par l'outbox (régime C). L'impl offline est enregistrée dans
+  // `registerAcademicsOffline` ; résolue en lazy → dispo au 1er accès. L'impl
+  // online `NotationRepositoryImpl` reste en code (dormante, non enregistrée).
   getIt.registerLazySingleton<NotationRepository>(
-    () => NotationRepositoryImpl(
-      remoteDataSource: getIt<CourseRemoteDataSource>(),
-      requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
+    () => getIt<NotationOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetNotesElevesUseCase>(
@@ -971,11 +1036,18 @@ Future<void> configureDependencies({
     () => ScheduleRemoteDataSource(getIt<Dio>()),
   );
 
-  getIt.registerLazySingleton<ScheduleRepository>(
+  // Online concret (conservé pour la délégation grille/écritures admin par
+  // l'impl offline).
+  getIt.registerLazySingleton<ScheduleRepositoryImpl>(
     () => ScheduleRepositoryImpl(
       remoteDataSource: getIt<ScheduleRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
     ),
+  );
+  // OFFLINE-FIRST (NF-7b b) : getMyTimetable composé en LOCAL ; grille admin +
+  // écritures encore online. Impl offline dans registerAcademicsOffline.
+  getIt.registerLazySingleton<ScheduleRepository>(
+    () => getIt<ScheduleOfflineRepositoryImpl>(),
   );
 
   getIt.registerFactory<GetMyTimetableUseCase>(
@@ -1022,6 +1094,7 @@ Future<void> configureDependencies({
     () => ResultatsRepositoryImpl(
       remoteDataSource: getIt<ResultatsRemoteDataSource>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      connectivity: getIt<ConnectivityService>(),
     ),
   );
 
@@ -1059,5 +1132,54 @@ Future<void> configureDependencies({
     () => PeriodesScolairesBloc(
       getPeriodesScolaires: getIt<GetPeriodesScolairesUseCase>(),
     ),
+  );
+
+  // ── Modules offline (branches A/B) ──────────────────────────────────────────
+  // Enregistre les DataSources locales, repositories offline-first, handlers
+  // d'outbox et BLoCs de chaque branche. Point d'extension additif.
+  registerOfflineModules(getIt);
+
+  // ── Contexte académique (remplace le module `bootstrap`) ────────────────────
+  // Lecture 100% locale du référentiel Inscription déjà pullé
+  // (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`),
+  // scopée à l'école courante. Dépend de `registerOfflineModules` ci-dessus
+  // (résolution paresseuse : l'ordre textuel importe peu, mais logiquement
+  // c'est un point d'extension du socle offline).
+  getIt.registerLazySingleton<AcademicYearContextRepository>(
+    () => AcademicYearContextRepositoryImpl(
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      pullRepository: getIt<EnrollmentPullRepository>(),
+      connectivity: getIt<ConnectivityService>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+
+  getIt.registerFactory<AcademicYearContextBloc>(
+    () => AcademicYearContextBloc(
+      repository: getIt<AcademicYearContextRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<AcademicYearPreviousContextBloc>(
+    () => AcademicYearPreviousContextBloc(
+      repository: getIt<AcademicYearContextRepository>(),
+    ),
+  );
+
+  // ── Identité de l'établissement ─────────────────────────────────────────────
+  // Lecture locale de `ref_school` (même DAO référentiel que le contexte
+  // académique), scopée à l'école de la session. Aucun pull propre.
+  getIt.registerLazySingleton<SchoolRepository>(
+    () => SchoolRepositoryImpl(
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+
+  // Exception assumée à la règle « BLoC en registerFactory » : instance unique
+  // app-lifetime, comme `SyncStatusCubit`. L'identité de l'école est la même
+  // pour tout l'arbre et se recharge sur les transitions de session (main.dart).
+  getIt.registerLazySingleton<SchoolIdentityCubit>(
+    () => SchoolIdentityCubit(repository: getIt<SchoolRepository>()),
   );
 }

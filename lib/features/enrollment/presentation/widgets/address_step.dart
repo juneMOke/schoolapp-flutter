@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
@@ -10,12 +12,12 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/addr
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/address/address_geo_catalog.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AddressStep extends StatefulWidget {
   final StudentDetail studentDetail;
   final String enrollmentId;
+
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -43,7 +45,6 @@ class AddressStepState extends State<AddressStep> {
   late final TextEditingController _municipalityController;
   late final TextEditingController _addressController;
   late final TextEditingController _additionalAddressController;
-  late final StudentBloc _studentBloc;
 
   String _initialCity = '';
   String _initialDistrict = '';
@@ -57,6 +58,7 @@ class AddressStepState extends State<AddressStep> {
   bool _isSaving = false;
   bool _isHydratingFromDetail = false;
   bool _isCatalogLoading = true;
+  bool _awaitingDraftSave = false;
   AddressGeoCatalog? _geoCatalog;
 
   bool get _canSave => _isDirty && _isValid;
@@ -320,7 +322,6 @@ class AddressStepState extends State<AddressStep> {
   @override
   void initState() {
     super.initState();
-    _studentBloc = getIt<StudentBloc>();
     _cityController = TextEditingController();
     _districtController = TextEditingController();
     _municipalityController = TextEditingController();
@@ -504,7 +505,6 @@ class AddressStepState extends State<AddressStep> {
     _municipalityController.dispose();
     _addressController.dispose();
     _additionalAddressController.dispose();
-    _studentBloc.close();
     super.dispose();
   }
 
@@ -527,7 +527,8 @@ class AddressStepState extends State<AddressStep> {
         city.isNotEmpty &&
         district.isNotEmpty &&
         municipality.isNotEmpty &&
-        address.isNotEmpty;
+        address.isNotEmpty &&
+        additionalAddress.isNotEmpty;
 
     final dirtyNow =
         city != _initialCity ||
@@ -575,6 +576,9 @@ class AddressStepState extends State<AddressStep> {
     if (_addressController.text.trim().isEmpty) {
       errors.add(l10n.requiredFieldError(l10n.neighborhood));
     }
+    if (_selectedAdditionalAddress.isEmpty) {
+      errors.add(l10n.requiredFieldError(l10n.addressComplementary));
+    }
     return errors;
   }
 
@@ -605,16 +609,42 @@ class AddressStepState extends State<AddressStep> {
 
     if (!_isDirty) return;
 
-    _studentBloc.add(
-      StudentAddressUpdateRequested(
+    _dispatchDraftAddress();
+  }
+
+  void _dispatchDraftAddress() {
+    _awaitingDraftSave = true;
+    _onSavingChanged(true);
+    context.read<EnrollmentOfflineBloc>().add(
+      SaveDraftAddressRequested(
         studentId: widget.studentDetail.id,
         city: _cityController.text.trim(),
         district: _districtController.text.trim(),
         municipality: _municipalityController.text.trim(),
         neighborhood: _addressController.text.trim(),
-        address: _buildAddressPayload(),
+        address: _asNullable(_buildAddressPayload()),
       ),
     );
+  }
+
+  void _onDraftSaved() {
+    _awaitingDraftSave = false;
+    _markCurrentAsSavedSnapshot();
+    _recomputeFormState();
+    _onSavingChanged(false);
+    if (_showValidationHints) {
+      setState(() => _showValidationHints = false);
+    }
+    AppSnackBar.showSuccess(
+      context,
+      AppLocalizations.of(context)!.addressSaveSuccess,
+    );
+    widget.onRefreshRequested?.call();
+  }
+
+  void _onDraftError(String message) {
+    _awaitingDraftSave = false;
+    _onSavingChanged(false);
   }
 
   @override
@@ -622,92 +652,64 @@ class AddressStepState extends State<AddressStep> {
     final l10n = AppLocalizations.of(context)!;
     final showValidation = _showValidationHints || (_isDirty && !_isValid);
 
-    return BlocProvider<StudentBloc>.value(
-      value: _studentBloc,
-      child: BlocConsumer<StudentBloc, StudentState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status || prev.operation != curr.operation,
-        listener: (context, state) {
-          if (state.operation != StudentUpdateOperation.address) {
-            return;
-          }
-
-          _onSavingChanged(state.status == StudentUpdateStatus.loading);
-
-          if (state.status == StudentUpdateStatus.success) {
-            _markCurrentAsSavedSnapshot();
-            _recomputeFormState();
-            _onSavingChanged(false);
-            if (_showValidationHints) {
-              setState(() => _showValidationHints = false);
-            }
-            widget.onRefreshRequested?.call();
-
-            AppSnackBar.showSuccess(context, l10n.addressSaveSuccess);
-          } else if (state.status == StudentUpdateStatus.failure) {
-            _onSavingChanged(false);
-            AppSnackBar.showError(
-              context,
-              l10n.addressSaveError(state.errorMessage ?? ''),
-              onRetry: submitForm,
-              retryLabel: l10n.enrollmentErrorRetry,
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading =
-              state.status == StudentUpdateStatus.loading &&
-              state.operation == StudentUpdateOperation.address;
-
-          return Padding(
-            padding: const EdgeInsets.all(AppTheme.defaultPadding),
-            child: AddressFormContent(
-              cityValue: _selectedCity,
-              districtValue: _selectedDistrict,
-              municipalityValue: _selectedMunicipality,
-              neighborhoodValue: _selectedNeighborhoodDisplay,
-              cityOptions: _cityOptions,
-              districtOptions: _districtOptions,
-              municipalityOptions: _municipalityOptions,
-              neighborhoodOptions: _neighborhoodOptions,
-              onCityChanged: _onCityChanged,
-              onDistrictChanged: _onDistrictChanged,
-              onMunicipalityChanged: _onMunicipalityChanged,
-              onNeighborhoodChanged: _onNeighborhoodChanged,
-              cityErrorText: _fieldError(
-                _cityController.text,
-                l10n.city,
-                l10n,
-                showValidation,
-              ),
-              districtErrorText: _fieldError(
-                _districtController.text,
-                l10n.district,
-                l10n,
-                showValidation,
-              ),
-              municipalityErrorText: _fieldError(
-                _municipalityController.text,
-                l10n.municipality,
-                l10n,
-                showValidation,
-              ),
-              addressErrorText: _fieldError(
-                _addressController.text,
-                l10n.neighborhood,
-                l10n,
-                showValidation,
-              ),
-              additionalAddressController: _additionalAddressController,
-              showInlineSaveButton: widget.showInlineSaveButton,
-              isLoading: isLoading,
-              isCatalogLoading: _isCatalogLoading,
-              canSave: _canSave,
-              onSave: _onSave,
-              isEditable: widget.isEditable,
-            ),
-          );
-        },
+    return EnrollmentDraftStepSaveListener(
+      enabled: true,
+      isAwaiting: () => _awaitingDraftSave,
+      onSaved: _onDraftSaved,
+      onError: _onDraftError,
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.defaultPadding),
+        child: AddressFormContent(
+          cityValue: _selectedCity,
+          districtValue: _selectedDistrict,
+          municipalityValue: _selectedMunicipality,
+          neighborhoodValue: _selectedNeighborhoodDisplay,
+          cityOptions: _cityOptions,
+          districtOptions: _districtOptions,
+          municipalityOptions: _municipalityOptions,
+          neighborhoodOptions: _neighborhoodOptions,
+          onCityChanged: _onCityChanged,
+          onDistrictChanged: _onDistrictChanged,
+          onMunicipalityChanged: _onMunicipalityChanged,
+          onNeighborhoodChanged: _onNeighborhoodChanged,
+          cityErrorText: _fieldError(
+            _cityController.text,
+            l10n.city,
+            l10n,
+            showValidation,
+          ),
+          districtErrorText: _fieldError(
+            _districtController.text,
+            l10n.district,
+            l10n,
+            showValidation,
+          ),
+          municipalityErrorText: _fieldError(
+            _municipalityController.text,
+            l10n.municipality,
+            l10n,
+            showValidation,
+          ),
+          addressErrorText: _fieldError(
+            _addressController.text,
+            l10n.neighborhood,
+            l10n,
+            showValidation,
+          ),
+          additionalAddressErrorText: _fieldError(
+            _selectedAdditionalAddress,
+            l10n.addressComplementary,
+            l10n,
+            showValidation,
+          ),
+          additionalAddressController: _additionalAddressController,
+          showInlineSaveButton: widget.showInlineSaveButton,
+          isLoading: _isSaving,
+          isCatalogLoading: _isCatalogLoading,
+          canSave: _canSave,
+          onSave: _onSave,
+          isEditable: widget.isEditable,
+        ),
       ),
     );
   }

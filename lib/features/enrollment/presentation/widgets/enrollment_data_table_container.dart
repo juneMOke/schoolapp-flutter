@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_listing_view_mode.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_grid_view.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
@@ -58,7 +58,7 @@ class _EnrollmentDataTableContainerState
       preferred: widget.preferredViewMode,
     );
 
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       builder: (context, state) {
         final stateWidget = _buildStateWidget(
           context,
@@ -89,7 +89,7 @@ class _EnrollmentDataTableContainerState
 
   Widget? _buildStateWidget(
     BuildContext context,
-    EnrollmentState state,
+    EnrollmentLocalListState state,
     EnrollmentListingViewMode effectiveViewMode,
   ) {
     if (state.summariesStatus == EnrollmentLoadStatus.loading) {
@@ -123,7 +123,10 @@ class _EnrollmentDataTableContainerState
     return null;
   }
 
-  Widget _buildTableView(EnrollmentState state, AppLocalizations l10n) {
+  Widget _buildTableView(
+    EnrollmentLocalListState state,
+    AppLocalizations l10n,
+  ) {
     return EnrollmentResultsTableView(
       key: ValueKey('table-${state.summariesStatus}'),
       enrollments: state.summaries,
@@ -138,11 +141,11 @@ class _EnrollmentDataTableContainerState
       totalPages: state.summariesTotalPages,
       pageSize: state.summariesSize,
       density: widget.tableDensity,
-      onPreviousPage: () => context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+      onPreviousPage: () => context.read<EnrollmentLocalListBloc>().add(
+        LocalListPageRequested(page: state.summariesPage - 1),
       ),
-      onNextPage: () => context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+      onNextPage: () => context.read<EnrollmentLocalListBloc>().add(
+        LocalListPageRequested(page: state.summariesPage + 1),
       ),
       pageLabelBuilder: (current, total) =>
           l10n.paginationPageIndicator(current, total),
@@ -150,7 +153,7 @@ class _EnrollmentDataTableContainerState
     );
   }
 
-  Widget _buildGridView(EnrollmentState state, AppLocalizations l10n) {
+  Widget _buildGridView(EnrollmentLocalListState state, AppLocalizations l10n) {
     return EnrollmentResultsGridView(
       key: ValueKey('grid-${state.summariesStatus}'),
       enrollments: state.summaries,
@@ -158,11 +161,11 @@ class _EnrollmentDataTableContainerState
       isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
       currentPage: state.summariesPage + 1,
       totalPages: state.summariesTotalPages,
-      onPreviousPage: () => context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+      onPreviousPage: () => context.read<EnrollmentLocalListBloc>().add(
+        LocalListPageRequested(page: state.summariesPage - 1),
       ),
-      onNextPage: () => context.read<EnrollmentBloc>().add(
-        EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+      onNextPage: () => context.read<EnrollmentLocalListBloc>().add(
+        LocalListPageRequested(page: state.summariesPage + 1),
       ),
       pageLabelBuilder: (current, total) =>
           l10n.paginationPageIndicator(current, total),
@@ -174,14 +177,14 @@ class _EnrollmentDataTableContainerState
       return () => widget.onRefresh!.call();
     }
 
-    return () => context.read<EnrollmentBloc>().add(
-      const EnrollmentSummariesRefreshRequested(),
+    return () => context.read<EnrollmentLocalListBloc>().add(
+      const LocalListRefreshRequested(),
     );
   }
 
   List<String> _buildCriteriaChips(
     BuildContext context,
-    EnrollmentState state,
+    EnrollmentLocalListState state,
   ) {
     final l10n = AppLocalizations.of(context)!;
     final query = state.lastSummariesQuery;
@@ -206,7 +209,10 @@ class _EnrollmentDataTableContainerState
     return chips;
   }
 
-  String _buildEmptyLabel(EnrollmentState state, AppLocalizations l10n) {
+  String _buildEmptyLabel(
+    EnrollmentLocalListState state,
+    AppLocalizations l10n,
+  ) {
     return switch (state.summariesStatus) {
       EnrollmentLoadStatus.initial => l10n.noResultsFound,
       EnrollmentLoadStatus.success => l10n.enrollmentNoResultsDescription,

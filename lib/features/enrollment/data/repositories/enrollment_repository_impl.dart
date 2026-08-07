@@ -3,9 +3,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/data/datasources/enrollment_remote_data_source.dart';
-import 'package:school_app_flutter/features/enrollment/data/models/create_enrollment_request_model.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary_page.dart';
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_repository.dart';
 
@@ -18,59 +16,6 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     required this.remoteDataSource,
     required this.requiredAuth,
   });
-
-  @override
-  Future<Either<Failure, EnrollmentSummary>> createEnrollment({
-    required String firstName,
-    required String lastName,
-    required String surname,
-    required String dateOfBirth,
-    required String birthPlace,
-    required String nationality,
-    required String gender,
-  }) async {
-    try {
-      final enrollmentSummaryModel = await remoteDataSource.createEnrollment(
-        requiredAuth,
-        CreateEnrollmentRequestModel(
-          firstName: firstName,
-          lastName: lastName,
-          surname: surname,
-          dateOfBirth: dateOfBirth,
-          birthPlace: birthPlace,
-          nationality: nationality,
-          gender: gender,
-        ),
-      );
-      return Right(enrollmentSummaryModel.toEnrollmentSummary());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, EnrollmentSummary>> updateEnrollmentStatus({
-    required String enrollmentId,
-    required String status,
-  }) async {
-    try {
-      final enrollmentSummaryModel = await remoteDataSource
-          .updateEnrollmentStatus(requiredAuth, enrollmentId, status);
-      return Right(enrollmentSummaryModel.toEnrollmentSummary());
-    } on DioException catch (e) {
-      if (e.error is Failure) {
-        return Left(e.error as Failure);
-      }
-      return const Left(NetworkFailure('Network error occurred'));
-    } catch (_) {
-      return const Left(ServerFailure('Unexpected error occurred'));
-    }
-  }
 
   @override
   Future<Either<Failure, EnrollmentSummaryPage>>

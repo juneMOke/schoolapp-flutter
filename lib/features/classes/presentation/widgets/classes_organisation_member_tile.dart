@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/classes/domain/entities/classroom_me
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Variante d'action de la ligne élève (PARCOURS 7).
 ///
@@ -22,6 +23,12 @@ enum ClassesOrganisationMemberAction { transfer, assign }
 class ClassesOrganisationMemberTile extends StatefulWidget {
   final ClassroomMember member;
   final String? classroomId;
+
+  /// Dossier d'inscription de l'élève — à ne renseigner que pour une ligne
+  /// **non répartie** ([ClassesOrganisationMemberAction.assign]) : c'est la clé
+  /// exigée par l'affectation serveur. `null` pour un membre déjà en classe.
+  final String? enrollmentId;
+
   final bool isReassigning;
   final bool isCurrentReassigningMember;
   final ClassesOrganisationMemberAction action;
@@ -34,6 +41,7 @@ class ClassesOrganisationMemberTile extends StatefulWidget {
     required this.isCurrentReassigningMember,
     required this.action,
     required this.onTransferTap,
+    this.enrollmentId,
     super.key,
   });
 
@@ -63,7 +71,7 @@ class _ClassesOrganisationMemberTileState
     widget.onTransferTap(
       ClassroomMemberReassignIntent(
         classroomId: widget.classroomId,
-        classroomMemberId: widget.member.id,
+        enrollmentId: widget.enrollmentId,
         studentId: widget.member.studentId,
         studentFirstName: widget.member.studentFirstName,
         studentLastName: widget.member.studentLastName,
@@ -142,6 +150,16 @@ class _ClassesOrganisationMemberTileState
                           color: AppColors.textSecondary,
                         ),
                       ),
+                    // Transfert local non synchronisé : composition à la lecture.
+                    if (widget.member.hasPendingTransfer) ...[
+                      const SizedBox(height: AppDimensions.spacingXS),
+                      ClassesOrganisationGenderPill(
+                        label: AppLocalizations.of(
+                          context,
+                        )!.classesOrganisationTransferPendingBadge,
+                        color: AppColors.warning,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -199,6 +217,7 @@ class _ActionButton extends StatelessWidget {
     final onTap = (enabled && !loading) ? onPressed : null;
 
     // Étroit : icône seule (+ tooltip) pour préserver la place du nom.
+    // Gel READ_ONLY (ADR-010) : transférer/affecter un élève est une écriture.
     if (compact) {
       final child = _styledButton(
         isTransfer: isTransfer,
@@ -208,22 +227,26 @@ class _ActionButton extends StatelessWidget {
             ? icon
             : Icon(isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
       );
-      return Tooltip(message: label, child: child);
+      return SessionWriteGate(
+        child: Tooltip(message: label, child: child),
+      );
     }
 
-    return _styledButton(
-      isTransfer: isTransfer,
-      onTap: onTap,
-      square: false,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon,
-          const SizedBox(width: AppDimensions.spacingXS),
-          Flexible(
-            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-        ],
+    return SessionWriteGate(
+      child: _styledButton(
+        isTransfer: isTransfer,
+        onTap: onTap,
+        square: false,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: AppDimensions.spacingXS),
+            Flexible(
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
       ),
     );
   }

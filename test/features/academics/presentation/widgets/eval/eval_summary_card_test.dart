@@ -72,4 +72,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Clôturée'), findsOneWidget);
   });
+
+  testWidgets(
+    'rejection_code (backstop 422, DF-N) : bannière de rejet affichée',
+    (tester) async {
+      final rejectedArgs = EvalDetailArgs(
+        brancheNom: 'Mathématiques',
+        classroomName: '6e A',
+        rattachementLabel: 'Semestre 1 · Période 2',
+        eval: EvalVm(
+          id: 'e1',
+          type: TypeEvaluation.interro,
+          nom: 'Interrogation 3',
+          chapitres: const [],
+          date: DateTime(2026, 6, 12),
+          maxPoints: 10,
+          poids: 1,
+          state: EvalState.upcoming,
+          pourcentageSaisie: 0,
+          saisies: 0,
+          total: 28,
+          rejectionCode: 'PERIOD_CLOSED',
+        ),
+      );
+
+      await tester.pumpWidget(host(EvalSummaryCard(args: rejectedArgs)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rejetée : période clôturée'), findsOneWidget);
+    },
+  );
+
+  testWidgets('pas de rejection_code : pas de bannière', (tester) async {
+    await tester.pumpWidget(
+      host(EvalSummaryCard(args: args(EvalState.partial))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.error_outline_rounded), findsNothing);
+  });
 }

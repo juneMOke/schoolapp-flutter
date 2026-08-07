@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_errors_sheet.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar_parts/top_bar_logout_button.dart';
@@ -15,6 +20,25 @@ class TopBarActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Pastille d'état de synchro globale (source : SyncStatusCubit racine).
+        BlocBuilder<SyncStatusCubit, SyncStatusState>(
+          builder: (context, state) => SyncIndicator(
+            status: state.status,
+            lastSyncAtMs: state.lastSyncAtMs,
+            // Seul chemin de sortie de l'état terminal `SYNC_ERROR` : sans lui
+            // la pastille « Conflit » est un cul-de-sac, l'écriture rejetée
+            // étant invisible et non rejouable.
+            //
+            // Ouvrable AUSSI quand la file est retenue sans être en erreur
+            // (dépendance non satisfaite, écriture d'un autre compte) : sinon
+            // « À envoyer » est un cul-de-sac symétrique, où l'explication de
+            // l'attente existe en base mais n'est atteignable par aucun geste.
+            onTap: state.status == SyncStatus.syncConflict || state.hasHeldWork
+                ? () => showSyncErrorsSheet(context)
+                : null,
+          ),
+        ),
+        const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
         TopBarNotificationButton(onPressed: () {}),
         const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
         if (!isCompact) ...[

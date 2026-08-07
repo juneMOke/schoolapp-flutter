@@ -78,6 +78,12 @@ class StudentChargesStepHandler extends BaseEnrollmentStepHandler {
       flowStepIndex: step.index,
       isEditable: false,
       stepController: controller,
+      // Flux brouillon local (création/édition) : l'étape GÉNÈRE les créances
+      // provisoires depuis la grille locale (FF5) avant de les lire — la
+      // consultation lecture seule se contente de lire le grand-livre.
+      initializeDraftCharges: context.detailPolicy.usesLocalDraft,
+      academicYearId: context.detail.enrollmentDetail.academicYearId,
+      schoolLevelGroupId: context.detail.enrollmentDetail.schoolLevelGroupId,
     );
   }
 }

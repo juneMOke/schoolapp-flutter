@@ -13,6 +13,7 @@ FeeTariffModel _$FeeTariffModelFromJson(Map<String, dynamic> json) =>
       amount: (json['amount'] as num).toDouble(),
       currency: json['currency'] as String,
       levelId: json['levelId'] as String,
+      dueAt: json['dueAt'] as String?,
     );
 
 Map<String, dynamic> _$FeeTariffModelToJson(FeeTariffModel instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$FeeTariffModelToJson(FeeTariffModel instance) =>
       'amount': instance.amount,
       'currency': instance.currency,
       'levelId': instance.levelId,
+      'dueAt': instance.dueAt,
     };

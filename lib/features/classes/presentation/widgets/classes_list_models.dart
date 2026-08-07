@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 
 class ClassesListCycleOption extends Equatable {
   final String id;
@@ -25,7 +25,7 @@ class ClassesListLevelOption extends Equatable {
   final String label;
   final int displayOrder;
   final bool splitIntoClassrooms;
-  final List<BootstrapClassroom> classrooms;
+  final List<OfflineClassroom> classrooms;
 
   const ClassesListLevelOption({
     required this.schoolLevelGroupId,
@@ -57,7 +57,7 @@ class ClassesListSearchRequest extends Equatable {
   final String surname;
   final ClassesListCycleOption? selectedCycle;
   final ClassesListLevelOption? selectedLevel;
-  final BootstrapClassroom? selectedClassroom;
+  final OfflineClassroom? selectedClassroom;
 
   const ClassesListSearchRequest({
     required this.firstName,

@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_school_detail.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_draft_event.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/widgets/enrollment_draft_step_save_listener.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stepper_flow_event.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/helpers/target_school_level_resolver.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_step_controller.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/academic_info_widgets.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_state_helper.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
-import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class TargetAcademicInfoStep extends StatefulWidget {
   final StudentDetail studentDetail;
+  final EnrollmentSchoolDetail enrollmentDetail;
   final String studentId;
   final String enrollmentId;
+
   final bool showInlineSaveButton;
   final int? flowStepIndex;
   final VoidCallback? onRefreshRequested;
@@ -27,6 +31,7 @@ class TargetAcademicInfoStep extends StatefulWidget {
   const TargetAcademicInfoStep({
     super.key,
     required this.studentDetail,
+    required this.enrollmentDetail,
     required this.studentId,
     required this.enrollmentId,
     this.showInlineSaveButton = true,
@@ -48,6 +53,17 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   late String _selectedSchoolLevelId;
   bool _bootstrapDefaultsApplied = false;
 
+  // Devient true dès que l'utilisateur choisit lui-même le cycle/niveau
+  // cible : le calcul auto (classe de l'année précédente → classe cible) ne
+  // s'applique plus alors, y compris si le dossier n'a encore rien de
+  // persisté (cf. pattern _validatedPreviousYearManuallySet de
+  // PreviousAcademicInfoStep).
+  bool _targetLevelManuallySet = false;
+
+  // true tant que la valeur actuellement affichée provient du calcul auto
+  // (et pas d'un choix manuel) — pilote uniquement le badge « Auto ».
+  bool _targetLevelAutoFilled = false;
+
   String _initialSchoolLevelGroupId = '';
   String _initialSchoolLevelId = '';
 
@@ -55,13 +71,12 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   bool _isValid = false;
   bool _showValidationHints = false;
   bool _isSaving = false;
+  bool _awaitingDraftSave = false;
 
   bool get _canSave => _stepState.canSave;
 
   StepFormState get _stepState =>
       StepFormState(dirty: _isDirty, valid: _isValid, saving: _isSaving);
-
-  late final StudentBloc _studentBloc;
 
   void submitForm() => _onSave();
 
@@ -80,7 +95,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
   @override
   void initState() {
     super.initState();
-    _studentBloc = getIt<StudentBloc>();
 
     _currYearController = TextEditingController();
     _targetOptionController = TextEditingController();
@@ -126,6 +140,8 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     if (oldWidget.studentDetail != widget.studentDetail) {
       _syncFromStudentDetail(widget.studentDetail, resetSnapshot: true);
       _bootstrapDefaultsApplied = false;
+      _targetLevelManuallySet = false;
+      _targetLevelAutoFilled = false;
       _showValidationHints = false;
       _isSaving = false;
       _recomputeFormState(notifyParent: false);
@@ -141,7 +157,6 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     widget.stepController?.unbind(submitForm);
     _currYearController.dispose();
     _targetOptionController.dispose();
-    _studentBloc.close();
     super.dispose();
   }
 
@@ -205,31 +220,57 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     }
     if (!_isDirty) return;
 
-    _studentBloc.add(
-      StudentAcademicInfoUpdateRequested(
-        studentId: widget.studentId,
+    _dispatchDraftTargetAcademic();
+  }
+
+  void _dispatchDraftTargetAcademic() {
+    _awaitingDraftSave = true;
+    _onSavingChanged(true);
+    context.read<EnrollmentOfflineBloc>().add(
+      SaveDraftTargetAcademicRequested(
+        enrollmentId: widget.enrollmentId,
         schoolLevelId: _selectedSchoolLevelId,
         schoolLevelGroupId: _selectedSchoolLevelGroupId,
       ),
     );
   }
 
-  void _applyBootstrapDefaults(Bootstrap bootstrap) {
+  void _onDraftSaved() {
+    _awaitingDraftSave = false;
+    _markCurrentAsSavedSnapshot();
+    _recomputeFormState();
+    _onSavingChanged(false);
+    if (_showValidationHints) {
+      setState(() => _showValidationHints = false);
+    }
+    AppSnackBar.showSuccess(
+      context,
+      AppLocalizations.of(context)!.academicInfoSaveSuccess,
+    );
+    widget.onRefreshRequested?.call();
+  }
+
+  void _onDraftError(String message) {
+    _awaitingDraftSave = false;
+    _onSavingChanged(false);
+  }
+
+  void _applyBootstrapDefaults(AcademicYearContext academicYearContext) {
     bool bootstrapChanged = false;
     final previousCurrentYear = _currYearController.text;
-    _currYearController.text = bootstrap.academicYear.name;
+    _currYearController.text = academicYearContext.academicYear.name;
     if (previousCurrentYear != _currYearController.text) {
       bootstrapChanged = true;
     }
     if (_bootstrapDefaultsApplied) return;
 
-    final groupBundles = bootstrap.schoolLevelGroups;
+    final groupBundles = academicYearContext.schoolLevelGroups;
     final selectedGroupBundle = groupBundles
-        .where((g) => g.schoolLevelGroup.id == _selectedSchoolLevelGroupId)
+        .where((g) => g.group.id == _selectedSchoolLevelGroupId)
         .firstOrNull;
 
     if (selectedGroupBundle == null && groupBundles.isNotEmpty) {
-      _selectedSchoolLevelGroupId = groupBundles.first.schoolLevelGroup.id;
+      _selectedSchoolLevelGroupId = groupBundles.first.group.id;
       // Ne pas réinitialiser _initialSchoolLevelGroupId : le snapshot initial
       // représente l'état serveur. Pour newFirstRegistration, _initial* reste ''
       // → formulaire dirty après application des defaults bootstrap.
@@ -237,14 +278,14 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     }
 
     final resolvedGroupBundle = groupBundles
-        .where((g) => g.schoolLevelGroup.id == _selectedSchoolLevelGroupId)
+        .where((g) => g.group.id == _selectedSchoolLevelGroupId)
         .firstOrNull;
     if (resolvedGroupBundle != null &&
-        resolvedGroupBundle.schoolLevels.every(
-          (l) => l.schoolLevel.id != _selectedSchoolLevelId,
+        resolvedGroupBundle.levels.every(
+          (l) => l.id != _selectedSchoolLevelId,
         )) {
-      _selectedSchoolLevelId = resolvedGroupBundle.schoolLevels.isNotEmpty
-          ? resolvedGroupBundle.schoolLevels.first.schoolLevel.id
+      _selectedSchoolLevelId = resolvedGroupBundle.levels.isNotEmpty
+          ? resolvedGroupBundle.levels.first.id
           : '';
       // Idem : ne pas écraser _initialSchoolLevelId.
       bootstrapChanged = true;
@@ -260,86 +301,128 @@ class TargetAcademicInfoStepState extends State<TargetAcademicInfoStep> {
     }
   }
 
+  /// Calcule la classe cible depuis la classe de l'année précédente
+  /// (réinscription), UNIQUEMENT si le dossier n'a ENCORE rien de persisté
+  /// pour la classe cible ([_isPersistedTargetEmpty]) — sinon on conserve la
+  /// valeur telle quelle, qu'elle vienne d'un choix manuel ou d'un
+  /// enregistrement précédent. Ré-évalué à chaque build (idempotent, comme
+  /// [_applyBootstrapDefaults]) tant que rien n'est encore persisté : si
+  /// l'Antécédents est confirmé APRÈS l'ouverture de cette étape (donc après
+  /// qu'un défaut naïf ait déjà été affiché), le calcul reprend la main dès
+  /// que la donnée devient disponible — mais un choix manuel dans la même
+  /// session ([_targetLevelManuallySet]) n'est lui jamais écrasé.
+  ///
+  /// Ne s'applique QUE si l'Antécédents a déjà été confirmé
+  /// ([_hasConfirmedPreviousYearData]) : `validatedPreviousYear` vaut `false`
+  /// par défaut tant que rien n'a été saisi, ce qui n'est PAS la même chose
+  /// qu'un redoublement réel — pas de valeur inventée, on force la saisie.
+  void _applyAutoTargetLevel(AcademicYearContext academicYearContext) {
+    if (_targetLevelManuallySet) return;
+    if (!_isPersistedTargetEmpty) return;
+    if (!_hasConfirmedPreviousYearData) return;
+
+    final previousLevelLabel = widget.enrollmentDetail.previousSchoolLevel;
+    if (previousLevelLabel.trim().isEmpty) return;
+
+    final resolution = resolveTargetSchoolLevel(
+      schoolLevelGroups: academicYearContext.schoolLevelGroups,
+      previousSchoolLevelLabel: previousLevelLabel,
+      previousSchoolLevelGroupLabel:
+          widget.enrollmentDetail.previousSchoolLevelGroup,
+      validatedPreviousYear: widget.enrollmentDetail.validatedPreviousYear,
+    );
+    if (resolution == null) return;
+    if (_selectedSchoolLevelGroupId == resolution.schoolLevelGroupId &&
+        _selectedSchoolLevelId == resolution.schoolLevelId &&
+        _targetLevelAutoFilled) {
+      return;
+    }
+
+    _selectedSchoolLevelGroupId = resolution.schoolLevelGroupId;
+    _selectedSchoolLevelId = resolution.schoolLevelId;
+    _targetLevelAutoFilled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _recomputeFormState();
+    });
+  }
+
+  bool get _isTargetLevelAutoComputed => _targetLevelAutoFilled;
+
+  /// `schoolLevelId`/`schoolLevelGroupId` du dossier PERSISTÉ (pas la
+  /// sélection locale, potentiellement déjà défaultée naïvement par
+  /// [_applyBootstrapDefaults]) — « target year vide » au sens où rien n'a
+  /// encore été enregistré pour ce dossier.
+  bool get _isPersistedTargetEmpty =>
+      widget.enrollmentDetail.schoolLevelId.isEmpty &&
+      widget.enrollmentDetail.schoolLevelGroupId.isEmpty;
+
+  /// `previousRank` n'est renseigné qu'après un enregistrement réussi de
+  /// l'étape Antécédents (moyenne + rang requis pour sauvegarder) — signal
+  /// fiable que `validatedPreviousYear` reflète une vraie saisie et pas le
+  /// défaut `false` d'un champ jamais rempli.
+  bool get _hasConfirmedPreviousYearData =>
+      widget.enrollmentDetail.previousRank != null;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final showValidation = _showValidationHints || (_isDirty && !_isValid);
 
-    return BlocProvider<StudentBloc>.value(
-      value: _studentBloc,
-      child: BlocConsumer<StudentBloc, StudentState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status || prev.operation != curr.operation,
-        listener: (context, state) {
-          if (state.operation != StudentUpdateOperation.academicInfo) {
-            return;
+    return EnrollmentDraftStepSaveListener(
+      enabled: true,
+      isAwaiting: () => _awaitingDraftSave,
+      onSaved: _onDraftSaved,
+      onError: _onDraftError,
+      child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+        builder: (context, academicYearState) {
+          final academicYearContext = academicYearState.context;
+          if (academicYearContext != null) {
+            // Le calcul auto doit avoir la main AVANT le défaut naïf de
+            // _applyBootstrapDefaults (1er groupe/1er niveau) : sinon ce
+            // dernier remplit _selectedXxx en premier et le calcul auto ne
+            // voit plus jamais "target vide" au niveau de la sélection
+            // locale (il se fie au dossier PERSISTÉ, pas à cette sélection).
+            _applyAutoTargetLevel(academicYearContext);
+            _applyBootstrapDefaults(academicYearContext);
           }
 
-          _onSavingChanged(state.status == StudentUpdateStatus.loading);
-
-          if (state.status == StudentUpdateStatus.success) {
-            _markCurrentAsSavedSnapshot();
-            _recomputeFormState();
-            _onSavingChanged(false);
-            if (_showValidationHints) {
-              setState(() => _showValidationHints = false);
-            }
-            widget.onRefreshRequested?.call();
-            AppSnackBar.showSuccess(context, l10n.academicInfoSaveSuccess);
-          } else if (state.status == StudentUpdateStatus.failure) {
-            _onSavingChanged(false);
-            AppSnackBar.showError(
-              context,
-              l10n.academicInfoSaveError(state.errorMessage ?? ''),
-              onRetry: submitForm,
-              retryLabel: l10n.enrollmentErrorRetry,
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading =
-              state.status == StudentUpdateStatus.loading &&
-              state.operation == StudentUpdateOperation.academicInfo;
-
-          return BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-            builder: (context, bootstrapState) {
-              final bootstrap = bootstrapState.bootstrap;
-              if (bootstrap != null) {
-                _applyBootstrapDefaults(bootstrap);
-              }
-
-              return TargetAcademicInfoStepBody(
-                bootstrap: bootstrap,
-                currYearController: _currYearController,
-                targetOptionController: _targetOptionController,
-                selectedSchoolLevelGroupId: _selectedSchoolLevelGroupId,
-                selectedSchoolLevelId: _selectedSchoolLevelId,
-                showValidation: showValidation,
-                isLoading: isLoading,
-                canSave: _canSave,
-                showInlineSaveButton: widget.showInlineSaveButton,
-                onSave: _onSave,
-                isEditable: widget.isEditable,
-                onGroupChanged: (groupId, firstLevelId) {
-                  setState(() {
-                    _selectedSchoolLevelGroupId = groupId;
-                    _selectedSchoolLevelId = firstLevelId;
-                  });
-                  _recomputeFormState();
-                },
-                onLevelChanged: (levelId) {
-                  setState(() => _selectedSchoolLevelId = levelId);
-                  _recomputeFormState();
-                },
-                groupError:
-                    showValidation && _selectedSchoolLevelGroupId.isEmpty
-                    ? l10n.requiredFieldError(l10n.targetCycleLabel)
-                    : null,
-                levelError: showValidation && _selectedSchoolLevelId.isEmpty
-                    ? l10n.requiredFieldError(l10n.targetLevelLabel)
-                    : null,
-              );
+          return TargetAcademicInfoStepBody(
+            bootstrap: academicYearContext,
+            currYearController: _currYearController,
+            targetOptionController: _targetOptionController,
+            selectedSchoolLevelGroupId: _selectedSchoolLevelGroupId,
+            selectedSchoolLevelId: _selectedSchoolLevelId,
+            showValidation: showValidation,
+            isLoading: _isSaving,
+            canSave: _canSave,
+            showInlineSaveButton: widget.showInlineSaveButton,
+            onSave: _onSave,
+            isEditable: widget.isEditable,
+            isAutoComputed: _isTargetLevelAutoComputed,
+            onGroupChanged: (groupId, firstLevelId) {
+              setState(() {
+                _selectedSchoolLevelGroupId = groupId;
+                _selectedSchoolLevelId = firstLevelId;
+                _targetLevelManuallySet = true;
+                _targetLevelAutoFilled = false;
+              });
+              _recomputeFormState();
             },
+            onLevelChanged: (levelId) {
+              setState(() {
+                _selectedSchoolLevelId = levelId;
+                _targetLevelManuallySet = true;
+                _targetLevelAutoFilled = false;
+              });
+              _recomputeFormState();
+            },
+            groupError: showValidation && _selectedSchoolLevelGroupId.isEmpty
+                ? l10n.requiredFieldError(l10n.targetCycleLabel)
+                : null,
+            levelError: showValidation && _selectedSchoolLevelId.isEmpty
+                ? l10n.requiredFieldError(l10n.targetLevelLabel)
+                : null,
           );
         },
       ),

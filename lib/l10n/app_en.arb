@@ -28,10 +28,20 @@
   "@loginErrorRateLimited": {
     "description": "429 error banner — temporary lockout with countdown",
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "loginContactAdmin": "Contact the administrator",
+  "loginErrorOfflineFirstLogin": "No connection, and this account has never signed in on this tablet. A first online sign-in is required.",
+  "@loginErrorOfflineFirstLogin": {
+    "description": "Banner: offline login impossible, account never seen online on this device (ADR-010 D-01)"
+  },
+  "loginErrorOfflineWindowExpired": "Offline work period expired. Sign in online as soon as the network is back.",
+  "@loginErrorOfflineWindowExpired": {
+    "description": "Banner: offline window closed (refresh bound passed or revoked) — online sign-in required (ADR-010 D-07/D-09)"
+  },
   "showPassword": "Show",
   "hidePassword": "Hide",
   "schoolApp": "ETEELO CONNECT",
@@ -39,7 +49,18 @@
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplify your school management",
   "splashSemanticsLabel": "ETEELO CONNECT — splash screen",
-  "bootstrapOfflineBanner": "Offline mode — cached data",
+  "sessionOfflineBanner": "Offline session — verified locally",
+  "@sessionOfflineBanner": {
+    "description": "Banner: session opened offline (ADR-010)"
+  },
+  "sessionWarningBanner": "Session needs refresh — reconnect soon",
+  "@sessionWarningBanner": {
+    "description": "WARNING banner: degraded offline session (D7–D21)"
+  },
+  "sessionReadOnlyBanner": "Read-only — online reconnection required",
+  "@sessionReadOnlyBanner": {
+    "description": "READ_ONLY banner: expired offline session (D21+)"
+  },
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",
@@ -47,8 +68,12 @@
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",
     "placeholders": {
-      "version": { "type": "String" },
-      "build": { "type": "String" }
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
     }
   },
   "logout": "Logout",
@@ -178,6 +203,8 @@
   "classesOrganisationDistributionByGender": "Distribute by gender",
   "classesOrganisationDistributionByPercentage": "Distribute by average",
   "classesOrganisationDistributeByGenderAction": "Start gender-based distribution",
+  "classesOrganisationDistributeOfflineHint": "You seem to be offline. A connection is required to start the distribution.",
+  "classesOrganisationDistributeLoadErrorHint": "Unable to compute the headcount to distribute right now. Please try again later.",
   "classesDistributionResultEyebrow": "Gender distribution",
   "classesDistributionProcessingTitle": "Distribution in progress…",
   "classesDistributionSuccessTitle": "Distribution complete",
@@ -204,14 +231,20 @@
   "classesDistributionClassLabel": "Class {code}",
   "@classesDistributionClassLabel": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "classesDistributionClassCapacity": "{count} students · capacity {capacity}",
   "@classesDistributionClassCapacity": {
     "placeholders": {
-      "count": { "type": "int" },
-      "capacity": { "type": "int" }
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
     }
   },
   "classesDistributionCapacityFull": "full",
@@ -230,15 +263,24 @@
   "classesReassignOptionStats": "{eff}/{cap} · B {boys} · G {girls}",
   "@classesReassignOptionStats": {
     "placeholders": {
-      "eff": { "type": "int" },
-      "cap": { "type": "int" },
-      "boys": { "type": "int" },
-      "girls": { "type": "int" }
+      "eff": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      },
+      "boys": {
+        "type": "int"
+      },
+      "girls": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationTransferAction": "Transfer",
   "classesOrganisationTransferInProgress": "Transfer in progress...",
-  "classesOrganisationTransferSuccess": "Transfer completed successfully.",
+  "classesOrganisationTransferQueued": "Transfer saved — pending synchronization.",
+  "classesOrganisationTransferPendingBadge": "Pending",
   "classesOrganisationTransferNoTarget": "No destination classroom is available.",
   "classesOrganisationSelectCycleAndLevelTitle": "Select a cycle and a level",
   "classesOrganisationSelectCycleAndLevelSubtitle": "Start by selecting a cycle, then a level to display class composition.",
@@ -246,33 +288,45 @@
   "classesOrganisationSelectLevelSubtitle": "Now select a level in the {cycleName} cycle.",
   "@classesOrganisationSelectLevelSubtitle": {
     "placeholders": {
-      "cycleName": { "type": "String" }
+      "cycleName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationPendingTitle": "Level not distributed yet",
   "classesOrganisationPendingMessage": "{count} students in {levelName} aren''t assigned to any class. Automatic distribution balances the classes by gender.",
   "@classesOrganisationPendingMessage": {
     "placeholders": {
-      "count": { "type": "int" },
-      "levelName": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "levelName": {
+        "type": "String"
+      }
     }
   },
   "classesOrganisationPendingStudentsToDistribute": "{count} students to distribute",
   "@classesOrganisationPendingStudentsToDistribute": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationGenderBoysPill": "B · {count}",
   "@classesOrganisationGenderBoysPill": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationGenderGirlsPill": "G · {count}",
   "@classesOrganisationGenderGirlsPill": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationUnassignedTitle": "Unassigned students",
@@ -281,10 +335,15 @@
   "classesOrganisationNoMembers": "No student in this classroom.",
   "classesOrganisationAssignAction": "Assign",
   "classesOrganisationAssignDialogTitle": "Assign the student",
+  "classesOrganisationAssignSuccess": "Student assigned to the class.",
+  "classesOrganisationAssignRejected": "Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.",
+  "classesOrganisationAssignNotFound": "Class or enrolment not found. Refresh the list.",
   "classesOrganisationLoadingClassroomsCount": "Loading members for {count} classrooms...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesOrganisationStudentDetailSoon": "Student details will be available in the next batch.",
@@ -310,14 +369,20 @@
   "classesListResultsSummary": "{count} students found — {criteria}",
   "@classesListResultsSummary": {
     "placeholders": {
-      "count": { "type": "int" },
-      "criteria": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "criteria": {
+        "type": "String"
+      }
     }
   },
   "classesListResultsSummaryWithoutCriteria": "{count} students found",
   "@classesListResultsSummaryWithoutCriteria": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "classesListClassroomChipLabel": "Classroom",
@@ -341,22 +406,34 @@
   "menuCourses": "Courses",
   "subMenuMyCourses": "My courses",
   "subMenuTimetable": "Timetable",
-  "myCoursesCount": "{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}",
+  "myCoursesCount": "{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}",
   "@myCoursesCount": {
     "placeholders": {
-      "classCount": { "type": "int" },
-      "courseCount": { "type": "int" }
+      "classCount": {
+        "type": "int"
+      },
+      "courseCount": {
+        "type": "int"
+      }
     }
   },
   "myCoursesExpandAll": "Expand all",
   "myCoursesCollapseAll": "Collapse all",
-  "myCoursesClassCourseCount": "{count, plural, =1{1 course} other{{count} courses}}",
+  "myCoursesClassCourseCount": "{count, plural, =0{0 courses} =1{1 course} other{{count} courses}}",
   "@myCoursesClassCourseCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesStudentCount": "{count, plural, =0{No students} =1{1 student} other{{count} students}}",
   "@myCoursesStudentCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesLoadingA11yLabel": "Loading your courses",
   "myCoursesEmptyTitle": "No course assigned",
@@ -376,73 +453,150 @@
   "myCoursesErrorContactAdmin": "Contact the administrator",
   "myCoursesErrorIncidentCode": "Incident code: {code}",
   "@myCoursesErrorIncidentCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailBackToCourses": "My courses",
   "courseDetailEvaluationCount": "{count, plural, =0{No evaluation} =1{1 evaluation} other{{count} evaluations}}",
   "@courseDetailEvaluationCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "courseDetailToGrade": "{count, plural, =1{1 to grade} other{{count} to grade}}",
+  "courseDetailToGrade": "{count, plural, =0{0 to grade} =1{1 to grade} other{{count} to grade}}",
   "@courseDetailToGrade": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNextEvalEyebrow": "Next evaluation",
   "courseDetailEvalMetaShort": "{date} · /{max} pts",
   "@courseDetailEvalMetaShort": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailEvalMeta": "{date} · /{max} pts · weight {poids}",
   "@courseDetailEvalMeta": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailSemesterLabel": "Semester {ordre}",
   "@courseDetailSemesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailTrimesterLabel": "Term {ordre}",
   "@courseDetailTrimesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailPeriodLabel": "Period {ordre}",
   "@courseDetailPeriodLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailExamLabel": "Exam",
   "courseDetailStatutClosed": "Closed",
   "courseDetailStatutCurrent": "In progress",
   "courseDetailStatutUpcoming": "Upcoming",
-  "courseDetailBucketNotes": "{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}",
+  "courseDetailBucketNotes": "{saisies}/{total} marks · {evals, plural, =0{0 eval.} =1{1 eval.} other{{evals} evals.}}",
   "@courseDetailBucketNotes": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "evals": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBucketNoEval": "No evaluation",
   "courseDetailExamToPlan": "To be scheduled",
   "courseDetailNoteGlobaleTitle": "Overall mark — {label}",
   "@courseDetailNoteGlobaleTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailProvisional": "provisional",
   "courseDetailClassAverageLabel": "Class average",
   "courseDetailAbove50": "{count}/{total} students ≥ 50%",
   "@courseDetailAbove50": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNoAverage": "No average yet",
   "courseDetailByStudent": "By student",
   "courseDetailBadgeGraded": "Graded",
   "courseDetailBadgeInProgress": "In progress · {saisies}/{total}",
   "@courseDetailBadgeInProgress": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBadgeUpcoming": "Upcoming",
-  "courseDetailEvalExpected": "{count, plural, =1{1 student expected} other{{count} students expected}}",
+  "courseDetailEvalExpected": "{count, plural, =0{0 students expected} =1{1 student expected} other{{count} students expected}}",
   "@courseDetailEvalExpected": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailReleveTitle": "Overall marks — {label}",
   "@courseDetailReleveTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailReleveKpiAverage": "Average",
   "courseDetailReleveKpiAbove50": "≥ 50%",
@@ -476,48 +630,96 @@
   "evalCreateFieldMax": "Maximum",
   "evalCreateFieldPoids": "Weight",
   "evalCreateFieldChapitres": "Related chapters",
-  "evalCreateChapitresComingSoon": "Coming soon",
+  "evalCreateChapitresEmpty": "No chapters available for this course",
   "evalCreateCancel": "Cancel",
   "evalCreateSubmit": "Create evaluation",
-  "evalCreateHint": "{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
+  "evalCreateHint": "{count, plural, =0{No student in {classroom} will be added} =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.",
   "@evalCreateHint": {
-    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
   },
   "evalCreateSuccessToast": "Evaluation created",
   "evalCreateErrorToast": "Creating the evaluation failed. Please try again.",
   "evalCreateClosedPeriodError": "Closed period: you can't add an evaluation to it.",
+  "evalCreateMaxReachedError": "Entry cap reached for this date.",
+  "evalRejectionPeriodClosed": "Rejected: closed period",
+  "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
+  "evalRejectionMaxReached": "Rejected: cap reached",
+  "evalRejectionGeneric": "Rejected by the server",
+  "noteRejectionUnknownEvaluation": "Evaluation unknown to the server",
+  "noteRejectionPeriodeClose": "Closed period",
+  "noteRejectionInvalid": "Invalid grade",
+  "noteRejectionContextUnavailable": "Context unavailable",
+  "noteRejectionGeneric": "Rejected by the server",
   "evalDetailBack": "Back to course",
   "evalBadgeComplete": "Closed",
   "evalBadgePartial": "Grading · {done}/{total}",
   "@evalBadgePartial": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalBadgeUpcoming": "Upcoming",
   "evalChipMax": "Maximum: {max} pts",
   "@evalChipMax": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalChipPoids": "Weight: {poids}",
   "@evalChipPoids": {
-    "placeholders": { "poids": { "type": "int" } }
+    "placeholders": {
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "evalModeTable": "Table",
   "evalModeFocus": "Focus",
-  "evalCountNotee": "{count, plural, =1{{count} graded} other{{count} graded}}",
+  "evalCountNotee": "{count, plural, =0{{count} graded} =1{{count} graded} other{{count} graded}}",
   "@evalCountNotee": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountEnAttente": "{count} pending",
   "@evalCountEnAttente": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsJust": "{count} exc. abs.",
   "@evalCountAbsJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsNonJust": "{count} unexc. abs.",
   "@evalCountAbsNonJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalStatutNotee": "Graded",
   "evalStatutEnAttente": "Pending",
@@ -525,7 +727,11 @@
   "evalStatutAbsNonJust": "Unexc. abs.",
   "evalNoteMaxError": "max {max}",
   "@evalNoteMaxError": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalAbsenceJustifieTooltip": "Excused absence",
   "evalAbsenceNonJustifieTooltip": "Unexcused absence",
@@ -535,21 +741,46 @@
   "evalFocusLast": "Last student",
   "evalFocusPosition": "Student {index} / {total}",
   "@evalFocusPosition": {
-    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveCounter": "{done} / {total} entered",
   "@evalSaveCounter": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
-  "evalSaveErrorsAlert": "{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}",
+  "evalSaveErrorsAlert": "{count, plural, =0{0 grades above the maximum} =1{1 grade above the maximum} other{{count} grades above the maximum}}",
   "@evalSaveErrorsAlert": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveButton": "Save grades",
   "evalSaveButtonSaving": "Saving…",
-  "evalSaveSuccessToast": "Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
+  "evalSaveSuccessToast": "Grades saved — {notees, plural, =0{{notees} graded} =1{{notees} graded} other{{notees} graded}} · {enAttente} pending",
   "@evalSaveSuccessToast": {
-    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+    "placeholders": {
+      "notees": {
+        "type": "int"
+      },
+      "enAttente": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveErrorToast": "Saving failed. Your entries are kept.",
   "evalSaisieEmptyTitle": "No students",
@@ -576,19 +807,65 @@
     }
   },
   "accueilBannerGreetingGeneric": "Hello",
-  "accueilBannerContextTail": "Here is the essential view of your school today.",
+  "accueilBannerSchoolLocation": "{school} · {locality}",
+  "@accueilBannerSchoolLocation": {
+    "description": "Home banner eyebrow: school name followed by its locality.",
+    "placeholders": {
+      "school": {
+        "type": "String"
+      },
+      "locality": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerSchoolYear": "School year {year}",
+  "@accueilBannerSchoolYear": {
+    "description": "Home banner context pill carrying the current school year.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "accueilModulesEyebrow": "Your modules",
   "accueilModulesTitle": "Where would you like to go?",
-  "accueilModulesIntro": "Four modules cover the administrative life of the school. Everything stays accessible from the side menu.",
+  "accueilModulesIntro": "Six modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
+  "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
+  "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
   "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
-  "accueilModuleCardSemantics": "{module} — open the dashboard",
+  "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@accueilModulePageCount": {
+    "description": "Module card subtitle: number of pages it gathers.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accueilModuleCardSemantics": "{module} — open {page}",
   "@accueilModuleCardSemantics": {
-    "description": "Accessibility label for the module card (button role, explicit destination).",
+    "description": "Accessibility label for the module card header (button role, explicit destination).",
     "placeholders": {
       "module": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSubModuleSemantics": "{page} — {module} module",
+  "@accueilSubModuleSemantics": {
+    "description": "Accessibility label for a sub-module row in a card footer.",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      },
+      "page": {
         "type": "String"
       }
     }
@@ -606,7 +883,6 @@
   "preRegistrations": "Pre-Registrations",
   "searchStudents": "Search Students",
   "searchFormSubtitleFirstRegistration": "Filter the enrollments list",
-  "searchFormSubtitlePreRegistration": "Online requests received, pending validation",
   "reRegistrationSearchHint": "Find a student or a class from the previous year to re-enroll",
   "reRegistrationSearchHelpPill": "Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.",
   "reRegistrationSearchTitle": "Search a student",
@@ -623,13 +899,32 @@
   "reRegistrationSearchReady": "Valid criteria, you can run the search.",
   "reRegistrationSearchInvitationTitle": "Start a re-registration search",
   "reRegistrationSearchInvitationMessage": "Fill the form above then click Search to display enrollment files.",
+  "preRegistrationSearchHint": "Find a pre-registration by student or by desired cycle/level",
+  "preRegistrationSearchHelpPill": "Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.",
+  "preRegistrationSearchTitle": "Search a pre-registration",
+  "preRegistrationSearchByNameGroup": "By name",
+  "preRegistrationSearchByLevelGroup": "By cycle / level",
+  "preRegistrationSearchOrSeparator": "OR",
+  "preRegistrationSearchActiveModeLabel": "Active search by:",
+  "preRegistrationSearchModeNameBadge": "Name",
+  "preRegistrationSearchModeLevelBadge": "Cycle / level",
+  "preRegistrationSearchLevelPlaceholder": "Choose a cycle first",
+  "preRegistrationSearchInvitationTitle": "Start a pre-registration search",
+  "preRegistrationSearchInvitationMessage": "Fill the form above then click Search to display requests.",
+  "firstRegistrationSearchByStudentGroup": "By student",
+  "firstRegistrationSearchByLevelGroup": "By target level",
+  "firstRegistrationSearchOrSeparator": "OR",
+  "firstRegistrationSearchActiveModeLabel": "Active search by:",
+  "firstRegistrationSearchModeStudentBadge": "Student",
+  "firstRegistrationSearchModeLevelBadge": "Level",
+  "firstRegistrationSearchLevelPlaceholder": "Choose a cycle",
   "firstName": "First Name",
   "lastName": "Last Name",
   "surname": "Surname",
   "dateOfBirth": "Date of Birth",
   "search": "Search",
   "clear": "Clear",
-  "viewDetails": "View Details",
+  "viewDetails": "View details",
   "editEnrollment": "Edit",
   "exportData": "Export",
   "noResultsFound": "No results found",
@@ -671,23 +966,37 @@
   "paginationPageIndicator": "Page {current} / {total}",
   "@paginationPageIndicator": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "paginationResultsCount": "{count, plural, =0{0 result} =1{1 result} other{{count} results}}",
   "@paginationResultsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "paginationRange": "{start}–{end} of {total} {unit}",
   "@paginationRange": {
     "placeholders": {
-      "start": { "type": "int" },
-      "end": { "type": "int" },
-      "total": { "type": "int" },
-      "unit": { "type": "String" }
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
   "paginationNavigationLabel": "Pagination",
@@ -714,10 +1023,7 @@
   "enrollmentDetailLoadingTitle": "Loading enrollment file",
   "enrollmentDetailLoadingMessage": "Please wait while enrollment details are being loaded.",
   "enrollmentDetailLoadErrorTitle": "Unable to load enrollment file",
-  "enrollmentDetailLoadErrorFallback": "An error occurred while loading enrollment details.",
   "enrollmentDetailRetryAction": "Retry",
-  "enrollmentDetailNotFoundTitle": "Details not found",
-  "enrollmentDetailNotFoundMessage": "This enrollment file does not exist or is no longer available.",
   "gender": "Gender",
   "actions": "Actions",
   "personalInformation": "Personal Information",
@@ -742,9 +1048,19 @@
   "guardianUnlinkError": "Failed to remove guardian: {message}",
   "@guardianUnlinkError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
+  "guardianSearchAction": "Search for a guardian",
+  "guardianSearchDialogTitle": "Search for an existing guardian",
+  "guardianSearchHint": "Enter at least one criterion (name or phone number)",
+  "guardianSearchEmptyTitle": "No guardian found",
+  "guardianSearchEmptyDescription": "No guardian matches these criteria. Check your input or add them as a new guardian.",
+  "guardianSearchAlreadyAddedError": "This guardian has already been added to this enrollment.",
+  "guardianSearchIdentityLockedHint": "Details from an existing record — not editable here.",
+  "guardianSearchErrorRetry": "Retry",
   "schoolFees": "School Fees",
   "summary": "Summary",
   "summaryYes": "Yes",
@@ -756,7 +1072,6 @@
   "nextPage": "Next page",
   "previousPage": "Previous page",
   "finish": "Finish",
-
   "personalInfoSubtitle": "Editable personal information",
   "firstNameHelp": "The student's official first name.",
   "lastNameHelp": "The student's family name.",
@@ -786,7 +1101,6 @@
   "dateHint": "dd/mm/yyyy",
   "genderMale": "Male",
   "genderFemale": "Female",
-
   "city": "City",
   "cityHelp": "Student's city of residence.",
   "district": "District",
@@ -800,7 +1114,6 @@
   "addressComplementaryPlaceholder": "Ex: 10, Avenue La source",
   "fullAddress": "Full address",
   "fullAddressHelp": "Full residential address.",
-
   "academicYearLabel": "Academic year",
   "academicYearLabelHelp": "Reference academic year.",
   "schoolLabel": "School",
@@ -822,15 +1135,18 @@
   "targetCycleLabelHelp": "Target cycle for this enrollment.",
   "targetLevelLabel": "Target level",
   "targetLevelLabelHelp": "Target level for this enrollment.",
+  "targetLevelAutoBadge": "Auto",
+  "targetLevelAutoBadgeHelp": "Class automatically computed from last year's class. Change the cycle or level to override it.",
   "optionLabel": "Option",
   "optionLabelHelp": "Desired option or specialization.",
   "toDefine": "To be defined",
-
   "primaryGuardian": "Primary Guardian",
   "guardianNumber": "Guardian {number}",
   "@guardianNumber": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "noGuardianInfo": "No guardian information available",
@@ -847,7 +1163,6 @@
   "relationshipAunt": "Aunt",
   "relationshipGrandparent": "Grandparent",
   "relationshipOther": "Other",
-
   "stepPersonalInfoSubtitle": "General student information",
   "stepAddressSubtitle": "Location and full address",
   "stepAddressTitle": "Student's address",
@@ -866,14 +1181,20 @@
   "stepIndicator": "Step {current} / {total}",
   "@stepIndicator": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "wizardStepNumberShort": "Step {number}",
   "@wizardStepNumberShort": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "stepForwardHint": "Click Continue to advance step by step.",
@@ -881,6 +1202,18 @@
   "journeyModeEdit": "Edit",
   "journeyModeView": "View",
   "journeyCloseAction": "Close",
+  "wizardExitConfirmTitle": "Leave the enrollment?",
+  "wizardExitConfirmMessage": "An enrollment is in progress. Unsaved changes on the current step will be lost; steps already saved remain available as a draft.",
+  "wizardExitConfirmAction": "Leave",
+  "wizardExitStayAction": "Keep editing",
+  "enrollmentFinalizeConfirmTitle": "Validate the enrollment?",
+  "enrollmentFinalizeConfirmMessage": "This action confirms the file and queues it for synchronization. Review the summary before validating.",
+  "enrollmentFinalizeProcessingTitle": "Validating enrollment…",
+  "enrollmentFinalizeSuccessTitle": "Enrollment validated",
+  "enrollmentFinalizeErrorTitle": "Validation failed",
+  "enrollmentFinalizeRetryAction": "Retry",
+  "enrollmentFinalizeCloseAction": "Close",
+  "enrollmentFinalizeContinueAction": "Continue",
   "stepSaveStateIdle": "No input yet",
   "stepSaveStateIncomplete": "Incomplete fields",
   "stepSaveStatePending": "Unsaved changes",
@@ -895,13 +1228,6 @@
   "validateEnrollment": "Validate enrollment",
   "validatingEnrollment": "Validating...",
   "goToFirstRegistration": "Go to First Registration",
-  "enrollmentStatusUpdateSuccess": "Status updated successfully.",
-  "enrollmentStatusUpdateError": "Failed to update status: {message}",
-  "@enrollmentStatusUpdateError": {
-    "placeholders": {
-      "message": { "type": "String" }
-    }
-  },
   "personalInfoSaveHintBeforeContinue": "Please save your changes before continuing.",
   "personalInfoValidationReasonsTitle": "Please correct the following fields:",
   "requiredFieldError": "The {field} field is required.",
@@ -961,12 +1287,30 @@
   },
   "@personalInfoSaveError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "enrollmentStudentColumnLabel": "Student",
   "enrollmentStatusFilterLabel": "Status",
   "enrollmentStatusInProgress": "In Progress",
+  "enrollmentDraftBadge": "Draft",
+  "@enrollmentDraftBadge": {
+    "description": "Listing row badge: enrollment started locally (unfinalized/unsynced draft), resumed on tap."
+  },
+  "enrollmentTypeReEnrollment": "Re-enrollment",
+  "@enrollmentTypeReEnrollment": {
+    "description": "Listing row type pill: re-enrollment dossier (RE_ENROLLMENT type), shown instead of the 'Pre-registered' status."
+  },
+  "enrollmentReenrollmentCandidateBadge": "To re-enroll",
+  "@enrollmentReenrollmentCandidateBadge": {
+    "description": "Re-enrollments page pill: prior-year cohort candidate not yet re-enrolled (no local dossier, tap = start). Replaces 'Pending' in this context."
+  },
+  "enrollmentReRegisteredBadge": "Re-enrolled",
+  "@enrollmentReRegisteredBadge": {
+    "description": "Listing row type pill: finalized/synced re-enrollment dossier (RE_ENROLLMENT, no local draft in progress). Replaces the generic 'Re-enrollment' pill once the dossier is confirmed."
+  },
   "enrollmentStatusAdminCompleted": "Admin Completed",
   "enrollmentStatusFinancialCompleted": "Financial Completed",
   "enrollmentStatusCompleted": "Completed",
@@ -977,7 +1321,6 @@
   "enrollmentReadOnlyMessage": "Student already enrolled — record can be viewed but not edited. Browse the steps to review the information.",
   "enrollmentEditableTitle": "Edit mode",
   "enrollmentEditableMessage": "This enrollment is in progress (IN_PROGRESS). Information can be updated.",
-
   "studentChargesStepTitle": "Student charges",
   "studentChargesStepSubtitle": "Financial charges applied to the student",
   "studentChargesLoading": "Loading student charges...",
@@ -1029,6 +1372,15 @@
   "studentChargeFeeCodeLatePaymentFee": "Late Payment Fee",
   "studentChargeFeeCodeRefund": "Refund",
   "studentChargeFeeCodeOther": "Other",
+  "studentChargeDueAtLabel": "Due: {date}",
+  "@studentChargeDueAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
   "studentChargeFeeCodeFallback": "School fee",
   "facturationSearchTitle": "Search Students",
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",
@@ -1051,24 +1403,52 @@
   "facturationBalanceDuePill": "{amount} due",
   "@facturationBalanceDuePill": {
     "description": "Billing AppBar pill when the balance is outstanding.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationBalanceUpToDatePill": "Up to date",
+  "financePendingSyncBadge": "Pending sync",
+  "@financePendingSyncBadge": {
+    "description": "Badge on a charge/payment whose local collection has not yet synced to the server."
+  },
+  "facturationFreshnessAt": "Ledger up to date at {time}",
+  "@facturationFreshnessAt": {
+    "description": "Freshness (ADR-002): timestamp of the last ledger refresh.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationFreshnessNever": "Ledger not synced",
+  "@facturationFreshnessNever": {
+    "description": "Freshness: no ledger refresh performed (offline)."
+  },
   "facturationChargeLineRemainingSuffix": "{amount} remaining",
   "@facturationChargeLineRemainingSuffix": {
     "description": "Fee line footer: amount remaining to pay.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationPaymentRecordedToast": "Payment of {amount} recorded",
   "@facturationPaymentRecordedToast": {
     "description": "Confirmation toast after a successful payment.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationChargeStatementCopied": "Statement copied to clipboard",
   "facturationChargeStatementEmpty": "No payment to export for this fee.",
   "facturationCsvHeaderFee": "Fee",
   "facturationCsvHeaderImputedAmount": "Imputed amount (USD)",
-
   "facturationDetailBackLabel": "Back to billing",
   "facturationDetailContextErrorTitle": "Detail context unavailable",
   "facturationDetailContextErrorMessage": "Required context for this detail view is missing. Go back to billing list and open the detail again.",
@@ -1094,8 +1474,12 @@
   "@facturationDetailPaymentsRecordedWithTotal": {
     "description": "Payments section subtitle: payment count + total paid.",
     "placeholders": {
-      "count": { "type": "int" },
-      "total": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "facturationPaymentMethodCash": "Cash",
@@ -1125,6 +1509,8 @@
   "facturationPaymentReceiptLabel": "Receipt no.",
   "facturationPaymentStudentLabel": "Student",
   "facturationPaymentDownloadReceiptLabel": "Download receipt",
+  "facturationPaymentReceiptPendingSyncHint": "The receipt will be available once the payment has been synchronised.",
+  "facturationPaymentReceiptNumberPending": "Awaiting synchronisation",
   "facturationPaymentCloseLabel": "Close",
   "facturationPaymentAllocationsSectionTitle": "Breakdown by fee",
   "facturationPaymentAllocationsSectionSubtitle": "List of charges covered by this payment.",
@@ -1247,6 +1633,10 @@
   "facturationCreatePaymentConfirmMessage": "This operation is irreversible. Do you confirm recording this payment?",
   "facturationCreatePaymentConfirmCancel": "Cancel",
   "facturationCreatePaymentConfirmValidate": "Confirm",
+  "facturationCreatePaymentCloseConfirmTitle": "Close this collection?",
+  "facturationCreatePaymentCloseConfirmMessage": "The information you entered will be lost if you close now.",
+  "facturationCreatePaymentCloseConfirmAction": "Close",
+  "facturationCreatePaymentCloseConfirmCancel": "Keep editing",
   "facturationCreatePaymentSuccessMessage": "Payment successfully recorded.",
   "facturationCreatePaymentExpectedLabel": "Expected",
   "facturationCreatePaymentPaidLabel": "Already paid",
@@ -1384,7 +1774,6 @@
   },
   "facturationCollectEditAction": "Edit",
   "facturationCollectRetryAction": "Retry",
-
   "attendanceHeroTitle": "Attendance",
   "attendanceHeroSubtitle": "View class attendance by date for reliable daily tracking.",
   "attendanceHeroChipClass": "Class-based search",
@@ -1511,6 +1900,14 @@
   "attendanceErrorUnknownMessage": "An unexpected error occurred while loading attendance.",
   "attendanceSaveCallAction": "Save attendance",
   "attendanceMarkAllPresentAction": "All present",
+  "attendanceCallNotTakenTitle": "Attendance not taken",
+  "@attendanceCallNotTakenTitle": {
+    "description": "Banner: no attendance session exists yet for this day (3rd state)."
+  },
+  "attendanceCallNotTakenMessage": "No attendance has been recorded for this day yet. Save to record it.",
+  "@attendanceCallNotTakenMessage": {
+    "description": "Not-taken banner subtitle: roster shown by default but nothing is validated."
+  },
   "attendanceSaveOverlayEyebrow": "Attendance",
   "attendanceSaveProcessingTitle": "Saving attendance…",
   "attendanceSaveSuccessTitle": "Attendance saved!",
@@ -1530,45 +1927,67 @@
   "absenceReasonWorkLeave": "Work leave",
   "absenceReasonUnjustified": "Unjustified absence",
   "absenceReasonOther": "Other",
-
-   "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
-   "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
-   "signOutAction": "Sign out",
-
-   "disciplinaryDetailBackLabel": "Back to disciplines",
-   "disciplinaryFollowUpTitle": "Disciplinary follow-up",
-   "disciplinaryHeroTitle": "Disciplinary case file detail",
-   "disciplinaryHeroChipCases": "Disciplinary cases",
-   "disciplinaryDetailContextErrorTitle": "Detail context unavailable",
-   "disciplinaryDetailContextErrorMessage": "Required context for this detail view is missing. Go back to the list and open the detail again.",
-   "disciplinaryTabCasesLabel": "Disciplinary cases",
-   "disciplinaryTabAttendanceHistoryLabel": "Attendance history",
+  "bootstrapContextUnavailableTitle": "Enrollment context unavailable",
+  "bootstrapContextUnavailableMessage": "Bootstrap data (academic year / school) is missing. Please sign out and sign in again to reload the configuration.",
+  "signOutAction": "Sign out",
+  "disciplinaryDetailBackLabel": "Back to disciplines",
+  "disciplinaryFollowUpTitle": "Disciplinary follow-up",
+  "disciplinaryHeroTitle": "Disciplinary case file detail",
+  "disciplinaryHeroChipCases": "Disciplinary cases",
+  "disciplinaryDetailContextErrorTitle": "Detail context unavailable",
+  "disciplinaryDetailContextErrorMessage": "Required context for this detail view is missing. Go back to the list and open the detail again.",
+  "disciplinaryTabCasesLabel": "Disciplinary cases",
+  "disciplinaryTabAttendanceHistoryLabel": "Attendance history",
   "presenceStatusPresent": "Present",
   "presenceStatusJustified": "Justified absence",
   "presenceStatusUnjustified": "Unjustified absence",
   "presenceSummaryTitle": "Attendance summary",
   "presenceSummaryA11yLabel": "Attendance summary, rate {rate}%",
   "@presenceSummaryA11yLabel": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
   "presenceKpiRate": "Attendance rate",
   "presenceRateValue": "{rate}%",
   "@presenceRateValue": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
-  "presenceSchoolDaysCount": "{count, plural, =1{1 school day} other{{count} school days}}",
+  "presenceSchoolDaysCount": "{count, plural, =0{0 school days} =1{1 school day} other{{count} school days}}",
   "@presenceSchoolDaysCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "presenceDistributionA11yLabel": "Distribution of days by status",
   "presencePresentOutOfTotal": "{present} days present out of {total}",
   "@presencePresentOutOfTotal": {
-    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "presenceAbsenceListTitle": "Absences detail",
   "presenceAbsenceDate": "{date}",
   "@presenceAbsenceDate": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
   },
   "presencePerfectTitle": "Perfect attendance",
   "presencePerfectMessage": "No absence on this period.",
@@ -1581,67 +2000,84 @@
   "presenceEmptyMessage": "No school days on this period. Pick another period to view attendance.",
   "presenceRangeYear": "School year {name}",
   "@presenceRangeYear": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "presenceRangeMonth": "{date}",
   "@presenceRangeMonth": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
   },
   "presenceRangeWeek": "Week of {date}",
   "@presenceRangeWeek": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
-  },   "disciplinaryUnknownValue": "-",
-   "disciplinaryCaseCreateAction": "New case",
-   "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
-   "disciplinaryCasesSummary": "{total} recorded cases - {open} open",
-   "@disciplinaryCasesSummary": {
-     "placeholders": {
-       "total": {
-         "type": "int"
-       },
-       "open": {
-         "type": "int"
-       }
-     }
-   },
-   "disciplinaryCasesTableTitleColumn": "Title",
-   "disciplinaryCasesTableStatusColumn": "Status",
-   "disciplinaryCasesTableActionColumn": "Actions",
-   "disciplinaryCasesDateUnavailable": "Date unavailable",
-   "disciplinaryCaseViewLabel": "View case",
-   "disciplinaryCasesLoadingMessage": "Loading disciplinary cases...",
-   "disciplinaryCasesEmptyMessage": "No disciplinary cases for this student.",
-   "disciplinaryCaseViewDialogTitle": "Disciplinary case detail",
-   "disciplinaryCaseViewDialogSectionTitle": "Case information",
-   "disciplinaryCaseViewDialogTitleField": "Title",
-   "disciplinaryCaseViewDialogStatusField": "Status",
-   "disciplinaryCaseViewDialogContentField": "Content",
-   "disciplinaryCaseViewDialogLoadingMessage": "Loading case detail...",
-   "disciplinaryCaseViewDialogErrorMessage": "Unable to load case detail",
-   "disciplinaryCaseCreateDialogTitle": "Create disciplinary case",
-   "disciplinaryCaseCreateDialogTitleField": "Case title",
-   "disciplinaryCaseCreateDialogTitleHint": "Give a brief case description",
-   "disciplinaryCaseCreateDialogContentField": "Content",
-   "disciplinaryCaseCreateDialogContentHint": "Disciplinary case details",
-   "disciplinaryCaseCreateDialogCaseDateField": "Case date",
-   "disciplinaryCaseCreateDialogCaseDateHint": "Select date",
-   "disciplinaryCaseCreateDialogSubmitAction": "Create case",
-   "disciplinaryCaseCreateDialogCreatingMessage": "Creating...",
-   "disciplinaryCaseCreateDialogSuccessMessage": "Disciplinary case created successfully.",
-   "disciplinaryCaseCreateDialogRequiredFieldError": "This field is required.",
-   "disciplinaryCasesNetworkError": "Check your internet connection and try again.",
-   "disciplinaryCasesNotFound": "No disciplinary cases found.",
-   "disciplinaryCasesValidationError": "Requested data is invalid.",
-   "disciplinaryCasesUnauthorizedError": "You are not authorized to access these cases.",
-   "disciplinaryCasesInvalidCredentialsError": "Your credentials do not allow access to cases.",
-   "disciplinaryCasesServerError": "Server is unavailable. Please try again later.",
-   "disciplinaryCasesStorageError": "A local storage error occurred.",
-   "disciplinaryCasesAuthError": "An authentication error prevents loading cases.",
-   "disciplinaryCasesUnknownError": "An unexpected error occurred.",
-   "disciplinaryCaseStatusOpen": "Open",
-   "disciplinaryCaseStatusInProgress": "In progress",
-   "disciplinaryCaseStatusClosed": "Closed",
-   "disciplinaryCaseStatusUnknown": "Unknown",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMd"
+      }
+    }
+  },
+  "presenceOfflineSyncPendingTitle": "Sync in progress",
+  "presenceOfflineSyncPendingMessage": "Local attendance data isn't complete enough yet to compute a reliable statistic. Try again in a moment.",
+  "disciplinaryUnknownValue": "-",
+  "disciplinaryCaseCreateAction": "New case",
+  "disciplinaryCaseCreateCtaSubtitle": "Document a new disciplinary incident for this student.",
+  "disciplinaryCasesSummary": "{total} recorded cases - {open} open",
+  "@disciplinaryCasesSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "open": {
+        "type": "int"
+      }
+    }
+  },
+  "disciplinaryCasesTableTitleColumn": "Title",
+  "disciplinaryCasesTableStatusColumn": "Status",
+  "disciplinaryCasesTableActionColumn": "Actions",
+  "disciplinaryCasesDateUnavailable": "Date unavailable",
+  "disciplinaryCaseViewLabel": "View case",
+  "disciplinaryCasesLoadingMessage": "Loading disciplinary cases...",
+  "disciplinaryCasesEmptyMessage": "No disciplinary cases for this student.",
+  "disciplinaryCaseViewDialogTitle": "Disciplinary case detail",
+  "disciplinaryCaseViewDialogSectionTitle": "Case information",
+  "disciplinaryCaseViewDialogTitleField": "Title",
+  "disciplinaryCaseViewDialogStatusField": "Status",
+  "disciplinaryCaseViewDialogContentField": "Content",
+  "disciplinaryCaseViewDialogLoadingMessage": "Loading case detail...",
+  "disciplinaryCaseViewDialogErrorMessage": "Unable to load case detail",
+  "disciplinaryCaseCreateDialogTitle": "Create disciplinary case",
+  "disciplinaryCaseCreateDialogTitleField": "Case title",
+  "disciplinaryCaseCreateDialogTitleHint": "Give a brief case description",
+  "disciplinaryCaseCreateDialogContentField": "Content",
+  "disciplinaryCaseCreateDialogContentHint": "Disciplinary case details",
+  "disciplinaryCaseCreateDialogCaseDateField": "Case date",
+  "disciplinaryCaseCreateDialogCaseDateHint": "Select date",
+  "disciplinaryCaseCreateDialogSubmitAction": "Create case",
+  "disciplinaryCaseCreateDialogCreatingMessage": "Creating...",
+  "disciplinaryCaseCreateDialogSuccessMessage": "Disciplinary case created successfully.",
+  "disciplinaryCaseCreateDialogRequiredFieldError": "This field is required.",
+  "disciplinaryCasesNetworkError": "Check your internet connection and try again.",
+  "disciplinaryCasesNotFound": "No disciplinary cases found.",
+  "disciplinaryCasesValidationError": "Requested data is invalid.",
+  "disciplinaryCasesUnauthorizedError": "You are not authorized to access these cases.",
+  "disciplinaryCasesInvalidCredentialsError": "Your credentials do not allow access to cases.",
+  "disciplinaryCasesServerError": "Server is unavailable. Please try again later.",
+  "disciplinaryCasesStorageError": "A local storage error occurred.",
+  "disciplinaryCasesAuthError": "An authentication error prevents loading cases.",
+  "disciplinaryCasesUnknownError": "An unexpected error occurred.",
+  "disciplinaryCaseStatusOpen": "Open",
+  "disciplinaryCaseStatusInProgress": "In progress",
+  "disciplinaryCaseStatusClosed": "Closed",
+  "disciplinaryCaseStatusUnknown": "Unknown",
   "disciplinarySeverityMinor": "Minor",
   "disciplinarySeverityMajor": "Major",
   "disciplinarySeveritySerious": "Serious",
@@ -1666,22 +2102,60 @@
   "disciplinarySanctionUnknown": "No sanction",
   "disciplinaryCaseSeverityChip": "Severity {severity}",
   "@disciplinaryCaseSeverityChip": {
-    "placeholders": { "severity": { "type": "String" } }
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
   },
   "disciplinaryAdvanceTakeCharge": "Take charge",
   "disciplinaryAdvanceClose": "Close",
+  "disciplinaryStatusOfflinePending": "In progress",
+  "disciplinaryStatusOfflineResolved": "Resolved",
+  "disciplinaryStatusOfflineDismissed": "Dismissed",
+  "disciplinaryAdvanceResolve": "Resolve",
+  "disciplinaryAdvanceDismiss": "Dismiss",
+  "disciplinaryCaseResolvedLabel": "Case resolved",
+  "disciplinaryCaseDismissedLabel": "Dismissed",
   "disciplinaryCaseClosedLabel": "Case closed",
-  "disciplinaryCasesCountPill": "{count, plural, =1{1 case} other{{count} cases}}",
+  "disciplinaryCommentsCountBadge": "{count, plural, =0{0 comments} =1{1 comment} other{{count} comments}}",
+  "@disciplinaryCommentsCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disciplinaryCommentsDialogTitle": "Comments",
+  "disciplinaryCommentsEmpty": "No comments yet.",
+  "disciplinaryCommentAddHint": "Add a comment…",
+  "disciplinaryCommentAddAction": "Add",
+  "disciplinaryCommentsCloseAction": "Close",
+  "disciplinaryFreshnessSynced": "Up to date",
+  "disciplinaryFreshnessLocal": "This device only",
+  "disciplinaryCasesCountPill": "{count, plural, =0{0 case} =1{1 case} other{{count} cases}}",
   "@disciplinaryCasesCountPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "disciplinaryCasesOpenPill": "{count, plural, =1{1 open} other{{count} open}}",
+  "disciplinaryCasesOpenPill": "{count, plural, =0{0 open} =1{1 open} other{{count} open}}",
   "@disciplinaryCasesOpenPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "disciplinaryCasesGravePill": "{count, plural, =1{1 serious} other{{count} serious}}",
+  "disciplinaryCasesGravePill": "{count, plural, =0{0 serious} =1{1 serious} other{{count} serious}}",
   "@disciplinaryCasesGravePill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCasesEmptyTitle": "No discipline case",
   "disciplinaryCasesEmptyDescription": "No incident recorded for this student. All good.",
@@ -1698,282 +2172,339 @@
   "disciplinaryErrorRetry": "Retry",
   "disciplinaryErrorReconnect": "Sign in again",
   "disciplinaryErrorContactAdmin": "Contact the administrator",
-
-   "enrollmentStatusPreRegistered": "Pre-registered",
-
-   "statusPaid": "Paid",
-   "statusPartial": "Partial",
-   "statusOverdue": "Overdue",
-
-   "statusPresent": "Present",
-   "statusAbsentJustified": "Justified",
-   "statusAbsentUnjustified": "Absent",
-
-   "statusSynced": "Up to date",
-    "statusSyncing": "Syncing…",
-    "statusOffline": "Offline",
-    "statusPendingUpload": "Pending upload",
-    "statusSyncConflict": "Conflict",
-
-    "previous": "Previous",
-    "next": "Next",
-
-    "componentGalleryTitle": "Component gallery",
-
-    "enrollmentStatsDashboardTitle": "Enrollment Dashboard",
-    "enrollmentStatsPeriodYear": "Year",
-    "enrollmentStatsPeriodMonth": "Month",
-    "enrollmentStatsPeriodWeek": "Week",
-    "enrollmentStatsKpiTotal": "Total",
-    "enrollmentStatsKpiFirst": "First enrollments",
-    "enrollmentStatsKpiRe": "Re-enrollments",
-    "enrollmentStatsKpiPre": "Pre-enrollments",
-    "enrollmentStatsKpiInProgress": "In progress",
-    "enrollmentStatsSectionEvolution": "Evolution",
-    "enrollmentStatsSectionCycle": "By cycle",
-    "enrollmentStatsSectionGender": "By gender",
-    "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
-    "enrollmentStatsSectionLevelEvolution": "Evolution by level",
-    "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
-    "enrollmentStatsGenderMale": "Boys",
-    "enrollmentStatsGenderFemale": "Girls",
-    "enrollmentStatsGenderOther": "Other",
-    "enrollmentStatsNoData": "No data available for this period",
-    "enrollmentStatsLoadingError": "Unable to load statistics",
-    "enrollmentStatsRetry": "Retry",
-    "enrollmentStatsStudents": "students",
-    "enrollmentStatsPercent": "{percent} %",
-    "@enrollmentStatsPercent": {
-      "placeholders": {
-        "percent": {
-          "type": "int"
-        }
+  "enrollmentStatusPreRegistered": "Pre-registered",
+  "statusPaid": "Paid",
+  "statusPartial": "Partial",
+  "statusOverdue": "Overdue",
+  "statusPresent": "Present",
+  "statusAbsentJustified": "Justified",
+  "statusAbsentUnjustified": "Absent",
+  "statusSynced": "Up to date",
+  "statusSyncing": "Syncing…",
+  "statusOffline": "Offline",
+  "statusPendingUpload": "Pending upload",
+  "statusSyncConflict": "Conflict",
+  "statusAuthRequired": "Sign-in required",
+  "@statusAuthRequired": {
+    "description": "Sync pill: network is back but the session has no tokens (offline login) — an online sign-in is required to synchronize"
+  },
+  "syncLastSyncJustNow": "Just now",
+  "syncLastSyncMinutesAgo": "{count, plural, =0{0 min ago} =1{1 min ago} other{{count} min ago}}",
+  "@syncLastSyncMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
-    },
-    "enrollmentStatsPeriodWeekCurrent": "This week",
-    "enrollmentStatsPeriodMonthCurrent": "This month",
-    "enrollmentStatsPeriodYearCurrent": "This year",
-    "enrollmentStatsSchoolYearUnavailable": "School year unavailable",
-    "enrollmentStatsHeaderA11yLabel": "Enrollment dashboard, school year {schoolYear}",
-    "@enrollmentStatsHeaderA11yLabel": {
-      "placeholders": {
-        "schoolYear": {
-          "type": "String"
-        }
+    }
+  },
+  "syncLastSyncHoursAgo": "{count, plural, =0{0 h ago} =1{1 h ago} other{{count} h ago}}",
+  "@syncLastSyncHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
-    },
-    "enrollmentStatsPeriodFilterA11yLabel": "Enrollment statistics time filter, active period: {selectedPeriod}",
-    "@enrollmentStatsPeriodFilterA11yLabel": {
-      "placeholders": {
-        "selectedPeriod": {
-          "type": "String"
-        }
+    }
+  },
+  "syncLastSyncDaysAgo": "{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}",
+  "@syncLastSyncDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
-    },
-    "enrollmentStatsContextSchoolYear": "Overview - School year {schoolYear}",
-    "@enrollmentStatsContextSchoolYear": {
-      "placeholders": {
-        "schoolYear": {
-          "type": "String"
-        }
+    }
+  },
+  "syncErrorsTitle": "Failed writes",
+  "syncErrorsSubtitle": "These records were rejected by the server. They will not be sent again on their own.",
+  "syncErrorsRetry": "Retry",
+  "syncErrorsRetryAll": "Retry all",
+  "syncErrorsEmptyLabel": "No failed writes",
+  "syncErrorsEmptyDescription": "Everything entered has been sent or is waiting its turn.",
+  "syncErrorsLoadFailedTitle": "List unavailable",
+  "syncErrorsLoadFailedMessage": "Could not read the local send queue.",
+  "syncErrorsNotReplayable": "This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.",
+  "syncErrorsClose": "Close",
+  "syncErrorsQueuedAt": "{date} at {time}",
+  "@syncErrorsQueuedAt": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
       }
-    },
-    "classesStatsDashboardTitle": "Classes Overview - School year",
-    "classesStatsSchoolYearUnavailable": "School year unavailable",
-    "classesStatsHeaderA11yLabel": "Classes dashboard, school year {schoolYear}",
-    "@classesStatsHeaderA11yLabel": {
-      "placeholders": {
-        "schoolYear": {
-          "type": "String"
-        }
+    }
+  },
+  "syncAggregateEnrollment": "Enrollment",
+  "syncAggregatePayment": "Payment",
+  "syncAggregateAttendance": "Attendance",
+  "syncAggregateDisciplinaryCase": "Disciplinary case",
+  "syncAggregateNotesBatch": "Grade batch",
+  "syncAggregateEvaluation": "Assessment",
+  "syncAggregateClassroomTransfer": "Class transfer",
+  "offlineQueuedGeneric": "Saved — pending synchronization",
+  "offlinePaymentQueued": "Payment saved — pending synchronization",
+  "offlineEnrollmentQueued": "Enrollment saved — pending synchronization",
+  "offlineAttendanceQueued": "Attendance saved — pending synchronization",
+  "offlineDisciplinaryCaseQueued": "Disciplinary case saved — pending synchronization",
+  "offlineDisciplinaryCaseUpdatedQueued": "Case updated — pending synchronization",
+  "offlineWriteError": "Local save failed",
+  "previous": "Previous",
+  "next": "Next",
+  "componentGalleryTitle": "Component gallery",
+  "enrollmentStatsDashboardTitle": "Enrollment Dashboard",
+  "enrollmentStatsPeriodYear": "Year",
+  "enrollmentStatsPeriodMonth": "Month",
+  "enrollmentStatsPeriodWeek": "Week",
+  "enrollmentStatsKpiTotal": "Total",
+  "enrollmentStatsKpiFirst": "First enrollments",
+  "enrollmentStatsKpiRe": "Re-enrollments",
+  "enrollmentStatsKpiPre": "Pre-enrollments",
+  "enrollmentStatsKpiInProgress": "In progress",
+  "enrollmentStatsSectionEvolution": "Evolution",
+  "enrollmentStatsSectionCycle": "By cycle",
+  "enrollmentStatsSectionGender": "By gender",
+  "enrollmentStatsSectionEvolutionEnrollments": "Enrollment evolution",
+  "enrollmentStatsSectionLevelEvolution": "Evolution by level",
+  "enrollmentStatsSectionGenderEvolution": "Evolution by gender",
+  "enrollmentStatsGenderMale": "Boys",
+  "enrollmentStatsGenderFemale": "Girls",
+  "enrollmentStatsGenderOther": "Other",
+  "enrollmentStatsNoData": "No data available for this period",
+  "enrollmentStatsLoadingError": "Unable to load statistics",
+  "enrollmentStatsRetry": "Retry",
+  "enrollmentStatsStudents": "students",
+  "enrollmentStatsPercent": "{percent} %",
+  "@enrollmentStatsPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
       }
-    },
-    "classesStatsKpiTotalStudents": "TOTAL STUDENTS",
-    "classesStatsKpiActiveGirls": "TOTAL GIRLS",
-    "classesStatsKpiActiveBoys": "BOYS",
-    "classesStatsKpiInactiveStudents": "TOTAL INACTIVE STUDENTS",
-    "classesStatsSectionCycleDistribution": "Active students distribution by cycle",
-    "classesStatsSectionLevelDistribution": "Levels distribution - {cycleCode}",
-    "@classesStatsSectionLevelDistribution": {
-      "placeholders": {
-        "cycleCode": {
-          "type": "String"
-        }
+    }
+  },
+  "enrollmentStatsPeriodWeekCurrent": "This week",
+  "enrollmentStatsPeriodMonthCurrent": "This month",
+  "enrollmentStatsPeriodYearCurrent": "This year",
+  "enrollmentStatsSchoolYearUnavailable": "School year unavailable",
+  "enrollmentStatsHeaderA11yLabel": "Enrollment dashboard, school year {schoolYear}",
+  "@enrollmentStatsHeaderA11yLabel": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
       }
-    },
-    "classesStatsSectionClassroomDetail": "Classrooms detail",
-    "classesStatsDetailColumnClassroom": "Classroom",
-    "classesStatsDetailColumnCycle": "Cycle",
-    "classesStatsDetailColumnLevel": "Level",
-    "classesStatsDetailColumnTotal": "Total",
-    "classesStatsDetailColumnGirls": "Girls",
-    "classesStatsDetailColumnBoys": "Boys",
-    "classesStatsNoData": "No data available for this period",
-    "classesStatsKpiBandA11yLabel": "Classes key performance indicators band",
-    "classesStatsCycleChartA11yLabel": "Chart of active students distribution by cycle",
-    "classesStatsLevelChartA11yLabel": "Chart of active students distribution by level for cycle {cycleCode}",
-    "@classesStatsLevelChartA11yLabel": {
-      "placeholders": {
-        "cycleCode": {
-          "type": "String"
-        }
+    }
+  },
+  "enrollmentStatsPeriodFilterA11yLabel": "Enrollment statistics time filter, active period: {selectedPeriod}",
+  "@enrollmentStatsPeriodFilterA11yLabel": {
+    "placeholders": {
+      "selectedPeriod": {
+        "type": "String"
       }
-    },
-    "classesStatsDetailA11yLabel": "Detailed classrooms table with gender breakdown",
-    "classesStatsLoadingA11yLabel": "Loading classes statistics",
-    "classesStatsErrorTitle": "Loading error",
-    "classesStatsRetry": "Retry",
-    "classesStatsRetryHint": "Retry loading classes statistics",
-    "classesStatsErrorA11yLabel": "Classes statistics loading error: {message}",
-    "@classesStatsErrorA11yLabel": {
-      "placeholders": {
-        "message": {
-          "type": "String"
-        }
+    }
+  },
+  "enrollmentStatsContextSchoolYear": "Overview - School year {schoolYear}",
+  "@enrollmentStatsContextSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
       }
-    },
-    "classesStatsNetworkError": "Unable to load classes statistics. Check your internet connection.",
-    "classesStatsNotFoundError": "No classes statistics available.",
-    "classesStatsValidationError": "The requested parameters are invalid.",
-    "classesStatsUnauthorizedError": "You are not authorized to view these statistics.",
-    "classesStatsInvalidCredentialsError": "Invalid session, please sign in again.",
-    "classesStatsServerError": "The server is currently unavailable.",
-    "classesStatsStorageError": "A local error prevents displaying statistics.",
-    "classesStatsAuthError": "An authentication error prevents loading statistics.",
-    "classesStatsUnknownError": "An unexpected error occurred while loading statistics.",
-    "financeStatsDashboardTitle": "Overview - School year",
-      "financeStatsSchoolYearUnavailable": "School year unavailable",
-      "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",
-      "@financeStatsContextSchoolYear": {
-        "placeholders": {
-          "schoolYear": {
-            "type": "String"
-          }
-        }
+    }
+  },
+  "classesStatsDashboardTitle": "Classes Overview - School year",
+  "classesStatsSchoolYearUnavailable": "School year unavailable",
+  "classesStatsHeaderA11yLabel": "Classes dashboard, school year {schoolYear}",
+  "@classesStatsHeaderA11yLabel": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "classesStatsKpiTotalStudents": "TOTAL STUDENTS",
+  "classesStatsKpiActiveGirls": "TOTAL GIRLS",
+  "classesStatsKpiActiveBoys": "BOYS",
+  "classesStatsKpiInactiveStudents": "TOTAL INACTIVE STUDENTS",
+  "classesStatsSectionCycleDistribution": "Active students distribution by cycle",
+  "classesStatsSectionLevelDistribution": "Levels distribution - {cycleCode}",
+  "@classesStatsSectionLevelDistribution": {
+    "placeholders": {
+      "cycleCode": {
+        "type": "String"
+      }
+    }
+  },
+  "classesStatsSectionClassroomDetail": "Classrooms detail",
+  "classesStatsDetailColumnClassroom": "Classroom",
+  "classesStatsDetailColumnCycle": "Cycle",
+  "classesStatsDetailColumnLevel": "Level",
+  "classesStatsDetailColumnTotal": "Total",
+  "classesStatsDetailColumnGirls": "Girls",
+  "classesStatsDetailColumnBoys": "Boys",
+  "classesStatsNoData": "No data available for this period",
+  "classesStatsKpiBandA11yLabel": "Classes key performance indicators band",
+  "classesStatsCycleChartA11yLabel": "Chart of active students distribution by cycle",
+  "classesStatsLevelChartA11yLabel": "Chart of active students distribution by level for cycle {cycleCode}",
+  "@classesStatsLevelChartA11yLabel": {
+    "placeholders": {
+      "cycleCode": {
+        "type": "String"
+      }
+    }
+  },
+  "classesStatsDetailA11yLabel": "Detailed classrooms table with gender breakdown",
+  "classesStatsLoadingA11yLabel": "Loading classes statistics",
+  "classesStatsErrorTitle": "Loading error",
+  "classesStatsRetry": "Retry",
+  "classesStatsRetryHint": "Retry loading classes statistics",
+  "classesStatsErrorA11yLabel": "Classes statistics loading error: {message}",
+  "@classesStatsErrorA11yLabel": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "classesStatsNetworkError": "Unable to load classes statistics. Check your internet connection.",
+  "classesStatsNotFoundError": "No classes statistics available.",
+  "classesStatsValidationError": "The requested parameters are invalid.",
+  "classesStatsUnauthorizedError": "You are not authorized to view these statistics.",
+  "classesStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+  "classesStatsServerError": "The server is currently unavailable.",
+  "classesStatsStorageError": "A local error prevents displaying statistics.",
+  "classesStatsAuthError": "An authentication error prevents loading statistics.",
+  "classesStatsUnknownError": "An unexpected error occurred while loading statistics.",
+  "financeStatsDashboardTitle": "Overview - School year",
+  "financeStatsSchoolYearUnavailable": "School year unavailable",
+  "financeStatsContextSchoolYear": "Overview - School year {schoolYear}",
+  "@financeStatsContextSchoolYear": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsPeriodWeekCurrent": "This week",
+  "financeStatsPeriodMonthCurrent": "This month",
+  "financeStatsPeriodYearCurrent": "This year",
+  "financeStatsKpiCollected": "Total collected",
+  "financeStatsKpiExpected": "Total expected",
+  "financeStatsKpiOutstanding": "Outstanding",
+  "financeStatsKpiCollectionRate": "Collection rate",
+  "financeStatsSectionEvolution": "Collection evolution",
+  "financeStatsLegendCurrentPeriod": "Current period",
+  "financeStatsLegendOtherPeriods": "Other periods",
+  "financeStatsSectionFeeTypeDistribution": "Distribution by fee type",
+  "financeStatsFeeTypeCollected": "Collected: {amount}",
+  "@financeStatsFeeTypeCollected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsFeeTypeExpected": "Expected: {amount}",
+  "@financeStatsFeeTypeExpected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsFeeTypeRate": "Rate: {rate}%",
+  "@financeStatsFeeTypeRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "financeStatsNoData": "No data available for this period",
+  "financeStatsNoDataHint": "Try another period to display more insights.",
+  "financeStatsErrorTitle": "Loading error",
+  "financeStatsRetry": "Retry",
+  "financeStatsRetryHint": "Reload finance statistics",
+  "financeStatsLoadingA11yLabel": "Finance statistics are loading",
+  "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
+  "@financeStatsHeaderA11yLabel": {
+    "placeholders": {
+      "schoolYear": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsPeriodFilterA11yLabel": "Finance statistics time filter, active period: {selectedPeriod}",
+  "@financeStatsPeriodFilterA11yLabel": {
+    "placeholders": {
+      "selectedPeriod": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
+  "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
+  "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
+  "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
+  "@financeStatsFeeTypeItemA11yLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
       },
-      "financeStatsPeriodWeekCurrent": "This week",
-      "financeStatsPeriodMonthCurrent": "This month",
-      "financeStatsPeriodYearCurrent": "This year",
-      "financeStatsKpiCollected": "Total collected",
-      "financeStatsKpiExpected": "Total expected",
-      "financeStatsKpiOutstanding": "Outstanding",
-      "financeStatsKpiCollectionRate": "Collection rate",
-      "financeStatsSectionEvolution": "Collection evolution",
-      "financeStatsLegendCurrentPeriod": "Current period",
-      "financeStatsLegendOtherPeriods": "Other periods",
-      "financeStatsSectionFeeTypeDistribution": "Distribution by fee type",
-      "financeStatsFeeTypeCollected": "Collected: {amount}",
-      "@financeStatsFeeTypeCollected": {
-        "placeholders": {
-          "amount": {
-            "type": "String"
-          }
-        }
+      "collected": {
+        "type": "String"
       },
-      "financeStatsFeeTypeExpected": "Expected: {amount}",
-      "@financeStatsFeeTypeExpected": {
-        "placeholders": {
-          "amount": {
-            "type": "String"
-          }
-        }
+      "expected": {
+        "type": "String"
       },
-      "financeStatsFeeTypeRate": "Rate: {rate}%",
-      "@financeStatsFeeTypeRate": {
-        "placeholders": {
-          "rate": {
-            "type": "int"
-          }
-        }
-      },
-      "financeStatsNoData": "No data available for this period",
-      "financeStatsNoDataHint": "Try another period to display more insights.",
-      "financeStatsErrorTitle": "Loading error",
-      "financeStatsRetry": "Retry",
-      "financeStatsRetryHint": "Reload finance statistics",
-      "financeStatsLoadingA11yLabel": "Finance statistics are loading",
-      "financeStatsHeaderA11yLabel": "Finance dashboard, school year {schoolYear}",
-      "@financeStatsHeaderA11yLabel": {
-        "placeholders": {
-          "schoolYear": {
-            "type": "String"
-          }
-        }
-      },
-      "financeStatsPeriodFilterA11yLabel": "Finance statistics time filter, active period: {selectedPeriod}",
-      "@financeStatsPeriodFilterA11yLabel": {
-        "placeholders": {
-          "selectedPeriod": {
-            "type": "String"
-          }
-        }
-      },
-      "financeStatsKpiBandA11yLabel": "Financial key performance indicators band",
-      "financeStatsEvolutionChartA11yLabel": "Collection amount evolution chart",
-      "financeStatsFeeTypeSectionA11yLabel": "Distribution of amounts by fee type",
-      "financeStatsFeeTypeItemA11yLabel": "Type {code}, collected {collected}, expected {expected}, rate {rate}%",
-      "@financeStatsFeeTypeItemA11yLabel": {
-        "placeholders": {
-          "code": {
-            "type": "String"
-          },
-          "collected": {
-            "type": "String"
-          },
-          "expected": {
-            "type": "String"
-          },
-          "rate": {
-            "type": "int"
-          }
-        }
-      },
-      "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
-      "@financeStatsErrorA11yLabel": {
-        "placeholders": {
-          "message": {
-            "type": "String"
-          }
-        }
-      },
-      "financeStatsEmptyA11yLabel": "No finance data available for this period",
-      "financeStatsNetworkError": "Unable to load finance statistics. Check your internet connection.",
-      "financeStatsNotFoundError": "No finance statistics available.",
-      "financeStatsValidationError": "The requested parameters are invalid.",
-      "financeStatsUnauthorizedError": "You are not authorized to view these statistics.",
-      "financeStatsInvalidCredentialsError": "Invalid session, please sign in again.",
-      "financeStatsServerError": "The server is currently unavailable.",
-      "financeStatsStorageError": "A local error prevents displaying statistics.",
-       "financeStatsAuthError": "An authentication error prevents loading statistics.",
-       "financeStatsUnknownError": "An unexpected error occurred while loading statistics.",
-       "enrollmentResults": "Results",
-       "viewDetails": "View details",
-       "refresh": "Refresh",
-       "sort": "Sort",
-       "switchToTableView": "Switch to table view",
-       "switchToGridView": "Switch to grid view",
-       "enrollmentViewTable": "Table",
-       "enrollmentViewGrid": "Grid",
-       "enrollmentResultsA11yLabel": "Enrollment results",
-       "dataTableSortAscending": "Ascending sort",
-       "dataTableSortDescending": "Descending sort",
-       "dataTableSortNone": "No sort",
-       "openDetailsForStudent": "Open student file for {studentName}",
-       "@openDetailsForStudent": {
-         "placeholders": {
-           "studentName": {
-             "type": "String"
-           }
-         }
-       },
-       "removeFilterNamed": "Remove filter {filter}",
-       "@removeFilterNamed": {
-         "placeholders": {
-           "filter": {
-             "type": "String"
-           }
-         }
-       },
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "financeStatsErrorA11yLabel": "Finance statistics loading error: {message}",
+  "@financeStatsErrorA11yLabel": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "financeStatsEmptyA11yLabel": "No finance data available for this period",
+  "financeStatsNetworkError": "Unable to load finance statistics. Check your internet connection.",
+  "financeStatsNotFoundError": "No finance statistics available.",
+  "financeStatsValidationError": "The requested parameters are invalid.",
+  "financeStatsUnauthorizedError": "You are not authorized to view these statistics.",
+  "financeStatsInvalidCredentialsError": "Invalid session, please sign in again.",
+  "financeStatsServerError": "The server is currently unavailable.",
+  "financeStatsStorageError": "A local error prevents displaying statistics.",
+  "financeStatsAuthError": "An authentication error prevents loading statistics.",
+  "financeStatsUnknownError": "An unexpected error occurred while loading statistics.",
+  "enrollmentResults": "Results",
+  "sort": "Sort",
+  "switchToTableView": "Switch to table view",
+  "switchToGridView": "Switch to grid view",
+  "enrollmentViewTable": "Table",
+  "enrollmentViewGrid": "Grid",
+  "enrollmentResultsA11yLabel": "Enrollment results",
+  "dataTableSortAscending": "Ascending sort",
+  "dataTableSortDescending": "Descending sort",
+  "dataTableSortNone": "No sort",
+  "openDetailsForStudent": "Open student file for {studentName}",
+  "@openDetailsForStudent": {
+    "placeholders": {
+      "studentName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFilterNamed": "Remove filter {filter}",
+  "@removeFilterNamed": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "attendanceOverviewEyebrow": "Discipline · Attendance",
   "attendanceOverviewTitle": "Dashboard",
   "attendanceOverviewContextSchoolYear": "School year",
@@ -1986,11 +2517,19 @@
   "attendanceOverviewKpiRecordedDays": "Recorded days",
   "attendanceOverviewRateValue": "{rate}%",
   "@attendanceOverviewRateValue": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewStudentDays": "{count} student-days",
   "@attendanceOverviewStudentDays": {
-    "placeholders": { "count": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewKpiBandA11yLabel": "Key attendance indicators",
   "attendanceOverviewSplitTitle": "Attendance / absence breakdown",
@@ -2001,9 +2540,15 @@
   "attendanceOverviewSplitA11yLabel": "Present {presence}%, justified {justified}%, unjustified {unjustified}%",
   "@attendanceOverviewSplitA11yLabel": {
     "placeholders": {
-      "presence": { "type": "String" },
-      "justified": { "type": "String" },
-      "unjustified": { "type": "String" }
+      "presence": {
+        "type": "String"
+      },
+      "justified": {
+        "type": "String"
+      },
+      "unjustified": {
+        "type": "String"
+      }
     }
   },
   "attendanceOverviewEvolutionTitle": "Attendance rate trend",
@@ -2012,7 +2557,11 @@
   "attendanceOverviewEvolutionHintDay": "by day",
   "attendanceOverviewEvolutionTarget": "Target {rate}%",
   "@attendanceOverviewEvolutionTarget": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewReasonsTitle": "Absence reasons",
   "attendanceOverviewReasonsHint": "school",
@@ -2039,15 +2588,18 @@
   "attendanceOverviewEmptyDescription": "No attendance has been recorded for this window. Statistics will appear as soon as the first attendance is taken.",
   "attendanceOverviewEmptyAction": "Take attendance",
   "attendanceOverviewLoadingA11yLabel": "Loading the attendance dashboard",
-  "disciplinaryFolderBreadcrumb": "Discipline list",
   "dossierTabsA11yLabel": "Student folder tabs",
   "dossierTabDisciplineLabel": "Discipline",
   "dossierTabDisciplineDescription": "Cases, sanctions & follow-up",
   "dossierTabPresenceLabel": "Attendance",
   "dossierTabPresenceDescription": "Absences & lateness",
-  "dossierOpenCasesChip": "{count, plural, =1{1 open case} other{{count} open cases}}",
+  "dossierOpenCasesChip": "{count, plural, =0{0 open case} =1{1 open case} other{{count} open cases}}",
   "@dossierOpenCasesChip": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dossierNoOpenCases": "No open case",
   "genderOther": "Other",
@@ -2061,12 +2613,17 @@
   "scheduleViewDay": "Day",
   "scheduleViewToggleSemantics": "Switch between Week and Day view",
   "scheduleWeekTitle": "Typical week",
-  "scheduleLoadSummary": "{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class",
+  "scheduleLoadSummary": "{count, plural, =0{{count} sessions} =1{{count} session} other{{count} sessions}} · {hours} h of class",
   "@scheduleLoadSummary": {
     "description": "Weekly load counter: number of sessions and total teaching hours.",
     "placeholders": {
-      "count": { "type": "int" },
-      "hours": { "type": "double", "format": "decimalPattern" }
+      "count": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
     }
   },
   "scheduleToday": "today",
@@ -2079,7 +2636,9 @@
   "@scheduleEmptyDayDescription": {
     "description": "Day view empty state, with the selected day.",
     "placeholders": {
-      "day": { "type": "String" }
+      "day": {
+        "type": "String"
+      }
     }
   },
   "scheduleWeekdayLongMon": "Monday",
@@ -2111,12 +2670,13 @@
   "@scheduleErrorIncidentCode": {
     "description": "Incident code shown under a server (500) error.",
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "menuResultats": "Results",
   "subMenuResultatsClasse": "Results by class",
-
   "resultatsSearchEyebrow": "Results",
   "resultatsSearchTitle": "Search results",
   "resultatsSearchModeSemantics": "Search mode",
@@ -2128,89 +2688,219 @@
   "resultatsFieldMiddleName": "Middle name",
   "resultatsFieldFirstName": "First name(s)",
   "resultatsFieldClassroom": "Class",
-
   "resultatsDecoupageTrimestres": "Terms",
   "resultatsDecoupageSemestres": "Semesters",
   "resultatsDecoupagePeriodes": "Periods",
   "resultatsPeriodShortTrimestre": "T{ordre}",
-  "@resultatsPeriodShortTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortSemestre": "S{ordre}",
-  "@resultatsPeriodShortSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortGeneric": "P{ordre}",
-  "@resultatsPeriodShortGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongTrimestre": "Term {ordre}",
-  "@resultatsPeriodLongTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongSemestre": "Semester {ordre}",
-  "@resultatsPeriodLongSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongGeneric": "Period {ordre}",
-  "@resultatsPeriodLongGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSubPeriodColumn": "P{ordre}",
-  "@resultatsSubPeriodColumn": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsSubPeriodColumn": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodsError": "Unable to load periods.",
   "resultatsPeriodsEmpty": "No period available.",
-
   "resultatsGenderMale": "Boy",
   "resultatsGenderFemale": "Girl",
   "resultatsGenderOther": "Other",
   "resultatsDash": "—",
   "resultatsPercentValue": "{value}%",
-  "@resultatsPercentValue": { "placeholders": { "value": { "type": "int" } } },
+  "@resultatsPercentValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsNoteOverMax": "{note}/{max}",
-  "@resultatsNoteOverMax": { "placeholders": { "note": { "type": "String" }, "max": { "type": "String" } } },
+  "@resultatsNoteOverMax": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsPlaceValue": "{place} / {total}",
-  "@resultatsPlaceValue": { "placeholders": { "place": { "type": "int" }, "total": { "type": "int" } } },
+  "@resultatsPlaceValue": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsDeltaPts": "{value} pts",
-  "@resultatsDeltaPts": { "placeholders": { "value": { "type": "String" } } },
-
+  "@resultatsDeltaPts": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsColumnRank": "#",
   "resultatsColumnEleve": "Student",
   "resultatsColumnMoyenne": "Average {period}",
-  "@resultatsColumnMoyenne": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsColumnMoyenne": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsNonClasseBadge": "Unranked",
-
   "resultatsSummaryAverageCaption": "Average · {period}",
-  "@resultatsSummaryAverageCaption": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsSummaryAverageCaption": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsSummaryReussites": "{count, plural, =0{0 passing} =1{1 passing} other{{count} passing}}",
-  "@resultatsSummaryReussites": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryReussites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryEchecs": "{count, plural, =0{0 failing} =1{1 failing} other{{count} failing}}",
-  "@resultatsSummaryEchecs": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryEchecs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryNonClasses": "{count, plural, =0{0 unranked} =1{1 unranked} other{{count} unranked}}",
-  "@resultatsSummaryNonClasses": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryNonClasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryFootnote": "{effectif} students · pass threshold {seuil}%",
-  "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
-
-  "resultatsEleveResultsCount": "{count, plural, =1{1 student found} other{{count} students found}}",
-  "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@resultatsSummaryFootnote": {
+    "placeholders": {
+      "effectif": {
+        "type": "int"
+      },
+      "seuil": {
+        "type": "int"
+      }
+    }
+  },
+  "resultatsEleveResultsCount": "{count, plural, =0{0 students found} =1{1 student found} other{{count} students found}}",
+  "@resultatsEleveResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusClassroom": "Class {classroom}",
-  "@resultatsFocusClassroom": { "placeholders": { "classroom": { "type": "String" } } },
+  "@resultatsFocusClassroom": {
+    "placeholders": {
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsFocusBack": "Back to class view",
   "resultatsFocusAnnualAverage": "Annual average",
   "resultatsFocusRankOf": "of {count} ranked",
-  "@resultatsFocusRankOf": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsFocusRankOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusNoBulletin": "Student unranked for this period: no detailed report.",
-
   "resultatsProgressionTitle": "Progress over the year",
   "resultatsProgressionPointLabel": "P{index}",
-  "@resultatsProgressionPointLabel": { "placeholders": { "index": { "type": "int" } } },
+  "@resultatsProgressionPointLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsStrengthsTitle": "Strengths",
   "resultatsWeaknessesTitle": "To improve",
-
   "resultatsOfficialBulletinTitle": "Official report card",
   "resultatsOfficialBulletinSubtitle": "Domains & subjects, coursework + exam marks, maxima, rank — printable national template.",
   "resultatsComingSoon": "Coming soon",
-
   "resultatsBulletinTitle": "Report by domain · {period}",
-  "@resultatsBulletinTitle": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsBulletinTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsBulletinLegend": "mark / maximum",
   "resultatsBulletinSubtotal": "Subtotal",
   "resultatsBulletinTotal": "Totals obtained",
-
   "resultatsSynthesePercent": "Percentage",
   "resultatsSynthesePlace": "Rank",
   "resultatsSyntheseApplication": "Application",
   "resultatsSyntheseConduite": "Conduct",
-
   "resultatsIdleTitle": "Choose a class or a student",
   "resultatsIdleDescription": "Select a cycle, a level and a class, then a period to display the results.",
   "resultatsLoadingSemantics": "Loading results",
@@ -2219,12 +2909,17 @@
   "resultatsEmptyEleveTitle": "No students found",
   "resultatsEmptyEleveDescription": "Check the spelling of the last, middle or first name, or broaden your search.",
   "resultatsEmptyAdjustAction": "Adjust search",
-
   "resultatsErrorRetry": "Try again",
   "resultatsErrorReconnect": "Sign in again",
   "resultatsErrorContactAdmin": "Contact the administrator",
   "resultatsErrorIncidentCode": "Incident code: {code}",
-  "@resultatsErrorIncidentCode": { "placeholders": { "code": { "type": "String" } } },
+  "@resultatsErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsErrorNetworkTitle": "Connection lost",
   "resultatsErrorNetworkMessage": "Check your internet connection and try again.",
   "resultatsErrorUnauthorizedTitle": "Session expired",
@@ -2234,5 +2929,173 @@
   "resultatsErrorServerTitle": "Server error",
   "resultatsErrorServerMessage": "Something went wrong on our side. Please try again shortly.",
   "resultatsErrorUnknownTitle": "Something went wrong",
-  "resultatsErrorUnknownMessage": "An unexpected problem occurred. Please try again."
+  "resultatsErrorUnknownMessage": "An unexpected problem occurred. Please try again.",
+  "syncErrorsOtherAccountTitle": "Waiting for another account",
+  "syncErrorsOtherAccountNamed": "{count, plural, =1{{count} write waiting for {name}} other{{count} writes waiting for {name}}}",
+  "@syncErrorsOtherAccountNamed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsOtherAccountAnonymous": "{count, plural, =1{{count} write waiting for another account} other{{count} writes waiting for another account}}",
+  "@syncErrorsOtherAccountAnonymous": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncErrorsOtherAccountOldest": "oldest from {date}",
+  "@syncErrorsOtherAccountOldest": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "syncErrorsOtherAccountHint": "They will be sent when that account signs back in on this tablet.",
+  "syncErrorsForeignEntry": "Written by {name} — it has to be retried from their own session.",
+  "@syncErrorsForeignEntry": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsForeignEntryAnonymous": "Written by another account — it has to be retried from that session.",
+  "syncErrorsHeldTitle": "Waiting",
+  "syncErrorsHeldSubtitle": "These writes are kept and will be sent as soon as their condition clears.",
+  "editiqueViewerReceiptTitle": "Payment receipt",
+  "editiqueViewerLoadingTitle": "Preparing the document…",
+  "editiqueViewerLoadingMessage": "The server is producing the document. This may take a few seconds.",
+  "editiqueViewerPrintLabel": "Print",
+  "editiqueViewerShareLabel": "Share",
+  "editiqueViewerCloseLabel": "Close",
+  "editiqueViewerActionFailed": "This action could not be completed on this device.",
+  "editiqueViewerDocumentNumberLabel": "Document no. {number}",
+  "@editiqueViewerDocumentNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "editiqueErrorNetworkTitle": "No connection",
+  "editiqueErrorNetworkMessage": "The document is produced by the server. Reconnect and try again — nothing was issued.",
+  "editiqueErrorUncertainTitle": "Undetermined outcome",
+  "editiqueErrorUncertainMessage": "The server did not answer in time. The document may have been issued: check before generating a new one.",
+  "editiqueErrorSessionExpiredTitle": "Session expired",
+  "editiqueErrorSessionExpiredMessage": "Sign in again to resume issuing the document.",
+  "editiqueErrorForbiddenTitle": "Access denied",
+  "editiqueErrorForbiddenMessage": "You do not have the rights required to issue this document.",
+  "editiqueErrorNotFoundTitle": "Document unavailable",
+  "editiqueErrorNotFoundMessage": "The server cannot find the elements required for this document.",
+  "editiqueErrorInvalidTitle": "Cannot be issued",
+  "editiqueErrorInvalidMessage": "The server rejected the request. Check the file before trying again.",
+  "editiqueErrorServerTitle": "Server error",
+  "editiqueErrorServerMessage": "The document could not be produced. Try again shortly.",
+  "editiqueErrorRetryLabel": "Try again",
+  "editiqueErrorReconnectLabel": "Sign in again",
+  "editiqueViewerStatementTitle": "Account statement",
+  "editiqueViewerAttestationTitle": "Enrolment certificate",
+  "editiqueViewerNotePerceptionTitle": "Fee notice",
+  "editiqueViewerClearanceTitle": "Financial clearance",
+  "editiqueErrorServerDetailLabel": "Reason returned by the server: {detail}",
+  "@editiqueErrorServerDetailLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationDetailStatementLabel": "Account statement",
+  "facturationDetailStatementNoChargesHint": "No fee for the year: the statement cannot be produced.",
+  "facturationDetailStatementPendingSyncHint": "Student not synced yet: the statement will be available after the next sync.",
+  "facturationDetailStatementOfflineHint": "Offline: the statement is produced by the server.",
+  "facturationDetailStatementConfirmTitle": "Generate an account statement?",
+  "facturationDetailStatementConfirmMessage": "The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.",
+  "facturationDetailStatementConfirmAction": "Generate",
+  "facturationDetailStatementConfirmCancel": "Cancel",
+  "menuDocuments": "Documents",
+  "subMenuDocumentsStudent": "Student documents",
+  "documentsSearchTitle": "Student documents",
+  "documentsSearchHelpBanner": "Search for one student, or a whole class, then open their document catalogue.",
+  "documentsSearchByStudentGroup": "By student",
+  "documentsSearchByClassGroup": "By class",
+  "documentsSearchOrSeparator": "OR",
+  "documentsSearchActiveModeLabel": "Active mode",
+  "documentsSearchModeStudentBadge": "Student",
+  "documentsSearchModeClassBadge": "Class",
+  "documentsSearchCycleLabel": "Cycle",
+  "documentsSearchLevelLabel": "Level",
+  "documentsSearchLevelPlaceholder": "Pick a cycle first",
+  "documentsSearchInvitationTitle": "Find the student, open their documents",
+  "documentsSearchInvitationMessage": "Enrolment certificate, fee notice, payment receipt, account statement and financial clearance: the documents issuable for a student.",
+  "documentsEmptyTitle": "No student found",
+  "documentsNoResultsDescription": "No student enrolled this year matches these criteria.",
+  "documentsOpenCatalogLabel": "Open documents",
+  "documentsCatalogEyebrow": "Documents",
+  "documentsCatalogUnknownStudent": "Student",
+  "documentsGroupScolariteTitle": "Schooling",
+  "documentsGroupScolariteSubtitle": "Enrolment file",
+  "documentsGroupFinancesTitle": "Finance",
+  "documentsGroupFinancesSubtitle": "Fee notices, receipts and settlement certificates",
+  "documentsNatureArchivedLabel": "Archived",
+  "documentsNatureTimestampedLabel": "Timestamped",
+  "documentsHintAttestation": "Archived document: asking again serves exactly the same file, under the same number.",
+  "documentsHintNotePerception": "Immutable accounting document, issued once per student and per year.",
+  "documentsHintReceipt": "One receipt per payment. It is issued from Billing, when the cash is taken in.",
+  "documentsHintStatement": "Snapshot of the account at the time of the request: every issue produces a new numbered document.",
+  "documentsHintClearance": "Certifies the student is settled as of the request date. Not archived, renumbered on every issue.",
+  "documentsActionEmitLabel": "Issue",
+  "documentsActionConsultLabel": "View",
+  "documentsActionGenerateLabel": "Generate now",
+  "documentsActionBusyLabel": "Generating…",
+  "documentsActionFailedNotice": "Generation failed. The document was not produced.",
+  "documentsBlockedPendingSyncNotice": "Student not synced yet: the document will be available after the next sync.",
+  "documentsBlockedEnrollmentPendingSyncNotice": "Enrolment not synced yet: the certificate will be available after the next sync.",
+  "documentsBlockedMissingEnrollmentNotice": "Enrolment not reachable from this link: reopen the student from the list.",
+  "documentsBlockedOfflineNotice": "Offline: this document is produced by the server.",
+  "documentsConfirmGenerateTitle": "Generate: {document}?",
+  "@documentsConfirmGenerateTitle": {"placeholders": {"document": {"type": "String"}}},
+  "documentsConfirmGenerateMessage": "The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.",
+  "documentsConfirmClearanceWarning": "The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.",
+  "documentsConfirmGenerateAction": "Generate",
+  "documentsConfirmGenerateCancel": "Cancel",
+  "documentsLastIssueSubtitle": "Last issued {date} · ref. {reference}",
+  "@documentsLastIssueSubtitle": {"placeholders": {"date": {"type": "String"}, "reference": {"type": "String"}}},
+  "documentsCancelledNotice": "Document cancelled by the school on {date}.",
+  "@documentsCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "documentsCancelledWithReasonNotice": "Document cancelled by the school on {date} — {reason}",
+  "@documentsCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "facturationReceiptCancelledNotice": "Receipt cancelled by the school on {date}.",
+  "@facturationReceiptCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "facturationReceiptCancelledWithReasonNotice": "Receipt cancelled by the school on {date} — {reason}",
+  "@facturationReceiptCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "ticketProvisionalBanner": "Provisional",
+  "ticketReferenceLabel": "Ref.",
+  "ticketCashierLabel": "Cashier:",
+  "ticketStudentLabel": "Student:",
+  "ticketMatriculationLabel": "Student no.:",
+  "ticketClassroomLabel": "Class:",
+  "ticketAmountReceivedLabel": "Amount received",
+  "ticketAllocationsLabel": "Breakdown",
+  "ticketBalanceLabel": "Balance",
+  "ticketBalanceReservation": "subject to synchronisation",
+  "ticketKeepNotice": "Keep this ticket until you receive your final receipt.",
+  "ticketPrintLabel": "Print ticket",
+  "ticketPrintFailed": "Printing unavailable: the ticket could not be produced.",
+  "ticketCutNotice": "Cut along the frame.",
+  "paymentAnomalyBannerTitle": "Overpayment to arbitrate",
+  "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
+  "paymentAnomalyAcknowledgeLabel": "Handled",
+  "paymentAnomalyOthersPending": "{count} more pending",
+  "@paymentAnomalyOthersPending": {"placeholders": {"count": {"type": "int"}}},
+  "documentsBlockedEnrollmentUnreadableNotice": "Enrolment not readable on this tablet: the certificate is unavailable here."
 }

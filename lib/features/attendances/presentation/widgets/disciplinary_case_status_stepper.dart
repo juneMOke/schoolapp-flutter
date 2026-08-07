@@ -3,28 +3,35 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
+import 'package:school_app_flutter/features/attendances/presentation/helpers/disciplinary_status_ui.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Frise (lecture seule) du cycle de vie d'un cas : Ouvert → En cours →
-/// Clôturé (3 statuts de l'enum backend). Étapes franchies = coche verte ;
-/// étape courante = icône pleine colorée + libellé gras ; suivantes grises.
+/// Frise (lecture seule) du cycle de vie d'un cas : Ouvert → Pris en charge →
+/// Résolu (chemin principal). Étapes franchies = coche verte ; étape courante =
+/// icône pleine colorée + libellé gras ; suivantes grises. Un cas **classé sans
+/// suite** (DISMISSED) sort du chemin linéaire → pastille terminale dédiée.
 class DisciplinaryCaseStatusStepper extends StatelessWidget {
-  final DisciplinaryCaseStatus status;
+  final DisciplinaryStatus status;
 
   const DisciplinaryCaseStatusStepper({super.key, required this.status});
 
   static const _flow = [
-    DisciplinaryCaseStatus.open,
-    DisciplinaryCaseStatus.inProgress,
-    DisciplinaryCaseStatus.closed,
+    DisciplinaryStatus.open,
+    DisciplinaryStatus.pending,
+    DisciplinaryStatus.resolved,
   ];
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final current = _flow.indexOf(status);
 
+    // Classé sans suite : terminal hors chemin linéaire → pastille dédiée.
+    if (status == DisciplinaryStatus.dismissed) {
+      return _TerminalChip(status: status, l10n: l10n);
+    }
+
+    final current = _flow.indexOf(status);
     final items = <Widget>[];
     for (var i = 0; i < _flow.length; i++) {
       if (i > 0) {
@@ -52,8 +59,43 @@ class DisciplinaryCaseStatusStepper extends StatelessWidget {
 
 enum _StepState { done, current, upcoming }
 
+class _TerminalChip extends StatelessWidget {
+  final DisciplinaryStatus status;
+  final AppLocalizations l10n;
+
+  const _TerminalChip({required this.status, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = status.getColor();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: AppDimensions.disciplinaryStepperDotSize,
+          height: AppDimensions.disciplinaryStepperDotSize,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          child: Icon(
+            status.getIcon(),
+            size: AppDimensions.disciplinaryStepperIconSize,
+            color: AppColors.textOnDark,
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Text(
+          status.getDisplayName(l10n),
+          style: AppTextStyles.caption.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _Step extends StatelessWidget {
-  final DisciplinaryCaseStatus status;
+  final DisciplinaryStatus status;
   final _StepState state;
   final AppLocalizations l10n;
 

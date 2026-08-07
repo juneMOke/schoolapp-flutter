@@ -100,6 +100,39 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
   }
 
   @override
+  Future<ClassroomMemberModel> assignEnrollmentToClassroom(
+    Map<String, dynamic> extras,
+    String classroomId,
+    AssignClassroomMemberRequestModel request,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<ClassroomMemberModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/classrooms/${classroomId}/members',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ClassroomMemberModel _value;
+    try {
+      _value = ClassroomMemberModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<LevelDistributionOverviewModel> getLevelDistributionOverview(
     Map<String, dynamic> extras,
     String academicYearId,
@@ -180,32 +213,6 @@ class _ClassroomRemoteDataSource implements ClassroomRemoteDataSource {
           .compose(
             _dio.options,
             '/api/v1/classrooms/distribute',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    await _dio.fetch<void>(_options);
-  }
-
-  @override
-  Future<void> reassignClassroomMember(
-    Map<String, dynamic> extras,
-    String targetClassroomId,
-    String classroomMemberId,
-    ReassignClassroomMemberRequestModel request,
-  ) async {
-    final _extra = <String, dynamic>{};
-    _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
-    final _options = _setStreamType<void>(
-      Options(method: 'PUT', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v1/classrooms/${targetClassroomId}/members/${classroomMemberId}',
             queryParameters: queryParameters,
             data: _data,
           )

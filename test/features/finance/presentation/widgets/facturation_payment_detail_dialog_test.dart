@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-FacturationPaymentDetailIntent _intent() => FacturationPaymentDetailIntent(
-  paymentId: 'pay-1',
-  studentId: 'stu-1',
-  academicYearId: 'ay-1',
-  firstName: 'Daniel',
-  lastName: 'Kabongo',
-  surname: 'Mwamba',
-  levelName: '6e A',
-  levelGroupName: 'Secondaire',
-  payerFirstName: 'Joseph',
-  payerLastName: 'Kabongo',
-  payerMiddleName: 'Mwamba',
-  amountInCents: 15000,
-  currency: 'USD',
-  paidAt: DateTime(2025, 11, 8),
-);
+FacturationPaymentDetailIntent _intent({bool isPendingSync = false}) =>
+    FacturationPaymentDetailIntent(
+      paymentId: 'pay-1',
+      studentId: 'stu-1',
+      academicYearId: 'ay-1',
+      firstName: 'Daniel',
+      lastName: 'Kabongo',
+      surname: 'Mwamba',
+      levelName: '6e A',
+      levelGroupName: 'Secondaire',
+      payerFirstName: 'Joseph',
+      payerLastName: 'Kabongo',
+      payerMiddleName: 'Mwamba',
+      amountInCents: 15000,
+      currency: 'USD',
+      paidAt: DateTime(2025, 11, 8),
+      isPendingSync: isPendingSync,
+    );
 
-Future<void> _pump(WidgetTester tester, {required VoidCallback onDownload}) {
+Future<void> _pump(
+  WidgetTester tester, {
+  required VoidCallback? onDownload,
+  bool isPendingSync = false,
+  String? receiptNumber,
+  bool receiptPending = false,
+  EditiqueCacheEntry? cancelledReceipt,
+}) {
   return tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
@@ -30,9 +40,12 @@ Future<void> _pump(WidgetTester tester, {required VoidCallback onDownload}) {
       home: Scaffold(
         body: Center(
           child: FacturationPaymentDetailDialogView(
-            intent: _intent(),
+            intent: _intent(isPendingSync: isPendingSync),
             allocations: const Text('ALLOC_SLOT'),
+            receiptNumber: receiptNumber,
+            receiptPending: receiptPending,
             onDownloadReceipt: onDownload,
+            cancelledReceipt: cancelledReceipt,
           ),
         ),
       ),
@@ -89,6 +102,242 @@ void main() {
     await tester.pump();
 
     expect(downloaded, isTrue);
+  });
+
+  // Le serveur produit le reçu à partir de l'identifiant du paiement. Tant que
+  // l'encaissement n'est pas remonté, cet identifiant est un uuid client qu'il
+  // ne connaît pas : l'action ne peut qu'échouer en 404.
+  testWidgets('paiement non synchronisé : action éteinte et expliquée', (
+    tester,
+  ) async {
+    await _pump(tester, onDownload: null, isPendingSync: true);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Télécharger le reçu'), findsOneWidget);
+    expect(
+      find.text('Le reçu sera disponible une fois le paiement synchronisé.'),
+      findsOneWidget,
+    );
+
+    // Le bouton reste visible mais inerte.
+    await tester.tap(find.text('Télécharger le reçu'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('paiement synchronisé : aucune explication d attente', (
+    tester,
+  ) async {
+    await _pump(tester, onDownload: () {});
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Le reçu sera disponible une fois le paiement synchronisé.'),
+      findsNothing,
+    );
+  });
+
+  group('ligne « Reçu n° »', () {
+    testWidgets('affiche le numéro définitif quand il est connu', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('ETL-RC-2526-000212'), findsOneWidget);
+      // Seule « Encaissé par » reste vide.
+      expect(find.text('—'), findsOneWidget);
+    });
+
+    // Un `PROV-…` local n'est pas un numéro de pièce : l'afficher comme tel
+    // ferait passer un provisoire pour une référence officielle.
+    testWidgets('annonce l attente plutôt qu un numéro provisoire', (
+      tester,
+    ) async {
+      await _pump(tester, onDownload: () {}, receiptPending: true);
+      await tester.pumpAndSettle();
+
+      expect(find.text('En attente de synchronisation'), findsOneWidget);
+    });
+
+    testWidgets('reste vide quand rien n est connu', (tester) async {
+      await _pump(tester, onDownload: () {});
+      await tester.pumpAndSettle();
+
+      expect(find.text('En attente de synchronisation'), findsNothing);
+      expect(find.text('—'), findsNWidgets(2));
+    });
+  });
+
+  // Un reçu que l'établissement a retiré : le numéro barré ne dit pas
+  // grand-chose seul, c'est la phrase qui explique. La rature la rend
+  // seulement impossible à manquer.
+  group('reçu annulé', () {
+    EditiqueCacheEntry cancelled({String? reason = 'Erreur de montant'}) =>
+        EditiqueCacheEntry(
+          id: 'c-1',
+          documentId: 'doc-1',
+          documentNumber: 'ETL-RC-2526-000212',
+          docType: 'RC',
+          schoolId: 'school-1',
+          sizeBytes: 1024,
+          contentSha256: 'abc',
+          cancelledAt: DateTime.utc(2026, 8, 6).millisecondsSinceEpoch,
+          cancellationReason: reason,
+          createdAt: 1000,
+          lastAccessedAt: 1000,
+        );
+
+    testWidgets('barre le numéro et dit le motif', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(),
+      );
+      await tester.pumpAndSettle();
+
+      final number = tester.widget<Text>(find.text('ETL-RC-2526-000212'));
+      expect(number.style?.decoration, TextDecoration.lineThrough);
+      expect(find.textContaining('Erreur de montant'), findsOneWidget);
+      expect(find.textContaining('annulé'), findsOneWidget);
+    });
+
+    // Arbitrage du 2026-08-06 : la copie annulée se ressort quand même — la
+    // rature et le motif sont à l'écran, la pièce ne trompe personne.
+    testWidgets('laisse le téléchargement offert', (tester) async {
+      var tapped = 0;
+      await _pump(
+        tester,
+        onDownload: () => tapped++,
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Télécharger le reçu'));
+      expect(tapped, 1);
+    });
+
+    // Le motif vient du serveur : il peut manquer, et l'écran n'invente pas la
+    // phrase absente.
+    testWidgets('dit le retrait même sans motif', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+        cancelledReceipt: cancelled(reason: null),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('annulé'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('un reçu qui tient n est ni barré ni commenté', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        receiptNumber: 'ETL-RC-2526-000212',
+      );
+      await tester.pumpAndSettle();
+
+      final number = tester.widget<Text>(find.text('ETL-RC-2526-000212'));
+      expect(number.style?.decoration, isNot(TextDecoration.lineThrough));
+      expect(find.textContaining('annulé'), findsNothing);
+    });
+  });
+
+  // Le geste que porte « Télécharger le reçu ». Éprouvé ici parce qu'une revue
+  // adversariale a montré ce que coûtait la mauvaise garde — et parce que la
+  // décision vivait jusque-là dans l'arbre de widgets, hors de portée de tout
+  // test.
+  group('facturationReceiptGesture', () {
+    EditiqueCacheEntry entry({
+      String? documentId = 'doc-1',
+      String? contentSha256 = 'abc',
+      int? cancelledAt,
+    }) => EditiqueCacheEntry(
+      id: 'c-1',
+      documentId: documentId,
+      documentNumber: 'ETL-RC-2526-000212',
+      docType: 'RC',
+      schoolId: 'school-1',
+      sizeBytes: 1024,
+      contentSha256: contentSha256,
+      cancelledAt: cancelledAt,
+      createdAt: 1000,
+      lastAccessedAt: 1000,
+    );
+
+    test('restitue une copie détenue', () {
+      expect(
+        facturationReceiptGesture(cached: entry(), isPendingSync: false),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    // LA régression trouvée par la revue adversariale. Garder sur les octets
+    // faisait retomber ce cas sur l'ÉMISSION, qui rescelle l'instantané, brûle
+    // un numéro d'une séquence auditée sans trou et repointe
+    // `payment.receiptId` — alors que la route de téléchargement du serveur ne
+    // filtre pas l'annulation et rendait la pièce gratuitement. Un reçu retiré
+    // pour erreur de montant redevenait le reçu officiel du versement.
+    test('restitue encore une pièce annulée dont les octets sont partis', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(contentSha256: null, cancelledAt: 1786013000000),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    test('restitue une pièce en vigueur dont les octets sont partis', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(contentSha256: null),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.restitute,
+      );
+    });
+
+    // Le serveur n'expose aucune recherche par numéro : sans identifiant
+    // d'archive, la restitution rendrait `NotFoundFailure`.
+    test('émet quand aucun identifiant d archive ne désigne la pièce', () {
+      expect(
+        facturationReceiptGesture(
+          cached: entry(documentId: null),
+          isPendingSync: false,
+        ),
+        FacturationReceiptGesture.emit,
+      );
+      expect(
+        facturationReceiptGesture(cached: null, isPendingSync: false),
+        FacturationReceiptGesture.emit,
+      );
+    });
+
+    test('n offre rien sur un encaissement pas encore remonté', () {
+      expect(
+        facturationReceiptGesture(cached: null, isPendingSync: true),
+        FacturationReceiptGesture.none,
+      );
+    });
+
+    // Une pièce adressable se restitue même hors synchro du versement : la
+    // lecture n'a besoin que de l'identifiant de la PIÈCE.
+    test('restitue malgré un versement non synchronisé', () {
+      expect(
+        facturationReceiptGesture(cached: entry(), isPendingSync: true),
+        FacturationReceiptGesture.restitute,
+      );
+    });
   });
 
   testWidgets('rendu sans débordement en largeur mobile (320 dp)', (

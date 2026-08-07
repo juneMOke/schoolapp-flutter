@@ -3,7 +3,9 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
     as core_avatar;
+import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_data_table_sorter.dart';
@@ -176,7 +178,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
                 EnrollmentStatus.fromString(enrollment.status),
               ),
             ),
-            cells: _buildCells(enrollment, isCompact),
+            cells: _buildCells(enrollment, isCompact, l10n),
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
               tooltip: l10n.viewDetails,
@@ -193,6 +195,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
   List<DataTableCellSpec> _buildCells(
     EnrollmentSummary enrollment,
     bool isCompact,
+    AppLocalizations l10n,
   ) {
     final formattedDate = _formatDate(enrollment.student.dateOfBirth);
 
@@ -205,7 +208,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
           secondaryText: formattedDate,
           secondaryVariant: DataTableCellTextVariant.mono,
         ),
-        _statusCell(enrollment),
+        _statusCell(enrollment, l10n),
       ];
     }
 
@@ -218,17 +221,63 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         text: formattedDate,
         variant: DataTableCellTextVariant.mono,
       ),
-      _statusCell(enrollment),
+      _statusCell(enrollment, l10n),
     ];
   }
 
-  DataTableCellSpec _statusCell(EnrollmentSummary enrollment) {
+  DataTableCellSpec _statusCell(
+    EnrollmentSummary enrollment,
+    AppLocalizations l10n,
+  ) {
+    // Statut métier + (si brouillon local) badge « Brouillon » sur la même
+    // ligne. Chaque badge est borné (le FittedBox de la cellule impose des
+    // contraintes non bornées ; le `Flexible` interne du badge casserait sinon).
+    final status = EnrollmentStatus.fromString(enrollment.status);
     return DataTableCellSpec(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 122),
-        child: EnrollmentStatusBadge(
-          status: EnrollmentStatus.fromString(enrollment.status),
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 122),
+            // Un dossier RE distingue « En cours » (brouillon local) de
+            // « Réinscrit » (finalisé/synchronisé) — axe syncState,
+            // indépendant du statut métier. PRE lit directement le statut
+            // métier (2 pastilles seulement — testé AVANT
+            // `isReenrollmentCandidate`, type-agnostique, qui classerait
+            // sinon à tort un candidat PRE brut comme « À réinscrire »).
+            // « À réinscrire » pour un candidat RE N-1 non commencé, sinon
+            // statut métier générique — même logique que la carte grille.
+            child: enrollment.isReEnrollment
+                ? StatusBadge.enrollmentReEnrollment(
+                    label: enrollment.isLocalDraft
+                        ? l10n.enrollmentStatusInProgress
+                        : l10n.enrollmentReRegisteredBadge,
+                  )
+                : enrollment.isPreEnrollment
+                ? (status == EnrollmentStatus.completed
+                      ? StatusBadge.enrollmentCompleted(
+                          label: l10n.enrollmentStatusPreRegistered,
+                        )
+                      : StatusBadge.enrollmentInProgress(
+                          label: l10n.enrollmentStatusInProgress,
+                        ))
+                : enrollment.isReenrollmentCandidate
+                ? StatusBadge.enrollmentPending(
+                    label: l10n.enrollmentReenrollmentCandidateBadge,
+                  )
+                : EnrollmentStatusBadge(status: status),
+          ),
+          if (enrollment.isLocalDraft) ...[
+            const SizedBox(width: AppSpacing.xs),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 110),
+              child: StatusBadge.draft(
+                label: l10n.enrollmentDraftBadge,
+                size: StatusBadgeSize.small,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

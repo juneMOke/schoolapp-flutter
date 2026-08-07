@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_data_table.dart';
@@ -59,6 +60,206 @@ void main() {
       gender: Gender.male,
     ),
   );
+
+  testWidgets(
+    'ligne brouillon (DRAFT) : badge « Brouillon » à côté du statut, sans '
+    'débordement',
+    (tester) async {
+      const draft = EnrollmentSummary(
+        enrollmentId: 'draft-1',
+        enrollmentCode: '',
+        status: 'IN_PROGRESS',
+        student: StudentSummary(
+          id: 'stu-9',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+        syncState: SyncState.draft,
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[draft],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      // Aucune exception de layout (Row de badges bornés sous FittedBox).
+      expect(tester.takeException(), isNull);
+      // Statut métier conservé + badge « Brouillon ».
+      expect(find.byType(EnrollmentStatusBadge), findsOneWidget);
+      expect(find.text('Brouillon'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ligne non-brouillon (syncState null) : aucun badge « Brouillon »',
+    (tester) async {
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[enrollment],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Brouillon'), findsNothing);
+    },
+  );
+
+  testWidgets('dossier RE avec brouillon local : pastille « En cours »', (
+    tester,
+  ) async {
+    const reDraft = EnrollmentSummary(
+      enrollmentId: 'enr-re-1',
+      enrollmentCode: 'RE-001',
+      status: 'PRE_REGISTERED',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.draft,
+      student: StudentSummary(
+        id: 'stu-10',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[reDraft],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('En cours'), findsOneWidget);
+    expect(find.text('Réinscrit'), findsNothing);
+  });
+
+  testWidgets('dossier RE finalisé/synchronisé : pastille « Réinscrit »', (
+    tester,
+  ) async {
+    const reFinalized = EnrollmentSummary(
+      enrollmentId: 'enr-re-2',
+      enrollmentCode: 'RE-002',
+      status: 'IN_PROGRESS',
+      enrollmentType: 'RE_ENROLLMENT',
+      syncState: SyncState.synced,
+      student: StudentSummary(
+        id: 'stu-11',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[reFinalized],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Réinscrit'), findsOneWidget);
+    expect(find.text('En cours'), findsNothing);
+  });
+
+  testWidgets(
+    'candidat de pré-inscription (enrollmentId vide) : pastille « En cours '
+    '», PAS « À réinscrire »',
+    (tester) async {
+      const preCandidate = EnrollmentSummary(
+        enrollmentId: '',
+        enrollmentCode: '',
+        status: 'IN_PROGRESS',
+        enrollmentType: 'PRE_ENROLLMENT',
+        student: StudentSummary(
+          id: 'pre-12',
+          firstName: 'Amina',
+          lastName: 'Moke',
+          surname: 'Junior',
+          dateOfBirth: '2015-04-02',
+          gender: Gender.female,
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(
+          SizedBox(
+            width: 800,
+            child: EnrollmentDataTable(
+              enrollments: const <EnrollmentSummary>[preCandidate],
+              onViewRequested: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('En cours'), findsOneWidget);
+      expect(find.text('À réinscrire'), findsNothing);
+      expect(find.text('Pré-inscrit'), findsNothing);
+    },
+  );
+
+  testWidgets('dossier PRE COMPLETED : pastille « Pré-inscrit »', (
+    tester,
+  ) async {
+    const preCompleted = EnrollmentSummary(
+      enrollmentId: 'pre-13',
+      enrollmentCode: '',
+      status: 'COMPLETED',
+      enrollmentType: 'PRE_ENROLLMENT',
+      syncState: SyncState.pendingSync,
+      student: StudentSummary(
+        id: 'stu-pre-13',
+        firstName: 'Amina',
+        lastName: 'Moke',
+        surname: 'Junior',
+        dateOfBirth: '2015-04-02',
+        gender: Gender.female,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildHarness(
+        SizedBox(
+          width: 800,
+          child: EnrollmentDataTable(
+            enrollments: const <EnrollmentSummary>[preCompleted],
+            onViewRequested: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Pré-inscrit'), findsOneWidget);
+    expect(find.text('En cours'), findsNothing);
+  });
 
   testWidgets('Téléphone (<600px) : 2 colonnes, date en sous-texte du nom', (
     tester,

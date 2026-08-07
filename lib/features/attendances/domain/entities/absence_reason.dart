@@ -29,7 +29,11 @@ extension AbsenceReasonX on AbsenceReason {
       'WORK_LEAVE' => AbsenceReason.workLeave,
       'UNJUSTIFIED' => AbsenceReason.unjustified,
       'OTHER' => AbsenceReason.other,
-      _ => AbsenceReason.unknown,
+      // Parsing défensif (invariant #9) : un motif ENRICHI côté back mais inconnu
+      // de cette tablette retombe sur `OTHER`, jamais une exception. Distinct de
+      // `UNKNOWN` (valeur cataloguée = motif inconnu à la saisie). Sans ça,
+      // ajouter un motif ferait tomber les tablettes non redéployées.
+      _ => AbsenceReason.other,
     };
   }
 

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/discipli
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 
 abstract class DisciplinaryCaseRepository {
@@ -31,5 +32,15 @@ abstract class DisciplinaryCaseRepository {
     required DisciplinaryCategory category,
     required DisciplinarySeverity severity,
     required DisciplinarySanction sanction,
+  });
+
+  /// Traitement d'un cas (DF-2, régime C) : `PUT /disciplinary-cases/{caseId}`.
+  /// Renvoie TOUJOURS la sanction courante (sinon effacement — DG-3). `409` →
+  /// [ConflictFailure] (verrou optimiste périmé, refetch + rejeu LWW en amont).
+  Future<Either<Failure, void>> updateDisciplinaryCaseStatus({
+    required String caseId,
+    required DisciplinaryStatus status,
+    DisciplinarySanction? sanction,
+    int? expectedVersion,
   });
 }

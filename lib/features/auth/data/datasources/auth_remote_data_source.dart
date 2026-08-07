@@ -15,6 +15,14 @@ abstract class AuthRemoteDataSource {
   @POST(AppConstants.loginEndpoint)
   Future<LoginResponseModel> login(@Body() LoginRequestModel request);
 
+  /// Rotation du refresh token (ADR-010 §7.2). Le refresh token voyage dans le
+  /// header `X-Refresh-Token` (pas de corps), la réponse réutilise
+  /// [LoginResponseModel] (surensemble ; le client ignore `user` au refresh).
+  @POST(AppConstants.refreshEndpoint)
+  Future<LoginResponseModel> refresh({
+    @Header('X-Refresh-Token') required String refreshToken,
+  });
+
   @POST(AppConstants.resetPasswordEndpoint)
   Future<void> resetPassword(
     @Body() ResetPasswordRequest request, {

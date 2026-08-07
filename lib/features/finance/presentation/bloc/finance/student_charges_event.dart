@@ -17,6 +17,31 @@ class StudentChargesRequested extends StudentChargesEvent {
   List<Object?> get props => [studentId, levelId];
 }
 
+/// Étape Frais du wizard en flux BROUILLON local : génère d'abord les créances
+/// provisoires depuis la grille locale `ref_fee_tariffs` (FF5, idempotent par
+/// élève+année), puis lit le grand-livre comme [StudentChargesRequested].
+class DraftStudentChargesRequested extends StudentChargesEvent {
+  final String studentId;
+  final String levelId;
+  final String academicYearId;
+  final String? schoolLevelGroupId;
+
+  const DraftStudentChargesRequested({
+    required this.studentId,
+    required this.levelId,
+    required this.academicYearId,
+    this.schoolLevelGroupId,
+  });
+
+  @override
+  List<Object?> get props => [
+    studentId,
+    levelId,
+    academicYearId,
+    schoolLevelGroupId,
+  ];
+}
+
 class StudentChargesByAcademicYearRequested extends StudentChargesEvent {
   final String studentId;
   final String academicYearId;

@@ -50,6 +50,23 @@ class AppRoutesNames {
   static const String resultatsClasse =
       '/resultats/${MenuConstants.resultatsClasseId}';
 
+  static const String documentsStudents =
+      '/documents/${MenuConstants.documentsStudentId}';
+
+  /// Catalogue des pièces d'un élève. L'année est dans le chemin — comme pour la
+  /// facturation — pour qu'un lien profond reste résoluble sans dépendre du
+  /// contexte académique en mémoire.
+  static const String documentsCatalog =
+      '/documents/${MenuConstants.documentsStudentId}'
+      '/catalogue/:studentId/:academicYearId';
+
+  static String documentsCatalogPath({
+    required String studentId,
+    required String academicYearId,
+  }) =>
+      '/documents/${MenuConstants.documentsStudentId}'
+      '/catalogue/$studentId/$academicYearId';
+
   static String disciplinaryStudentDetailPath({
     required String studentId,
     required String academicYearId,

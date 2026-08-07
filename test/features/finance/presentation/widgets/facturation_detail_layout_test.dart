@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_app_bar.dart';
+import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_balance_pill.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_detail_kpi_strip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -45,12 +46,13 @@ void main() {
     await _pump(
       tester,
       const AppPageBackground(
-        appBar: FacturationDetailAppBar(
+        appBar: StudentDetailAppBar(
           fullName: 'Kabongo Mwamba Daniel',
           eyebrow: 'Facturation · 6e A',
           firstName: 'Daniel',
           lastName: 'Kabongo',
           fallbackRoute: '/finances/facturations',
+          showCloseButton: true,
           trailing: FacturationBalancePill(
             hasBalance: true,
             label: '150 USD dû',
@@ -69,12 +71,13 @@ void main() {
       await _pump(
         tester,
         AppPageBackground(
-          appBar: const FacturationDetailAppBar(
+          appBar: const StudentDetailAppBar(
             fullName: 'Kabongo Mwamba Daniel',
             eyebrow: 'Facturation · 6e A',
             firstName: 'Daniel',
             lastName: 'Kabongo',
             fallbackRoute: '/finances/facturations',
+            showCloseButton: true,
             trailing: FacturationBalancePill(
               hasBalance: true,
               label: '150 USD dû',

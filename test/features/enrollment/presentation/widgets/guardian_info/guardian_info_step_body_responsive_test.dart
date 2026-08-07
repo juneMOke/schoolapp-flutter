@@ -19,6 +19,7 @@ void main() {
           onItemStateChanged: (_, _) {},
           onItemValueChanged: (_, _) {},
           onAddParent: () {},
+          onSearchParent: () {},
           onSave: () {},
           showInlineSaveButton: false,
         ),
@@ -36,6 +37,8 @@ void main() {
       final buttonTop = tester.getTopLeft(find.text(buttonLabel)).dy;
       // Empilé : le bouton est sous le bloc titre.
       expect(buttonTop, greaterThan(titleBottom));
+      // Empilé : le bouton de recherche porte aussi son libellé complet.
+      expect(find.text('Rechercher un parent'), findsOneWidget);
     },
   );
 
@@ -53,6 +56,11 @@ void main() {
       // En ligne : même bande verticale (approx.) et bouton à droite du titre.
       expect((buttonCenterY - titleCenterY).abs(), lessThan(60));
       expect(buttonX, greaterThan(titleX));
+      // En ligne : le bouton de recherche est compact (icône + tooltip) pour
+      // laisser la place au libellé complet du bouton d'ajout.
+      expect(find.text('Rechercher un parent'), findsNothing);
+      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+      expect(find.byTooltip('Rechercher un parent'), findsOneWidget);
     },
   );
 }

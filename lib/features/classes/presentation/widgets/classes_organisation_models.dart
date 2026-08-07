@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 
 class ClassesOrganisationCycleOption extends Equatable {
@@ -23,7 +22,6 @@ class ClassesOrganisationLevelOption extends Equatable {
   final String schoolLevelId;
   final String schoolLevelName;
   final bool splitIntoClassrooms;
-  final List<BootstrapClassroom> classrooms;
 
   const ClassesOrganisationLevelOption({
     required this.schoolLevelGroupId,
@@ -31,7 +29,6 @@ class ClassesOrganisationLevelOption extends Equatable {
     required this.schoolLevelId,
     required this.schoolLevelName,
     required this.splitIntoClassrooms,
-    required this.classrooms,
   });
 
   String get key => '$schoolLevelGroupId::$schoolLevelId';
@@ -42,14 +39,12 @@ class ClassesOrganisationLevelOption extends Equatable {
     String? schoolLevelId,
     String? schoolLevelName,
     bool? splitIntoClassrooms,
-    List<BootstrapClassroom>? classrooms,
   }) => ClassesOrganisationLevelOption(
     schoolLevelGroupId: schoolLevelGroupId ?? this.schoolLevelGroupId,
     schoolLevelGroupName: schoolLevelGroupName ?? this.schoolLevelGroupName,
     schoolLevelId: schoolLevelId ?? this.schoolLevelId,
     schoolLevelName: schoolLevelName ?? this.schoolLevelName,
     splitIntoClassrooms: splitIntoClassrooms ?? this.splitIntoClassrooms,
-    classrooms: classrooms ?? this.classrooms,
   );
 
   @override
@@ -59,7 +54,6 @@ class ClassesOrganisationLevelOption extends Equatable {
     schoolLevelId,
     schoolLevelName,
     splitIntoClassrooms,
-    classrooms,
   ];
 }
 
@@ -83,7 +77,13 @@ class ClassesOrganisationSearchRequest extends Equatable {
 class ClassroomMemberReassignIntent extends Equatable {
   /// Classe d'origine de l'élève. `null` → élève non réparti (mode affectation).
   final String? classroomId;
-  final String classroomMemberId;
+
+  /// Dossier d'inscription à affecter — renseigné **uniquement** en mode
+  /// affectation ([classroomId] `null`), où la ligne cliquée n'est pas un membre
+  /// de classe mais un non-réparti. Le POST d'affectation exige cet identifiant :
+  /// lui envoyer un `classroomMemberId` (que l'élève n'a pas encore) retourne 404.
+  final String? enrollmentId;
+
   final String studentId;
   final String studentFirstName;
   final String studentLastName;
@@ -92,18 +92,18 @@ class ClassroomMemberReassignIntent extends Equatable {
 
   const ClassroomMemberReassignIntent({
     required this.classroomId,
-    required this.classroomMemberId,
     required this.studentId,
     required this.studentFirstName,
     required this.studentLastName,
     required this.studentGender,
     required this.studentDisplayName,
+    this.enrollmentId,
   });
 
   @override
   List<Object?> get props => [
     classroomId,
-    classroomMemberId,
+    enrollmentId,
     studentId,
     studentFirstName,
     studentLastName,

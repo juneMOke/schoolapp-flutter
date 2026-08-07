@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_member_tile.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// PARCOURS 8 — Section ambre « Élèves non répartis ».
@@ -13,18 +15,26 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// classe (nouveaux arrivants, transferts annulés…). Chaque élève propose un
 /// bouton « Affecter » qui ouvre la popin de choix de classe. La section
 /// disparaît dès qu'il n'y a plus de non-répartis (gérée par l'appelant).
+///
+/// Elle consomme des **inscriptions**, pas des membres de classe : un
+/// non-réparti n'a par définition aucune ligne roster. Le [ClassroomMember]
+/// construit ici est un véhicule d'AFFICHAGE pour la tuile partagée — jamais
+/// une identité serveur ; celle qui compte (`enrollmentId`) voyage à part.
 class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
   final int count;
-  final List<ClassroomMember> members;
+  final List<EnrollmentSummary> enrollments;
   final bool isReassigning;
-  final String reassigningMemberId;
+
+  /// Inscription dont l'affectation est en cours (tuile en attente).
+  final String assigningEnrollmentId;
+
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
 
   const ClassesOrganisationUnassignedMembersSection({
     required this.count,
-    required this.members,
+    required this.enrollments,
     required this.isReassigning,
-    required this.reassigningMemberId,
+    required this.assigningEnrollmentId,
     required this.onTransferTap,
     super.key,
   });
@@ -110,16 +120,17 @@ class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
               return Wrap(
                 spacing: gap,
                 runSpacing: gap,
-                children: members
+                children: enrollments
                     .map(
-                      (member) => SizedBox(
+                      (enrollment) => SizedBox(
                         width: tileWidth,
                         child: ClassesOrganisationMemberTile(
-                          member: member,
+                          member: _toDisplayMember(enrollment),
                           classroomId: null,
+                          enrollmentId: enrollment.enrollmentId,
                           isReassigning: isReassigning,
                           isCurrentReassigningMember:
-                              member.id == reassigningMemberId,
+                              enrollment.enrollmentId == assigningEnrollmentId,
                           action: ClassesOrganisationMemberAction.assign,
                           onTransferTap: onTransferTap,
                         ),
@@ -133,4 +144,23 @@ class ClassesOrganisationUnassignedMembersSection extends StatelessWidget {
       ),
     );
   }
+
+  /// Véhicule d'affichage pour la tuile partagée. `id` porte l'`enrollmentId`
+  /// (identité de la ligne à l'écran) ; `classroomId`/`academicYearId` sont
+  /// vides **par nature** — l'élève n'est dans aucune classe. Ces champs ne
+  /// sont jamais renvoyés au serveur : l'affectation ne transporte que
+  /// l'`enrollmentId`, passé explicitement à la tuile.
+  ClassroomMember _toDisplayMember(EnrollmentSummary enrollment) =>
+      ClassroomMember(
+        id: enrollment.enrollmentId,
+        studentId: enrollment.student.id,
+        classroomId: '',
+        academicYearId: '',
+        studentFirstName: enrollment.student.firstName,
+        studentLastName: enrollment.student.lastName,
+        studentMiddleName: enrollment.student.surname,
+        studentGender: enrollment.student.gender == Gender.female
+            ? ClassroomMemberGender.female
+            : ClassroomMemberGender.male,
+      );
 }

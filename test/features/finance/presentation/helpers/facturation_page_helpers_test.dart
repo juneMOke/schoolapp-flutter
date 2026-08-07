@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_bundle.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_school_level_group_bundle.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_page_helpers.dart';
 
 void main() {
@@ -72,34 +71,28 @@ void main() {
   });
 }
 
-BootstrapSchoolLevelGroupBundle _bundle({
+SchoolLevelGroupBundle _bundle({
   required String groupId,
   required String groupName,
   required int groupOrder,
   required List<_LevelData> levels,
 }) {
-  return BootstrapSchoolLevelGroupBundle(
-    schoolLevelGroup: BootstrapSchoolLevelGroup(
+  return SchoolLevelGroupBundle(
+    group: SchoolLevelGroup(
       id: groupId,
-      version: 1,
       name: groupName,
       code: 'CODE-$groupId',
       periodType: 'ANNUAL',
       displayOrder: groupOrder,
     ),
-    schoolLevels: levels
+    levels: levels
         .map(
-          (level) => BootstrapSchoolLevelBundle(
-            schoolLevel: BootstrapSchoolLevel(
-              id: level.id,
-              version: 1,
-              name: level.name,
-              code: 'CODE-${level.id}',
-              displayOrder: level.order,
-              splitIntoClassrooms: false,
-            ),
-            classrooms: const [],
-            tariffs: const [],
+          (level) => SchoolLevel(
+            id: level.id,
+            name: level.name,
+            code: 'CODE-${level.id}',
+            displayOrder: level.order,
+            splitIntoClassrooms: false,
           ),
         )
         .toList(growable: false),

@@ -31,9 +31,15 @@ abstract class ClassroomRepository {
     required ClassroomDistributionCriterion distributionCriterion,
   });
 
-  Future<Either<Failure, void>> reassignClassroomMember({
-    required String classroomMemberId,
-    required String targetClassroomId,
+  /// Première affectation d'un élève non réparti (POST members) : crée sa ligne
+  /// roster à partir de son **dossier d'inscription** et renvoie le membre
+  /// canonique créé par le serveur (à intégrer au miroir par l'appelant).
+  ///
+  /// Ne couvre QUE la première mise en classe : le déplacement d'un membre
+  /// existant passe par l'événement de transfert hors ligne.
+  Future<Either<Failure, ClassroomMember>> assignEnrollmentToClassroom({
+    required String classroomId,
+    required String enrollmentId,
   });
 
   Future<Either<Failure, ClassroomStats>> getClassroomStats();

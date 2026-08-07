@@ -19,20 +19,29 @@ class AccueilNavTarget {
   });
 }
 
-/// Puce de lien rapide affichée dans le pied d'une carte module (spec §04).
+/// Sous-module listé dans le pied d'une carte module (spec §03/§04).
+///
+/// [isDashboard] distingue la ligne « Tableau de bord » — mise en avant
+/// (médaillon + fond doux + libellé gras) — des autres pages du module, qui
+/// s'affichent en lignes légères à puce.
 @immutable
-class AccueilQuickLink {
+class AccueilSubModule {
   final String label;
   final AccueilNavTarget target;
+  final bool isDashboard;
 
-  const AccueilQuickLink({required this.label, required this.target});
+  const AccueilSubModule({
+    required this.label,
+    required this.target,
+    this.isDashboard = false,
+  });
 }
 
 /// Carte de présentation d'un module sur la page d'accueil (spec §03).
 ///
-/// Décrit l'application : un médaillon coloré, un titre, une phrase de
-/// description et des puces de liens rapides. La carte entière mène au tableau
-/// de bord du module ([dashboardTarget]) ; chaque puce a sa propre cible.
+/// Décrit l'application : un médaillon coloré, un titre, le nombre de pages,
+/// une phrase de description et la liste de ses sous-modules. L'en-tête mène à
+/// la page d'entrée du module ([entryTarget]) ; chaque ligne à son sous-écran.
 @immutable
 class AccueilModule {
   final String id;
@@ -41,8 +50,7 @@ class AccueilModule {
   final IconData icon;
   final Color accent;
   final Color softBackground;
-  final AccueilNavTarget dashboardTarget;
-  final List<AccueilQuickLink> quickLinks;
+  final List<AccueilSubModule> subModules;
 
   const AccueilModule({
     required this.id,
@@ -51,7 +59,17 @@ class AccueilModule {
     required this.icon,
     required this.accent,
     required this.softBackground,
-    required this.dashboardTarget,
-    required this.quickLinks,
-  });
+    required this.subModules,
+  }) : assert(subModules.length > 0, 'Un module a au moins une page');
+
+  /// Page d'entrée du module (spec §03) : le tableau de bord s'il existe,
+  /// sinon le premier sous-module. Ainsi Cours ouvre « Emploi du temps » et
+  /// Résultats « Résultats par classe ».
+  AccueilSubModule get entry => subModules.firstWhere(
+    (sub) => sub.isDashboard,
+    orElse: () => subModules.first,
+  );
+
+  /// Nombre de pages annoncé sous le titre de la carte.
+  int get pageCount => subModules.length;
 }

@@ -101,6 +101,32 @@ class LoginBannerData {
           countdownSeconds: rateLimitSeconds,
           countdownMessage: (s) => l10n.loginErrorRateLimited(s),
         );
+      case AuthErrorKind.offlineFirstLoginRequired:
+        // Hors ligne + compte jamais vu online sur ce device (ADR-010 D-01) :
+        // expliquer POURQUOI le login n'aboutira pas sans réseau — un bandeau
+        // « pas de connexion » générique inviterait à retenter en boucle.
+        return LoginBannerData(
+          tone: LoginBannerTone.network,
+          icon: Icons.cloud_off_rounded,
+          message: l10n.loginErrorOfflineFirstLogin,
+          action: LoginBannerAction(
+            label: l10n.splashErrorRetry,
+            icon: Icons.refresh_rounded,
+            onTap: onRetry,
+          ),
+        );
+      case AuthErrorKind.offlineWindowExpired:
+        // Fenêtre de travail offline close (borne dépassée ou révocation D-09).
+        return LoginBannerData(
+          tone: LoginBannerTone.warning,
+          icon: Icons.lock_clock_rounded,
+          message: l10n.loginErrorOfflineWindowExpired,
+          action: LoginBannerAction(
+            label: l10n.splashErrorRetry,
+            icon: Icons.refresh_rounded,
+            onTap: onRetry,
+          ),
+        );
       case AuthErrorKind.server:
       case AuthErrorKind.generic:
         return LoginBannerData(

@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
 import 'package:school_app_flutter/features/enrollment/domain/repositories/enrollment_stats_repository.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_stats_bloc.dart';
 
+import '../../../../core/offline/offline_full_test_db.dart';
 import '../../../../test_helpers/widget_test_utils.dart';
 
 class MockEnrollmentRemoteDataSource extends Mock
@@ -78,7 +79,7 @@ void main() {
         appEnvironment: AppEnvironment.dev.label,
         apiBaseUrl: 'http://127.0.0.1:8080',
       ),
-      bootstrapBoxName: 'bootstrap_box_enrollment_stats_test',
+      offlineDatabase: await openFullOfflineDb(),
     );
 
     mockRemoteDataSource = MockEnrollmentRemoteDataSource();

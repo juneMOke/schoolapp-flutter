@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_search_actions.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class AttendanceSearchFields extends StatelessWidget {
@@ -13,7 +13,7 @@ class AttendanceSearchFields extends StatelessWidget {
   final String? selectedCycleId;
   final List<AttendanceLevelOption> levelOptions;
   final String? selectedLevelKey;
-  final List<BootstrapClassroom> classroomOptions;
+  final List<OfflineClassroom> classroomOptions;
   final String? selectedClassroomId;
   final DateTime selectedDate;
   final ValueChanged<String?> onCycleChanged;

@@ -17,6 +17,14 @@ enum ClassroomMemberGender {
         throw FormatException('Invalid classroom member gender: $value');
     }
   }
+
+  /// Réciproque de [fromApiValue] (SCREAMING_SNAKE du contrat) : sert à
+  /// réécrire dans le miroir local un membre reçu du serveur.
+  String toApiValue() => switch (this) {
+    ClassroomMemberGender.male => 'MALE',
+    ClassroomMemberGender.female => 'FEMALE',
+    ClassroomMemberGender.other => 'OTHER',
+  };
 }
 
 class ClassroomMember extends Equatable {
@@ -29,6 +37,11 @@ class ClassroomMember extends Equatable {
   final String? studentMiddleName;
   final ClassroomMemberGender studentGender;
 
+  /// `true` si l'élève est présent dans la classe consultée via un transfert
+  /// local **non encore synchronisé** (composition à la lecture, CF4). Sert la
+  /// pastille « en attente de synchro ». Toujours `false` hors contexte offline.
+  final bool hasPendingTransfer;
+
   const ClassroomMember({
     required this.id,
     required this.studentId,
@@ -38,6 +51,7 @@ class ClassroomMember extends Equatable {
     required this.studentLastName,
     this.studentMiddleName,
     required this.studentGender,
+    this.hasPendingTransfer = false,
   });
 
   @override
@@ -50,5 +64,6 @@ class ClassroomMember extends Equatable {
     studentLastName,
     studentMiddleName,
     studentGender,
+    hasPendingTransfer,
   ];
 }

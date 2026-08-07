@@ -28,10 +28,20 @@
   "@loginErrorRateLimited": {
     "description": "Bandeau d'erreur 429 — verrouillage temporaire avec compte à rebours",
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "loginContactAdmin": "Contacter l'administrateur",
+  "loginErrorOfflineFirstLogin": "Pas de connexion, et ce compte ne s'est jamais connecté sur cette tablette. Une première connexion en ligne est nécessaire.",
+  "@loginErrorOfflineFirstLogin": {
+    "description": "Bandeau : login offline impossible, compte jamais vu online sur ce device (ADR-010 D-01)"
+  },
+  "loginErrorOfflineWindowExpired": "Période de travail hors-ligne expirée. Reconnectez-vous en ligne dès que le réseau revient.",
+  "@loginErrorOfflineWindowExpired": {
+    "description": "Bandeau : fenêtre offline close (borne refresh dépassée ou révoquée) — reconnexion online exigée (ADR-010 D-07/D-09)"
+  },
   "showPassword": "Afficher",
   "hidePassword": "Masquer",
   "schoolApp": "ETEELO CONNECT",
@@ -39,7 +49,18 @@
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplifier la gestion de votre école",
   "splashSemanticsLabel": "ETEELO CONNECT — écran de démarrage",
-  "bootstrapOfflineBanner": "Mode hors-ligne — données en cache",
+  "sessionOfflineBanner": "Session hors-ligne — vérifiée localement",
+  "@sessionOfflineBanner": {
+    "description": "Bandeau : session ouverte hors ligne (ADR-010)"
+  },
+  "sessionWarningBanner": "Session à rafraîchir — reconnectez-vous bientôt",
+  "@sessionWarningBanner": {
+    "description": "Bandeau WARNING : session offline dégradée (J7–J21)"
+  },
+  "sessionReadOnlyBanner": "Lecture seule — reconnexion en ligne requise",
+  "@sessionReadOnlyBanner": {
+    "description": "Bandeau READ_ONLY : session offline expirée (J21+)"
+  },
   "splashErrorTitle": "Connexion impossible",
   "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
   "splashErrorRetry": "Réessayer",
@@ -47,8 +68,12 @@
   "@splashVersion": {
     "description": "Version technique affichée au pied du splash",
     "placeholders": {
-      "version": { "type": "String" },
-      "build": { "type": "String" }
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
     }
   },
   "logout": "Déconnexion",
@@ -145,6 +170,8 @@
   "classesOrganisationDistributionByGender": "Répartition par genre",
   "classesOrganisationDistributionByPercentage": "Répartition par moyenne",
   "classesOrganisationDistributeByGenderAction": "Lancer la répartition par genre",
+  "classesOrganisationDistributeOfflineHint": "Vous semblez hors-ligne. Une connexion est nécessaire pour lancer la répartition.",
+  "classesOrganisationDistributeLoadErrorHint": "Impossible de calculer l'effectif à répartir pour le moment. Réessayez plus tard.",
   "classesDistributionResultEyebrow": "Répartition par genre",
   "classesDistributionProcessingTitle": "Répartition en cours…",
   "classesDistributionSuccessTitle": "Répartition réussie",
@@ -219,7 +246,8 @@
   },
   "classesOrganisationTransferAction": "Transférer",
   "classesOrganisationTransferInProgress": "Transfert en cours...",
-  "classesOrganisationTransferSuccess": "Transfert effectué avec succès.",
+  "classesOrganisationTransferQueued": "Transfert enregistré — en attente de synchronisation.",
+  "classesOrganisationTransferPendingBadge": "En attente",
   "classesOrganisationTransferNoTarget": "Aucune sous-classe de destination disponible.",
   "classesOrganisationSelectCycleAndLevelTitle": "Sélectionnez un cycle et un niveau",
   "classesOrganisationSelectCycleAndLevelSubtitle": "Commencez par choisir un cycle, puis un niveau pour afficher la composition des classes.",
@@ -274,6 +302,9 @@
   "classesOrganisationNoMembers": "Aucun élève dans cette classe.",
   "classesOrganisationAssignAction": "Affecter",
   "classesOrganisationAssignDialogTitle": "Affecter l'élève",
+  "classesOrganisationAssignSuccess": "Élève affecté à la classe.",
+  "classesOrganisationAssignRejected": "Affectation refusée : cet élève est déjà dans une classe, ou son inscription n'est pas sur ce niveau. Actualisez la liste.",
+  "classesOrganisationAssignNotFound": "Classe ou inscription introuvable. Actualisez la liste.",
   "classesOrganisationLoadingClassroomsCount": "Chargement des membres de {count} sous-classes...",
   "@classesOrganisationLoadingClassroomsCount": {
     "placeholders": {
@@ -336,22 +367,34 @@
   "menuCourses": "Cours",
   "subMenuMyCourses": "Mes cours",
   "subMenuTimetable": "Emploi du temps",
-  "myCoursesCount": "{classCount, plural, =1{1 classe} other{{classCount} classes}} · {courseCount, plural, =1{1 cours} other{{courseCount} cours}}",
+  "myCoursesCount": "{classCount, plural, =0{0 classe} =1{1 classe} other{{classCount} classes}} · {courseCount, plural, =0{0 cours} =1{1 cours} other{{courseCount} cours}}",
   "@myCoursesCount": {
     "placeholders": {
-      "classCount": { "type": "int" },
-      "courseCount": { "type": "int" }
+      "classCount": {
+        "type": "int"
+      },
+      "courseCount": {
+        "type": "int"
+      }
     }
   },
   "myCoursesExpandAll": "Tout déplier",
   "myCoursesCollapseAll": "Tout replier",
-  "myCoursesClassCourseCount": "{count, plural, =1{1 cours} other{{count} cours}}",
+  "myCoursesClassCourseCount": "{count, plural, =0{0 cours} =1{1 cours} other{{count} cours}}",
   "@myCoursesClassCourseCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesStudentCount": "{count, plural, =0{Aucun élève} =1{1 élève} other{{count} élèves}}",
   "@myCoursesStudentCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "myCoursesLoadingA11yLabel": "Chargement de vos cours",
   "myCoursesEmptyTitle": "Aucun cours affecté",
@@ -371,73 +414,150 @@
   "myCoursesErrorContactAdmin": "Contacter l'administrateur",
   "myCoursesErrorIncidentCode": "Code incident : {code}",
   "@myCoursesErrorIncidentCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailBackToCourses": "Mes cours",
   "courseDetailEvaluationCount": "{count, plural, =0{Aucune évaluation} =1{1 évaluation} other{{count} évaluations}}",
   "@courseDetailEvaluationCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "courseDetailToGrade": "{count, plural, =1{1 à saisir} other{{count} à saisir}}",
+  "courseDetailToGrade": "{count, plural, =0{0 à saisir} =1{1 à saisir} other{{count} à saisir}}",
   "@courseDetailToGrade": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNextEvalEyebrow": "Prochaine évaluation",
   "courseDetailEvalMetaShort": "{date} · /{max} pts",
   "@courseDetailEvalMetaShort": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailEvalMeta": "{date} · /{max} pts · poids {poids}",
   "@courseDetailEvalMeta": {
-    "placeholders": { "date": { "type": "String" }, "max": { "type": "String" }, "poids": { "type": "int" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailSemesterLabel": "Semestre {ordre}",
   "@courseDetailSemesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailTrimesterLabel": "Trimestre {ordre}",
   "@courseDetailTrimesterLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailPeriodLabel": "Période {ordre}",
   "@courseDetailPeriodLabel": {
-    "placeholders": { "ordre": { "type": "int" } }
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailExamLabel": "Examen",
   "courseDetailStatutClosed": "Clôturée",
   "courseDetailStatutCurrent": "En cours",
   "courseDetailStatutUpcoming": "À venir",
-  "courseDetailBucketNotes": "{saisies}/{total} notes · {evals, plural, =1{1 éval.} other{{evals} éval.}}",
+  "courseDetailBucketNotes": "{saisies}/{total} notes · {evals, plural, =0{0 éval.} =1{1 éval.} other{{evals} éval.}}",
   "@courseDetailBucketNotes": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" }, "evals": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "evals": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBucketNoEval": "Aucune évaluation",
   "courseDetailExamToPlan": "À planifier",
   "courseDetailNoteGlobaleTitle": "Note globale — {label}",
   "@courseDetailNoteGlobaleTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailProvisional": "provisoire",
   "courseDetailClassAverageLabel": "Moyenne de classe",
   "courseDetailAbove50": "{count}/{total} élèves ≥ 50 %",
   "@courseDetailAbove50": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailNoAverage": "Pas encore de moyenne",
   "courseDetailByStudent": "Par élève",
   "courseDetailBadgeGraded": "Notée",
   "courseDetailBadgeInProgress": "En cours · {saisies}/{total}",
   "@courseDetailBadgeInProgress": {
-    "placeholders": { "saisies": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailBadgeUpcoming": "À venir",
-  "courseDetailEvalExpected": "{count, plural, =1{1 élève attendu} other{{count} élèves attendus}}",
+  "courseDetailEvalExpected": "{count, plural, =0{0 élève attendu} =1{1 élève attendu} other{{count} élèves attendus}}",
   "@courseDetailEvalExpected": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "courseDetailReleveTitle": "Notes globales — {label}",
   "@courseDetailReleveTitle": {
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "courseDetailReleveKpiAverage": "Moyenne",
   "courseDetailReleveKpiAbove50": "≥ 50 %",
@@ -471,48 +591,96 @@
   "evalCreateFieldMax": "Maximum",
   "evalCreateFieldPoids": "Poids",
   "evalCreateFieldChapitres": "Chapitres concernés",
-  "evalCreateChapitresComingSoon": "Bientôt disponible",
+  "evalCreateChapitresEmpty": "Aucun chapitre disponible pour ce cours",
   "evalCreateCancel": "Annuler",
   "evalCreateSubmit": "Créer l'évaluation",
-  "evalCreateHint": "{count, plural, =1{L'élève de {classroom} sera ajouté} other{Les {count} élèves de {classroom} seront ajoutés}} avec le statut « En attente ».",
+  "evalCreateHint": "{count, plural, =0{Aucun élève de {classroom} ne sera ajouté} =1{L'élève de {classroom} sera ajouté} other{Les {count} élèves de {classroom} seront ajoutés}} avec le statut « En attente ».",
   "@evalCreateHint": {
-    "placeholders": { "count": { "type": "int" }, "classroom": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
   },
   "evalCreateSuccessToast": "Évaluation créée",
   "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
   "evalCreateClosedPeriodError": "Période clôturée : impossible d'y ajouter une évaluation.",
+  "evalCreateMaxReachedError": "Plafond de saisie atteint pour cette date.",
+  "evalRejectionPeriodClosed": "Rejetée : période clôturée",
+  "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
+  "evalRejectionMaxReached": "Rejetée : plafond atteint",
+  "evalRejectionGeneric": "Rejetée par le serveur",
+  "noteRejectionUnknownEvaluation": "Évaluation inconnue du serveur",
+  "noteRejectionPeriodeClose": "Période close",
+  "noteRejectionInvalid": "Note invalide",
+  "noteRejectionContextUnavailable": "Contexte indisponible",
+  "noteRejectionGeneric": "Rejetée par le serveur",
   "evalDetailBack": "Retour au cours",
   "evalBadgeComplete": "Clôturée",
   "evalBadgePartial": "Saisie en cours · {done}/{total}",
   "@evalBadgePartial": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalBadgeUpcoming": "À venir",
   "evalChipMax": "Maximum : {max} pts",
   "@evalChipMax": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalChipPoids": "Poids : {poids}",
   "@evalChipPoids": {
-    "placeholders": { "poids": { "type": "int" } }
+    "placeholders": {
+      "poids": {
+        "type": "int"
+      }
+    }
   },
   "evalModeTable": "Tableau",
   "evalModeFocus": "Focus",
-  "evalCountNotee": "{count, plural, =1{{count} notée} other{{count} notées}}",
+  "evalCountNotee": "{count, plural, =0{{count} notées} =1{{count} notée} other{{count} notées}}",
   "@evalCountNotee": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountEnAttente": "{count} en attente",
   "@evalCountEnAttente": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsJust": "{count} abs. just.",
   "@evalCountAbsJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalCountAbsNonJust": "{count} abs. non just.",
   "@evalCountAbsNonJust": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalStatutNotee": "Notée",
   "evalStatutEnAttente": "En attente",
@@ -520,7 +688,11 @@
   "evalStatutAbsNonJust": "Abs. non just.",
   "evalNoteMaxError": "max {max}",
   "@evalNoteMaxError": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "evalAbsenceJustifieTooltip": "Absence justifiée",
   "evalAbsenceNonJustifieTooltip": "Absence non justifiée",
@@ -530,21 +702,46 @@
   "evalFocusLast": "Dernier élève",
   "evalFocusPosition": "Élève {index} / {total}",
   "@evalFocusPosition": {
-    "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveCounter": "{done} / {total} saisies",
   "@evalSaveCounter": {
-    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
-  "evalSaveErrorsAlert": "{count, plural, =1{1 note au-dessus du maximum} other{{count} notes au-dessus du maximum}}",
+  "evalSaveErrorsAlert": "{count, plural, =0{0 note au-dessus du maximum} =1{1 note au-dessus du maximum} other{{count} notes au-dessus du maximum}}",
   "@evalSaveErrorsAlert": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveButton": "Enregistrer les notes",
   "evalSaveButtonSaving": "Enregistrement…",
-  "evalSaveSuccessToast": "Notes enregistrées — {notees, plural, =1{{notees} notée} other{{notees} notées}} · {enAttente} en attente",
+  "evalSaveSuccessToast": "Notes enregistrées — {notees, plural, =0{{notees} notées} =1{{notees} notée} other{{notees} notées}} · {enAttente} en attente",
   "@evalSaveSuccessToast": {
-    "placeholders": { "notees": { "type": "int" }, "enAttente": { "type": "int" } }
+    "placeholders": {
+      "notees": {
+        "type": "int"
+      },
+      "enAttente": {
+        "type": "int"
+      }
+    }
   },
   "evalSaveErrorToast": "Échec de l'enregistrement. Vos saisies sont conservées.",
   "evalSaisieEmptyTitle": "Aucun élève",
@@ -568,19 +765,65 @@
     }
   },
   "accueilBannerGreetingGeneric": "Bonjour",
-  "accueilBannerContextTail": "Voici l'essentiel de votre école aujourd'hui.",
+  "accueilBannerSchoolLocation": "{school} · {locality}",
+  "@accueilBannerSchoolLocation": {
+    "description": "Eyebrow du bandeau d'accueil : nom de l'école suivi de sa localité.",
+    "placeholders": {
+      "school": {
+        "type": "String"
+      },
+      "locality": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerSchoolYear": "Année scolaire {year}",
+  "@accueilBannerSchoolYear": {
+    "description": "Pastille de contexte du bandeau d'accueil portant l'année scolaire courante.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "accueilModulesEyebrow": "Vos modules",
   "accueilModulesTitle": "Où souhaitez-vous aller ?",
-  "accueilModulesIntro": "Quatre modules couvrent la vie administrative de l'école. Tout reste accessible depuis le menu latéral.",
+  "accueilModulesIntro": "Six modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
+  "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
+  "accueilModuleResultatsDescription": "Pourcentages par période, par classe entière ou pour un élève précis.",
   "accueilModuleDisciplinesDescription": "Présences du jour, dossiers de discipline et suivi des élèves.",
-  "accueilModuleCardSemantics": "{module} — ouvrir le tableau de bord",
+  "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@accueilModulePageCount": {
+    "description": "Sous-titre d'une carte module : nombre de pages qu'elle regroupe.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accueilModuleCardSemantics": "{module} — ouvrir {page}",
   "@accueilModuleCardSemantics": {
-    "description": "Libellé d'accessibilité de la carte module (rôle bouton, destination explicite).",
+    "description": "Libellé d'accessibilité de l'en-tête d'une carte module (rôle bouton, destination explicite).",
     "placeholders": {
       "module": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSubModuleSemantics": "{page} — module {module}",
+  "@accueilSubModuleSemantics": {
+    "description": "Libellé d'accessibilité d'une ligne sous-module dans le pied d'une carte.",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      },
+      "page": {
         "type": "String"
       }
     }
@@ -598,7 +841,6 @@
   "preRegistrations": "Pré-Inscriptions",
   "searchStudents": "Rechercher des élèves",
   "searchFormSubtitleFirstRegistration": "Filtrez la liste des inscriptions",
-  "searchFormSubtitlePreRegistration": "Demandes reçues en ligne, en attente de validation",
   "reRegistrationSearchHint": "Retrouvez un élève ou une classe de l'année précédente à réinscrire",
   "reRegistrationSearchHelpPill": "Retrouvez un élève précis (nom + post-nom + prénom) ou toute une classe de l'année précédente (cycle + niveau) à réinscrire pour la nouvelle année. Vous pouvez aussi combiner les deux.",
   "reRegistrationSearchTitle": "Rechercher un élève",
@@ -615,30 +857,49 @@
   "reRegistrationSearchReady": "Critères valides, vous pouvez lancer la recherche.",
   "reRegistrationSearchInvitationTitle": "Lancez une recherche de re-inscription",
   "reRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les dossiers.",
+  "preRegistrationSearchHint": "Retrouvez une pré-inscription par élève ou par cycle/niveau souhaité",
+  "preRegistrationSearchHelpPill": "Retrouvez une demande précise (nom + post-nom + prénom) ou toutes les demandes d'un cycle/niveau souhaité. Vous pouvez aussi combiner les deux.",
+  "preRegistrationSearchTitle": "Rechercher une pré-inscription",
+  "preRegistrationSearchByNameGroup": "Par nom",
+  "preRegistrationSearchByLevelGroup": "Par cycle / niveau",
+  "preRegistrationSearchOrSeparator": "OU",
+  "preRegistrationSearchActiveModeLabel": "Recherche active par :",
+  "preRegistrationSearchModeNameBadge": "Nom",
+  "preRegistrationSearchModeLevelBadge": "Cycle / niveau",
+  "preRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
+  "preRegistrationSearchInvitationTitle": "Lancez une recherche de pré-inscription",
+  "preRegistrationSearchInvitationMessage": "Remplissez le formulaire ci-dessus puis cliquez sur Rechercher pour afficher les demandes.",
+  "firstRegistrationSearchByStudentGroup": "Par élève",
+  "firstRegistrationSearchByLevelGroup": "Par niveau visé",
+  "firstRegistrationSearchOrSeparator": "OU",
+  "firstRegistrationSearchActiveModeLabel": "Recherche active par :",
+  "firstRegistrationSearchModeStudentBadge": "Élève",
+  "firstRegistrationSearchModeLevelBadge": "Niveau",
+  "firstRegistrationSearchLevelPlaceholder": "Choisissez un cycle",
   "firstName": "Prénom",
   "lastName": "Nom",
   "surname": "Post-nom",
   "dateOfBirth": "Date de Naissance",
   "search": "Rechercher",
   "clear": "Effacer",
-  "viewDetails": "Voir Détails",
+  "viewDetails": "Voir les détails",
   "editEnrollment": "Modifier",
   "exportData": "Exporter",
   "noResultsFound": "Aucun résultat trouvé",
   "enrollmentNoResultsDescription": "Aucun élève ne correspond à vos critères de recherche.",
   "enrollmentEmptyTitle": "Aucun résultat",
-  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l\u0027élève n\u0027est pas encore enregistré.",
+  "enrollmentEmptyDescription": "Aucune inscription ne correspond à ces critères. Ajustez votre recherche, ou créez la fiche si l'élève n'est pas encore enregistré.",
   "enrollmentEmptyWithoutFilterDescription": "Aucune inscription pour le moment.",
   "enrollmentEmptyCreateAction": "Inscrire un nouvel élève",
   "enrollmentErrorRetry": "Réessayer",
   "enrollmentErrorReconnect": "Se reconnecter",
-  "enrollmentErrorContactAdmin": "Contacter l\u0027administrateur",
+  "enrollmentErrorContactAdmin": "Contacter l'administrateur",
   "enrollmentErrorNetworkTitle": "Pas de connexion",
   "enrollmentErrorNetworkMessage": "Vous semblez hors-ligne. Vérifiez votre connexion internet, puis relancez.",
   "enrollmentErrorUnauthorizedTitle": "Session expirée",
   "enrollmentErrorUnauthorizedMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
   "enrollmentErrorForbiddenTitle": "Accès refusé",
-  "enrollmentErrorForbiddenMessage": "Vous n\u0027avez pas les droits requis pour voir cette liste.",
+  "enrollmentErrorForbiddenMessage": "Vous n'avez pas les droits requis pour voir cette liste.",
   "enrollmentErrorServerTitle": "Erreur du serveur",
   "enrollmentErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
   "enrollmentErrorIncidentCode": "Code incident : {code}",
@@ -720,10 +981,7 @@
   "enrollmentDetailLoadingTitle": "Chargement du dossier",
   "enrollmentDetailLoadingMessage": "Veuillez patienter pendant la récupération des informations.",
   "enrollmentDetailLoadErrorTitle": "Impossible de charger le dossier",
-  "enrollmentDetailLoadErrorFallback": "Erreur lors du chargement des détails.",
   "enrollmentDetailRetryAction": "Réessayer",
-  "enrollmentDetailNotFoundTitle": "Détails introuvables",
-  "enrollmentDetailNotFoundMessage": "Ce dossier n'existe pas ou n'est plus disponible.",
   "gender": "Genre",
   "actions": "Actions",
   "personalInformation": "Informations personnelles",
@@ -753,6 +1011,14 @@
       }
     }
   },
+  "guardianSearchAction": "Rechercher un parent",
+  "guardianSearchDialogTitle": "Rechercher un parent existant",
+  "guardianSearchHint": "Renseignez au moins un critère (nom ou téléphone)",
+  "guardianSearchEmptyTitle": "Aucun parent trouvé",
+  "guardianSearchEmptyDescription": "Aucun parent ne correspond à ces critères. Vérifiez la saisie ou ajoutez-le comme nouveau tuteur.",
+  "guardianSearchAlreadyAddedError": "Ce parent est déjà ajouté à cette inscription.",
+  "guardianSearchIdentityLockedHint": "Informations issues d'une fiche existante — non modifiables ici.",
+  "guardianSearchErrorRetry": "Réessayer",
   "schoolFees": "Frais Scolaires",
   "summary": "Résumé",
   "summaryYes": "Oui",
@@ -829,6 +1095,8 @@
   "targetCycleLabelHelp": "Cycle souhaité pour l'inscription.",
   "targetLevelLabel": "Niveau souhaité",
   "targetLevelLabelHelp": "Niveau souhaité pour l'inscription.",
+  "targetLevelAutoBadge": "Auto",
+  "targetLevelAutoBadgeHelp": "Classe calculée automatiquement depuis la classe de l'année précédente. Modifiez le cycle ou le niveau pour la remplacer.",
   "optionLabel": "Option",
   "optionLabelHelp": "Option ou spécialisation souhaitée.",
   "toDefine": "À définir",
@@ -894,6 +1162,18 @@
   "journeyModeEdit": "Modification",
   "journeyModeView": "Consultation",
   "journeyCloseAction": "Fermer",
+  "wizardExitConfirmTitle": "Quitter l'inscription ?",
+  "wizardExitConfirmMessage": "Une inscription est en cours. Les modifications non enregistrées de l'étape actuelle seront perdues ; les étapes déjà enregistrées restent disponibles en brouillon.",
+  "wizardExitConfirmAction": "Quitter",
+  "wizardExitStayAction": "Continuer la saisie",
+  "enrollmentFinalizeConfirmTitle": "Valider l'inscription ?",
+  "enrollmentFinalizeConfirmMessage": "Cette action confirme le dossier et le place en file de synchronisation. Vérifiez le récapitulatif avant de valider.",
+  "enrollmentFinalizeProcessingTitle": "Validation de l'inscription…",
+  "enrollmentFinalizeSuccessTitle": "Inscription validée",
+  "enrollmentFinalizeErrorTitle": "Échec de la validation",
+  "enrollmentFinalizeRetryAction": "Réessayer",
+  "enrollmentFinalizeCloseAction": "Fermer",
+  "enrollmentFinalizeContinueAction": "Continuer",
   "stepSaveStateIdle": "Aucune saisie",
   "stepSaveStateIncomplete": "Champs incomplets",
   "stepSaveStatePending": "Modifications non enregistrées",
@@ -908,15 +1188,6 @@
   "validateEnrollment": "Valider l'inscription",
   "validatingEnrollment": "Validation en cours...",
   "goToFirstRegistration": "Retourner à la première inscription",
-  "enrollmentStatusUpdateSuccess": "Statut mis à jour avec succès.",
-  "enrollmentStatusUpdateError": "Erreur lors de la mise à jour du statut : {message}",
-  "@enrollmentStatusUpdateError": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "personalInfoSaveHintBeforeContinue": "Veuillez enregistrer vos modifications avant de continuer.",
   "personalInfoValidationReasonsTitle": "Veuillez corriger les champs suivants :",
   "requiredFieldError": "Le champ {field} est requis.",
@@ -984,6 +1255,22 @@
   "enrollmentStudentColumnLabel": "Eleve",
   "enrollmentStatusFilterLabel": "Statut",
   "enrollmentStatusInProgress": "En cours",
+  "enrollmentDraftBadge": "Brouillon",
+  "@enrollmentDraftBadge": {
+    "description": "Badge sur une ligne de listing : dossier commencé localement (brouillon non finalisé/non synchronisé), repris au tap."
+  },
+  "enrollmentTypeReEnrollment": "Réinscription",
+  "@enrollmentTypeReEnrollment": {
+    "description": "Pastille de type sur une ligne de listing : dossier de réinscription (type RE_ENROLLMENT), affichée à la place du statut « Pré-inscrit »."
+  },
+  "enrollmentReenrollmentCandidateBadge": "À réinscrire",
+  "@enrollmentReenrollmentCandidateBadge": {
+    "description": "Pastille sur la page Réinscriptions : candidat du vivier N-1 pas encore réinscrit (aucun dossier local, tap = démarrer). Remplace « En attente » dans ce contexte."
+  },
+  "enrollmentReRegisteredBadge": "Réinscrit",
+  "@enrollmentReRegisteredBadge": {
+    "description": "Pastille de type sur une ligne de listing : dossier de réinscription (RE_ENROLLMENT) finalisé/synchronisé (pas de brouillon local en cours). Remplace « Réinscription » (générique) une fois le dossier confirmé."
+  },
   "enrollmentStatusAdminCompleted": "Complété (Administratif)",
   "enrollmentStatusFinancialCompleted": "Complété (Financier)",
   "enrollmentStatusCompleted": "Complété",
@@ -1045,6 +1332,15 @@
   "studentChargeFeeCodeLatePaymentFee": "Pénalité de retard",
   "studentChargeFeeCodeRefund": "Remboursement",
   "studentChargeFeeCodeOther": "Autre",
+  "studentChargeDueAtLabel": "Échéance : {date}",
+  "@studentChargeDueAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
   "studentChargeFeeCodeFallback": "Frais scolaire",
   "facturationSearchTitle": "Rechercher les élèves",
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",
@@ -1067,18 +1363,47 @@
   "facturationBalanceDuePill": "{amount} dû",
   "@facturationBalanceDuePill": {
     "description": "Pastille AppBar facturation lorsque le solde est dû.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationBalanceUpToDatePill": "À jour",
+  "financePendingSyncBadge": "En attente de synchro",
+  "@financePendingSyncBadge": {
+    "description": "Badge sur une créance/un paiement dont l'encaissement local n'est pas encore remonté au serveur."
+  },
+  "facturationFreshnessAt": "Grand-livre à jour à {time}",
+  "@facturationFreshnessAt": {
+    "description": "Fraîcheur (ADR-002) : horodatage du dernier rafraîchissement du grand-livre.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationFreshnessNever": "Grand-livre non synchronisé",
+  "@facturationFreshnessNever": {
+    "description": "Fraîcheur : aucun rafraîchissement du grand-livre effectué (hors-ligne)."
+  },
   "facturationChargeLineRemainingSuffix": "{amount} restant",
   "@facturationChargeLineRemainingSuffix": {
     "description": "Pied de la ligne de frais : montant restant à payer.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationPaymentRecordedToast": "Paiement de {amount} enregistré",
   "@facturationPaymentRecordedToast": {
     "description": "Toast de confirmation après un encaissement réussi.",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "facturationChargeStatementCopied": "Relevé copié dans le presse-papiers",
   "facturationChargeStatementEmpty": "Aucun paiement à exporter pour ce frais.",
@@ -1109,8 +1434,12 @@
   "@facturationDetailPaymentsRecordedWithTotal": {
     "description": "Sous-titre de la section paiements : nombre de versements + total payé.",
     "placeholders": {
-      "count": { "type": "int" },
-      "total": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "facturationPaymentMethodCash": "Espèces",
@@ -1140,6 +1469,8 @@
   "facturationPaymentReceiptLabel": "Reçu n°",
   "facturationPaymentStudentLabel": "Élève",
   "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",
+  "facturationPaymentReceiptPendingSyncHint": "Le reçu sera disponible une fois le paiement synchronisé.",
+  "facturationPaymentReceiptNumberPending": "En attente de synchronisation",
   "facturationPaymentCloseLabel": "Fermer",
   "facturationPaymentAllocationsSectionTitle": "Répartition par frais",
   "facturationPaymentAllocationsSectionSubtitle": "Liste des charges couvertes par ce paiement.",
@@ -1262,6 +1593,10 @@
   "facturationCreatePaymentConfirmMessage": "Cette opération est irréversible. Confirmez-vous l'enregistrement de ce paiement ?",
   "facturationCreatePaymentConfirmCancel": "Annuler",
   "facturationCreatePaymentConfirmValidate": "Confirmer",
+  "facturationCreatePaymentCloseConfirmTitle": "Fermer l'encaissement ?",
+  "facturationCreatePaymentCloseConfirmMessage": "Les informations saisies seront perdues si vous fermez maintenant.",
+  "facturationCreatePaymentCloseConfirmAction": "Fermer",
+  "facturationCreatePaymentCloseConfirmCancel": "Continuer la saisie",
   "facturationCreatePaymentSuccessMessage": "Paiement enregistré avec succès.",
   "facturationCreatePaymentExpectedLabel": "Montant attendu",
   "facturationCreatePaymentPaidLabel": "Déjà payé",
@@ -1525,6 +1860,14 @@
   "attendanceErrorUnknownMessage": "Une erreur inattendue est survenue lors du chargement de l'appel.",
   "attendanceSaveCallAction": "Enregistrer l'appel",
   "attendanceMarkAllPresentAction": "Tout présent",
+  "attendanceCallNotTakenTitle": "Appel non fait",
+  "@attendanceCallNotTakenTitle": {
+    "description": "Bandeau : aucune session d'appel n'existe encore pour ce jour (3e état)."
+  },
+  "attendanceCallNotTakenMessage": "Aucun appel n'a encore été enregistré pour ce jour. Validez pour l'enregistrer.",
+  "@attendanceCallNotTakenMessage": {
+    "description": "Sous-texte du bandeau appel non fait : le roster est présenté par défaut mais rien n'est validé."
+  },
   "attendanceSaveOverlayEyebrow": "Appel",
   "attendanceSaveProcessingTitle": "Enregistrement en cours…",
   "attendanceSaveSuccessTitle": "Appel enregistré !",
@@ -1561,26 +1904,50 @@
   "presenceSummaryTitle": "Synthèse de présence",
   "presenceSummaryA11yLabel": "Synthèse de présence, taux {rate} %",
   "@presenceSummaryA11yLabel": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
   "presenceKpiRate": "Taux de présence",
   "presenceRateValue": "{rate} %",
   "@presenceRateValue": {
-    "placeholders": { "rate": { "type": "int" } }
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
   },
-  "presenceSchoolDaysCount": "{count, plural, =1{1 jour scolaire} other{{count} jours scolaires}}",
+  "presenceSchoolDaysCount": "{count, plural, =0{0 jour scolaire} =1{1 jour scolaire} other{{count} jours scolaires}}",
   "@presenceSchoolDaysCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "presenceDistributionA11yLabel": "Répartition des jours par statut",
   "presencePresentOutOfTotal": "{present} jours présents sur {total}",
   "@presencePresentOutOfTotal": {
-    "placeholders": { "present": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "presenceAbsenceListTitle": "Détail des absences",
   "presenceAbsenceDate": "{date}",
   "@presenceAbsenceDate": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMEEEEd" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
   },
   "presencePerfectTitle": "Assiduité parfaite",
   "presencePerfectMessage": "Aucune absence sur cette période.",
@@ -1593,16 +1960,33 @@
   "presenceEmptyMessage": "Aucun jour scolaire sur cette période. Choisissez une autre période pour consulter l'assiduité.",
   "presenceRangeYear": "Année scolaire {name}",
   "@presenceRangeYear": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "presenceRangeMonth": "{date}",
   "@presenceRangeMonth": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMM" } }
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
   },
   "presenceRangeWeek": "Semaine du {date}",
   "@presenceRangeWeek": {
-    "placeholders": { "date": { "type": "DateTime", "format": "yMMMMd" } }
-  },  "disciplinaryUnknownValue": "-",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMd"
+      }
+    }
+  },
+  "presenceOfflineSyncPendingTitle": "Synchronisation en cours",
+  "presenceOfflineSyncPendingMessage": "Les données locales de présence ne sont pas encore complètes pour calculer une statistique fiable. Réessayez dans un instant.",
+  "disciplinaryUnknownValue": "-",
   "disciplinaryCaseCreateAction": "Nouveau cas",
   "disciplinaryCaseCreateCtaSubtitle": "Documentez un nouvel incident disciplinaire pour cet élève.",
   "disciplinaryCasesSummary": "{total} cas enregistrés - {open} ouverts",
@@ -1678,22 +2062,60 @@
   "disciplinarySanctionUnknown": "Aucune sanction",
   "disciplinaryCaseSeverityChip": "Gravité {severity}",
   "@disciplinaryCaseSeverityChip": {
-    "placeholders": { "severity": { "type": "String" } }
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
   },
   "disciplinaryAdvanceTakeCharge": "Prendre en charge",
   "disciplinaryAdvanceClose": "Clôturer",
+  "disciplinaryStatusOfflinePending": "Pris en charge",
+  "disciplinaryStatusOfflineResolved": "Résolu",
+  "disciplinaryStatusOfflineDismissed": "Classé sans suite",
+  "disciplinaryAdvanceResolve": "Résoudre",
+  "disciplinaryAdvanceDismiss": "Classer sans suite",
+  "disciplinaryCaseResolvedLabel": "Dossier résolu",
+  "disciplinaryCaseDismissedLabel": "Classé sans suite",
   "disciplinaryCaseClosedLabel": "Dossier clôturé",
-  "disciplinaryCasesCountPill": "{count, plural, =1{1 cas} other{{count} cas}}",
+  "disciplinaryCasesCountPill": "{count, plural, =0{0 cas} =1{1 cas} other{{count} cas}}",
   "@disciplinaryCasesCountPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "disciplinaryCasesOpenPill": "{count, plural, =1{1 ouvert} other{{count} ouverts}}",
+  "disciplinaryCommentsCountBadge": "{count, plural, =0{0 commentaire} =1{1 commentaire} other{{count} commentaires}}",
+  "@disciplinaryCommentsCountBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disciplinaryCommentsDialogTitle": "Commentaires",
+  "disciplinaryCommentsEmpty": "Aucun commentaire pour l'instant.",
+  "disciplinaryCommentAddHint": "Ajouter un commentaire…",
+  "disciplinaryCommentAddAction": "Ajouter",
+  "disciplinaryCommentsCloseAction": "Fermer",
+  "disciplinaryFreshnessSynced": "À jour",
+  "disciplinaryFreshnessLocal": "Poste local",
+  "disciplinaryCasesOpenPill": "{count, plural, =0{0 ouvert} =1{1 ouvert} other{{count} ouverts}}",
   "@disciplinaryCasesOpenPill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "disciplinaryCasesGravePill": "{count, plural, =1{1 grave} other{{count} graves}}",
+  "disciplinaryCasesGravePill": "{count, plural, =0{0 grave} =1{1 grave} other{{count} graves}}",
   "@disciplinaryCasesGravePill": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "disciplinaryCasesEmptyTitle": "Aucun cas de discipline",
   "disciplinaryCasesEmptyDescription": "Aucun incident enregistré pour cet élève. Tout va bien.",
@@ -1722,6 +2144,72 @@
   "statusOffline": "Hors ligne",
   "statusPendingUpload": "À envoyer",
   "statusSyncConflict": "Conflit",
+  "statusAuthRequired": "Reconnexion requise",
+  "@statusAuthRequired": {
+    "description": "Pastille synchro : réseau présent mais session sans jetons (login offline) — un login online est requis pour synchroniser"
+  },
+  "syncLastSyncJustNow": "À l'instant",
+  "syncLastSyncMinutesAgo": "{count, plural, =0{Il y a 0 min} =1{Il y a 1 min} other{Il y a {count} min}}",
+  "@syncLastSyncMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLastSyncHoursAgo": "{count, plural, =0{Il y a 0 h} =1{Il y a 1 h} other{Il y a {count} h}}",
+  "@syncLastSyncHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLastSyncDaysAgo": "{count, plural, =0{Il y a 0 jour} =1{Il y a 1 jour} other{Il y a {count} jours}}",
+  "@syncLastSyncDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncErrorsTitle": "Écritures en échec",
+  "syncErrorsSubtitle": "Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d'eux-mêmes.",
+  "syncErrorsRetry": "Réessayer",
+  "syncErrorsRetryAll": "Tout réessayer",
+  "syncErrorsEmptyLabel": "Aucune écriture en échec",
+  "syncErrorsEmptyDescription": "Tout ce qui a été saisi est parti ou attend son tour.",
+  "syncErrorsLoadFailedTitle": "Liste indisponible",
+  "syncErrorsLoadFailedMessage": "Impossible de lire la file d'envoi locale.",
+  "syncErrorsNotReplayable": "Cet appel ne peut pas être renvoyé tel quel : la liste des absences a pu changer depuis. Rouvrez la journée concernée et revalidez-la.",
+  "syncErrorsClose": "Fermer",
+  "syncErrorsQueuedAt": "{date} à {time}",
+  "@syncErrorsQueuedAt": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "syncAggregateEnrollment": "Inscription",
+  "syncAggregatePayment": "Paiement",
+  "syncAggregateAttendance": "Présence",
+  "syncAggregateDisciplinaryCase": "Cas disciplinaire",
+  "syncAggregateNotesBatch": "Lot de notes",
+  "syncAggregateEvaluation": "Évaluation",
+  "syncAggregateClassroomTransfer": "Transfert de classe",
+  "offlineQueuedGeneric": "Enregistré — en attente de synchronisation",
+  "offlinePaymentQueued": "Paiement enregistré — en attente de synchronisation",
+  "offlineEnrollmentQueued": "Inscription enregistrée — en attente de synchronisation",
+  "offlineAttendanceQueued": "Appel enregistré — en attente de synchronisation",
+  "offlineDisciplinaryCaseQueued": "Cas disciplinaire enregistré — en attente de synchronisation",
+  "offlineDisciplinaryCaseUpdatedQueued": "Cas mis à jour — en attente de synchronisation",
+  "offlineWriteError": "Échec de l'enregistrement local",
   "componentGalleryTitle": "Galerie de composants",
   "enrollmentStatsDashboardTitle": "Vue d'ensemble – Année scolaire",
   "enrollmentStatsPeriodYear": "Année",
@@ -1950,8 +2438,6 @@
   "financeStatsAuthError": "Une erreur d'authentification empêche le chargement des statistiques.",
   "financeStatsUnknownError": "Une erreur inattendue est survenue lors du chargement des statistiques.",
   "enrollmentResults": "Résultats",
-  "viewDetails": "Voir les détails",
-  "refresh": "Actualiser",
   "sort": "Trier",
   "switchToTableView": "Passer à la vue tableau",
   "switchToGridView": "Passer à la vue grille",
@@ -1989,11 +2475,19 @@
   "attendanceOverviewKpiRecordedDays": "Jours enregistrés",
   "attendanceOverviewRateValue": "{rate} %",
   "@attendanceOverviewRateValue": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewStudentDays": "{count} élève-jours",
   "@attendanceOverviewStudentDays": {
-    "placeholders": { "count": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewKpiBandA11yLabel": "Indicateurs clés de présence",
   "attendanceOverviewSplitTitle": "Répartition présence / absences",
@@ -2004,9 +2498,15 @@
   "attendanceOverviewSplitA11yLabel": "Présence {presence} %, justifiées {justified} %, non justifiées {unjustified} %",
   "@attendanceOverviewSplitA11yLabel": {
     "placeholders": {
-      "presence": { "type": "String" },
-      "justified": { "type": "String" },
-      "unjustified": { "type": "String" }
+      "presence": {
+        "type": "String"
+      },
+      "justified": {
+        "type": "String"
+      },
+      "unjustified": {
+        "type": "String"
+      }
     }
   },
   "attendanceOverviewEvolutionTitle": "Évolution du taux de présence",
@@ -2015,7 +2515,11 @@
   "attendanceOverviewEvolutionHintDay": "par jour",
   "attendanceOverviewEvolutionTarget": "Objectif {rate} %",
   "@attendanceOverviewEvolutionTarget": {
-    "placeholders": { "rate": { "type": "String" } }
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
   },
   "attendanceOverviewReasonsTitle": "Motifs d'absence",
   "attendanceOverviewReasonsHint": "école",
@@ -2042,15 +2546,18 @@
   "attendanceOverviewEmptyDescription": "Aucun appel n'a été enregistré sur la fenêtre. Les statistiques apparaîtront dès le premier appel saisi.",
   "attendanceOverviewEmptyAction": "Faire l'appel",
   "attendanceOverviewLoadingA11yLabel": "Chargement du tableau de bord des présences",
-  "disciplinaryFolderBreadcrumb": "Liste disciplines",
   "dossierTabsA11yLabel": "Onglets du dossier élève",
   "dossierTabDisciplineLabel": "Discipline",
   "dossierTabDisciplineDescription": "Cas, sanctions & suivi",
   "dossierTabPresenceLabel": "Présence",
   "dossierTabPresenceDescription": "Absences & retards",
-  "dossierOpenCasesChip": "{count, plural, =1{1 cas ouvert} other{{count} cas ouverts}}",
+  "dossierOpenCasesChip": "{count, plural, =0{0 cas ouvert} =1{1 cas ouvert} other{{count} cas ouverts}}",
   "@dossierOpenCasesChip": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dossierNoOpenCases": "Aucun cas ouvert",
   "genderOther": "Autre",
@@ -2064,12 +2571,17 @@
   "scheduleViewDay": "Jour",
   "scheduleViewToggleSemantics": "Basculer entre la vue Semaine et la vue Jour",
   "scheduleWeekTitle": "Semaine type",
-  "scheduleLoadSummary": "{count, plural, =1{{count} séance} other{{count} séances}} · {hours} h de cours",
+  "scheduleLoadSummary": "{count, plural, =0{{count} séances} =1{{count} séance} other{{count} séances}} · {hours} h de cours",
   "@scheduleLoadSummary": {
     "description": "Compteur de charge de la semaine : nombre de séances et heures de cours cumulées.",
     "placeholders": {
-      "count": { "type": "int" },
-      "hours": { "type": "double", "format": "decimalPattern" }
+      "count": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
     }
   },
   "scheduleToday": "auj.",
@@ -2082,7 +2594,9 @@
   "@scheduleEmptyDayDescription": {
     "description": "État vide de la vue Jour, avec le jour sélectionné.",
     "placeholders": {
-      "day": { "type": "String" }
+      "day": {
+        "type": "String"
+      }
     }
   },
   "scheduleWeekdayLongMon": "Lundi",
@@ -2114,12 +2628,13 @@
   "@scheduleErrorIncidentCode": {
     "description": "Code d'incident affiché sous une erreur serveur (500).",
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "menuResultats": "Résultats",
   "subMenuResultatsClasse": "Résultats par classe",
-
   "resultatsSearchEyebrow": "Résultats",
   "resultatsSearchTitle": "Rechercher des résultats",
   "resultatsSearchModeSemantics": "Mode de recherche",
@@ -2131,89 +2646,219 @@
   "resultatsFieldMiddleName": "Postnom",
   "resultatsFieldFirstName": "Prénom(s)",
   "resultatsFieldClassroom": "Classe",
-
   "resultatsDecoupageTrimestres": "Trimestres",
   "resultatsDecoupageSemestres": "Semestres",
   "resultatsDecoupagePeriodes": "Périodes",
   "resultatsPeriodShortTrimestre": "T{ordre}",
-  "@resultatsPeriodShortTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortSemestre": "S{ordre}",
-  "@resultatsPeriodShortSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodShortGeneric": "P{ordre}",
-  "@resultatsPeriodShortGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodShortGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongTrimestre": "Trimestre {ordre}",
-  "@resultatsPeriodLongTrimestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongTrimestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongSemestre": "Semestre {ordre}",
-  "@resultatsPeriodLongSemestre": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongSemestre": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodLongGeneric": "Période {ordre}",
-  "@resultatsPeriodLongGeneric": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsPeriodLongGeneric": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSubPeriodColumn": "P{ordre}",
-  "@resultatsSubPeriodColumn": { "placeholders": { "ordre": { "type": "int" } } },
+  "@resultatsSubPeriodColumn": {
+    "placeholders": {
+      "ordre": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsPeriodsError": "Impossible de charger les périodes.",
   "resultatsPeriodsEmpty": "Aucune période disponible.",
-
   "resultatsGenderMale": "Garçon",
   "resultatsGenderFemale": "Fille",
   "resultatsGenderOther": "Autre",
   "resultatsDash": "—",
   "resultatsPercentValue": "{value} %",
-  "@resultatsPercentValue": { "placeholders": { "value": { "type": "int" } } },
+  "@resultatsPercentValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsNoteOverMax": "{note}/{max}",
-  "@resultatsNoteOverMax": { "placeholders": { "note": { "type": "String" }, "max": { "type": "String" } } },
+  "@resultatsNoteOverMax": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsPlaceValue": "{place} / {total}",
-  "@resultatsPlaceValue": { "placeholders": { "place": { "type": "int" }, "total": { "type": "int" } } },
+  "@resultatsPlaceValue": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsDeltaPts": "{value} pts",
-  "@resultatsDeltaPts": { "placeholders": { "value": { "type": "String" } } },
-
+  "@resultatsDeltaPts": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsColumnRank": "#",
   "resultatsColumnEleve": "Élève",
   "resultatsColumnMoyenne": "Moyenne {period}",
-  "@resultatsColumnMoyenne": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsColumnMoyenne": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsNonClasseBadge": "Non classé",
-
   "resultatsSummaryAverageCaption": "Moyenne · {period}",
-  "@resultatsSummaryAverageCaption": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsSummaryAverageCaption": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsSummaryReussites": "{count, plural, =0{0 réussite} =1{1 réussite} other{{count} réussites}}",
-  "@resultatsSummaryReussites": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryReussites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryEchecs": "{count, plural, =0{0 échec} =1{1 échec} other{{count} échecs}}",
-  "@resultatsSummaryEchecs": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryEchecs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryNonClasses": "{count, plural, =0{0 non classé} =1{1 non classé} other{{count} non classés}}",
-  "@resultatsSummaryNonClasses": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsSummaryNonClasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsSummaryFootnote": "{effectif} élèves · seuil de réussite {seuil} %",
-  "@resultatsSummaryFootnote": { "placeholders": { "effectif": { "type": "int" }, "seuil": { "type": "int" } } },
-
-  "resultatsEleveResultsCount": "{count, plural, =1{1 élève trouvé} other{{count} élèves trouvés}}",
-  "@resultatsEleveResultsCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@resultatsSummaryFootnote": {
+    "placeholders": {
+      "effectif": {
+        "type": "int"
+      },
+      "seuil": {
+        "type": "int"
+      }
+    }
+  },
+  "resultatsEleveResultsCount": "{count, plural, =0{0 élève trouvé} =1{1 élève trouvé} other{{count} élèves trouvés}}",
+  "@resultatsEleveResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusClassroom": "Classe {classroom}",
-  "@resultatsFocusClassroom": { "placeholders": { "classroom": { "type": "String" } } },
+  "@resultatsFocusClassroom": {
+    "placeholders": {
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsFocusBack": "Retour à la vue classe",
   "resultatsFocusAnnualAverage": "Moyenne annuelle",
   "resultatsFocusRankOf": "sur {count} classés",
-  "@resultatsFocusRankOf": { "placeholders": { "count": { "type": "int" } } },
+  "@resultatsFocusRankOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsFocusNoBulletin": "Élève non classé sur cette période : pas de bulletin détaillé.",
-
   "resultatsProgressionTitle": "Progression sur l'année",
   "resultatsProgressionPointLabel": "P{index}",
-  "@resultatsProgressionPointLabel": { "placeholders": { "index": { "type": "int" } } },
+  "@resultatsProgressionPointLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "resultatsStrengthsTitle": "Points forts",
   "resultatsWeaknessesTitle": "À renforcer",
-
   "resultatsOfficialBulletinTitle": "Bulletin officiel",
   "resultatsOfficialBulletinSubtitle": "Domaines & branches, notes journalières + examen, maxima, place — gabarit national imprimable.",
   "resultatsComingSoon": "Bientôt disponible",
-
   "resultatsBulletinTitle": "Bulletin par domaine · {period}",
-  "@resultatsBulletinTitle": { "placeholders": { "period": { "type": "String" } } },
+  "@resultatsBulletinTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsBulletinLegend": "note / maximum",
   "resultatsBulletinSubtotal": "Sous-total",
   "resultatsBulletinTotal": "Totaux obtenus",
-
   "resultatsSynthesePercent": "Pourcentage",
   "resultatsSynthesePlace": "Place",
   "resultatsSyntheseApplication": "Application",
   "resultatsSyntheseConduite": "Conduite",
-
   "resultatsIdleTitle": "Choisissez une classe ou un élève",
   "resultatsIdleDescription": "Sélectionnez un cycle, un niveau et une classe, puis une période pour afficher les résultats.",
   "resultatsLoadingSemantics": "Chargement des résultats",
@@ -2222,12 +2867,17 @@
   "resultatsEmptyEleveTitle": "Aucun élève trouvé",
   "resultatsEmptyEleveDescription": "Vérifiez l'orthographe du nom, du postnom ou du prénom, ou élargissez la recherche.",
   "resultatsEmptyAdjustAction": "Ajuster la recherche",
-
   "resultatsErrorRetry": "Réessayer",
   "resultatsErrorReconnect": "Se reconnecter",
   "resultatsErrorContactAdmin": "Contacter l'administrateur",
   "resultatsErrorIncidentCode": "Code incident : {code}",
-  "@resultatsErrorIncidentCode": { "placeholders": { "code": { "type": "String" } } },
+  "@resultatsErrorIncidentCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "resultatsErrorNetworkTitle": "Connexion interrompue",
   "resultatsErrorNetworkMessage": "Vérifiez votre connexion internet puis réessayez.",
   "resultatsErrorUnauthorizedTitle": "Session expirée",
@@ -2237,5 +2887,173 @@
   "resultatsErrorServerTitle": "Erreur serveur",
   "resultatsErrorServerMessage": "Une erreur est survenue de notre côté. Réessayez dans un instant.",
   "resultatsErrorUnknownTitle": "Une erreur est survenue",
-  "resultatsErrorUnknownMessage": "Un problème inattendu est survenu. Réessayez."
+  "resultatsErrorUnknownMessage": "Un problème inattendu est survenu. Réessayez.",
+  "syncErrorsOtherAccountTitle": "En attente d'un autre compte",
+  "syncErrorsOtherAccountNamed": "{count, plural, =1{{count} écriture en attente de {name}} other{{count} écritures en attente de {name}}}",
+  "@syncErrorsOtherAccountNamed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsOtherAccountAnonymous": "{count, plural, =1{{count} écriture en attente d'un autre compte} other{{count} écritures en attente d'un autre compte}}",
+  "@syncErrorsOtherAccountAnonymous": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncErrorsOtherAccountOldest": "la plus ancienne du {date}",
+  "@syncErrorsOtherAccountOldest": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "syncErrorsOtherAccountHint": "Elles repartiront à sa reconnexion sur cette tablette.",
+  "syncErrorsForeignEntry": "Écriture de {name} — elle devra la reprendre depuis cette liste, sur sa propre session.",
+  "@syncErrorsForeignEntry": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncErrorsForeignEntryAnonymous": "Écriture d'un autre compte — elle devra être reprise depuis sa propre session.",
+  "syncErrorsHeldTitle": "En attente",
+  "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
+  "editiqueViewerReceiptTitle": "Reçu de paiement",
+  "editiqueViewerLoadingTitle": "Préparation du document…",
+  "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",
+  "editiqueViewerPrintLabel": "Imprimer",
+  "editiqueViewerShareLabel": "Partager",
+  "editiqueViewerCloseLabel": "Fermer",
+  "editiqueViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
+  "editiqueViewerDocumentNumberLabel": "Pièce n° {number}",
+  "@editiqueViewerDocumentNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "editiqueErrorNetworkTitle": "Pas de connexion",
+  "editiqueErrorNetworkMessage": "Le document est produit par le serveur. Reconnectez-vous puis réessayez — rien n'a été émis.",
+  "editiqueErrorUncertainTitle": "Résultat indéterminé",
+  "editiqueErrorUncertainMessage": "Le serveur n'a pas répondu à temps. La pièce a peut-être été émise : vérifiez avant d'en générer une nouvelle.",
+  "editiqueErrorSessionExpiredTitle": "Session expirée",
+  "editiqueErrorSessionExpiredMessage": "Reconnectez-vous pour reprendre l'émission du document.",
+  "editiqueErrorForbiddenTitle": "Accès refusé",
+  "editiqueErrorForbiddenMessage": "Vous n'avez pas les droits nécessaires pour éditer cette pièce.",
+  "editiqueErrorNotFoundTitle": "Document indisponible",
+  "editiqueErrorNotFoundMessage": "Le serveur ne trouve pas les éléments nécessaires à cette pièce.",
+  "editiqueErrorInvalidTitle": "Émission impossible",
+  "editiqueErrorInvalidMessage": "Le serveur a refusé la demande. Vérifiez le dossier avant de réessayer.",
+  "editiqueErrorServerTitle": "Erreur du serveur",
+  "editiqueErrorServerMessage": "La pièce n'a pas pu être produite. Réessayez dans un instant.",
+  "editiqueErrorRetryLabel": "Réessayer",
+  "editiqueErrorReconnectLabel": "Se reconnecter",
+  "editiqueViewerStatementTitle": "Relevé de compte",
+  "editiqueViewerAttestationTitle": "Attestation d'inscription",
+  "editiqueViewerNotePerceptionTitle": "Note de perception",
+  "editiqueViewerClearanceTitle": "Quitus financier",
+  "editiqueErrorServerDetailLabel": "Motif renvoyé par le serveur : {detail}",
+  "@editiqueErrorServerDetailLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "facturationDetailStatementLabel": "Relevé de compte",
+  "facturationDetailStatementNoChargesHint": "Aucun frais sur l'année : le relevé ne peut pas être produit.",
+  "facturationDetailStatementPendingSyncHint": "Élève pas encore synchronisé : le relevé sera disponible après la prochaine synchronisation.",
+  "facturationDetailStatementOfflineHint": "Hors connexion : le relevé est produit par le serveur.",
+  "facturationDetailStatementConfirmTitle": "Générer un relevé de compte ?",
+  "facturationDetailStatementConfirmMessage": "Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les relevés déjà remis restent valides — ils ne sont pas remplacés.",
+  "facturationDetailStatementConfirmAction": "Générer",
+  "facturationDetailStatementConfirmCancel": "Annuler",
+  "menuDocuments": "Documents",
+  "subMenuDocumentsStudent": "Documents de l'élève",
+  "documentsSearchTitle": "Documents de l'élève",
+  "documentsSearchHelpBanner": "Recherchez un élève précis, ou toute une classe, puis ouvrez son catalogue de pièces.",
+  "documentsSearchByStudentGroup": "Par élève",
+  "documentsSearchByClassGroup": "Par classe",
+  "documentsSearchOrSeparator": "OU",
+  "documentsSearchActiveModeLabel": "Mode actif",
+  "documentsSearchModeStudentBadge": "Élève",
+  "documentsSearchModeClassBadge": "Classe",
+  "documentsSearchCycleLabel": "Cycle",
+  "documentsSearchLevelLabel": "Niveau",
+  "documentsSearchLevelPlaceholder": "Choisissez d'abord un cycle",
+  "documentsSearchInvitationTitle": "Trouvez l'élève, ouvrez ses documents",
+  "documentsSearchInvitationMessage": "Attestation d'inscription, note de perception, reçu de paiement, relevé de compte et quitus financier : les pièces émissibles pour un élève.",
+  "documentsEmptyTitle": "Aucun élève trouvé",
+  "documentsNoResultsDescription": "Aucun élève inscrit cette année ne correspond à ces critères.",
+  "documentsOpenCatalogLabel": "Ouvrir les documents",
+  "documentsCatalogEyebrow": "Documents",
+  "documentsCatalogUnknownStudent": "Élève",
+  "documentsGroupScolariteTitle": "Scolarité",
+  "documentsGroupScolariteSubtitle": "Dossier d'inscription",
+  "documentsGroupFinancesTitle": "Finances",
+  "documentsGroupFinancesSubtitle": "Perception, reçus et attestations de règlement",
+  "documentsNatureArchivedLabel": "Figé",
+  "documentsNatureTimestampedLabel": "Horodaté",
+  "documentsHintAttestation": "Pièce archivée : la redemander re-sert exactement le même document, sous le même numéro.",
+  "documentsHintNotePerception": "Document comptable immuable, émis une seule fois par élève et par année.",
+  "documentsHintReceipt": "Un reçu par versement. Il s'émet depuis la Facturation, au moment de l'encaissement.",
+  "documentsHintStatement": "Photo du compte à l'instant de la demande : chaque émission produit une nouvelle pièce numérotée.",
+  "documentsHintClearance": "Atteste que l'élève est en règle à la date de la demande. Non archivé, renuméroté à chaque émission.",
+  "documentsActionEmitLabel": "Émettre",
+  "documentsActionConsultLabel": "Consulter",
+  "documentsActionGenerateLabel": "Générer maintenant",
+  "documentsActionBusyLabel": "Génération…",
+  "documentsActionFailedNotice": "La génération a échoué. Le document n'a pas été produit.",
+  "documentsBlockedPendingSyncNotice": "Élève pas encore synchronisé : la pièce sera disponible après la prochaine synchronisation.",
+  "documentsBlockedEnrollmentPendingSyncNotice": "Dossier pas encore synchronisé : l'attestation sera disponible après la prochaine synchronisation.",
+  "documentsBlockedMissingEnrollmentNotice": "Dossier introuvable depuis ce lien : rouvrez la fiche depuis la liste des élèves.",
+  "documentsBlockedOfflineNotice": "Hors connexion : cette pièce est produite par le serveur.",
+  "documentsConfirmGenerateTitle": "Générer : {document} ?",
+  "@documentsConfirmGenerateTitle": {"placeholders": {"document": {"type": "String"}}},
+  "documentsConfirmGenerateMessage": "Le serveur produira une nouvelle pièce numérotée, datée de maintenant. Les pièces déjà remises restent valides — elles ne sont pas remplacées.",
+  "documentsConfirmClearanceWarning": "Le quitus est émis quel que soit le solde : un élève qui n'est pas en règle recevra une pièce portant la mention « NON EN RÈGLE ».",
+  "documentsConfirmGenerateAction": "Générer",
+  "documentsConfirmGenerateCancel": "Annuler",
+  "documentsLastIssueSubtitle": "Dernière émission {date} · réf. {reference}",
+  "@documentsLastIssueSubtitle": {"placeholders": {"date": {"type": "String"}, "reference": {"type": "String"}}},
+  "documentsCancelledNotice": "Pièce annulée le {date} par l'établissement.",
+  "@documentsCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "documentsCancelledWithReasonNotice": "Pièce annulée le {date} par l'établissement — {reason}",
+  "@documentsCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "facturationReceiptCancelledNotice": "Reçu annulé le {date} par l'établissement.",
+  "@facturationReceiptCancelledNotice": {"placeholders": {"date": {"type": "String"}}},
+  "facturationReceiptCancelledWithReasonNotice": "Reçu annulé le {date} par l'établissement — {reason}",
+  "@facturationReceiptCancelledWithReasonNotice": {"placeholders": {"date": {"type": "String"}, "reason": {"type": "String"}}},
+  "ticketProvisionalBanner": "Provisoire",
+  "ticketReferenceLabel": "Réf.",
+  "ticketCashierLabel": "Caissier :",
+  "ticketStudentLabel": "Élève :",
+  "ticketMatriculationLabel": "Matricule :",
+  "ticketClassroomLabel": "Classe :",
+  "ticketAmountReceivedLabel": "Montant reçu",
+  "ticketAllocationsLabel": "Répartition",
+  "ticketBalanceLabel": "Solde",
+  "ticketBalanceReservation": "sous réserve de synchronisation",
+  "ticketKeepNotice": "Conservez ce ticket jusqu'à la remise de votre reçu définitif.",
+  "ticketPrintLabel": "Imprimer le ticket",
+  "ticketPrintFailed": "Impression indisponible : le ticket n'a pas pu être produit.",
+  "ticketCutNotice": "Découpez le long du cadre.",
+  "paymentAnomalyBannerTitle": "Trop-perçu à arbitrer",
+  "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
+  "paymentAnomalyAcknowledgeLabel": "Traité",
+  "paymentAnomalyOthersPending": "{count} autre(s) en attente",
+  "@paymentAnomalyOthersPending": {"placeholders": {"count": {"type": "int"}}},
+  "documentsBlockedEnrollmentUnreadableNotice": "Dossier illisible sur cette tablette : l'attestation n'est pas disponible ici."
 }

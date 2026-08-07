@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class EnrollmentJourneyAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -14,16 +15,30 @@ class EnrollmentJourneyAppBar extends StatelessWidget
   final int currentStep;
   final int totalSteps;
 
+  /// Sortie déléguée (retour ET fermeture) : la page hôte peut intercepter la
+  /// sortie (ex. confirmation d'abandon d'un brouillon en cours). Null →
+  /// comportement historique (pop, sinon retour à l'accueil).
+  final VoidCallback? onExitRequested;
+
   const EnrollmentJourneyAppBar({
     super.key,
     required this.modeLabel,
     required this.studentDisplayName,
     required this.currentStep,
     required this.totalSteps,
+    this.onExitRequested,
   });
 
   @override
   Size get preferredSize => const Size.fromHeight(68);
+
+  static void _defaultExit(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.goNamed(AppRoutesNames.home);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,13 +70,8 @@ class EnrollmentJourneyAppBar extends StatelessWidget
                         _JourneyIconButton(
                           icon: Icons.arrow_back_rounded,
                           tooltip: l10n.previous,
-                          onPressed: () {
-                            if (context.canPop()) {
-                              context.pop();
-                              return;
-                            }
-                            context.go('/home');
-                          },
+                          onPressed:
+                              onExitRequested ?? () => _defaultExit(context),
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
@@ -100,13 +110,8 @@ class EnrollmentJourneyAppBar extends StatelessWidget
                         _JourneyIconButton(
                           icon: Icons.close_rounded,
                           tooltip: l10n.journeyCloseAction,
-                          onPressed: () {
-                            if (context.canPop()) {
-                              context.pop();
-                              return;
-                            }
-                            context.go('/home');
-                          },
+                          onPressed:
+                              onExitRequested ?? () => _defaultExit(context),
                         ),
                       ],
                     ),

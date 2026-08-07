@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// État « Niveau non réparti » (PARCOURS 3).
 ///
@@ -37,6 +41,16 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
     final isLoadingOverview =
         overviewStatus == ClassroomStatus.loading ||
         overviewStatus == ClassroomStatus.initial;
+    // Échec du calcul offline (`OfflineLevelUnassignedEnrollmentsRequested`) :
+    // l'effectif est purgé côté bloc (jamais de chiffres périmés affichés
+    // comme fiables) — on bloque donc aussi la répartition tant que le calcul
+    // n'a pas abouti, plutôt que de laisser partir une répartition à l'aveugle.
+    final isOverviewFailure = overviewStatus == ClassroomStatus.failure;
+    // La répartition est une écriture SERVEUR (ADR-004) : jamais rejouable
+    // offline (contrairement au transfert). Le bouton exige donc une
+    // connexion active, en plus du gel READ_ONLY (SessionWriteGate).
+    final isOffline =
+        context.watch<SyncStatusCubit>().state.status == SyncStatus.offline;
 
     return ClassesOrganisationDashedContainer(
       backgroundColor: AppColors.surfaceRaised,
@@ -95,46 +109,97 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: (isDistributing || isLoadingOverview)
-                  ? null
-                  : onDistributionRequested,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.terreCuite,
-                foregroundColor: AppColors.blancCasse,
-                minimumSize: const Size(0, AppDimensions.minTouchTarget),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.spacingM,
-                ),
-                shape: const StadiumBorder(),
-              ),
-              // Bouton pleine largeur + libellé flexible : sur très petit écran
-              // le texte passe sur 2 lignes plutôt que de déborder.
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isDistributing)
-                    const SizedBox(
-                      width: AppDimensions.detailMiniIconSize,
-                      height: AppDimensions.detailMiniIconSize,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else
-                    const Icon(Icons.auto_awesome_outlined),
-                  const SizedBox(width: AppDimensions.spacingS),
-                  Flexible(
-                    child: Text(
-                      l10n.classesOrganisationDistributeByGenderAction,
-                      textAlign: TextAlign.center,
-                    ),
+            // Gel READ_ONLY (ADR-010) : la distribution affecte les élèves.
+            child: SessionWriteGate(
+              child: FilledButton(
+                onPressed:
+                    (isDistributing ||
+                        isLoadingOverview ||
+                        isOverviewFailure ||
+                        isOffline)
+                    ? null
+                    : onDistributionRequested,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.terreCuite,
+                  foregroundColor: AppColors.blancCasse,
+                  minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.spacingM,
                   ),
-                ],
+                  shape: const StadiumBorder(),
+                ),
+                // Bouton pleine largeur + libellé flexible : sur très petit
+                // écran le texte passe sur 2 lignes plutôt que de déborder.
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isDistributing)
+                      const SizedBox(
+                        width: AppDimensions.detailMiniIconSize,
+                        height: AppDimensions.detailMiniIconSize,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      const Icon(Icons.auto_awesome_outlined),
+                    const SizedBox(width: AppDimensions.spacingS),
+                    Flexible(
+                      child: Text(
+                        l10n.classesOrganisationDistributeByGenderAction,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          if (isOffline) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            _InlineHint(
+              icon: Icons.cloud_off,
+              message: l10n.classesOrganisationDistributeOfflineHint,
+            ),
+          ] else if (isOverviewFailure) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            _InlineHint(
+              icon: Icons.error_outline,
+              message: l10n.classesOrganisationDistributeLoadErrorHint,
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// Message court expliquant pourquoi le bouton de répartition est désactivé
+/// (ton neutre — même langage que [SyncIndicator] à l'état hors-ligne, pas une
+/// alerte criarde : ce sont des états attendus, réseau ou lecture locale).
+class _InlineHint extends StatelessWidget {
+  final IconData icon;
+  final String message;
+
+  const _InlineHint({required this.icon, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: AppDimensions.detailMiniIconSize,
+          color: AppColors.textMuted,
+        ),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Expanded(
+          child: Text(
+            message,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+          ),
+        ),
+      ],
     );
   }
 }

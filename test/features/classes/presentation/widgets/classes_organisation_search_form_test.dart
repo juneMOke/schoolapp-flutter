@@ -16,7 +16,6 @@ void main() {
         schoolLevelId: 'level-1',
         schoolLevelName: '5e',
         splitIntoClassrooms: false,
-        classrooms: [],
       ),
     ],
   );

@@ -25,6 +25,24 @@ class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
 
+/// Tick périodique (timer) : recalcule le mode de dégradation sans réseau
+/// (ADR-010 D-08). Le temps ne peut que dégrader.
+class AuthFreshnessTick extends AuthEvent {
+  const AuthFreshnessTick();
+}
+
+/// Le serveur a révoqué la session (`userVersion` divergent, D-09) : wipe de la
+/// **session** (jamais l'outbox) et retour à `unauthenticated`.
+class AuthSessionRevoked extends AuthEvent {
+  const AuthSessionRevoked();
+}
+
+/// Le refresh token est expiré/rejeté (D-07/§7.2) : reconnexion interactive
+/// obligatoire.
+class AuthRefreshExpired extends AuthEvent {
+  const AuthRefreshExpired();
+}
+
 class AuthResetPasswordRequested extends AuthEvent {
   final String email;
   final String newPassword;

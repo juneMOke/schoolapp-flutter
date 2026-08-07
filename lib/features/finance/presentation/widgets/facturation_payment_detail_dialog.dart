@@ -6,11 +6,67 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
+import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Ce que « Télécharger le reçu » fait réellement quand on appuie dessus.
+///
+/// Deux gestes derrière un même bouton, et ils n'ont pas du tout le même poids —
+/// d'où ce type, et d'où le fait que la décision soit une fonction pure
+/// éprouvable plutôt qu'une clause noyée dans un arbre de widgets.
+enum FacturationReceiptGesture {
+  /// **Lecture.** La copie locale si elle est là — ce qui fonctionne hors
+  /// ligne —, sinon un `GET` qui rend exactement cette pièce-là. Rien n'est
+  /// écrit, aucun numéro n'est consommé.
+  restitute,
+
+  /// **Écriture.** Le serveur produit le reçu à partir de l'identifiant du
+  /// paiement. Sur un reçu annulé, cela rescelle son instantané, consomme un
+  /// numéro d'une séquence auditée sans trou et repointe `payment.receiptId`.
+  emit,
+
+  /// Rien à offrir : l'encaissement n'est pas remonté, son uuid est client.
+  none,
+}
+
+/// Décide du geste, sur l'**adressabilité** de la pièce — jamais sur ses octets.
+///
+/// C'est tout l'objet de cette fonction, et une revue adversariale a montré ce
+/// que coûtait l'autre garde. Une pièce annulée dont l'éviction a emporté les
+/// octets reste parfaitement lisible : la route de téléchargement du serveur ne
+/// filtre PAS l'annulation (`DocumentStoreService.getArchived` charge par
+/// identifiant ; le filtre d'annulation vit sur `EditiquePortImpl
+/// .findDocumentById`, qui est un autre chemin). Garder sur « a-t-on les
+/// octets ? » retombait donc sur l'ÉMISSION pour une pièce que le serveur
+/// rendait gratuitement — et un reçu retiré pour erreur de montant redevenait
+/// le reçu officiel du versement, avec le même montant erroné.
+///
+/// L'identifiant d'archive, lui, survit à l'éviction : `downgradeToKnown` ne
+/// remet à null que l'empreinte et le poids.
+///
+/// [FacturationReceiptGesture.restitute] exige `documentId` et non
+/// [EditiqueCacheEntry.isAddressable] : le serveur n'expose aucune recherche
+/// par numéro, et la restitution rend `NotFoundFailure` sans identifiant. Un
+/// numéro seul ne désigne rien.
+@visibleForTesting
+FacturationReceiptGesture facturationReceiptGesture({
+  required EditiqueCacheEntry? cached,
+  required bool isPendingSync,
+}) {
+  if (cached?.documentId?.isNotEmpty ?? false) {
+    return FacturationReceiptGesture.restitute;
+  }
+  return isPendingSync
+      ? FacturationReceiptGesture.none
+      : FacturationReceiptGesture.emit;
+}
 
 /// Ouvre le détail d'un paiement en popin (spec §15).
 Future<void> showFacturationPaymentDetailDialog(
@@ -20,19 +76,66 @@ Future<void> showFacturationPaymentDetailDialog(
   return showDialog<void>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => BlocProvider<PaymentsBloc>(
-      create: (_) {
-        final bloc = getIt<PaymentsBloc>();
-        if (intent.paymentId.trim().isNotEmpty) {
-          bloc.add(PaymentsAllocationsRequested(paymentId: intent.paymentId));
-        }
-        return bloc;
-      },
-      child: FacturationPaymentDetailDialogView(
-        intent: intent,
-        allocations: FacturationPaymentAllocationsSection(
-          paymentId: intent.paymentId,
-          currency: intent.currency,
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider<PaymentsBloc>(
+          create: (_) {
+            final bloc = getIt<PaymentsBloc>();
+            if (intent.paymentId.trim().isNotEmpty) {
+              bloc.add(
+                PaymentsAllocationsRequested(paymentId: intent.paymentId),
+              );
+            }
+            return bloc;
+          },
+        ),
+        // Numéro de pièce lu en local (table `generated_documents`) : le
+        // serveur ne l'expose sur aucune lecture REST, seule la synchro l'a
+        // scellé. Aucun téléchargement n'est nécessaire pour l'afficher.
+        BlocProvider<PaymentReceiptCubit>(
+          create: (_) => getIt<PaymentReceiptCubit>()..load(intent.paymentId),
+        ),
+      ],
+      child: BlocBuilder<PaymentReceiptCubit, PaymentReceiptState>(
+        builder: (_, receipt) => FacturationPaymentDetailDialogView(
+          intent: intent,
+          allocations: FacturationPaymentAllocationsSection(
+            paymentId: intent.paymentId,
+            currency: intent.currency,
+          ),
+          receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
+          receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
+          // Le retrait se dit toujours, quel que soit le geste offert : c'est
+          // ce que le guichet doit pouvoir expliquer à la famille qui présente
+          // le papier.
+          cancelledReceipt: receipt.cached?.isCancelled ?? false
+              ? receipt.cached
+              : null,
+          // Le geste est décidé par `facturationReceiptGesture`, qui porte la
+          // règle et son pourquoi. La copie annulée est bien servie (arbitrage
+          // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
+          // d'une famille le papier qu'elle présente pour lui expliquer
+          // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
+          // la pièce ne trompe personne.
+          onDownloadReceipt: switch (facturationReceiptGesture(
+            cached: receipt.cached,
+            isPendingSync: intent.isPendingSync,
+          )) {
+            FacturationReceiptGesture.restitute =>
+              () => showEditiqueRestitutionDialog(
+                context,
+                type: EditiqueDocumentType.paymentReceipt,
+                title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
+                documentId: receipt.cached?.documentId,
+                documentNumber: receipt.cached?.documentNumber,
+              ),
+            FacturationReceiptGesture.emit =>
+              () => showEditiquePaymentReceiptDialog(
+                context,
+                paymentId: intent.paymentId,
+              ),
+            FacturationReceiptGesture.none => null,
+          },
         ),
       ),
     ),
@@ -43,14 +146,54 @@ Future<void> showFacturationPaymentDetailDialog(
 class FacturationPaymentDetailDialogView extends StatelessWidget {
   final FacturationPaymentDetailIntent intent;
   final Widget allocations;
+
+  /// Numéro **définitif** de la pièce, ou `null` s'il n'est pas connu.
+  ///
+  /// Ne transite jamais un `PROV-…` : un numéro provisoire n'est pas un numéro
+  /// de pièce, il se signale par [receiptPending].
+  final String? receiptNumber;
+
+  /// La pièce existe mais son numéro n'est pas encore scellé par le serveur.
+  final bool receiptPending;
+
+  /// `null` désactive le téléchargement — cas d'un encaissement pas encore
+  /// remonté, dont l'identifiant est inconnu du serveur.
   final VoidCallback? onDownloadReceipt;
+
+  /// Reçu que l'établissement a **retiré**, `null` tant qu'il tient.
+  ///
+  /// Barre son numéro et porte le motif. Un numéro barré seul ne dirait pas
+  /// grand-chose : c'est la phrase qui explique, la rature ne fait que la
+  /// rendre impossible à manquer.
+  final EditiqueCacheEntry? cancelledReceipt;
 
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
     required this.allocations,
+    this.receiptNumber,
+    this.receiptPending = false,
     this.onDownloadReceipt,
+    this.cancelledReceipt,
   });
+
+  /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
+  ///
+  /// Le motif vient du serveur — texte libre saisi par un agent. Affiché tel
+  /// quel, sans traduction ; son absence ne se comble pas.
+  String? _cancellationNotice(BuildContext context, AppLocalizations l10n) {
+    final cancelledAt = cancelledReceipt?.cancelledAt;
+    if (cancelledAt == null) return null;
+
+    final date = MaterialLocalizations.of(
+      context,
+    ).formatMediumDate(DateTime.fromMillisecondsSinceEpoch(cancelledAt));
+    final reason = cancelledReceipt?.cancellationReason?.trim();
+
+    return (reason == null || reason.isEmpty)
+        ? l10n.facturationReceiptCancelledNotice(date)
+        : l10n.facturationReceiptCancelledWithReasonNotice(date, reason);
+  }
 
   String _payerFullName(AppLocalizations l10n) {
     final fullName = [
@@ -59,6 +202,19 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
       intent.payerFirstName,
     ].map((v) => v.trim()).where((v) => v.isNotEmpty).join(' ');
     return fullName.isEmpty ? l10n.facturationDetailUnknownValue : fullName;
+  }
+
+  /// Numéro de pièce affichable, ou un libellé neutre.
+  ///
+  /// Trois cas : numéro définitif scellé par la synchro → affiché tel quel ;
+  /// pièce en attente de scellement → mention d'attente, car un `PROV-…` n'est
+  /// pas un numéro de pièce officiel ; rien de connu → chaîne vide, comme
+  /// avant (le rendu clé/valeur affiche alors un tiret).
+  String _receiptNumberValue(AppLocalizations l10n) {
+    final number = receiptNumber?.trim();
+    if (number != null && number.isNotEmpty) return number;
+    if (receiptPending) return l10n.facturationPaymentReceiptNumberPending;
+    return '';
   }
 
   String _studentFullName(AppLocalizations l10n) {
@@ -71,18 +227,6 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   }
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
-
-  void _onDownload(BuildContext context) {
-    if (onDownloadReceipt != null) {
-      onDownloadReceipt!();
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.pageUnderConstruction),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,10 +302,38 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                         FinanceKeyValueRow(
                           icon: Icons.receipt_long_outlined,
                           label: l10n.facturationPaymentReceiptLabel,
-                          value: '',
+                          value: _receiptNumberValue(l10n),
+                          isStruckThrough: cancelledReceipt != null,
                         ),
                       ],
                     ),
+                    if (_cancellationNotice(context, l10n) case final notice?)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: AppDimensions.spacingS,
+                        ),
+                        // Jamais la seule rature ni la seule couleur : l'icône
+                        // et la phrase disent ce que le trait ne peut pas dire.
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.cancel_outlined,
+                              size: 16,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: AppDimensions.spacingXS),
+                            Expanded(
+                              child: Text(
+                                notice,
+                                style: AppTextStyles.body.copyWith(
+                                  color: AppColors.warning,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: AppDimensions.spacingM),
                     allocations,
                   ],
@@ -172,7 +344,8 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
             FinanceModalFooter(
               secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
               secondaryIcon: Icons.download_outlined,
-              onSecondary: () => _onDownload(context),
+              onSecondary: onDownloadReceipt,
+              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => _close(context),

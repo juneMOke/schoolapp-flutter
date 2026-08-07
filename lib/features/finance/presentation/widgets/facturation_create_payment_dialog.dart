@@ -4,11 +4,13 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
@@ -18,6 +20,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Ouvre la modale d'encaissement (spec MODALE-12).
 ///
@@ -29,6 +32,7 @@ Future<void> showFacturationCreatePaymentDialog(
   required FacturationCreatePaymentIntent intent,
   required PaymentsBloc paymentsBloc,
   required StudentChargesBloc studentChargesBloc,
+  required FinanceOfflineBloc financeOfflineBloc,
 }) {
   void refreshDetail() {
     paymentsBloc.add(
@@ -47,10 +51,18 @@ Future<void> showFacturationCreatePaymentDialog(
 
   return showDialog<void>(
     context: context,
-    barrierDismissible: true,
+    // Un clic hors de la popin ne doit pas faire perdre la saisie en cours :
+    // seule la confirmation explicite (croix/retour) ferme la modale.
+    barrierDismissible: false,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => BlocProvider<PaymentsBloc>.value(
-      value: paymentsBloc,
+    // Les dialogs vivent sur une route au-dessus de l'arbre de la page : les
+    // BLoCs sont fournis explicitement (lecture : PaymentsBloc online ;
+    // écriture : FinanceOfflineBloc offline-first).
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider<PaymentsBloc>.value(value: paymentsBloc),
+        BlocProvider<FinanceOfflineBloc>.value(value: financeOfflineBloc),
+      ],
       child: FacturationCreatePaymentDialogView(
         intent: intent,
         onPaymentCreated: refreshDetail,
@@ -83,6 +95,10 @@ class _FacturationCreatePaymentDialogViewState
 
   late final List<_ChargeEntry> _entries;
 
+  /// Anti double-dialogue : un second déclencheur (retour système pendant que
+  /// la croix a déjà ouvert la confirmation) est ignoré.
+  bool _closeConfirmationOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -111,6 +127,31 @@ class _FacturationCreatePaymentDialogViewState
 
   void _onChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// Demande de fermeture (croix, retour système) : passe toujours par une
+  /// confirmation, contrairement au succès d'encaissement qui referme
+  /// directement (cf. [_onCollect]). `Navigator.pop()` ci-dessous ferme
+  /// réellement la modale : contrairement à `maybePop`/au retour système, il
+  /// n'est pas soumis au `PopScope` englobant et n'est donc pas re-intercepté.
+  Future<void> _requestClose() async {
+    if (_closeConfirmationOpen) return;
+    _closeConfirmationOpen = true;
+    try {
+      final l10n = AppLocalizations.of(context)!;
+      final confirmed = await showAppConfirmationDialog(
+        context: context,
+        title: l10n.facturationCreatePaymentCloseConfirmTitle,
+        message: l10n.facturationCreatePaymentCloseConfirmMessage,
+        confirmLabel: l10n.facturationCreatePaymentCloseConfirmAction,
+        cancelLabel: l10n.facturationCreatePaymentCloseConfirmCancel,
+        isDestructive: true,
+      );
+      if (!mounted || !confirmed) return;
+      Navigator.of(context).pop();
+    } finally {
+      _closeConfirmationOpen = false;
+    }
   }
 
   String _formatPlain(int cents) {
@@ -186,7 +227,7 @@ class _FacturationCreatePaymentDialogViewState
     }
 
     final retained = _entries.where((e) => e.effectiveCents > 0).toList();
-    final bloc = context.read<PaymentsBloc>();
+    final offlineBloc = context.read<FinanceOfflineBloc>();
 
     final request = PaymentsCreateRequested(
       studentId: widget.intent.studentId,
@@ -215,7 +256,7 @@ class _FacturationCreatePaymentDialogViewState
     // résultat et le toast est remplacé par la popin.
     final outcome = await showFacturationCreatePaymentConfirmDialog(
       context,
-      paymentsBloc: bloc,
+      financeOfflineBloc: offlineBloc,
       totalLabel: _formatWithCurrency(total, currency),
       studentName: _studentFullName(l10n),
       payerName: _payerFullName(l10n),
@@ -240,7 +281,10 @@ class _FacturationCreatePaymentDialogViewState
     // le paiement) ; faire le refresh après fermeture évite qu'un éventuel échec
     // de rechargement ne contredise l'écran de succès.
     if (outcome == FacturationCollectOutcome.succeeded) {
-      Navigator.of(context).maybePop();
+      // Fermeture automatique après succès : `pop()` (pas `maybePop`) pour ne
+      // pas déclencher la confirmation de fermeture, il n'y a plus rien à
+      // perdre.
+      Navigator.of(context).pop();
       widget.onPaymentCreated();
     }
   }
@@ -258,69 +302,86 @@ class _FacturationCreatePaymentDialogViewState
         final currency = _currency;
         final canCollect = _payerValid && total > 0 && !isLoading;
 
-        return Dialog(
-          backgroundColor: AppColors.surfaceRaised,
-          surfaceTintColor: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
-          insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-          shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: AppDimensions.facturationCreatePaymentModalMaxWidth,
-              maxHeight: maxHeight,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FinanceModalDarkHeader(
-                  eyebrow: l10n.facturationDetailCollectPaymentAction,
-                  title: _studentFullName(l10n),
-                  onClose: () => Navigator.of(context).maybePop(),
-                ),
-                const FinanceModalGoldDivider(),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppDimensions.spacingM),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FacturationCreatePaymentPayerSection(
-                          lastNameController: _lastNameController,
-                          firstNameController: _firstNameController,
-                          middleNameController: _middleNameController,
-                          readOnly: isLoading,
-                        ),
-                        const SizedBox(height: AppDimensions.spacingL),
-                        _ChargesToSettle(
-                          entries: _entries,
-                          onToggle: isLoading ? null : _onToggle,
-                          onSettleAll: isLoading ? null : _onSettleAll,
-                        ),
-                      ],
-                    ),
+        return PopScope(
+          // Bloque uniquement le retour système / `maybePop` (croix incluse) :
+          // toute fermeture passe par `_requestClose`. `Navigator.pop()` direct
+          // (succès d'encaissement) n'est pas concerné par ce garde-fou.
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            _requestClose();
+          },
+          child: Dialog(
+            backgroundColor: AppColors.surfaceRaised,
+            surfaceTintColor: Colors.transparent,
+            clipBehavior: Clip.antiAlias,
+            insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: AppDimensions.facturationCreatePaymentModalMaxWidth,
+                maxHeight: maxHeight,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FinanceModalDarkHeader(
+                    eyebrow: l10n.facturationDetailCollectPaymentAction,
+                    title: _studentFullName(l10n),
+                    onClose: () => Navigator.of(context).maybePop(),
                   ),
-                ),
-                const Divider(height: 1, color: AppColors.border),
-                _TotalBand(
-                  label: l10n.facturationCreatePaymentTotalToCollect,
-                  amount: _formatWithCurrency(total, currency),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(AppDimensions.spacingM),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: EteeloButton.primary(
-                      label: l10n.facturationCreatePaymentCollectAmountAction(
-                        _formatWithCurrency(total, currency),
+                  const FinanceModalGoldDivider(),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppDimensions.spacingM),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FacturationCreatePaymentPayerSection(
+                            lastNameController: _lastNameController,
+                            firstNameController: _firstNameController,
+                            middleNameController: _middleNameController,
+                            readOnly: isLoading,
+                          ),
+                          const SizedBox(height: AppDimensions.spacingL),
+                          _ChargesToSettle(
+                            entries: _entries,
+                            onToggle: isLoading ? null : _onToggle,
+                            onSettleAll: isLoading ? null : _onSettleAll,
+                          ),
+                        ],
                       ),
-                      icon: Icons.account_balance_wallet_outlined,
-                      isLoading: isLoading,
-                      onPressed: canCollect ? () => _onCollect(l10n) : null,
                     ),
                   ),
-                ),
-              ],
+                  const Divider(height: 1, color: AppColors.border),
+                  _TotalBand(
+                    label: l10n.facturationCreatePaymentTotalToCollect,
+                    amount: _formatWithCurrency(total, currency),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(AppDimensions.spacingM),
+                    child: SizedBox(
+                      width: double.infinity,
+                      // Gel READ_ONLY (ADR-010) : le CTA d'entrée est gaté, mais
+                      // le tick de fraîcheur (5 min) peut basculer le mode
+                      // PENDANT que ce dialog est ouvert — le submit doit l'être
+                      // aussi (argent).
+                      child: SessionWriteGate(
+                        child: EteeloButton.primary(
+                          label: l10n
+                              .facturationCreatePaymentCollectAmountAction(
+                                _formatWithCurrency(total, currency),
+                              ),
+                          icon: Icons.account_balance_wallet_outlined,
+                          isLoading: isLoading,
+                          onPressed: canCollect ? () => _onCollect(l10n) : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

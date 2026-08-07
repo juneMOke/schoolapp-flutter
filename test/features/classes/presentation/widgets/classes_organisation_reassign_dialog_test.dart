@@ -4,19 +4,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class MockClassroomBloc extends MockBloc<ClassroomEvent, ClassroomState>
-    implements ClassroomBloc {}
+// La réassignation passe désormais par le BLoC offline (PUT online + re-pull
+// best-effort) ; l'année scolaire courante est lue sur l'AcademicYearContextBloc.
+class MockClassroomOfflineBloc
+    extends MockBloc<ClassroomOfflineEvent, ClassroomOfflineState>
+    implements ClassroomOfflineBloc {}
+
+class MockAcademicYearContextBloc
+    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
+    implements AcademicYearContextBloc {}
 
 void main() {
-  late MockClassroomBloc bloc;
+  late MockClassroomOfflineBloc bloc;
+  late MockAcademicYearContextBloc academicYearContextBloc;
 
   const options = [
     ClassroomReassignOption(
@@ -47,7 +56,6 @@ void main() {
 
   const transferIntent = ClassroomMemberReassignIntent(
     classroomId: 'c1',
-    classroomMemberId: 'm1',
     studentId: 's1',
     studentFirstName: 'Jane',
     studentLastName: 'Doe',
@@ -57,7 +65,7 @@ void main() {
 
   const assignIntent = ClassroomMemberReassignIntent(
     classroomId: null,
-    classroomMemberId: 'm9',
+    enrollmentId: 'enr-9',
     studentId: 's9',
     studentFirstName: 'Paul',
     studentLastName: 'Martin',
@@ -66,8 +74,12 @@ void main() {
   );
 
   setUp(() {
-    bloc = MockClassroomBloc();
-    when(() => bloc.state).thenReturn(const ClassroomState());
+    bloc = MockClassroomOfflineBloc();
+    when(() => bloc.state).thenReturn(const ClassroomOfflineState());
+    academicYearContextBloc = MockAcademicYearContextBloc();
+    when(
+      () => academicYearContextBloc.state,
+    ).thenReturn(const AcademicYearContextState.initial());
   });
 
   Future<void> openDialog(
@@ -84,8 +96,13 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<ClassroomBloc>.value(
-          value: bloc,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<ClassroomOfflineBloc>.value(value: bloc),
+            BlocProvider<AcademicYearContextBloc>.value(
+              value: academicYearContextBloc,
+            ),
+          ],
           child: Builder(
             builder: (context) => Scaffold(
               body: Center(
@@ -94,6 +111,7 @@ void main() {
                     context: context,
                     intent: intent,
                     options: options,
+                    schoolLevelId: 'level-1',
                   ),
                   child: const Text('open'),
                 ),
@@ -136,11 +154,15 @@ void main() {
     await tester.tap(actionFinder);
     await tester.pumpAndSettle();
 
+    // Origine non nulle (c1) → TRANSFERT offline (événement), pas l'affectation.
     verify(
       () => bloc.add(
-        const ClassroomMemberReassignRequested(
-          classroomMemberId: 'm1',
-          targetClassroomId: 'c2',
+        const MemberTransferRequested(
+          studentId: 's1',
+          fromClassroomId: 'c1',
+          toClassroomId: 'c2',
+          schoolLevelId: 'level-1',
+          academicYearId: '',
         ),
       ),
     ).called(1);
@@ -162,9 +184,10 @@ void main() {
 
       verify(
         () => bloc.add(
-          const ClassroomMemberReassignRequested(
-            classroomMemberId: 'm9',
+          const MemberAssignRequested(
+            enrollmentId: 'enr-9',
             targetClassroomId: 'c2',
+            academicYearId: '',
           ),
         ),
       ).called(1);

@@ -260,6 +260,18 @@ abstract class AppLocalizations {
   /// **'Contact the administrator'**
   String get loginContactAdmin;
 
+  /// Banner: offline login impossible, account never seen online on this device (ADR-010 D-01)
+  ///
+  /// In en, this message translates to:
+  /// **'No connection, and this account has never signed in on this tablet. A first online sign-in is required.'**
+  String get loginErrorOfflineFirstLogin;
+
+  /// Banner: offline window closed (refresh bound passed or revoked) — online sign-in required (ADR-010 D-07/D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Offline work period expired. Sign in online as soon as the network is back.'**
+  String get loginErrorOfflineWindowExpired;
+
   /// No description provided for @showPassword.
   ///
   /// In en, this message translates to:
@@ -302,11 +314,23 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT — splash screen'**
   String get splashSemanticsLabel;
 
-  /// No description provided for @bootstrapOfflineBanner.
+  /// Banner: session opened offline (ADR-010)
   ///
   /// In en, this message translates to:
-  /// **'Offline mode — cached data'**
-  String get bootstrapOfflineBanner;
+  /// **'Offline session — verified locally'**
+  String get sessionOfflineBanner;
+
+  /// WARNING banner: degraded offline session (D7–D21)
+  ///
+  /// In en, this message translates to:
+  /// **'Session needs refresh — reconnect soon'**
+  String get sessionWarningBanner;
+
+  /// READ_ONLY banner: expired offline session (D21+)
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only — online reconnection required'**
+  String get sessionReadOnlyBanner;
 
   /// No description provided for @splashErrorTitle.
   ///
@@ -644,6 +668,18 @@ abstract class AppLocalizations {
   /// **'Start gender-based distribution'**
   String get classesOrganisationDistributeByGenderAction;
 
+  /// No description provided for @classesOrganisationDistributeOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You seem to be offline. A connection is required to start the distribution.'**
+  String get classesOrganisationDistributeOfflineHint;
+
+  /// No description provided for @classesOrganisationDistributeLoadErrorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to compute the headcount to distribute right now. Please try again later.'**
+  String get classesOrganisationDistributeLoadErrorHint;
+
   /// No description provided for @classesDistributionResultEyebrow.
   ///
   /// In en, this message translates to:
@@ -848,11 +884,17 @@ abstract class AppLocalizations {
   /// **'Transfer in progress...'**
   String get classesOrganisationTransferInProgress;
 
-  /// No description provided for @classesOrganisationTransferSuccess.
+  /// No description provided for @classesOrganisationTransferQueued.
   ///
   /// In en, this message translates to:
-  /// **'Transfer completed successfully.'**
-  String get classesOrganisationTransferSuccess;
+  /// **'Transfer saved — pending synchronization.'**
+  String get classesOrganisationTransferQueued;
+
+  /// No description provided for @classesOrganisationTransferPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get classesOrganisationTransferPendingBadge;
 
   /// No description provided for @classesOrganisationTransferNoTarget.
   ///
@@ -949,6 +991,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Assign the student'**
   String get classesOrganisationAssignDialogTitle;
+
+  /// No description provided for @classesOrganisationAssignSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Student assigned to the class.'**
+  String get classesOrganisationAssignSuccess;
+
+  /// No description provided for @classesOrganisationAssignRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.'**
+  String get classesOrganisationAssignRejected;
+
+  /// No description provided for @classesOrganisationAssignNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Class or enrolment not found. Refresh the list.'**
+  String get classesOrganisationAssignNotFound;
 
   /// No description provided for @classesOrganisationLoadingClassroomsCount.
   ///
@@ -1181,7 +1241,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCoursesCount.
   ///
   /// In en, this message translates to:
-  /// **'{classCount, plural, =1{1 class} other{{classCount} classes}} · {courseCount, plural, =1{1 course} other{{courseCount} courses}}'**
+  /// **'{classCount, plural, =0{0 classes} =1{1 class} other{{classCount} classes}} · {courseCount, plural, =0{0 courses} =1{1 course} other{{courseCount} courses}}'**
   String myCoursesCount(int classCount, int courseCount);
 
   /// No description provided for @myCoursesExpandAll.
@@ -1199,7 +1259,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCoursesClassCourseCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 course} other{{count} courses}}'**
+  /// **'{count, plural, =0{0 courses} =1{1 course} other{{count} courses}}'**
   String myCoursesClassCourseCount(int count);
 
   /// No description provided for @myCoursesStudentCount.
@@ -1325,7 +1385,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailToGrade.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 to grade} other{{count} to grade}}'**
+  /// **'{count, plural, =0{0 to grade} =1{1 to grade} other{{count} to grade}}'**
   String courseDetailToGrade(int count);
 
   /// No description provided for @courseDetailNextEvalEyebrow.
@@ -1391,7 +1451,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailBucketNotes.
   ///
   /// In en, this message translates to:
-  /// **'{saisies}/{total} marks · {evals, plural, =1{1 eval.} other{{evals} evals.}}'**
+  /// **'{saisies}/{total} marks · {evals, plural, =0{0 eval.} =1{1 eval.} other{{evals} evals.}}'**
   String courseDetailBucketNotes(int saisies, int total, int evals);
 
   /// No description provided for @courseDetailBucketNoEval.
@@ -1463,7 +1523,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailEvalExpected.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 student expected} other{{count} students expected}}'**
+  /// **'{count, plural, =0{0 students expected} =1{1 student expected} other{{count} students expected}}'**
   String courseDetailEvalExpected(int count);
 
   /// No description provided for @courseDetailReleveTitle.
@@ -1664,11 +1724,11 @@ abstract class AppLocalizations {
   /// **'Related chapters'**
   String get evalCreateFieldChapitres;
 
-  /// No description provided for @evalCreateChapitresComingSoon.
+  /// No description provided for @evalCreateChapitresEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get evalCreateChapitresComingSoon;
+  /// **'No chapters available for this course'**
+  String get evalCreateChapitresEmpty;
 
   /// No description provided for @evalCreateCancel.
   ///
@@ -1685,7 +1745,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalCreateHint.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
+  /// **'{count, plural, =0{No student in {classroom} will be added} =1{The student in {classroom} will be added} other{The {count} students in {classroom} will be added}} with the “Pending” status.'**
   String evalCreateHint(int count, String classroom);
 
   /// No description provided for @evalCreateSuccessToast.
@@ -1705,6 +1765,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Closed period: you can\'t add an evaluation to it.'**
   String get evalCreateClosedPeriodError;
+
+  /// No description provided for @evalCreateMaxReachedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry cap reached for this date.'**
+  String get evalCreateMaxReachedError;
+
+  /// No description provided for @evalRejectionPeriodClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: closed period'**
+  String get evalRejectionPeriodClosed;
+
+  /// No description provided for @evalRejectionExamNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: exam not allowed'**
+  String get evalRejectionExamNotAllowed;
+
+  /// No description provided for @evalRejectionMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: cap reached'**
+  String get evalRejectionMaxReached;
+
+  /// No description provided for @evalRejectionGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server'**
+  String get evalRejectionGeneric;
+
+  /// No description provided for @noteRejectionUnknownEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluation unknown to the server'**
+  String get noteRejectionUnknownEvaluation;
+
+  /// No description provided for @noteRejectionPeriodeClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed period'**
+  String get noteRejectionPeriodeClose;
+
+  /// No description provided for @noteRejectionInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid grade'**
+  String get noteRejectionInvalid;
+
+  /// No description provided for @noteRejectionContextUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Context unavailable'**
+  String get noteRejectionContextUnavailable;
+
+  /// No description provided for @noteRejectionGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server'**
+  String get noteRejectionGeneric;
 
   /// No description provided for @evalDetailBack.
   ///
@@ -1757,7 +1877,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalCountNotee.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{{count} graded} other{{count} graded}}'**
+  /// **'{count, plural, =0{{count} graded} =1{{count} graded} other{{count} graded}}'**
   String evalCountNotee(int count);
 
   /// No description provided for @evalCountEnAttente.
@@ -1859,7 +1979,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalSaveErrorsAlert.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
+  /// **'{count, plural, =0{0 grades above the maximum} =1{1 grade above the maximum} other{{count} grades above the maximum}}'**
   String evalSaveErrorsAlert(int count);
 
   /// No description provided for @evalSaveButton.
@@ -1877,7 +1997,7 @@ abstract class AppLocalizations {
   /// No description provided for @evalSaveSuccessToast.
   ///
   /// In en, this message translates to:
-  /// **'Grades saved — {notees, plural, =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
+  /// **'Grades saved — {notees, plural, =0{{notees} graded} =1{{notees} graded} other{{notees} graded}} · {enAttente} pending'**
   String evalSaveSuccessToast(int notees, int enAttente);
 
   /// No description provided for @evalSaveErrorToast.
@@ -1964,11 +2084,17 @@ abstract class AppLocalizations {
   /// **'Hello'**
   String get accueilBannerGreetingGeneric;
 
-  /// No description provided for @accueilBannerContextTail.
+  /// Home banner eyebrow: school name followed by its locality.
   ///
   /// In en, this message translates to:
-  /// **'Here is the essential view of your school today.'**
-  String get accueilBannerContextTail;
+  /// **'{school} · {locality}'**
+  String accueilBannerSchoolLocation(String school, String locality);
+
+  /// Home banner context pill carrying the current school year.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {year}'**
+  String accueilBannerSchoolYear(String year);
 
   /// No description provided for @accueilModulesEyebrow.
   ///
@@ -1985,7 +2111,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.'**
+  /// **'Six modules cover the life of the school — each card opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.
@@ -2006,17 +2132,41 @@ abstract class AppLocalizations {
   /// **'Class composition and student lists by cycle.'**
   String get accueilModuleClassesDescription;
 
+  /// No description provided for @accueilModuleCoursDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly timetable and follow-up of your courses.'**
+  String get accueilModuleCoursDescription;
+
+  /// No description provided for @accueilModuleResultatsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentages by period, for a whole class or a single student.'**
+  String get accueilModuleResultatsDescription;
+
   /// No description provided for @accueilModuleDisciplinesDescription.
   ///
   /// In en, this message translates to:
   /// **'Daily attendance, disciplinary records and student follow-up.'**
   String get accueilModuleDisciplinesDescription;
 
-  /// Accessibility label for the module card (button role, explicit destination).
+  /// Module card subtitle: number of pages it gathers.
   ///
   /// In en, this message translates to:
-  /// **'{module} — open the dashboard'**
-  String accueilModuleCardSemantics(String module);
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String accueilModulePageCount(int count);
+
+  /// Accessibility label for the module card header (button role, explicit destination).
+  ///
+  /// In en, this message translates to:
+  /// **'{module} — open {page}'**
+  String accueilModuleCardSemantics(String module, String page);
+
+  /// Accessibility label for a sub-module row in a card footer.
+  ///
+  /// In en, this message translates to:
+  /// **'{page} — {module} module'**
+  String accueilSubModuleSemantics(String module, String page);
 
   /// No description provided for @accueilSignature.
   ///
@@ -2095,12 +2245,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter the enrollments list'**
   String get searchFormSubtitleFirstRegistration;
-
-  /// No description provided for @searchFormSubtitlePreRegistration.
-  ///
-  /// In en, this message translates to:
-  /// **'Online requests received, pending validation'**
-  String get searchFormSubtitlePreRegistration;
 
   /// No description provided for @reRegistrationSearchHint.
   ///
@@ -2197,6 +2341,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill the form above then click Search to display enrollment files.'**
   String get reRegistrationSearchInvitationMessage;
+
+  /// No description provided for @preRegistrationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a pre-registration by student or by desired cycle/level'**
+  String get preRegistrationSearchHint;
+
+  /// No description provided for @preRegistrationSearchHelpPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.'**
+  String get preRegistrationSearchHelpPill;
+
+  /// No description provided for @preRegistrationSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a pre-registration'**
+  String get preRegistrationSearchTitle;
+
+  /// No description provided for @preRegistrationSearchByNameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get preRegistrationSearchByNameGroup;
+
+  /// No description provided for @preRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By cycle / level'**
+  String get preRegistrationSearchByLevelGroup;
+
+  /// No description provided for @preRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get preRegistrationSearchOrSeparator;
+
+  /// No description provided for @preRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get preRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @preRegistrationSearchModeNameBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get preRegistrationSearchModeNameBadge;
+
+  /// No description provided for @preRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle / level'**
+  String get preRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @preRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle first'**
+  String get preRegistrationSearchLevelPlaceholder;
+
+  /// No description provided for @preRegistrationSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a pre-registration search'**
+  String get preRegistrationSearchInvitationTitle;
+
+  /// No description provided for @preRegistrationSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the form above then click Search to display requests.'**
+  String get preRegistrationSearchInvitationMessage;
+
+  /// No description provided for @firstRegistrationSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get firstRegistrationSearchByStudentGroup;
+
+  /// No description provided for @firstRegistrationSearchByLevelGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By target level'**
+  String get firstRegistrationSearchByLevelGroup;
+
+  /// No description provided for @firstRegistrationSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get firstRegistrationSearchOrSeparator;
+
+  /// No description provided for @firstRegistrationSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active search by:'**
+  String get firstRegistrationSearchActiveModeLabel;
+
+  /// No description provided for @firstRegistrationSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get firstRegistrationSearchModeStudentBadge;
+
+  /// No description provided for @firstRegistrationSearchModeLevelBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get firstRegistrationSearchModeLevelBadge;
+
+  /// No description provided for @firstRegistrationSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cycle'**
+  String get firstRegistrationSearchLevelPlaceholder;
 
   /// No description provided for @firstName.
   ///
@@ -2486,29 +2744,11 @@ abstract class AppLocalizations {
   /// **'Unable to load enrollment file'**
   String get enrollmentDetailLoadErrorTitle;
 
-  /// No description provided for @enrollmentDetailLoadErrorFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'An error occurred while loading enrollment details.'**
-  String get enrollmentDetailLoadErrorFallback;
-
   /// No description provided for @enrollmentDetailRetryAction.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get enrollmentDetailRetryAction;
-
-  /// No description provided for @enrollmentDetailNotFoundTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Details not found'**
-  String get enrollmentDetailNotFoundTitle;
-
-  /// No description provided for @enrollmentDetailNotFoundMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This enrollment file does not exist or is no longer available.'**
-  String get enrollmentDetailNotFoundMessage;
 
   /// No description provided for @gender.
   ///
@@ -2641,6 +2881,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to remove guardian: {message}'**
   String guardianUnlinkError(String message);
+
+  /// No description provided for @guardianSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a guardian'**
+  String get guardianSearchAction;
+
+  /// No description provided for @guardianSearchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for an existing guardian'**
+  String get guardianSearchDialogTitle;
+
+  /// No description provided for @guardianSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one criterion (name or phone number)'**
+  String get guardianSearchHint;
+
+  /// No description provided for @guardianSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No guardian found'**
+  String get guardianSearchEmptyTitle;
+
+  /// No description provided for @guardianSearchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No guardian matches these criteria. Check your input or add them as a new guardian.'**
+  String get guardianSearchEmptyDescription;
+
+  /// No description provided for @guardianSearchAlreadyAddedError.
+  ///
+  /// In en, this message translates to:
+  /// **'This guardian has already been added to this enrollment.'**
+  String get guardianSearchAlreadyAddedError;
+
+  /// No description provided for @guardianSearchIdentityLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Details from an existing record — not editable here.'**
+  String get guardianSearchIdentityLockedHint;
+
+  /// No description provided for @guardianSearchErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get guardianSearchErrorRetry;
 
   /// No description provided for @schoolFees.
   ///
@@ -3044,6 +3332,18 @@ abstract class AppLocalizations {
   /// **'Target level for this enrollment.'**
   String get targetLevelLabelHelp;
 
+  /// No description provided for @targetLevelAutoBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get targetLevelAutoBadge;
+
+  /// No description provided for @targetLevelAutoBadgeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Class automatically computed from last year\'s class. Change the cycle or level to override it.'**
+  String get targetLevelAutoBadgeHelp;
+
   /// No description provided for @optionLabel.
   ///
   /// In en, this message translates to:
@@ -3290,6 +3590,78 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get journeyCloseAction;
 
+  /// No description provided for @wizardExitConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the enrollment?'**
+  String get wizardExitConfirmTitle;
+
+  /// No description provided for @wizardExitConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An enrollment is in progress. Unsaved changes on the current step will be lost; steps already saved remain available as a draft.'**
+  String get wizardExitConfirmMessage;
+
+  /// No description provided for @wizardExitConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get wizardExitConfirmAction;
+
+  /// No description provided for @wizardExitStayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get wizardExitStayAction;
+
+  /// No description provided for @enrollmentFinalizeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate the enrollment?'**
+  String get enrollmentFinalizeConfirmTitle;
+
+  /// No description provided for @enrollmentFinalizeConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action confirms the file and queues it for synchronization. Review the summary before validating.'**
+  String get enrollmentFinalizeConfirmMessage;
+
+  /// No description provided for @enrollmentFinalizeProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating enrollment…'**
+  String get enrollmentFinalizeProcessingTitle;
+
+  /// No description provided for @enrollmentFinalizeSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment validated'**
+  String get enrollmentFinalizeSuccessTitle;
+
+  /// No description provided for @enrollmentFinalizeErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation failed'**
+  String get enrollmentFinalizeErrorTitle;
+
+  /// No description provided for @enrollmentFinalizeRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get enrollmentFinalizeRetryAction;
+
+  /// No description provided for @enrollmentFinalizeCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get enrollmentFinalizeCloseAction;
+
+  /// No description provided for @enrollmentFinalizeContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get enrollmentFinalizeContinueAction;
+
   /// No description provided for @stepSaveStateIdle.
   ///
   /// In en, this message translates to:
@@ -3373,18 +3745,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to First Registration'**
   String get goToFirstRegistration;
-
-  /// No description provided for @enrollmentStatusUpdateSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Status updated successfully.'**
-  String get enrollmentStatusUpdateSuccess;
-
-  /// No description provided for @enrollmentStatusUpdateError.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update status: {message}'**
-  String enrollmentStatusUpdateError(String message);
 
   /// No description provided for @personalInfoSaveHintBeforeContinue.
   ///
@@ -3577,6 +3937,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In Progress'**
   String get enrollmentStatusInProgress;
+
+  /// Listing row badge: enrollment started locally (unfinalized/unsynced draft), resumed on tap.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get enrollmentDraftBadge;
+
+  /// Listing row type pill: re-enrollment dossier (RE_ENROLLMENT type), shown instead of the 'Pre-registered' status.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrollment'**
+  String get enrollmentTypeReEnrollment;
+
+  /// Re-enrollments page pill: prior-year cohort candidate not yet re-enrolled (no local dossier, tap = start). Replaces 'Pending' in this context.
+  ///
+  /// In en, this message translates to:
+  /// **'To re-enroll'**
+  String get enrollmentReenrollmentCandidateBadge;
+
+  /// Listing row type pill: finalized/synced re-enrollment dossier (RE_ENROLLMENT, no local draft in progress). Replaces the generic 'Re-enrollment' pill once the dossier is confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enrolled'**
+  String get enrollmentReRegisteredBadge;
 
   /// No description provided for @enrollmentStatusAdminCompleted.
   ///
@@ -3944,6 +4328,12 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get studentChargeFeeCodeOther;
 
+  /// No description provided for @studentChargeDueAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due: {date}'**
+  String studentChargeDueAtLabel(DateTime date);
+
   /// No description provided for @studentChargeFeeCodeFallback.
   ///
   /// In en, this message translates to:
@@ -4069,6 +4459,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Up to date'**
   String get facturationBalanceUpToDatePill;
+
+  /// Badge on a charge/payment whose local collection has not yet synced to the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending sync'**
+  String get financePendingSyncBadge;
+
+  /// Freshness (ADR-002): timestamp of the last ledger refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger up to date at {time}'**
+  String facturationFreshnessAt(String time);
+
+  /// Freshness: no ledger refresh performed (offline).
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger not synced'**
+  String get facturationFreshnessNever;
 
   /// Fee line footer: amount remaining to pay.
   ///
@@ -4369,6 +4777,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download receipt'**
   String get facturationPaymentDownloadReceiptLabel;
+
+  /// No description provided for @facturationPaymentReceiptPendingSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt will be available once the payment has been synchronised.'**
+  String get facturationPaymentReceiptPendingSyncHint;
+
+  /// No description provided for @facturationPaymentReceiptNumberPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting synchronisation'**
+  String get facturationPaymentReceiptNumberPending;
 
   /// No description provided for @facturationPaymentCloseLabel.
   ///
@@ -5023,6 +5443,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get facturationCreatePaymentConfirmValidate;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this collection?'**
+  String get facturationCreatePaymentCloseConfirmTitle;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The information you entered will be lost if you close now.'**
+  String get facturationCreatePaymentCloseConfirmMessage;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get facturationCreatePaymentCloseConfirmAction;
+
+  /// No description provided for @facturationCreatePaymentCloseConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get facturationCreatePaymentCloseConfirmCancel;
 
   /// No description provided for @facturationCreatePaymentSuccessMessage.
   ///
@@ -5880,6 +6324,18 @@ abstract class AppLocalizations {
   /// **'All present'**
   String get attendanceMarkAllPresentAction;
 
+  /// Banner: no attendance session exists yet for this day (3rd state).
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance not taken'**
+  String get attendanceCallNotTakenTitle;
+
+  /// Not-taken banner subtitle: roster shown by default but nothing is validated.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance has been recorded for this day yet. Save to record it.'**
+  String get attendanceCallNotTakenMessage;
+
   /// No description provided for @attendanceSaveOverlayEyebrow.
   ///
   /// In en, this message translates to:
@@ -6105,7 +6561,7 @@ abstract class AppLocalizations {
   /// No description provided for @presenceSchoolDaysCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 school day} other{{count} school days}}'**
+  /// **'{count, plural, =0{0 school days} =1{1 school day} other{{count} school days}}'**
   String presenceSchoolDaysCount(int count);
 
   /// No description provided for @presenceDistributionA11yLabel.
@@ -6203,6 +6659,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Week of {date}'**
   String presenceRangeWeek(DateTime date);
+
+  /// No description provided for @presenceOfflineSyncPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync in progress'**
+  String get presenceOfflineSyncPendingTitle;
+
+  /// No description provided for @presenceOfflineSyncPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local attendance data isn\'t complete enough yet to compute a reliable statistic. Try again in a moment.'**
+  String get presenceOfflineSyncPendingMessage;
 
   /// No description provided for @disciplinaryUnknownValue.
   ///
@@ -6606,28 +7074,118 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get disciplinaryAdvanceClose;
 
+  /// No description provided for @disciplinaryStatusOfflinePending.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get disciplinaryStatusOfflinePending;
+
+  /// No description provided for @disciplinaryStatusOfflineResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get disciplinaryStatusOfflineResolved;
+
+  /// No description provided for @disciplinaryStatusOfflineDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get disciplinaryStatusOfflineDismissed;
+
+  /// No description provided for @disciplinaryAdvanceResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get disciplinaryAdvanceResolve;
+
+  /// No description provided for @disciplinaryAdvanceDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get disciplinaryAdvanceDismiss;
+
+  /// No description provided for @disciplinaryCaseResolvedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Case resolved'**
+  String get disciplinaryCaseResolvedLabel;
+
+  /// No description provided for @disciplinaryCaseDismissedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get disciplinaryCaseDismissedLabel;
+
   /// No description provided for @disciplinaryCaseClosedLabel.
   ///
   /// In en, this message translates to:
   /// **'Case closed'**
   String get disciplinaryCaseClosedLabel;
 
+  /// No description provided for @disciplinaryCommentsCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 comments} =1{1 comment} other{{count} comments}}'**
+  String disciplinaryCommentsCountBadge(int count);
+
+  /// No description provided for @disciplinaryCommentsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get disciplinaryCommentsDialogTitle;
+
+  /// No description provided for @disciplinaryCommentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get disciplinaryCommentsEmpty;
+
+  /// No description provided for @disciplinaryCommentAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get disciplinaryCommentAddHint;
+
+  /// No description provided for @disciplinaryCommentAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get disciplinaryCommentAddAction;
+
+  /// No description provided for @disciplinaryCommentsCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get disciplinaryCommentsCloseAction;
+
+  /// No description provided for @disciplinaryFreshnessSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get disciplinaryFreshnessSynced;
+
+  /// No description provided for @disciplinaryFreshnessLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'This device only'**
+  String get disciplinaryFreshnessLocal;
+
   /// No description provided for @disciplinaryCasesCountPill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 case} other{{count} cases}}'**
+  /// **'{count, plural, =0{0 case} =1{1 case} other{{count} cases}}'**
   String disciplinaryCasesCountPill(int count);
 
   /// No description provided for @disciplinaryCasesOpenPill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 open} other{{count} open}}'**
+  /// **'{count, plural, =0{0 open} =1{1 open} other{{count} open}}'**
   String disciplinaryCasesOpenPill(int count);
 
   /// No description provided for @disciplinaryCasesGravePill.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 serious} other{{count} serious}}'**
+  /// **'{count, plural, =0{0 serious} =1{1 serious} other{{count} serious}}'**
   String disciplinaryCasesGravePill(int count);
 
   /// No description provided for @disciplinaryCasesEmptyTitle.
@@ -6791,6 +7349,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Conflict'**
   String get statusSyncConflict;
+
+  /// Sync pill: network is back but the session has no tokens (offline login) — an online sign-in is required to synchronize
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get statusAuthRequired;
+
+  /// No description provided for @syncLastSyncJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get syncLastSyncJustNow;
+
+  /// No description provided for @syncLastSyncMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 min ago} =1{1 min ago} other{{count} min ago}}'**
+  String syncLastSyncMinutesAgo(int count);
+
+  /// No description provided for @syncLastSyncHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 h ago} =1{1 h ago} other{{count} h ago}}'**
+  String syncLastSyncHoursAgo(int count);
+
+  /// No description provided for @syncLastSyncDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}'**
+  String syncLastSyncDaysAgo(int count);
+
+  /// No description provided for @syncErrorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed writes'**
+  String get syncErrorsTitle;
+
+  /// No description provided for @syncErrorsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These records were rejected by the server. They will not be sent again on their own.'**
+  String get syncErrorsSubtitle;
+
+  /// No description provided for @syncErrorsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get syncErrorsRetry;
+
+  /// No description provided for @syncErrorsRetryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry all'**
+  String get syncErrorsRetryAll;
+
+  /// No description provided for @syncErrorsEmptyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No failed writes'**
+  String get syncErrorsEmptyLabel;
+
+  /// No description provided for @syncErrorsEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything entered has been sent or is waiting its turn.'**
+  String get syncErrorsEmptyDescription;
+
+  /// No description provided for @syncErrorsLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List unavailable'**
+  String get syncErrorsLoadFailedTitle;
+
+  /// No description provided for @syncErrorsLoadFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the local send queue.'**
+  String get syncErrorsLoadFailedMessage;
+
+  /// No description provided for @syncErrorsNotReplayable.
+  ///
+  /// In en, this message translates to:
+  /// **'This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.'**
+  String get syncErrorsNotReplayable;
+
+  /// No description provided for @syncErrorsClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get syncErrorsClose;
+
+  /// No description provided for @syncErrorsQueuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} at {time}'**
+  String syncErrorsQueuedAt(DateTime date, DateTime time);
+
+  /// No description provided for @syncAggregateEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment'**
+  String get syncAggregateEnrollment;
+
+  /// No description provided for @syncAggregatePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get syncAggregatePayment;
+
+  /// No description provided for @syncAggregateAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get syncAggregateAttendance;
+
+  /// No description provided for @syncAggregateDisciplinaryCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case'**
+  String get syncAggregateDisciplinaryCase;
+
+  /// No description provided for @syncAggregateNotesBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade batch'**
+  String get syncAggregateNotesBatch;
+
+  /// No description provided for @syncAggregateEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment'**
+  String get syncAggregateEvaluation;
+
+  /// No description provided for @syncAggregateClassroomTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Class transfer'**
+  String get syncAggregateClassroomTransfer;
+
+  /// No description provided for @offlineQueuedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved — pending synchronization'**
+  String get offlineQueuedGeneric;
+
+  /// No description provided for @offlinePaymentQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment saved — pending synchronization'**
+  String get offlinePaymentQueued;
+
+  /// No description provided for @offlineEnrollmentQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment saved — pending synchronization'**
+  String get offlineEnrollmentQueued;
+
+  /// No description provided for @offlineAttendanceQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved — pending synchronization'**
+  String get offlineAttendanceQueued;
+
+  /// No description provided for @offlineDisciplinaryCaseQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary case saved — pending synchronization'**
+  String get offlineDisciplinaryCaseQueued;
+
+  /// No description provided for @offlineDisciplinaryCaseUpdatedQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Case updated — pending synchronization'**
+  String get offlineDisciplinaryCaseUpdatedQueued;
+
+  /// No description provided for @offlineWriteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Local save failed'**
+  String get offlineWriteError;
 
   /// No description provided for @previous.
   ///
@@ -7815,12 +8553,6 @@ abstract class AppLocalizations {
   /// **'Loading the attendance dashboard'**
   String get attendanceOverviewLoadingA11yLabel;
 
-  /// No description provided for @disciplinaryFolderBreadcrumb.
-  ///
-  /// In en, this message translates to:
-  /// **'Discipline list'**
-  String get disciplinaryFolderBreadcrumb;
-
   /// No description provided for @dossierTabsA11yLabel.
   ///
   /// In en, this message translates to:
@@ -7854,7 +8586,7 @@ abstract class AppLocalizations {
   /// No description provided for @dossierOpenCasesChip.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 open case} other{{count} open cases}}'**
+  /// **'{count, plural, =0{0 open case} =1{1 open case} other{{count} open cases}}'**
   String dossierOpenCasesChip(int count);
 
   /// No description provided for @dossierNoOpenCases.
@@ -7932,7 +8664,7 @@ abstract class AppLocalizations {
   /// Weekly load counter: number of sessions and total teaching hours.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{{count} session} other{{count} sessions}} · {hours} h of class'**
+  /// **'{count, plural, =0{{count} sessions} =1{{count} session} other{{count} sessions}} · {hours} h of class'**
   String scheduleLoadSummary(int count, double hours);
 
   /// No description provided for @scheduleToday.
@@ -8388,7 +9120,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultatsEleveResultsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 student found} other{{count} students found}}'**
+  /// **'{count, plural, =0{0 students found} =1{1 student found} other{{count} students found}}'**
   String resultatsEleveResultsCount(int count);
 
   /// No description provided for @resultatsFocusClassroom.
@@ -8642,6 +9374,699 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected problem occurred. Please try again.'**
   String get resultatsErrorUnknownMessage;
+
+  /// No description provided for @syncErrorsOtherAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for another account'**
+  String get syncErrorsOtherAccountTitle;
+
+  /// No description provided for @syncErrorsOtherAccountNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} write waiting for {name}} other{{count} writes waiting for {name}}}'**
+  String syncErrorsOtherAccountNamed(int count, String name);
+
+  /// No description provided for @syncErrorsOtherAccountAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} write waiting for another account} other{{count} writes waiting for another account}}'**
+  String syncErrorsOtherAccountAnonymous(int count);
+
+  /// No description provided for @syncErrorsOtherAccountOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'oldest from {date}'**
+  String syncErrorsOtherAccountOldest(DateTime date);
+
+  /// No description provided for @syncErrorsOtherAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They will be sent when that account signs back in on this tablet.'**
+  String get syncErrorsOtherAccountHint;
+
+  /// No description provided for @syncErrorsForeignEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by {name} — it has to be retried from their own session.'**
+  String syncErrorsForeignEntry(String name);
+
+  /// No description provided for @syncErrorsForeignEntryAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by another account — it has to be retried from that session.'**
+  String get syncErrorsForeignEntryAnonymous;
+
+  /// No description provided for @syncErrorsHeldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get syncErrorsHeldTitle;
+
+  /// No description provided for @syncErrorsHeldSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These writes are kept and will be sent as soon as their condition clears.'**
+  String get syncErrorsHeldSubtitle;
+
+  /// No description provided for @editiqueViewerReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment receipt'**
+  String get editiqueViewerReceiptTitle;
+
+  /// No description provided for @editiqueViewerLoadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the document…'**
+  String get editiqueViewerLoadingTitle;
+
+  /// No description provided for @editiqueViewerLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is producing the document. This may take a few seconds.'**
+  String get editiqueViewerLoadingMessage;
+
+  /// No description provided for @editiqueViewerPrintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get editiqueViewerPrintLabel;
+
+  /// No description provided for @editiqueViewerShareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get editiqueViewerShareLabel;
+
+  /// No description provided for @editiqueViewerCloseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get editiqueViewerCloseLabel;
+
+  /// No description provided for @editiqueViewerActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This action could not be completed on this device.'**
+  String get editiqueViewerActionFailed;
+
+  /// No description provided for @editiqueViewerDocumentNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Document no. {number}'**
+  String editiqueViewerDocumentNumberLabel(String number);
+
+  /// No description provided for @editiqueErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get editiqueErrorNetworkTitle;
+
+  /// No description provided for @editiqueErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is produced by the server. Reconnect and try again — nothing was issued.'**
+  String get editiqueErrorNetworkMessage;
+
+  /// No description provided for @editiqueErrorUncertainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undetermined outcome'**
+  String get editiqueErrorUncertainTitle;
+
+  /// No description provided for @editiqueErrorUncertainMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not answer in time. The document may have been issued: check before generating a new one.'**
+  String get editiqueErrorUncertainMessage;
+
+  /// No description provided for @editiqueErrorSessionExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get editiqueErrorSessionExpiredTitle;
+
+  /// No description provided for @editiqueErrorSessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to resume issuing the document.'**
+  String get editiqueErrorSessionExpiredMessage;
+
+  /// No description provided for @editiqueErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get editiqueErrorForbiddenTitle;
+
+  /// No description provided for @editiqueErrorForbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have the rights required to issue this document.'**
+  String get editiqueErrorForbiddenMessage;
+
+  /// No description provided for @editiqueErrorNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document unavailable'**
+  String get editiqueErrorNotFoundTitle;
+
+  /// No description provided for @editiqueErrorNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot find the elements required for this document.'**
+  String get editiqueErrorNotFoundMessage;
+
+  /// No description provided for @editiqueErrorInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be issued'**
+  String get editiqueErrorInvalidTitle;
+
+  /// No description provided for @editiqueErrorInvalidMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the request. Check the file before trying again.'**
+  String get editiqueErrorInvalidMessage;
+
+  /// No description provided for @editiqueErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get editiqueErrorServerTitle;
+
+  /// No description provided for @editiqueErrorServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be produced. Try again shortly.'**
+  String get editiqueErrorServerMessage;
+
+  /// No description provided for @editiqueErrorRetryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get editiqueErrorRetryLabel;
+
+  /// No description provided for @editiqueErrorReconnectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get editiqueErrorReconnectLabel;
+
+  /// No description provided for @editiqueViewerStatementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account statement'**
+  String get editiqueViewerStatementTitle;
+
+  /// No description provided for @editiqueViewerAttestationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment certificate'**
+  String get editiqueViewerAttestationTitle;
+
+  /// No description provided for @editiqueViewerNotePerceptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee notice'**
+  String get editiqueViewerNotePerceptionTitle;
+
+  /// No description provided for @editiqueViewerClearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial clearance'**
+  String get editiqueViewerClearanceTitle;
+
+  /// No description provided for @editiqueErrorServerDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason returned by the server: {detail}'**
+  String editiqueErrorServerDetailLabel(String detail);
+
+  /// No description provided for @facturationDetailStatementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account statement'**
+  String get facturationDetailStatementLabel;
+
+  /// No description provided for @facturationDetailStatementNoChargesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee for the year: the statement cannot be produced.'**
+  String get facturationDetailStatementNoChargesHint;
+
+  /// No description provided for @facturationDetailStatementPendingSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not synced yet: the statement will be available after the next sync.'**
+  String get facturationDetailStatementPendingSyncHint;
+
+  /// No description provided for @facturationDetailStatementOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: the statement is produced by the server.'**
+  String get facturationDetailStatementOfflineHint;
+
+  /// No description provided for @facturationDetailStatementConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate an account statement?'**
+  String get facturationDetailStatementConfirmTitle;
+
+  /// No description provided for @facturationDetailStatementConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.'**
+  String get facturationDetailStatementConfirmMessage;
+
+  /// No description provided for @facturationDetailStatementConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get facturationDetailStatementConfirmAction;
+
+  /// No description provided for @facturationDetailStatementConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get facturationDetailStatementConfirmCancel;
+
+  /// No description provided for @menuDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get menuDocuments;
+
+  /// No description provided for @subMenuDocumentsStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student documents'**
+  String get subMenuDocumentsStudent;
+
+  /// No description provided for @documentsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student documents'**
+  String get documentsSearchTitle;
+
+  /// No description provided for @documentsSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for one student, or a whole class, then open their document catalogue.'**
+  String get documentsSearchHelpBanner;
+
+  /// No description provided for @documentsSearchByStudentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By student'**
+  String get documentsSearchByStudentGroup;
+
+  /// No description provided for @documentsSearchByClassGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get documentsSearchByClassGroup;
+
+  /// No description provided for @documentsSearchOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get documentsSearchOrSeparator;
+
+  /// No description provided for @documentsSearchActiveModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active mode'**
+  String get documentsSearchActiveModeLabel;
+
+  /// No description provided for @documentsSearchModeStudentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get documentsSearchModeStudentBadge;
+
+  /// No description provided for @documentsSearchModeClassBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get documentsSearchModeClassBadge;
+
+  /// No description provided for @documentsSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get documentsSearchCycleLabel;
+
+  /// No description provided for @documentsSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get documentsSearchLevelLabel;
+
+  /// No description provided for @documentsSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get documentsSearchLevelPlaceholder;
+
+  /// No description provided for @documentsSearchInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the student, open their documents'**
+  String get documentsSearchInvitationTitle;
+
+  /// No description provided for @documentsSearchInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment certificate, fee notice, payment receipt, account statement and financial clearance: the documents issuable for a student.'**
+  String get documentsSearchInvitationMessage;
+
+  /// No description provided for @documentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get documentsEmptyTitle;
+
+  /// No description provided for @documentsNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled this year matches these criteria.'**
+  String get documentsNoResultsDescription;
+
+  /// No description provided for @documentsOpenCatalogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open documents'**
+  String get documentsOpenCatalogLabel;
+
+  /// No description provided for @documentsCatalogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsCatalogEyebrow;
+
+  /// No description provided for @documentsCatalogUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get documentsCatalogUnknownStudent;
+
+  /// No description provided for @documentsGroupScolariteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schooling'**
+  String get documentsGroupScolariteTitle;
+
+  /// No description provided for @documentsGroupScolariteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment file'**
+  String get documentsGroupScolariteSubtitle;
+
+  /// No description provided for @documentsGroupFinancesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get documentsGroupFinancesTitle;
+
+  /// No description provided for @documentsGroupFinancesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee notices, receipts and settlement certificates'**
+  String get documentsGroupFinancesSubtitle;
+
+  /// No description provided for @documentsNatureArchivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get documentsNatureArchivedLabel;
+
+  /// No description provided for @documentsNatureTimestampedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Timestamped'**
+  String get documentsNatureTimestampedLabel;
+
+  /// No description provided for @documentsHintAttestation.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived document: asking again serves exactly the same file, under the same number.'**
+  String get documentsHintAttestation;
+
+  /// No description provided for @documentsHintNotePerception.
+  ///
+  /// In en, this message translates to:
+  /// **'Immutable accounting document, issued once per student and per year.'**
+  String get documentsHintNotePerception;
+
+  /// No description provided for @documentsHintReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'One receipt per payment. It is issued from Billing, when the cash is taken in.'**
+  String get documentsHintReceipt;
+
+  /// No description provided for @documentsHintStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot of the account at the time of the request: every issue produces a new numbered document.'**
+  String get documentsHintStatement;
+
+  /// No description provided for @documentsHintClearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifies the student is settled as of the request date. Not archived, renumbered on every issue.'**
+  String get documentsHintClearance;
+
+  /// No description provided for @documentsActionEmitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue'**
+  String get documentsActionEmitLabel;
+
+  /// No description provided for @documentsActionConsultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get documentsActionConsultLabel;
+
+  /// No description provided for @documentsActionGenerateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate now'**
+  String get documentsActionGenerateLabel;
+
+  /// No description provided for @documentsActionBusyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get documentsActionBusyLabel;
+
+  /// No description provided for @documentsActionFailedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed. The document was not produced.'**
+  String get documentsActionFailedNotice;
+
+  /// No description provided for @documentsBlockedPendingSyncNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not synced yet: the document will be available after the next sync.'**
+  String get documentsBlockedPendingSyncNotice;
+
+  /// No description provided for @documentsBlockedEnrollmentPendingSyncNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not synced yet: the certificate will be available after the next sync.'**
+  String get documentsBlockedEnrollmentPendingSyncNotice;
+
+  /// No description provided for @documentsBlockedMissingEnrollmentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not reachable from this link: reopen the student from the list.'**
+  String get documentsBlockedMissingEnrollmentNotice;
+
+  /// No description provided for @documentsBlockedOfflineNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: this document is produced by the server.'**
+  String get documentsBlockedOfflineNotice;
+
+  /// No description provided for @documentsConfirmGenerateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate: {document}?'**
+  String documentsConfirmGenerateTitle(String document);
+
+  /// No description provided for @documentsConfirmGenerateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.'**
+  String get documentsConfirmGenerateMessage;
+
+  /// No description provided for @documentsConfirmClearanceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.'**
+  String get documentsConfirmClearanceWarning;
+
+  /// No description provided for @documentsConfirmGenerateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get documentsConfirmGenerateAction;
+
+  /// No description provided for @documentsConfirmGenerateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get documentsConfirmGenerateCancel;
+
+  /// No description provided for @documentsLastIssueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last issued {date} · ref. {reference}'**
+  String documentsLastIssueSubtitle(String date, String reference);
+
+  /// No description provided for @documentsCancelledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Document cancelled by the school on {date}.'**
+  String documentsCancelledNotice(String date);
+
+  /// No description provided for @documentsCancelledWithReasonNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Document cancelled by the school on {date} — {reason}'**
+  String documentsCancelledWithReasonNotice(String date, String reason);
+
+  /// No description provided for @facturationReceiptCancelledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt cancelled by the school on {date}.'**
+  String facturationReceiptCancelledNotice(String date);
+
+  /// No description provided for @facturationReceiptCancelledWithReasonNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt cancelled by the school on {date} — {reason}'**
+  String facturationReceiptCancelledWithReasonNotice(
+    String date,
+    String reason,
+  );
+
+  /// No description provided for @ticketProvisionalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get ticketProvisionalBanner;
+
+  /// No description provided for @ticketReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ref.'**
+  String get ticketReferenceLabel;
+
+  /// No description provided for @ticketCashierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier:'**
+  String get ticketCashierLabel;
+
+  /// No description provided for @ticketStudentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student:'**
+  String get ticketStudentLabel;
+
+  /// No description provided for @ticketMatriculationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student no.:'**
+  String get ticketMatriculationLabel;
+
+  /// No description provided for @ticketClassroomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class:'**
+  String get ticketClassroomLabel;
+
+  /// No description provided for @ticketAmountReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get ticketAmountReceivedLabel;
+
+  /// No description provided for @ticketAllocationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get ticketAllocationsLabel;
+
+  /// No description provided for @ticketBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get ticketBalanceLabel;
+
+  /// No description provided for @ticketBalanceReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'subject to synchronisation'**
+  String get ticketBalanceReservation;
+
+  /// No description provided for @ticketKeepNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this ticket until you receive your final receipt.'**
+  String get ticketKeepNotice;
+
+  /// No description provided for @ticketPrintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print ticket'**
+  String get ticketPrintLabel;
+
+  /// No description provided for @ticketPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing unavailable: the ticket could not be produced.'**
+  String get ticketPrintFailed;
+
+  /// No description provided for @ticketCutNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut along the frame.'**
+  String get ticketCutNotice;
+
+  /// No description provided for @paymentAnomalyBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overpayment to arbitrate'**
+  String get paymentAnomalyBannerTitle;
+
+  /// No description provided for @paymentAnomalyBannerFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment exceeds the amount still due.'**
+  String get paymentAnomalyBannerFallback;
+
+  /// No description provided for @paymentAnomalyAcknowledgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Handled'**
+  String get paymentAnomalyAcknowledgeLabel;
+
+  /// No description provided for @paymentAnomalyOthersPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more pending'**
+  String paymentAnomalyOthersPending(int count);
+
+  /// No description provided for @documentsBlockedEnrollmentUnreadableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment not readable on this tablet: the certificate is unavailable here.'**
+  String get documentsBlockedEnrollmentUnreadableNotice;
 }
 
 class _AppLocalizationsDelegate

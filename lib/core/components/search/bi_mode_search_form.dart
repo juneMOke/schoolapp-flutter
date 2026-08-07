@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/components/search/search_form_actions.dart';
 import 'package:school_app_flutter/core/components/search/search_group_box.dart';
 import 'package:school_app_flutter/core/components/search/search_level_cascade.dart';
 import 'package:school_app_flutter/core/components/search/search_mode_badges.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
-import 'package:school_app_flutter/core/components/search/search_or_separator.dart';
+import 'package:school_app_flutter/core/components/search/search_two_groups_layout.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 
 /// Libellés (i18n) de la carte de recherche bi-mode, fournis par la feature.
 class BiModeSearchLabels {
@@ -242,7 +242,19 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
       classArmed: hasLevel,
     );
 
-    final actions = _buildActions();
+    final actions = SearchFormActions(
+      isLoading: widget.isLoading,
+      canSearch: _canSearch,
+      onClear: _reset,
+      onSearch: _submit,
+      clearLabel: widget.labels.clearLabel,
+      searchLabel: widget.labels.searchLabel,
+    );
+    final groupsLayout = SearchTwoGroupsLayout(
+      studentGroup: studentGroup,
+      classGroup: classGroup,
+      orSeparatorLabel: labels.orSeparator,
+    );
 
     return BiToneSectionCard(
       title: labels.title,
@@ -262,96 +274,36 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
               final isWide =
                   constraints.maxWidth >= AppBreakpoints.formMediumMin;
               if (isWide) {
-                return _WideLayout(
-                  studentGroup: studentGroup,
-                  orSeparator: SearchOrSeparator(
-                    label: labels.orSeparator,
-                    vertical: false,
-                  ),
-                  classGroup: classGroup,
-                  modeBadges: modeBadges,
-                  actions: actions,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    groupsLayout,
+                    const SizedBox(height: AppDimensions.spacingM),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(child: modeBadges),
+                        const SizedBox(width: AppDimensions.spacingM),
+                        actions,
+                      ],
+                    ),
+                  ],
                 );
               }
-              return _CompactLayout(
-                studentGroup: studentGroup,
-                orSeparator: SearchOrSeparator(label: labels.orSeparator),
-                classGroup: classGroup,
-                modeBadges: modeBadges,
-                actions: actions,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  groupsLayout,
+                  const SizedBox(height: AppDimensions.spacingM),
+                  modeBadges,
+                  const SizedBox(height: AppDimensions.spacingM),
+                  Align(alignment: Alignment.centerRight, child: actions),
+                ],
               );
             },
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActions() {
-    // Convention app : « Effacer » à gauche, « Rechercher » (primaire) à droite.
-    return Wrap(
-      spacing: AppDimensions.spacingS,
-      runSpacing: AppDimensions.spacingS,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.end,
-      children: [
-        EteeloButton.ghost(
-          onPressed: widget.isLoading ? null : _reset,
-          icon: Icons.refresh_rounded,
-          label: widget.labels.clearLabel,
-        ),
-        EteeloButton.primary(
-          onPressed: _canSearch ? _submit : null,
-          icon: Icons.search_rounded,
-          label: widget.labels.searchLabel,
-          isLoading: widget.isLoading,
-        ),
-      ],
-    );
-  }
-}
-
-/// Disposition large : les deux groupes côte à côte, séparés par « OU ».
-class _WideLayout extends StatelessWidget {
-  final Widget studentGroup;
-  final Widget orSeparator;
-  final Widget classGroup;
-  final Widget modeBadges;
-  final Widget actions;
-
-  const _WideLayout({
-    required this.studentGroup,
-    required this.orSeparator,
-    required this.classGroup,
-    required this.modeBadges,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Pas d'IntrinsicHeight : les groupes contiennent un LayoutBuilder
-        // (champs nom), incompatible avec le calcul des dimensions intrinsèques.
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(flex: 3, child: studentGroup),
-            orSeparator,
-            Expanded(flex: 2, child: classGroup),
-          ],
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: modeBadges),
-            const SizedBox(width: AppDimensions.spacingM),
-            actions,
-          ],
-        ),
-      ],
     );
   }
 }
@@ -389,39 +341,6 @@ class _HelpPill extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Disposition compacte : groupes empilés + « OU » + badges + actions.
-class _CompactLayout extends StatelessWidget {
-  final Widget studentGroup;
-  final Widget orSeparator;
-  final Widget classGroup;
-  final Widget modeBadges;
-  final Widget actions;
-
-  const _CompactLayout({
-    required this.studentGroup,
-    required this.orSeparator,
-    required this.classGroup,
-    required this.modeBadges,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        studentGroup,
-        orSeparator,
-        classGroup,
-        const SizedBox(height: AppDimensions.spacingM),
-        modeBadges,
-        const SizedBox(height: AppDimensions.spacingM),
-        Align(alignment: Alignment.centerRight, child: actions),
-      ],
     );
   }
 }

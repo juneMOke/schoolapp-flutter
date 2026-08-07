@@ -42,12 +42,10 @@ class ClassroomState extends Equatable {
   final ClassroomErrorType membersErrorType;
   final ClassroomStatus distributionStatus;
   final ClassroomErrorType distributionErrorType;
+  final bool distributionRePullFailed;
   final ClassroomStatus distributionOverviewStatus;
   final ClassroomErrorType distributionOverviewErrorType;
   final LevelDistributionOverview? distributionOverview;
-  final ClassroomStatus reassignStatus;
-  final ClassroomErrorType reassignErrorType;
-  final String reassigningMemberId;
 
   const ClassroomState({
     this.status = ClassroomStatus.initial,
@@ -60,12 +58,10 @@ class ClassroomState extends Equatable {
     this.membersErrorType = ClassroomErrorType.none,
     this.distributionStatus = ClassroomStatus.initial,
     this.distributionErrorType = ClassroomErrorType.none,
+    this.distributionRePullFailed = false,
     this.distributionOverviewStatus = ClassroomStatus.initial,
     this.distributionOverviewErrorType = ClassroomErrorType.none,
     this.distributionOverview,
-    this.reassignStatus = ClassroomStatus.initial,
-    this.reassignErrorType = ClassroomErrorType.none,
-    this.reassigningMemberId = '',
   });
 
   ClassroomState copyWith({
@@ -79,12 +75,10 @@ class ClassroomState extends Equatable {
     ClassroomErrorType? membersErrorType,
     ClassroomStatus? distributionStatus,
     ClassroomErrorType? distributionErrorType,
+    bool? distributionRePullFailed,
     ClassroomStatus? distributionOverviewStatus,
     ClassroomErrorType? distributionOverviewErrorType,
     Object? distributionOverview = _undefined,
-    ClassroomStatus? reassignStatus,
-    ClassroomErrorType? reassignErrorType,
-    String? reassigningMemberId,
   }) => ClassroomState(
     status: status ?? this.status,
     classrooms: classrooms ?? this.classrooms,
@@ -96,6 +90,8 @@ class ClassroomState extends Equatable {
     membersErrorType: membersErrorType ?? this.membersErrorType,
     distributionStatus: distributionStatus ?? this.distributionStatus,
     distributionErrorType: distributionErrorType ?? this.distributionErrorType,
+    distributionRePullFailed:
+        distributionRePullFailed ?? this.distributionRePullFailed,
     distributionOverviewStatus:
         distributionOverviewStatus ?? this.distributionOverviewStatus,
     distributionOverviewErrorType:
@@ -103,9 +99,6 @@ class ClassroomState extends Equatable {
     distributionOverview: identical(distributionOverview, _undefined)
         ? this.distributionOverview
         : distributionOverview as LevelDistributionOverview?,
-    reassignStatus: reassignStatus ?? this.reassignStatus,
-    reassignErrorType: reassignErrorType ?? this.reassignErrorType,
-    reassigningMemberId: reassigningMemberId ?? this.reassigningMemberId,
   );
 
   @override
@@ -120,12 +113,10 @@ class ClassroomState extends Equatable {
     membersErrorType,
     distributionStatus,
     distributionErrorType,
+    distributionRePullFailed,
     distributionOverviewStatus,
     distributionOverviewErrorType,
     distributionOverview,
-    reassignStatus,
-    reassignErrorType,
-    reassigningMemberId,
   ];
 }
 

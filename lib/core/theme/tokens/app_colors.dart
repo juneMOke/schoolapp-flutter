@@ -13,6 +13,10 @@ class AppColors {
   static const terreCuiteDark = Color(0xFF9A4A21);
   static const terreCuiteSoft = Color(0xFFF7EBE3);
   static const bleuArdoiseSoft = Color(0xFFEBF2F7);
+
+  /// Bleu ardoise éclairci — dernier arrêt des dégradés de surface sombre
+  /// (bandeau d'accueil), pour que la lumière file vers la droite.
+  static const bleuArdoiseLight = Color(0xFF23587A);
   static const vertSavane = Color(0xFF3D6B4A);
   static const blancCasse = Color(0xFFFAFAF7);
   static const papier = Color(0xFFF1EDE2);
@@ -183,8 +187,14 @@ class AppColors {
   static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
   static const accueilFinancesAccent = vertSavane; // #3D6B4A
   static const accueilFinancesSoft = Color(0xFFEDF5EF);
-  static const accueilClassesAccent = orDoux; // #D9A24E
+  // Or profond propre à l'Accueil : l'or-doux de marque (#D9A24E) est trop
+  // clair pour porter un titre ou une icône sur fond papier (spec §03).
+  static const accueilClassesAccent = Color(0xFFB8862B);
   static const accueilClassesSoft = Color(0xFFFBF3E3);
+  static const accueilCoursAccent = terreCuite; // #B85C2C
+  static const accueilCoursSoft = Color(0xFFF8EEE6);
+  static const accueilResultatsAccent = Color(0xFF7A4E68);
+  static const accueilResultatsSoft = Color(0xFFF5EDF2);
   static const accueilDisciplinesAccent = info; // #2E6E8E
   static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
 
@@ -221,4 +231,18 @@ class AppColors {
   static const academicsScoreWeakSoft = Color(0xFFFBF1DF);
   static const academicsScoreGood = vertSavane;
   static const academicsScoreGoodSoft = Color(0xFFEBF2ED);
+
+  // Éditique — badges de NATURE d'une pièce (§08 de la spec Documents).
+  // « Figé » reprend le bleu-ardoise de marque ; « horodaté » introduit l'ambre
+  // du module, distinct du `warning` sémantique : il ne signale pas un problème
+  // mais une pièce volatile, recalculée à chaque demande.
+  static const documentsFigeBorder = Color(0xFFCFE0EA);
+  static const documentsHorodateText = Color(0xFF8A6A1F);
+  static const documentsHorodateSoft = Color(0xFFFBF4E4);
+  static const documentsHorodateBorder = Color(0xFFEAD7A8);
+  // Ligne de document en échec : l'erreur reste DANS la ligne, elle ne fait pas
+  // basculer la page entière (§18 — « un service peut tomber pour un document
+  // sans que la page entière bascule en erreur »).
+  static const documentsRowErrorSoft = Color(0xFFFCF2F0);
+  static const documentsRowErrorBorder = Color(0xFFE4B9B3);
 }

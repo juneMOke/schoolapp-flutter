@@ -8,7 +8,7 @@ Pour les patterns détaillés (Retrofit, BLoC, FeatureScope…), lire **AGENTS.m
 ## Stack en une ligne
 
 Flutter + Clean Architecture (3 couches) · flutter_bloc · GetIt · Dio + Retrofit ·
-GoRouter · Hive + FlutterSecureStorage · dartz (`Either<Failure, T>`).
+GoRouter · SQLCipher (offline) + FlutterSecureStorage · dartz (`Either<Failure, T>`).
 
 ## Commandes essentielles
 
@@ -44,15 +44,15 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 | Module | Rôle | Spécificités |
 |---|---|---|
 | `auth` | Login, OTP, reset password, JWT | flow complexe · voir `lib/features/auth/CLAUDE.md` |
-| `bootstrap` | Chargement initial des données après auth | bloque la navigation · voir `lib/features/bootstrap/CLAUDE.md` |
-| `splash` | Écran d'attente initial | pattern standard |
+| `splash` | Écran d'attente initial | bloque la navigation via `AcademicYearContextBloc` (gate) |
 | `home` | Dashboard post-connexion | pattern standard |
 | `student` | CRUD élèves | pattern standard |
 | `classes` | Gestion des classes | pattern standard |
 | `enrollment` | Inscriptions des élèves | utilise `FeatureScope` (cf. AGENTS.md §11) |
 | `attendances` | Présences | pattern standard |
-| `academic_year` | Années scolaires | pattern standard |
+| `academic_year` | Contexte académique (année courante/précédente + cycles/niveaux) | remplace l'ex-module `bootstrap` — lecture 100% locale du référentiel Inscription (`ref_academic_years`/`ref_school_level_groups`/`ref_school_levels`), scopée par école (`CurrentUserContext`) ; `AcademicYearContextBloc` sert aussi de gate de navigation |
 | `finance` | Paiements et frais scolaires | voir aussi `FINANCE_MOTION_MAP.md` |
+| `documents` | Éditique — émission des pièces PDF scellées (attestation, note de perception, reçu, relevé, quitus) | **socle only, aucune UI** · 100% online (pas d'outbox) · seul module à réponses binaires · RL/QT NON idempotents : jamais de rejeu automatique (cf. `UncertainOutcomeFailure`) · bulletin hors périmètre |
 
 ## Fichiers où atterrir en premier
 
@@ -64,7 +64,7 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 | Registrations DI | `lib/core/di/injection.dart` |
 | Routes & redirect logic | `lib/router/app_router.dart`, `lib/router/app_routes_names.dart` |
 | Types de Failure | `lib/core/error/failures.dart` |
-| Couplage Auth ↔ Bootstrap | `lib/main.dart` |
+| Couplage Auth ↔ Contexte académique (ex-Bootstrap) | `lib/main.dart` |
 | Référence de test BLoC | `test/features/auth/presentation/bloc/auth_bloc_test.dart` |
 
 ## Fichiers générés (ne PAS éditer à la main)

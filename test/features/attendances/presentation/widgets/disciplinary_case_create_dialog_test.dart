@@ -2,30 +2,32 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class MockDisciplinaryCaseBloc
-    extends MockBloc<DisciplinaryCaseEvent, DisciplinaryCaseState>
-    implements DisciplinaryCaseBloc {}
+// Écriture offline-first : le dialog dispatche/observe désormais le BLoC
+// offline (création locale + outbox), c'est donc lui qu'on fournit ici.
+class MockDisciplinaryCaseOfflineBloc
+    extends MockBloc<DisciplinaryCaseOfflineEvent, DisciplinaryCaseOfflineState>
+    implements DisciplinaryCaseOfflineBloc {}
 
 void main() {
-  late MockDisciplinaryCaseBloc bloc;
+  late MockDisciplinaryCaseOfflineBloc bloc;
 
   setUp(() {
-    bloc = MockDisciplinaryCaseBloc();
+    bloc = MockDisciplinaryCaseOfflineBloc();
     whenListen(
       bloc,
-      const Stream<DisciplinaryCaseState>.empty(),
-      initialState: const DisciplinaryCaseState(),
+      const Stream<DisciplinaryCaseOfflineState>.empty(),
+      initialState: const DisciplinaryOfflineInitial(),
     );
   });
 
   Widget harness(
-    DisciplinaryCaseBloc bloc, {
+    DisciplinaryCaseOfflineBloc bloc, {
     EdgeInsets viewInsets = EdgeInsets.zero,
   }) {
     return MaterialApp(
@@ -37,7 +39,7 @@ void main() {
           data: MediaQuery.of(
             context,
           ).copyWith(viewInsets: viewInsets, disableAnimations: true),
-          child: BlocProvider<DisciplinaryCaseBloc>.value(
+          child: BlocProvider<DisciplinaryCaseOfflineBloc>.value(
             value: bloc,
             child: const DisciplinaryCaseCreateDialog(
               studentId: 's1',

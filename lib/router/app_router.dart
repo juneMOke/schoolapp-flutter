@@ -14,9 +14,13 @@ import 'package:school_app_flutter/features/auth/presentation/pages/forgot_passw
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_otp_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/login_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/reset_password_page.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_catalog_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
@@ -40,15 +44,16 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_s
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
-  final BootstrapBloc _bootstrapBloc;
+  final AcademicYearContextBloc _academicYearContextBloc;
   late final StreamSubscription<AuthState> _authSubscription;
-  late final StreamSubscription<BootstrapState> _bootstrapSubscription;
+  late final StreamSubscription<AcademicYearContextState>
+  _academicYearContextSubscription;
   late _RouterRefreshSnapshot _snapshot;
 
-  RouterNotifier(this._authBloc, this._bootstrapBloc) {
+  RouterNotifier(this._authBloc, this._academicYearContextBloc) {
     _snapshot = _currentSnapshot();
     _authSubscription = _authBloc.stream.listen((_) => _notifyIfNeeded());
-    _bootstrapSubscription = _bootstrapBloc.stream.listen(
+    _academicYearContextSubscription = _academicYearContextBloc.stream.listen(
       (_) => _notifyIfNeeded(),
     );
   }
@@ -56,8 +61,10 @@ class RouterNotifier extends ChangeNotifier {
   _RouterRefreshSnapshot _currentSnapshot() {
     return _RouterRefreshSnapshot(
       authStatus: _authBloc.state.status,
-      bootstrapBlocksNavigation: _bootstrapBloc.state.blocksNavigation,
-      bootstrapHasBlockingFailure: _bootstrapBloc.state.hasBlockingFailure,
+      academicYearBlocksNavigation:
+          _academicYearContextBloc.state.blocksNavigation,
+      academicYearHasBlockingFailure:
+          _academicYearContextBloc.state.hasBlockingFailure,
     );
   }
 
@@ -74,20 +81,20 @@ class RouterNotifier extends ChangeNotifier {
   @override
   void dispose() {
     _authSubscription.cancel();
-    _bootstrapSubscription.cancel();
+    _academicYearContextSubscription.cancel();
     super.dispose();
   }
 }
 
 class _RouterRefreshSnapshot {
   final AuthStatus authStatus;
-  final bool bootstrapBlocksNavigation;
-  final bool bootstrapHasBlockingFailure;
+  final bool academicYearBlocksNavigation;
+  final bool academicYearHasBlockingFailure;
 
   const _RouterRefreshSnapshot({
     required this.authStatus,
-    required this.bootstrapBlocksNavigation,
-    required this.bootstrapHasBlockingFailure,
+    required this.academicYearBlocksNavigation,
+    required this.academicYearHasBlockingFailure,
   });
 
   @override
@@ -95,36 +102,39 @@ class _RouterRefreshSnapshot {
     if (identical(this, other)) return true;
     return other is _RouterRefreshSnapshot &&
         other.authStatus == authStatus &&
-        other.bootstrapBlocksNavigation == bootstrapBlocksNavigation &&
-        other.bootstrapHasBlockingFailure == bootstrapHasBlockingFailure;
+        other.academicYearBlocksNavigation == academicYearBlocksNavigation &&
+        other.academicYearHasBlockingFailure == academicYearHasBlockingFailure;
   }
 
   @override
   int get hashCode => Object.hash(
     authStatus,
-    bootstrapBlocksNavigation,
-    bootstrapHasBlockingFailure,
+    academicYearBlocksNavigation,
+    academicYearHasBlockingFailure,
   );
 }
 
 class AppRouter {
   const AppRouter._();
 
-  static GoRouter createRouter(AuthBloc authBloc, BootstrapBloc bootstrapBloc) {
-    final notifier = RouterNotifier(authBloc, bootstrapBloc);
+  static GoRouter createRouter(
+    AuthBloc authBloc,
+    AcademicYearContextBloc academicYearContextBloc,
+  ) {
+    final notifier = RouterNotifier(authBloc, academicYearContextBloc);
 
     return GoRouter(
       initialLocation: '/splash',
       refreshListenable: notifier,
       redirect: (context, state) {
         final authState = authBloc.state;
-        final bootstrapState = bootstrapBloc.state;
+        final academicYearState = academicYearContextBloc.state;
         final isAuthenticated = authState.status == AuthStatus.authenticated;
         final isAuthLoading =
             authState.status == AuthStatus.loading ||
             authState.status == AuthStatus.initial;
-        final isBootstrapBlocking = bootstrapState.blocksNavigation;
-        final hasBootstrapFailure = bootstrapState.hasBlockingFailure;
+        final isAcademicYearBlocking = academicYearState.blocksNavigation;
+        final hasAcademicYearFailure = academicYearState.hasBlockingFailure;
         final isOnSplash = state.matchedLocation == '/splash';
         final isOnAuthFlow =
             state.matchedLocation == '/login' ||
@@ -138,13 +148,13 @@ class AppRouter {
           return isOnAuthFlow ? null : '/login';
         }
 
-        if (isBootstrapBlocking) {
+        if (isAcademicYearBlocking) {
           return isOnSplash ? null : '/splash';
         }
 
-        // Échec du bootstrap distant : retenir sur le splash (ErrorView + retry)
-        // au lieu d'éjecter vers /home sans données.
-        if (hasBootstrapFailure) {
+        // Échec de la résolution du contexte académique : retenir sur le
+        // splash (ErrorView + retry) au lieu d'éjecter vers /home sans données.
+        if (hasAcademicYearFailure) {
           return isOnSplash ? null : '/splash';
         }
 
@@ -315,6 +325,40 @@ class AppRouter {
 
                 return DisciplinaryStudentDetailPage(intent: intent);
               },
+            ),
+          ],
+        ),
+        ShellRoute(
+          builder: (context, state, child) =>
+              DocumentsFeatureScope(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutesNames.documentsStudents,
+              builder: (context, state) => const DocumentsPage(),
+              routes: [
+                GoRoute(
+                  path: 'catalogue/:studentId/:academicYearId',
+                  redirect: (context, state) {
+                    if (!_hasRequiredPathParameters(state, const [
+                      'studentId',
+                      'academicYearId',
+                    ])) {
+                      return AppRoutesNames.documentsStudents;
+                    }
+                    return null;
+                  },
+                  builder: (context, state) {
+                    final intent = DocumentsCatalogIntent.fromRouteContext(
+                      studentId: state.pathParameters['studentId'] ?? '',
+                      academicYearId:
+                          state.pathParameters['academicYearId'] ?? '',
+                      extra: state.extra,
+                    );
+
+                    return DocumentsCatalogPage(intent: intent);
+                  },
+                ),
+              ],
             ),
           ],
         ),

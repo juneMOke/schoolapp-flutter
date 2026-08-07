@@ -7,11 +7,13 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_bloc.dart';
-import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_event.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// PARCOURS 9 — Popin de choix de classe.
 ///
@@ -25,6 +27,7 @@ Future<void> showClassesOrganisationReassignDialog({
   required BuildContext context,
   required ClassroomMemberReassignIntent intent,
   required List<ClassroomReassignOption> options,
+  required String schoolLevelId,
 }) async {
   final selectedTargetId = await showDialog<String>(
     context: context,
@@ -38,12 +41,42 @@ Future<void> showClassesOrganisationReassignDialog({
     return;
   }
 
-  context.read<ClassroomBloc>().add(
-    ClassroomMemberReassignRequested(
-      classroomMemberId: intent.classroomMemberId,
-      targetClassroomId: selectedTargetId,
-    ),
-  );
+  final academicYearId =
+      context.read<AcademicYearContextBloc>().state.context?.academicYear.id ??
+      '';
+
+  final bloc = context.read<ClassroomOfflineBloc>();
+  final fromClassroomId = intent.classroomId;
+  if (fromClassroomId != null) {
+    // TRANSFERT (A→B, même niveau) : OFFLINE — événement + outbox, composition à
+    // la lecture. Le miroir n'est jamais muté ici.
+    bloc.add(
+      MemberTransferRequested(
+        studentId: intent.studentId,
+        fromClassroomId: fromClassroomId,
+        toClassroomId: selectedTargetId,
+        schoolLevelId: schoolLevelId,
+        academicYearId: academicYearId,
+      ),
+    );
+  } else {
+    // AFFECTATION d'un non-réparti : ONLINE (distribution, ADR-004) — un
+    // non-réparti n'existe pas dans le miroir offline, donc pas d'événement.
+    // Le POST d'affectation identifie l'élève par son dossier d'inscription :
+    // hors mode affectation l'intent ne le porte pas, on n'émet alors rien
+    // plutôt que d'envoyer une identité que le serveur ne reconnaîtrait pas.
+    final enrollmentId = intent.enrollmentId;
+    if (enrollmentId == null || enrollmentId.isEmpty) {
+      return;
+    }
+    bloc.add(
+      MemberAssignRequested(
+        enrollmentId: enrollmentId,
+        targetClassroomId: selectedTargetId,
+        academicYearId: academicYearId,
+      ),
+    );
+  }
 }
 
 class _ReassignDialog extends StatefulWidget {
@@ -206,18 +239,23 @@ class _ReassignDialogState extends State<_ReassignDialog> {
       onPressed: () => Navigator.of(context).pop(),
       child: Text(l10n.cancel),
     );
-    final action = FilledButton.icon(
-      onPressed: _selectedId == null
-          ? null
-          : () => Navigator.of(context).pop(_selectedId),
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.bleuArdoise,
-        foregroundColor: AppColors.blancCasse,
-        minimumSize: const Size(0, AppDimensions.minTouchTarget),
-        shape: const StadiumBorder(),
+    // Gel READ_ONLY (ADR-010) : valider la réaffectation déclenche l'écriture
+    // chez l'appelant — le tick de fraîcheur peut basculer le mode pendant que
+    // le dialog est ouvert. « Annuler » (navigation) reste libre.
+    final action = SessionWriteGate(
+      child: FilledButton.icon(
+        onPressed: _selectedId == null
+            ? null
+            : () => Navigator.of(context).pop(_selectedId),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.bleuArdoise,
+          foregroundColor: AppColors.blancCasse,
+          minimumSize: const Size(0, AppDimensions.minTouchTarget),
+          shape: const StadiumBorder(),
+        ),
+        icon: Icon(_isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
+        label: Text(actionLabel),
       ),
-      icon: Icon(_isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
-      label: Text(actionLabel),
     );
 
     return Padding(

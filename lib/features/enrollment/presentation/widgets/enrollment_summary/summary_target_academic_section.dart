@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart'
     as enrollment;
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/summary_field.dart';
@@ -33,10 +32,10 @@ class SummaryTargetAcademicSection extends StatelessWidget {
         ? enrollmentData.schoolLevelId
         : student.schoolLevel.id;
 
-    return BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-      buildWhen: (prev, curr) => prev.bootstrap != curr.bootstrap,
+    return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+      buildWhen: (prev, curr) => prev.context != curr.context,
       builder: (context, state) {
-        final bootstrap = state.bootstrap;
+        final bootstrap = state.context;
         final resolvedGroupName = EnrollmentSummaryUtils.resolveTargetGroupName(
           bootstrap: bootstrap,
           groupId: targetGroupId,

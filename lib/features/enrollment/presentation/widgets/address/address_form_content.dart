@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/forms/wizard_fields_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class AddressFormContent extends StatelessWidget {
   final String? cityValue;
@@ -25,6 +26,7 @@ class AddressFormContent extends StatelessWidget {
   final String? districtErrorText;
   final String? municipalityErrorText;
   final String? addressErrorText;
+  final String? additionalAddressErrorText;
   final TextEditingController additionalAddressController;
   final bool showInlineSaveButton;
   final bool isLoading;
@@ -51,6 +53,7 @@ class AddressFormContent extends StatelessWidget {
     required this.districtErrorText,
     required this.municipalityErrorText,
     required this.addressErrorText,
+    required this.additionalAddressErrorText,
     required this.additionalAddressController,
     required this.showInlineSaveButton,
     required this.isLoading,
@@ -144,7 +147,8 @@ class AddressFormContent extends StatelessWidget {
               EteeloTextInput(
                 label: l10n.addressComplementary,
                 controller: additionalAddressController,
-                required: false,
+                required: true,
+                errorText: additionalAddressErrorText,
                 placeholder: l10n.addressComplementaryPlaceholder,
                 readOnly: !isEditable,
                 inputFormatters: const [
@@ -163,34 +167,36 @@ class AddressFormContent extends StatelessWidget {
           const SizedBox(height: 22),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: (isLoading || !canSave) ? null : onSave,
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.textOnDark,
-                      ),
-                    )
-                  : const Icon(Icons.save_outlined),
-              label: Text(isLoading ? l10n.savingAddress : l10n.saveAddress),
-              style: FilledButton.styleFrom(
-                backgroundColor: canSave ? AppColors.terreCuite : null,
-                foregroundColor: AppColors.textOnDark,
-                elevation: 0,
-                minimumSize: const Size(164, 44),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: AppRadius.brMd,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+            child: SessionWriteGate(
+              child: FilledButton.icon(
+                onPressed: (isLoading || !canSave) ? null : onSave,
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textOnDark,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(isLoading ? l10n.savingAddress : l10n.saveAddress),
+                style: FilledButton.styleFrom(
+                  backgroundColor: canSave ? AppColors.terreCuite : null,
+                  foregroundColor: AppColors.textOnDark,
+                  elevation: 0,
+                  minimumSize: const Size(164, 44),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: AppRadius.brMd,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

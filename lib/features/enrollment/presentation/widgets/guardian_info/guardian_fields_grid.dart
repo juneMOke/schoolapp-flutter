@@ -20,6 +20,14 @@ class GuardianFieldsGrid extends StatelessWidget {
   final bool isPrimary;
   final ValueChanged<bool?>? onPrimaryChanged;
 
+  /// true si ce tuteur a été rattaché via "Rechercher un parent" cette
+  /// session : verrouille les champs d'IDENTITÉ (nom/postnom/prénom/
+  /// téléphone/email) en lecture seule PLEINE COULEUR (pas grisé — convention
+  /// projet), pour éviter d'éditer par erreur une fiche parent existante,
+  /// potentiellement partagée avec d'autres élèves. Le lien de parenté et le
+  /// statut "principal" restent éditables (propres à CET élève).
+  final bool identityReadOnly;
+
   const GuardianFieldsGrid({
     super.key,
     required this.firstNameController,
@@ -32,6 +40,7 @@ class GuardianFieldsGrid extends StatelessWidget {
     this.isEditable = true,
     this.isPrimary = false,
     this.onPrimaryChanged,
+    this.identityReadOnly = false,
   });
 
   String _relationshipLabel(BuildContext context, RelationshipType type) {
@@ -54,12 +63,34 @@ class GuardianFieldsGrid extends StatelessWidget {
 
     return WizardFieldsGrid(
       fields: [
+        if (identityReadOnly)
+          WizardGridField(
+            Row(
+              children: [
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.guardianSearchIdentityLockedHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            fullWidth: true,
+          ),
         WizardGridField(
           EteeloTextInput(
             label: l10n.firstName,
             controller: firstNameController,
             required: true,
-            readOnly: !isEditable,
+            readOnly: !isEditable || identityReadOnly,
             inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
@@ -68,7 +99,7 @@ class GuardianFieldsGrid extends StatelessWidget {
             label: l10n.lastName,
             controller: lastNameController,
             required: true,
-            readOnly: !isEditable,
+            readOnly: !isEditable || identityReadOnly,
             inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
@@ -76,7 +107,7 @@ class GuardianFieldsGrid extends StatelessWidget {
           EteeloTextInput(
             label: l10n.surname,
             controller: surnameController,
-            readOnly: !isEditable,
+            readOnly: !isEditable || identityReadOnly,
             inputFormatters: const [FirstLetterUppercaseTextInputFormatter()],
           ),
         ),
@@ -86,7 +117,7 @@ class GuardianFieldsGrid extends StatelessWidget {
             controller: phoneController,
             keyboardType: EteeloTextInputType.phone,
             required: true,
-            readOnly: !isEditable,
+            readOnly: !isEditable || identityReadOnly,
             placeholder: l10n.phoneNumberHelp,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
@@ -98,7 +129,7 @@ class GuardianFieldsGrid extends StatelessWidget {
             label: l10n.emailLabel,
             controller: emailController,
             keyboardType: EteeloTextInputType.email,
-            readOnly: !isEditable,
+            readOnly: !isEditable || identityReadOnly,
             placeholder: l10n.emailLabelHelp,
             inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
           ),

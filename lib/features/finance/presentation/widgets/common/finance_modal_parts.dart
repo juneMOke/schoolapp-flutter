@@ -129,10 +129,18 @@ class FinanceKeyValueRow {
   final String label;
   final String value;
 
+  /// Barre la valeur : ce qu'elle désigne n'a plus cours — un numéro de pièce
+  /// que l'établissement a retiré, par exemple.
+  ///
+  /// La rature ne porte jamais l'information seule : l'appelant doit doubler
+  /// d'une phrase qui dit ce qui a été retiré, et pourquoi.
+  final bool isStruckThrough;
+
   const FinanceKeyValueRow({
     required this.icon,
     required this.label,
     required this.value,
+    this.isStruckThrough = false,
   });
 }
 
@@ -199,7 +207,13 @@ class _KeyValueRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
               style: AppTextStyles.bodyStrong.copyWith(
-                color: isEmpty ? AppColors.textMuted : AppColors.textPrimary,
+                color: isEmpty || data.isStruckThrough
+                    ? AppColors.textMuted
+                    : AppColors.textPrimary,
+                decoration: data.isStruckThrough
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationColor: AppColors.textMuted,
               ),
             ),
           ),
@@ -214,10 +228,22 @@ class _KeyValueRow extends StatelessWidget {
 class FinanceModalFooter extends StatelessWidget {
   final String secondaryLabel;
   final IconData secondaryIcon;
-  final VoidCallback onSecondary;
+
+  /// Nullable : `null` rend l'action secondaire inerte. Sert aux actions qui ne
+  /// peuvent pas encore aboutir (reçu d'un encaissement non synchronisé) —
+  /// mieux vaut un bouton visiblement éteint, accompagné de [secondaryHint],
+  /// qu'un bouton qui échoue à chaque appui.
+  final VoidCallback? onSecondary;
+
+  /// Explication affichée sous le pied quand l'action secondaire est inerte.
+  final String? secondaryHint;
+
   final String primaryLabel;
   final IconData primaryIcon;
-  final VoidCallback onPrimary;
+
+  /// Nullable : `null` rend l'action primaire désactivée (ex. gel READ_ONLY
+  /// ADR-010) tout en laissant la secondaire (navigation) libre.
+  final VoidCallback? onPrimary;
   final double stackBelowWidth;
 
   const FinanceModalFooter({
@@ -225,6 +251,7 @@ class FinanceModalFooter extends StatelessWidget {
     required this.secondaryLabel,
     required this.secondaryIcon,
     required this.onSecondary,
+    this.secondaryHint,
     required this.primaryLabel,
     required this.primaryIcon,
     required this.onPrimary,
@@ -244,29 +271,47 @@ class FinanceModalFooter extends StatelessWidget {
       onPressed: onPrimary,
     );
 
+    // N'a de sens que si l'action secondaire est effectivement inerte : sinon
+    // l'explication contredirait un bouton actif.
+    final hint = onSecondary == null ? secondaryHint?.trim() : null;
+
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < stackBelowWidth) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                secondary,
-                const SizedBox(height: AppDimensions.spacingS),
-                primary,
-              ],
-            );
-          }
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < stackBelowWidth) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    secondary,
+                    const SizedBox(height: AppDimensions.spacingS),
+                    primary,
+                  ],
+                );
+              }
 
-          return Row(
-            children: [
-              Expanded(child: secondary),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(child: primary),
-            ],
-          );
-        },
+              return Row(
+                children: [
+                  Expanded(child: secondary),
+                  const SizedBox(width: AppDimensions.spacingS),
+                  Expanded(child: primary),
+                ],
+              );
+            },
+          ),
+          if (hint != null && hint.isNotEmpty) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            Text(
+              hint,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ],
+        ],
       ),
     );
   }

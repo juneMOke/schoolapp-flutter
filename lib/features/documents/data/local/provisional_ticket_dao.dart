@@ -1,0 +1,264 @@
+import 'package:sqflite_common/sqlite_api.dart';
+
+/// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
+///
+/// DAO **dédié** plutôt que trois lectures empruntées à Inscription, Classe et
+/// Facturation : le ticket a ses propres besoins (identité d'école, matricule,
+/// nom de classe, caissier stampé sur le paiement), et les disperser rendrait
+/// impossible de vérifier d'un coup d'œil que le gabarit n'invente rien.
+///
+/// Toutes les lectures rendent `null` plutôt que de lever : un référentiel non
+/// encore pullé est un cas NORMAL hors ligne, et le gabarit sait taire ce qu'il
+/// ne connaît pas.
+class ProvisionalTicketDao {
+  final DatabaseExecutor _db;
+
+  const ProvisionalTicketDao(this._db);
+
+  /// Le paiement, avec le caissier et l'appareil stampés à l'encaissement.
+  Future<TicketPaymentRow?> findPayment(String paymentId) async {
+    final rows = await _db.query(
+      'payments',
+      columns: const [
+        'id',
+        'student_id',
+        'academic_year_id',
+        'amount_in_cents',
+        'currency',
+        'paid_at',
+        'cashier_first_name',
+        'cashier_last_name',
+        'device_id',
+        'sync_status',
+      ],
+      where: 'id = ?',
+      whereArgs: [paymentId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final r = rows.first;
+    return TicketPaymentRow(
+      id: r['id'] as String,
+      studentId: r['student_id'] as String,
+      academicYearId: r['academic_year_id'] as String?,
+      amountInCents: (r['amount_in_cents'] as int?) ?? 0,
+      currency: (r['currency'] as String?) ?? '',
+      paidAt: (r['paid_at'] as String?) ?? '',
+      cashierFirstName: r['cashier_first_name'] as String?,
+      cashierLastName: r['cashier_last_name'] as String?,
+      deviceId: r['device_id'] as String?,
+      syncStatus: (r['sync_status'] as String?) ?? 'PENDING_SYNC',
+    );
+  }
+
+  /// Répartition ligne à ligne, dans l'ordre d'écriture — c'est une **saisie**
+  /// du guichet (A-2), pas un calcul : elle s'imprime telle quelle.
+  Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
+    final rows = await _db.query(
+      'payment_allocations',
+      columns: const ['student_charge_label', 'fee_code', 'amount_in_cents'],
+      where: 'payment_id = ?',
+      whereArgs: [paymentId],
+    );
+
+    return rows
+        .map(
+          (r) => TicketAllocationRow(
+            label:
+                (r['student_charge_label'] as String?)?.trim().isNotEmpty ??
+                    false
+                ? r['student_charge_label'] as String
+                : (r['fee_code'] as String?) ?? '',
+            amountInCents: (r['amount_in_cents'] as int?) ?? 0,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  /// Numéro provisoire du reçu. On lit `provisional_number` **puis** `number` :
+  /// la première colonne survit au scellement, la seconde est écrasée par le
+  /// numéro définitif.
+  Future<String?> findProvisionalNumber(String paymentId) async {
+    final rows = await _db.query(
+      'generated_documents',
+      columns: const ['provisional_number', 'number'],
+      where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
+      whereArgs: [paymentId, 'PAYMENT', 'RC'],
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final provisional = (rows.first['provisional_number'] as String?)?.trim();
+    if (provisional != null && provisional.isNotEmpty) return provisional;
+    return (rows.first['number'] as String?)?.trim();
+  }
+
+  /// Identité de l'élève. `matriculation_number` est NULL hors ligne par
+  /// construction — il est attribué à l'ACK.
+  Future<TicketStudentRow?> findStudent(String studentId) async {
+    final rows = await _db.query(
+      'students',
+      columns: const [
+        'first_name',
+        'last_name',
+        'surname',
+        'matriculation_number',
+      ],
+      where: 'id = ?',
+      whereArgs: [studentId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final r = rows.first;
+    return TicketStudentRow(
+      firstName: (r['first_name'] as String?) ?? '',
+      lastName: (r['last_name'] as String?) ?? '',
+      surname: r['surname'] as String?,
+      matriculationNumber: r['matriculation_number'] as String?,
+    );
+  }
+
+  /// Dénomination et commune de l'établissement (zone Z1). `null` tant que le
+  /// référentiel n'a pas été pullé.
+  Future<TicketSchoolRow?> findSchool() async {
+    final rows = await _db.query(
+      'ref_school',
+      columns: const ['name', 'municipality', 'city'],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final r = rows.first;
+    return TicketSchoolRow(
+      name: (r['name'] as String?) ?? '',
+      municipality: r['municipality'] as String?,
+      city: r['city'] as String?,
+    );
+  }
+
+  /// Nom de la classe de l'élève sur l'année. `null` si le roster n'a pas été
+  /// pullé — cas courant sur une tablette fraîche.
+  ///
+  /// La classe est **composée**, jamais lue brute dans le miroir : un transfert
+  /// saisi hors ligne n'a pas encore repositionné `ref_classroom_members`, mais
+  /// il fait déjà autorité partout ailleurs (roster, fiche élève, recherche).
+  /// Sans cette composition, le ticket imprimerait l'ancienne classe pendant que
+  /// tous les écrans affichent la nouvelle — deux vérités contradictoires sur la
+  /// même tablette, dont l'une est remise sur papier.
+  ///
+  /// Même expression que `ClassroomLocalDataSource`, à dessein : c'est elle qui
+  /// définit « la classe d'un élève » dans cette application.
+  Future<String?> findClassroomName({
+    required String studentId,
+    String? academicYearId,
+  }) async {
+    final where = StringBuffer("m.student_id = ? AND m.status = 'ACTIVE'");
+    final args = <Object?>[studentId];
+    if (academicYearId != null && academicYearId.isNotEmpty) {
+      where.write(' AND m.academic_year_id = ?');
+      args.add(academicYearId);
+    }
+
+    final rows = await _db.rawQuery('''
+      SELECT c.name AS name
+      FROM ref_classroom_members m
+      JOIN ref_classrooms c ON c.id = COALESCE(
+        (SELECT t.to_classroom_id FROM classroom_transfers t
+           WHERE t.student_id = m.student_id
+             AND t.academic_year_id = m.academic_year_id
+             AND t.sync_status <> 'SYNCED'
+           ORDER BY t.transferred_at DESC LIMIT 1),
+        m.classroom_id
+      )
+      WHERE $where
+      ORDER BY m.updated_at DESC
+      LIMIT 1
+    ''', args);
+
+    if (rows.isEmpty) return null;
+    return (rows.first['name'] as String?)?.trim();
+  }
+}
+
+class TicketPaymentRow {
+  final String id;
+  final String studentId;
+  final String? academicYearId;
+  final int amountInCents;
+  final String currency;
+  final String paidAt;
+  final String? cashierFirstName;
+  final String? cashierLastName;
+  final String? deviceId;
+  final String syncStatus;
+
+  const TicketPaymentRow({
+    required this.id,
+    required this.studentId,
+    this.academicYearId,
+    required this.amountInCents,
+    required this.currency,
+    required this.paidAt,
+    this.cashierFirstName,
+    this.cashierLastName,
+    this.deviceId,
+    required this.syncStatus,
+  });
+
+  /// Nom affichable du caissier, `null` si aucune identité n'a été stampée
+  /// (encaissement antérieur à la v19, ou annuaire muet au moment du geste).
+  String? get cashierFullName {
+    final parts = [
+      cashierFirstName?.trim(),
+      cashierLastName?.trim(),
+    ].where((p) => p != null && p.isNotEmpty).cast<String>();
+    return parts.isEmpty ? null : parts.join(' ');
+  }
+}
+
+class TicketAllocationRow {
+  final String label;
+  final int amountInCents;
+
+  const TicketAllocationRow({required this.label, required this.amountInCents});
+}
+
+class TicketStudentRow {
+  final String firstName;
+  final String lastName;
+  final String? surname;
+  final String? matriculationNumber;
+
+  const TicketStudentRow({
+    required this.firstName,
+    required this.lastName,
+    this.surname,
+    this.matriculationNumber,
+  });
+
+  /// `NOM Post-nom Prénom` (zone Z2), dans l'ordre d'usage en RDC.
+  String get fullName => [
+    lastName.trim(),
+    surname?.trim() ?? '',
+    firstName.trim(),
+  ].where((p) => p.isNotEmpty).join(' ');
+}
+
+class TicketSchoolRow {
+  final String name;
+  final String? municipality;
+  final String? city;
+
+  const TicketSchoolRow({required this.name, this.municipality, this.city});
+
+  /// Ligne 2 de la zone Z1 : commune si connue, ville à défaut.
+  String? get locality {
+    final commune = municipality?.trim();
+    if (commune != null && commune.isNotEmpty) return commune;
+    final town = city?.trim();
+    return (town != null && town.isNotEmpty) ? town : null;
+  }
+}

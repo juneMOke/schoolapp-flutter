@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
@@ -17,6 +21,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_payments_section.dart';
@@ -61,8 +66,11 @@ class FacturationDetailPage extends StatelessWidget {
       return;
     }
 
+    // FRONT §6/§8 : on retient les postes dont le RESTE composé est > 0, JAMAIS
+    // `status` (miroir serveur — un poste soldé localement afficherait encore
+    // UNPAID et réapparaîtrait comme payable → re-encaissement sur ce guichet).
     final unpaid = chargesState.studentCharges
-        .where((c) => c.status != StudentChargeStatus.paid)
+        .where((c) => c.remainingInCents > 0)
         .toList();
 
     if (unpaid.isEmpty) {
@@ -88,6 +96,7 @@ class FacturationDetailPage extends StatelessWidget {
       ),
       paymentsBloc: context.read<PaymentsBloc>(),
       studentChargesBloc: context.read<StudentChargesBloc>(),
+      financeOfflineBloc: context.read<FinanceOfflineBloc>(),
     );
   }
 
@@ -132,6 +141,9 @@ class FacturationDetailPage extends StatelessWidget {
         amountInCents: payment.amountInCents,
         currency: payment.currency,
         paidAt: payment.paidAt,
+        // Garde du reçu : tant que l'encaissement n'est pas remonté, son uuid
+        // est inconnu du serveur et la demande de pièce répondrait 404.
+        isPendingSync: payment.isPendingSync,
       ),
     );
   }
@@ -147,14 +159,33 @@ class FacturationDetailPage extends StatelessWidget {
         BlocProvider<StudentChargesBloc>(
           create: (_) => getIt<StudentChargesBloc>(),
         ),
+        // Chemin d'écriture offline-first de l'encaissement (file outbox).
+        // La lecture (paiements/créances) est servie en local par les repos
+        // offline-first liés en DI (BLoCs online ci-dessus inchangés).
+        BlocProvider<FinanceOfflineBloc>(
+          create: (_) => getIt<FinanceOfflineBloc>(),
+        ),
+        // Fraîcheur du grand-livre (ADR-002) affichée sous les totaux.
+        BlocProvider<LedgerFreshnessCubit>(
+          create: (_) => getIt<LedgerFreshnessCubit>(),
+        ),
+        // Garde d'éditique : le relevé prend le studentId dans son URL, or un
+        // élève saisi hors ligne porte un uuid client que le serveur ignore.
+        // Résolu une fois au montage — l'id de l'élève ne change pas ici.
+        BlocProvider<EditiqueEligibilityCubit>(
+          create: (_) =>
+              getIt<EditiqueEligibilityCubit>()
+                ..resolveForStudent(intent.studentId),
+        ),
       ],
       child: AppPageBackground(
-        appBar: FacturationDetailAppBar(
+        appBar: StudentDetailAppBar(
           fullName: studentFullName,
           eyebrow: '${l10n.facturationDetailEyebrow} · ${_classLabel(l10n)}',
           firstName: intent.firstName,
           lastName: intent.lastName,
           fallbackRoute: AppRoutesNames.facturations,
+          showCloseButton: true,
           trailing: const _BillingBalanceAppBarPill(),
         ),
         child: LayoutBuilder(
@@ -201,15 +232,22 @@ class FacturationDetailPage extends StatelessWidget {
                                         sum + charge.expectedAmountInCents,
                                   )
                                 : 0.0;
+                            // Déjà payé & reste COMPOSÉS (miroir serveur +
+                            // encaissements de ce poste non remontés), FRONT §5.
                             final alreadyPaid = hasCharges
                                 ? state.studentCharges.fold<double>(
                                     0.0,
                                     (sum, charge) =>
-                                        sum + charge.amountPaidInCents,
+                                        sum + charge.paidTotalInCents,
                                   )
                                 : 0.0;
-                            final remaining = (totalDue - alreadyPaid)
-                                .toDouble();
+                            final remaining = hasCharges
+                                ? state.studentCharges.fold<double>(
+                                    0.0,
+                                    (sum, charge) =>
+                                        sum + charge.remainingInCents,
+                                  )
+                                : 0.0;
                             final currency = hasCharges
                                 ? state.studentCharges.first.currency
                                 : '';
@@ -224,6 +262,11 @@ class FacturationDetailPage extends StatelessWidget {
                               currency: currency,
                             );
                           },
+                        ),
+                        const SizedBox(height: AppDimensions.spacingS),
+                        FacturationDetailStatementBar(
+                          studentId: intent.studentId,
+                          academicYearId: intent.academicYearId,
                         ),
                         SizedBox(height: blockSpacing),
                         if (!intent.hasDisplayContext)
@@ -322,15 +365,12 @@ class _BillingBalanceAppBarPill extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final totalDue = state.studentCharges.fold<double>(
+        // Solde = somme des restes COMPOSÉS (FRONT §5) : le miroir serveur seul
+        // ferait réapparaître un poste soldé localement comme dû.
+        final remaining = state.studentCharges.fold<double>(
           0.0,
-          (sum, charge) => sum + charge.expectedAmountInCents,
+          (sum, charge) => sum + charge.remainingInCents,
         );
-        final alreadyPaid = state.studentCharges.fold<double>(
-          0.0,
-          (sum, charge) => sum + charge.amountPaidInCents,
-        );
-        final remaining = totalDue - alreadyPaid;
         final hasBalance = remaining > 0;
         final amount = formatMonetaryAmountWithCurrency(
           amount: remaining / 100,

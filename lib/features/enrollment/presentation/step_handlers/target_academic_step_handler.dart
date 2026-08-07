@@ -61,6 +61,7 @@ class TargetAcademicStepHandler extends BaseEnrollmentStepHandler {
   Widget buildContent(HandlerBuildContext context) {
     return TargetAcademicInfoStep(
       studentDetail: context.detail.studentDetail,
+      enrollmentDetail: context.detail.enrollmentDetail,
       studentId: resolveStudentId(context),
       enrollmentId: context.detail.enrollmentDetail.id,
       showInlineSaveButton: false,

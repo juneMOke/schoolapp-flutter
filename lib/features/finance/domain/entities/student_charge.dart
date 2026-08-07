@@ -27,9 +27,17 @@ class StudentCharge extends Equatable {
   final String feeCode;
   final String label;
   final double expectedAmountInCents;
-  final double amountPaidInCents;
+  final double amountPaidInCents; // miroir serveur (autoritaire)
+
+  /// Déjà payé par CE poste, pas encore remonté (composé au read côté offline,
+  /// FRONT §5). Nul (0) sur le chemin online pur → comportement inchangé.
+  final double amountPaidPendingInCents;
+
+  /// Créance locale d'un nouvel élève, jamais poussée (FRONT §5.2). Faux online.
+  final bool isProvisional;
   final String currency;
   final StudentChargeStatus status;
+  final String? dueAt; // yyyy-MM-dd | null
 
   const StudentCharge({
     required this.id,
@@ -42,9 +50,23 @@ class StudentCharge extends Equatable {
     required this.label,
     required this.expectedAmountInCents,
     required this.amountPaidInCents,
+    this.amountPaidPendingInCents = 0,
+    this.isProvisional = false,
     required this.currency,
     required this.status,
+    this.dueAt,
   });
+
+  /// Déjà payé TOTAL affiché : miroir serveur + encaissements de ce poste non
+  /// remontés (FRONT §5 « paid_total »).
+  double get paidTotalInCents => amountPaidInCents + amountPaidPendingInCents;
+
+  /// Reste à payer composé (FRONT §5) : `max(0, expected - paid_total)`. C'est
+  /// LA seule vérité locale pour filtrer/borner, jamais `status` (FRONT §6/§8).
+  double get remainingInCents {
+    final remaining = expectedAmountInCents - paidTotalInCents;
+    return remaining < 0 ? 0 : remaining;
+  }
 
   StudentCharge copyWith({
     String? id,
@@ -57,8 +79,11 @@ class StudentCharge extends Equatable {
     String? label,
     double? expectedAmountInCents,
     double? amountPaidInCents,
+    double? amountPaidPendingInCents,
+    bool? isProvisional,
     String? currency,
     StudentChargeStatus? status,
+    String? dueAt,
   }) {
     return StudentCharge(
       id: id ?? this.id,
@@ -72,8 +97,12 @@ class StudentCharge extends Equatable {
       expectedAmountInCents:
           expectedAmountInCents ?? this.expectedAmountInCents,
       amountPaidInCents: amountPaidInCents ?? this.amountPaidInCents,
+      amountPaidPendingInCents:
+          amountPaidPendingInCents ?? this.amountPaidPendingInCents,
+      isProvisional: isProvisional ?? this.isProvisional,
       currency: currency ?? this.currency,
       status: status ?? this.status,
+      dueAt: dueAt ?? this.dueAt,
     );
   }
 
@@ -89,7 +118,10 @@ class StudentCharge extends Equatable {
     label,
     expectedAmountInCents,
     amountPaidInCents,
+    amountPaidPendingInCents,
+    isProvisional,
     currency,
     status,
+    dueAt,
   ];
 }

@@ -109,7 +109,8 @@ void main() {
     await tester.tap(find.widgetWithText(OutlinedButton, 'Transférer'));
     expect(captured, isNotNull);
     expect(captured!.classroomId, 'c1');
-    expect(captured!.classroomMemberId, 'member-1');
+    // Membre déjà en classe : pas de dossier d'inscription à transporter.
+    expect(captured!.enrollmentId, isNull);
     expect(captured!.studentDisplayName, 'Doe K Jane');
   });
 

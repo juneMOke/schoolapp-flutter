@@ -187,13 +187,14 @@ void main() {
     expect(entity.topAbsentClasses.first.absenceRate, 18.5);
     expect(entity.topAbsentClasses.first.absenceDays, 33);
 
-    // byAbsenceReason : SICKNESS / null / valeur inconnue -> unknown
+    // byAbsenceReason : SICKNESS / null / valeur non mappée -> other (parsing
+    // défensif, invariant #9 : distinct de UNKNOWN explicite).
     expect(entity.byAbsenceReason, hasLength(3));
     expect(entity.byAbsenceReason[0].reason, AbsenceReason.sickness);
     expect(entity.byAbsenceReason[0].absenceDays, 12);
     expect(entity.byAbsenceReason[1].reason, isNull);
     expect(entity.byAbsenceReason[1].absenceDays, 5);
-    expect(entity.byAbsenceReason[2].reason, AbsenceReason.unknown);
+    expect(entity.byAbsenceReason[2].reason, AbsenceReason.other);
     expect(entity.byAbsenceReason[2].absenceDays, 2);
 
     // byWeekday : MONDAY -> monday, SATURDAY (hors lundi-vendredi) -> unknown

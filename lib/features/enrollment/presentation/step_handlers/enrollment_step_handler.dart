@@ -11,12 +11,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class SaveLabelContext {
   final bool savingNow;
   final bool isEnrollmentAlreadyCompleted;
-  final EnrollmentState enrollmentState;
 
   const SaveLabelContext({
     required this.savingNow,
     required this.isEnrollmentAlreadyCompleted,
-    required this.enrollmentState,
   });
 }
 

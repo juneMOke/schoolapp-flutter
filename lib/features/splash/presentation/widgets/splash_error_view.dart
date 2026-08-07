@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Vue d'échec du splash (spec §00 : « l'ErrorView, réutilisé tel quel quand
-/// l'amorçage échoue »). Affichée à la place du chargement quand le bootstrap
-/// distant échoue, avec un bouton « Réessayer » qui relance l'amorçage.
+/// l'amorçage échoue »). Affichée à la place du chargement quand la résolution
+/// du contexte académique échoue, avec un bouton « Réessayer » qui relance
+/// l'amorçage.
 ///
-/// Le réessai passe par [BootstrapRetryRequested] : le widget signale l'intention
-/// et le bloc relance lui-même les fetch distants (règle du module bootstrap :
-/// pas de remote déclenché directement depuis un widget).
+/// Le réessai passe par [AcademicYearContextRetryRequested] : le widget signale
+/// l'intention et le bloc relance lui-même le chargement (pas de remote
+/// déclenché directement depuis un widget).
 class SplashErrorView extends StatelessWidget {
   const SplashErrorView({super.key});
 
@@ -30,8 +31,9 @@ class SplashErrorView extends StatelessWidget {
       title: l10n.splashErrorTitle,
       message: l10n.splashErrorMessage,
       primaryAction: FilledButton.icon(
-        onPressed: () =>
-            context.read<BootstrapBloc>().add(const BootstrapRetryRequested()),
+        onPressed: () => context.read<AcademicYearContextBloc>().add(
+          const AcademicYearContextRetryRequested(),
+        ),
         icon: const Icon(Icons.refresh_rounded),
         label: Text(l10n.splashErrorRetry),
       ),

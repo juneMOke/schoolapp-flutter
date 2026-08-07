@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_letter_uppercase_text_input_formatter.dart';
 
@@ -20,7 +20,7 @@ class ClassesListSearchFieldsGrid extends StatelessWidget {
   final String? selectedCycleId;
   final List<ClassesListLevelOption> levelOptions;
   final String? selectedLevelKey;
-  final List<BootstrapClassroom> classroomOptions;
+  final List<OfflineClassroom> classroomOptions;
   final String? selectedClassroomId;
   final bool classroomEnabled;
   final TextEditingController firstNameController;

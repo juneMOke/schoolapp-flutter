@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/config/app_environment.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/main.dart';
+import 'core/offline/offline_full_test_db.dart';
 import 'test_helpers/widget_test_utils.dart';
 
 void main() {
@@ -16,7 +17,9 @@ void main() {
         appEnvironment: AppEnvironment.dev.label,
         apiBaseUrl: 'http://127.0.0.1:8080',
       ),
-      bootstrapBoxName: 'bootstrap_box_widget_test',
+      // `noIsolate` : sous `testWidgets` (FakeAsync), une requête servie par
+      // l'isolat ffi ne revient jamais — cf. `openFullOfflineDb`.
+      offlineDatabase: await openFullOfflineDb(noIsolate: true),
     );
   });
 

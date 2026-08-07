@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Issue de la sur-couche d'encaissement (confirmation → résultat).
 enum FacturationCollectOutcome { edited, cancelled, succeeded }
@@ -34,7 +41,7 @@ class FacturationConfirmAllocationItem {
 /// sinon.
 Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   BuildContext context, {
-  required PaymentsBloc paymentsBloc,
+  required FinanceOfflineBloc financeOfflineBloc,
   required String totalLabel,
   required String studentName,
   required String payerName,
@@ -46,8 +53,10 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
     context: context,
     barrierDismissible: false,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => BlocProvider<PaymentsBloc>.value(
-      value: paymentsBloc,
+    // Route au-dessus de l'arbre de la page : le BLoC offline est fourni
+    // explicitement (l'encaissement est écrit en local puis mis en file outbox).
+    builder: (_) => BlocProvider<FinanceOfflineBloc>.value(
+      value: financeOfflineBloc,
       child: _CollectFlowDialog(
         totalLabel: totalLabel,
         studentName: studentName,
@@ -87,6 +96,7 @@ class _CollectFlowDialog extends StatefulWidget {
 class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   _Phase _phase = _Phase.confirm;
   bool _awaitingBloc = false;
+  bool _printing = false;
   String? _incidentCode;
 
   void _confirm() {
@@ -98,18 +108,30 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       _phase = _Phase.processing;
       _awaitingBloc = true;
     });
-    context.read<PaymentsBloc>().add(widget.request);
+    // Écriture offline-first : on écrit en local + mise en file outbox au lieu
+    // de l'appel réseau. La confirmation « succès » reflète la mise en file
+    // (pending-sync), pas encore l'acquittement serveur.
+    context.read<FinanceOfflineBloc>().add(
+      RecordLocalPayment(recordPaymentDraftFromRequest(widget.request)),
+    );
   }
 
-  void _onBlocState(PaymentsState state) {
+  /// Encaissement écrit en local — clé du reçu provisoire à imprimer.
+  String? _paymentId;
+
+  void _onBlocState(FinanceOfflineState state) {
     if (!mounted || !_awaitingBloc) return;
-    if (state.createStatus == PaymentsStatus.success) {
+    if (state is FinanceOfflinePaymentPendingSync) {
       _awaitingBloc = false;
-      // Le rafraîchissement du détail est déclenché APRÈS fermeture de la popin
-      // (cf. _onCollect) pour qu'un éventuel échec de refresh ne contredise pas
-      // l'écran de succès. La liste est déjà à jour (le bloc insère le paiement).
+      // Retenu pour le ticket : c'est la seule clé disponible à cet instant, et
+      // l'écran de succès était jusqu'ici un cul-de-sac (ADR-012 D-3).
+      _paymentId = state.paymentId;
+      // Encaissement écrit localement (en attente de synchro) : on allume la
+      // pastille globale et le rafraîchissement du détail est déclenché APRÈS
+      // fermeture de la popin (cf. _onCollect).
+      context.read<SyncStatusCubit>().notifyLocalWrite();
       setState(() => _phase = _Phase.success);
-    } else if (state.createStatus == PaymentsStatus.failure) {
+    } else if (state is FinanceOfflineError) {
       _awaitingBloc = false;
       setState(() {
         _phase = _Phase.error;
@@ -118,20 +140,32 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     }
   }
 
+  /// Imprime le ticket provisoire. Un échec est DIT — jamais avalé : sans
+  /// message, l'appui ne produirait rien du tout et le caissier croirait le
+  /// papier parti.
+  Future<void> _printTicket() async {
+    final paymentId = _paymentId;
+    // Même invariant « un seul geste en vol » que `_confirm` : le rendu puis
+    // l'ouverture de l'interface système ne rendent pas la main tout de suite,
+    // et deux appuis lançaient deux tâches d'impression — donc deux tickets
+    // pour un seul versement.
+    if (paymentId == null || _printing) return;
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final message = AppLocalizations.of(context)!.ticketPrintFailed;
+
+    setState(() => _printing = true);
+    final printed = await printProvisionalTicket(context, paymentId: paymentId);
+    if (!mounted) return;
+
+    setState(() => _printing = false);
+    if (printed) return;
+
+    messenger?.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   String _generateIncidentCode() =>
       'INC-${DateTime.now().millisecondsSinceEpoch.remainder(1000000)}';
-
-  void _onDownloadReceipt() {
-    if (widget.onDownloadReceipt != null) {
-      widget.onDownloadReceipt!();
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.pageUnderConstruction),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +173,8 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
     final resultActive = _phase != _Phase.confirm;
 
-    return BlocListener<PaymentsBloc, PaymentsState>(
-      listenWhen: (prev, curr) => prev.createStatus != curr.createStatus,
+    return BlocListener<FinanceOfflineBloc, FinanceOfflineState>(
+      listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
       listener: (_, state) => _onBlocState(state),
       // Pendant le traitement, la sortie est neutralisée (croix, scrim ET
       // bouton retour système) : une issue succès|échec est toujours rendue
@@ -220,15 +254,22 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
         return Column(
           children: [
             const Divider(height: 1, color: AppColors.border),
-            FinanceModalFooter(
-              secondaryLabel: l10n.facturationCollectEditAction,
-              secondaryIcon: Icons.edit_outlined,
-              onSecondary: () =>
-                  Navigator.of(context).pop(FacturationCollectOutcome.edited),
-              primaryLabel: l10n.facturationCreatePaymentConfirmValidate,
-              primaryIcon: Icons.check_circle_outline_rounded,
-              onPrimary: _confirm,
-              stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+            // Gel READ_ONLY (ADR-010) : `_confirm` déclenche l'écriture du
+            // paiement — le tick de fraîcheur peut basculer le mode pendant
+            // que la modale est ouverte (argent). Seule l'action PRIMAIRE est
+            // gelée : « Modifier » (navigation) reste libre, sinon
+            // l'utilisateur serait piégé dans la modale.
+            SessionWriteGate.builder(
+              builder: (context, blocksWrites) => FinanceModalFooter(
+                secondaryLabel: l10n.facturationCollectEditAction,
+                secondaryIcon: Icons.edit_outlined,
+                onSecondary: () =>
+                    Navigator.of(context).pop(FacturationCollectOutcome.edited),
+                primaryLabel: l10n.facturationCreatePaymentConfirmValidate,
+                primaryIcon: Icons.check_circle_outline_rounded,
+                onPrimary: blocksWrites ? null : _confirm,
+                stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              ),
             ),
           ],
         );
@@ -237,9 +278,21 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
           children: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
-              secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
-              secondaryIcon: Icons.download_outlined,
-              onSecondary: _onDownloadReceipt,
+              // Le reçu DÉFINITIF est inatteignable ici : on vient d'atteindre
+              // `FinanceOfflinePaymentPendingSync`, l'uuid du paiement est
+              // encore inconnu du serveur et la demande répondrait 404. Ce que
+              // le guichet peut remettre tout de suite, c'est le ticket
+              // PROVISOIRE — une projection des lignes qui viennent d'être
+              // écrites, sans le moindre appel réseau (ADR-012 D-3).
+              secondaryLabel: l10n.ticketPrintLabel,
+              secondaryIcon: Icons.print_outlined,
+              // Éteint tant qu'une impression est en vol : un `VoidCallback`
+              // n'a aucun anti-rebond, et rien ne bouge à l'écran entre l'appui
+              // et l'apparition de l'interface système.
+              onSecondary: _paymentId == null || _printing
+                  ? null
+                  : _printTicket,
+              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => Navigator.of(
@@ -253,16 +306,20 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
         return Column(
           children: [
             const Divider(height: 1, color: AppColors.border),
-            FinanceModalFooter(
-              secondaryLabel: l10n.facturationCreatePaymentConfirmCancel,
-              secondaryIcon: Icons.close_rounded,
-              onSecondary: () => Navigator.of(
-                context,
-              ).pop(FacturationCollectOutcome.cancelled),
-              primaryLabel: l10n.facturationCollectRetryAction,
-              primaryIcon: Icons.refresh_rounded,
-              onPrimary: _confirm,
-              stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+            // Même gel que la phase confirm : « Réessayer » relance `_confirm`.
+            // « Annuler » (navigation) reste libre.
+            SessionWriteGate.builder(
+              builder: (context, blocksWrites) => FinanceModalFooter(
+                secondaryLabel: l10n.facturationCreatePaymentConfirmCancel,
+                secondaryIcon: Icons.close_rounded,
+                onSecondary: () => Navigator.of(
+                  context,
+                ).pop(FacturationCollectOutcome.cancelled),
+                primaryLabel: l10n.facturationCollectRetryAction,
+                primaryIcon: Icons.refresh_rounded,
+                onPrimary: blocksWrites ? null : _confirm,
+                stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              ),
             ),
           ],
         );
@@ -358,7 +415,7 @@ class _ResultBody extends StatelessWidget {
       _Phase.error => (
         EteeloResultKind.error,
         l10n.facturationCollectErrorTitle,
-        l10n.facturationCollectErrorNoDebit,
+        l10n.offlineWriteError,
       ),
       _ => (EteeloResultKind.processing, l10n.facturationCollectProcessing, ''),
     };
@@ -388,6 +445,14 @@ class _ResultBody extends StatelessWidget {
             ),
           ],
           if (phase == _Phase.success) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            // Retour pending-sync : l'encaissement est en file, pas encore
+            // synchronisé avec le serveur.
+            Text(
+              l10n.offlinePaymentQueued,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
             const SizedBox(height: AppDimensions.spacingM),
             _ResultChip(
               icon: Icons.receipt_long_outlined,

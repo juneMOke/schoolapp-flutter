@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
@@ -11,8 +11,8 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/att
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_page_content.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_context_bloc.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -34,10 +34,8 @@ class _PresencesPageState extends State<PresencesPage> {
         return;
       }
 
-      context.read<BootstrapCurrentYearBloc>().add(
-        const BootstrapContextLocalRequested(
-          key: AppConstants.bootstrapPayloadKey,
-        ),
+      context.read<AcademicYearContextBloc>().add(
+        const AcademicYearContextRequested(),
       );
     });
   }
@@ -48,34 +46,59 @@ class _PresencesPageState extends State<PresencesPage> {
       // L'erreur de chargement est desormais affichee en place via l'anatomie
       // d'erreur partagee (AttendanceResultsErrorState) : plus de snackbar
       // redondant sur echec de fetch.
-      child: BlocBuilder<BootstrapCurrentYearBloc, BootstrapContextState>(
-        buildWhen: AttendancePageHelpers.buildWhenBootstrapChanges,
-        builder: (context, bootstrapState) {
-          if (bootstrapState.status == BootstrapContextLoadStatus.loading ||
-              bootstrapState.status == BootstrapContextLoadStatus.initial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (bootstrapState.status != BootstrapContextLoadStatus.success ||
-              bootstrapState.bootstrap == null) {
-            return BootstrapContextError(
-              onLogout: () {
-                context.read<AuthBloc>().add(const AuthLogoutRequested());
-              },
-            );
-          }
-
-          final options = AttendancePageHelpers.buildCycleOptions(
-            bootstrapState.bootstrap?.schoolLevelGroups ?? const [],
-          );
-
-          return AttendancePageContent(
-            options: options,
-            lastRequest: _lastRequest,
-            onSearch: _handleSearch,
-            onRetry: _retryLastSearch,
+      child: BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
+        // Transition de STATUT (pas égalité de valeur) : un contexte qui se
+        // résout à une valeur identique (rien n'a changé au référentiel
+        // niveaux/cycles) doit quand même redéclencher la lecture des classes,
+        // sourcées séparément dans `ClassroomOfflineBloc` (revue adversariale —
+        // aligné sur `ClassesListPageHelpers`/`classes_list_page.dart`).
+        listenWhen: (prev, curr) =>
+            prev.status != curr.status &&
+            curr.status == AcademicYearContextLoadStatus.success,
+        listener: (context, academicYearState) {
+          context.read<ClassroomOfflineBloc>().add(
+            OfflineClassroomsRequested(
+              academicYearId: academicYearState.context!.academicYear.id,
+            ),
           );
         },
+        child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+          buildWhen: AttendancePageHelpers.buildWhenAcademicYearContextChanges,
+          builder: (context, academicYearState) {
+            if (academicYearState.status ==
+                    AcademicYearContextLoadStatus.loading ||
+                academicYearState.status ==
+                    AcademicYearContextLoadStatus.initial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (academicYearState.status !=
+                    AcademicYearContextLoadStatus.success ||
+                academicYearState.context == null) {
+              return BootstrapContextError(
+                onLogout: () {
+                  context.read<AuthBloc>().add(const AuthLogoutRequested());
+                },
+              );
+            }
+
+            final classrooms = context
+                .watch<ClassroomOfflineBloc>()
+                .state
+                .classrooms;
+            final options = AttendancePageHelpers.buildCycleOptions(
+              academicYearState.context!.schoolLevelGroups,
+              classrooms,
+            );
+
+            return AttendancePageContent(
+              options: options,
+              lastRequest: _lastRequest,
+              onSearch: _handleSearch,
+              onRetry: _retryLastSearch,
+            );
+          },
+        ),
       ),
     );
   }
@@ -95,8 +118,11 @@ class _PresencesPageState extends State<PresencesPage> {
       context.read<AttendanceBloc>().add(const AttendanceResetRequested());
     }
 
-    final bootstrap = context.read<BootstrapCurrentYearBloc>().state.bootstrap;
-    final academicYearId = bootstrap?.academicYear.id ?? '';
+    final academicYearContext = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context;
+    final academicYearId = academicYearContext?.academicYear.id ?? '';
     if (academicYearId.isEmpty) {
       return;
     }

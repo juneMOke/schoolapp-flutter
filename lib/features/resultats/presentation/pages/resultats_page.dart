@@ -4,10 +4,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
-import 'package:school_app_flutter/features/bootstrap/presentation/bloc/bootstrap_current_year_bloc.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
+import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
@@ -56,7 +58,7 @@ class _ResultatsPageState extends State<ResultatsPage> {
 
   /// Classe sélectionnée dans la cascade : détermine quelles périodes charger
   /// (endpoint scopé classe) et l'affichage de la barre de période.
-  BootstrapClassroom? _currentClassroom;
+  OfflineClassroom? _currentClassroom;
   PeriodeScolaire? _selectedPeriode;
 
   /// Dernière recherche validée (mode courant conservé). Remis à `null` au
@@ -71,61 +73,88 @@ class _ResultatsPageState extends State<ResultatsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bootstrap = context.watch<BootstrapCurrentYearBloc>().state.bootstrap;
-    if (bootstrap == null) {
-      return const AppPageBackground(
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final cycleOptions = ClassesListPageHelpers.buildCycleOptions(
-      bootstrap.schoolLevelGroups,
-    );
-    final classeState = context.watch<ResultatsClasseBloc>().state;
-    final eleveState = context.watch<EleveSearchBloc>().state;
-    final isSubmitting = _mode == ResultatsSearchMode.classe
-        ? classeState.status == ResultatsClasseStatus.loading
-        : eleveState.status == EleveSearchStatus.loading;
-
-    return AppPageBackground(
-      scrollable: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ResultatsSearchCard(
-            cycleOptions: cycleOptions,
-            periodeSelected: _selectedPeriode != null,
-            isSubmitting: isSubmitting,
-            onModeChanged: (mode) => setState(() => _mode = mode),
-            onCycleChanged: (cycle) => _onCycleChanged(cycle, bootstrap),
-            onClassroomChanged: _onClassroomChanged,
-            onSubmit: _onSubmit,
+    return BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
+      // Transition de STATUT (pas égalité de valeur) : voir même remarque dans
+      // `presences_page.dart` (revue adversariale).
+      listenWhen: (prev, curr) =>
+          prev.status != curr.status &&
+          curr.status == AcademicYearContextLoadStatus.success,
+      listener: (context, state) {
+        context.read<ClassroomOfflineBloc>().add(
+          OfflineClassroomsRequested(
+            academicYearId: state.context!.academicYear.id,
           ),
-          if (_currentClassroom != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            ResultatsPeriodeBar(
-              cycleDecoupage: _currentDecoupage,
-              selectedPeriodeId: _selectedPeriode?.id,
-              onSelect: _onPeriodeSelected,
-              onRetry: _loadPeriodes,
+        );
+      },
+      child: Builder(
+        builder: (context) {
+          final academicYearContext = context
+              .watch<AcademicYearContextBloc>()
+              .state
+              .context;
+          if (academicYearContext == null) {
+            return const AppPageBackground(
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final classrooms = context
+              .watch<ClassroomOfflineBloc>()
+              .state
+              .classrooms;
+          final cycleOptions = ClassesListPageHelpers.buildCycleOptions(
+            academicYearContext.schoolLevelGroups,
+            classrooms,
+          );
+          final classeState = context.watch<ResultatsClasseBloc>().state;
+          final eleveState = context.watch<EleveSearchBloc>().state;
+          final isSubmitting = _mode == ResultatsSearchMode.classe
+              ? classeState.status == ResultatsClasseStatus.loading
+              : eleveState.status == EleveSearchStatus.loading;
+
+          return AppPageBackground(
+            scrollable: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ResultatsSearchCard(
+                  cycleOptions: cycleOptions,
+                  periodeSelected: _selectedPeriode != null,
+                  isSubmitting: isSubmitting,
+                  onModeChanged: (mode) => setState(() => _mode = mode),
+                  onCycleChanged: (cycle) =>
+                      _onCycleChanged(cycle, academicYearContext),
+                  onClassroomChanged: _onClassroomChanged,
+                  onSubmit: _onSubmit,
+                ),
+                if (_currentClassroom != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  ResultatsPeriodeBar(
+                    cycleDecoupage: _currentDecoupage,
+                    selectedPeriodeId: _selectedPeriode?.id,
+                    onSelect: _onPeriodeSelected,
+                    onRetry: _loadPeriodes,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xl),
+                MultiBlocListener(
+                  listeners: [
+                    BlocListener<EleveSearchBloc, EleveSearchState>(
+                      listenWhen: (prev, curr) => prev.status != curr.status,
+                      listener: _onEleveSearchChanged,
+                    ),
+                    // Auto-sélection de la période « courante » à l'arrivée des périodes.
+                    BlocListener<PeriodesScolairesBloc, PeriodesScolairesState>(
+                      listenWhen: (prev, curr) => prev.status != curr.status,
+                      listener: _onPeriodesLoaded,
+                    ),
+                  ],
+                  child: _resultsZone(l10n, classeState, eleveState),
+                ),
+              ],
             ),
-          ],
-          const SizedBox(height: AppSpacing.xl),
-          MultiBlocListener(
-            listeners: [
-              BlocListener<EleveSearchBloc, EleveSearchState>(
-                listenWhen: (prev, curr) => prev.status != curr.status,
-                listener: _onEleveSearchChanged,
-              ),
-              // Auto-sélection de la période « courante » à l'arrivée des périodes.
-              BlocListener<PeriodesScolairesBloc, PeriodesScolairesState>(
-                listenWhen: (prev, curr) => prev.status != curr.status,
-                listener: _onPeriodesLoaded,
-              ),
-            ],
-            child: _resultsZone(l10n, classeState, eleveState),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -225,18 +254,21 @@ class _ResultatsPageState extends State<ResultatsPage> {
 
   // ── Interactions ─────────────────────────────────────────────────────────
 
-  void _onCycleChanged(ClassesListCycleOption? cycle, Bootstrap bootstrap) {
+  void _onCycleChanged(
+    ClassesListCycleOption? cycle,
+    AcademicYearContext academicYearContext,
+  ) {
     // Le cycle ne fait que fixer le découpage (trimestres/semestres) : les
     // périodes se chargent à la sélection de la CLASSE (endpoint scopé classe).
     setState(() {
-      _currentDecoupage = _decoupageFor(cycle, bootstrap);
+      _currentDecoupage = _decoupageFor(cycle, academicYearContext);
       // La classe/période affichée devient invalide (le cycle a changé).
       _submitted = null;
       _committedPeriode = null;
     });
   }
 
-  void _onClassroomChanged(BootstrapClassroom? classroom) {
+  void _onClassroomChanged(OfflineClassroom? classroom) {
     setState(() {
       _currentClassroom = classroom;
       _selectedPeriode = null;
@@ -440,25 +472,23 @@ class _ResultatsPageState extends State<ResultatsPage> {
 
   // ── Utilitaires ──────────────────────────────────────────────────────────
 
-  Decoupage _decoupageFor(ClassesListCycleOption? cycle, Bootstrap bootstrap) {
+  Decoupage _decoupageFor(
+    ClassesListCycleOption? cycle,
+    AcademicYearContext academicYearContext,
+  ) {
     if (cycle == null) {
       return Decoupage.unknown;
     }
-    for (final bundle in bootstrap.schoolLevelGroups) {
-      if (bundle.schoolLevelGroup.id == cycle.id) {
-        return DecoupageX.fromApiValue(bundle.schoolLevelGroup.periodType);
+    for (final bundle in academicYearContext.schoolLevelGroups) {
+      if (bundle.group.id == cycle.id) {
+        return DecoupageX.fromApiValue(bundle.group.periodType);
       }
     }
     return Decoupage.unknown;
   }
 
   String _academicYearId() =>
-      context
-          .read<BootstrapCurrentYearBloc>()
-          .state
-          .bootstrap
-          ?.academicYear
-          .id ??
+      context.read<AcademicYearContextBloc>().state.context?.academicYear.id ??
       '';
 
   String? _nullable(String value) => value.trim().isEmpty ? null : value.trim();

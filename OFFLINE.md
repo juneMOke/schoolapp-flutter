@@ -1,0 +1,240 @@
+# OFFLINE.md — Architecture offline-first
+
+Document de référence des choix d'implémentation de la couche **offline-first**
+(4 modules : Inscription, Facturation, Classe, Présence/Discipline).
+
+> Portée : décisions verrouillées, contrat écriture/lecture, câblage UI, gaps
+> backend et TODO différés. Pour les patterns génériques (BLoC, Retrofit,
+> FeatureScope), voir `AGENTS.md`. Branche de travail : `feature/implements_offline`.
+
+---
+
+## 1. Socle partagé
+
+`lib/core/database/` + `lib/core/offline/`
+
+- **Base chiffrée SQLCipher** (`sqflite_sqlcipher`) — clé 256 bits stockée en
+  secure storage via `DatabaseKeyService`. Ouverture eager au démarrage
+  (`registerOfflineCore`, `offline_injection.dart`).
+- **Outbox générique** (`OutboxDao`) — file de push FIFO par `created_at`, backoff
+  exponentiel borné, garde-fou tenant `school_id` (nullable pour l'instant).
+  Compteurs `pendingCount()` / `errorCount()`.
+- **`SyncEngine`** — vide l'outbox en FIFO, route chaque entrée vers le
+  `OutboxSyncHandler` de son `aggregateType`, marque ACKED / SYNC_ERROR / retry.
+  Un seul flush à la fois. Déclenché à la demande **et** au passage *online*.
+  **Housekeeping** (Phase 1) : cap poison-message (`maxAttempts` → `SYNC_ERROR`)
+  + purge `deleteAcked()` en fin de flush.
+- **`PullCoordinator`** + **`PullHandler`** (Phase 1) — pendant *lecture* du
+  `SyncEngine` : registre de handlers de **pull delta** par ressource, pré-garde
+  connectivité, verrou anti-concurrence, isolation par handler. Déclenché au
+  **retour online** par `SyncStatusCubit` (push → pull → refresh). Premier
+  handler branché : `ClassroomPullHandler` (`/sync/classrooms`, année résolue via
+  bootstrap local). Curseur `updatedSince` **ISO-8601** via `SyncMetaDao`.
+- `SyncMetaDao` (curseurs de pull + fraîcheur), `ConnectivityService`,
+  `IdGenerator`, `ConflictFailure` (+ branche 409 de l'intercepteur Dio).
+
+### Mécanisme anti-conflit de merge (clé)
+
+Chaque module ne touche que **2 lignes additives** du socle :
+
+- `buildOfflineSchema()` (`offline_schema.dart`) agrège une `List<TableSchema>`
+  par module (ex. `enrollmentFinanceOfflineTables`,
+  `classroomAttendanceOfflineTables`).
+- `registerOfflineModules()` (`offline_injection.dart`) appelle **un registrar
+  par branche** dans `lib/core/di/offline_modules/`.
+
+Les handlers d'outbox sont branchés via `getIt<SyncEngine>().registerHandler(...)`.
+
+---
+
+## 2. Découpage en modules (2 branches parallèles, mergées)
+
+| Branche | Modules | Couplage |
+|---|---|---|
+| **A** | Inscription + Facturation | FIFO agrégat → paiement du même élève |
+| **B** | Classe + Présence/Discipline | roster partagé `ref_classroom_members` |
+
+**15 tables** : outbox, sync_meta, students, parents, student_parent,
+enrollments, generated_documents, payments, payment_allocations, student_charges,
+ref_fee_tariffs, ref_classrooms, ref_classroom_members, attendance_records,
+disciplinary_cases. **4 handlers d'outbox** : ENROLLMENT, PAYMENT, ATTENDANCE,
+DISCIPLINARY_CASE.
+
+---
+
+## 3. Décisions verrouillées (avec le *pourquoi*)
+
+| Décision | Détail | Pourquoi |
+|---|---|---|
+| **Cents INTEGER** | Tous les montants des nouveaux modèles offline en cents entiers | Zéro flottant sur la monnaie (cf. `FINANCE_MOTION_MAP.md`) |
+| **Agrégat inscription** | `POST /api/v1/sync/enrollments` consolide les 5 écritures incrémentales + remap ACK (parent provisoire → canonique) | Atomicité côté serveur, remap des id client |
+| **Progression niveau RE** | Déléguée au serveur | Règle métier centralisée |
+| **Réassignation classe (CF4)** | **ONLINE V1** (PUT + re-pull), **zéro outbox** | Exige la connexion ; conflits difficiles à réconcilier offline |
+| **Compteurs élèves** | Jamais `total = F + M` (OTHER inclus) | Le genre `OTHER` existe |
+| **Présence** | Stockage **par exception** + LWW `updated_at` | Volume réduit, résolution déterministe |
+| **Discipline** | Régime A (create id-client) + C (update LWW) ; sanction toujours renvoyée au PUT | Idempotence + réconciliation best-effort |
+| **Écriture UI** | **OFFLINE-FIRST STRICT** (voir §4) | Cible offline-first assumée |
+| **Lecture UI** | **GARDÉE ONLINE** (voir §4) | Cache non peuplé sans pull → basculer afficherait du vide |
+| **Wizard inscription NEW** | **Draft local persisté par étape** (pas seulement au résumé) — voir §5 | Vrai offline-first du parcours de création ; reprise possible ; zéro appel serveur pendant le parcours |
+
+---
+
+## 4. Contrat offline-first strict (écriture / lecture)
+
+**Écriture = offline-first strict.** Au point d'écriture d'un écran, l'appel
+online est **retiré** ; l'écriture passe par le BLoC offline → base locale +
+mise en file **outbox**. La pastille de synchro s'allume via
+`SyncStatusCubit.notifyLocalWrite()`.
+
+**Lecture = online (dette, plus une fatalité).** Les listes/détails/rosters
+restent branchés sur les BLoCs online existants. Ce choix datait de l'ère « P0 »
+où les pulls `/api/v1/sync/*` n'existaient pas. **Depuis le 2026-07-07 la vague
+V1.0 back est livrée** (`/sync/classrooms`, `/sync/attendance`,
+`/sync/academics/*`, `/sync/schedule`) : la bascule des lectures en local
+(peupler puis lire sqflite) est désormais **débloquée** et devient une **dette à
+résorber** (`OFFLINE_GAP_ANALYSIS.md`, Phase 2). Restent réellement
+backend-gated : le pull ledger Facturation et l'agrégat/cohorte Inscription
+(V1.1).
+
+**Conséquences assumées (tant que `/sync/*` n'est pas livré) :**
+
+- Les écritures **ne persistent pas côté serveur** ; elles restent en attente
+  dans l'outbox (la pastille passe « à envoyer », puis « conflit » si rejet).
+- **Read-your-writes différé** : après une écriture, la liste online ne reflète
+  pas l'entrée en attente. Le retour visuel « en attente de synchronisation »
+  (clés l10n `offline*Queued`) compense côté UX.
+
+---
+
+## 5. Câblage UI
+
+### Pastille de synchro globale
+
+- `SyncStatusCubit` (`lib/core/components/status/sync_status_cubit.dart`) —
+  agrège connectivité + `SyncEngine.isFlushing` + `OutboxDao.pendingCount`/
+  `errorCount` → `SyncStatus{synced, syncing, offline, pendingUpload,
+  syncConflict}`. **Défensif** (aucun accès plugin/base ne remonte d'exception
+  dans l'arbre — les tests ne mockent pas `connectivity_plus`). Déclenche un
+  flush opportuniste au passage *online*.
+- Fourni **une fois à la racine** (`main.dart`, `.value` — factory conforme à la
+  règle #2, instance unique app-lifetime accessible via `context`). Monté dans
+  `TopBarActions` (`SyncIndicator`).
+
+> Gotcha : les modales sont poussées sur le **root navigator**. Le cubit doit
+> donc être fourni **au-dessus** de `MaterialApp` pour qu'un `context.read`
+> depuis une modale le trouve (vrai en prod ; à reproduire dans les tests widget).
+
+### Les 5 écrans (écriture offline-first, lecture online)
+
+| Écran | Point d'écriture | Bloc offline / event |
+|---|---|---|
+| **Encaissement** | `facturation_create_payment_confirm_dialog.dart` `_confirm()` | `FinanceOfflineBloc` · `RecordLocalPayment` (mapper `facturation_offline_payment_mapper.dart`) |
+| **Appel présence** | `attendance_save_overlay.dart` | `AttendanceOfflineBloc` · `RecordDailyAttendanceRequested` |
+| **Cas discipline** | `disciplinary_case_create_dialog.dart` `_submit()` (+ avancement `onAdvance`) | `DisciplinaryCaseOfflineBloc` · `CreateOfflineDisciplinaryCase` / `UpdateOfflineDisciplinaryCase` |
+| **Réassignation classe** | `classes_organisation_reassign_dialog.dart` | `ClassroomOfflineBloc` · `MemberReassignRequested` (**online**, pas d'outbox ; gère le succès partiel `reassignRePullFailed`) |
+| **Inscription — confirmation RE/PRE** | `summary_step_handler.dart` `submit()` | `EnrollmentOfflineBloc` · `ConfirmLocalEnrollment` (projette l'agrégat online ; NEW suit le flux draft, voir plus bas) |
+
+**BLoCs de présentation offline** : la chaîne A (Inscription/Facturation) les
+avait déjà ; la chaîne B en était dépourvue → créés dans cette itération
+(`AttendanceOfflineBloc`, `DisciplinaryCaseOfflineBloc`, `ClassroomOfflineBloc`),
+enregistrés dans `classroom_attendance_offline_di.dart`. Ces BLoCs mappent leurs
+échecs via des chaînes FR en dur (aligné sur `FinanceOfflineBloc`, pas de l10n).
+
+### Wizard inscription NEW — draft local persisté (M1 + M2)
+
+Le parcours **NEW first-registration** va plus loin que « offline-first strict » :
+il n'appelle **plus le serveur pendant le parcours**. Architecture :
+
+- **M1 — data/domaine** (`enrollment/offline/`) : l'id client (`enrollmentId` +
+  `studentId`) est figé au **démarrage** du wizard (`startDraft`, plus au serveur).
+  Chaque étape écrit un **brouillon local** (`sync_status='DRAFT'`) via
+  `EnrollmentDraftBloc` → repo `saveDraft{Identity,Address,PreviousAcademic,
+  TargetAcademic,Guardians}` → DAO `insertDraft*` / `updateDraftColumns` (**UPDATE
+  colonne-à-colonne**, jamais un `toMap()` complet qui écraserait à NULL les
+  champs pas encore saisis) / `replaceDraftParents`. Le résumé appelle
+  `finalizeDraft` : DRAFT → PENDING_SYNC (élève + inscription + tuteurs) + **une**
+  entrée outbox à **id déterministe** (`outbox-enr-<id>`, donc idempotent). Les
+  brouillons sont **exclus des listes** (`WHERE sync_status != 'DRAFT'`).
+- **M2 — présentation** : l'agrégat entre étapes est **re-lu depuis la base
+  locale** (`getDraftDetail`) et projeté par `local_enrollment_detail_mapper`
+  (résout `schoolLevelId`/`schoolLevelGroupId` en objets `SchoolLevel`/
+  `SchoolLevelGroup` via le **bootstrap** déjà chargé). La page détail a un
+  **double chemin** serveur/local mémoïsé par `identical()` (car `EnrollmentDetail`
+  n'est pas `Equatable` — recomposer resynchroniserait le stepper).
+
+**Gating strict** sur `EnrollmentDetailOrigin.newFirstRegistration` (flag
+`useOfflineDraft` propagé aux étapes, défaut `false`). **RE / PRE / édition
+restent online** (confirmation conservatrice `ConfirmLocalEnrollment`, ligne du
+tableau ci-dessus) — aucun changement de comportement pour eux.
+
+**Limites v1 (assumées)** : reprise après kill non gérée (un remount NEW
+régénère les ids → brouillon orphelin) ; pas de placeholder matricule « en cours »
+dans l'UI ; suppression d'un tuteur = remplacement local ; le chemin de création
+serveur historique est laissé **inerte** (NEW routé offline, RE/PRE ne créent
+jamais). Voir §6 pour les suivis (draft RE/PRE, reprise après kill).
+
+---
+
+## 6. Gaps backend & TODO différés
+
+**Mise à jour 2026-07-07 :** les **pulls de lecture V1.0 sont livrés** côté back
+(`/sync/classrooms`, `/sync/attendance`, `/sync/academics/cours|notes`,
+`/sync/schedule`) — cf. `OFFLINE_GAP_ANALYSIS.md`. Ils ne sont pas encore
+consommés côté Flutter (dette Phase 1/2).
+
+**Endpoints backend réellement absents** (contrats miroir câblés côté client,
+testés avec Dio mocké) :
+
+- `POST /api/v1/sync/enrollments` (agrégat d'inscription G1) — **inexistant** (V1.1).
+- Pulls finance `/sync/finance/tariffs` + `/ledger` — **inexistants** (V1.1).
+- Pull référentiel / cohorte Inscription (F5) — non implémenté (V1.1).
+- `PUT /disciplinary-cases/{id}` avec `version`/LWW (DG-2) — **inexistant** (V1.1).
+
+**Fait depuis :** wizard inscription **NEW** en draft local persisté (M1+M2, voir
+§5) ; alignement `ConnectivityService` sur les invariants `connectivity_plus`
+(`isOnline` = état radio seulement).
+
+**TODO différés :**
+
+- **Draft RE/PRE** : étendre le draft persisté aux réinscriptions/pré-inscriptions
+  (charger l'élève serveur existant dans un brouillon local ; RE/PRE restent
+  online aujourd'hui).
+- **Reprise après kill** du wizard NEW : reprendre le brouillon orphelin au
+  remount au lieu de régénérer des ids.
+- **Migration des lectures → offline** quand le pull `/sync/*` sera livré.
+- Réconciliation `version` LWW discipline (read model sans version/updatedAt).
+- Réponse enrichie présence (AG-3) → `markDaySynced`.
+- Visibilité `content` par rôle (DF-3).
+- Pastille `onTap` → bottom-sheet détail de synchro.
+- Genre `other` éventuel replié sur `MALE` (builder de confirmation ET mapper
+  draft — à raffiner).
+
+---
+
+## 7. Tests & validation
+
+- Socle : tests DAO (`outbox_dao_test`, incl. `errorCount`), `sync_engine_test`,
+  `sync_state_test`, `sync_status_cubit_test`, `connectivity_service_test`.
+- Chaîne A/B : tests data/domain/sync + tests des 3 BLoCs offline créés.
+- 3 tests widget existants réécrits pour le chemin offline (encaissement,
+  réassignation, layout home).
+- Wizard NEW draft (M1+M2) : DAO draft (`enrollment_local_dao_test`), repo/bloc
+  draft (`enrollment_draft_*_test`), mapper (`local_enrollment_detail_mapper_test`),
+  gating présentation (`summary_step_handler_offline_gating_test`,
+  `personal_info_step_offline_dispatch_test`).
+- État validé : `flutter analyze` **clean**, **803 tests verts**, `dart format`
+  conforme.
+
+---
+
+## 8. Ajouter un nouveau module offline
+
+1. Créer `lib/core/database/schema/<module>_offline_schema.dart` exposant une
+   `List<TableSchema>` ; l'ajouter à `buildOfflineSchema()`.
+2. Créer `lib/core/di/offline_modules/<module>_offline_di.dart` (DataSources →
+   Repos → UseCases → BLoCs → handlers d'outbox) ; l'appeler depuis
+   `registerOfflineModules()`.
+3. Ajouter les endpoints de sync dans `AppConstants`.
+4. Écriture UI = dispatch offline + `notifyLocalWrite()` ; lecture UI = online
+   tant que le pull n'est pas livré (cf. §4).
+5. Tests miroir dans `test/`.

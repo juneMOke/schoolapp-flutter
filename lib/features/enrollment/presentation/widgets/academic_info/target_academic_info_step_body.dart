@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/academic_info/target_year_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class TargetAcademicInfoStepBody extends StatelessWidget {
-  final Bootstrap? bootstrap;
+  final AcademicYearContext? bootstrap;
   final TextEditingController currYearController;
   final TextEditingController targetOptionController;
   final String selectedSchoolLevelGroupId;
@@ -21,6 +22,7 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
   final ValueChanged<String> onLevelChanged;
   final String? groupError;
   final String? levelError;
+  final bool isAutoComputed;
 
   const TargetAcademicInfoStepBody({
     super.key,
@@ -39,6 +41,7 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
     required this.onLevelChanged,
     this.groupError,
     this.levelError,
+    this.isAutoComputed = false,
   });
 
   @override
@@ -62,39 +65,42 @@ class TargetAcademicInfoStepBody extends StatelessWidget {
             onGroupChanged: onGroupChanged,
             onLevelChanged: onLevelChanged,
             isEditable: isEditable,
+            isAutoComputed: isAutoComputed,
           ),
           if (showInlineSaveButton) ...<Widget>[
             const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerRight,
-              child: FilledButton.icon(
-                onPressed: (isLoading || !canSave) ? null : onSave,
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.textOnDark,
-                        ),
-                      )
-                    : const Icon(Icons.save_outlined),
-                label: Text(
-                  isLoading ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: canSave ? AppColors.info : null,
-                  foregroundColor: AppColors.textOnDark,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
+              child: SessionWriteGate(
+                child: FilledButton.icon(
+                  onPressed: (isLoading || !canSave) ? null : onSave,
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.textOnDark,
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(
+                    isLoading ? l10n.savingAcademicInfo : l10n.saveAcademicInfo,
                   ),
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: canSave ? AppColors.info : null,
+                    foregroundColor: AppColors.textOnDark,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                    elevation: canSave ? 6 : 0,
+                    shadowColor: AppColors.info.withValues(alpha: 0.45),
                   ),
-                  elevation: canSave ? 6 : 0,
-                  shadowColor: AppColors.info.withValues(alpha: 0.45),
                 ),
               ),
             ),

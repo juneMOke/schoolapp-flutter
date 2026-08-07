@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_search_form_logic.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/resultats/presentation/helpers/resultats_search_mode.dart';
@@ -33,7 +33,7 @@ class ResultatsSearchCard extends StatefulWidget {
 
   /// Notifie la classe sélectionnée (ou `null` au reset de la cascade) : le
   /// parent charge alors les périodes de cette classe (endpoint scopé classe).
-  final ValueChanged<BootstrapClassroom?> onClassroomChanged;
+  final ValueChanged<OfflineClassroom?> onClassroomChanged;
   final ValueChanged<ResultatsSearchRequest> onSubmit;
 
   const ResultatsSearchCard({
@@ -237,7 +237,7 @@ class _ResultatsSearchCardState extends State<ResultatsSearchCard> {
   List<Widget> _cascadeFields(
     AppLocalizations l10n, {
     required List<ClassesListLevelOption> levelOptions,
-    required List<BootstrapClassroom> classroomOptions,
+    required List<OfflineClassroom> classroomOptions,
     required bool classroomEnabled,
   }) => [
     EteeloSelectInput<String>(

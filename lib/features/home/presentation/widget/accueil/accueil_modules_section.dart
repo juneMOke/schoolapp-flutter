@@ -2,17 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_entrance.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_card.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Section « Vos modules » : en-tête éditorial + grille responsive de cartes
 /// (spec Accueil §02/§03). La grille se reconfigure par largeur minimale d'item
-/// (auto-fill minmax(248, 1fr)) : 1 → 2 → 4 colonnes.
+/// (auto-fill minmax(272, 1fr)) : 1 → 2 → 3 colonnes.
 class AccueilModulesSection extends StatelessWidget {
   final List<AccueilModule> modules;
 
-  const AccueilModulesSection({super.key, required this.modules});
+  /// Rang de la première carte dans la séquence d'entrée de la page (le
+  /// bandeau occupe les rangs précédents) — cf. [AccueilEntrance].
+  final int entranceIndexOffset;
+
+  const AccueilModulesSection({
+    super.key,
+    required this.modules,
+    this.entranceIndexOffset = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,19 +57,26 @@ class AccueilModulesSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AccueilUiTokens.sectionHeaderToGridGap),
-        _ModulesGrid(modules: modules),
+        _ModulesGrid(
+          modules: modules,
+          entranceIndexOffset: entranceIndexOffset,
+        ),
       ],
     );
   }
 }
 
 /// Grille manuelle : on calcule le nombre de colonnes comme le ferait
-/// `auto-fill minmax(248, 1fr)`, puis on dispose les cartes en rangées
+/// `auto-fill minmax(272, 1fr)`, puis on dispose les cartes en rangées
 /// d'égale hauteur (`IntrinsicHeight`) pour aligner les pieds de cartes.
 class _ModulesGrid extends StatelessWidget {
   final List<AccueilModule> modules;
+  final int entranceIndexOffset;
 
-  const _ModulesGrid({required this.modules});
+  const _ModulesGrid({
+    required this.modules,
+    required this.entranceIndexOffset,
+  });
 
   int _columnCount(double width) {
     const gap = AccueilUiTokens.gridGap;
@@ -82,7 +98,7 @@ class _ModulesGrid extends StatelessWidget {
           if (rows.isNotEmpty) {
             rows.add(const SizedBox(height: AccueilUiTokens.gridGap));
           }
-          rows.add(_buildRow(rowModules, columns));
+          rows.add(_buildRow(rowModules, columns, start));
         }
 
         return Column(children: rows);
@@ -90,7 +106,11 @@ class _ModulesGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(List<AccueilModule> rowModules, int columns) {
+  Widget _buildRow(
+    List<AccueilModule> rowModules,
+    int columns,
+    int firstModuleIndex,
+  ) {
     final children = <Widget>[];
     for (var i = 0; i < columns; i++) {
       if (i > 0) {
@@ -101,7 +121,10 @@ class _ModulesGrid extends StatelessWidget {
       children.add(
         Expanded(
           child: i < rowModules.length
-              ? AccueilModuleCard(module: rowModules[i])
+              ? AccueilEntrance(
+                  index: entranceIndexOffset + firstModuleIndex + i,
+                  child: AccueilModuleCard(module: rowModules[i]),
+                )
               : const SizedBox.shrink(),
         ),
       );

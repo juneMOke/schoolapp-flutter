@@ -141,39 +141,3 @@ class EnrollmentDetailErrorTemplate extends StatelessWidget {
     );
   }
 }
-
-class EnrollmentDetailEmptyTemplate extends StatelessWidget {
-  const EnrollmentDetailEmptyTemplate({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(
-          Icons.inbox_outlined,
-          size: 42,
-          color: AppColors.textSecondary,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.enrollmentDetailNotFoundTitle,
-          style: AppTypography.titleMedium.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          l10n.enrollmentDetailNotFoundMessage,
-          textAlign: TextAlign.center,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.45,
-          ),
-        ),
-      ],
-    );
-  }
-}

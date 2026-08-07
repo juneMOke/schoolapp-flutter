@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/saisie_draft_controller.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Barre d'enregistrement (spec §10) : compteur « x / n saisies », barre de
 /// progression (verte, rouge si erreurs), alerte des notes hors bornes, et le
@@ -76,16 +77,20 @@ class SaisieSaveBar extends StatelessWidget {
                   ],
                 ),
               ),
-              EteeloButton.primary(
-                label: isSaving
-                    ? l10n.evalSaveButtonSaving
-                    : l10n.evalSaveButton,
-                icon: isSaving ? null : Icons.check_rounded,
-                isLoading: isSaving,
-                loadingLabel: l10n.evalSaveButtonSaving,
-                size: EteeloButtonSize.regular,
-                fullWidth: false,
-                onPressed: canSave ? onSave : null,
+              // Gel READ_ONLY (ADR-010) : rien ne persiste sans ce bouton — le
+              // geler suffit (la grille de saisie reste un brouillon volatil).
+              SessionWriteGate(
+                child: EteeloButton.primary(
+                  label: isSaving
+                      ? l10n.evalSaveButtonSaving
+                      : l10n.evalSaveButton,
+                  icon: isSaving ? null : Icons.check_rounded,
+                  isLoading: isSaving,
+                  loadingLabel: l10n.evalSaveButtonSaving,
+                  size: EteeloButtonSize.regular,
+                  fullWidth: false,
+                  onPressed: canSave ? onSave : null,
+                ),
               ),
             ],
           ),

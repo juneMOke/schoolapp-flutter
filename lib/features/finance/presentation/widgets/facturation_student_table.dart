@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollment_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_data_table.dart';
@@ -14,8 +14,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Adapte l'état BLoC vers la config de [FacturationDataTable].
 ///
-/// Responsabilité unique : écouter [EnrollmentBloc] et router vers le bon
-/// widget selon l'état courant. Tout rendu est déléguée à [FacturationDataTable].
+/// Responsabilité unique : écouter [EnrollmentLocalListBloc] (recherche locale,
+/// offline-first) et router vers le bon widget selon l'état courant. Tout rendu
+/// est délégué à [FacturationDataTable].
 class FacturationStudentTable extends StatelessWidget {
   /// Appelé quand l'icône "œil" est tapée.
   /// [levelId] provient du dernier critère de recherche stocké dans l'état BLoC.
@@ -28,7 +29,7 @@ class FacturationStudentTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<EnrollmentBloc, EnrollmentState>(
+    return BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
       buildWhen: _shouldBuild,
       builder: (context, state) {
         // Aucune recherche byAcademicInfo lancée → invitation à chercher
@@ -55,8 +56,8 @@ class FacturationStudentTable extends StatelessWidget {
               key: const ValueKey('facturation-results-error'),
               type: state.summariesErrorType ?? EnrollmentErrorType.unknown,
               message: state.errorMessage,
-              onRetry: () => context.read<EnrollmentBloc>().add(
-                const EnrollmentSummariesRefreshRequested(),
+              onRetry: () => context.read<EnrollmentLocalListBloc>().add(
+                const LocalListRefreshRequested(),
               ),
               onReconnect: () =>
                   context.read<AuthBloc>().add(const AuthLogoutRequested()),
@@ -95,11 +96,11 @@ class FacturationStudentTable extends StatelessWidget {
             currentPage: state.summariesPage + 1,
             totalPages: state.summariesTotalPages,
             pageSize: state.summariesSize,
-            onPreviousPage: () => context.read<EnrollmentBloc>().add(
-              EnrollmentSummariesPageRequested(page: state.summariesPage - 1),
+            onPreviousPage: () => context.read<EnrollmentLocalListBloc>().add(
+              LocalListPageRequested(page: state.summariesPage - 1),
             ),
-            onNextPage: () => context.read<EnrollmentBloc>().add(
-              EnrollmentSummariesPageRequested(page: state.summariesPage + 1),
+            onNextPage: () => context.read<EnrollmentLocalListBloc>().add(
+              LocalListPageRequested(page: state.summariesPage + 1),
             ),
             pageLabelBuilder: (current, total) =>
                 l10n.paginationPageIndicator(current, total),
@@ -112,7 +113,10 @@ class FacturationStudentTable extends StatelessWidget {
 
   /// Construit les puces de critères (nom / post-nom / prénom) à partir de la
   /// dernière requête, pour rappeler à l'utilisateur ce qui a été recherché.
-  List<String> _buildCriteria(EnrollmentState state, AppLocalizations l10n) {
+  List<String> _buildCriteria(
+    EnrollmentLocalListState state,
+    AppLocalizations l10n,
+  ) {
     final query = state.lastSummariesQuery;
     if (query == null) {
       return const <String>[];
@@ -132,7 +136,10 @@ class FacturationStudentTable extends StatelessWidget {
     return chips;
   }
 
-  String _buildEmptyLabel(EnrollmentState state, AppLocalizations l10n) {
+  String _buildEmptyLabel(
+    EnrollmentLocalListState state,
+    AppLocalizations l10n,
+  ) {
     return switch (state.summariesStatus) {
       EnrollmentLoadStatus.initial => l10n.noResultsFound,
       EnrollmentLoadStatus.success => l10n.facturationNoResultsDescription,
@@ -140,7 +147,10 @@ class FacturationStudentTable extends StatelessWidget {
     };
   }
 
-  static bool _shouldBuild(EnrollmentState prev, EnrollmentState curr) =>
+  static bool _shouldBuild(
+    EnrollmentLocalListState prev,
+    EnrollmentLocalListState curr,
+  ) =>
       prev.summariesQueryType != curr.summariesQueryType ||
       prev.summariesStatus != curr.summariesStatus ||
       prev.summaries != curr.summaries ||

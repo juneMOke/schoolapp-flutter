@@ -16,6 +16,17 @@ class FacturationPaymentDetailIntent extends Equatable {
   final String currency;
   final DateTime paidAt;
 
+  /// Encaissement pas encore remonté au serveur.
+  ///
+  /// Le serveur honore l'uuid client au push, donc [paymentId] devient un
+  /// identifiant serveur valide dès la synchro — mais **avant**, il lui est
+  /// inconnu et toute demande de reçu répondrait 404. C'est la garde du bouton
+  /// de téléchargement.
+  ///
+  /// Défaut `false` : un paiement reconstruit depuis l'URL (deep-link à froid)
+  /// vient forcément du serveur, donc il est synchronisé.
+  final bool isPendingSync;
+
   const FacturationPaymentDetailIntent({
     required this.paymentId,
     required this.studentId,
@@ -31,6 +42,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.amountInCents,
     required this.currency,
     required this.paidAt,
+    this.isPendingSync = false,
   });
 
   FacturationPaymentDetailIntent.invalid({
@@ -80,6 +92,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     amountInCents: amountInCents,
     currency: currency,
     paidAt: paidAt,
+    isPendingSync: isPendingSync,
   );
 
   static FacturationPaymentDetailIntent fromRouteContext({
@@ -119,5 +132,6 @@ class FacturationPaymentDetailIntent extends Equatable {
     amountInCents,
     currency,
     paidAt,
+    isPendingSync,
   ];
 }

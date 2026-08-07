@@ -39,6 +39,26 @@ String decoupageFieldLabel(AppLocalizations l10n, PeriodeDecoupage decoupage) =>
       PeriodeDecoupage.trimestre => l10n.evalCreateFieldTrimestre,
     };
 
+/// Libellé du backstop `422` terminal ayant rejeté une évaluation (DF-N) —
+/// code porté en tête du message serveur, jamais un champ dédié.
+String evalRejectionLabel(AppLocalizations l10n, String code) => switch (code) {
+  'PERIOD_CLOSED' => l10n.evalRejectionPeriodClosed,
+  'EXAM_NOT_ALLOWED' => l10n.evalRejectionExamNotAllowed,
+  'MAX_REACHED' => l10n.evalRejectionMaxReached,
+  _ => l10n.evalRejectionGeneric,
+};
+
+/// Libellé du motif de rejet d'une note (`NoteLineOutcome.reason`) — `INVALID`
+/// porte un suffixe variable côté contrat (`INVALID: …`), reconnu par préfixe.
+String noteRejectionLabel(AppLocalizations l10n, String reason) =>
+    switch (reason) {
+      'UNKNOWN_EVALUATION' => l10n.noteRejectionUnknownEvaluation,
+      'PERIODE_CLOSE' => l10n.noteRejectionPeriodeClose,
+      'EVALUATION_CONTEXT_UNAVAILABLE' => l10n.noteRejectionContextUnavailable,
+      _ when reason.startsWith('INVALID') => l10n.noteRejectionInvalid,
+      _ => l10n.noteRejectionGeneric,
+    };
+
 /// Libellé d'un pas de la frise : « Période N » pour une sous-période (renommée
 /// côté UI), « Examen » pour l'examen de période.
 String bucketLabel(AppLocalizations l10n, BucketVm bucket) =>

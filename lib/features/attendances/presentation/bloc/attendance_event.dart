@@ -59,13 +59,6 @@ class AttendanceAbsenceNoteChanged extends AttendanceEvent {
   List<Object?> get props => [studentId, note];
 }
 
-class AttendanceSaveRequested extends AttendanceEvent {
-  const AttendanceSaveRequested();
-
-  @override
-  List<Object?> get props => [];
-}
-
 class AttendanceSaveStatusResetRequested extends AttendanceEvent {
   const AttendanceSaveStatusResetRequested();
 

@@ -14,6 +14,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/helpers/attendance_page_helpers.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_models.dart';
@@ -26,6 +27,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class AttendanceResultsSection extends StatelessWidget {
   final AttendanceSearchRequest? lastRequest;
@@ -139,6 +141,7 @@ class AttendanceResultsSection extends StatelessWidget {
             await showAttendanceSaveOverlay(
               context: context,
               attendanceBloc: context.read<AttendanceBloc>(),
+              offlineBloc: context.read<AttendanceOfflineBloc>(),
               classroomName: request.selectedClassroom.name,
               date: request.date,
               presentCount: presentCount,
@@ -150,6 +153,12 @@ class AttendanceResultsSection extends StatelessWidget {
           child = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 3e état (invariant #1) : pas de session ⇒ appel non fait. On le
+              // signale explicitement (le roster affiché n'est PAS un appel validé).
+              if (!state.callTaken) ...[
+                const _AppelNonFaitBar(),
+                const SizedBox(height: AppDimensions.spacingS),
+              ],
               _AttendanceActionBar(
                 isSaving: state.saveStatus == AttendanceStatus.loading,
                 canSave: state.canSave && missingReasonsCount == 0,
@@ -207,7 +216,7 @@ class AttendanceResultsSection extends StatelessWidget {
           switchOutCurve: AppMotion.inCurve,
           child: KeyedSubtree(
             key: ValueKey(
-              '${state.fetchStatus}-${state.draftRows.length}-${state.fetchErrorType}-${state.saveStatus}-${state.hasUnsavedChanges}-${state.hasValidationErrors}',
+              '${state.fetchStatus}-${state.draftRows.length}-${state.fetchErrorType}-${state.saveStatus}-${state.hasUnsavedChanges}-${state.hasValidationErrors}-${state.callTaken}',
             ),
             child: child,
           ),
@@ -234,22 +243,81 @@ class _AttendanceActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        EteeloButton.secondary(
-          label: l10n.attendanceMarkAllPresentAction,
-          onPressed: isSaving ? null : onMarkAllPresent,
-          fullWidth: false,
+    // Gel READ_ONLY (ADR-010) : l'appel est une écriture métier.
+    return SessionWriteGate(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          EteeloButton.secondary(
+            label: l10n.attendanceMarkAllPresentAction,
+            onPressed: isSaving ? null : onMarkAllPresent,
+            fullWidth: false,
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          EteeloButton.primary(
+            label: l10n.attendanceSaveCallAction,
+            isLoading: isSaving,
+            onPressed: canSave ? onSaveCall : null,
+            fullWidth: false,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bandeau du 3e état (invariant #1) : aucune session pour ce jour → l'appel
+/// n'a pas été fait. Le roster est affiché pour la saisie mais rien n'est validé.
+class _AppelNonFaitBar extends StatelessWidget {
+  const _AppelNonFaitBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
         ),
-        const SizedBox(width: AppDimensions.spacingS),
-        EteeloButton.primary(
-          label: l10n.attendanceSaveCallAction,
-          isLoading: isSaving,
-          onPressed: canSave ? onSaveCall : null,
-          fullWidth: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.event_busy_outlined,
+              size: 16,
+              color: AppColors.info,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.attendanceCallNotTakenTitle,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.info,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    l10n.attendanceCallNotTakenMessage,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

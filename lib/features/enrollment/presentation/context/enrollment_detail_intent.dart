@@ -6,24 +6,36 @@ class EnrollmentDetailIntent extends Equatable {
   static const String originQueryParameter = 'origin';
   static const String studentIdQueryParameter = 'studentId';
   static const String statusQueryParameter = 'status';
+  static const String enrollmentTypeQueryParameter = 'enrollmentType';
 
   final EnrollmentDetailOrigin origin;
   final String enrollmentId;
   final String? studentId;
   final String? status;
+  final String? enrollmentType;
 
   const EnrollmentDetailIntent({
     required this.origin,
     required this.enrollmentId,
     this.studentId,
     this.status,
+    this.enrollmentType,
   });
 
-  const EnrollmentDetailIntent.preRegistration({required String enrollmentId})
-    : this(
-        origin: EnrollmentDetailOrigin.preRegistration,
-        enrollmentId: enrollmentId,
-      );
+  /// [studentId] réutilise le slot générique pour porter le `preEnrollmentId`
+  /// d'un candidat BRUT (`enrollmentId` encore vide, segment de route littéral
+  /// `new`) à travers le round-trip GoRouter — même procédé que
+  /// `.reRegistration` avec son `studentId` réel. Une fois le dossier seedé
+  /// (id réel), `studentId` redevient superflu (le dossier se rouvre par
+  /// `enrollmentId`).
+  const EnrollmentDetailIntent.preRegistration({
+    required String enrollmentId,
+    String? studentId,
+  }) : this(
+         origin: EnrollmentDetailOrigin.preRegistration,
+         enrollmentId: enrollmentId,
+         studentId: studentId,
+       );
 
   const EnrollmentDetailIntent.newFirstRegistration()
     : this(
@@ -40,12 +52,32 @@ class EnrollmentDetailIntent extends Equatable {
          studentId: studentId,
        );
 
+  /// Reprise d'un brouillon LOCAL déjà en base : l'`enrollmentId` est l'id
+  /// client du dossier DRAFT ; `studentId` est indicatif (l'agrégat local le
+  /// porte déjà). `enrollmentType` = valeur RÉELLE du dossier repris (portée
+  /// par `EnrollmentSummary` au tap) : sans elle, un re-save d'identité
+  /// écraserait un brouillon RE/PRE avec le défaut NEW (cf.
+  /// `LocalDraftResumeDetailPolicy`). Pas de `status` : `draftStatus` est
+  /// DÉRIVÉ du type par la policy, pas lu depuis un status persisté (qui
+  /// peut être une valeur legacy périmée sur un brouillon ancien).
+  const EnrollmentDetailIntent.localDraftResume({
+    required String enrollmentId,
+    String? studentId,
+    String? enrollmentType,
+  }) : this(
+         origin: EnrollmentDetailOrigin.localDraftResume,
+         enrollmentId: enrollmentId,
+         studentId: studentId,
+         enrollmentType: enrollmentType,
+       );
+
   EnrollmentDetailIntent withEnrollmentId(String enrollmentId) {
     return EnrollmentDetailIntent(
       origin: origin,
       enrollmentId: enrollmentId,
       studentId: studentId,
       status: status,
+      enrollmentType: enrollmentType,
     );
   }
 
@@ -55,6 +87,8 @@ class EnrollmentDetailIntent extends Equatable {
       if (studentId != null && studentId!.isNotEmpty)
         studentIdQueryParameter: studentId!,
       if (status != null && status!.isNotEmpty) statusQueryParameter: status!,
+      if (enrollmentType != null && enrollmentType!.isNotEmpty)
+        enrollmentTypeQueryParameter: enrollmentType!,
     };
   }
 
@@ -82,10 +116,17 @@ class EnrollmentDetailIntent extends Equatable {
 
     final studentId = queryParameters[studentIdQueryParameter]?.trim();
     final status = queryParameters[statusQueryParameter]?.trim();
+    final enrollmentType = queryParameters[enrollmentTypeQueryParameter]
+        ?.trim();
 
     return switch (origin) {
       EnrollmentDetailOrigin.preRegistration =>
-        EnrollmentDetailIntent.preRegistration(enrollmentId: enrollmentId),
+        EnrollmentDetailIntent.preRegistration(
+          enrollmentId: enrollmentId,
+          studentId: (studentId != null && studentId.isNotEmpty)
+              ? studentId
+              : null,
+        ),
       EnrollmentDetailOrigin.reRegistration =>
         (studentId != null && studentId.isNotEmpty)
             ? EnrollmentDetailIntent.reRegistration(
@@ -108,6 +149,16 @@ class EnrollmentDetailIntent extends Equatable {
         studentId: studentId,
         status: status,
       ),
+      EnrollmentDetailOrigin.localDraftResume =>
+        EnrollmentDetailIntent.localDraftResume(
+          enrollmentId: enrollmentId,
+          studentId: (studentId != null && studentId.isNotEmpty)
+              ? studentId
+              : null,
+          enrollmentType: (enrollmentType != null && enrollmentType.isNotEmpty)
+              ? enrollmentType
+              : null,
+        ),
     };
   }
 
@@ -118,5 +169,11 @@ class EnrollmentDetailIntent extends Equatable {
   }
 
   @override
-  List<Object?> get props => [origin, enrollmentId, studentId, status];
+  List<Object?> get props => [
+    origin,
+    enrollmentId,
+    studentId,
+    status,
+    enrollmentType,
+  ];
 }

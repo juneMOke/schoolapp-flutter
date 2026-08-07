@@ -53,10 +53,16 @@ class _SkeletonBar extends StatefulWidget {
 
 class _SkeletonBarState extends State<_SkeletonBar>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: AppMotion.skeletonPulse,
-  )..repeat(reverse: true);
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppMotion.skeletonPulse,
+    )..repeat(reverse: true);
+  }
 
   @override
   void dispose() {

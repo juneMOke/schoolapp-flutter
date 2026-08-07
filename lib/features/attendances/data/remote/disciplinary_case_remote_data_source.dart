@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/attendances/data/models/create_disciplinary_case_request_model.dart';
 import 'package:school_app_flutter/features/attendances/data/models/disciplinary_case_detail_model.dart';
 import 'package:school_app_flutter/features/attendances/data/models/disciplinary_case_summary_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/update_disciplinary_case_request_model.dart';
 
 part 'disciplinary_case_remote_data_source.g.dart';
 
@@ -30,5 +31,13 @@ abstract class DisciplinaryCaseRemoteDataSource {
   Future<DisciplinaryCaseSummaryModel> createCase(
     @Extras() Map<String, dynamic> extras,
     @Body() CreateDisciplinaryCaseRequestModel request,
+  );
+
+  /// Traitement d'un cas online (status + sanction courante, régime C, LWW).
+  @PUT(AppConstants.disciplinaryCaseByIdEndpoint)
+  Future<void> updateDisciplinaryCase(
+    @Extras() Map<String, dynamic> extras,
+    @Path('caseId') String caseId,
+    @Body() UpdateDisciplinaryCaseRequestModel request,
   );
 }

@@ -2,12 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/attendances/data/models/create_disciplinary_case_request_model.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/update_disciplinary_case_request_model.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/disciplinary_case_remote_data_source.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_detail.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_summary.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/offline/disciplinary_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/disciplinary_case_repository.dart';
 
@@ -97,6 +99,34 @@ class DisciplinaryCaseRepositoryImpl implements DisciplinaryCaseRepository {
         ),
       );
       return Right(model.toEntity());
+    } on DioException catch (e) {
+      if (e.error is Failure) {
+        return Left(e.error as Failure);
+      }
+      return const Left(NetworkFailure('Network error occurred'));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateDisciplinaryCaseStatus({
+    required String caseId,
+    required DisciplinaryStatus status,
+    DisciplinarySanction? sanction,
+    int? expectedVersion,
+  }) async {
+    try {
+      await remoteDataSource.updateDisciplinaryCase(
+        requiredAuth,
+        caseId,
+        UpdateDisciplinaryCaseRequestModel.fromDomain(
+          status: status,
+          sanction: sanction,
+          expectedVersion: expectedVersion,
+        ),
+      );
+      return const Right(null);
     } on DioException catch (e) {
       if (e.error is Failure) {
         return Left(e.error as Failure);

@@ -6,18 +6,19 @@ import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_event.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_state.dart';
-import 'package:school_app_flutter/features/attendances/presentation/helpers/disciplinary_case_helpers.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_dialog_shell.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 class DisciplinaryCaseCreateDialog extends StatefulWidget {
   final String studentId;
@@ -154,8 +155,11 @@ class _DisciplinaryCaseCreateDialogState
   void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
 
-    context.read<DisciplinaryCaseBloc>().add(
-      DisciplinaryCaseCreateRequested(
+    // Offline-first strict : l'écriture passe par le BLoC offline (écriture
+    // locale + mise en file outbox) au lieu de l'appel online. Mêmes 12 champs
+    // que l'ancien DisciplinaryCaseCreateRequested.
+    context.read<DisciplinaryCaseOfflineBloc>().add(
+      CreateOfflineDisciplinaryCase(
         studentId: widget.studentId,
         studentFirstName: widget.studentFirstName,
         studentLastName: widget.studentLastName,
@@ -177,39 +181,48 @@ class _DisciplinaryCaseCreateDialogState
     final l10n = AppLocalizations.of(context)!;
     return DisciplinaryCaseDialogShell(
       maxWidth: AppDimensions.disciplinaryCreateDialogMaxWidth,
-      child: BlocListener<DisciplinaryCaseBloc, DisciplinaryCaseState>(
-        listenWhen: (prev, curr) => prev.createStatus != curr.createStatus,
-        listener: (context, state) {
-          if (state.createStatus == DisciplinaryCaseStatusState.success) {
-            AppSnackBar.showSuccess(
-              context,
-              l10n.disciplinaryCaseCreateDialogSuccessMessage,
-            );
-            Navigator.pop(context);
-            return;
-          }
+      child:
+          BlocListener<
+            DisciplinaryCaseOfflineBloc,
+            DisciplinaryCaseOfflineState
+          >(
+            listenWhen: (prev, curr) => prev != curr,
+            listener: (context, state) {
+              // Succès offline : cas écrit en local + enfilé (pending-sync).
+              if (state is DisciplinaryOfflineCasePendingSync) {
+                AppSnackBar.showSuccess(
+                  context,
+                  l10n.offlineDisciplinaryCaseQueued,
+                );
+                context.read<SyncStatusCubit>().notifyLocalWrite();
+                Navigator.pop(context);
+                return;
+              }
 
-          if (state.createStatus == DisciplinaryCaseStatusState.failure) {
-            AppSnackBar.showError(
-              context,
-              DisciplinaryCaseHelpers.mapErrorType(l10n, state.createErrorType),
-            );
-          }
-        },
-        child: BlocBuilder<DisciplinaryCaseBloc, DisciplinaryCaseState>(
-          buildWhen: (prev, curr) => prev.createStatus != curr.createStatus,
-          builder: (context, state) => _buildForm(context, l10n, state),
-        ),
-      ),
+              if (state is DisciplinaryOfflineError) {
+                AppSnackBar.showError(context, l10n.offlineWriteError);
+              }
+            },
+            child:
+                BlocBuilder<
+                  DisciplinaryCaseOfflineBloc,
+                  DisciplinaryCaseOfflineState
+                >(
+                  buildWhen: (prev, curr) =>
+                      (prev is DisciplinaryOfflineSaving) !=
+                      (curr is DisciplinaryOfflineSaving),
+                  builder: (context, state) => _buildForm(context, l10n, state),
+                ),
+          ),
     );
   }
 
   Widget _buildForm(
     BuildContext context,
     AppLocalizations l10n,
-    DisciplinaryCaseState state,
+    DisciplinaryCaseOfflineState state,
   ) {
-    final isLoading = state.createStatus == DisciplinaryCaseStatusState.loading;
+    final isLoading = state is DisciplinaryOfflineSaving;
     // reduced-motion : les transitions du formulaire deviennent instantanées.
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
@@ -381,58 +394,63 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                 ),
               ),
-              Semantics(
-                label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                button: true,
-                enabled: !isLoading,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.disciplinaryDetailAccent,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimensions.spacingM,
-                      vertical: AppDimensions.spacingS,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.spacingM,
+              // Gel READ_ONLY (ADR-010) : le dialog peut être ouvert au moment
+              // où le tick de fraîcheur bascule le mode — le submit doit être
+              // gaté comme le CTA d'entrée.
+              SessionWriteGate(
+                child: Semantics(
+                  label: l10n.disciplinaryCaseCreateDialogSubmitAction,
+                  button: true,
+                  enabled: !isLoading,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.disciplinaryDetailAccent,
+                      foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.spacingM,
+                        vertical: AppDimensions.spacingS,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.spacingM,
+                        ),
                       ),
                     ),
-                  ),
-                  onPressed: isLoading ? null : () => _submit(context),
-                  icon: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                    switchInCurve: AppMotion.outCurve,
-                    switchOutCurve: AppMotion.inCurve,
-                    child: isLoading
-                        ? const SizedBox(
-                            key: ValueKey('loading-icon'),
-                            width: AppDimensions
-                                .disciplinaryCreateSubmitSpinnerSize,
-                            height: AppDimensions
-                                .disciplinaryCreateSubmitSpinnerSize,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.surface,
+                    onPressed: isLoading ? null : () => _submit(context),
+                    icon: AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                      switchInCurve: AppMotion.outCurve,
+                      switchOutCurve: AppMotion.inCurve,
+                      child: isLoading
+                          ? const SizedBox(
+                              key: ValueKey('loading-icon'),
+                              width: AppDimensions
+                                  .disciplinaryCreateSubmitSpinnerSize,
+                              height: AppDimensions
+                                  .disciplinaryCreateSubmitSpinnerSize,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.surface,
+                                ),
                               ),
+                            )
+                          : const Icon(
+                              Icons.add_task_outlined,
+                              key: ValueKey('submit-icon'),
                             ),
-                          )
-                        : const Icon(
-                            Icons.add_task_outlined,
-                            key: ValueKey('submit-icon'),
-                          ),
-                  ),
-                  label: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                    switchInCurve: AppMotion.outCurve,
-                    switchOutCurve: AppMotion.inCurve,
-                    child: Text(
-                      isLoading
-                          ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                          : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                      key: ValueKey(isLoading),
-                      style: AppTextStyles.action,
+                    ),
+                    label: AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                      switchInCurve: AppMotion.outCurve,
+                      switchOutCurve: AppMotion.inCurve,
+                      child: Text(
+                        isLoading
+                            ? l10n.disciplinaryCaseCreateDialogCreatingMessage
+                            : l10n.disciplinaryCaseCreateDialogSubmitAction,
+                        key: ValueKey(isLoading),
+                        style: AppTextStyles.action,
+                      ),
                     ),
                   ),
                 ),

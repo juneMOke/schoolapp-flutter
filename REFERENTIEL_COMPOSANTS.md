@@ -829,6 +829,67 @@ une identite, un statut et un jeu de metadonnees compactes.
 
 ---
 
+## 12) StudentDetailAppBar (+ StudentDetailAppBarPill)
+
+- **Fichier**: `lib/core/components/app_bars/student_detail_app_bar.dart`
+- **Type Flutter**: `StatelessWidget implements PreferredSizeWidget`
+- **Statut**: stable
+
+### Description
+
+AppBar sombre commune a tous les dossiers eleve (Facturation, Discipline,
+Documents). Reprend la TopBar applicative — degrade Bleu Profond -> Bleu
+Ardoise, filigrane Kuba — et la contextualise a un eleve : retour, avatar a
+initiales, sur-titre or-doux, nom complet, pastille de synthese optionnelle.
+Un lisere or-doux la separe du contenu.
+
+Elle a remplace trois barres locales identiques a ~95 % (facturation,
+discipline, plus l'en-tete clair du catalogue Documents).
+
+### Zones caracteristiques
+
+- Hauteur : `AppDimensions.topBarHeight` (68) + 2 px de lisere.
+- Retour : carre 42 sur blanc a 10 %, `Icons.arrow_back_rounded`.
+- Avatar : cercle 42 a initiales NOM+Prenom sur blanc a 16 % (`?` si identite
+  inconnue — un lien profond rechargé perd le contexte d'affichage).
+- Sur-titre : `AppTypography.labelSmall` or-doux, MAJUSCULES, letterSpacing 1.2.
+- Fermeture : carre 40 optionnel (`showCloseButton`).
+
+### Slots / props (fournis par la page)
+
+- `fullName`, `eyebrow` : requis — deja localises par la page.
+- `firstName`, `lastName` : requis — source des initiales.
+- `fallbackRoute` : requis — route rejointe quand la pile est vide.
+- `trailing` : pastille de synthese metier (voir plus bas).
+- `showCloseButton` : croix de sortie en plus du retour (Facturation seule).
+
+### Contrat de reactvite (conteneur)
+
+Pleine largeur ; le titre ellipse sur une ligne, la pastille garde sa taille.
+
+### Pastille de synthese
+
+`StudentDetailAppBarPill(accent, icon, label, alert)` ne porte que la forme :
+fond `accent` a 20 % et bord a 50 % si `alert`, 26 % / 40 % sinon. Le sens
+reste au module — `FacturationBalancePill` (solde du / a jour) et
+`DisciplinaryOpenCasesAppBarPill` (cas ouverts) l'habillent.
+
+Documents n'affiche aucune pastille : le back n'expose pas de listing des
+pieces d'un eleve, donc aucune synthese ne serait honnete.
+
+### Exemples d'usages actuels
+
+- `facturation_detail_page.dart` (avec croix + pastille de solde)
+- `disciplinary_student_detail_page.dart` (pastille cas ouverts)
+- `documents_catalog_page.dart` (barre sobre)
+
+### Tests associes
+
+- `test/core/components/app_bars/student_detail_app_bar_test.dart`
+- `test/features/finance/presentation/widgets/facturation_balance_pill_test.dart`
+
+---
+
 ## Template pour prochains composants
 
 Copier/coller cette section pour toute nouvelle entree:

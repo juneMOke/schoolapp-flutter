@@ -47,15 +47,15 @@ ForgotPasswordEmailPage
 
 Le `main.dart` écoute `AuthBloc.state.status` et déclenche :
 
-| Transition | Action sur `BootstrapBloc` |
+| Transition | Action sur `AcademicYearContextBloc` |
 |---|---|
-| → `authenticated` | `BootstrapRemoteCurrentYearRequested` + `BootstrapRemotePreviousYearRequested` |
-| → `unauthenticated` | `BootstrapResetRequested` |
+| → `authenticated` | `AcademicYearContextRequested` (un seul événement, en ligne comme hors-ligne — le repository lit d'abord le référentiel local et ne pull que si absent) |
+| → `unauthenticated` | `AcademicYearContextResetRequested` |
 
 → **Toute modification de `AuthStatus`** doit être vérifiée contre :
 - `main.dart` (listener)
 - `app_router.dart` (`RouterNotifier`, logique de redirect)
-- `bootstrap_bloc.dart` (réactions)
+- `academic_year_context_bloc.dart` (réactions, dont `sessionExpired` sur 401/403)
 
 ## Token & session
 
@@ -109,5 +109,5 @@ Toutes minces, délèguent aux widgets (`AppTitle`, `AuthErrorBanner`, etc.).
 1. **`AuthStatus.failure` ≠ `AuthStatus.unauthenticated`** — `failure` garde le user en mémoire, `unauthenticated` le clear. Ne pas confondre.
 2. **`AuthCheckRequested` est idempotent** — toujours déclenché au démarrage dans `main.dart`. Ne pas en ajouter ailleurs.
 3. **L'`otpToken` n'est valable qu'une fois** — si reset échoue, le user doit refaire validate OTP.
-4. **Ne pas appeler `_bootstrapBloc.add(...)` depuis `AuthBloc`** — le couplage passe par le listener dans `main.dart`. Sens unique.
+4. **Ne pas appeler `_academicYearContextBloc.add(...)` depuis `AuthBloc`** — le couplage passe par le listener dans `main.dart`. Sens unique.
 5. **Le router redirige sur `AuthStatus`** — émettre une transition de status incorrecte casse la navigation.

@@ -63,6 +63,7 @@ class SummaryChargesSection extends StatelessWidget {
           }
 
           final rows = state.studentCharges;
+          // Somme en cents (comme FacturationChargeLine), converti au format.
           final total = rows.fold<double>(
             0,
             (sum, charge) => sum + charge.expectedAmountInCents,
@@ -88,7 +89,7 @@ class SummaryChargesSection extends StatelessWidget {
                   ),
                   Text(
                     formatMonetaryAmountWithCurrency(
-                      amount: total,
+                      amount: total / 100,
                       currency: currency,
                     ),
                     style: AppTextStyles.totalAmountLora.copyWith(

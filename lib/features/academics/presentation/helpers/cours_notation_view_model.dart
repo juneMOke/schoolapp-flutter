@@ -302,6 +302,11 @@ class EvalVm extends Equatable {
   final int saisies;
   final int total;
 
+  /// Code du backstop `422` terminal (`PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/
+  /// `MAX_REACHED`/`REJECTED`) ayant rejeté la création offline — `null` hors
+  /// rejet.
+  final String? rejectionCode;
+
   const EvalVm({
     required this.id,
     required this.type,
@@ -314,6 +319,7 @@ class EvalVm extends Equatable {
     required this.pourcentageSaisie,
     required this.saisies,
     required this.total,
+    this.rejectionCode,
   });
 
   factory EvalVm._fromSummary(EvaluationSummary e, int effectif) => EvalVm(
@@ -328,6 +334,7 @@ class EvalVm extends Equatable {
     pourcentageSaisie: e.pourcentageSaisie,
     saisies: _saisies(e.pourcentageSaisie, effectif),
     total: effectif,
+    rejectionCode: e.rejectionCode,
   );
 
   factory EvalVm._fromExamen(ExamenNotation e, int effectif) => EvalVm(
@@ -342,6 +349,7 @@ class EvalVm extends Equatable {
     pourcentageSaisie: e.pourcentageSaisie,
     saisies: _saisies(e.pourcentageSaisie, effectif),
     total: effectif,
+    rejectionCode: e.rejectionCode,
   );
 
   static int _saisies(double pourcentage, int effectif) =>
@@ -374,5 +382,6 @@ class EvalVm extends Equatable {
     pourcentageSaisie,
     saisies,
     total,
+    rejectionCode,
   ];
 }

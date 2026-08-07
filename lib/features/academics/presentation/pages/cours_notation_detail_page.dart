@@ -30,6 +30,7 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/state
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Page détail d'un cours (spec « Détail-Cours ») : en-tête → onglets de période
 /// → frise de buckets → panneau de la sélection. Le FAB « Nouvelle évaluation »
@@ -252,15 +253,18 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
           return const SizedBox.shrink();
         }
         final detail = state.detail!;
-        return FloatingActionButton.extended(
-          // Pas de hero : la coquille bascule entre plusieurs Scaffolds
-          // (liste ↔ cours ↔ saisie) via AnimatedSwitcher.
-          heroTag: null,
-          onPressed: () => _openCreateModal(detail),
-          backgroundColor: AppColors.terreCuite,
-          foregroundColor: AppColors.textOnDark,
-          icon: const Icon(Icons.add_rounded),
-          label: Text(l10n.evalCreateTitle),
+        // Gel READ_ONLY (ADR-010) : la création d'évaluation est une écriture.
+        return SessionWriteGate(
+          child: FloatingActionButton.extended(
+            // Pas de hero : la coquille bascule entre plusieurs Scaffolds
+            // (liste ↔ cours ↔ saisie) via AnimatedSwitcher.
+            heroTag: null,
+            onPressed: () => _openCreateModal(detail),
+            backgroundColor: AppColors.terreCuite,
+            foregroundColor: AppColors.textOnDark,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(l10n.evalCreateTitle),
+          ),
         );
       },
     );

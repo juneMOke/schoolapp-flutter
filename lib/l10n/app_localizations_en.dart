@@ -95,6 +95,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginContactAdmin => 'Contact the administrator';
 
   @override
+  String get loginErrorOfflineFirstLogin =>
+      'No connection, and this account has never signed in on this tablet. A first online sign-in is required.';
+
+  @override
+  String get loginErrorOfflineWindowExpired =>
+      'Offline work period expired. Sign in online as soon as the network is back.';
+
+  @override
   String get showPassword => 'Show';
 
   @override
@@ -116,7 +124,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashSemanticsLabel => 'ETEELO CONNECT — splash screen';
 
   @override
-  String get bootstrapOfflineBanner => 'Offline mode — cached data';
+  String get sessionOfflineBanner => 'Offline session — verified locally';
+
+  @override
+  String get sessionWarningBanner => 'Session needs refresh — reconnect soon';
+
+  @override
+  String get sessionReadOnlyBanner =>
+      'Read-only — online reconnection required';
 
   @override
   String get splashErrorTitle => 'Connection failed';
@@ -306,6 +321,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Start gender-based distribution';
 
   @override
+  String get classesOrganisationDistributeOfflineHint =>
+      'You seem to be offline. A connection is required to start the distribution.';
+
+  @override
+  String get classesOrganisationDistributeLoadErrorHint =>
+      'Unable to compute the headcount to distribute right now. Please try again later.';
+
+  @override
   String get classesDistributionResultEyebrow => 'Gender distribution';
 
   @override
@@ -422,8 +445,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classesOrganisationTransferInProgress => 'Transfer in progress...';
 
   @override
-  String get classesOrganisationTransferSuccess =>
-      'Transfer completed successfully.';
+  String get classesOrganisationTransferQueued =>
+      'Transfer saved — pending synchronization.';
+
+  @override
+  String get classesOrganisationTransferPendingBadge => 'Pending';
 
   @override
   String get classesOrganisationTransferNoTarget =>
@@ -486,6 +512,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classesOrganisationAssignDialogTitle => 'Assign the student';
+
+  @override
+  String get classesOrganisationAssignSuccess =>
+      'Student assigned to the class.';
+
+  @override
+  String get classesOrganisationAssignRejected =>
+      'Assignment refused: this student already has a class, or their enrolment is not on this level. Refresh the list.';
+
+  @override
+  String get classesOrganisationAssignNotFound =>
+      'Class or enrolment not found. Refresh the list.';
 
   @override
   String classesOrganisationLoadingClassroomsCount(int count) {
@@ -629,12 +667,14 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$classCount classes',
       one: '1 class',
+      zero: '0 classes',
     );
     String _temp1 = intl.Intl.pluralLogic(
       courseCount,
       locale: localeName,
       other: '$courseCount courses',
       one: '1 course',
+      zero: '0 courses',
     );
     return '$_temp0 · $_temp1';
   }
@@ -652,6 +692,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count courses',
       one: '1 course',
+      zero: '0 courses',
     );
     return '$_temp0';
   }
@@ -749,6 +790,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count to grade',
       one: '1 to grade',
+      zero: '0 to grade',
     );
     return '$_temp0';
   }
@@ -800,6 +842,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$evals evals.',
       one: '1 eval.',
+      zero: '0 eval.',
     );
     return '$saisies/$total marks · $_temp0';
   }
@@ -850,6 +893,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count students expected',
       one: '1 student expected',
+      zero: '0 students expected',
     );
     return '$_temp0';
   }
@@ -966,7 +1010,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateFieldChapitres => 'Related chapters';
 
   @override
-  String get evalCreateChapitresComingSoon => 'Coming soon';
+  String get evalCreateChapitresEmpty =>
+      'No chapters available for this course';
 
   @override
   String get evalCreateCancel => 'Cancel';
@@ -981,6 +1026,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: 'The $count students in $classroom will be added',
       one: 'The student in $classroom will be added',
+      zero: 'No student in $classroom will be added',
     );
     return '$_temp0 with the “Pending” status.';
   }
@@ -995,6 +1041,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get evalCreateClosedPeriodError =>
       'Closed period: you can\'t add an evaluation to it.';
+
+  @override
+  String get evalCreateMaxReachedError => 'Entry cap reached for this date.';
+
+  @override
+  String get evalRejectionPeriodClosed => 'Rejected: closed period';
+
+  @override
+  String get evalRejectionExamNotAllowed => 'Rejected: exam not allowed';
+
+  @override
+  String get evalRejectionMaxReached => 'Rejected: cap reached';
+
+  @override
+  String get evalRejectionGeneric => 'Rejected by the server';
+
+  @override
+  String get noteRejectionUnknownEvaluation =>
+      'Evaluation unknown to the server';
+
+  @override
+  String get noteRejectionPeriodeClose => 'Closed period';
+
+  @override
+  String get noteRejectionInvalid => 'Invalid grade';
+
+  @override
+  String get noteRejectionContextUnavailable => 'Context unavailable';
+
+  @override
+  String get noteRejectionGeneric => 'Rejected by the server';
 
   @override
   String get evalDetailBack => 'Back to course';
@@ -1033,6 +1110,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count graded',
       one: '$count graded',
+      zero: '$count graded',
     );
     return '$_temp0';
   }
@@ -1104,6 +1182,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count grades above the maximum',
       one: '1 grade above the maximum',
+      zero: '0 grades above the maximum',
     );
     return '$_temp0';
   }
@@ -1121,6 +1200,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$notees graded',
       one: '$notees graded',
+      zero: '$notees graded',
     );
     return 'Grades saved — $_temp0 · $enAttente pending';
   }
@@ -1176,8 +1256,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accueilBannerGreetingGeneric => 'Hello';
 
   @override
-  String get accueilBannerContextTail =>
-      'Here is the essential view of your school today.';
+  String accueilBannerSchoolLocation(String school, String locality) {
+    return '$school · $locality';
+  }
+
+  @override
+  String accueilBannerSchoolYear(String year) {
+    return 'School year $year';
+  }
 
   @override
   String get accueilModulesEyebrow => 'Your modules';
@@ -1187,7 +1273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.';
+      'Six modules cover the life of the school — each card opens its dashboard or its pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -1202,12 +1288,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Class composition and student lists by cycle.';
 
   @override
+  String get accueilModuleCoursDescription =>
+      'Weekly timetable and follow-up of your courses.';
+
+  @override
+  String get accueilModuleResultatsDescription =>
+      'Percentages by period, for a whole class or a single student.';
+
+  @override
   String get accueilModuleDisciplinesDescription =>
       'Daily attendance, disciplinary records and student follow-up.';
 
   @override
-  String accueilModuleCardSemantics(String module) {
-    return '$module — open the dashboard';
+  String accueilModulePageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accueilModuleCardSemantics(String module, String page) {
+    return '$module — open $page';
+  }
+
+  @override
+  String accueilSubModuleSemantics(String module, String page) {
+    return '$page — $module module';
   }
 
   @override
@@ -1249,10 +1359,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get searchFormSubtitleFirstRegistration =>
       'Filter the enrollments list';
-
-  @override
-  String get searchFormSubtitlePreRegistration =>
-      'Online requests received, pending validation';
 
   @override
   String get reRegistrationSearchHint =>
@@ -1309,6 +1415,67 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reRegistrationSearchInvitationMessage =>
       'Fill the form above then click Search to display enrollment files.';
+
+  @override
+  String get preRegistrationSearchHint =>
+      'Find a pre-registration by student or by desired cycle/level';
+
+  @override
+  String get preRegistrationSearchHelpPill =>
+      'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.';
+
+  @override
+  String get preRegistrationSearchTitle => 'Search a pre-registration';
+
+  @override
+  String get preRegistrationSearchByNameGroup => 'By name';
+
+  @override
+  String get preRegistrationSearchByLevelGroup => 'By cycle / level';
+
+  @override
+  String get preRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get preRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get preRegistrationSearchModeNameBadge => 'Name';
+
+  @override
+  String get preRegistrationSearchModeLevelBadge => 'Cycle / level';
+
+  @override
+  String get preRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
+
+  @override
+  String get preRegistrationSearchInvitationTitle =>
+      'Start a pre-registration search';
+
+  @override
+  String get preRegistrationSearchInvitationMessage =>
+      'Fill the form above then click Search to display requests.';
+
+  @override
+  String get firstRegistrationSearchByStudentGroup => 'By student';
+
+  @override
+  String get firstRegistrationSearchByLevelGroup => 'By target level';
+
+  @override
+  String get firstRegistrationSearchOrSeparator => 'OR';
+
+  @override
+  String get firstRegistrationSearchActiveModeLabel => 'Active search by:';
+
+  @override
+  String get firstRegistrationSearchModeStudentBadge => 'Student';
+
+  @override
+  String get firstRegistrationSearchModeLevelBadge => 'Level';
+
+  @override
+  String get firstRegistrationSearchLevelPlaceholder => 'Choose a cycle';
 
   @override
   String get firstName => 'First Name';
@@ -1489,18 +1656,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrollmentDetailLoadErrorTitle => 'Unable to load enrollment file';
 
   @override
-  String get enrollmentDetailLoadErrorFallback =>
-      'An error occurred while loading enrollment details.';
-
-  @override
   String get enrollmentDetailRetryAction => 'Retry';
-
-  @override
-  String get enrollmentDetailNotFoundTitle => 'Details not found';
-
-  @override
-  String get enrollmentDetailNotFoundMessage =>
-      'This enrollment file does not exist or is no longer available.';
 
   @override
   String get gender => 'Gender';
@@ -1571,6 +1727,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String guardianUnlinkError(String message) {
     return 'Failed to remove guardian: $message';
   }
+
+  @override
+  String get guardianSearchAction => 'Search for a guardian';
+
+  @override
+  String get guardianSearchDialogTitle => 'Search for an existing guardian';
+
+  @override
+  String get guardianSearchHint =>
+      'Enter at least one criterion (name or phone number)';
+
+  @override
+  String get guardianSearchEmptyTitle => 'No guardian found';
+
+  @override
+  String get guardianSearchEmptyDescription =>
+      'No guardian matches these criteria. Check your input or add them as a new guardian.';
+
+  @override
+  String get guardianSearchAlreadyAddedError =>
+      'This guardian has already been added to this enrollment.';
+
+  @override
+  String get guardianSearchIdentityLockedHint =>
+      'Details from an existing record — not editable here.';
+
+  @override
+  String get guardianSearchErrorRetry => 'Retry';
 
   @override
   String get schoolFees => 'School Fees';
@@ -1779,6 +1963,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get targetLevelLabelHelp => 'Target level for this enrollment.';
 
   @override
+  String get targetLevelAutoBadge => 'Auto';
+
+  @override
+  String get targetLevelAutoBadgeHelp =>
+      'Class automatically computed from last year\'s class. Change the cycle or level to override it.';
+
+  @override
   String get optionLabel => 'Option';
 
   @override
@@ -1908,6 +2099,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journeyCloseAction => 'Close';
 
   @override
+  String get wizardExitConfirmTitle => 'Leave the enrollment?';
+
+  @override
+  String get wizardExitConfirmMessage =>
+      'An enrollment is in progress. Unsaved changes on the current step will be lost; steps already saved remain available as a draft.';
+
+  @override
+  String get wizardExitConfirmAction => 'Leave';
+
+  @override
+  String get wizardExitStayAction => 'Keep editing';
+
+  @override
+  String get enrollmentFinalizeConfirmTitle => 'Validate the enrollment?';
+
+  @override
+  String get enrollmentFinalizeConfirmMessage =>
+      'This action confirms the file and queues it for synchronization. Review the summary before validating.';
+
+  @override
+  String get enrollmentFinalizeProcessingTitle => 'Validating enrollment…';
+
+  @override
+  String get enrollmentFinalizeSuccessTitle => 'Enrollment validated';
+
+  @override
+  String get enrollmentFinalizeErrorTitle => 'Validation failed';
+
+  @override
+  String get enrollmentFinalizeRetryAction => 'Retry';
+
+  @override
+  String get enrollmentFinalizeCloseAction => 'Close';
+
+  @override
+  String get enrollmentFinalizeContinueAction => 'Continue';
+
+  @override
   String get stepSaveStateIdle => 'No input yet';
 
   @override
@@ -1952,14 +2181,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToFirstRegistration => 'Go to First Registration';
-
-  @override
-  String get enrollmentStatusUpdateSuccess => 'Status updated successfully.';
-
-  @override
-  String enrollmentStatusUpdateError(String message) {
-    return 'Failed to update status: $message';
-  }
 
   @override
   String get personalInfoSaveHintBeforeContinue =>
@@ -2077,6 +2298,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enrollmentStatusInProgress => 'In Progress';
+
+  @override
+  String get enrollmentDraftBadge => 'Draft';
+
+  @override
+  String get enrollmentTypeReEnrollment => 'Re-enrollment';
+
+  @override
+  String get enrollmentReenrollmentCandidateBadge => 'To re-enroll';
+
+  @override
+  String get enrollmentReRegisteredBadge => 'Re-enrolled';
 
   @override
   String get enrollmentStatusAdminCompleted => 'Admin Completed';
@@ -2279,6 +2512,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentChargeFeeCodeOther => 'Other';
 
   @override
+  String studentChargeDueAtLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Due: $dateString';
+  }
+
+  @override
   String get studentChargeFeeCodeFallback => 'School fee';
 
   @override
@@ -2346,6 +2587,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationBalanceUpToDatePill => 'Up to date';
+
+  @override
+  String get financePendingSyncBadge => 'Pending sync';
+
+  @override
+  String facturationFreshnessAt(String time) {
+    return 'Ledger up to date at $time';
+  }
+
+  @override
+  String get facturationFreshnessNever => 'Ledger not synced';
 
   @override
   String facturationChargeLineRemainingSuffix(String amount) {
@@ -2525,6 +2777,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPaymentDownloadReceiptLabel => 'Download receipt';
+
+  @override
+  String get facturationPaymentReceiptPendingSyncHint =>
+      'The receipt will be available once the payment has been synchronised.';
+
+  @override
+  String get facturationPaymentReceiptNumberPending =>
+      'Awaiting synchronisation';
 
   @override
   String get facturationPaymentCloseLabel => 'Close';
@@ -2923,6 +3183,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentConfirmValidate => 'Confirm';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmTitle =>
+      'Close this collection?';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmMessage =>
+      'The information you entered will be lost if you close now.';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmAction => 'Close';
+
+  @override
+  String get facturationCreatePaymentCloseConfirmCancel => 'Keep editing';
 
   @override
   String get facturationCreatePaymentSuccessMessage =>
@@ -3424,6 +3698,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceMarkAllPresentAction => 'All present';
 
   @override
+  String get attendanceCallNotTakenTitle => 'Attendance not taken';
+
+  @override
+  String get attendanceCallNotTakenMessage =>
+      'No attendance has been recorded for this day yet. Save to record it.';
+
+  @override
   String get attendanceSaveOverlayEyebrow => 'Attendance';
 
   @override
@@ -3551,6 +3832,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count school days',
       one: '1 school day',
+      zero: '0 school days',
     );
     return '$_temp0';
   }
@@ -3624,6 +3906,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return 'Week of $dateString';
   }
+
+  @override
+  String get presenceOfflineSyncPendingTitle => 'Sync in progress';
+
+  @override
+  String get presenceOfflineSyncPendingMessage =>
+      'Local attendance data isn\'t complete enough yet to compute a reliable statistic. Try again in a moment.';
 
   @override
   String get disciplinaryUnknownValue => '-';
@@ -3844,7 +4133,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disciplinaryAdvanceClose => 'Close';
 
   @override
+  String get disciplinaryStatusOfflinePending => 'In progress';
+
+  @override
+  String get disciplinaryStatusOfflineResolved => 'Resolved';
+
+  @override
+  String get disciplinaryStatusOfflineDismissed => 'Dismissed';
+
+  @override
+  String get disciplinaryAdvanceResolve => 'Resolve';
+
+  @override
+  String get disciplinaryAdvanceDismiss => 'Dismiss';
+
+  @override
+  String get disciplinaryCaseResolvedLabel => 'Case resolved';
+
+  @override
+  String get disciplinaryCaseDismissedLabel => 'Dismissed';
+
+  @override
   String get disciplinaryCaseClosedLabel => 'Case closed';
+
+  @override
+  String disciplinaryCommentsCountBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '1 comment',
+      zero: '0 comments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get disciplinaryCommentsDialogTitle => 'Comments';
+
+  @override
+  String get disciplinaryCommentsEmpty => 'No comments yet.';
+
+  @override
+  String get disciplinaryCommentAddHint => 'Add a comment…';
+
+  @override
+  String get disciplinaryCommentAddAction => 'Add';
+
+  @override
+  String get disciplinaryCommentsCloseAction => 'Close';
+
+  @override
+  String get disciplinaryFreshnessSynced => 'Up to date';
+
+  @override
+  String get disciplinaryFreshnessLocal => 'This device only';
 
   @override
   String disciplinaryCasesCountPill(int count) {
@@ -3853,6 +4196,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count cases',
       one: '1 case',
+      zero: '0 case',
     );
     return '$_temp0';
   }
@@ -3864,6 +4208,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count open',
       one: '1 open',
+      zero: '0 open',
     );
     return '$_temp0';
   }
@@ -3875,6 +4220,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count serious',
       one: '1 serious',
+      zero: '0 serious',
     );
     return '$_temp0';
   }
@@ -3961,6 +4307,138 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusSyncConflict => 'Conflict';
+
+  @override
+  String get statusAuthRequired => 'Sign-in required';
+
+  @override
+  String get syncLastSyncJustNow => 'Just now';
+
+  @override
+  String syncLastSyncMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min ago',
+      one: '1 min ago',
+      zero: '0 min ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncLastSyncHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count h ago',
+      one: '1 h ago',
+      zero: '0 h ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncLastSyncDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+      zero: '0 days ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncErrorsTitle => 'Failed writes';
+
+  @override
+  String get syncErrorsSubtitle =>
+      'These records were rejected by the server. They will not be sent again on their own.';
+
+  @override
+  String get syncErrorsRetry => 'Retry';
+
+  @override
+  String get syncErrorsRetryAll => 'Retry all';
+
+  @override
+  String get syncErrorsEmptyLabel => 'No failed writes';
+
+  @override
+  String get syncErrorsEmptyDescription =>
+      'Everything entered has been sent or is waiting its turn.';
+
+  @override
+  String get syncErrorsLoadFailedTitle => 'List unavailable';
+
+  @override
+  String get syncErrorsLoadFailedMessage =>
+      'Could not read the local send queue.';
+
+  @override
+  String get syncErrorsNotReplayable =>
+      'This attendance record cannot be resent as is: the absence list may have changed since. Reopen the day and validate it again.';
+
+  @override
+  String get syncErrorsClose => 'Close';
+
+  @override
+  String syncErrorsQueuedAt(DateTime date, DateTime time) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+    final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$dateString at $timeString';
+  }
+
+  @override
+  String get syncAggregateEnrollment => 'Enrollment';
+
+  @override
+  String get syncAggregatePayment => 'Payment';
+
+  @override
+  String get syncAggregateAttendance => 'Attendance';
+
+  @override
+  String get syncAggregateDisciplinaryCase => 'Disciplinary case';
+
+  @override
+  String get syncAggregateNotesBatch => 'Grade batch';
+
+  @override
+  String get syncAggregateEvaluation => 'Assessment';
+
+  @override
+  String get syncAggregateClassroomTransfer => 'Class transfer';
+
+  @override
+  String get offlineQueuedGeneric => 'Saved — pending synchronization';
+
+  @override
+  String get offlinePaymentQueued => 'Payment saved — pending synchronization';
+
+  @override
+  String get offlineEnrollmentQueued =>
+      'Enrollment saved — pending synchronization';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Attendance saved — pending synchronization';
+
+  @override
+  String get offlineDisciplinaryCaseQueued =>
+      'Disciplinary case saved — pending synchronization';
+
+  @override
+  String get offlineDisciplinaryCaseUpdatedQueued =>
+      'Case updated — pending synchronization';
+
+  @override
+  String get offlineWriteError => 'Local save failed';
 
   @override
   String get previous => 'Previous';
@@ -4551,9 +5029,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Loading the attendance dashboard';
 
   @override
-  String get disciplinaryFolderBreadcrumb => 'Discipline list';
-
-  @override
   String get dossierTabsA11yLabel => 'Student folder tabs';
 
   @override
@@ -4575,6 +5050,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count open cases',
       one: '1 open case',
+      zero: '0 open case',
     );
     return '$_temp0';
   }
@@ -4628,6 +5104,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count sessions',
       one: '$count session',
+      zero: '$count sessions',
     );
     return '$_temp0 · $hoursString h of class';
   }
@@ -4929,6 +5406,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count students found',
       one: '1 student found',
+      zero: '0 students found',
     );
     return '$_temp0';
   }
@@ -5077,4 +5555,431 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get resultatsErrorUnknownMessage =>
       'An unexpected problem occurred. Please try again.';
+
+  @override
+  String get syncErrorsOtherAccountTitle => 'Waiting for another account';
+
+  @override
+  String syncErrorsOtherAccountNamed(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count writes waiting for $name',
+      one: '$count write waiting for $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountAnonymous(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count writes waiting for another account',
+      one: '$count write waiting for another account',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncErrorsOtherAccountOldest(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'oldest from $dateString';
+  }
+
+  @override
+  String get syncErrorsOtherAccountHint =>
+      'They will be sent when that account signs back in on this tablet.';
+
+  @override
+  String syncErrorsForeignEntry(String name) {
+    return 'Written by $name — it has to be retried from their own session.';
+  }
+
+  @override
+  String get syncErrorsForeignEntryAnonymous =>
+      'Written by another account — it has to be retried from that session.';
+
+  @override
+  String get syncErrorsHeldTitle => 'Waiting';
+
+  @override
+  String get syncErrorsHeldSubtitle =>
+      'These writes are kept and will be sent as soon as their condition clears.';
+
+  @override
+  String get editiqueViewerReceiptTitle => 'Payment receipt';
+
+  @override
+  String get editiqueViewerLoadingTitle => 'Preparing the document…';
+
+  @override
+  String get editiqueViewerLoadingMessage =>
+      'The server is producing the document. This may take a few seconds.';
+
+  @override
+  String get editiqueViewerPrintLabel => 'Print';
+
+  @override
+  String get editiqueViewerShareLabel => 'Share';
+
+  @override
+  String get editiqueViewerCloseLabel => 'Close';
+
+  @override
+  String get editiqueViewerActionFailed =>
+      'This action could not be completed on this device.';
+
+  @override
+  String editiqueViewerDocumentNumberLabel(String number) {
+    return 'Document no. $number';
+  }
+
+  @override
+  String get editiqueErrorNetworkTitle => 'No connection';
+
+  @override
+  String get editiqueErrorNetworkMessage =>
+      'The document is produced by the server. Reconnect and try again — nothing was issued.';
+
+  @override
+  String get editiqueErrorUncertainTitle => 'Undetermined outcome';
+
+  @override
+  String get editiqueErrorUncertainMessage =>
+      'The server did not answer in time. The document may have been issued: check before generating a new one.';
+
+  @override
+  String get editiqueErrorSessionExpiredTitle => 'Session expired';
+
+  @override
+  String get editiqueErrorSessionExpiredMessage =>
+      'Sign in again to resume issuing the document.';
+
+  @override
+  String get editiqueErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get editiqueErrorForbiddenMessage =>
+      'You do not have the rights required to issue this document.';
+
+  @override
+  String get editiqueErrorNotFoundTitle => 'Document unavailable';
+
+  @override
+  String get editiqueErrorNotFoundMessage =>
+      'The server cannot find the elements required for this document.';
+
+  @override
+  String get editiqueErrorInvalidTitle => 'Cannot be issued';
+
+  @override
+  String get editiqueErrorInvalidMessage =>
+      'The server rejected the request. Check the file before trying again.';
+
+  @override
+  String get editiqueErrorServerTitle => 'Server error';
+
+  @override
+  String get editiqueErrorServerMessage =>
+      'The document could not be produced. Try again shortly.';
+
+  @override
+  String get editiqueErrorRetryLabel => 'Try again';
+
+  @override
+  String get editiqueErrorReconnectLabel => 'Sign in again';
+
+  @override
+  String get editiqueViewerStatementTitle => 'Account statement';
+
+  @override
+  String get editiqueViewerAttestationTitle => 'Enrolment certificate';
+
+  @override
+  String get editiqueViewerNotePerceptionTitle => 'Fee notice';
+
+  @override
+  String get editiqueViewerClearanceTitle => 'Financial clearance';
+
+  @override
+  String editiqueErrorServerDetailLabel(String detail) {
+    return 'Reason returned by the server: $detail';
+  }
+
+  @override
+  String get facturationDetailStatementLabel => 'Account statement';
+
+  @override
+  String get facturationDetailStatementNoChargesHint =>
+      'No fee for the year: the statement cannot be produced.';
+
+  @override
+  String get facturationDetailStatementPendingSyncHint =>
+      'Student not synced yet: the statement will be available after the next sync.';
+
+  @override
+  String get facturationDetailStatementOfflineHint =>
+      'Offline: the statement is produced by the server.';
+
+  @override
+  String get facturationDetailStatementConfirmTitle =>
+      'Generate an account statement?';
+
+  @override
+  String get facturationDetailStatementConfirmMessage =>
+      'The server will produce a new numbered document, dated now. Statements already handed out remain valid — they are not replaced.';
+
+  @override
+  String get facturationDetailStatementConfirmAction => 'Generate';
+
+  @override
+  String get facturationDetailStatementConfirmCancel => 'Cancel';
+
+  @override
+  String get menuDocuments => 'Documents';
+
+  @override
+  String get subMenuDocumentsStudent => 'Student documents';
+
+  @override
+  String get documentsSearchTitle => 'Student documents';
+
+  @override
+  String get documentsSearchHelpBanner =>
+      'Search for one student, or a whole class, then open their document catalogue.';
+
+  @override
+  String get documentsSearchByStudentGroup => 'By student';
+
+  @override
+  String get documentsSearchByClassGroup => 'By class';
+
+  @override
+  String get documentsSearchOrSeparator => 'OR';
+
+  @override
+  String get documentsSearchActiveModeLabel => 'Active mode';
+
+  @override
+  String get documentsSearchModeStudentBadge => 'Student';
+
+  @override
+  String get documentsSearchModeClassBadge => 'Class';
+
+  @override
+  String get documentsSearchCycleLabel => 'Cycle';
+
+  @override
+  String get documentsSearchLevelLabel => 'Level';
+
+  @override
+  String get documentsSearchLevelPlaceholder => 'Pick a cycle first';
+
+  @override
+  String get documentsSearchInvitationTitle =>
+      'Find the student, open their documents';
+
+  @override
+  String get documentsSearchInvitationMessage =>
+      'Enrolment certificate, fee notice, payment receipt, account statement and financial clearance: the documents issuable for a student.';
+
+  @override
+  String get documentsEmptyTitle => 'No student found';
+
+  @override
+  String get documentsNoResultsDescription =>
+      'No student enrolled this year matches these criteria.';
+
+  @override
+  String get documentsOpenCatalogLabel => 'Open documents';
+
+  @override
+  String get documentsCatalogEyebrow => 'Documents';
+
+  @override
+  String get documentsCatalogUnknownStudent => 'Student';
+
+  @override
+  String get documentsGroupScolariteTitle => 'Schooling';
+
+  @override
+  String get documentsGroupScolariteSubtitle => 'Enrolment file';
+
+  @override
+  String get documentsGroupFinancesTitle => 'Finance';
+
+  @override
+  String get documentsGroupFinancesSubtitle =>
+      'Fee notices, receipts and settlement certificates';
+
+  @override
+  String get documentsNatureArchivedLabel => 'Archived';
+
+  @override
+  String get documentsNatureTimestampedLabel => 'Timestamped';
+
+  @override
+  String get documentsHintAttestation =>
+      'Archived document: asking again serves exactly the same file, under the same number.';
+
+  @override
+  String get documentsHintNotePerception =>
+      'Immutable accounting document, issued once per student and per year.';
+
+  @override
+  String get documentsHintReceipt =>
+      'One receipt per payment. It is issued from Billing, when the cash is taken in.';
+
+  @override
+  String get documentsHintStatement =>
+      'Snapshot of the account at the time of the request: every issue produces a new numbered document.';
+
+  @override
+  String get documentsHintClearance =>
+      'Certifies the student is settled as of the request date. Not archived, renumbered on every issue.';
+
+  @override
+  String get documentsActionEmitLabel => 'Issue';
+
+  @override
+  String get documentsActionConsultLabel => 'View';
+
+  @override
+  String get documentsActionGenerateLabel => 'Generate now';
+
+  @override
+  String get documentsActionBusyLabel => 'Generating…';
+
+  @override
+  String get documentsActionFailedNotice =>
+      'Generation failed. The document was not produced.';
+
+  @override
+  String get documentsBlockedPendingSyncNotice =>
+      'Student not synced yet: the document will be available after the next sync.';
+
+  @override
+  String get documentsBlockedEnrollmentPendingSyncNotice =>
+      'Enrolment not synced yet: the certificate will be available after the next sync.';
+
+  @override
+  String get documentsBlockedMissingEnrollmentNotice =>
+      'Enrolment not reachable from this link: reopen the student from the list.';
+
+  @override
+  String get documentsBlockedOfflineNotice =>
+      'Offline: this document is produced by the server.';
+
+  @override
+  String documentsConfirmGenerateTitle(String document) {
+    return 'Generate: $document?';
+  }
+
+  @override
+  String get documentsConfirmGenerateMessage =>
+      'The server will produce a new numbered document, dated now. Documents already handed out remain valid — they are not replaced.';
+
+  @override
+  String get documentsConfirmClearanceWarning =>
+      'The clearance is issued whatever the balance: a student who is not settled will receive a document marked “NOT SETTLED”.';
+
+  @override
+  String get documentsConfirmGenerateAction => 'Generate';
+
+  @override
+  String get documentsConfirmGenerateCancel => 'Cancel';
+
+  @override
+  String documentsLastIssueSubtitle(String date, String reference) {
+    return 'Last issued $date · ref. $reference';
+  }
+
+  @override
+  String documentsCancelledNotice(String date) {
+    return 'Document cancelled by the school on $date.';
+  }
+
+  @override
+  String documentsCancelledWithReasonNotice(String date, String reason) {
+    return 'Document cancelled by the school on $date — $reason';
+  }
+
+  @override
+  String facturationReceiptCancelledNotice(String date) {
+    return 'Receipt cancelled by the school on $date.';
+  }
+
+  @override
+  String facturationReceiptCancelledWithReasonNotice(
+    String date,
+    String reason,
+  ) {
+    return 'Receipt cancelled by the school on $date — $reason';
+  }
+
+  @override
+  String get ticketProvisionalBanner => 'Provisional';
+
+  @override
+  String get ticketReferenceLabel => 'Ref.';
+
+  @override
+  String get ticketCashierLabel => 'Cashier:';
+
+  @override
+  String get ticketStudentLabel => 'Student:';
+
+  @override
+  String get ticketMatriculationLabel => 'Student no.:';
+
+  @override
+  String get ticketClassroomLabel => 'Class:';
+
+  @override
+  String get ticketAmountReceivedLabel => 'Amount received';
+
+  @override
+  String get ticketAllocationsLabel => 'Breakdown';
+
+  @override
+  String get ticketBalanceLabel => 'Balance';
+
+  @override
+  String get ticketBalanceReservation => 'subject to synchronisation';
+
+  @override
+  String get ticketKeepNotice =>
+      'Keep this ticket until you receive your final receipt.';
+
+  @override
+  String get ticketPrintLabel => 'Print ticket';
+
+  @override
+  String get ticketPrintFailed =>
+      'Printing unavailable: the ticket could not be produced.';
+
+  @override
+  String get ticketCutNotice => 'Cut along the frame.';
+
+  @override
+  String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
+
+  @override
+  String get paymentAnomalyBannerFallback =>
+      'A payment exceeds the amount still due.';
+
+  @override
+  String get paymentAnomalyAcknowledgeLabel => 'Handled';
+
+  @override
+  String paymentAnomalyOthersPending(int count) {
+    return '$count more pending';
+  }
+
+  @override
+  String get documentsBlockedEnrollmentUnreadableNotice =>
+      'Enrolment not readable on this tablet: the certificate is unavailable here.';
 }

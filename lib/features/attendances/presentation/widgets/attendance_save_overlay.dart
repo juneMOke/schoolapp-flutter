@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -9,13 +10,16 @@ import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_event.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 Future<void> showAttendanceSaveOverlay({
   required BuildContext context,
   required AttendanceBloc attendanceBloc,
+  required AttendanceOfflineBloc offlineBloc,
   required String classroomName,
   required DateTime date,
   required int presentCount,
@@ -26,8 +30,14 @@ Future<void> showAttendanceSaveOverlay({
     context: context,
     barrierDismissible: false,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => BlocProvider<AttendanceBloc>.value(
-      value: attendanceBloc,
+    // La boîte de dialogue est montée sous le root navigator : on ré-expose les
+    // deux BLoCs. Lecture du contexte de recherche (draft, active*) via
+    // AttendanceBloc ; écriture offline-first via AttendanceOfflineBloc.
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider<AttendanceBloc>.value(value: attendanceBloc),
+        BlocProvider<AttendanceOfflineBloc>.value(value: offlineBloc),
+      ],
       child: AttendanceSaveOverlay(
         classroomName: classroomName,
         date: date,
@@ -64,7 +74,6 @@ class AttendanceSaveOverlay extends StatefulWidget {
 class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
   _Phase _phase = _Phase.processing;
   bool _awaitingBloc = false;
-  EteeloErrorType _errorType = EteeloErrorType.unknown;
   String? _incidentCode;
 
   @override
@@ -77,23 +86,52 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
 
   void _startSave() {
     if (_awaitingBloc) return;
+
+    // Contexte de recherche courant (renseigné au fetch), repris tel quel pour
+    // l'écriture offline dispatchée ci-dessous.
+    final attendanceState = context.read<AttendanceBloc>().state;
+    final classroomId = attendanceState.activeClassroomId;
+    final academicYearId = attendanceState.activeAcademicYearId;
+    final date = attendanceState.activeDate;
+
+    if (classroomId == null || academicYearId == null || date == null) {
+      setState(() {
+        _phase = _Phase.error;
+        _incidentCode = _generateIncidentCode();
+      });
+      return;
+    }
+
     setState(() {
       _phase = _Phase.processing;
       _awaitingBloc = true;
     });
-    context.read<AttendanceBloc>().add(const AttendanceSaveRequested());
+
+    // Offline-first : on remplace l'appel online par une écriture locale mise
+    // en file outbox (même liste complète d'élèves : draftRows.toUpdate()).
+    context.read<AttendanceOfflineBloc>().add(
+      RecordDailyAttendanceRequested(
+        classroomId: classroomId,
+        date: date,
+        academicYearId: academicYearId,
+        updates: attendanceState.draftRows
+            .map((row) => row.toUpdate())
+            .toList(growable: false),
+      ),
+    );
   }
 
-  void _onBlocState(AttendanceState state) {
+  void _onOfflineState(AttendanceOfflineState state) {
     if (!mounted || !_awaitingBloc) return;
-    if (state.saveStatus == AttendanceStatus.success) {
+    if (state is AttendanceOfflinePendingSync) {
       _awaitingBloc = false;
+      // Pastille globale de synchronisation + push opportuniste en arrière-plan.
+      context.read<SyncStatusCubit>().notifyLocalWrite();
       setState(() => _phase = _Phase.success);
-    } else if (state.saveStatus == AttendanceStatus.failure) {
+    } else if (state is AttendanceOfflineError) {
       _awaitingBloc = false;
       setState(() {
         _phase = _Phase.error;
-        _errorType = _mapErrorType(state.saveErrorType);
         _incidentCode = _generateIncidentCode();
       });
     }
@@ -102,25 +140,14 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
   String _generateIncidentCode() =>
       'ATT-${DateTime.now().millisecondsSinceEpoch.remainder(1000000)}';
 
-  EteeloErrorType _mapErrorType(AttendanceErrorType type) => switch (type) {
-    AttendanceErrorType.network => EteeloErrorType.network,
-    AttendanceErrorType.unauthorized ||
-    AttendanceErrorType.auth ||
-    AttendanceErrorType.invalidCredentials => EteeloErrorType.unauthorized,
-    AttendanceErrorType.forbidden => EteeloErrorType.forbidden,
-    AttendanceErrorType.server ||
-    AttendanceErrorType.storage => EteeloErrorType.server,
-    _ => EteeloErrorType.unknown,
-  };
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocListener<AttendanceBloc, AttendanceState>(
+    return BlocListener<AttendanceOfflineBloc, AttendanceOfflineState>(
       listenWhen: (previous, current) =>
-          previous.saveStatus != current.saveStatus,
-      listener: (context, state) => _onBlocState(state),
+          previous.runtimeType != current.runtimeType,
+      listener: (context, state) => _onOfflineState(state),
       child: PopScope(
         canPop: _phase != _Phase.processing,
         child: Dialog(
@@ -157,7 +184,9 @@ class _AttendanceSaveOverlayState extends State<AttendanceSaveOverlay> {
                       ),
                       _Phase.error => _ErrorBody(
                         l10n: l10n,
-                        errorType: _errorType,
+                        // Erreur d'écriture locale (base/outbox) : type
+                        // générique, l'anatomie « unknown » propose Réessayer.
+                        errorType: EteeloErrorType.unknown,
                         incidentCode: _incidentCode,
                         onRetry: _startSave,
                         onClose: () => Navigator.of(context).pop(),
@@ -320,7 +349,9 @@ class _SuccessBody extends StatelessWidget {
         ),
         const SizedBox(height: AppDimensions.spacingXS),
         Text(
-          l10n.attendanceSaveSuccessSubtitle,
+          // Écriture locale confirmée : retour visuel « en attente de
+          // synchronisation » (offline-first).
+          l10n.offlineAttendanceQueued,
           textAlign: TextAlign.center,
           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
         ),
@@ -448,12 +479,18 @@ class _ErrorBody extends StatelessWidget {
     return EteeloErrorResult(
       type: errorType,
       title: l10n.attendanceSaveErrorTitle,
-      message: l10n.attendanceSaveErrorMessage,
+      // Échec de l'écriture locale offline (base/outbox).
+      message: l10n.offlineWriteError,
       incidentCodeLabel: incidentCode,
-      primaryAction: EteeloButton.primary(
-        label: l10n.attendanceSaveRetryAction,
-        onPressed: onRetry,
-        fullWidth: false,
+      // Gel READ_ONLY (ADR-010) : « Réessayer » relance l'écriture de l'appel
+      // — le mode peut avoir basculé pendant que l'overlay est ouvert.
+      // « Fermer » (navigation) reste libre.
+      primaryAction: SessionWriteGate(
+        child: EteeloButton.primary(
+          label: l10n.attendanceSaveRetryAction,
+          onPressed: onRetry,
+          fullWidth: false,
+        ),
       ),
       secondaryAction: EteeloButton.ghost(
         label: l10n.attendanceSaveCloseAction,

@@ -18,10 +18,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
     };
 
 /// Trois cartes radio de type (spec §2). Choisir un type applique ses défauts
-/// (géré par l'appelant via [onChanged]).
+/// (géré par l'appelant via [onChanged]). [disabledTypes] grise une carte sans
+/// la retirer (ex. EXAMEN sur une branche dont `maxExamenParPeriodeScolaire`
+/// est `null` — jamais traité comme 0, DF-M).
 class EvalTypeCards extends StatelessWidget {
   final TypeEvaluation selected;
   final ValueChanged<TypeEvaluation> onChanged;
+  final Set<TypeEvaluation> disabledTypes;
 
   static const List<TypeEvaluation> _types = [
     TypeEvaluation.interro,
@@ -33,6 +36,7 @@ class EvalTypeCards extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onChanged,
+    this.disabledTypes = const {},
   });
 
   @override
@@ -44,6 +48,7 @@ class EvalTypeCards extends StatelessWidget {
             child: _TypeCard(
               type: _types[i],
               isSelected: _types[i] == selected,
+              isDisabled: disabledTypes.contains(_types[i]),
               onTap: () => onChanged(_types[i]),
             ),
           ),
@@ -57,56 +62,63 @@ class EvalTypeCards extends StatelessWidget {
 class _TypeCard extends StatelessWidget {
   final TypeEvaluation type;
   final bool isSelected;
+  final bool isDisabled;
   final VoidCallback onTap;
 
   const _TypeCard({
     required this.type,
     required this.isSelected,
     required this.onTap,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final visual = evalTypeVisual(type);
+    final isActive = isSelected && !isDisabled;
     return Semantics(
       button: true,
-      selected: isSelected,
+      enabled: !isDisabled,
+      selected: isActive,
       label: typeEvaluationLabel(l10n, type),
       child: Material(
-        color: isSelected ? visual.soft : AppColors.surfaceRaised,
+        color: isActive ? visual.soft : AppColors.surfaceRaised,
         borderRadius: AppRadius.brMd,
         child: InkWell(
           borderRadius: AppRadius.brMd,
-          onTap: onTap,
+          onTap: isDisabled ? null : onTap,
           child: Container(
             height: 66,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: AppRadius.brMd,
               border: Border.all(
-                color: isSelected ? visual.color : AppColors.border,
-                width: isSelected ? 2 : 1,
+                color: isActive ? visual.color : AppColors.border,
+                width: isActive ? 2 : 1,
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  visual.icon,
-                  size: 20,
-                  color: isSelected ? visual.color : AppColors.textMuted,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  typeEvaluationLabel(l10n, type),
-                  textAlign: TextAlign.center,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: isSelected ? visual.color : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            child: Opacity(
+              opacity: isDisabled ? 0.5 : 1,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    visual.icon,
+                    size: 20,
+                    color: isActive ? visual.color : AppColors.textMuted,
                   ),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    typeEvaluationLabel(l10n, type),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: isActive ? visual.color : AppColors.textSecondary,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

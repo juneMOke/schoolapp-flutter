@@ -1,19 +1,19 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/bootstrap/domain/entities/bootstrap_classroom.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
 import 'package:school_app_flutter/features/resultats/presentation/helpers/resultats_search_mode.dart';
 
 /// Requête émise par la carte de recherche à la validation (spec §1).
 ///
 /// Réutilise les view-models de cascade de la feature `classes`
-/// ([ClassesListCycleOption] / [ClassesListLevelOption] + [BootstrapClassroom]).
+/// ([ClassesListCycleOption] / [ClassesListLevelOption] + [OfflineClassroom]).
 /// [classroom] est **toujours** renseigné (la validation l'exige) ; les noms
 /// sont vides quand non saisis (ET côté backend, vide = absent).
 class ResultatsSearchRequest extends Equatable {
   final ResultatsSearchMode mode;
   final ClassesListCycleOption cycle;
   final ClassesListLevelOption level;
-  final BootstrapClassroom classroom;
+  final OfflineClassroom classroom;
   final String nom;
   final String postnom;
   final String prenom;

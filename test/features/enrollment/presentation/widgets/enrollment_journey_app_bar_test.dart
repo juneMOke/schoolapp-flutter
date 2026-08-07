@@ -39,4 +39,28 @@ void main() {
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
   });
+
+  testWidgets(
+    'onExitRequested fourni → retour ET fermeture délèguent à la page '
+    '(aucune navigation directe)',
+    (tester) async {
+      var exitRequests = 0;
+      await tester.pumpWidget(
+        buildHost(
+          EnrollmentJourneyAppBar(
+            modeLabel: 'Nouvelle',
+            studentDisplayName: 'Jean Doe',
+            currentStep: 0,
+            totalSteps: 7,
+            onExitRequested: () => exitRequests++,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+      await tester.tap(find.byIcon(Icons.close_rounded));
+
+      expect(exitRequests, 2);
+    },
+  );
 }
