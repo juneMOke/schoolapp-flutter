@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/components/avatars/student_avatar.dart'
-    as core_avatar;
+import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_catalog_entry.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
@@ -37,6 +33,27 @@ class DocumentsCatalogPage extends StatelessWidget {
 
   const DocumentsCatalogPage({super.key, required this.intent});
 
+  /// Sur-titre de la barre : « DOCUMENTS · {classe} ».
+  String _eyebrow(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      l10n.documentsCatalogEyebrow,
+      if (intent.levelName.trim().isNotEmpty) intent.levelName,
+    ].join(' · ');
+  }
+
+  /// Nom complet, ou repli explicite : un lien profond rechargé perd le contexte
+  /// d'affichage transporté par `extra`, mais le catalogue reste ouvrable.
+  String _fullName(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (!intent.hasDisplayContext) return l10n.documentsCatalogUnknownStudent;
+    return [
+      intent.lastName,
+      intent.surname,
+      intent.firstName,
+    ].where((part) => part.trim().isNotEmpty).join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -61,20 +78,17 @@ class DocumentsCatalogPage extends StatelessWidget {
         ),
       ],
       child: AppPageBackground(
+        appBar: StudentDetailAppBar(
+          fullName: _fullName(context),
+          eyebrow: _eyebrow(context),
+          firstName: intent.firstName,
+          lastName: intent.lastName,
+          fallbackRoute: AppRoutesNames.documentsStudents,
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _CatalogHeader(intent: intent),
-                  const SizedBox(height: AppDimensions.spacingL),
-                  _CatalogGroups(intent: intent),
-                ],
-              ),
-            ),
+            child: _CatalogGroups(intent: intent),
           ),
         ),
       ),
@@ -139,91 +153,5 @@ class _CatalogGroups extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-/// En-tête compact : retour, identité de l'élève, sur-titre de classe.
-///
-/// Volontairement clair et non l'AppBar sombre pleine largeur de la spec : une
-/// AppBar sombre a déjà été refusée sur la coquille de fiche élève de la
-/// Discipline, et ce module n'a pas à trancher seul un parti pris de charte qui
-/// dépasse son périmètre.
-class _CatalogHeader extends StatelessWidget {
-  final DocumentsCatalogIntent intent;
-
-  const _CatalogHeader({required this.intent});
-
-  void _onExit(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    context.go(AppRoutesNames.documentsStudents);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final eyebrow = [
-      l10n.documentsCatalogEyebrow,
-      if (intent.levelName.trim().isNotEmpty) intent.levelName,
-    ].join(' · ');
-
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => _onExit(context),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: AppColors.textSecondary,
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-        ),
-        const SizedBox(width: AppDimensions.spacingXS),
-        core_avatar.StudentAvatar(
-          firstName: intent.firstName,
-          lastName: intent.lastName,
-          studentId: intent.studentId,
-          size: core_avatar.AvatarSize.md,
-        ),
-        const SizedBox(width: AppDimensions.spacingM),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                eyebrow.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textMuted,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _fullName(l10n),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.titleLarge.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Nom complet, ou repli explicite : un lien profond rechargé perd le contexte
-  /// d'affichage transporté par `extra`, mais le catalogue reste ouvrable.
-  String _fullName(AppLocalizations l10n) {
-    if (!intent.hasDisplayContext) return l10n.documentsCatalogUnknownStudent;
-    return [
-      intent.lastName,
-      intent.surname,
-      intent.firstName,
-    ].where((part) => part.trim().isNotEmpty).join(' ');
   }
 }
