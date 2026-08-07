@@ -11,6 +11,11 @@ class AppMotion {
   static const Duration standard = Duration(milliseconds: 220);
   static const Duration entrance = Duration(milliseconds: 260);
   static const Duration layout = Duration(milliseconds: 280);
+  // Entrée ample d'une page d'atterrissage (Accueil) : le contenu se pose au
+  // lieu d'apparaître.
+  static const Duration entranceSlow = Duration(milliseconds: 550);
+  // Décalage entre deux éléments d'une entrée en cascade.
+  static const Duration stagger = Duration(milliseconds: 60);
   static const Duration stepIn = Duration(milliseconds: 340);
   static const Duration pop = Duration(milliseconds: 420);
   static const Duration skeletonPulse = Duration(milliseconds: 1500);
