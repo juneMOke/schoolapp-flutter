@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -17,7 +18,7 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/dis
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_cases_tab.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_detail_back_button.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_dossier_tabs.dart';
-import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_student_detail_app_bar.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_open_cases_pill.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/student_attendance_summary_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -116,7 +117,7 @@ class _DisciplinaryStudentDetailPageState
 
         return AppPageBackground(
           scrollable: false,
-          appBar: DisciplinaryStudentDetailAppBar(
+          appBar: StudentDetailAppBar(
             fullName: _studentFullName(l10n),
             eyebrow: _studentEyebrow(l10n),
             firstName: intent.studentFirstName,

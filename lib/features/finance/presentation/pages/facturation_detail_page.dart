@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -178,12 +179,13 @@ class FacturationDetailPage extends StatelessWidget {
         ),
       ],
       child: AppPageBackground(
-        appBar: FacturationDetailAppBar(
+        appBar: StudentDetailAppBar(
           fullName: studentFullName,
           eyebrow: '${l10n.facturationDetailEyebrow} · ${_classLabel(l10n)}',
           firstName: intent.firstName,
           lastName: intent.lastName,
           fallbackRoute: AppRoutesNames.facturations,
+          showCloseButton: true,
           trailing: const _BillingBalanceAppBarPill(),
         ),
         child: LayoutBuilder(

@@ -1,34 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 
-/// AppBar de la fiche élève (module Discipline).
+/// AppBar sombre des dossiers élève — Inscription, Facturation, Discipline,
+/// Documents.
 ///
-/// Reprend la TopBar applicative — Bleu Profond texturé Kuba — au même titre
-/// que l'inscription et la facturation : retour, avatar à initiales,
-/// sur-titre « classe · niveau », nom complet et pastille de synthèse
-/// optionnelle à droite. Un liseré or-doux la sépare du contenu.
-class DisciplinaryStudentDetailAppBar extends StatelessWidget
+/// Reprend la TopBar applicative — Bleu Profond texturé Kuba — et la
+/// contextualise à un élève : retour, avatar à initiales, sur-titre or-doux,
+/// nom complet, pastille de synthèse optionnelle à droite. Un liseré or-doux
+/// la sépare du contenu.
+///
+/// Chaque module fournit sa propre pastille [trailing] : la synthèse affichée
+/// (solde, cas ouverts…) est du métier, la barre n'en connaît que la place.
+class StudentDetailAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   static const double _backSize = 42;
   static const double _avatarSize = 42;
+  static const double _closeSize = 40;
   static const double _dividerHeight = 2;
 
   final String fullName;
   final String eyebrow;
   final String firstName;
   final String lastName;
+
+  /// Route rejointe quand la pile de navigation est vide (lien profond).
   final String fallbackRoute;
 
-  /// Pastille de synthèse affichée à droite (cf. [DisciplinaryOpenCasesAppBarPill]).
+  /// Pastille de synthèse affichée à droite (cf. [StudentDetailAppBarPill]).
   final Widget? trailing;
 
-  const DisciplinaryStudentDetailAppBar({
+  /// Croix de fermeture à l'extrême droite, en plus du retour.
+  ///
+  /// Réservée aux dossiers dont on « sort » (Facturation) ; ailleurs, la
+  /// flèche de retour est la seule sortie.
+  final bool showCloseButton;
+
+  const StudentDetailAppBar({
     super.key,
     required this.fullName,
     required this.eyebrow,
@@ -36,13 +49,14 @@ class DisciplinaryStudentDetailAppBar extends StatelessWidget
     required this.lastName,
     required this.fallbackRoute,
     this.trailing,
+    this.showCloseButton = false,
   });
 
   @override
   Size get preferredSize =>
       const Size.fromHeight(AppDimensions.topBarHeight + _dividerHeight);
 
-  void _onBack(BuildContext context) {
+  void _onExit(BuildContext context) {
     if (context.canPop()) {
       context.pop();
       return;
@@ -83,7 +97,7 @@ class DisciplinaryStudentDetailAppBar extends StatelessWidget
             hoverColor: _white(0.08),
             icon: Icons.arrow_back_rounded,
             iconSize: 22,
-            onTap: () => _onBack(context),
+            onTap: () => _onExit(context),
           ),
         ),
       ),
@@ -123,8 +137,24 @@ class DisciplinaryStudentDetailAppBar extends StatelessWidget
       actions: [
         if (trailing != null)
           Padding(
-            padding: const EdgeInsets.only(right: AppDimensions.spacingM),
+            padding: EdgeInsets.only(
+              right: showCloseButton
+                  ? AppDimensions.spacingS
+                  : AppDimensions.spacingM,
+            ),
             child: Center(child: trailing),
+          ),
+        if (showCloseButton)
+          Padding(
+            padding: const EdgeInsets.only(right: AppDimensions.spacingM),
+            child: _SquareIconButton(
+              size: _closeSize,
+              baseColor: _white(0.06),
+              hoverColor: _white(0.08),
+              icon: Icons.close_rounded,
+              iconSize: 20,
+              onTap: () => _onExit(context),
+            ),
           ),
       ],
       bottom: const PreferredSize(
@@ -138,42 +168,37 @@ class DisciplinaryStudentDetailAppBar extends StatelessWidget
       AppColors.textOnDark.withValues(alpha: opacity);
 }
 
-/// Pastille de synthèse « cas ouverts » affichée dans l'AppBar sombre.
+/// Pastille de synthèse posée dans [StudentDetailAppBar].
 ///
-/// Rouge translucide si des cas sont ouverts, vert translucide sinon.
-/// [openCasesCount] null = le compte n'est pas encore connu (pastille masquée).
-class DisciplinaryOpenCasesAppBarPill extends StatelessWidget {
-  final int? openCasesCount;
-  final String openLabel;
-  final String noneLabel;
+/// [alert] porte la lecture : une synthèse qui appelle une action (solde dû,
+/// cas ouverts) se pose plus franchement qu'une synthèse rassurante.
+class StudentDetailAppBarPill extends StatelessWidget {
+  final Color accent;
+  final IconData icon;
+  final String label;
+  final bool alert;
 
-  const DisciplinaryOpenCasesAppBarPill({
+  const StudentDetailAppBarPill({
     super.key,
-    required this.openCasesCount,
-    required this.openLabel,
-    required this.noneLabel,
+    required this.accent,
+    required this.icon,
+    required this.label,
+    required this.alert,
   });
 
   @override
   Widget build(BuildContext context) {
-    final count = openCasesCount;
-    if (count == null) return const SizedBox.shrink();
-
-    final hasOpen = count > 0;
-    final accent = hasOpen ? AppColors.error : AppColors.vertSavane;
-    final background = accent.withValues(alpha: hasOpen ? 0.20 : 0.26);
-    final borderColor = accent.withValues(alpha: hasOpen ? 0.50 : 0.40);
-    final icon = hasOpen ? Icons.error_outline : Icons.check_circle_outline;
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingM,
         vertical: AppDimensions.spacingXS + 2,
       ),
       decoration: BoxDecoration(
-        color: background,
+        color: accent.withValues(alpha: alert ? 0.20 : 0.26),
         borderRadius: AppRadius.brPill,
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: accent.withValues(alpha: alert ? 0.50 : 0.40),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -181,7 +206,7 @@ class DisciplinaryOpenCasesAppBarPill extends StatelessWidget {
           Icon(icon, size: 16, color: AppColors.textOnDark),
           const SizedBox(width: AppDimensions.spacingXS),
           Text(
-            hasOpen ? openLabel : noneLabel,
+            label,
             style: AppTextStyles.bodyStrong.copyWith(
               color: AppColors.textOnDark,
             ),
@@ -234,7 +259,7 @@ class _GoldDivider extends StatelessWidget {
   }
 }
 
-/// Avatar carré arrondi à initiales sur fond blanc translucide.
+/// Avatar rond à initiales sur fond blanc translucide.
 class _AvatarBadge extends StatelessWidget {
   final String initials;
   final double size;
@@ -262,7 +287,7 @@ class _AvatarBadge extends StatelessWidget {
   }
 }
 
-/// Bouton carré (retour) sur fond blanc translucide, état survol géré.
+/// Bouton carré (retour / fermer) sur fond blanc translucide, état survol géré.
 class _SquareIconButton extends StatelessWidget {
   final double size;
   final Color baseColor;
