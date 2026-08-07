@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_docume
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -60,6 +61,7 @@ class _MyAppState extends State<MyApp> {
   late final ForgotPasswordBloc _forgotPasswordBloc;
   late final SyncStatusCubit _syncStatusCubit;
   late final PaymentAnomaliesCubit _paymentAnomaliesCubit;
+  late final SchoolIdentityCubit _schoolIdentityCubit;
   late final GoRouter _router;
 
   @override
@@ -77,6 +79,10 @@ class _MyAppState extends State<MyApp> {
     // l'arbre via `.value` (top bar + écrans write-path la lisent par contexte).
     _syncStatusCubit = getIt<SyncStatusCubit>();
     _paymentAnomaliesCubit = getIt<PaymentAnomaliesCubit>()..refresh();
+    // Identité de l'établissement : rien à charger avant l'auth (le
+    // schoolId vient de la session), la lecture est déclenchée par la
+    // transition `authenticated` ci-dessous.
+    _schoolIdentityCubit = getIt<SchoolIdentityCubit>();
     _router = AppRouter.createRouter(_authBloc, _academicYearContextBloc);
   }
 
@@ -108,6 +114,7 @@ class _MyAppState extends State<MyApp> {
     _authBloc.close();
     _syncStatusCubit.close();
     _paymentAnomaliesCubit.close();
+    _schoolIdentityCubit.close();
     super.dispose();
   }
 
@@ -128,6 +135,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<PaymentAnomaliesCubit>.value(
           value: _paymentAnomaliesCubit,
         ),
+        BlocProvider<SchoolIdentityCubit>.value(value: _schoolIdentityCubit),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -158,6 +166,11 @@ class _MyAppState extends State<MyApp> {
                 // crochet ait à être déplacé. Ni clé ni répertoire ne sont
                 // touchés par ce balayage.
                 unawaited(_reclaimEditiqueCacheOrphans());
+                // Nom et ville de l'école : le référentiel local peut déjà les
+                // porter (session rouverte hors ligne) ou être pullé dans la
+                // foulée par le contexte académique — d'où la relecture au
+                // retour réseau plus bas.
+                unawaited(_schoolIdentityCubit.load());
                 return;
               }
 
@@ -165,6 +178,9 @@ class _MyAppState extends State<MyApp> {
                 _academicYearContextBloc.add(
                   const AcademicYearContextResetRequested(),
                 );
+                // Sans cela, une reconnexion sur une autre école garderait le
+                // nom de la précédente le temps du rechargement.
+                _schoolIdentityCubit.clear();
               }
             },
           ),
@@ -189,6 +205,7 @@ class _MyAppState extends State<MyApp> {
               _academicYearContextBloc.add(
                 const AcademicYearContextRequested(),
               );
+              unawaited(_schoolIdentityCubit.load());
             },
           ),
         ],

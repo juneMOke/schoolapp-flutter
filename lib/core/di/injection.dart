@@ -66,6 +66,9 @@ import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
+import 'package:school_app_flutter/features/school/data/repositories/school_repository_impl.dart';
+import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/enrollment_academic_info_repository_impl.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/enrollment_academic_info_repository.dart';
@@ -1161,5 +1164,22 @@ Future<void> configureDependencies({
     () => AcademicYearPreviousContextBloc(
       repository: getIt<AcademicYearContextRepository>(),
     ),
+  );
+
+  // ── Identité de l'établissement ─────────────────────────────────────────────
+  // Lecture locale de `ref_school` (même DAO référentiel que le contexte
+  // académique), scopée à l'école de la session. Aucun pull propre.
+  getIt.registerLazySingleton<SchoolRepository>(
+    () => SchoolRepositoryImpl(
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+
+  // Exception assumée à la règle « BLoC en registerFactory » : instance unique
+  // app-lifetime, comme `SyncStatusCubit`. L'identité de l'école est la même
+  // pour tout l'arbre et se recharge sur les transitions de session (main.dart).
+  getIt.registerLazySingleton<SchoolIdentityCubit>(
+    () => SchoolIdentityCubit(repository: getIt<SchoolRepository>()),
   );
 }
