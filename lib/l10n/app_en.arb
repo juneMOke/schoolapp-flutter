@@ -807,19 +807,65 @@
     }
   },
   "accueilBannerGreetingGeneric": "Hello",
-  "accueilBannerContextTail": "Here is the essential view of your school today.",
+  "accueilBannerSchoolLocation": "{school} · {locality}",
+  "@accueilBannerSchoolLocation": {
+    "description": "Home banner eyebrow: school name followed by its locality.",
+    "placeholders": {
+      "school": {
+        "type": "String"
+      },
+      "locality": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerSchoolYear": "School year {year}",
+  "@accueilBannerSchoolYear": {
+    "description": "Home banner context pill carrying the current school year.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "accueilModulesEyebrow": "Your modules",
   "accueilModulesTitle": "Where would you like to go?",
-  "accueilModulesIntro": "Four modules cover the administrative life of the school. Everything stays accessible from the side menu.",
+  "accueilModulesIntro": "Six modules cover the life of the school — each card opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
+  "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
+  "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
   "accueilModuleDisciplinesDescription": "Daily attendance, disciplinary records and student follow-up.",
-  "accueilModuleCardSemantics": "{module} — open the dashboard",
+  "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@accueilModulePageCount": {
+    "description": "Module card subtitle: number of pages it gathers.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accueilModuleCardSemantics": "{module} — open {page}",
   "@accueilModuleCardSemantics": {
-    "description": "Accessibility label for the module card (button role, explicit destination).",
+    "description": "Accessibility label for the module card header (button role, explicit destination).",
     "placeholders": {
       "module": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSubModuleSemantics": "{page} — {module} module",
+  "@accueilSubModuleSemantics": {
+    "description": "Accessibility label for a sub-module row in a card footer.",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      },
+      "page": {
         "type": "String"
       }
     }

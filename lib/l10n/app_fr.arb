@@ -765,19 +765,65 @@
     }
   },
   "accueilBannerGreetingGeneric": "Bonjour",
-  "accueilBannerContextTail": "Voici l'essentiel de votre école aujourd'hui.",
+  "accueilBannerSchoolLocation": "{school} · {locality}",
+  "@accueilBannerSchoolLocation": {
+    "description": "Eyebrow du bandeau d'accueil : nom de l'école suivi de sa localité.",
+    "placeholders": {
+      "school": {
+        "type": "String"
+      },
+      "locality": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilBannerSchoolYear": "Année scolaire {year}",
+  "@accueilBannerSchoolYear": {
+    "description": "Pastille de contexte du bandeau d'accueil portant l'année scolaire courante.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "accueilModulesEyebrow": "Vos modules",
   "accueilModulesTitle": "Où souhaitez-vous aller ?",
-  "accueilModulesIntro": "Quatre modules couvrent la vie administrative de l'école. Tout reste accessible depuis le menu latéral.",
+  "accueilModulesIntro": "Six modules couvrent la vie de l'école — chaque carte ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
+  "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
+  "accueilModuleResultatsDescription": "Pourcentages par période, par classe entière ou pour un élève précis.",
   "accueilModuleDisciplinesDescription": "Présences du jour, dossiers de discipline et suivi des élèves.",
-  "accueilModuleCardSemantics": "{module} — ouvrir le tableau de bord",
+  "accueilModulePageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@accueilModulePageCount": {
+    "description": "Sous-titre d'une carte module : nombre de pages qu'elle regroupe.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accueilModuleCardSemantics": "{module} — ouvrir {page}",
   "@accueilModuleCardSemantics": {
-    "description": "Libellé d'accessibilité de la carte module (rôle bouton, destination explicite).",
+    "description": "Libellé d'accessibilité de l'en-tête d'une carte module (rôle bouton, destination explicite).",
     "placeholders": {
       "module": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "accueilSubModuleSemantics": "{page} — module {module}",
+  "@accueilSubModuleSemantics": {
+    "description": "Libellé d'accessibilité d'une ligne sous-module dans le pied d'une carte.",
+    "placeholders": {
+      "module": {
+        "type": "String"
+      },
+      "page": {
         "type": "String"
       }
     }

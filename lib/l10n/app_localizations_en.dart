@@ -1256,8 +1256,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accueilBannerGreetingGeneric => 'Hello';
 
   @override
-  String get accueilBannerContextTail =>
-      'Here is the essential view of your school today.';
+  String accueilBannerSchoolLocation(String school, String locality) {
+    return '$school · $locality';
+  }
+
+  @override
+  String accueilBannerSchoolYear(String year) {
+    return 'School year $year';
+  }
 
   @override
   String get accueilModulesEyebrow => 'Your modules';
@@ -1267,7 +1273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.';
+      'Six modules cover the life of the school — each card opens its dashboard or its pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -1282,12 +1288,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Class composition and student lists by cycle.';
 
   @override
+  String get accueilModuleCoursDescription =>
+      'Weekly timetable and follow-up of your courses.';
+
+  @override
+  String get accueilModuleResultatsDescription =>
+      'Percentages by period, for a whole class or a single student.';
+
+  @override
   String get accueilModuleDisciplinesDescription =>
       'Daily attendance, disciplinary records and student follow-up.';
 
   @override
-  String accueilModuleCardSemantics(String module) {
-    return '$module — open the dashboard';
+  String accueilModulePageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accueilModuleCardSemantics(String module, String page) {
+    return '$module — open $page';
+  }
+
+  @override
+  String accueilSubModuleSemantics(String module, String page) {
+    return '$page — $module module';
   }
 
   @override

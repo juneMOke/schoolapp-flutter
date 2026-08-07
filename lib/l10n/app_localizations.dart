@@ -2084,11 +2084,17 @@ abstract class AppLocalizations {
   /// **'Hello'**
   String get accueilBannerGreetingGeneric;
 
-  /// No description provided for @accueilBannerContextTail.
+  /// Home banner eyebrow: school name followed by its locality.
   ///
   /// In en, this message translates to:
-  /// **'Here is the essential view of your school today.'**
-  String get accueilBannerContextTail;
+  /// **'{school} · {locality}'**
+  String accueilBannerSchoolLocation(String school, String locality);
+
+  /// Home banner context pill carrying the current school year.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {year}'**
+  String accueilBannerSchoolYear(String year);
 
   /// No description provided for @accueilModulesEyebrow.
   ///
@@ -2105,7 +2111,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModulesIntro.
   ///
   /// In en, this message translates to:
-  /// **'Four modules cover the administrative life of the school. Everything stays accessible from the side menu.'**
+  /// **'Six modules cover the life of the school — each card opens its dashboard or its pages.'**
   String get accueilModulesIntro;
 
   /// No description provided for @accueilModuleInscriptionsDescription.
@@ -2126,17 +2132,41 @@ abstract class AppLocalizations {
   /// **'Class composition and student lists by cycle.'**
   String get accueilModuleClassesDescription;
 
+  /// No description provided for @accueilModuleCoursDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly timetable and follow-up of your courses.'**
+  String get accueilModuleCoursDescription;
+
+  /// No description provided for @accueilModuleResultatsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentages by period, for a whole class or a single student.'**
+  String get accueilModuleResultatsDescription;
+
   /// No description provided for @accueilModuleDisciplinesDescription.
   ///
   /// In en, this message translates to:
   /// **'Daily attendance, disciplinary records and student follow-up.'**
   String get accueilModuleDisciplinesDescription;
 
-  /// Accessibility label for the module card (button role, explicit destination).
+  /// Module card subtitle: number of pages it gathers.
   ///
   /// In en, this message translates to:
-  /// **'{module} — open the dashboard'**
-  String accueilModuleCardSemantics(String module);
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String accueilModulePageCount(int count);
+
+  /// Accessibility label for the module card header (button role, explicit destination).
+  ///
+  /// In en, this message translates to:
+  /// **'{module} — open {page}'**
+  String accueilModuleCardSemantics(String module, String page);
+
+  /// Accessibility label for a sub-module row in a card footer.
+  ///
+  /// In en, this message translates to:
+  /// **'{page} — {module} module'**
+  String accueilSubModuleSemantics(String module, String page);
 
   /// No description provided for @accueilSignature.
   ///

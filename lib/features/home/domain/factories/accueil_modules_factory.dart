@@ -4,136 +4,225 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Construit les 4 cartes modules de la page d'accueil avec leur copy localisée,
-/// leurs accents (spec §03) et leur mappage de navigation (spec §10).
+/// Construit les 6 cartes modules de la page d'accueil avec leur copy localisée,
+/// leurs accents (spec §03) et leur mappage de navigation (spec §11).
 ///
-/// Les libellés de puces réutilisent les titres de sous-menus existants pour
-/// rester cohérents avec la sidebar (le `\n` de « Composition des classes » est
-/// neutralisé). Les titres de cartes réutilisent les titres de menus.
+/// Les libellés de sous-modules réutilisent les titres de sous-menus existants
+/// pour rester cohérents avec la sidebar (le `\n` de « Composition des classes »
+/// est neutralisé). Les titres de cartes réutilisent les titres de menus.
+///
+/// Deux modules n'ont pas de tableau de bord (Cours, Résultats) : leur page
+/// d'entrée est simplement leur premier sous-module (cf. `AccueilModule.entry`).
 class AccueilModulesFactory {
   const AccueilModulesFactory._();
 
   static List<AccueilModule> create(AppLocalizations l10n) {
-    // Titre des tableaux de bord = libellé « Tableau de bord » partagé.
-    final dashboardTitle = l10n.subMenuDashboard;
-
     return [
-      AccueilModule(
-        id: MenuConstants.inscriptionsMenuId,
-        title: l10n.menuInscriptions,
-        description: l10n.accueilModuleInscriptionsDescription,
-        icon: Icons.person_add_alt_1_outlined,
-        accent: AppColors.accueilInscriptionsAccent,
-        softBackground: AppColors.accueilInscriptionsSoft,
-        dashboardTarget: AccueilNavTarget(
-          menuId: MenuConstants.inscriptionsMenuId,
-          subMenuId: MenuConstants.inscriptionsDashboardId,
-          title: dashboardTitle,
-        ),
-        quickLinks: [
-          AccueilQuickLink(
-            label: l10n.subMenuFirstRegistration,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.inscriptionsMenuId,
-              subMenuId: MenuConstants.premiereInscriptionId,
-              title: l10n.subMenuFirstRegistration,
-            ),
-          ),
-          AccueilQuickLink(
-            label: l10n.subMenuReRegistrations,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.inscriptionsMenuId,
-              subMenuId: MenuConstants.reInscriptionsId,
-              title: l10n.subMenuReRegistrations,
-            ),
-          ),
-        ],
-      ),
-      AccueilModule(
-        id: MenuConstants.financesMenuId,
-        title: l10n.menuFinances,
-        description: l10n.accueilModuleFinancesDescription,
-        icon: Icons.account_balance_outlined,
-        accent: AppColors.accueilFinancesAccent,
-        softBackground: AppColors.accueilFinancesSoft,
-        dashboardTarget: AccueilNavTarget(
-          menuId: MenuConstants.financesMenuId,
-          subMenuId: MenuConstants.financesDashboardId,
-          title: dashboardTitle,
-        ),
-        quickLinks: [
-          AccueilQuickLink(
-            label: l10n.subMenuBilling,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.financesMenuId,
-              subMenuId: MenuConstants.facturationsId,
-              title: l10n.subMenuBilling,
-            ),
-          ),
-        ],
-      ),
-      AccueilModule(
-        id: MenuConstants.classesMenuId,
-        title: l10n.menuClasses,
-        description: l10n.accueilModuleClassesDescription,
-        icon: Icons.grid_view_outlined,
-        accent: AppColors.accueilClassesAccent,
-        softBackground: AppColors.accueilClassesSoft,
-        dashboardTarget: AccueilNavTarget(
-          menuId: MenuConstants.classesMenuId,
-          subMenuId: MenuConstants.classesDashboardId,
-          title: dashboardTitle,
-        ),
-        quickLinks: [
-          AccueilQuickLink(
-            label: l10n.subMenuOrganization.replaceAll('\n', ' '),
-            target: AccueilNavTarget(
-              menuId: MenuConstants.classesMenuId,
-              subMenuId: MenuConstants.organisationId,
-              title: l10n.subMenuOrganization,
-            ),
-          ),
-          AccueilQuickLink(
-            label: l10n.subMenuClassesList,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.classesMenuId,
-              subMenuId: MenuConstants.classesListId,
-              title: l10n.subMenuClassesList,
-            ),
-          ),
-        ],
-      ),
-      AccueilModule(
-        id: MenuConstants.disciplinesMenuId,
-        title: l10n.menuDisciplines,
-        description: l10n.accueilModuleDisciplinesDescription,
-        icon: Icons.school_outlined,
-        accent: AppColors.accueilDisciplinesAccent,
-        softBackground: AppColors.accueilDisciplinesSoft,
-        dashboardTarget: AccueilNavTarget(
-          menuId: MenuConstants.disciplinesMenuId,
-          subMenuId: MenuConstants.disciplinesDashboardId,
-          title: dashboardTitle,
-        ),
-        quickLinks: [
-          AccueilQuickLink(
-            label: l10n.subMenuAttendance,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.disciplinesMenuId,
-              subMenuId: MenuConstants.presencesId,
-              title: l10n.subMenuAttendance,
-            ),
-          ),
-          AccueilQuickLink(
-            label: l10n.subMenuDisciplinesList,
-            target: AccueilNavTarget(
-              menuId: MenuConstants.disciplinesMenuId,
-              subMenuId: MenuConstants.disciplinesListId,
-              title: l10n.subMenuDisciplinesList,
-            ),
-          ),
-        ],
-      ),
+      _inscriptions(l10n),
+      _finances(l10n),
+      _classes(l10n),
+      _cours(l10n),
+      _resultats(l10n),
+      _disciplines(l10n),
     ];
+  }
+
+  /// Sous-module « Tableau de bord » — libellé partagé avec la sidebar.
+  static AccueilSubModule _dashboard(
+    AppLocalizations l10n, {
+    required String menuId,
+    required String subMenuId,
+  }) {
+    return AccueilSubModule(
+      label: l10n.subMenuDashboard,
+      isDashboard: true,
+      target: AccueilNavTarget(
+        menuId: menuId,
+        subMenuId: subMenuId,
+        title: l10n.subMenuDashboard,
+      ),
+    );
+  }
+
+  /// Sous-module ordinaire. [label] permet de neutraliser un retour à la ligne
+  /// présent dans le libellé de sidebar sans perdre le titre d'origine, qui
+  /// reste celui affiché par la barre supérieure une fois la page ouverte.
+  static AccueilSubModule _page({
+    required String menuId,
+    required String subMenuId,
+    required String title,
+    String? label,
+  }) {
+    return AccueilSubModule(
+      label: label ?? title,
+      target: AccueilNavTarget(
+        menuId: menuId,
+        subMenuId: subMenuId,
+        title: title,
+      ),
+    );
+  }
+
+  static AccueilModule _inscriptions(AppLocalizations l10n) {
+    const menuId = MenuConstants.inscriptionsMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuInscriptions,
+      description: l10n.accueilModuleInscriptionsDescription,
+      icon: Icons.person_add_alt_1_outlined,
+      accent: AppColors.accueilInscriptionsAccent,
+      softBackground: AppColors.accueilInscriptionsSoft,
+      subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.inscriptionsDashboardId,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.premiereInscriptionId,
+          title: l10n.subMenuFirstRegistration,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.reInscriptionsId,
+          title: l10n.subMenuReRegistrations,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.preInscriptionsId,
+          title: l10n.subMenuPreRegistrations,
+        ),
+      ],
+    );
+  }
+
+  static AccueilModule _finances(AppLocalizations l10n) {
+    const menuId = MenuConstants.financesMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuFinances,
+      description: l10n.accueilModuleFinancesDescription,
+      icon: Icons.account_balance_outlined,
+      accent: AppColors.accueilFinancesAccent,
+      softBackground: AppColors.accueilFinancesSoft,
+      subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.financesDashboardId,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.facturationsId,
+          title: l10n.subMenuBilling,
+        ),
+      ],
+    );
+  }
+
+  static AccueilModule _classes(AppLocalizations l10n) {
+    const menuId = MenuConstants.classesMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuClasses,
+      description: l10n.accueilModuleClassesDescription,
+      icon: Icons.grid_view_outlined,
+      accent: AppColors.accueilClassesAccent,
+      softBackground: AppColors.accueilClassesSoft,
+      subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.classesDashboardId,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.organisationId,
+          title: l10n.subMenuOrganization,
+          label: l10n.subMenuOrganization.replaceAll('\n', ' '),
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.classesListId,
+          title: l10n.subMenuClassesList,
+        ),
+      ],
+    );
+  }
+
+  /// Cours — pas de tableau de bord : l'en-tête ouvre « Emploi du temps »,
+  /// premier sous-module de la liste (spec §03, note « page d'entrée »).
+  static AccueilModule _cours(AppLocalizations l10n) {
+    const menuId = MenuConstants.coursesMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuCourses,
+      description: l10n.accueilModuleCoursDescription,
+      icon: Icons.menu_book_outlined,
+      accent: AppColors.accueilCoursAccent,
+      softBackground: AppColors.accueilCoursSoft,
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.timetableId,
+          title: l10n.subMenuTimetable,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.myCoursesId,
+          title: l10n.subMenuMyCourses,
+        ),
+      ],
+    );
+  }
+
+  /// Résultats — page unique : l'en-tête et l'unique ligne mènent au même écran.
+  static AccueilModule _resultats(AppLocalizations l10n) {
+    const menuId = MenuConstants.resultatsMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuResultats,
+      description: l10n.accueilModuleResultatsDescription,
+      icon: Icons.percent,
+      accent: AppColors.accueilResultatsAccent,
+      softBackground: AppColors.accueilResultatsSoft,
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.resultatsClasseId,
+          title: l10n.subMenuResultatsClasse,
+        ),
+      ],
+    );
+  }
+
+  static AccueilModule _disciplines(AppLocalizations l10n) {
+    const menuId = MenuConstants.disciplinesMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuDisciplines,
+      description: l10n.accueilModuleDisciplinesDescription,
+      icon: Icons.school_outlined,
+      accent: AppColors.accueilDisciplinesAccent,
+      softBackground: AppColors.accueilDisciplinesSoft,
+      subModules: [
+        _dashboard(
+          l10n,
+          menuId: menuId,
+          subMenuId: MenuConstants.disciplinesDashboardId,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.presencesId,
+          title: l10n.subMenuAttendance,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.disciplinesListId,
+          title: l10n.subMenuDisciplinesList,
+        ),
+      ],
+    );
   }
 }

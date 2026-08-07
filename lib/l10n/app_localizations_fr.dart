@@ -1261,8 +1261,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accueilBannerGreetingGeneric => 'Bonjour';
 
   @override
-  String get accueilBannerContextTail =>
-      'Voici l\'essentiel de votre école aujourd\'hui.';
+  String accueilBannerSchoolLocation(String school, String locality) {
+    return '$school · $locality';
+  }
+
+  @override
+  String accueilBannerSchoolYear(String year) {
+    return 'Année scolaire $year';
+  }
 
   @override
   String get accueilModulesEyebrow => 'Vos modules';
@@ -1272,7 +1278,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModulesIntro =>
-      'Quatre modules couvrent la vie administrative de l\'école. Tout reste accessible depuis le menu latéral.';
+      'Six modules couvrent la vie de l\'école — chaque carte ouvre son tableau de bord ou ses pages.';
 
   @override
   String get accueilModuleInscriptionsDescription =>
@@ -1287,12 +1293,36 @@ class AppLocalizationsFr extends AppLocalizations {
       'Composition des classes et liste des élèves par cycle.';
 
   @override
+  String get accueilModuleCoursDescription =>
+      'Emploi du temps de la semaine et suivi de vos cours.';
+
+  @override
+  String get accueilModuleResultatsDescription =>
+      'Pourcentages par période, par classe entière ou pour un élève précis.';
+
+  @override
   String get accueilModuleDisciplinesDescription =>
       'Présences du jour, dossiers de discipline et suivi des élèves.';
 
   @override
-  String accueilModuleCardSemantics(String module) {
-    return '$module — ouvrir le tableau de bord';
+  String accueilModulePageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accueilModuleCardSemantics(String module, String page) {
+    return '$module — ouvrir $page';
+  }
+
+  @override
+  String accueilSubModuleSemantics(String module, String page) {
+    return '$page — module $module';
   }
 
   @override

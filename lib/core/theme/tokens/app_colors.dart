@@ -13,6 +13,10 @@ class AppColors {
   static const terreCuiteDark = Color(0xFF9A4A21);
   static const terreCuiteSoft = Color(0xFFF7EBE3);
   static const bleuArdoiseSoft = Color(0xFFEBF2F7);
+
+  /// Bleu ardoise éclairci — dernier arrêt des dégradés de surface sombre
+  /// (bandeau d'accueil), pour que la lumière file vers la droite.
+  static const bleuArdoiseLight = Color(0xFF23587A);
   static const vertSavane = Color(0xFF3D6B4A);
   static const blancCasse = Color(0xFFFAFAF7);
   static const papier = Color(0xFFF1EDE2);
@@ -183,8 +187,14 @@ class AppColors {
   static const accueilInscriptionsSoft = Color(0xFFEBF2F7);
   static const accueilFinancesAccent = vertSavane; // #3D6B4A
   static const accueilFinancesSoft = Color(0xFFEDF5EF);
-  static const accueilClassesAccent = orDoux; // #D9A24E
+  // Or profond propre à l'Accueil : l'or-doux de marque (#D9A24E) est trop
+  // clair pour porter un titre ou une icône sur fond papier (spec §03).
+  static const accueilClassesAccent = Color(0xFFB8862B);
   static const accueilClassesSoft = Color(0xFFFBF3E3);
+  static const accueilCoursAccent = terreCuite; // #B85C2C
+  static const accueilCoursSoft = Color(0xFFF8EEE6);
+  static const accueilResultatsAccent = Color(0xFF7A4E68);
+  static const accueilResultatsSoft = Color(0xFFF5EDF2);
   static const accueilDisciplinesAccent = info; // #2E6E8E
   static const accueilDisciplinesSoft = Color(0xFFE8F3F7);
 
