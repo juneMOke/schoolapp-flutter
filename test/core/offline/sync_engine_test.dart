@@ -364,8 +364,7 @@ void main() {
   });
 
   group('garde d\'attribution (tablette partagée)', () {
-    String payloadOf(String? authorId) =>
-        jsonEncode({if (authorId != null) 'authorId': authorId});
+    String payloadOf(String? authorId) => jsonEncode({'authorId': ?authorId});
 
     OutboxEntry authored(String id, String? authorId, {int createdAt = 1000}) =>
         OutboxEntry(
@@ -497,7 +496,7 @@ void main() {
         'non attribué et part', () async {
       goOnline();
       await dao.enqueue(
-        OutboxEntry(
+        const OutboxEntry(
           id: 'e1',
           aggregateType: 'ENROLLMENT',
           aggregateId: 'agg-e1',

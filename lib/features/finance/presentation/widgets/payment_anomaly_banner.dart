@@ -130,10 +130,12 @@ class _Bar extends StatelessWidget {
   /// Chaque élément est omis s'il est inconnu — un libellé vide serait pire que
   /// son absence.
   String _detail(AppLocalizations l10n) {
+    // Le motif n'est retenu que s'il porte quelque chose : `?anomaly.reason`
+    // laisserait passer une chaîne blanche, et le séparateur l'annoncerait.
+    final reason = anomaly.reason;
     final parts = <String>[
-      if (anomaly.cashierFullName case final cashier?) cashier,
-      if (anomaly.reason case final reason? when reason.trim().isNotEmpty)
-        reason,
+      ?anomaly.cashierFullName,
+      if (reason != null && reason.trim().isNotEmpty) reason,
       if (remaining > 0) l10n.paymentAnomalyOthersPending(remaining),
     ];
     return parts.isEmpty

@@ -60,10 +60,10 @@ void main() {
     'charge à 150000 cents → champ et total affichent 1 500, pas 150 000',
     (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('fr'),
+          locale: Locale('fr'),
           home: Scaffold(
             body: StudentChargesStep(
               studentId: 'stu-1',
@@ -87,10 +87,10 @@ void main() {
     'plus de 2 décimales saisies → rejeté (invalide), pas arrondi en silence',
     (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('fr'),
+          locale: Locale('fr'),
           home: Scaffold(
             body: StudentChargesStep(
               studentId: 'stu-1',

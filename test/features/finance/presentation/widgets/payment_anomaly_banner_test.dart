@@ -11,7 +11,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Faux AuthBloc : le bandeau ne lit que le statut de session.
 class _FakeAuthBloc extends Bloc<AuthEvent, AuthState> implements AuthBloc {
-  _FakeAuthBloc(AuthState initial) : super(initial);
+  _FakeAuthBloc(super.initial);
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

@@ -194,7 +194,7 @@ void main() {
           aggregateType: 'PAYMENT',
           aggregateId: 'agg-$id',
           operation: OutboxOperation.create,
-          payload: jsonEncode({if (authorId != null) 'authorId': authorId}),
+          payload: jsonEncode({'authorId': ?authorId}),
           createdAt: createdAt,
         );
 
@@ -299,7 +299,7 @@ void main() {
       aggregateType: type,
       aggregateId: 'agg-$id',
       operation: OutboxOperation.create,
-      payload: jsonEncode({if (authorId != null) 'authorId': authorId}),
+      payload: jsonEncode({'authorId': ?authorId}),
       createdAt: 1000,
     );
 

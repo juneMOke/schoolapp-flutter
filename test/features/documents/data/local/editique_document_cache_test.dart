@@ -788,7 +788,7 @@ void main() {
       access.entitled = false;
 
       final retained = await cache.recordKnownDocuments([
-        EditiqueCacheEntry(
+        const EditiqueCacheEntry(
           id: 'ignoré',
           documentId: 'doc-9',
           documentNumber: 'ETL-NP-9',

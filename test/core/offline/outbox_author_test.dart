@@ -26,7 +26,7 @@ void main() {
   );
 
   String payloadOf(String? authorId) =>
-      jsonEncode({if (authorId != null) kOutboxAuthorIdKey: authorId, 'x': 1});
+      jsonEncode({kOutboxAuthorIdKey: ?authorId, 'x': 1});
 
   group('outboxAuthorUidOf', () {
     test('lit la clé racine authorId', () {
