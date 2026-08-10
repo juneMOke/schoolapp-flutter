@@ -117,4 +117,28 @@ void main() {
 
     verify(() => bloc.add(const AcademicYearContextRetryRequested())).called(1);
   });
+
+  // ADR-014 §4 — un compte authentifié peut se voir refuser l'amorçage faute de
+  // permission. Rien à réessayer : seul un changement de droits côté serveur y
+  // remédie, et proposer « Réessayer » ne ferait que faire tourner l'agent en
+  // rond sur une réponse qui ne changera pas.
+  testWidgets('403 sur l\'amorçage → message de droits, sans « Réessayer »', (
+    tester,
+  ) async {
+    await pumpSplash(
+      tester,
+      size: const Size(800, 900),
+      state: const AcademicYearContextState(
+        status: AcademicYearContextLoadStatus.failure,
+        context: null,
+        errorMessage: 'Access forbidden',
+        insufficientPermissions: true,
+      ),
+    );
+
+    expect(find.byType(SplashErrorView), findsOneWidget);
+    expect(find.text('Accès non autorisé'), findsOneWidget);
+    expect(find.text('Réessayer'), findsNothing);
+    expect(find.text('Connexion impossible'), findsNothing);
+  });
 }

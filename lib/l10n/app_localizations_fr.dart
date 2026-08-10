@@ -146,6 +146,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashErrorRetry => 'Réessayer';
 
   @override
+  String get splashForbiddenTitle => 'Accès non autorisé';
+
+  @override
+  String get splashForbiddenMessage =>
+      'Votre compte ne dispose pas des droits nécessaires pour ouvrir l\'application. Contactez l\'administrateur de votre école.';
+
+  @override
   String splashVersion(String version, String build) {
     return 'v$version (build $build)';
   }

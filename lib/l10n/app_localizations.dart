@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get splashErrorRetry;
 
+  /// Bootstrap screen title when the account lacks the permission to load the referential (403)
+  ///
+  /// In en, this message translates to:
+  /// **'Access not allowed'**
+  String get splashForbiddenTitle;
+
+  /// Bootstrap screen message on 403 — retrying cannot help, only a rights change will
+  ///
+  /// In en, this message translates to:
+  /// **'Your account does not have the rights needed to open the application. Contact your school administrator.'**
+  String get splashForbiddenMessage;
+
   /// Technical version shown in the splash footer
   ///
   /// In en, this message translates to:

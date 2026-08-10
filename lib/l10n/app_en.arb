@@ -64,6 +64,14 @@
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",
+  "splashForbiddenTitle": "Access not allowed",
+  "@splashForbiddenTitle": {
+    "description": "Bootstrap screen title when the account lacks the permission to load the referential (403)"
+  },
+  "splashForbiddenMessage": "Your account does not have the rights needed to open the application. Contact your school administrator.",
+  "@splashForbiddenMessage": {
+    "description": "Bootstrap screen message on 403 — retrying cannot help, only a rights change will"
+  },
   "splashVersion": "v{version} (build {build})",
   "@splashVersion": {
     "description": "Technical version shown in the splash footer",

@@ -130,7 +130,7 @@ void main() {
     },
   );
 
-  group('sessionExpired (401/403 sur le pull référentiel)', () {
+  group('sessionExpired (401 sur le pull référentiel)', () {
     blocTest<AcademicYearContextBloc, AcademicYearContextState>(
       'InvalidCredentialsFailure → sessionExpired=true (main.dart déclenchera '
       'un logout)',
@@ -144,8 +144,12 @@ void main() {
       verify: (bloc) => expect(bloc.state.sessionExpired, isTrue),
     );
 
+    // ADR-014 §4 — depuis que les permissions sont appliquées, n'importe quel
+    // point d'entrée peut refuser un compte parfaitement authentifié. Lire ce
+    // refus comme une session morte renverrait l'agent à l'écran de connexion,
+    // où il se reconnecterait pour être éjecté de nouveau.
     blocTest<AcademicYearContextBloc, AcademicYearContextState>(
-      'UnauthorizedFailure → sessionExpired=true',
+      'UnauthorizedFailure (403) → PAS de logout, mais droits insuffisants',
       build: () {
         when(
           () => repository.loadCurrentContext(),
@@ -153,7 +157,45 @@ void main() {
         return AcademicYearContextBloc(repository: repository);
       },
       act: (bloc) => bloc.add(const AcademicYearContextRequested()),
-      verify: (bloc) => expect(bloc.state.sessionExpired, isTrue),
+      verify: (bloc) {
+        expect(bloc.state.sessionExpired, isFalse);
+        expect(bloc.state.insufficientPermissions, isTrue);
+        // L'écran reste bloquant : sans référentiel, il n'y a rien à afficher.
+        expect(bloc.state.hasBlockingFailure, isTrue);
+      },
+    );
+
+    blocTest<AcademicYearContextBloc, AcademicYearContextState>(
+      'NetworkFailure → insufficientPermissions reste false (le 403 ne se '
+      'confond pas avec une panne)',
+      build: () {
+        when(
+          () => repository.loadCurrentContext(),
+        ).thenAnswer((_) async => const Left(NetworkFailure('hors ligne')));
+        return AcademicYearContextBloc(repository: repository);
+      },
+      act: (bloc) => bloc.add(const AcademicYearContextRequested()),
+      verify: (bloc) => expect(bloc.state.insufficientPermissions, isFalse),
+    );
+
+    blocTest<AcademicYearContextBloc, AcademicYearContextState>(
+      'un succès qui suit un 403 redescend insufficientPermissions à false',
+      build: () {
+        var callCount = 0;
+        when(() => repository.loadCurrentContext()).thenAnswer((_) async {
+          callCount++;
+          return callCount == 1
+              ? const Left(UnauthorizedFailure('forbidden'))
+              : const Right(context);
+        });
+        return AcademicYearContextBloc(repository: repository);
+      },
+      act: (bloc) async {
+        bloc.add(const AcademicYearContextRequested());
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const AcademicYearContextRetryRequested());
+      },
+      verify: (bloc) => expect(bloc.state.insufficientPermissions, isFalse),
     );
 
     blocTest<AcademicYearContextBloc, AcademicYearContextState>(
@@ -186,7 +228,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         // Rafraîchissement au retour réseau (main.dart, transition
         // offline→online) : c'est ce chemin qui éjectait l'agent de son écran
-        // sur un 401/403 isolé, alors que la session était intacte.
+        // sur un 401 isolé, alors que la session était intacte.
         bloc.add(const AcademicYearContextRetryRequested());
       },
       verify: (bloc) {
