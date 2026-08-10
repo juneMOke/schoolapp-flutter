@@ -1,11 +1,12 @@
 import 'package:school_app_flutter/features/auth/data/jwt_claims.dart';
 import 'package:school_app_flutter/features/auth/data/models/user_model.dart';
+import 'package:school_app_flutter/features/auth/data/session_permissions.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
 
 /// Réponse de `/auth/login` et `/auth/refresh` (le refresh réutilise le même
 /// record, ADR-010 §7.2). Contrat amendé §0.2 : `expiresIn`/`refreshExpiresIn`
-/// relatifs en secondes, `userVersion` présent.
+/// relatifs en secondes, `userVersion` présent. ADR-014 §4 ajoute `permissions`.
 class LoginResponseModel {
   final String accessToken;
   final String tokenType;
@@ -13,6 +14,15 @@ class LoginResponseModel {
   final String? refreshToken;
   final int? refreshExpiresIn;
   final int userVersion;
+
+  /// Ensemble effectif des permissions, en valeurs sur le fil (ADR-014 §4).
+  /// **Projection d'affichage, jamais une autorité** : le serveur re-dérive
+  /// l'autorisation à chaque requête. Ensemble OUVERT de chaînes — toute valeur
+  /// inconnue est conservée telle quelle et ignorée en silence côté usage, le
+  /// catalogue serveur pouvant grandir sans release. Liste vide = aucun droit
+  /// (fail-closed) : c'est aussi ce qu'on retient si le champ est absent.
+  final List<String> permissions;
+
   final UserModel user;
 
   const LoginResponseModel({
@@ -22,6 +32,7 @@ class LoginResponseModel {
     required this.refreshToken,
     required this.refreshExpiresIn,
     required this.userVersion,
+    this.permissions = const <String>[],
     required this.user,
   });
 
@@ -38,6 +49,7 @@ class LoginResponseModel {
       refreshToken: json['refreshToken'] as String?,
       refreshExpiresIn: (json['refreshExpiresIn'] as num?)?.toInt(),
       userVersion: (json['userVersion'] as num?)?.toInt() ?? 0,
+      permissions: SessionPermissions.sanitize(json['permissions']),
       user: userJson is Map<String, dynamic>
           ? UserModel.fromJson(userJson)
           : const UserModel(
@@ -77,6 +89,7 @@ class LoginResponseModel {
           ? nowMs + refreshExpiresIn! * 1000
           : null,
       userVersion: userVersion,
+      permissions: permissions,
       user: resolvedUser,
     );
   }
