@@ -508,17 +508,15 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
-  // ⚠️ v24 est DÉLIBÉRÉMENT SAUTÉE : la branche `feature/auth_permissions`,
-  // livrée et poussée avant celle-ci, la consomme déjà. Deux migrations
-  // différentes sous un même numéro seraient invisibles jusqu'au terrain — une
-  // tablette ayant reçu l'autre v24 verrait sa base marquée à jour et NE
-  // REJOUERAIT JAMAIS celle-ci, jusqu'au premier SQL qui lit la colonne
-  // absente. Un trou de numéro ne coûte rien ; un doublon coûte une base.
-  //
-  // ⚠️ **Celle des deux branches qui fusionne en SECOND doit renuméroter
-  // au-dessus de la version déjà en place**, quelle qu'elle soit. Le saut
-  // ci-dessous ne dispense pas de cette vérification, il la rend seulement
-  // inutile si les permissions fusionnent en premier.
+  // ⚠️ v24 est un TROU PERMANENT — aucune migration ne porte ce numéro, et
+  // aucune ne doit le reprendre. `feature/manage_app_printing` l'avait sautée
+  // en réservant la v24 aux permissions ; c'est elle qui a fusionné en
+  // premier, donc les permissions ont renuméroté en v26 (ci-dessous) selon sa
+  // propre consigne. Le numéro 24 reste néanmoins BRÛLÉ : des tablettes de
+  // développement ont tourné sur l'ancienne v24 « permissions » et portent une
+  // base estampillée 24. Y recoller une autre migration la rendrait invisible
+  // sur ces postes — base marquée à jour, colonne absente, panne au premier
+  // SQL qui la lit. Un trou de numéro ne coûte rien ; un doublon coûte une base.
   if (oldVersion < 25) {
     // v25 — Rattrapage d'impression du ticket de perception : retenir qu'un
     // papier est SORTI pour ce versement.
@@ -542,6 +540,34 @@ Future<void> migrateOfflineDatabase(
         !await _hasColumn(db, 'payments', 'ticket_printed_at')) {
       await db.execute(
         'ALTER TABLE payments ADD COLUMN ticket_printed_at INTEGER',
+      );
+    }
+  }
+  if (oldVersion < 26) {
+    // v26 — Auth (ADR-014 §4) : `auth_local_user.permissions`.
+    //
+    // ⚠️ Renumérotée depuis la v24 au rebase sur `main` : l'impression (v25) a
+    // fusionné en premier, et un palier posé SOUS la version courante ne serait
+    // jamais rejoué sur une base déjà estampillée 25 — colonne absente, panne
+    // au premier SQL qui la lit.
+    //
+    // L'ensemble des permissions ne descend qu'au login et au refresh — jamais
+    // sur les pages de sync. La copie de session (secure storage) est effacée
+    // au logout ; sans copie DURABLE par compte, le login offline suivant
+    // reconstruirait une session à zéro droit et l'agent, hors ligne, ne
+    // verrait plus un seul module.
+    //
+    // Une colonne nullable, sans backfill : les comptes déjà connus n'ont
+    // jamais reçu d'ensemble et NULL dit exactement « aucune permission
+    // connue » — le prochain contact serveur la renseignera.
+    //
+    // La garde `_hasColumn` n'est pas cosmétique ici : les tablettes de dev
+    // passées par l'ancienne v24 portent DÉJÀ la colonne, et sans elle leur
+    // montée 24→26 échouerait sur `duplicate column name`.
+    if (await _hasTable(db, 'auth_local_user') &&
+        !await _hasColumn(db, 'auth_local_user', 'permissions')) {
+      await db.execute(
+        'ALTER TABLE auth_local_user ADD COLUMN permissions TEXT',
       );
     }
   }

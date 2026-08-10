@@ -115,6 +115,10 @@ class AuthSessionManager
         lastServerSeenAt: nowMs,
         sessionStartedAt: nowMs,
         refreshExpiresAt: refreshExpiresAt,
+        // Copie durable des permissions (ADR-014 §4) : elle survit au logout
+        // pour que le login offline suivant rouvre la session avec les droits
+        // du dernier contact serveur, et non avec zéro droit.
+        permissions: session.permissions,
       ),
     );
     await _authLocalDao.upsertSession(
@@ -228,7 +232,15 @@ class AuthSessionManager
     final stored = await _tokenStorage.readAuthSession();
     final AuthSession session;
     if (stored != null && stored.user.id == user.userId) {
-      var reused = stored.copyWith(userVersion: user.userVersion);
+      // Les permissions d'une session ouverte HORS LIGNE viennent toujours de
+      // la copie durable du compte (ADR-014 §4), jamais du secure storage : les
+      // deux sont écrites au même contact serveur, mais seule la copie durable
+      // survit à un logout — une seule source évite qu'elles divergent selon la
+      // branche empruntée ici.
+      var reused = stored.copyWith(
+        userVersion: user.userVersion,
+        permissions: user.permissions,
+      );
       // État partiel (crash du `clearAuthSession` au logout, deletes non
       // ordonnés) : access présent mais refresh ABSENT alors que la consigne
       // du compte existe. Sans réinjection, le premier 401 n'aurait aucun
@@ -275,6 +287,7 @@ class AuthSessionManager
           refreshToken: parked.refreshToken,
           refreshExpiresAt: bound,
           userVersion: user.userVersion,
+          permissions: user.permissions,
           user: _userFromRecord(user),
         );
         await _tokenStorage.saveAuthSession(session);
@@ -285,6 +298,7 @@ class AuthSessionManager
           tokenType: 'Bearer',
           expiresIn: 0,
           userVersion: user.userVersion,
+          permissions: user.permissions,
           user: _userFromRecord(user),
         );
       }
@@ -334,6 +348,16 @@ class AuthSessionManager
     );
   }
 
+  /// Permissions du compte de la session courante (ADR-014 §4), lues sur la
+  /// copie durable — la seule que le refresh tient à jour. `null` s'il n'y a
+  /// pas de session locale : rien à dire, l'appelant garde ce qu'il a (ne PAS
+  /// confondre avec l'ensemble vide, qui est un retrait de droits réel).
+  ///
+  /// Volontairement séparée de [evaluateFreshness] : la dégradation temporelle
+  /// et l'ensemble des droits sont deux axes sans rapport.
+  Future<List<String>?> currentPermissions() async =>
+      (await _authLocalDao.getSessionUser())?.permissions;
+
   // ── Refresh rotatif (D-07/§7.2) ──────────────────────────────────────────────
 
   /// Applique une paire fraîche issue d'un refresh réussi : réécrit les jetons
@@ -365,6 +389,11 @@ class AuthSessionManager
     }
     final nowMs = _now();
     await _authLocalDao.updateLastServerSeen(user.userId, nowMs);
+    // Le refresh est le SEUL canal par lequel un changement de droits redescend
+    // (ADR-014 §4) : la copie durable suit, ensemble vide compris. Contrairement
+    // à `user_version`, il n'y a rien à blanchir ici — les permissions ne sont
+    // qu'une projection d'affichage, jamais l'autorité.
+    await _authLocalDao.updatePermissions(user.userId, session.permissions);
     _observedUserVersion = session.userVersion;
 
     final sessionRow = await _authLocalDao.getSession();

@@ -180,6 +180,11 @@ class AppConstants {
   static const String userRoleKey = 'user_role';
   static const String userSchoolIdKey = 'user_school_id';
   static const String userCreatedAtKey = 'user_created_at';
+  // ADR-014 §4 — permissions effectives de la session ACTIVE, en JSON. Copie de
+  // travail : elle est effacée au logout comme le reste de la session. La copie
+  // durable par compte vit dans `auth_local_user.permissions` (elle, survit au
+  // logout pour servir le login offline).
+  static const String userPermissionsKey = 'user_permissions';
 
   static const String bootstrapPreviousYearPayloadKey =
       'bootstrap_previous_year_payload';
@@ -363,7 +368,26 @@ class AppConstants {
   // expliquer pourquoi il n'a plus cours. Deux `ALTER` nullables, sans backfill
   // — une pièce déjà en cache n'a jamais connu son annulation, et le prochain
   // cycle la lui apprendra.
-  static const int offlineDbSchemaVersion = 25;
+  // v24 : NUMÉRO BRÛLÉ, aucune migration ne le porte. Il avait été réservé aux
+  // permissions, livrées d'abord sous ce numéro ; l'impression (v25) ayant
+  // fusionné en premier, elles ont renuméroté en v26. Ne jamais le réattribuer :
+  // des tablettes de dev portent une base estampillée 24, un palier posé là leur
+  // serait invisible.
+  // v25 (2026-08-11) : Impression thermique (ADR-013) — `payments
+  // .ticket_printed_at`. Colonne strictement LOCALE, jamais poussée ni
+  // descendue : « ce poste a sorti le papier » est un fait d'appareil. Sans
+  // elle, aucune trace d'impression pour un encaissement pas encore scellé,
+  // donc pas de rattrapage possible sans rouvrir la réimpression qu'interdit
+  // l'ADR-013.
+  // v26 (2026-08-10, renumérotée depuis la v24 au rebase) : Auth (ADR-014 §4) —
+  // `auth_local_user.permissions`. L'ensemble des permissions arrive au
+  // login/refresh et ne repasse jamais par les pages de sync ; sans copie
+  // durable par compte, un login OFFLINE reconstruit une session sans aucun
+  // droit (fail-closed) et l'agent ne voit plus un seul module hors ligne. Un
+  // `ALTER` nullable, sans backfill — les comptes déjà connus n'ont jamais reçu
+  // d'ensemble, et NULL vaut exactement « aucune permission connue » jusqu'au
+  // prochain contact serveur.
+  static const int offlineDbSchemaVersion = 26;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

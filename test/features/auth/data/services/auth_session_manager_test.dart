@@ -20,6 +20,7 @@ AuthSession _session({
   required String uid,
   int userVersion = 0,
   int? refreshExpiresAt,
+  List<String> permissions = const <String>[],
 }) => AuthSession(
   accessToken: 'jwt',
   tokenType: 'Bearer',
@@ -27,6 +28,7 @@ AuthSession _session({
   refreshToken: 'refresh',
   refreshExpiresAt: refreshExpiresAt,
   userVersion: userVersion,
+  permissions: permissions,
   user: AuthenticatedUser(
     id: uid,
     email: 'prof@ecole.cd',
@@ -755,5 +757,159 @@ void main() {
     );
 
     await expectLater(manager.wipeSession(), completes);
+  });
+
+  // ── Permissions (ADR-014 §4) ───────────────────────────────────────────────
+  // Elles ne descendent qu'au login et au refresh. La copie de session (secure
+  // storage) meurt au logout ; c'est la copie durable par compte qui doit
+  // permettre à un login OFFLINE de rouvrir la session avec des droits.
+  group('permissions', () {
+    test('persistOnlineLogin écrit la copie durable du compte', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const ['attendance.read', 'classroom.read'],
+        ),
+        'MotDePasse123',
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, <String>[
+        'attendance.read',
+        'classroom.read',
+      ]);
+    });
+
+    test('applyRefresh met à jour la copie durable', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read', 'finance.write'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      await manager.applyRefresh(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const ['attendance.read'],
+        ),
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, <String>[
+        'attendance.read',
+      ]);
+    });
+
+    test('applyRefresh propage un RETRAIT total de droits', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      await manager.applyRefresh(
+        _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+      );
+
+      expect((await dao.getUser('u1'))?.permissions, isEmpty);
+    });
+
+    test(
+      'loginOffline après logout rouvre la session AVEC les droits',
+      () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read', 'classroom.read'],
+          ),
+          'MotDePasse123',
+        );
+        await manager.wipeSession(); // logout : la copie de session est effacée
+        when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+          (_) async =>
+              const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+        );
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, <String>[
+            'attendance.read',
+            'classroom.read',
+          ]);
+        });
+      },
+    );
+
+    test(
+      'loginOffline sur session réutilisée : la copie durable fait foi',
+      () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        // Jetons de CE compte encore actifs en storage, mais porteurs d'un
+        // ensemble périmé : la copie durable (dernier contact serveur) gagne.
+        when(() => tokenStorage.readAuthSession()).thenAnswer(
+          (_) async => _session(
+            uid: 'u1',
+            permissions: const ['finance.write', 'attendance.read'],
+          ),
+        );
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, <String>['attendance.read']);
+        });
+      },
+    );
+
+    test(
+      'compte migré (jamais revu online) → aucun droit hors ligne',
+      () async {
+        // Après la migration v24 la colonne est NULL : fail-closed jusqu'au
+        // prochain contact serveur.
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+          'MotDePasse123',
+        );
+        await db.update('auth_local_user', {'permissions': null});
+
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        res.fold((f) => fail('login offline refusé : $f'), (snap) {
+          expect(snap.session.permissions, isEmpty);
+        });
+      },
+    );
   });
 }

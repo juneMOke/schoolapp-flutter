@@ -2,6 +2,7 @@
 /// mapping SQLite ↔ Dart, sans logique métier.
 library;
 
+import 'package:school_app_flutter/features/auth/data/session_permissions.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 
 export 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart'
@@ -28,6 +29,11 @@ class AuthLocalUserRecord {
   /// (D-09). `null` = pas de fenêtre → reconnexion online exigée.
   final int? refreshExpiresAt;
 
+  /// Permissions effectives du compte au dernier contact serveur (ADR-014 §4).
+  /// Copie durable : elle survit au logout pour que le login offline rouvre une
+  /// session avec les droits connus. Vide = aucun droit (fail-closed).
+  final List<String> permissions;
+
   const AuthLocalUserRecord({
     required this.userId,
     required this.email,
@@ -42,6 +48,7 @@ class AuthLocalUserRecord {
     required this.lastServerSeenAt,
     this.sessionStartedAt,
     this.refreshExpiresAt,
+    this.permissions = SessionPermissions.none,
   });
 
   factory AuthLocalUserRecord.fromMap(Map<String, Object?> map) {
@@ -59,6 +66,7 @@ class AuthLocalUserRecord {
       lastServerSeenAt: map['last_server_seen_at'] as int,
       sessionStartedAt: map['session_started_at'] as int?,
       refreshExpiresAt: map['refresh_expires_at'] as int?,
+      permissions: SessionPermissions.decode(map['permissions'] as String?),
     );
   }
 
@@ -76,6 +84,7 @@ class AuthLocalUserRecord {
     'last_server_seen_at': lastServerSeenAt,
     'session_started_at': sessionStartedAt,
     'refresh_expires_at': refreshExpiresAt,
+    'permissions': SessionPermissions.encode(permissions),
   };
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/features/auth/data/session_permissions.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 
@@ -49,11 +50,16 @@ class TokenStorageService {
         key: AppConstants.userSchoolIdKey,
         value: session.user.schoolId,
       ),
+      _storage.write(
+        key: AppConstants.userPermissionsKey,
+        value: SessionPermissions.encode(session.permissions),
+      ),
     ]);
   }
 
-  /// Réécrit **uniquement** les jetons + bornes après un refresh (§7.2), sans
-  /// toucher le profil utilisateur déjà stocké.
+  /// Réécrit les jetons + bornes après un refresh (§7.2), sans toucher le
+  /// profil utilisateur déjà stocké — les permissions font exception, cf. plus
+  /// bas.
   ///
   /// Le refresh token n'est réécrit que s'il est **fourni** : un backend à
   /// refresh **non rotatif** ne renvoie qu'un nouvel access token → on préserve
@@ -78,6 +84,17 @@ class TokenStorageService {
       _writeIfPresent(
         AppConstants.refreshExpiresAtKey,
         session.refreshExpiresAt?.toString(),
+      ),
+      // Les permissions, elles, sont réécrites SANS condition — écrasement par
+      // le dernier mot du serveur, ensemble vide compris. C'est tout le
+      // mécanisme d'ADR-014 §4 : elles ne voyagent que sur login/refresh, et le
+      // refresh est donc le seul moment où un retrait de droits peut se
+      // matérialiser. Les préserver « si absentes » (comme le refresh token
+      // non rotatif) laisserait un compte dépouillé continuer d'afficher ses
+      // anciens modules jusqu'à la prochaine reconnexion complète.
+      _storage.write(
+        key: AppConstants.userPermissionsKey,
+        value: SessionPermissions.encode(session.permissions),
       ),
     ]);
   }
@@ -143,6 +160,9 @@ class TokenStorageService {
     final userRole = await _storage.read(key: AppConstants.userRoleKey) ?? '';
     final userSchoolId =
         await _storage.read(key: AppConstants.userSchoolIdKey) ?? '';
+    final permissions = await _storage.read(
+      key: AppConstants.userPermissionsKey,
+    );
 
     return AuthSession(
       accessToken: accessToken,
@@ -151,6 +171,7 @@ class TokenStorageService {
       refreshToken: refreshToken,
       accessExpiresAt: int.tryParse(accessExpiresAt ?? ''),
       refreshExpiresAt: int.tryParse(refreshExpiresAt ?? ''),
+      permissions: SessionPermissions.decode(permissions),
       user: AuthenticatedUser(
         id: userId,
         email: userEmail,
@@ -176,6 +197,7 @@ class TokenStorageService {
       _storage.delete(key: AppConstants.userLastNameKey),
       _storage.delete(key: AppConstants.userRoleKey),
       _storage.delete(key: AppConstants.userSchoolIdKey),
+      _storage.delete(key: AppConstants.userPermissionsKey),
     ]);
   }
 
