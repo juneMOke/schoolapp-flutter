@@ -225,4 +225,70 @@ void main() {
       expect(classes.entry.target.subMenuId, MenuConstants.organisationId);
     });
   });
+
+  // ADR-014 §2.9 — masquer une tuile ne suffit pas : un lien profond, un retour
+  // arrière ou une restauration d'état atteignent la route sans passer par le
+  // menu. La garde interroge la MÊME table, sans déclaration parallèle.
+  group('garde de route', () {
+    bool allows(String location, List<String> permissions) =>
+        canAccessLocation(Uri.parse(location), permissions);
+
+    test('route de module interdite → refusée', () {
+      expect(allows('/finances/facturations', _enseignant), isFalse);
+      expect(allows('/finances/facturations', _comptabilite), isTrue);
+    });
+
+    // C'est le cas que le filtrage du registre ne couvrait pas : la route porte
+    // des paramètres, donc elle ne figure dans aucun menu.
+    test('route à paramètres : le second segment décide', () {
+      const detail = '/finances/facturations/detail/stu-1/ay-1';
+      expect(allows(detail, _enseignant), isFalse);
+      expect(allows(detail, _comptabilite), isTrue);
+
+      const catalogue = '/documents/documents-eleve/catalogue/stu-1/ay-1';
+      expect(allows(catalogue, _enseignant), isFalse);
+      expect(allows(catalogue, _comptabilite), isTrue);
+
+      const discipline = '/disciplines/presences/student/stu-1/ay-1';
+      expect(allows(discipline, _enseignant), isTrue);
+      expect(allows(discipline, _comptabilite), isFalse);
+    });
+
+    test('les routes hors coquille passent (auth, splash, accueil)', () {
+      for (final location in const ['/home', '/login', '/splash', '/']) {
+        expect(allows(location, const []), isTrue, reason: location);
+      }
+    });
+
+    test('une route non déclarée passe (galerie de composants en debug)', () {
+      expect(allows('/dev/components', const []), isTrue);
+    });
+
+    test('aucun droit : toute route de module est refusée', () {
+      expect(allows('/classes/organisation', const []), isFalse);
+      expect(allows('/cours/my-courses', const []), isFalse);
+      expect(allows('/resultats/resultats-classe', const []), isFalse);
+    });
+
+    // Cohérence avec les deux autres surfaces : ce qui est masqué au menu doit
+    // être refusé à la route, et l'inverse.
+    test('la garde et le menu s\'accordent, sous-menu par sous-menu', () {
+      for (final permissions in const <List<String>>[
+        _enseignant,
+        _comptabilite,
+        <String>[],
+      ]) {
+        final visibles = menuSubMenuIds(permissions);
+        for (final entry in kModuleAccessRegistry.entries) {
+          for (final subMenuId in entry.value.keys) {
+            expect(
+              allows('/${entry.key}/$subMenuId', permissions),
+              visibles.contains(subMenuId),
+              reason: '$subMenuId diverge entre menu et garde de route',
+            );
+          }
+        }
+      }
+    });
+  });
 }

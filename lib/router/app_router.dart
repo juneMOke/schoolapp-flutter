@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_s
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
@@ -62,6 +63,11 @@ class RouterNotifier extends ChangeNotifier {
   _RouterRefreshSnapshot _currentSnapshot() {
     return _RouterRefreshSnapshot(
       authStatus: _authBloc.state.status,
+      // Signature de l'ensemble effectif : un refresh peut retirer un droit en
+      // arrière-plan (ADR-014 §4). Sans elle, le routeur ne rejouerait pas son
+      // `redirect` et laisserait ouverte une route devenue interdite —
+      // exactement le trou que la garde ci-dessous existe pour fermer.
+      permissionsSignature: _permissionsSignature(_authBloc.state.permissions),
       academicYearBlocksNavigation:
           _academicYearContextBloc.state.blocksNavigation,
       academicYearHasBlockingFailure:
@@ -87,15 +93,25 @@ class RouterNotifier extends ChangeNotifier {
   }
 }
 
+/// Signature stable de l'ensemble effectif — triée, car l'ordre du serveur n'a
+/// aucun sens métier et une simple permutation ne doit pas passer pour un
+/// changement de droits.
+String _permissionsSignature(List<String> permissions) {
+  final sorted = [...permissions]..sort();
+  return sorted.join('\u0000');
+}
+
 class _RouterRefreshSnapshot {
   final AuthStatus authStatus;
   final bool academicYearBlocksNavigation;
   final bool academicYearHasBlockingFailure;
+  final String permissionsSignature;
 
   const _RouterRefreshSnapshot({
     required this.authStatus,
     required this.academicYearBlocksNavigation,
     required this.academicYearHasBlockingFailure,
+    required this.permissionsSignature,
   });
 
   @override
@@ -104,7 +120,9 @@ class _RouterRefreshSnapshot {
     return other is _RouterRefreshSnapshot &&
         other.authStatus == authStatus &&
         other.academicYearBlocksNavigation == academicYearBlocksNavigation &&
-        other.academicYearHasBlockingFailure == academicYearHasBlockingFailure;
+        other.academicYearHasBlockingFailure ==
+            academicYearHasBlockingFailure &&
+        other.permissionsSignature == permissionsSignature;
   }
 
   @override
@@ -112,6 +130,7 @@ class _RouterRefreshSnapshot {
     authStatus,
     academicYearBlocksNavigation,
     academicYearHasBlockingFailure,
+    permissionsSignature,
   );
 }
 
@@ -161,7 +180,13 @@ class AppRouter {
 
         if (isOnAuthFlow || isOnSplash) return '/home';
 
-        return null;
+        // Garde de permission (ADR-014 §2.9) : masquer une tuile ne suffit pas.
+        // Un lien profond, une restauration d'état ou un retour arrière
+        // atteignent la route sans passer par le menu — c'est précisément ce
+        // que le filtrage du registre ne couvre pas.
+        return canAccessLocation(state.uri, authState.permissions)
+            ? null
+            : '/home';
       },
       routes: [
         GoRoute(
