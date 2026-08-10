@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/avatars/student_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -227,25 +229,35 @@ class _ActionButton extends StatelessWidget {
             ? icon
             : Icon(isTransfer ? Icons.swap_horiz_rounded : Icons.add_rounded),
       );
-      return SessionWriteGate(
-        child: Tooltip(message: label, child: child),
+      return PermissionGate(
+        requires: const [Perm.classroomWrite],
+        child: SessionWriteGate(
+          child: Tooltip(message: label, child: child),
+        ),
       );
     }
 
-    return SessionWriteGate(
-      child: _styledButton(
-        isTransfer: isTransfer,
-        onTap: onTap,
-        square: false,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            const SizedBox(width: AppDimensions.spacingXS),
-            Flexible(
-              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-          ],
+    return PermissionGate(
+      requires: const [Perm.classroomWrite],
+      child: SessionWriteGate(
+        child: _styledButton(
+          isTransfer: isTransfer,
+          onTap: onTap,
+          square: false,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: AppDimensions.spacingXS),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

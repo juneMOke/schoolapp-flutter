@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -175,13 +177,23 @@ class _SectionHeader extends StatelessWidget {
         // qu'il y a la place (desktop, 2 colonnes, tablette) ; il ne passe sous
         // le titre que sur petit téléphone.
         final compact = constraints.maxWidth < AppBreakpoints.dataTablePhoneMax;
-        // Gel READ_ONLY (ADR-010) : l'encaissement est une écriture métier.
-        final button = SessionWriteGate(
-          child: EteeloButton.primary(
-            label: actionLabel,
-            icon: Icons.add,
-            onPressed: onActionPressed,
-            fullWidth: false,
+        // Deux gardes superposées, deux causes distinctes : la permission
+        // MASQUE (ADR-014, « pas vous »), le mode de session GÈLE (ADR-010,
+        // « pas maintenant »). La conjonction est celle du chemin de POUSSÉE :
+        // `POST /sync/payments` exige aussi `editique.write`, parce qu'il scelle
+        // le reçu en encaissant. Offrir le bouton sans ce droit produirait une
+        // écriture d'outbox rejetée en 403 TERMINAL — l'argent saisi serait
+        // perdu, pas rejoué.
+        final button = PermissionGate(
+          requires: const [Perm.financePaymentWrite, Perm.editiqueWrite],
+          requiresAll: true,
+          child: SessionWriteGate(
+            child: EteeloButton.primary(
+              label: actionLabel,
+              icon: Icons.add,
+              onPressed: onActionPressed,
+              fullWidth: false,
+            ),
           ),
         );
 

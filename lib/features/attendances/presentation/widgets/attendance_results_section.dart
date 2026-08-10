@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -243,24 +245,28 @@ class _AttendanceActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Gel READ_ONLY (ADR-010) : l'appel est une écriture métier.
-    return SessionWriteGate(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          EteeloButton.secondary(
-            label: l10n.attendanceMarkAllPresentAction,
-            onPressed: isSaving ? null : onMarkAllPresent,
-            fullWidth: false,
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          EteeloButton.primary(
-            label: l10n.attendanceSaveCallAction,
-            isLoading: isSaving,
-            onPressed: canSave ? onSaveCall : null,
-            fullWidth: false,
-          ),
-        ],
+    // La feuille d'appel est atteignable avec `attendance.read` seul : sans
+    // cette garde, un profil en lecture se verrait offrir l'enregistrement.
+    return PermissionGate(
+      requires: const [Perm.attendanceWrite],
+      child: SessionWriteGate(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            EteeloButton.secondary(
+              label: l10n.attendanceMarkAllPresentAction,
+              onPressed: isSaving ? null : onMarkAllPresent,
+              fullWidth: false,
+            ),
+            const SizedBox(width: AppDimensions.spacingS),
+            EteeloButton.primary(
+              label: l10n.attendanceSaveCallAction,
+              isLoading: isSaving,
+              onPressed: canSave ? onSaveCall : null,
+              fullWidth: false,
+            ),
+          ],
+        ),
       ),
     );
   }

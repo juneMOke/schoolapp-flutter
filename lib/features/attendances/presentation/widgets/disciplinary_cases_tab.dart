@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -247,13 +249,17 @@ class _DisciplinaryCasesHeader extends StatelessWidget {
       ],
     );
 
-    // Gel READ_ONLY (ADR-010) : la création de cas est une écriture métier.
-    final button = SessionWriteGate(
-      child: PrimaryButton(
-        label: l10n.disciplinaryCaseCreateAction,
-        icon: Icons.add_rounded,
-        fullWidth: false,
-        onPressed: onCreateCase,
+    // L'onglet s'ouvre avec `discipline.read` : la création exige, elle,
+    // l'écriture du domaine.
+    final button = PermissionGate(
+      requires: const [Perm.disciplineWrite],
+      child: SessionWriteGate(
+        child: PrimaryButton(
+          label: l10n.disciplinaryCaseCreateAction,
+          icon: Icons.add_rounded,
+          fullWidth: false,
+          onPressed: onCreateCase,
+        ),
       ),
     );
 
