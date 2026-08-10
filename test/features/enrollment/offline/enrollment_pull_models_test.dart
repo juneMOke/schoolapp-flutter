@@ -114,7 +114,7 @@ void main() {
         expect(bundle.current.schoolLevelGroups.single.displayOrder, 2);
         expect(bundle.current.schoolLevels.single.splitIntoClassrooms, isTrue);
         // Argent en centimes entiers.
-        final tariff = bundle.current.feeTariffs.single;
+        final tariff = bundle.current.feeTariffs!.single;
         expect(tariff.amountInCents, isA<int>());
         expect(tariff.amountInCents, 1500000);
         expect(tariff.label, isNull);
@@ -133,6 +133,42 @@ void main() {
         'serverTime': 't',
       });
       expect(bundle.previous, isNull);
+    });
+
+    // ADR-014 §4 — la portion tarifaire est retirée du bundle pour qui n'a pas
+    // `finance.grid.read`. `null` (non communiquée) et `[]` (réellement aucune)
+    // ne doivent PAS se confondre : la purge locale se décide dessus.
+    test('`feeTariffs` absent → null, jamais liste vide', () {
+      final json = yearBundleJson(yearId: 'ay-1', current: true)
+        ..remove('feeTariffs');
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': json,
+        'serverTime': 't',
+      });
+      expect(bundle.current.feeTariffs, isNull);
+    });
+
+    test('`feeTariffs` à null → null', () {
+      final json = yearBundleJson(yearId: 'ay-1', current: true);
+      json['feeTariffs'] = null;
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': json,
+        'serverTime': 't',
+      });
+      expect(bundle.current.feeTariffs, isNull);
+    });
+
+    test('`feeTariffs` à [] → liste vide (l\'école n\'a aucun tarif)', () {
+      final json = yearBundleJson(yearId: 'ay-1', current: true);
+      json['feeTariffs'] = <dynamic>[];
+      final bundle = ReferentialBundleDto.fromJson({
+        'school': schoolJson(),
+        'current': json,
+        'serverTime': 't',
+      });
+      expect(bundle.current.feeTariffs, isEmpty);
     });
 
     test(
@@ -169,7 +205,10 @@ void main() {
         });
         expect(bundle.current.schoolLevelGroups, isEmpty);
         expect(bundle.current.schoolLevels, isEmpty);
-        expect(bundle.current.feeTariffs, isEmpty);
+        // `feeTariffs` fait exception depuis ADR-014 §4 : la portion peut être
+        // RETIRÉE par le serveur, et l'absence doit rester distinguable d'une
+        // grille vide — sans quoi la purge locale l'effacerait.
+        expect(bundle.current.feeTariffs, isNull);
       },
     );
   });

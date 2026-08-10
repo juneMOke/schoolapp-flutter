@@ -279,16 +279,26 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       syncedAt: syncedAt,
       schoolId: currentUser.schoolId ?? '',
     );
-    final allTariffs = [
-      ...body.current.feeTariffs,
-      ...?body.previous?.feeTariffs,
+    // Portion réservée (ADR-014 §4) : le serveur envoie `feeTariffs: null` —
+    // et non `[]` — quand l'appelant n'a pas `finance.grid.read`. `null` dit
+    // « je ne te la montre pas », jamais « cette école n'a pas de tarifs ».
+    // Replier l'un sur l'autre ferait lire à la purge scopée un ordre de tout
+    // supprimer : la purge ne connaît que l'année, pas le compte, donc sur une
+    // tablette partagée un pull sans ce droit effacerait la grille dont dépend
+    // l'inscription hors ligne d'un autre poste. On ne purge donc QUE les
+    // années dont le bundle a réellement porté sa section — une section
+    // présente mais vide reste, elle, un ordre de purge légitime.
+    final tariffBundles = <ReferentialYearBundleDto>[
+      if (body.current.feeTariffs != null) body.current,
+      if (body.previous?.feeTariffs != null) body.previous!,
     ];
+    if (tariffBundles.isEmpty) return upserted;
+
+    final allTariffs = [for (final b in tariffBundles) ...b.feeTariffs!];
     final yearIds = <String>{
-      body.current.academicYear.id,
-      if (body.previous != null) body.previous!.academicYear.id,
-      for (final g in body.current.schoolLevelGroups) g.academicYearId,
-      if (body.previous != null)
-        for (final g in body.previous!.schoolLevelGroups) g.academicYearId,
+      for (final b in tariffBundles) b.academicYear.id,
+      for (final b in tariffBundles)
+        for (final g in b.schoolLevelGroups) g.academicYearId,
       for (final t in allTariffs) t.academicYearId,
     }.toList(growable: false);
     await replaceTariffs(

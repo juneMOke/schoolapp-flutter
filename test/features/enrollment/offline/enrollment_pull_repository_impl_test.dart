@@ -89,9 +89,13 @@ void main() {
     serverTime: serverTime,
   );
 
+  /// [withheldTariffs] simule la portion retirée par le serveur (ADR-014 §4) :
+  /// `feeTariffs: null`, à ne pas confondre avec `tariffs: const []` qui, lui,
+  /// dit que l'école n'a réellement aucun tarif.
   ReferentialBundleDto bundle({
     List<RefFeeTariffDto>? tariffs,
     ReferentialYearBundleDto? previous,
+    bool withheldTariffs = false,
   }) => ReferentialBundleDto(
     school: const RefSchoolDto(id: 'sch-1', name: 'Ecole Etoile'),
     current: ReferentialYearBundleDto(
@@ -102,19 +106,20 @@ void main() {
       ),
       schoolLevelGroups: const [],
       schoolLevels: const [],
-      feeTariffs:
-          tariffs ??
-          const [
-            RefFeeTariffDto(
-              id: 'tar-1',
-              feeCode: 'INSCRIPTION',
-              schoolLevelGroupId: 'grp-1',
-              schoolLevelId: 'lvl-1',
-              amountInCents: 5000,
-              currency: 'USD',
-              academicYearId: 'ay-1',
-            ),
-          ],
+      feeTariffs: withheldTariffs
+          ? null
+          : tariffs ??
+                const [
+                  RefFeeTariffDto(
+                    id: 'tar-1',
+                    feeCode: 'INSCRIPTION',
+                    schoolLevelGroupId: 'grp-1',
+                    schoolLevelId: 'lvl-1',
+                    amountInCents: 5000,
+                    currency: 'USD',
+                    academicYearId: 'ay-1',
+                  ),
+                ],
     ),
     previous: previous,
     serverTime: '2026-07-08T10:00:00Z',
@@ -298,6 +303,88 @@ void main() {
         expect(capturedTariffs, hasLength(2));
         expect(capturedYears, containsAll(['ay-1', 'ay-0']));
         expect(await db.query('ref_academic_years'), hasLength(2));
+      },
+    );
+
+    // ADR-014 §4 — la grille tarifaire est retirée du bundle pour qui n'a pas
+    // `finance.grid.read`. La purge scopée ne connaît que l'année, jamais le
+    // compte : la déclencher sur une portion absente effacerait, sur une
+    // tablette partagée, la grille dont dépend l'inscription hors ligne d'un
+    // autre poste.
+    test(
+      'portion tarifaire retirée (null) → aucune purge, le reste s\'applique',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle(withheldTariffs: true)));
+
+        final result = await repo.syncReferential();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.upserted, 2); // 1 école + 1 année, aucun tarif
+        expect(capturedTariffs, isEmpty);
+        // Le point qui compte : `replaceTariffs` n'est pas appelé du tout.
+        expect(capturedYears, isEmpty);
+        // École, années et niveaux s'appliquent normalement — l'amorçage de
+        // l'application ne dépend pas de la portion réservée.
+        expect(await db.query('ref_school'), hasLength(1));
+        expect(await db.query('ref_academic_years'), hasLength(1));
+      },
+    );
+
+    test(
+      'portion présente mais vide ([]) → purge légitime de l\'année',
+      () async {
+        when(
+          () => api.pullReferential(any()),
+        ).thenAnswer((_) async => httpOk(bundle(tariffs: const [])));
+
+        final result = await repo.syncReferential();
+
+        expect(result.isRight(), isTrue);
+        expect(capturedTariffs, isEmpty);
+        // « Cette école n'a plus aucun tarif » est une information : les
+        // lignes locales de l'année doivent disparaître.
+        expect(capturedYears, ['ay-1']);
+      },
+    );
+
+    test(
+      'portion retirée sur `current` seulement → seule l\'année de `previous` '
+      'est purgée',
+      () async {
+        when(() => api.pullReferential(any())).thenAnswer(
+          (_) async => httpOk(
+            bundle(
+              withheldTariffs: true,
+              previous: const ReferentialYearBundleDto(
+                academicYear: RefAcademicYearDto(
+                  id: 'ay-0',
+                  name: '2025',
+                  isCurrent: false,
+                ),
+                schoolLevelGroups: [],
+                schoolLevels: [],
+                feeTariffs: [
+                  RefFeeTariffDto(
+                    id: 'tar-0',
+                    feeCode: 'INSCRIPTION',
+                    schoolLevelGroupId: 'grp-0',
+                    schoolLevelId: 'lvl-0',
+                    amountInCents: 4500,
+                    currency: 'USD',
+                    academicYearId: 'ay-0',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await repo.syncReferential();
+
+        expect(capturedTariffs, hasLength(1));
+        expect(capturedYears, ['ay-0']);
       },
     );
 

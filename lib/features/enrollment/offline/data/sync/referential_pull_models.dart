@@ -81,7 +81,14 @@ class ReferentialYearBundleDto {
   final RefAcademicYearDto academicYear;
   final List<RefSchoolLevelGroupDto> schoolLevelGroups;
   final List<RefSchoolLevelDto> schoolLevels;
-  final List<RefFeeTariffDto> feeTariffs;
+
+  /// Grille tarifaire — **nullable, et la nuance porte de l'argent** (ADR-014
+  /// §4). Le serveur retire cette portion du bundle pour qui ne détient pas
+  /// `finance.grid.read` et l'envoie à `null` plutôt qu'à `[]`, précisément
+  /// pour ne pas laisser croire que l'école n'a pas de tarifs. `null` = non
+  /// communiquée, `[]` = réellement aucune. La purge scopée du côté local
+  /// dépend de cette distinction : voir `_applyReferential`.
+  final List<RefFeeTariffDto>? feeTariffs;
 
   const ReferentialYearBundleDto({
     required this.academicYear,
@@ -100,7 +107,11 @@ class ReferentialYearBundleDto {
           RefSchoolLevelGroupDto.fromJson,
         ),
         schoolLevels: pullList(j['schoolLevels'], RefSchoolLevelDto.fromJson),
-        feeTariffs: pullList(j['feeTariffs'], RefFeeTariffDto.fromJson),
+        // Volontairement hors de `pullList`, qui replie `null` sur la liste
+        // vide : c'est exactement la distinction à préserver ici.
+        feeTariffs: j['feeTariffs'] == null
+            ? null
+            : pullList(j['feeTariffs'], RefFeeTariffDto.fromJson),
       );
 }
 
