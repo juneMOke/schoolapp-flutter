@@ -144,6 +144,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashErrorRetry => 'Retry';
 
   @override
+  String get accueilNoAccessTitle => 'No module available';
+
+  @override
+  String get accueilNoAccessMessage =>
+      'Your account has access to no module. Contact your school administrator to have your rights adjusted.';
+
+  @override
+  String get accueilNoAccessOfflineMessage =>
+      'Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.';
+
+  @override
+  String get accueilNoAccessSignOut => 'Sign out';
+
+  @override
   String get splashForbiddenTitle => 'Access not allowed';
 
   @override

@@ -350,6 +350,30 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get splashErrorRetry;
 
+  /// Home title when the effective permission set unlocks no module (ADR-014 fail-closed)
+  ///
+  /// In en, this message translates to:
+  /// **'No module available'**
+  String get accueilNoAccessTitle;
+
+  /// Message when the server did report the rights and they are empty
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has access to no module. Contact your school administrator to have your rights adjusted.'**
+  String get accueilNoAccessMessage;
+
+  /// Message when the session comes from the local durable copy — signing in online can refresh the rights
+  ///
+  /// In en, this message translates to:
+  /// **'Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.'**
+  String get accueilNoAccessOfflineMessage;
+
+  /// The only useful action from this screen: go back to the sign-in screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get accueilNoAccessSignOut;
+
   /// Bootstrap screen title when the account lacks the permission to load the referential (403)
   ///
   /// In en, this message translates to:

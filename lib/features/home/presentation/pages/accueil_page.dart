@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/home/domain/factories/accueil_module
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_brand_banner.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_entrance.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_modules_section.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_no_access_state.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_signature.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -41,6 +42,9 @@ class AccueilPage extends StatelessWidget {
       l10n,
       permissions: permissions,
     );
+    final isOffline = context.select<AuthBloc, bool>(
+      (bloc) => bloc.state.isOffline,
+    );
 
     return AppPageBackground(
       child: Column(
@@ -51,10 +55,19 @@ class AccueilPage extends StatelessWidget {
             child: AccueilBrandBanner(),
           ),
           const SizedBox(height: AccueilUiTokens.bannerToModulesGap),
-          AccueilModulesSection(
-            modules: modules,
-            entranceIndexOffset: _bannerEntranceIndex + 1,
-          ),
+          // Le bandeau de marque reste : il porte le nom de l'école et la
+          // salutation, qui situent l'utilisateur même quand il n'a accès à
+          // rien. Seule la grille cède la place à l'explication.
+          if (modules.isEmpty)
+            AccueilEntrance(
+              index: _bannerEntranceIndex + 1,
+              child: AccueilNoAccessState(isOffline: isOffline),
+            )
+          else
+            AccueilModulesSection(
+              modules: modules,
+              entranceIndexOffset: _bannerEntranceIndex + 1,
+            ),
           const SizedBox(height: AccueilUiTokens.modulesToSignatureGap),
           const AccueilSignature(),
           // Seul endroit de l'application d'où l'on atteint `/dev/components` et

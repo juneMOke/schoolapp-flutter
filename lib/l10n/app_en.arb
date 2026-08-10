@@ -64,6 +64,22 @@
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",
+  "accueilNoAccessTitle": "No module available",
+  "@accueilNoAccessTitle": {
+    "description": "Home title when the effective permission set unlocks no module (ADR-014 fail-closed)"
+  },
+  "accueilNoAccessMessage": "Your account has access to no module. Contact your school administrator to have your rights adjusted.",
+  "@accueilNoAccessMessage": {
+    "description": "Message when the server did report the rights and they are empty"
+  },
+  "accueilNoAccessOfflineMessage": "Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.",
+  "@accueilNoAccessOfflineMessage": {
+    "description": "Message when the session comes from the local durable copy — signing in online can refresh the rights"
+  },
+  "accueilNoAccessSignOut": "Sign out",
+  "@accueilNoAccessSignOut": {
+    "description": "The only useful action from this screen: go back to the sign-in screen"
+  },
   "splashForbiddenTitle": "Access not allowed",
   "@splashForbiddenTitle": {
     "description": "Bootstrap screen title when the account lacks the permission to load the referential (403)"

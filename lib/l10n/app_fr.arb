@@ -64,6 +64,22 @@
   "splashErrorTitle": "Connexion impossible",
   "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
   "splashErrorRetry": "Réessayer",
+  "accueilNoAccessTitle": "Aucun module accessible",
+  "@accueilNoAccessTitle": {
+    "description": "Titre de l'accueil quand l'ensemble effectif des permissions ne débloque aucun module (ADR-014 fail-closed)"
+  },
+  "accueilNoAccessMessage": "Votre compte ne donne accès à aucun module. Contactez l'administrateur de votre école pour qu'il ajuste vos droits.",
+  "@accueilNoAccessMessage": {
+    "description": "Message quand le serveur a bien communiqué les droits et qu'ils sont vides"
+  },
+  "accueilNoAccessOfflineMessage": "Votre session a été ouverte hors ligne et aucun droit n'est connu pour ce compte. Reconnectez-vous en ligne dès que le réseau est disponible.",
+  "@accueilNoAccessOfflineMessage": {
+    "description": "Message quand la session vient de la copie durable locale — une reconnexion en ligne peut rafraîchir les droits"
+  },
+  "accueilNoAccessSignOut": "Se déconnecter",
+  "@accueilNoAccessSignOut": {
+    "description": "Seule action utile depuis cet écran : repartir de l'écran de connexion"
+  },
   "splashForbiddenTitle": "Accès non autorisé",
   "@splashForbiddenTitle": {
     "description": "Titre de l'écran d'amorçage quand le compte n'a pas la permission de charger le référentiel (403)"
