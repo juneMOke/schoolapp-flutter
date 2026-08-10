@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/auth/permissions.dart';
+
 /// Issue d'un pull delta d'une ressource (diagnostic / agrégation par le
 /// coordinateur). Miroir *lecture* de `OutboxDispatchResult` (qui, lui, pousse).
 enum PullResult {
@@ -63,6 +65,19 @@ abstract class PullHandler {
   /// Clé de ressource (identique à celle utilisée dans `SyncMetaDao`, ex.
   /// `'classrooms'`). Sert de clé de routage et de déduplication.
   String get resource;
+
+  /// Permission(s) de lecture exigées par le point d'entrée `/sync` de cette
+  /// ressource (ADR-014). Le coordinateur saute la ressource quand la session
+  /// ne les détient pas : sans ce filtre, chaque cycle de pull collectionnerait
+  /// des 403 sur les domaines que le compte n'a pas à lire — bruit permanent,
+  /// et un état de synchronisation qui ne distingue plus « pas le droit » d'un
+  /// incident réseau.
+  ///
+  /// Plusieurs valeurs = **conjonction** (le point d'entrée franchit deux
+  /// frontières d'autorité). Volontairement sans implémentation par défaut : un
+  /// handler neuf doit déclarer son exigence, et l'oubli est une erreur de
+  /// compilation plutôt qu'une ressource silencieusement non filtrée.
+  List<Perm> get requiredPermissions;
 
   /// Exécute le pull delta et peuple le cache local. Ne lève pas.
   Future<PullOutcome> pull();

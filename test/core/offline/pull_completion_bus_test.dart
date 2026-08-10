@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -20,6 +21,9 @@ class _StubHandler implements PullHandler {
   final String resource;
   final PullOutcome outcome;
 
+  @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
   const _StubHandler(this.resource, this.outcome);
 
   @override
@@ -29,6 +33,9 @@ class _StubHandler implements PullHandler {
 class _ThrowingHandler implements PullHandler {
   @override
   final String resource;
+
+  @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
 
   const _ThrowingHandler(this.resource);
 

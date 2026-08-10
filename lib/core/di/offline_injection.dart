@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
@@ -78,6 +79,11 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   // chemins offline pour estampiller `authorId` sur les payloads `/sync`.
   getIt.registerLazySingleton<CurrentUserContext>(() => CurrentUserContext());
 
+  // Ensemble effectif des permissions (ADR-014 §4) : alimenté par l'auth, lu
+  // par la boucle de pull pour sauter les ressources que ce compte n'a pas le
+  // droit de lire — sans quoi chaque cycle collectionnerait des 403.
+  getIt.registerLazySingleton<CurrentPermissions>(() => CurrentPermissions());
+
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<ConnectivityService>(
     () => ConnectivityService(getIt<Connectivity>()),
@@ -110,6 +116,7 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
     () => PullCoordinator(
       connectivity: getIt<ConnectivityService>(),
       completionBus: getIt<PullCompletionBus>(),
+      permissions: getIt<CurrentPermissions>(),
     ),
   );
 

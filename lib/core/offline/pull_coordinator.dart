@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
+import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
@@ -9,6 +11,13 @@ class PullRunReport {
   final int updated;
   final int notModified;
   final int failed;
+
+  /// Ressources sautées faute de permission de lecture (ADR-014). Comptées à
+  /// part des échecs : ce n'est ni une panne ni un incident, c'est le
+  /// fonctionnement normal d'un compte au périmètre plus étroit. Les confondre
+  /// afficherait une synchronisation « en erreur » à un enseignant dont tout
+  /// va bien.
+  final int forbidden;
 
   /// Horloge **serveur** (epoch ms) la plus récente observée ce cycle, tous
   /// handlers confondus (max des [PullOutcome.serverTimeMs] non-null) — sert
@@ -23,12 +32,15 @@ class PullRunReport {
     this.updated = 0,
     this.notModified = 0,
     this.failed = 0,
+    this.forbidden = 0,
     this.latestServerTimeMs,
   });
 
   const PullRunReport.skipped() : this(skipped: true);
   const PullRunReport.offline() : this(offline: true);
 
+  /// Ressources réellement tirées. [forbidden] en est exclu : une ressource
+  /// sautée n'a produit ni donnée ni échec.
   int get processed => updated + notModified + failed;
 }
 
@@ -50,6 +62,7 @@ class PullRunReport {
 class PullCoordinator {
   final ConnectivityService _connectivity;
   final PullCompletionBus? _completionBus;
+  final CurrentPermissions? _permissions;
   final Map<String, PullHandler> _handlers = {};
 
   bool _pulling = false;
@@ -57,8 +70,10 @@ class PullCoordinator {
   PullCoordinator({
     required ConnectivityService connectivity,
     PullCompletionBus? completionBus,
+    CurrentPermissions? permissions,
   }) : _connectivity = connectivity,
-       _completionBus = completionBus;
+       _completionBus = completionBus,
+       _permissions = permissions;
 
   /// Enregistre le handler d'une ressource (appelé par la DI des branches).
   void registerHandler(PullHandler handler) {
@@ -77,9 +92,13 @@ class PullCoordinator {
         return const PullRunReport.offline();
       }
 
-      var updated = 0, notModified = 0, failed = 0;
+      var updated = 0, notModified = 0, failed = 0, forbidden = 0;
       int? latestServerTimeMs;
       for (final handler in _handlers.values) {
+        if (!_isReadable(handler)) {
+          forbidden++;
+          continue;
+        }
         try {
           final outcome = await handler.pull();
           switch (outcome.result) {
@@ -110,10 +129,32 @@ class PullCoordinator {
         updated: updated,
         notModified: notModified,
         failed: failed,
+        forbidden: forbidden,
         latestServerTimeMs: latestServerTimeMs,
       );
     } finally {
       _pulling = false;
     }
+  }
+
+  /// Vrai si la session courante peut lire cette ressource (ADR-014).
+  ///
+  /// **Ensemble inconnu → on tire quand même.** Le holder rend `null` tant que
+  /// la couche auth n'a pas alimenté la session (amorçage, ou tests montant le
+  /// coordinateur seul) : filtrer là-dessus couperait toute la synchronisation
+  /// sur un simple trou d'alimentation, alors que ne pas filtrer ne coûte, au
+  /// pire, qu'un appel refusé par le serveur — qui reste la seule vraie
+  /// frontière. L'ensemble **vide**, lui, est une information : aucun droit,
+  /// donc aucune ressource tirée.
+  bool _isReadable(PullHandler handler) {
+    final held = _permissions?.permissions;
+    if (held == null) return true;
+    return canAccess(
+      requires: handler.requiredPermissions,
+      permissions: held,
+      // Conjonction : un point d'entrée qui franchit deux frontières
+      // d'autorité les exige toutes les deux.
+      requiresAll: true,
+    );
   }
 }

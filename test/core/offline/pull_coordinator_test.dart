@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
@@ -11,10 +13,17 @@ class MockConnectivity extends Mock implements Connectivity {}
 
 /// Handler configurable qui compte ses appels.
 class FakePullHandler implements PullHandler {
-  FakePullHandler(this.resource, this._outcome);
+  FakePullHandler(
+    this.resource,
+    this._outcome, {
+    this.requiredPermissions = const [Perm.schoolRead],
+  });
 
   @override
   final String resource;
+
+  @override
+  final List<Perm> requiredPermissions;
   final PullOutcome _outcome;
   int calls = 0;
 
@@ -31,6 +40,9 @@ class ThrowingPullHandler implements PullHandler {
   String get resource => 'boom';
 
   @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
   Future<PullOutcome> pull() async => throw StateError('réseau coupé');
 }
 
@@ -42,6 +54,9 @@ class SlowPullHandler implements PullHandler {
 
   @override
   String get resource => 'slow';
+
+  @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
 
   @override
   Future<PullOutcome> pull() async {
@@ -198,4 +213,124 @@ void main() {
       expect(slow.calls, 1);
     },
   );
+
+  // ADR-014 — la boucle de pull tape des points d'entrée gardés par la
+  // permission de lecture de leur domaine. Sans filtre, un compte au périmètre
+  // étroit collectionnerait des 403 à chaque cycle, et l'état de synchro ne
+  // distinguerait plus « pas le droit » d'un incident réseau.
+  group('filtrage par permission', () {
+    PullCoordinator buildWith(CurrentPermissions permissions) =>
+        PullCoordinator(connectivity: service, permissions: permissions);
+
+    test('ressource non autorisée : sautée, jamais appelée', () async {
+      goOnline();
+      final autorise = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final interdit = FakePullHandler(
+        'payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          buildWith(CurrentPermissions()..set(const ['classroom.read']))
+            ..registerHandler(autorise)
+            ..registerHandler(interdit);
+
+      final report = await coord.pullAll();
+
+      expect(interdit.calls, 0);
+      expect(autorise.calls, 1);
+      expect(report.updated, 1);
+      // Compté à part : ce n'est pas une panne, c'est un périmètre.
+      expect(report.forbidden, 1);
+      expect(report.failed, 0);
+      expect(report.processed, 1);
+    });
+
+    test('ensemble vide : plus rien n\'est tiré', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord = buildWith(CurrentPermissions()..set(const []))
+        ..registerHandler(handler);
+
+      final report = await coord.pullAll();
+
+      expect(handler.calls, 0);
+      expect(report.forbidden, 1);
+    });
+
+    // `null` ≠ ensemble vide : tant que la couche auth n'a pas alimenté le
+    // holder, on tire comme avant et c'est le serveur qui tranche. Filtrer là
+    // couperait toute la synchro sur un simple trou d'alimentation.
+    test('ensemble inconnu : on tire quand même', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord = buildWith(CurrentPermissions())..registerHandler(handler);
+
+      final report = await coord.pullAll();
+
+      expect(handler.calls, 1);
+      expect(report.forbidden, 0);
+      expect(report.updated, 1);
+    });
+
+    test('holder absent (coordinateur monté seul) : aucun filtrage', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord = build()..registerHandler(handler);
+
+      expect((await coord.pullAll()).updated, 1);
+      expect(handler.calls, 1);
+    });
+
+    test(
+      'conjonction : une seule des deux permissions ne suffit pas',
+      () async {
+        goOnline();
+        final handler = FakePullHandler(
+          'referential',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.schoolRead, Perm.financeGridRead],
+        );
+        final coord = buildWith(
+          CurrentPermissions()..set(const ['school.read']),
+        )..registerHandler(handler);
+
+        final report = await coord.pullAll();
+
+        expect(handler.calls, 0);
+        expect(report.forbidden, 1);
+      },
+    );
+
+    test('une permission inconnue du client ne débloque rien', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord = buildWith(
+        CurrentPermissions()..set(const ['classroom.readonly']),
+      )..registerHandler(handler);
+
+      expect((await coord.pullAll()).forbidden, 1);
+      expect(handler.calls, 0);
+    });
+  });
 }

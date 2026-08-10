@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 
 /// [PullHandler] des évaluations (référence des évaluations serveur, itéré par
@@ -10,6 +11,10 @@ class EvaluationsPullHandler implements PullHandler {
 
   @override
   String get resource => kAcademicsEvaluationsResourcePrefix;
+
+  /// GET /sync/academics/evaluations — gardé sur `academics.grade.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.academicsGradeRead];
 
   @override
   Future<PullOutcome> pull() async {
@@ -34,6 +39,10 @@ class NotesPullHandler implements PullHandler {
 
   @override
   String get resource => kAcademicsNotesResourcePrefix;
+
+  /// GET /sync/academics/notes — gardé sur `academics.grade.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.academicsGradeRead];
 
   @override
   Future<PullOutcome> pull() async {

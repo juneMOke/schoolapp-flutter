@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_transfer_pull_repository.dart';
 
@@ -12,6 +13,10 @@ class ClassroomTransferPullHandler implements PullHandler {
 
   @override
   String get resource => ClassroomTransferPullRepositoryImpl.resource;
+
+  /// GET /sync/classroom-transfers — gardé sur `classroom.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.classroomRead];
 
   @override
   Future<PullOutcome> pull() async {

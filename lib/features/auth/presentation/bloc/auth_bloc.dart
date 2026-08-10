@@ -102,6 +102,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _sessionManager.primeCurrentUser(
           session.user.id,
           schoolId: session.user.schoolId,
+          // Amorce aussi l'ensemble effectif : la boucle de synchro démarre
+          // avant tout tick de fraîcheur, et sans lui elle tirerait des
+          // ressources que ce compte n'a pas le droit de lire.
+          permissions: session.permissions,
         );
         // Session valide en storage : dériver le mode de dégradation courant.
         final eval = await _sessionManager.evaluateFreshness();

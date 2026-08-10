@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
@@ -15,21 +16,33 @@ class EnrollmentPullHandler implements PullHandler {
   @override
   final String resource;
 
+  @override
+  final List<Perm> requiredPermissions;
+
   final Future<Either<Failure, EnrollmentPullOutcome>> Function() _pull;
 
-  const EnrollmentPullHandler._(this.resource, this._pull);
+  const EnrollmentPullHandler._(
+    this.resource,
+    this.requiredPermissions,
+    this._pull,
+  );
 
   /// Socle référentiel (années, cycles, niveaux, grille tarifaire).
+  ///
+  /// `school.read` et **pas** `finance.grid.read` : le serveur a délibérément
+  /// ouvert cette route à tous, quitte à retirer la seule portion tarifaire de
+  /// la réponse. Exiger la permission de la grille ici fermerait l'amorçage de
+  /// l'application à tout profil qui n'a pas à voir les montants.
   EnrollmentPullHandler.referential(EnrollmentPullRepository repository)
-    : this._(
-        EnrollmentPullRepositoryImpl.referentialResource,
-        repository.syncReferential,
-      );
+    : this._(EnrollmentPullRepositoryImpl.referentialResource, const [
+        Perm.schoolRead,
+      ], repository.syncReferential);
 
   /// Cohorte de réinscription N-1 (`ref_previous_year_students`).
   EnrollmentPullHandler.reenrollmentCohort(EnrollmentPullRepository repository)
     : this._(
         EnrollmentPullRepositoryImpl.cohortResource,
+        const [Perm.enrollmentRead],
         repository.syncReenrollmentCohort,
       );
 
@@ -37,6 +50,7 @@ class EnrollmentPullHandler implements PullHandler {
   EnrollmentPullHandler.preEnrollments(EnrollmentPullRepository repository)
     : this._(
         EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+        const [Perm.enrollmentRead],
         repository.syncPreEnrollments,
       );
 
@@ -44,15 +58,15 @@ class EnrollmentPullHandler implements PullHandler {
   EnrollmentPullHandler.enrollmentSnapshots(EnrollmentPullRepository repository)
     : this._(
         EnrollmentPullRepositoryImpl.snapshotsResource,
+        const [Perm.enrollmentRead],
         repository.syncEnrollmentSnapshots,
       );
 
   /// Delta descendant MAIGRE des inscriptions (réconciliation multi-tablettes).
   EnrollmentPullHandler.enrollmentDelta(EnrollmentPullRepository repository)
-    : this._(
-        EnrollmentPullRepositoryImpl.deltaResource,
-        repository.syncEnrollmentDelta,
-      );
+    : this._(EnrollmentPullRepositoryImpl.deltaResource, const [
+        Perm.enrollmentRead,
+      ], repository.syncEnrollmentDelta);
 
   @override
   Future<PullOutcome> pull() async {

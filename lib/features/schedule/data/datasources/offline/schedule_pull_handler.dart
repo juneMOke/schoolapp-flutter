@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
 
 /// [PullHandler] des créneaux horaires (référence, scope école/JWT). Enregistré
@@ -11,6 +12,10 @@ class TimeSlotsPullHandler implements PullHandler {
 
   @override
   String get resource => kScheduleTimeSlotsResource;
+
+  /// GET /sync/schedule/time-slots — gardé sur `schedule.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.scheduleRead];
 
   @override
   Future<PullOutcome> pull() async {
@@ -35,6 +40,10 @@ class SessionsPullHandler implements PullHandler {
 
   @override
   String get resource => kScheduleSessionsResource;
+
+  /// GET /sync/schedule/sessions — gardé sur `schedule.read` côté serveur.
+  @override
+  List<Perm> get requiredPermissions => const [Perm.scheduleRead];
 
   @override
   Future<PullOutcome> pull() async {

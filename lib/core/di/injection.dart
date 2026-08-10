@@ -86,6 +86,7 @@ import 'package:school_app_flutter/features/auth/data/repositories/auth_reposito
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
@@ -391,6 +392,7 @@ Future<void> configureDependencies({
       verifier: getIt<PasswordVerifierService>(),
       revocationBus: getIt<SessionRevocationBus>(),
       currentUser: getIt<CurrentUserContext>(),
+      currentPermissions: getIt<CurrentPermissions>(),
       sharedDocumentCache: getIt<SharedDocumentCache>(),
     ),
   );

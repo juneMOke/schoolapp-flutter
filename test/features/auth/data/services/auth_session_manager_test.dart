@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -886,6 +887,63 @@ void main() {
         res.fold((f) => fail('login offline refusé : $f'), (snap) {
           expect(snap.session.permissions, <String>['attendance.read']);
         });
+      },
+    );
+
+    // La boucle de synchro vit hors de l'arbre de widgets : ce holder est sa
+    // seule source. Un point d'alimentation oublié se paierait en ressources
+    // sautées à tort — le filtre du PullCoordinator ne verrait rien.
+    test(
+      'le holder mémoire suit login, refresh, login offline et wipe',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        // Inconnu tant qu'aucune session n'est résolue — et non « vide », qui
+        // couperait la synchro.
+        expect(holder.permissions, isNull);
+
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        expect(holder.permissions, ['attendance.read']);
+
+        await manager.applyRefresh(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 2000000,
+            permissions: const ['attendance.read', 'classroom.read'],
+          ),
+        );
+        expect(holder.permissions, ['attendance.read', 'classroom.read']);
+
+        await manager.wipeSession();
+        expect(holder.permissions, isNull);
+
+        // Login offline : la copie durable réalimente le holder.
+        when(() => tokenStorage.readParkedRefresh()).thenAnswer(
+          (_) async =>
+              const ParkedRefreshToken(uid: 'u1', refreshToken: 'refresh-A'),
+        );
+        final res = await manager.loginOffline(
+          email: 'prof@ecole.cd',
+          password: 'MotDePasse123',
+        );
+
+        expect(res.isRight(), isTrue);
+        expect(holder.permissions, ['attendance.read', 'classroom.read']);
       },
     );
 

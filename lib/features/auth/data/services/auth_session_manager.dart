@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
@@ -41,6 +42,13 @@ class AuthSessionManager
   final PasswordVerifierService _verifier;
   final SessionRevocationBus? _revocationBus;
   final CurrentUserContext? _currentUser;
+
+  /// Ensemble effectif des permissions de la session (ADR-014 §4), tenu à
+  /// jour aux MÊMES points que [_currentUser] : les consommateurs hors arbre
+  /// de widgets — la boucle de synchronisation d'abord — n'ont pas d'autre
+  /// source. Un point d'alimentation oublié se paierait en ressources
+  /// sautées à tort, pas en droits accordés à tort.
+  final CurrentPermissions? _currentPermissions;
   final WallClock _now;
 
   /// Purge des pièces déposées en clair par le partage système. Optionnel : sans
@@ -65,6 +73,7 @@ class AuthSessionManager
     required PasswordVerifierService verifier,
     SessionRevocationBus? revocationBus,
     CurrentUserContext? currentUser,
+    CurrentPermissions? currentPermissions,
     SharedDocumentCache? sharedDocumentCache,
     WallClock now = _systemWallClock,
   }) : _tokenStorage = tokenStorage,
@@ -72,6 +81,7 @@ class AuthSessionManager
        _verifier = verifier,
        _revocationBus = revocationBus,
        _currentUser = currentUser,
+       _currentPermissions = currentPermissions,
        _sharedDocumentCache = sharedDocumentCache,
        _now = now;
 
@@ -133,6 +143,7 @@ class AuthSessionManager
     _clockTampered = false;
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(uid, schoolId: session.user.schoolId);
+    _currentPermissions?.set(session.permissions);
 
     // Des jetons frais rendent la consigne de CE compte obsolète. Celle d'un
     // AUTRE compte survit (slot partagé : elle attend son propriétaire).
@@ -150,8 +161,17 @@ class AuthSessionManager
   /// version) : sans cet amorçage, une écriture offline partirait avec un
   /// `authorId` null → 403 terminal (D-05). `uid` vide = pas d'amorçage
   /// (session héritée sans claim `uid`).
-  void primeCurrentUser(String? uid, {String? schoolId}) =>
-      _currentUser?.set(uid, schoolId: schoolId);
+  /// [permissions] amorce du même coup l'ensemble effectif : au cold-start,
+  /// il vient de la session restaurée du token store — `null` le laisse
+  /// inconnu plutôt que vide, la nuance décidant si la synchro filtre ou non.
+  void primeCurrentUser(
+    String? uid, {
+    String? schoolId,
+    List<String>? permissions,
+  }) {
+    _currentUser?.set(uid, schoolId: schoolId);
+    if (permissions != null) _currentPermissions?.set(permissions);
+  }
 
   // ── Login offline (D-01/D-02) ────────────────────────────────────────────────
 
@@ -306,6 +326,7 @@ class AuthSessionManager
 
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(user.userId, schoolId: user.schoolId);
+    _currentPermissions?.set(user.permissions);
     return Right(
       AuthSessionSnapshot(session: session, mode: mode, isOffline: true),
     );
@@ -324,6 +345,7 @@ class AuthSessionManager
     // existe mais le contexte mémoire est vide) — nécessaire pour estampiller
     // authorId (D-05) et scoper le référentiel par école.
     _currentUser?.set(user.userId, schoolId: user.schoolId);
+    _currentPermissions?.set(user.permissions);
 
     final nowMs = _now();
     final eval = SessionFreshness.evaluate(
@@ -394,6 +416,7 @@ class AuthSessionManager
     // à `user_version`, il n'y a rien à blanchir ici — les permissions ne sont
     // qu'une projection d'affichage, jamais l'autorité.
     await _authLocalDao.updatePermissions(user.userId, session.permissions);
+    _currentPermissions?.set(session.permissions);
     _observedUserVersion = session.userVersion;
 
     final sessionRow = await _authLocalDao.getSession();
@@ -548,6 +571,7 @@ class AuthSessionManager
     }
     _observedUserVersion = null;
     _currentUser?.clear();
+    _currentPermissions?.clear();
 
     // Les pièces partagées vivent EN CLAIR dans le cache de l'application, hors
     // de la base chiffrée : elles doivent partir avec la session (ADR-012 D-7).
