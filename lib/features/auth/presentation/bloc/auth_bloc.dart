@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -114,6 +115,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             status: AuthStatus.authenticated,
             user: session.user,
             sessionMode: eval?.mode ?? SessionMode.normal,
+            permissions: session.permissions,
           ),
         );
         _startFreshnessTimer();
@@ -139,7 +141,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (failure) => _handleOnlineLoginFailure(event, failure, emit),
       (session) async {
-        emit(AuthState(status: AuthStatus.authenticated, user: session.user));
+        emit(
+          AuthState(
+            status: AuthStatus.authenticated,
+            user: session.user,
+            permissions: session.permissions,
+          ),
+        );
         _startFreshnessTimer();
       },
     );
@@ -198,6 +206,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             user: snapshot.session.user,
             sessionMode: snapshot.mode,
             isOffline: true,
+            permissions: snapshot.session.permissions,
           ),
         );
         _startFreshnessTimer();
@@ -282,11 +291,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // (resynchronisation silencieuse post-déconsignation, V1.1) n'est plus
     // « hors ligne » : le bandeau tombe. Seul un contact réel l'éteint (D-08).
     final clearOffline = state.isOffline && eval.hadServerContact;
-    if (eval.mode != state.sessionMode || clearOffline) {
+    // Les permissions ne descendent qu'au login et au refresh (ADR-014 §4) : le
+    // refresh se produit en arrière-plan, sans rien émettre ici. Sans cette
+    // relecture, un changement de droits n'atteindrait l'écran qu'au prochain
+    // démarrage. `null` = pas de session locale → on garde l'existant (≠
+    // ensemble vide, qui est un retrait réel et doit, lui, s'appliquer).
+    final permissions = await _sessionManager.currentPermissions();
+    final permissionsChanged =
+        permissions != null && !listEquals(permissions, state.permissions);
+    if (eval.mode != state.sessionMode || clearOffline || permissionsChanged) {
       emit(
         state.copyWith(
           sessionMode: eval.mode,
           isOffline: clearOffline ? false : null,
+          permissions: permissionsChanged ? permissions : null,
         ),
       );
     }

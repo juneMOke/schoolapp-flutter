@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/auth/domain/entities/auth_session.da
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session_snapshot.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
+import 'package:school_app_flutter/features/auth/domain/session_freshness.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/login_use_case.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/logout_use_case.dart';
@@ -366,5 +367,236 @@ void main() {
         AuthState(status: AuthStatus.failure, errorMessage: 'Storage error'),
       ],
     );
+  });
+
+  // ── Permissions (ADR-014 §4) ──────────────────────────────────────────────
+  // L'état les EXPOSE, il ne les arbitre pas : le serveur reste l'autorité.
+  group('permissions', () {
+    const tPermissions = <String>['attendance.read', 'classroom.read'];
+    const tSessionWithPermissions = AuthSession(
+      accessToken: 'token123',
+      tokenType: 'Bearer',
+      expiresIn: 86400,
+      permissions: tPermissions,
+      user: tUser,
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'login online : l\'ensemble du serveur atterrit dans l\'état',
+      setUp: () {
+        when(
+          () => mockLoginUseCase(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => const Right(tSessionWithPermissions));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: tPermissions,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'cold start : la session restaurée porte ses permissions',
+      setUp: () {
+        when(
+          () => mockCheckAuthStatusUseCase(),
+        ).thenAnswer((_) async => const Right(tSessionWithPermissions));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(const AuthCheckRequested()),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: tPermissions,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'login offline : les droits de la copie durable sont exposés',
+      setUp: () {
+        when(
+          () => mockLoginUseCase(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async => const Left(NetworkFailure('Network error occurred')),
+        );
+        when(
+          () => mockRepository.hasLocalUser('test@example.com'),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockRepository.loginOffline(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async => const Right(
+            AuthSessionSnapshot(
+              session: tSessionWithPermissions,
+              mode: SessionMode.warning,
+              isOffline: true,
+            ),
+          ),
+        );
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 450),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          sessionMode: SessionMode.warning,
+          isOffline: true,
+          permissions: tPermissions,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'logout : l\'état repart sans aucun droit',
+      setUp: () {
+        when(
+          () => mockLogoutUseCase(),
+        ).thenAnswer((_) async => const Right(null));
+      },
+      build: buildBloc,
+      seed: () => const AuthState(
+        status: AuthStatus.authenticated,
+        user: tUser,
+        permissions: tPermissions,
+      ),
+      act: (bloc) => bloc.add(const AuthLogoutRequested()),
+      expect: () => const [
+        AuthState(
+          status: AuthStatus.loading,
+          user: tUser,
+          permissions: tPermissions,
+        ),
+        AuthState(status: AuthStatus.unauthenticated),
+      ],
+    );
+
+    // Le refresh redescend les droits en arrière-plan, sans passer par le bloc :
+    // sans relecture au tick, un retrait n'atteindrait l'écran qu'au prochain
+    // démarrage.
+    blocTest<AuthBloc, AuthState>(
+      'tick de fraîcheur : un RETRAIT de droits atteint l\'état',
+      setUp: () {
+        when(() => mockSessionManager.evaluateFreshness()).thenAnswer(
+          (_) async => const SessionEvaluation(
+            refreshExpired: false,
+            mode: SessionMode.normal,
+          ),
+        );
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => const ['attendance.read']);
+      },
+      build: buildBloc,
+      seed: () => const AuthState(
+        status: AuthStatus.authenticated,
+        user: tUser,
+        permissions: tPermissions,
+      ),
+      act: (bloc) => bloc.add(const AuthFreshnessTick()),
+      expect: () => const [
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: ['attendance.read'],
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'tick de fraîcheur : ensemble inchangé → aucune émission',
+      setUp: () {
+        when(() => mockSessionManager.evaluateFreshness()).thenAnswer(
+          (_) async => const SessionEvaluation(
+            refreshExpired: false,
+            mode: SessionMode.normal,
+          ),
+        );
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => tPermissions);
+      },
+      build: buildBloc,
+      seed: () => const AuthState(
+        status: AuthStatus.authenticated,
+        user: tUser,
+        permissions: tPermissions,
+      ),
+      act: (bloc) => bloc.add(const AuthFreshnessTick()),
+      expect: () => const <AuthState>[],
+    );
+
+    // `null` = pas de session locale à interroger (session héritée sans uid) :
+    // rien à dire ≠ retrait de droits. L'état garde ce qu'il a.
+    blocTest<AuthBloc, AuthState>(
+      'tick de fraîcheur : pas de session locale → droits conservés',
+      setUp: () {
+        when(() => mockSessionManager.evaluateFreshness()).thenAnswer(
+          (_) async => const SessionEvaluation(
+            refreshExpired: false,
+            mode: SessionMode.normal,
+          ),
+        );
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => null);
+      },
+      build: buildBloc,
+      seed: () => const AuthState(
+        status: AuthStatus.authenticated,
+        user: tUser,
+        permissions: tPermissions,
+      ),
+      act: (bloc) => bloc.add(const AuthFreshnessTick()),
+      expect: () => const <AuthState>[],
+    );
+
+    test('hasPermission lit l\'ensemble exposé, fail-closed par défaut', () {
+      const granted = AuthState(
+        status: AuthStatus.authenticated,
+        user: tUser,
+        permissions: tPermissions,
+      );
+      expect(granted.hasPermission('attendance.read'), isTrue);
+      expect(granted.hasPermission('finance.write'), isFalse);
+
+      // Hors session : aucun droit.
+      expect(
+        const AuthState(
+          status: AuthStatus.unauthenticated,
+        ).hasPermission('attendance.read'),
+        isFalse,
+      );
+    });
   });
 }
