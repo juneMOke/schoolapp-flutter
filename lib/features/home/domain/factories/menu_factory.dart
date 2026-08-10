@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -8,9 +9,19 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 class MenuFactory {
   const MenuFactory._();
 
-  /// Crée la liste complète des menus avec leurs sous-menus
-  static List<MenuItem> createMenuItems(AppLocalizations l10n) {
-    return [
+  /// Crée la liste des menus, filtrée par les [permissions] de la session
+  /// (ADR-014). Un sous-menu inaccessible disparaît ; un menu dont plus aucun
+  /// sous-menu n'est accessible disparaît à son tour — un menu qui s'ouvre sur
+  /// le vide invite à cliquer pour rien.
+  ///
+  /// Les exigences viennent de `kModuleAccessRegistry`, partagé avec la grille
+  /// d'accueil : c'est ce partage qui empêche la barre latérale et l'accueil de
+  /// diverger.
+  static List<MenuItem> createMenuItems(
+    AppLocalizations l10n, {
+    required List<String> permissions,
+  }) {
+    final all = [
       _createAccueilMenu(l10n),
       _createInscriptionsMenu(l10n),
       _createFinancesMenu(l10n),
@@ -20,6 +31,22 @@ class MenuFactory {
       _createResultatsMenu(l10n),
       _createDocumentsMenu(l10n),
     ];
+
+    final visible = <MenuItem>[];
+    for (final menu in all) {
+      // Item feuille (Accueil) : rien à filtrer, il reste la porte de sortie
+      // quand tout le reste est masqué.
+      if (menu.subMenus.isEmpty) {
+        visible.add(menu);
+        continue;
+      }
+      final subMenus = menu.subMenus
+          .where((sub) => canAccessSubMenu(sub.id, permissions))
+          .toList(growable: false);
+      if (subMenus.isEmpty) continue;
+      visible.add(menu.copyWith(subMenus: subMenus));
+    }
+    return visible;
   }
 
   /// Menu Documents — l'éditique couvre trois domaines (Scolarité, Finances,

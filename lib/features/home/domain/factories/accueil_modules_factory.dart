@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
@@ -16,8 +17,17 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class AccueilModulesFactory {
   const AccueilModulesFactory._();
 
-  static List<AccueilModule> create(AppLocalizations l10n) {
-    return [
+  /// [permissions] filtre la grille (ADR-014) : une ligne de sous-module
+  /// inaccessible disparaît, et une carte dont plus aucune ligne ne subsiste
+  /// disparaît avec elle — une carte vide serait une porte sur rien.
+  ///
+  /// Les exigences viennent de `kModuleAccessRegistry`, partagé avec la barre
+  /// latérale : les deux surfaces montrent donc exactement le même périmètre.
+  static List<AccueilModule> create(
+    AppLocalizations l10n, {
+    required List<String> permissions,
+  }) {
+    final all = [
       _inscriptions(l10n),
       _finances(l10n),
       _classes(l10n),
@@ -25,6 +35,16 @@ class AccueilModulesFactory {
       _resultats(l10n),
       _disciplines(l10n),
     ];
+
+    final visible = <AccueilModule>[];
+    for (final module in all) {
+      final subModules = module.subModules
+          .where((sub) => canAccessSubMenu(sub.target.subMenuId, permissions))
+          .toList(growable: false);
+      if (subModules.isEmpty) continue;
+      visible.add(module.copyWith(subModules: subModules));
+    }
+    return visible;
   }
 
   /// Sous-module « Tableau de bord » — libellé partagé avec la sidebar.

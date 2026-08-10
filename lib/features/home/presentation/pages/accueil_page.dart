@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 // Import debug — uniquement atteint sous kDebugMode (cf. bas de la page).
 import 'package:school_app_flutter/dev/dev_tools_entry.dart';
@@ -30,7 +32,15 @@ class AccueilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final modules = AccueilModulesFactory.create(l10n);
+    // `select` plutôt que `read` : un refresh porteur d'un nouvel ensemble de
+    // droits recompose la grille sans rien d'impératif (ADR-014 §5).
+    final permissions = context.select<AuthBloc, List<String>>(
+      (bloc) => bloc.state.permissions,
+    );
+    final modules = AccueilModulesFactory.create(
+      l10n,
+      permissions: permissions,
+    );
 
     return AppPageBackground(
       child: Column(

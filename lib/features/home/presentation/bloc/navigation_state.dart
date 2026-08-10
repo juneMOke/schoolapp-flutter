@@ -19,13 +19,17 @@ class NavigationState extends Equatable {
     required this.currentTitle,
   });
 
-  factory NavigationState.initial(AppLocalizations l10n) {
+  factory NavigationState.initial(
+    AppLocalizations l10n, {
+    required List<String> permissions,
+  }) {
     // Atterrissage post-connexion sur la page d'accueil (spec Accueil §00/§09) :
     // l'entrée feuille « Accueil » est l'item actif, le contenu affiché est la
     // page d'accueil. Aucun menu module n'est déployé.
-    final initialMenuItems = MenuFactory.createMenuItems(l10n).map((menu) {
-      return menu.copyWith(isActive: menu.id == MenuConstants.accueilId);
-    }).toList();
+    final initialMenuItems =
+        MenuFactory.createMenuItems(l10n, permissions: permissions).map((menu) {
+          return menu.copyWith(isActive: menu.id == MenuConstants.accueilId);
+        }).toList();
 
     return NavigationState(
       menuItems: initialMenuItems,

@@ -9,10 +9,64 @@ part 'navigation_event.dart';
 part 'navigation_state.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-  NavigationBloc(AppLocalizations l10n) : super(NavigationState.initial(l10n)) {
+  NavigationBloc(AppLocalizations l10n, {required List<String> permissions})
+    : super(NavigationState.initial(l10n, permissions: permissions)) {
     on<MenuItemSelected>(_onMenuItemSelected);
     on<SubMenuItemSelected>(_onSubMenuItemSelected);
     on<SidebarToggled>(_onSidebarToggled);
+    on<NavigationPermissionsChanged>(_onPermissionsChanged);
+  }
+
+  /// Reconstruit l'arborescence sur le nouvel ensemble de droits, en préservant
+  /// l'écran affiché **s'il reste accessible** — sinon on retombe sur l'accueil
+  /// plutôt que de laisser l'utilisateur sur une page qu'il n'a plus le droit
+  /// d'ouvrir. Le titre suit, sans quoi la barre supérieure annoncerait un
+  /// écran qui n'est plus là.
+  void _onPermissionsChanged(
+    NavigationPermissionsChanged event,
+    Emitter<NavigationState> emit,
+  ) {
+    final menus = MenuFactory.createMenuItems(
+      event.l10n,
+      permissions: event.permissions,
+    );
+    final selected = state.selectedSubMenuId;
+    final stillVisible =
+        selected == MenuConstants.accueilId ||
+        menus.any((m) => m.subMenus.any((s) => s.id == selected));
+
+    if (stillVisible) {
+      emit(
+        state.copyWith(
+          menuItems: menus
+              .map(
+                (menu) => menu.copyWith(
+                  isActive: menu.id == state.selectedMenuId,
+                  subMenus: menu.subMenus
+                      .map((sub) => sub.copyWith(isActive: sub.id == selected))
+                      .toList(),
+                ),
+              )
+              .toList(),
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        menuItems: menus
+            .map(
+              (menu) =>
+                  menu.copyWith(isActive: menu.id == MenuConstants.accueilId),
+            )
+            .toList(),
+        selectedMenuId: MenuConstants.accueilId,
+        selectedSubMenuId: MenuConstants.accueilId,
+        openedMenuId: MenuConstants.accueilId,
+        currentTitle: event.l10n.home,
+      ),
+    );
   }
 
   void _onMenuItemSelected(
