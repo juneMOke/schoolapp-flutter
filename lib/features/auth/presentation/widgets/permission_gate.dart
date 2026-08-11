@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -47,6 +48,18 @@ class PermissionGate extends StatelessWidget {
   /// de déclencher n'a pas à laisser de trace.
   final Widget? fallback;
 
+  /// Garde une action dont l'exigence est **nommée** dans le registre
+  /// (`kEnrollmentSubmitAccess`, `kPaymentCollectAccess`…). À préférer au
+  /// littéral dès qu'une exigence est partagée par plusieurs écrans : un
+  /// contrôle d'accès recopié finit par diverger.
+  PermissionGate.access(
+    ModuleAccess access, {
+    super.key,
+    required this.child,
+    this.fallback,
+  }) : requires = access.requires,
+       requiresAll = access.requiresAll;
+
   @override
   Widget build(BuildContext context) {
     final bloc = _maybeAuthBloc(context);
@@ -84,8 +97,9 @@ class PermissionGate extends StatelessWidget {
     );
   }
 
-  static bool _sameSet(List<String> a, List<String> b) {
+  static bool _sameSet(List<String>? a, List<String>? b) {
     if (identical(a, b)) return true;
+    if (a == null || b == null) return false;
     if (a.length != b.length) return false;
     final held = b.toSet();
     return a.every(held.contains);

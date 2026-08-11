@@ -14,6 +14,67 @@ class ModuleAccess {
   const ModuleAccess(this.requires, {this.requiresAll = false});
 }
 
+/// Exigences des **actions d'écriture** gardées, nommées une fois et lues par
+/// les widgets comme par les tests (ADR-014 §2.11).
+///
+/// Elles sont ici, et non en littéral dans chaque widget, pour deux raisons.
+/// D'abord la conjonction d'inscription était écrite à quatre endroits : quatre
+/// occasions de diverger sur un contrôle d'accès. Ensuite, une conjonction que
+/// **aucun rôle du template ne détient** bloque un métier au lieu de le
+/// protéger — le corollaire appris à l'implémentation serveur — et cela ne se
+/// vérifie que si la liste des exigences est énumérable.
+///
+/// Les deux valeurs viennent du chemin de POUSSÉE, pas du POST en ligne : les
+/// points d'entrée `/sync` scellent une pièce numérotée en écrivant, donc
+/// exigent `editique.write` en plus. Un 403 y est classé TERMINAL — la saisie
+/// serait perdue, pas rejouée.
+
+/// Créer, amorcer ou valider un dossier d'inscription (`POST /sync/enrollments`).
+///
+/// **Conjonction** : ce point d'entrée scelle une attestation en inscrivant,
+/// d'où `editique.write` en plus.
+const ModuleAccess kEnrollmentSubmitAccess = ModuleAccess([
+  Perm.enrollmentWrite,
+  Perm.editiqueWrite,
+], requiresAll: true);
+
+/// Instruire un cas disciplinaire : créer, faire avancer, classer sans suite,
+/// commenter (`POST /sync/disciplinary-cases`).
+///
+/// Les quatre gestes partagent un agrégat et un point d'entrée : les séparer
+/// laisserait la porte ouverte sur trois d'entre eux, ce qui est précisément ce
+/// qui était arrivé.
+/// **`discipline.write` seul** : `POST /sync/disciplinary-cases` n'exige rien
+/// d'autre. Y ajouter `editique.write` par symétrie avec les deux exigences
+/// voisines fermerait le module au surveillant général — ce serait bloquer un
+/// métier, pas le protéger.
+const ModuleAccess kDisciplineInstructAccess = ModuleAccess([
+  Perm.disciplineWrite,
+]);
+
+/// Encaisser un paiement (`POST /sync/payments`).
+///
+/// **Conjonction** : ce point d'entrée scelle le reçu en encaissant.
+const ModuleAccess kPaymentCollectAccess = ModuleAccess([
+  Perm.financePaymentWrite,
+  Perm.editiqueWrite,
+], requiresAll: true);
+
+/// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
+/// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
+/// hors de portée de tous les rôles.
+const Map<String, ModuleAccess> kGuardedWriteActions = {
+  'valider une inscription': kEnrollmentSubmitAccess,
+  'encaisser un paiement': kPaymentCollectAccess,
+  'émettre une pièce': ModuleAccess([Perm.editiqueWrite]),
+  'enregistrer un appel': ModuleAccess([Perm.attendanceWrite]),
+  'instruire un cas disciplinaire': kDisciplineInstructAccess,
+  'créer une évaluation / saisir des notes': ModuleAccess([
+    Perm.academicsGradeWrite,
+  ]),
+  'répartir ou affecter des élèves': ModuleAccess([Perm.classroomWrite]),
+};
+
 /// **Source unique** du mapping sous-module → permissions requises.
 ///
 /// La grille d'accueil et la barre latérale décrivent la même arborescence
@@ -31,16 +92,8 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.inscriptionsDashboardId: ModuleAccess([
       Perm.enrollmentStatsRead,
     ]),
-    // Le wizard de première inscription est une CRÉATION, et son écriture part
-    // par l'outbox : `POST /sync/enrollments` exige les deux permissions, parce
-    // qu'il scelle une attestation en même temps qu'il inscrit. Exiger ici la
-    // seule permission d'inscription laisserait produire hors ligne une écriture
-    // que le serveur rejettera définitivement au flush — un 403 y est classé
-    // TERMINAL, la saisie serait perdue.
-    MenuConstants.premiereInscriptionId: ModuleAccess([
-      Perm.enrollmentWrite,
-      Perm.editiqueWrite,
-    ], requiresAll: true),
+    // Le wizard est une CRÉATION : même exigence que l'action qu'il porte.
+    MenuConstants.premiereInscriptionId: kEnrollmentSubmitAccess,
     MenuConstants.reInscriptionsId: ModuleAccess([Perm.enrollmentRead]),
     MenuConstants.preInscriptionsId: ModuleAccess([Perm.enrollmentRead]),
   },
@@ -85,9 +138,10 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
 /// le seul endroit du dispositif où l'absence ouvre — ailleurs, tout échoue
 /// vers le refus. La contrepartie est le test qui vérifie que chaque
 /// sous-menu réellement offert par les fabriques figure bien ici.
-bool canAccessSubMenu(String subMenuId, List<String> permissions) {
+bool canAccessSubMenu(String subMenuId, List<String>? permissions) {
   final access = _accessOf(subMenuId);
   if (access == null) return true;
+  if (permissions == null) return false;
   return canAccess(
     requires: access.requires,
     permissions: permissions,
@@ -97,7 +151,7 @@ bool canAccessSubMenu(String subMenuId, List<String> permissions) {
 
 /// Vrai si [menuId] doit apparaître : au moins un de ses sous-modules est
 /// accessible. Un menu sans sous-module déclaré (l'accueil) reste visible.
-bool canAccessMenu(String menuId, List<String> permissions) {
+bool canAccessMenu(String menuId, List<String>? permissions) {
   final subMenus = kModuleAccessRegistry[menuId];
   if (subMenus == null) return true;
   return subMenus.keys.any((id) => canAccessSubMenu(id, permissions));
@@ -114,7 +168,7 @@ bool canAccessMenu(String menuId, List<String> permissions) {
 /// Les chemins à un seul segment (`/home`, `/login`, `/splash`) et ceux dont le
 /// second segment n'est pas déclaré (galerie de composants en debug) passent :
 /// la table décrit ce qui est gardé, pas ce qui existe.
-bool canAccessLocation(Uri location, List<String> permissions) {
+bool canAccessLocation(Uri location, List<String>? permissions) {
   final segments = location.pathSegments;
   if (segments.length < 2) return true;
   return canAccessSubMenu(segments[1], permissions);

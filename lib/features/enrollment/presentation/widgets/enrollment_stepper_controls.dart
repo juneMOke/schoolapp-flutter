@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/buttons/stepper_actions_bar.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -98,9 +98,8 @@ class EnrollmentStepperControls extends StatelessWidget {
           // intermédiaires, save reste secondaire (disquette).
           // Gel READ_ONLY (ADR-010) : seul Save/Valider écrit — la navigation
           // entre étapes reste libre (consultation du brouillon).
-          (_) => PermissionGate(
-            requires: const [Perm.enrollmentWrite, Perm.editiqueWrite],
-            requiresAll: true,
+          (_) => PermissionGate.access(
+            kEnrollmentSubmitAccess,
             child: SessionWriteGate(
               child: isLast
                   ? EteeloButton.primary(
@@ -149,9 +148,8 @@ class EnrollmentStepperControls extends StatelessWidget {
         ),
       if (showSaveAction)
         // Gel READ_ONLY (ADR-010) — même règle que la barre large.
-        PermissionGate(
-          requires: const [Perm.enrollmentWrite, Perm.editiqueWrite],
-          requiresAll: true,
+        PermissionGate.access(
+          kEnrollmentSubmitAccess,
           child: SessionWriteGate(
             child: _StepperNavButton(
               // Au dernier step, « Enregistrer » porte l'action Valider l'inscription :

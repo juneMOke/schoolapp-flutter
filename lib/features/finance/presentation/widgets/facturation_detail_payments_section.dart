@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -184,9 +184,8 @@ class _SectionHeader extends StatelessWidget {
         // le reçu en encaissant. Offrir le bouton sans ce droit produirait une
         // écriture d'outbox rejetée en 403 TERMINAL — l'argent saisi serait
         // perdu, pas rejoué.
-        final button = PermissionGate(
-          requires: const [Perm.financePaymentWrite, Perm.editiqueWrite],
-          requiresAll: true,
+        final button = PermissionGate.access(
+          kPaymentCollectAccess,
           child: SessionWriteGate(
             child: EteeloButton.primary(
               label: actionLabel,
