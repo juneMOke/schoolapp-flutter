@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/documents/data/printing/selected_printer_store.dart';
+import 'package:school_app_flutter/dev/ticket_bench_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
@@ -53,7 +53,7 @@ class _TicketBenchPrinterPanelState extends State<TicketBenchPrinterPanel> {
   }
 
   Future<void> _restoreSelection() async {
-    final mac = await getIt<SelectedPrinterStore>().read();
+    final mac = await getIt<TicketBenchPrinterStore>().read();
     if (!mounted || mac == null) return;
     setState(() => _selected = mac);
   }
@@ -96,7 +96,7 @@ class _TicketBenchPrinterPanelState extends State<TicketBenchPrinterPanel> {
 
   Future<void> _select(String mac) async {
     setState(() => _selected = mac);
-    await getIt<SelectedPrinterStore>().write(mac);
+    await getIt<TicketBenchPrinterStore>().write(mac);
   }
 
   Future<void> _send(Uint8List bytes, String what) => _run(() async {

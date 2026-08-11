@@ -382,16 +382,6 @@ class AppConstants {
   /// illisibles — en supprimant cette clé — sans rien détruire de la base.
   static const String editiqueCacheKeyStorageKey = 'editique_cache_key';
 
-  /// Clé du secure storage retenant l'adresse MAC de l'imprimante thermique de
-  /// cette tablette (cf. SelectedPrinterStore).
-  ///
-  /// Propriété de l'**appareil**, pas de l'utilisateur ni de l'école : une
-  /// tablette de guichet est posée à côté d'une imprimante, et ce couple ne
-  /// change pas parce qu'un autre caissier ouvre sa session. Elle n'est donc
-  /// **pas** emportée par l'effacement de D-7, qui est un geste de
-  /// confidentialité — rien de confidentiel dans une adresse d'imprimante.
-  static const String thermalPrinterMacStorageKey = 'thermal_printer_mac';
-
   // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
   /// Budget disque du cache éditique, en octets (2 Gio).
   ///

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -121,9 +122,10 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/documents/data/datasources/editique_remote_data_source.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+// Import debug — la mémoire d'imprimante du banc, sous kDebugMode.
+import 'package:school_app_flutter/dev/ticket_bench_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/permission_handler_thermal_permission.dart';
 import 'package:school_app_flutter/features/documents/data/printing/print_bluetooth_thermal_channel.dart';
-import 'package:school_app_flutter/features/documents/data/printing/selected_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_adapter.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
@@ -896,9 +898,14 @@ Future<void> configureDependencies({
       getIt<ThermalPrinterPermission>(),
     ),
   );
-  getIt.registerLazySingleton<SelectedPrinterStore>(
-    () => SelectedPrinterStore(getIt<FlutterSecureStorage>()),
-  );
+  // Mémoire d'imprimante du banc de calage, jamais de la production : le ticket
+  // demande l'imprimante à chaque impression. Enregistrée sous `kDebugMode`
+  // comme les routes qu'elle sert, donc absente du build release.
+  if (kDebugMode) {
+    getIt.registerLazySingleton<TicketBenchPrinterStore>(
+      () => TicketBenchPrinterStore(getIt<FlutterSecureStorage>()),
+    );
+  }
 
   // ── Attendance ────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AttendanceRemoteDataSource>(

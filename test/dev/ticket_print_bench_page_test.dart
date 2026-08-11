@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/dev/ticket_print_bench_page.dart';
-import 'package:school_app_flutter/features/documents/data/printing/selected_printer_store.dart';
+import 'package:school_app_flutter/dev/ticket_bench_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
@@ -80,7 +80,7 @@ class _FakePermission implements ThermalPrinterPermission {
   Future<void> openSettings() async => settingsOpened++;
 }
 
-class _FakeStore implements SelectedPrinterStore {
+class _FakeStore implements TicketBenchPrinterStore {
   String? mac;
 
   @override
@@ -109,7 +109,7 @@ void main() {
     getIt
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
-      ..registerSingleton<SelectedPrinterStore>(store);
+      ..registerSingleton<TicketBenchPrinterStore>(store);
   });
 
   tearDown(getIt.reset);
