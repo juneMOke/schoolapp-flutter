@@ -4094,6 +4094,12 @@ abstract class AppLocalizations {
   /// **'No charges are available for this student.'**
   String get studentChargesEmpty;
 
+  /// Wizard fee step when the server withheld the fee grid from the referential for lack of finance.grid.read (ADR-014) — not to be confused with "no charges"
+  ///
+  /// In en, this message translates to:
+  /// **'Fees cannot be computed: your account has no access to the fee grid. Ask an authorised account to synchronise this device.'**
+  String get studentChargesTariffsWithheld;
+
   /// No description provided for @studentChargesUnavailable.
   ///
   /// In en, this message translates to:

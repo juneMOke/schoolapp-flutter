@@ -2403,6 +2403,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get studentChargesEmpty => 'Aucune charge disponible pour cet élève.';
 
   @override
+  String get studentChargesTariffsWithheld =>
+      'Les frais ne peuvent pas être calculés : votre compte n\'a pas accès à la grille tarifaire. Demandez à un compte habilité de synchroniser cet appareil.';
+
+  @override
   String get studentChargesUnavailable =>
       'Impossible de charger les charges sans élève ou niveau cible.';
 

@@ -109,16 +109,24 @@ class StudentChargesStepController {
     return updates;
   }
 
+  /// [tariffsWithheld] : le compte n'a pas le droit de voir la grille
+  /// tarifaire, donc le référentiel local n'en porte pas — voir
+  /// `StudentChargesStepBody`. Une liste vide n'est alors PAS l'information
+  /// « cet élève ne doit rien » : c'est une absence de donnée, et
+  /// `every` sur une liste vide rendrait `true`, validant l'étape.
   bool recomputeFormState({
     required bool canFetch,
     required bool canEditAmounts,
     required StudentChargesStatus currentStatus,
     required double? Function(String rawValue) parseAmount,
+    bool tariffsWithheld = false,
   }) {
     bool nextValid = false;
     bool nextDirty = false;
 
-    if (canFetch && currentStatus == StudentChargesStatus.success) {
+    final blocked = tariffsWithheld && _studentCharges.isEmpty;
+
+    if (!blocked && canFetch && currentStatus == StudentChargesStatus.success) {
       if (canEditAmounts) {
         nextValid = _studentCharges.every(
           (charge) =>

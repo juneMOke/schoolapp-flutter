@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
@@ -53,6 +55,15 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   bool get _canFetch =>
       widget.studentId.trim().isNotEmpty && widget.levelId.trim().isNotEmpty;
 
+  /// Le compte peut-il voir la grille tarifaire (ADR-014) ? Le serveur retire
+  /// cette portion du référentiel à qui n'a pas `finance.grid.read`, si bien
+  /// que rien ne peut être calculé localement — et une liste vide cesse de
+  /// vouloir dire « cet élève ne doit rien ».
+  ///
+  /// Résolu dans [didChangeDependencies] plutôt qu'à la volée : la validité de
+  /// l'étape en dépend, et elle se recalcule hors `build`.
+  bool _tariffsWithheld = false;
+
   bool get _canEditAmounts =>
       widget.isEditable &&
       widget.enrollmentStatus == EnrollmentStatus.inProgress;
@@ -77,6 +88,21 @@ class StudentChargesStepState extends State<StudentChargesStep> {
     });
 
     widget.stepController?.bind(submitForm);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final withheld = !PermissionGate.allows(context, const [
+      Perm.financeGridRead,
+    ]);
+    if (withheld == _tariffsWithheld) return;
+    _tariffsWithheld = withheld;
+    _recomputeFormState(notifyParent: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _emitStepState();
+    });
   }
 
   @override
@@ -188,6 +214,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       canEditAmounts: _canEditAmounts,
       currentStatus: _studentChargesBloc.state.status,
       parseAmount: _parseAmount,
+      tariffsWithheld: _tariffsWithheld,
     );
 
     if (changed) {
@@ -318,6 +345,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
             unavailableMessage: _canFetch
                 ? null
                 : l10n.studentChargesUnavailable,
+            tariffsWithheld: _tariffsWithheld,
           );
         },
       ),

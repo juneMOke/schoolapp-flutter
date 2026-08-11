@@ -24,6 +24,11 @@ class StudentChargesStepBody extends StatelessWidget {
   final ValueChanged<String> onAmountChanged;
   final String? unavailableMessage;
 
+  /// Le compte n'a pas `finance.grid.read` : le serveur retire la grille
+  /// tarifaire du référentiel (ADR-014), donc rien ne peut être calculé
+  /// localement. Une liste vide ne veut alors pas dire « rien à payer ».
+  final bool tariffsWithheld;
+
   const StudentChargesStepBody({
     super.key,
     required this.l10n,
@@ -36,6 +41,7 @@ class StudentChargesStepBody extends StatelessWidget {
     required this.onRetry,
     required this.onAmountChanged,
     this.unavailableMessage,
+    this.tariffsWithheld = false,
   });
 
   // Le champ affiche/édite des unités monétaires ; on revient en cents (même
@@ -79,7 +85,15 @@ class StudentChargesStepBody extends StatelessWidget {
       ),
       StudentChargesStatus.success =>
         studentCharges.isEmpty
-            ? const StudentChargesEmptyState()
+            // « Aucune charge » et « je n'ai pas pu les calculer » se
+            // ressemblent à l'écran et ne se ressemblent pas au guichet :
+            // le premier laisse partir la famille sans rien devoir, le second
+            // fait manquer l'encaissement du jour. On ne les confond pas.
+            ? (tariffsWithheld
+                  ? StudentChargesErrorState(
+                      message: l10n.studentChargesTariffsWithheld,
+                    )
+                  : const StudentChargesEmptyState())
             : Padding(
                 padding: const EdgeInsets.only(top: AppDimensions.spacingS),
                 child: Column(
