@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -326,6 +328,10 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
   /// Écrit tous les tuteurs saisis dans le brouillon local (sémantique
   /// « remplace l'ensemble » — pas de create/update/unlink individuel).
   void _dispatchDraftGuardians() {
+    // Ceinture : seul point de passage des trois chemins d'écriture (save,
+    // rattachement, suppression). Un CTA futur qui rappellerait cette méthode
+    // reste fermé sans avoir à y penser.
+    if (!_canWrite(context)) return;
     final studentId = widget.studentId.trim();
     if (studentId.isEmpty) {
       AppSnackBar.showError(
@@ -580,6 +586,19 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
     _recomputeFormState();
   }
 
+  /// Vrai si la session peut écrire ce dossier. Les CTA « Ajouter » /
+  /// « Rechercher un parent » et la corbeille écrivent le brouillon SANS
+  /// attendre le bouton « Enregistrer » du pied — lequel est, lui, gardé. Sans
+  /// cette composition, un profil en lecture voyait « Enregistrer » masqué mais
+  /// mutait quand même la composition des tuteurs ; la mutation partait ensuite
+  /// dans l'agrégat finalisé par quelqu'un d'autre, donc acceptée par le
+  /// serveur et attribuée au mauvais auteur.
+  bool _canWrite(BuildContext context) => PermissionGate.allows(
+    context,
+    kEnrollmentSubmitAccess.requires,
+    requiresAll: kEnrollmentSubmitAccess.requiresAll,
+  );
+
   @override
   Widget build(BuildContext context) {
     return EnrollmentDraftStepSaveListener(
@@ -603,7 +622,7 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
         canSave: _canSave,
         showInlineSaveButton: widget.showInlineSaveButton,
         onSave: _onSave,
-        isEditable: widget.isEditable,
+        isEditable: widget.isEditable && _canWrite(context),
         identityLockedParentIds: _linkedFromSearchParentIds,
       ),
     );

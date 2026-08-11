@@ -160,7 +160,14 @@ void main() {
   testWidgets('paiement non synchronisé : action éteinte et expliquée', (
     tester,
   ) async {
-    await _pump(tester, onDownload: null, isPendingSync: true);
+    // En production, `receiptPending` dérive de `isPendingSync` : les dissocier
+    // ici testerait une combinaison qui n'existe pas.
+    await _pump(
+      tester,
+      onDownload: null,
+      isPendingSync: true,
+      receiptPending: true,
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Télécharger le reçu'), findsOneWidget);

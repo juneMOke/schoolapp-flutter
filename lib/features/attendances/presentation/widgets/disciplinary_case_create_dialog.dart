@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -394,62 +396,66 @@ class _DisciplinaryCaseCreateDialogState
                   ),
                 ),
               ),
-              // Gel READ_ONLY (ADR-010) : le dialog peut être ouvert au moment
-              // où le tick de fraîcheur bascule le mode — le submit doit être
-              // gaté comme le CTA d'entrée.
-              SessionWriteGate(
-                child: Semantics(
-                  label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                  button: true,
-                  enabled: !isLoading,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.disciplinaryDetailAccent,
-                      foregroundColor: AppColors.surface,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.spacingM,
-                        vertical: AppDimensions.spacingS,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.spacingM,
+              // Le dialog peut rester ouvert quand la permission redescend en
+              // cours de session (refresh) : garder la porte ne suffit pas, il
+              // faut garder le geste. Même raison que pour le gel READ_ONLY,
+              // dont le raisonnement est ici étendu aux droits.
+              PermissionGate.access(
+                kDisciplineInstructAccess,
+                child: SessionWriteGate(
+                  child: Semantics(
+                    label: l10n.disciplinaryCaseCreateDialogSubmitAction,
+                    button: true,
+                    enabled: !isLoading,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.disciplinaryDetailAccent,
+                        foregroundColor: AppColors.surface,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.spacingM,
+                          vertical: AppDimensions.spacingS,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.spacingM,
+                          ),
                         ),
                       ),
-                    ),
-                    onPressed: isLoading ? null : () => _submit(context),
-                    icon: AnimatedSwitcher(
-                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: isLoading
-                          ? const SizedBox(
-                              key: ValueKey('loading-icon'),
-                              width: AppDimensions
-                                  .disciplinaryCreateSubmitSpinnerSize,
-                              height: AppDimensions
-                                  .disciplinaryCreateSubmitSpinnerSize,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.surface,
+                      onPressed: isLoading ? null : () => _submit(context),
+                      icon: AnimatedSwitcher(
+                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                        switchInCurve: AppMotion.outCurve,
+                        switchOutCurve: AppMotion.inCurve,
+                        child: isLoading
+                            ? const SizedBox(
+                                key: ValueKey('loading-icon'),
+                                width: AppDimensions
+                                    .disciplinaryCreateSubmitSpinnerSize,
+                                height: AppDimensions
+                                    .disciplinaryCreateSubmitSpinnerSize,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.surface,
+                                  ),
                                 ),
+                              )
+                            : const Icon(
+                                Icons.add_task_outlined,
+                                key: ValueKey('submit-icon'),
                               ),
-                            )
-                          : const Icon(
-                              Icons.add_task_outlined,
-                              key: ValueKey('submit-icon'),
-                            ),
-                    ),
-                    label: AnimatedSwitcher(
-                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: Text(
-                        isLoading
-                            ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                            : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                        key: ValueKey(isLoading),
-                        style: AppTextStyles.action,
+                      ),
+                      label: AnimatedSwitcher(
+                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                        switchInCurve: AppMotion.outCurve,
+                        switchOutCurve: AppMotion.inCurve,
+                        child: Text(
+                          isLoading
+                              ? l10n.disciplinaryCaseCreateDialogCreatingMessage
+                              : l10n.disciplinaryCaseCreateDialogSubmitAction,
+                          key: ValueKey(isLoading),
+                          style: AppTextStyles.action,
+                        ),
                       ),
                     ),
                   ),

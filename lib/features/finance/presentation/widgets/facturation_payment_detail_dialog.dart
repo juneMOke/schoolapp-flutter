@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -57,17 +59,21 @@ enum FacturationReceiptGesture {
 /// [EditiqueCacheEntry.isAddressable] : le serveur n'expose aucune recherche
 /// par numéro, et la restitution rend `NotFoundFailure` sans identifiant. Un
 /// numéro seul ne désigne rien.
+/// [canEmit] porte la permission `editique.write` (ADR-014). La RESTITUTION
+/// d'une copie déjà émise n'écrit rien, ne consomme aucun numéro et reste donc
+/// ouverte à qui a ouvert la fiche ; c'est la PRODUCTION d'une pièce neuve qui
+/// est gardée — même partage que le catalogue Documents.
 @visibleForTesting
 FacturationReceiptGesture facturationReceiptGesture({
   required EditiqueCacheEntry? cached,
   required bool isPendingSync,
+  bool canEmit = true,
 }) {
   if (cached?.documentId?.isNotEmpty ?? false) {
     return FacturationReceiptGesture.restitute;
   }
-  return isPendingSync
-      ? FacturationReceiptGesture.none
-      : FacturationReceiptGesture.emit;
+  if (isPendingSync || !canEmit) return FacturationReceiptGesture.none;
+  return FacturationReceiptGesture.emit;
 }
 
 /// Ouvre le détail d'un paiement en popin (spec §15).
@@ -115,6 +121,9 @@ Future<void> showFacturationPaymentDetailDialog(
             receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
             receiptPending:
                 intent.isPendingSync || receipt.hasProvisionalNumber,
+            receiptForbidden: !PermissionGate.allows(context, const [
+              Perm.editiqueWrite,
+            ]),
             // Le retrait se dit toujours, quel que soit le geste offert : c'est
             // ce que le guichet doit pouvoir expliquer à la famille qui présente
             // le papier.
@@ -130,6 +139,9 @@ Future<void> showFacturationPaymentDetailDialog(
             onDownloadReceipt: switch (facturationReceiptGesture(
               cached: receipt.cached,
               isPendingSync: intent.isPendingSync,
+              canEmit: PermissionGate.allows(context, const [
+                Perm.editiqueWrite,
+              ]),
             )) {
               FacturationReceiptGesture.restitute =>
                 () => showEditiqueRestitutionDialog(
@@ -167,6 +179,11 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   final FacturationPaymentDetailIntent intent;
   final Widget allocations;
 
+  /// Vrai si l'émission est refusée faute de `editique.write` (ADR-014). La
+  /// vue ne décide pas du droit — elle en reçoit le verdict pour pouvoir
+  /// nommer la bonne cause sous un bouton éteint.
+  final bool receiptForbidden;
+
   /// Numéro **définitif** de la pièce, ou `null` s'il n'est pas connu.
   ///
   /// Ne transite jamais un `PROV-…` : un numéro provisoire n'est pas un numéro
@@ -197,6 +214,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     required this.allocations,
     this.receiptNumber,
     this.receiptPending = false,
+    this.receiptForbidden = false,
     this.onDownloadReceipt,
     this.cancelledReceipt,
     this.ticketPrint,
@@ -380,7 +398,15 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
               secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
               secondaryIcon: Icons.download_outlined,
               onSecondary: onDownloadReceipt,
-              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
+              // Le motif doit correspondre au refus, et un bouton éteint sans
+              // explication n'en est pas un meilleur qu'un motif faux : les
+              // deux causes ont chacune leur phrase, dans l'ordre où elles se
+              // lèvent (une pièce en attente le reste, droits ou pas).
+              secondaryHint: receiptPending
+                  ? l10n.facturationPaymentReceiptPendingSyncHint
+                  : receiptForbidden && onDownloadReceipt == null
+                  ? l10n.facturationPaymentReceiptForbiddenHint
+                  : null,
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => _close(context),
