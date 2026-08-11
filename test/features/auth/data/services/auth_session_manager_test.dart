@@ -833,6 +833,71 @@ void main() {
       expect((await dao.getUser('u1'))?.permissions, isEmpty);
     });
 
+    // Miroir exact du refresh, sur le chemin login : deux chemins sur trois
+    // respectaient déjà la règle, celui-ci l'enfreignait.
+    test(
+      'persistOnlineLogin sans permissions (null) préserve la copie durable',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['enrollment.read', 'finance.charge.read'],
+          ),
+          'MotDePasse123',
+        );
+
+        // Reconnexion contre une instance qui n'émet pas le champ (rollback,
+        // canari, passerelle qui filtre) : elle ne dit rien de ce compte.
+        await manager.persistOnlineLogin(
+          _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+          'MotDePasse123',
+        );
+
+        expect((await dao.getUser('u1'))?.permissions, [
+          'enrollment.read',
+          'finance.charge.read',
+        ]);
+        // Colonne et holder ne doivent pas diverger.
+        expect(holder.permissions, ['enrollment.read', 'finance.charge.read']);
+        // Et le tick de fraîcheur a de quoi rouvrir l'écran.
+        expect(await manager.currentPermissions(), isNotNull);
+      },
+    );
+
+    // Symétrique indispensable : sans lui, on rouvrirait le trou inverse.
+    test('persistOnlineLogin avec un ensemble VIDE explicite écrase', () async {
+      final manager = build();
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const ['enrollment.read'],
+        ),
+        'MotDePasse123',
+      );
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000000,
+          permissions: const <String>[],
+        ),
+        'MotDePasse123',
+      );
+
+      final stored = (await dao.getUser('u1'))?.permissions;
+      expect(stored, isNotNull);
+      expect(stored, isEmpty);
+    });
+
     test('applyRefresh sans permissions (null) préserve la copie durable', () {
       return () async {
         final manager = build();

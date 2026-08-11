@@ -9,6 +9,10 @@ import 'package:school_app_flutter/features/auth/domain/entities/authenticated_u
 /// refresh et de dégradation. [userVersion] n'est significatif qu'à la sortie du
 /// serveur (login/refresh) ; la valeur **canonique** de révocation vit dans
 /// `auth_local_user` (comparée par le guardian).
+/// Sentinelle du `copyWith` : distingue « ne touche pas au champ » de « pose
+/// `null` », qui est une valeur significative depuis le tri-état.
+const Object _unset = Object();
+
 class AuthSession extends Equatable {
   final String accessToken;
   final String tokenType;
@@ -54,7 +58,7 @@ class AuthSession extends Equatable {
     int? accessExpiresAt,
     int? refreshExpiresAt,
     int? userVersion,
-    List<String>? permissions,
+    Object? permissions = _unset,
     AuthenticatedUser? user,
   }) {
     return AuthSession(
@@ -66,7 +70,13 @@ class AuthSession extends Equatable {
       accessExpiresAt: accessExpiresAt ?? this.accessExpiresAt,
       refreshExpiresAt: refreshExpiresAt ?? this.refreshExpiresAt,
       userVersion: userVersion ?? this.userVersion,
-      permissions: permissions ?? this.permissions,
+      // `??` confondrait « pose null » et « ne touche pas » — et son unique
+      // appelant, le login offline, affirme l'invariant inverse : les droits
+      // d'une session hors ligne viennent de la copie durable, jamais du
+      // secure storage.
+      permissions: identical(permissions, _unset)
+          ? this.permissions
+          : permissions as List<String>?,
       user: user ?? this.user,
     );
   }

@@ -44,7 +44,7 @@ const _comptabilite = <String>[
 void main() {
   final AppLocalizations l10n = AppLocalizationsFr();
 
-  Set<String> menuSubMenuIds(List<String> permissions) => {
+  Set<String> menuSubMenuIds(List<String>? permissions) => {
     for (final menu in MenuFactory.createMenuItems(
       l10n,
       permissions: permissions,
@@ -52,7 +52,7 @@ void main() {
       for (final sub in menu.subMenus) sub.id,
   };
 
-  Set<String> accueilSubMenuIds(List<String> permissions) => {
+  Set<String> accueilSubMenuIds(List<String>? permissions) => {
     for (final module in AccueilModulesFactory.create(
       l10n,
       permissions: permissions,
@@ -200,6 +200,13 @@ void main() {
       expect(ids, isNot(contains(MenuConstants.coursesMenuId)));
     });
 
+    test('droits inconnus : la grille est vide, l\'accueil demeure', () {
+      final menus = MenuFactory.createMenuItems(l10n, permissions: null);
+
+      expect(menus.map((m) => m.id), [MenuConstants.accueilId]);
+      expect(AccueilModulesFactory.create(l10n, permissions: null), isEmpty);
+    });
+
     test('l\'accueil reste, même sans aucun droit', () {
       final menus = MenuFactory.createMenuItems(l10n, permissions: const []);
 
@@ -231,7 +238,7 @@ void main() {
   // arrière ou une restauration d'état atteignent la route sans passer par le
   // menu. La garde interroge la MÊME table, sans déclaration parallèle.
   group('garde de route', () {
-    bool allows(String location, List<String> permissions) =>
+    bool allows(String location, List<String>? permissions) =>
         canAccessLocation(Uri.parse(location), permissions);
 
     test('route de module interdite → refusée', () {
@@ -285,6 +292,16 @@ void main() {
         Uri.parse(EnrollmentConstants.enrollmentDetailRoute).pathSegments.first,
         isIn(kStandaloneRouteAccess.keys),
       );
+    });
+
+    // L'état de tout le parc au premier démarrage après la montée v24.
+    test('droits INCONNUS : les routes ferment comme sans droits', () {
+      expect(allows('/finances/facturations', null), isFalse);
+      expect(allows('/enrollments/detail/e-1', null), isFalse);
+      // Les chemins hors coquille restent atteignables : sans eux,
+      // l'utilisateur n'aurait plus d'écran du tout pour se reconnecter.
+      expect(allows('/home', null), isTrue);
+      expect(allows('/login', null), isTrue);
     });
 
     test('aucun droit : toute route de module est refusée', () {

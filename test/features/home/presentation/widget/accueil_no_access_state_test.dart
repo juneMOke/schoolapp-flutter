@@ -24,7 +24,7 @@ void main() {
   late _MockAuthBloc authBloc;
 
   Widget buildHarness({
-    required List<String> permissions,
+    required List<String>? permissions,
     bool isOffline = false,
   }) {
     authBloc = _MockAuthBloc();
@@ -63,7 +63,7 @@ void main() {
 
   Future<void> pump(
     WidgetTester tester, {
-    required List<String> permissions,
+    required List<String>? permissions,
     bool isOffline = false,
   }) async {
     await tester.binding.setSurfaceSize(const Size(1200, 2000));
@@ -136,5 +136,41 @@ void main() {
     await pump(tester, permissions: const ['module.futur.read']);
 
     expect(find.byType(AccueilNoAccessState), findsOneWidget);
+  });
+
+  // Troisième état, jamais exercé jusqu'ici : c'est pourtant celui de TOUT le
+  // parc au premier démarrage après la montée v24 — colonne ajoutée sans
+  // backfill, clé de storage absente. Le distinguer du retrait de droits évite
+  // d'envoyer l'agent réclamer à son administration ce qu'une reconnexion
+  // suffit à récupérer.
+  group('droits inconnus', () {
+    testWidgets('message de reconnexion, pas celui du retrait', (tester) async {
+      await pump(tester, permissions: null);
+
+      expect(find.byType(AccueilNoAccessState), findsOneWidget);
+      expect(find.text('Droits non connus'), findsOneWidget);
+      expect(find.text('Aucun module accessible'), findsNothing);
+      expect(find.textContaining('administrateur'), findsNothing);
+    });
+
+    testWidgets('en ligne : la déconnexion reste offerte', (tester) async {
+      await pump(tester, permissions: null);
+
+      expect(find.text('Se déconnecter'), findsOneWidget);
+    });
+
+    // Hors ligne, se reconnecter est impossible : offrir le bouton serait un
+    // piège, la session partirait sans pouvoir se rouvrir.
+    testWidgets('hors ligne : aucune action', (tester) async {
+      await pump(tester, permissions: null, isOffline: true);
+
+      expect(find.text('Se déconnecter'), findsNothing);
+    });
+
+    testWidgets('aucun CTA d\'écriture n\'est offert', (tester) async {
+      await pump(tester, permissions: null);
+
+      expect(find.byType(AccueilModuleCard), findsNothing);
+    });
   });
 }

@@ -78,6 +78,27 @@ void main() {
   });
 
   group('fail-closed', () {
+    // Unique point de fermeture du tri-état côté interface, et le plus exposé :
+    // à la montée v24, TOUT le parc est dans cet état — colonne ajoutée sans
+    // backfill, clé de storage absente. Une régression sur cette ligne frappe
+    // 100 % des postes le jour même. Le pendant côté synchro (null = on tire)
+    // est épinglé deux fois dans `pull_coordinator_test.dart` ; celui-ci ne
+    // l'était pas du tout.
+    test('ensemble INCONNU (null) → refus, comme le vide', () {
+      expect(
+        canAccess(requires: const [Perm.enrollmentRead], permissions: null),
+        isFalse,
+      );
+      expect(
+        canAccess(
+          requires: const [Perm.enrollmentRead, Perm.editiqueWrite],
+          permissions: null,
+          requiresAll: true,
+        ),
+        isFalse,
+      );
+    });
+
     test('ensemble effectif vide → refus', () {
       expect(
         canAccess(

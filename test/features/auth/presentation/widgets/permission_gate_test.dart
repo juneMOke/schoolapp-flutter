@@ -15,7 +15,7 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 void main() {
   late _MockAuthBloc authBloc;
 
-  Widget harness(Widget child, {required List<String> permissions}) {
+  Widget harness(Widget child, {required List<String>? permissions}) {
     authBloc = _MockAuthBloc();
     final state = AuthState(
       status: AuthStatus.authenticated,
@@ -50,6 +50,19 @@ void main() {
       harness(
         const PermissionGate(requires: [Perm.financePaymentWrite], child: cta),
         permissions: const ['finance.charge.read'],
+      ),
+    );
+
+    expect(find.text('Encaisser'), findsNothing);
+  });
+
+  // Le parc entier est dans cet état au premier démarrage post-v24 : un CTA
+  // d'écriture ne doit pas être offert sur des droits qu'on ignore.
+  testWidgets('ensemble inconnu (null) → action masquée', (tester) async {
+    await tester.pumpWidget(
+      harness(
+        const PermissionGate(requires: [Perm.financePaymentWrite], child: cta),
+        permissions: null,
       ),
     );
 

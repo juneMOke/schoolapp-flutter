@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/auth/data/models/login_response_model.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/authenticated_user.dart';
 
 void main() {
   group('LoginResponseModel', () {
@@ -159,6 +160,41 @@ void main() {
       // et non « contactez l'administrateur », et la synchro continuera de
       // tirer plutôt que de s'arrêter net.
       expect(session.permissions, isNull);
+    });
+  });
+
+  // ADR-014 — `copyWith` doit pouvoir POSER `null` : son appelant, le login
+  // offline, affirme que les droits d'une session hors ligne viennent de la
+  // copie durable du compte et jamais du secure storage. Un `??` faisait
+  // exactement parler le storage quand la copie durable disait « inconnu ».
+  group('AuthSession.copyWith — permissions', () {
+    const base = AuthSession(
+      accessToken: 'jwt',
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+      permissions: ['attendance.read'],
+      user: AuthenticatedUser(
+        id: 'u1',
+        email: 'p@e.cd',
+        firstName: 'A',
+        lastName: 'K',
+        role: 'TEACHER',
+        schoolId: 's1',
+      ),
+    );
+
+    test('omis → inchangé', () {
+      expect(base.copyWith(expiresIn: 60).permissions, ['attendance.read']);
+    });
+
+    test('null explicite → inconnu', () {
+      expect(base.copyWith(permissions: null).permissions, isNull);
+    });
+
+    test('vide explicite → vide, pas inchangé', () {
+      final copie = base.copyWith(permissions: const <String>[]);
+      expect(copie.permissions, isNotNull);
+      expect(copie.permissions, isEmpty);
     });
   });
 }

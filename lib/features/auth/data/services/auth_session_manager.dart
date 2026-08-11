@@ -110,6 +110,9 @@ class AuthSessionManager
     final refreshExpiresAt =
         session.refreshExpiresAt ?? nowMs + _defaultRefreshTtlMs;
     final existing = await _authLocalDao.getUser(uid);
+    // Un ensemble vide COMMUNIQUÉ écrase (retrait de droits) ; un ensemble
+    // absent laisse la copie durable en place.
+    final permissions = session.permissions ?? existing?.permissions;
     await _authLocalDao.upsertUser(
       AuthLocalUserRecord(
         userId: uid,
@@ -128,7 +131,15 @@ class AuthSessionManager
         // Copie durable des permissions (ADR-014 §4) : elle survit au logout
         // pour que le login offline suivant rouvre la session avec les droits
         // du dernier contact serveur, et non avec zéro droit.
-        permissions: session.permissions,
+        //
+        // `upsertUser` REMPLACE la ligne entière : un ensemble absent de la
+        // réponse y écrirait NULL, alors qu'il ne dit rien de ce compte. Même
+        // règle que sur le chemin refresh (`updatePermissions`, `updateTokens`)
+        // — deux chemins sur trois la respectaient, celui-ci l'enfreignait.
+        // C'est cette colonne que le tick de fraîcheur relit pour rouvrir
+        // l'écran : l'effacer ferme la boucle sur l'utilisateur, dont la seule
+        // action offerte (se reconnecter) rejouerait l'effacement.
+        permissions: permissions,
       ),
     );
     await _authLocalDao.upsertSession(
@@ -143,7 +154,7 @@ class AuthSessionManager
     _clockTampered = false;
     // estampillage authorId + schoolId au write-time (D-05)
     _currentUser?.set(uid, schoolId: session.user.schoolId);
-    _currentPermissions?.set(session.permissions);
+    _currentPermissions?.set(permissions);
 
     // Des jetons frais rendent la consigne de CE compte obsolète. Celle d'un
     // AUTRE compte survit (slot partagé : elle attend son propriétaire).
