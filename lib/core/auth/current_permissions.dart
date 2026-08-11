@@ -23,9 +23,12 @@ class CurrentPermissions {
   List<String>? get permissions => _permissions;
 
   /// Pose l'ensemble courant. Une liste vide est conservée telle quelle : elle
-  /// dit « aucun droit », ce qui n'est pas « je ne sais pas ».
-  void set(List<String> permissions) =>
-      _permissions = List<String>.unmodifiable(permissions);
+  /// dit « aucun droit », ce qui n'est pas « je ne sais pas ». `null` repose
+  /// l'état inconnu — utile quand la copie durable du compte n'a jamais été
+  /// renseignée (session d'avant la migration v24).
+  void set(List<String>? permissions) => _permissions = permissions == null
+      ? null
+      : List<String>.unmodifiable(permissions);
 
   /// Repasse à l'état inconnu (logout, wipe de session).
   void clear() => _permissions = null;

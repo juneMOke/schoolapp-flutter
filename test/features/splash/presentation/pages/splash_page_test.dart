@@ -5,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/eteelo_animated_symbol.dart';
 import 'package:school_app_flutter/features/splash/presentation/widgets/splash_error_view.dart';
@@ -12,6 +15,9 @@ import 'package:school_app_flutter/features/splash/presentation/widgets/splash_p
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../../test_helpers/widget_test_utils.dart';
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
 
 class _MockAcademicYearContextBloc
     extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
@@ -28,11 +34,23 @@ void main() {
     errorMessage: 'boom',
   );
 
-  Future<_MockAcademicYearContextBloc> pumpSplash(
+  Future<({_MockAcademicYearContextBloc year, _MockAuthBloc auth})> pumpSplash(
     WidgetTester tester, {
     required Size size,
     AcademicYearContextState state = loadingState,
   }) async {
+    // L'AuthBloc est requis depuis ADR-014 : la variante 403 offre une sortie
+    // par déconnexion, sans quoi le routeur épingle l'appareil sur le splash.
+    final authBloc = _MockAuthBloc();
+    const authState = AuthState(status: AuthStatus.authenticated);
+    when(() => authBloc.state).thenReturn(authState);
+    whenListen(
+      authBloc,
+      const Stream<AuthState>.empty(),
+      initialState: authState,
+    );
+    addTearDown(authBloc.close);
+
     final bloc = _MockAcademicYearContextBloc();
     when(() => bloc.state).thenReturn(state);
     whenListen(
@@ -52,8 +70,11 @@ void main() {
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider<AcademicYearContextBloc>.value(
-          value: bloc,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<AcademicYearContextBloc>.value(value: bloc),
+            BlocProvider<AuthBloc>.value(value: authBloc),
+          ],
           child: const SplashPage(),
         ),
       ),
@@ -61,7 +82,7 @@ void main() {
     // Avance l'animation d'entrée sans attendre la stabilisation (l'arc en
     // rotation et la barre indéterminée ne se stabilisent jamais).
     await tester.pump(const Duration(milliseconds: 900));
-    return bloc;
+    return (year: bloc, auth: authBloc);
   }
 
   testWidgets(
@@ -96,7 +117,7 @@ void main() {
   testWidgets('échec du bootstrap → ErrorView + Réessayer relance l\'amorçage', (
     tester,
   ) async {
-    final bloc = await pumpSplash(
+    final blocs = await pumpSplash(
       tester,
       size: const Size(800, 900),
       state: failureState,
@@ -115,7 +136,9 @@ void main() {
     await tester.tap(find.text('Réessayer'));
     await tester.pump();
 
-    verify(() => bloc.add(const AcademicYearContextRetryRequested())).called(1);
+    verify(
+      () => blocs.year.add(const AcademicYearContextRetryRequested()),
+    ).called(1);
   });
 
   // ADR-014 §4 — un compte authentifié peut se voir refuser l'amorçage faute de
@@ -140,5 +163,27 @@ void main() {
     expect(find.text('Accès non autorisé'), findsOneWidget);
     expect(find.text('Réessayer'), findsNothing);
     expect(find.text('Connexion impossible'), findsNothing);
+    // Mais une sortie : le routeur retient sur le splash tant que le contexte
+    // académique est en échec bloquant, et la session survit au redémarrage.
+    // Sans elle, l'appareil est immobilisé sur ce compte.
+    expect(find.text('Se déconnecter'), findsOneWidget);
+  });
+
+  testWidgets('403 : la déconnexion libère l\'appareil', (tester) async {
+    final blocs = await pumpSplash(
+      tester,
+      size: const Size(800, 900),
+      state: const AcademicYearContextState(
+        status: AcademicYearContextLoadStatus.failure,
+        context: null,
+        errorMessage: 'Access forbidden',
+        insufficientPermissions: true,
+      ),
+    );
+
+    await tester.tap(find.text('Se déconnecter'));
+    await tester.pump();
+
+    verify(() => blocs.auth.add(const AuthLogoutRequested())).called(1);
   });
 }

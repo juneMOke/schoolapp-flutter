@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -189,34 +191,38 @@ class _AddField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Gel READ_ONLY (ADR-010) : tout le champ d'ajout (la saisie soumet aussi
-    // via onSubmitted) — la CONSULTATION des commentaires reste ouverte.
-    return SessionWriteGate(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 3,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSubmit(),
-              decoration: InputDecoration(
-                hintText: l10n.disciplinaryCommentAddHint,
-                isDense: true,
+    // Même agrégat, même point d'entrée que l'avancement : le champ d'AJOUT est
+    // gardé, la CONSULTATION du fil reste ouverte (elle ne relève que de
+    // `discipline.read`, qui a ouvert l'onglet).
+    return PermissionGate.access(
+      kDisciplineInstructAccess,
+      child: SessionWriteGate(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSubmit(),
+                decoration: InputDecoration(
+                  hintText: l10n.disciplinaryCommentAddHint,
+                  isDense: true,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, AppDimensions.minTouchTarget),
+            const SizedBox(width: AppDimensions.spacingS),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
+              onPressed: onSubmit,
+              child: Text(l10n.disciplinaryCommentAddAction),
             ),
-            onPressed: onSubmit,
-            child: Text(l10n.disciplinaryCommentAddAction),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

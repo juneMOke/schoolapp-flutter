@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Vue d'échec du splash (spec §00 : « l'ErrorView, réutilisé tel quel quand
@@ -39,8 +41,19 @@ class SplashErrorView extends StatelessWidget {
       message: forbidden
           ? l10n.splashForbiddenMessage
           : l10n.splashErrorMessage,
+      // Le 403 ne propose pas de réessayer — mais il doit proposer QUELQUE
+      // CHOSE : le routeur retient sur le splash tant que le contexte académique
+      // est en échec bloquant, et la session survit au redémarrage. Sans cette
+      // sortie, l'appareil reste immobilisé sur ce compte, et le seul recours à
+      // portée de l'agent — effacer les données de l'application — détruirait
+      // l'outbox avec elles.
       primaryAction: forbidden
-          ? null
+          ? OutlinedButton.icon(
+              onPressed: () =>
+                  context.read<AuthBloc>().add(const AuthLogoutRequested()),
+              icon: const Icon(Icons.logout_rounded),
+              label: Text(l10n.signOutAction),
+            )
           : FilledButton.icon(
               onPressed: () => context.read<AcademicYearContextBloc>().add(
                 const AcademicYearContextRetryRequested(),

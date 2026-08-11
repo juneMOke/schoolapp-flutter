@@ -170,7 +170,7 @@ class AuthSessionManager
     List<String>? permissions,
   }) {
     _currentUser?.set(uid, schoolId: schoolId);
-    if (permissions != null) _currentPermissions?.set(permissions);
+    _currentPermissions?.set(permissions);
   }
 
   // ── Login offline (D-01/D-02) ────────────────────────────────────────────────
@@ -403,6 +403,22 @@ class AuthSessionManager
     final generation = _wipeGeneration;
     final user = await _authLocalDao.getSessionUser();
     if (user == null) return;
+
+    // Filtre d'identité (même discipline que `recordServerContact`) : la garde
+    // anti-résurrection ci-dessus ne couvre que la fenêtre lecture→écriture,
+    // jamais le VOL RÉSEAU du refresh. Sur tablette partagée, A se déconnecte,
+    // B ouvre sa session, et la réponse tardive de A arrive : sans ce test elle
+    // écrirait les jetons de A dans le slot actif de B, réécrirait durablement
+    // les permissions de B, et poserait le `userVersion` de A — que le guardian
+    // comparerait au baseline de B, brûlant sa fenêtre offline. Ensuite chaque
+    // écriture de B partirait sous le Bearer de A : 403 par item, classé
+    // TERMINAL, encaissements perdus.
+    //
+    // On abandonne sans rien nettoyer : la session de B est saine, ce sont les
+    // jetons de A qui n'ont plus de destinataire.
+    final refreshedUid = session.user.id;
+    if (refreshedUid.isEmpty || refreshedUid != user.userId) return;
+
     await _tokenStorage.updateTokens(session);
     if (generation != _wipeGeneration) {
       // Wipe survenu entre la lecture et l'écriture (TOCTOU) : on annule.
