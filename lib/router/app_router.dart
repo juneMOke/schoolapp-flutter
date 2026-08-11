@@ -192,154 +192,101 @@ class AppRouter {
             ? null
             : '/home';
       },
+      routes: buildRoutes(),
+    );
+  }
+
+  /// Arbre de routes de l'application, **extrait de [createRouter]** pour être
+  /// parcourable par un test.
+  ///
+  /// La garde de permission (§2.9) ne s'applique qu'aux chemins dont le second
+  /// segment est un sous-menu déclaré, ou dont le premier figure dans
+  /// `kStandaloneRouteAccess`. C'est une propriété du couple routeur/registre,
+  /// pas d'une route en particulier — et elle ne se vérifie qu'en énumérant les
+  /// routes réellement déclarées. Un test l'exige donc ici, plutôt que de figer
+  /// la correction ponctuelle d'un trou déjà trouvé.
+  static List<RouteBase> buildRoutes() => [
+    GoRoute(
+      path: '/splash',
+      name: AppRoutesNames.splash,
+      builder: (context, state) => const SplashPage(),
+    ),
+    GoRoute(
+      path: '/login',
+      name: AppRoutesNames.login,
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/forgot-password/email',
+      name: AppRoutesNames.forgotPasswordEmail,
+      builder: (context, state) => const ForgotPasswordEmailPage(),
+    ),
+    GoRoute(
+      path: '/forgot-password/otp',
+      name: AppRoutesNames.forgotPasswordOtp,
+      builder: (context, state) => const ForgotPasswordOtpPage(),
+    ),
+    GoRoute(
+      path: '/forgot-password/reset',
+      name: AppRoutesNames.forgotPasswordReset,
+      builder: (context, state) => const ResetPasswordPage(),
+    ),
+    GoRoute(
+      path: '/home',
+      name: AppRoutesNames.home,
+      builder: (context, state) =>
+          HomePage(initialSubMenuId: state.uri.queryParameters['subMenuId']),
+    ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return EnrollmentFeatureScope(child: child);
+      },
       routes: [
         GoRoute(
-          path: '/splash',
-          name: AppRoutesNames.splash,
-          builder: (context, state) => const SplashPage(),
+          path: AppRoutesNames.preInscriptions,
+          builder: (context, state) => const PreRegistrationsPage(),
         ),
         GoRoute(
-          path: '/login',
-          name: AppRoutesNames.login,
-          builder: (context, state) => const LoginPage(),
+          path: AppRoutesNames.premiereInscription,
+          builder: (context, state) => const FirstRegistrationPage(),
         ),
         GoRoute(
-          path: '/forgot-password/email',
-          name: AppRoutesNames.forgotPasswordEmail,
-          builder: (context, state) => const ForgotPasswordEmailPage(),
+          path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+          builder: (context, state) {
+            final enrollmentId = state.pathParameters['enrollmentId']!;
+            final intent = EnrollmentDetailIntent.fromRouteContext(
+              enrollmentId: enrollmentId,
+              queryParameters: state.uri.queryParameters,
+              extra: state.extra,
+            );
+
+            return EnrollmentDetailPage(intent: intent);
+          },
         ),
+      ],
+    ),
+    ShellRoute(
+      builder: (context, state, child) => FinanceFeatureScope(child: child),
+      routes: [
         GoRoute(
-          path: '/forgot-password/otp',
-          name: AppRoutesNames.forgotPasswordOtp,
-          builder: (context, state) => const ForgotPasswordOtpPage(),
-        ),
-        GoRoute(
-          path: '/forgot-password/reset',
-          name: AppRoutesNames.forgotPasswordReset,
-          builder: (context, state) => const ResetPasswordPage(),
-        ),
-        GoRoute(
-          path: '/home',
-          name: AppRoutesNames.home,
-          builder: (context, state) => HomePage(
-            initialSubMenuId: state.uri.queryParameters['subMenuId'],
+          path: AppRoutesNames.financesDashboard,
+          builder: (context, state) => const FinanceStatsDashboardScope(
+            child: FinanceStatsDashboardPage(),
           ),
         ),
-        ShellRoute(
-          builder: (context, state, child) {
-            return EnrollmentFeatureScope(child: child);
-          },
+        GoRoute(
+          path: AppRoutesNames.facturations,
+          builder: (context, state) => const FacturationPage(),
           routes: [
             GoRoute(
-              path: AppRoutesNames.preInscriptions,
-              builder: (context, state) => const PreRegistrationsPage(),
-            ),
-            GoRoute(
-              path: AppRoutesNames.premiereInscription,
-              builder: (context, state) => const FirstRegistrationPage(),
-            ),
-            GoRoute(
-              path:
-                  '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
-              builder: (context, state) {
-                final enrollmentId = state.pathParameters['enrollmentId']!;
-                final intent = EnrollmentDetailIntent.fromRouteContext(
-                  enrollmentId: enrollmentId,
-                  queryParameters: state.uri.queryParameters,
-                  extra: state.extra,
-                );
-
-                return EnrollmentDetailPage(intent: intent);
-              },
-            ),
-          ],
-        ),
-        ShellRoute(
-          builder: (context, state, child) => FinanceFeatureScope(child: child),
-          routes: [
-            GoRoute(
-              path: AppRoutesNames.financesDashboard,
-              builder: (context, state) => const FinanceStatsDashboardScope(
-                child: FinanceStatsDashboardPage(),
-              ),
-            ),
-            GoRoute(
-              path: AppRoutesNames.facturations,
-              builder: (context, state) => const FacturationPage(),
-              routes: [
-                GoRoute(
-                  path: 'detail/:studentId/:academicYearId',
-                  redirect: (context, state) {
-                    if (!_hasRequiredPathParameters(state, const [
-                      'studentId',
-                      'academicYearId',
-                    ])) {
-                      return AppRoutesNames.facturations;
-                    }
-                    return null;
-                  },
-                  builder: (context, state) {
-                    final studentId = state.pathParameters['studentId'] ?? '';
-                    final academicYearId =
-                        state.pathParameters['academicYearId'] ?? '';
-
-                    final intent = FacturationDetailIntent.fromRouteContext(
-                      studentId: studentId,
-                      academicYearId: academicYearId,
-                      extra: state.extra,
-                    );
-
-                    return FacturationDetailPage(intent: intent);
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        ShellRoute(
-          builder: (context, state, child) => ClassesFeatureScope(child: child),
-          routes: [
-            GoRoute(
-              path: AppRoutesNames.classesDashboard,
-              builder: (context, state) => const ClassesStatsDashboardPage(),
-            ),
-            GoRoute(
-              path: AppRoutesNames.organisation,
-              builder: (context, state) => const ClassesOrganisationPage(),
-            ),
-            GoRoute(
-              path: AppRoutesNames.classesList,
-              builder: (context, state) => const ClassesListPage(
-                intent: ClassesListIntent.classesList(),
-              ),
-            ),
-            GoRoute(
-              path: AppRoutesNames.disciplinesList,
-              builder: (context, state) => const ClassesListPage(
-                intent: ClassesListIntent.disciplinesList(),
-              ),
-            ),
-          ],
-        ),
-        ShellRoute(
-          builder: (context, state, child) =>
-              AttendanceFeatureScope(child: child),
-          routes: [
-            GoRoute(
-              path: AppRoutesNames.presences,
-              builder: (context, state) => const PresencesPage(),
-            ),
-            GoRoute(
-              path: AppRoutesNames.disciplinaryStudentDetail,
+              path: 'detail/:studentId/:academicYearId',
               redirect: (context, state) {
-                final studentId = state.pathParameters['studentId'] ?? '';
-                final academicYearId =
-                    state.pathParameters['academicYearId'] ?? '';
-
-                if (studentId.trim().isEmpty || academicYearId.trim().isEmpty) {
-                  return AppRoutesNames.presences;
+                if (!_hasRequiredPathParameters(state, const [
+                  'studentId',
+                  'academicYearId',
+                ])) {
+                  return AppRoutesNames.facturations;
                 }
-
                 return null;
               },
               builder: (context, state) {
@@ -347,72 +294,128 @@ class AppRouter {
                 final academicYearId =
                     state.pathParameters['academicYearId'] ?? '';
 
-                final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
+                final intent = FacturationDetailIntent.fromRouteContext(
                   studentId: studentId,
                   academicYearId: academicYearId,
                   extra: state.extra,
                 );
 
-                return DisciplinaryStudentDetailPage(intent: intent);
+                return FacturationDetailPage(intent: intent);
               },
             ),
           ],
         ),
-        ShellRoute(
-          builder: (context, state, child) =>
-              DocumentsFeatureScope(child: child),
+      ],
+    ),
+    ShellRoute(
+      builder: (context, state, child) => ClassesFeatureScope(child: child),
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.classesDashboard,
+          builder: (context, state) => const ClassesStatsDashboardPage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.organisation,
+          builder: (context, state) => const ClassesOrganisationPage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.classesList,
+          builder: (context, state) =>
+              const ClassesListPage(intent: ClassesListIntent.classesList()),
+        ),
+        GoRoute(
+          path: AppRoutesNames.disciplinesList,
+          builder: (context, state) => const ClassesListPage(
+            intent: ClassesListIntent.disciplinesList(),
+          ),
+        ),
+      ],
+    ),
+    ShellRoute(
+      builder: (context, state, child) => AttendanceFeatureScope(child: child),
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.presences,
+          builder: (context, state) => const PresencesPage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.disciplinaryStudentDetail,
+          redirect: (context, state) {
+            final studentId = state.pathParameters['studentId'] ?? '';
+            final academicYearId = state.pathParameters['academicYearId'] ?? '';
+
+            if (studentId.trim().isEmpty || academicYearId.trim().isEmpty) {
+              return AppRoutesNames.presences;
+            }
+
+            return null;
+          },
+          builder: (context, state) {
+            final studentId = state.pathParameters['studentId'] ?? '';
+            final academicYearId = state.pathParameters['academicYearId'] ?? '';
+
+            final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
+              studentId: studentId,
+              academicYearId: academicYearId,
+              extra: state.extra,
+            );
+
+            return DisciplinaryStudentDetailPage(intent: intent);
+          },
+        ),
+      ],
+    ),
+    ShellRoute(
+      builder: (context, state, child) => DocumentsFeatureScope(child: child),
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.documentsStudents,
+          builder: (context, state) => const DocumentsPage(),
           routes: [
             GoRoute(
-              path: AppRoutesNames.documentsStudents,
-              builder: (context, state) => const DocumentsPage(),
-              routes: [
-                GoRoute(
-                  path: 'catalogue/:studentId/:academicYearId',
-                  redirect: (context, state) {
-                    if (!_hasRequiredPathParameters(state, const [
-                      'studentId',
-                      'academicYearId',
-                    ])) {
-                      return AppRoutesNames.documentsStudents;
-                    }
-                    return null;
-                  },
-                  builder: (context, state) {
-                    final intent = DocumentsCatalogIntent.fromRouteContext(
-                      studentId: state.pathParameters['studentId'] ?? '',
-                      academicYearId:
-                          state.pathParameters['academicYearId'] ?? '',
-                      extra: state.extra,
-                    );
+              path: 'catalogue/:studentId/:academicYearId',
+              redirect: (context, state) {
+                if (!_hasRequiredPathParameters(state, const [
+                  'studentId',
+                  'academicYearId',
+                ])) {
+                  return AppRoutesNames.documentsStudents;
+                }
+                return null;
+              },
+              builder: (context, state) {
+                final intent = DocumentsCatalogIntent.fromRouteContext(
+                  studentId: state.pathParameters['studentId'] ?? '',
+                  academicYearId: state.pathParameters['academicYearId'] ?? '',
+                  extra: state.extra,
+                );
 
-                    return DocumentsCatalogPage(intent: intent);
-                  },
-                ),
-              ],
+                return DocumentsCatalogPage(intent: intent);
+              },
             ),
           ],
         ),
-        // -------------------------------------------------------------------
-        // Route debug — galerie de composants (kDebugMode uniquement)
-        // -------------------------------------------------------------------
-        if (kDebugMode)
-          GoRoute(
-            path: AppRoutesNames.componentGallery,
-            name: AppRoutesNames.componentGallery,
-            builder: (context, state) => const ComponentGalleryPage(),
-          ),
-        // -------------------------------------------------------------------
-        // Route debug — banc de calage thermique (kDebugMode uniquement)
-        // -------------------------------------------------------------------
-        if (kDebugMode)
-          GoRoute(
-            path: AppRoutesNames.ticketPrintBench,
-            name: AppRoutesNames.ticketPrintBench,
-            builder: (context, state) => const TicketPrintBenchPage(),
-          ),
       ],
-    );
-  }
+    ),
+    // -------------------------------------------------------------------
+    // Route debug — galerie de composants (kDebugMode uniquement)
+    // -------------------------------------------------------------------
+    if (kDebugMode)
+      GoRoute(
+        path: AppRoutesNames.componentGallery,
+        name: AppRoutesNames.componentGallery,
+        builder: (context, state) => const ComponentGalleryPage(),
+      ),
+    // -------------------------------------------------------------------
+    // Route debug — banc de calage thermique (kDebugMode uniquement)
+    // -------------------------------------------------------------------
+    if (kDebugMode)
+      GoRoute(
+        path: AppRoutesNames.ticketPrintBench,
+        name: AppRoutesNames.ticketPrintBench,
+        builder: (context, state) => const TicketPrintBenchPage(),
+      ),
+  ];
 
   static bool _hasRequiredPathParameters(
     GoRouterState state,

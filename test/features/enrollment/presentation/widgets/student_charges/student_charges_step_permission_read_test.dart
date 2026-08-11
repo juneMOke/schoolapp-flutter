@@ -1,0 +1,126 @@
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_empty_state.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+class _MockStudentChargesBloc extends Mock implements StudentChargesBloc {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+/// Exerce la **seule ligne** qui relie la permission au blocage de l'étape
+/// Frais : la lecture de `finance.grid.read` dans `didChangeDependencies`.
+///
+/// Le reste de la chaîne est couvert en passant les drapeaux explicitement au
+/// corps et au contrôleur — ce qui laisse cette ligne libre de lire la mauvaise
+/// permission, ou de n'être jamais appelée, sans qu'aucun test ne rougisse.
+void main() {
+  setUpAll(() {
+    registerFallbackValue(
+      const StudentChargesRequested(studentId: 'x', levelId: 'x'),
+    );
+  });
+
+  late _MockStudentChargesBloc chargesBloc;
+
+  setUp(() {
+    chargesBloc = _MockStudentChargesBloc();
+    // Créances vides et grille présente sur l'appareil : la seule variable qui
+    // reste est le droit du compte courant.
+    whenListen(
+      chargesBloc,
+      Stream<StudentChargesState>.fromIterable([
+        const StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [],
+        ),
+      ]),
+      initialState: const StudentChargesState(),
+    );
+    when(() => chargesBloc.close()).thenAnswer((_) async {});
+    getIt.registerFactory<StudentChargesBloc>(() => chargesBloc);
+  });
+
+  tearDown(() => getIt.reset());
+
+  Future<void> pump(WidgetTester tester, List<String>? permissions) async {
+    final authBloc = _MockAuthBloc();
+    final state = AuthState(
+      status: AuthStatus.authenticated,
+      permissions: permissions,
+    );
+    when(() => authBloc.state).thenReturn(state);
+    whenListen(authBloc, Stream<AuthState>.value(state), initialState: state);
+    addTearDown(authBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BlocProvider<AuthBloc>.value(
+          value: authBloc,
+          child: const Scaffold(
+            body: StudentChargesStep(
+              studentId: 'stu-1',
+              levelId: 'lvl-1',
+              enrollmentStatus: EnrollmentStatus.inProgress,
+              isEditable: false,
+              showInlineSaveButton: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('sans finance.grid.read : le motif du droit est affiché', (
+    tester,
+  ) async {
+    await pump(tester, const ['enrollment.read', 'enrollment.write']);
+
+    expect(find.byType(StudentChargesEmptyState), findsNothing);
+    expect(find.textContaining('grille tarifaire'), findsOneWidget);
+  });
+
+  testWidgets('avec finance.grid.read : « aucune charge » légitime', (
+    tester,
+  ) async {
+    await pump(tester, const ['enrollment.read', 'finance.grid.read']);
+
+    expect(find.byType(StudentChargesEmptyState), findsOneWidget);
+    expect(find.textContaining('grille tarifaire'), findsNothing);
+  });
+
+  // Fail-closed : un ensemble inconnu ne permet pas d'affirmer que le compte a
+  // le droit, donc il ne permet pas d'annoncer un montant.
+  testWidgets('droits inconnus : traité comme le droit manquant', (
+    tester,
+  ) async {
+    await pump(tester, null);
+
+    expect(find.byType(StudentChargesEmptyState), findsNothing);
+    expect(find.textContaining('grille tarifaire'), findsOneWidget);
+  });
+
+  // Le piège que ce test existe pour attraper : lire la mauvaise permission.
+  // `finance.charge.read` ouvre la fiche de facturation, pas la grille.
+  testWidgets('une permission finance voisine ne débloque pas l\'étape', (
+    tester,
+  ) async {
+    await pump(tester, const ['finance.charge.read', 'finance.payment.read']);
+
+    expect(find.textContaining('grille tarifaire'), findsOneWidget);
+  });
+}
