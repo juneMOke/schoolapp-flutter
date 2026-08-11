@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/dev/dev_tools_entry.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_card.dart';
@@ -138,5 +139,21 @@ void main() {
 
     // 4 + 2 + 3 + 2 + 1 + 3 sous-modules (spec §03).
     expect(find.byType(AccueilSubModuleRow), findsNWidgets(15));
+  });
+
+  /// L'accueil est le **seul** chemin vers `/dev/components` et
+  /// `/dev/ticket-print` : les deux routes existent dans le routeur mais ne
+  /// sont référencées que par cette porte. La retirer d'ici les rendrait
+  /// silencieusement inatteignables — ce qu'elles ont déjà été.
+  ///
+  /// Le test tient en debug comme en release : `flutter test` s'exécute
+  /// toujours avec `kDebugMode` à `true`, valeur sous laquelle la porte est
+  /// montée. La production, elle, la voit disparaître au const-folding.
+  testWidgets('porte les outils de développement en bas de page', (
+    tester,
+  ) async {
+    await pumpAccueil(tester);
+
+    expect(find.byType(DevToolsEntry), findsOneWidget);
   });
 }
