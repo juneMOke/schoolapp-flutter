@@ -111,8 +111,15 @@ const _enseignant = <String>[
   'academics.referential.read',
 ];
 
-/// `DIRECTOR` et `SUPER_ADMIN` partagent `FULL_SCHOOL_ACCESS` : les 43.
-final _direction = Perm.values.map((p) => p.wire).toList(growable: false);
+/// `DIRECTOR` et `SUPER_ADMIN` partagent `FULL_SCHOOL_ACCESS` : tout le
+/// catalogue **sauf le périmètre plateforme**, qui n'appartient à aucune école
+/// et n'est jamais semé (ADR-014 §2.13). Écrire « toutes les valeurs » ferait
+/// dire au test que la direction détient un droit qu'aucun résolveur ne lui
+/// donnera jamais.
+final _direction = Perm.values
+    .where((p) => p != Perm.platformSchoolProvision)
+    .map((p) => p.wire)
+    .toList(growable: false);
 
 /// Rôles servis par une application aujourd'hui. `PARENT` et `STUDENT` sont
 /// volontairement sans droits côté serveur, et n'ont pas d'application — leur

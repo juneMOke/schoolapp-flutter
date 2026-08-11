@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 
 /// Fige la table `(nom, valeur sur le fil)` du catalogue client (ADR-014 §2.7).
@@ -56,10 +57,32 @@ void main() {
     Perm.teacherWrite: 'teacher.write',
     Perm.scheduleRead: 'schedule.read',
     Perm.scheduleWrite: 'schedule.write',
+    Perm.authUserRead: 'auth.user.read',
+    Perm.authUserWrite: 'auth.user.write',
+    Perm.authPermissionRead: 'auth.permission.read',
+    Perm.authPermissionWrite: 'auth.permission.write',
+    Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 43 permissions (v1.2 du catalogue serveur)', () {
-    expect(Perm.values, hasLength(43));
+  test('le catalogue compte 48 permissions (v1.7 du catalogue serveur)', () {
+    expect(Perm.values, hasLength(48));
+  });
+
+  // `platform.school.provision` n'appartient à aucune école : jamais semée,
+  // refusée à l'édition, ignorée par le résolveur (ADR-014 §2.13). Elle ne peut
+  // donc JAMAIS arriver dans un ensemble effectif — la garder déclarée sert le
+  // miroir du catalogue, pas l'autorisation.
+  test('le périmètre plateforme est déclaré mais inatteignable', () {
+    expect(
+      canAccess(
+        requires: const [Perm.platformSchoolProvision],
+        permissions: Perm.values
+            .where((p) => p != Perm.platformSchoolProvision)
+            .map((p) => p.wire)
+            .toList(),
+      ),
+      isFalse,
+    );
   });
 
   test('chaque permission porte exactement sa valeur sur le fil', () {

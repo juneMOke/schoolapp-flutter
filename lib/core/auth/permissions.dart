@@ -91,7 +91,25 @@ enum Perm {
 
   // ── Emploi du temps ───────────────────────────────────────────────────────
   scheduleRead('schedule.read'),
-  scheduleWrite('schedule.write');
+  scheduleWrite('schedule.write'),
+
+  // ── Administration (aucun consommateur dans l'APK à ce jour) ──────────────
+  // Comptes et définitions de rôle : ces écrans vivent côté serveur/back-office.
+  // Elles sont déclarées ici pour que le catalogue client reste le miroir exact
+  // du catalogue serveur — c'est ce miroir qui rend une dérive détectable.
+  authUserRead('auth.user.read'),
+  authUserWrite('auth.user.write'),
+  authPermissionRead('auth.permission.read'),
+  authPermissionWrite('auth.permission.write'),
+
+  // ── Périmètre PLATEFORME — hors du modèle scopé-école ─────────────────────
+  /// **Ne peut jamais apparaître dans un ensemble effectif.** Le provisionnement
+  /// d'établissement n'appartient à aucune école : la permission n'est jamais
+  /// semée, l'édition la refuse, et le résolveur l'ignore (ADR-014 §2.13). La
+  /// déclarer ici n'ouvre donc rien — elle existe pour que le miroir du
+  /// catalogue soit complet, et pour qu'un `PermissionGate` qui la référencerait
+  /// un jour se lise immédiatement comme une impasse.
+  platformSchoolProvision('platform.school.provision');
 
   const Perm(this.wire);
 
