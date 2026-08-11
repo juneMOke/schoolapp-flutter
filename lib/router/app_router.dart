@@ -36,6 +36,7 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
 import 'package:school_app_flutter/dev/component_gallery_page.dart';
+import 'package:school_app_flutter/dev/ticket_print_bench_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/context/classes_list_intent.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
@@ -370,6 +371,15 @@ class AppRouter {
             path: AppRoutesNames.componentGallery,
             name: AppRoutesNames.componentGallery,
             builder: (context, state) => const ComponentGalleryPage(),
+          ),
+        // -------------------------------------------------------------------
+        // Route debug — banc de calage thermique (kDebugMode uniquement)
+        // -------------------------------------------------------------------
+        if (kDebugMode)
+          GoRoute(
+            path: AppRoutesNames.ticketPrintBench,
+            name: AppRoutesNames.ticketPrintBench,
+            builder: (context, state) => const TicketPrintBenchPage(),
           ),
       ],
     );

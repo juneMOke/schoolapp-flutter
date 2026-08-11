@@ -75,4 +75,7 @@ class AppRoutesNames {
 
   // Debug — galerie de composants (kDebugMode uniquement)
   static const String componentGallery = '/dev/components';
+
+  // Debug — banc de calage de l'impression thermique (kDebugMode uniquement)
+  static const String ticketPrintBench = '/dev/ticket-print';
 }
