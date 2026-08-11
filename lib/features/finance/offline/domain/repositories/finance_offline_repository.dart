@@ -52,6 +52,11 @@ abstract class FinanceOfflineRepository {
   /// Encaisse un paiement en local-first. Renvoie l'id du paiement (uuid client).
   Future<Either<Failure, String>> recordPayment(RecordPaymentDraft draft);
 
+  /// La grille tarifaire est-elle présente sur cet appareil pour cette année ?
+  /// Sépare « rien à payer » de « rien à annoncer » quand les créances
+  /// générées sont vides.
+  Future<Either<Failure, bool>> hasFeeGridForYear(String academicYearId);
+
   /// Génère les créances provisoires d'un nouvel élève depuis la grille (FF5).
   Future<Either<Failure, List<LocalStudentCharge>>> initializeCharges({
     required String studentId,

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/student_char
 import 'package:school_app_flutter/features/finance/domain/usecases/get_payment_allocations_from_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 
 part 'student_charges_event.dart';
@@ -26,6 +27,11 @@ class StudentChargesBloc
   /// lecture (parité avec [StudentChargesRequested]).
   final InitializeChargesUseCase? _initializeChargesUseCase;
 
+  /// Sonde de présence de la grille tarifaire (flux brouillon). Optionnelle :
+  /// sans elle, le wizard se comporte comme avant — une liste vide passe pour
+  /// « rien à payer ».
+  final HasFeeGridUseCase? _hasFeeGridUseCase;
+
   StudentChargesBloc({
     required GetStudentChargesUseCase getStudentChargesUseCase,
     required GetStudentChargesByAcademicYearUseCase
@@ -35,6 +41,7 @@ class StudentChargesBloc
     required UpdateStudentChargeExpectedAmountUseCase
     updateStudentChargeExpectedAmountUseCase,
     InitializeChargesUseCase? initializeChargesUseCase,
+    HasFeeGridUseCase? hasFeeGridUseCase,
   }) : _getStudentChargesUseCase = getStudentChargesUseCase,
        _getStudentChargesByAcademicYearUseCase =
            getStudentChargesByAcademicYearUseCase,
@@ -43,6 +50,7 @@ class StudentChargesBloc
        _updateStudentChargeExpectedAmountUseCase =
            updateStudentChargeExpectedAmountUseCase,
        _initializeChargesUseCase = initializeChargesUseCase,
+       _hasFeeGridUseCase = hasFeeGridUseCase,
        super(const StudentChargesState()) {
     on<StudentChargesRequested>(_onStudentChargesRequested);
     on<DraftStudentChargesRequested>(_onDraftStudentChargesRequested);
@@ -121,6 +129,29 @@ class StudentChargesBloc
       levelId: event.levelId,
       scopedAcademicYearId: event.academicYearId,
       emit: emit,
+    );
+
+    // Créances vides : deux causes qui se ressemblent à l'écran et pas au
+    // guichet. « Ce niveau n'a pas de frais » laisse poursuivre ; « la grille
+    // n'est pas sur cet appareil » doit bloquer — sinon le secrétariat annonce
+    // 0 F et la famille repart sans régler.
+    //
+    // Le cas est né de ce chantier : depuis que `feeTariffs` est nullable, un
+    // profil sans `finance.grid.read` hydrate le référentiel en laissant
+    // `ref_academic_years` peuplée (donc le wizard s'ouvre) et la grille vide.
+    final probe = _hasFeeGridUseCase;
+    if (probe == null ||
+        state.status != StudentChargesStatus.success ||
+        state.studentCharges.isNotEmpty ||
+        event.academicYearId.trim().isEmpty) {
+      return;
+    }
+    final hasGrid = await probe(event.academicYearId);
+    // Sonde en échec (base illisible) : on ne prétend pas savoir, et on ferme.
+    emit(
+      state.copyWith(
+        feeGridUnavailable: hasGrid.fold((_) => true, (present) => !present),
+      ),
     );
   }
 

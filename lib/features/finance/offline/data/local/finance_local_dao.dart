@@ -68,6 +68,10 @@ class FinanceLocalDao {
 
   // ── Créances offline (FF5) ─────────────────────────────────────────────────
 
+  /// Cf. `FinanceChargeSeedDao.hasAnyTariffForYear`.
+  Future<bool> hasAnyTariffForYear(String academicYearId) =>
+      _seed.hasAnyTariffForYear(academicYearId);
+
   Future<List<LocalStudentCharge>> initializeChargesForStudent({
     required String studentId,
     required String academicYearId,

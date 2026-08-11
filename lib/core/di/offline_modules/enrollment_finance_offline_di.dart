@@ -62,6 +62,7 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/payment_ou
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
@@ -377,6 +378,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetLocalPaymentsUseCase>(
     () => GetLocalPaymentsUseCase(getIt<FinanceOfflineRepository>()),
   );
+  getIt.registerFactory<HasFeeGridUseCase>(
+    () => HasFeeGridUseCase(getIt<FinanceOfflineRepository>()),
+  );
+
   getIt.registerFactory<InitializeChargesUseCase>(
     () => InitializeChargesUseCase(getIt<FinanceOfflineRepository>()),
   );

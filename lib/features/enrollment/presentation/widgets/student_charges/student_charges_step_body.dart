@@ -29,6 +29,12 @@ class StudentChargesStepBody extends StatelessWidget {
   /// localement. Une liste vide ne veut alors pas dire « rien à payer ».
   final bool tariffsWithheld;
 
+  /// La grille est absente de CET APPAREIL pour l'année visée, quel que soit
+  /// le droit du compte courant — typiquement parce qu'un profil sans
+  /// `finance.grid.read` a hydraté le référentiel en premier sur une tablette
+  /// partagée. Même conséquence, autre remède : ici une synchronisation suffit.
+  final bool feeGridUnavailable;
+
   const StudentChargesStepBody({
     super.key,
     required this.l10n,
@@ -42,6 +48,7 @@ class StudentChargesStepBody extends StatelessWidget {
     required this.onAmountChanged,
     this.unavailableMessage,
     this.tariffsWithheld = false,
+    this.feeGridUnavailable = false,
   });
 
   // Le champ affiche/édite des unités monétaires ; on revient en cents (même
@@ -89,9 +96,17 @@ class StudentChargesStepBody extends StatelessWidget {
             // ressemblent à l'écran et ne se ressemblent pas au guichet :
             // le premier laisse partir la famille sans rien devoir, le second
             // fait manquer l'encaissement du jour. On ne les confond pas.
+            // Trois lectures d'une liste vide, trois gestes différents : le
+            // droit manque (l'administration doit agir), la grille manque sur
+            // l'appareil (une synchronisation suffit), ou ce niveau n'a
+            // réellement pas de frais (on poursuit).
             ? (tariffsWithheld
                   ? StudentChargesErrorState(
                       message: l10n.studentChargesTariffsWithheld,
+                    )
+                  : feeGridUnavailable
+                  ? StudentChargesErrorState(
+                      message: l10n.studentChargesFeeGridUnavailable,
                     )
                   : const StudentChargesEmptyState())
             : Padding(

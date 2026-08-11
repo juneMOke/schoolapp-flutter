@@ -4094,6 +4094,12 @@ abstract class AppLocalizations {
   /// **'No charges are available for this student.'**
   String get studentChargesEmpty;
 
+  /// Fee step: the grid is missing from the local referential whatever the current account's right — a sync is enough, unlike the missing-right case
+  ///
+  /// In en, this message translates to:
+  /// **'The fee grid is not available on this device for this year. Synchronise before continuing.'**
+  String get studentChargesFeeGridUnavailable;
+
   /// Wizard fee step when the server withheld the fee grid from the referential for lack of finance.grid.read (ADR-014) — not to be confused with "no charges"
   ///
   /// In en, this message translates to:

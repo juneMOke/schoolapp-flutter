@@ -149,6 +149,18 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   }
 
   @override
+  Future<Either<Failure, bool>> hasFeeGridForYear(String academicYearId) async {
+    try {
+      return Right(await _dao.hasAnyTariffForYear(academicYearId));
+    } catch (_) {
+      // Base illisible : on ne prétend pas savoir. L'appelant traite l'échec
+      // comme « grille absente » (fail-closed : mieux vaut bloquer que
+      // d'annoncer un montant qu'on ne peut pas justifier).
+      return const Left(StorageFailure('Failed to probe fee grid'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<LocalStudentCharge>>> initializeCharges({
     required String studentId,
     required String academicYearId,

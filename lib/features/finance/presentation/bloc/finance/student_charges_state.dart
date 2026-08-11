@@ -26,6 +26,11 @@ class StudentChargesState extends Equatable {
   final StudentChargesErrorType allocationsErrorType;
   final String? updatingChargeId;
 
+  /// Flux BROUILLON seulement : la grille tarifaire est absente de cet appareil
+  /// pour l'année visée, donc une liste de créances vide ne veut pas dire
+  /// « rien à payer ». Le wizard bloque et le dit, plutôt que d'annoncer 0 F.
+  final bool feeGridUnavailable;
+
   const StudentChargesState({
     this.status = StudentChargesStatus.initial,
     this.studentCharges = const [],
@@ -34,6 +39,7 @@ class StudentChargesState extends Equatable {
     this.allocationsByChargeId = const {},
     this.allocationsErrorType = StudentChargesErrorType.none,
     this.updatingChargeId,
+    this.feeGridUnavailable = false,
   });
 
   StudentChargesState copyWith({
@@ -43,6 +49,7 @@ class StudentChargesState extends Equatable {
     StudentChargesStatus? allocationsStatus,
     Map<String, List<PaymentAllocation>>? allocationsByChargeId,
     StudentChargesErrorType? allocationsErrorType,
+    bool? feeGridUnavailable,
     Object? updatingChargeId = _undefined,
   }) => StudentChargesState(
     status: status ?? this.status,
@@ -54,6 +61,7 @@ class StudentChargesState extends Equatable {
     updatingChargeId: identical(updatingChargeId, _undefined)
         ? this.updatingChargeId
         : updatingChargeId as String?,
+    feeGridUnavailable: feeGridUnavailable ?? this.feeGridUnavailable,
   );
 
   @override
@@ -65,5 +73,6 @@ class StudentChargesState extends Equatable {
     allocationsByChargeId,
     allocationsErrorType,
     updatingChargeId,
+    feeGridUnavailable,
   ];
 }

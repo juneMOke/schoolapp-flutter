@@ -1354,6 +1354,10 @@
   "studentChargesLoading": "Loading student charges...",
   "studentChargesRetry": "Retry",
   "studentChargesEmpty": "No charges are available for this student.",
+  "studentChargesFeeGridUnavailable": "The fee grid is not available on this device for this year. Synchronise before continuing.",
+  "@studentChargesFeeGridUnavailable": {
+    "description": "Fee step: the grid is missing from the local referential whatever the current account's right — a sync is enough, unlike the missing-right case"
+  },
   "studentChargesTariffsWithheld": "Fees cannot be computed: your account has no access to the fee grid. Ask an authorised account to synchronise this device.",
   "@studentChargesTariffsWithheld": {
     "description": "Wizard fee step when the server withheld the fee grid from the referential for lack of finance.grid.read (ADR-014) — not to be confused with \"no charges\""

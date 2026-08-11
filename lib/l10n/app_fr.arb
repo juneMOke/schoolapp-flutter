@@ -1314,6 +1314,10 @@
   "studentChargesLoading": "Chargement des charges de l'élève...",
   "studentChargesRetry": "Réessayer",
   "studentChargesEmpty": "Aucune charge disponible pour cet élève.",
+  "studentChargesFeeGridUnavailable": "La grille tarifaire n'est pas disponible sur cet appareil pour cette année. Synchronisez avant de poursuivre.",
+  "@studentChargesFeeGridUnavailable": {
+    "description": "Étape Frais : la grille est absente du référentiel local, quel que soit le droit du compte courant — une synchronisation suffit, contrairement au cas du droit manquant"
+  },
   "studentChargesTariffsWithheld": "Les frais ne peuvent pas être calculés : votre compte n'a pas accès à la grille tarifaire. Demandez à un compte habilité de synchroniser cet appareil.",
   "@studentChargesTariffsWithheld": {
     "description": "Étape Frais du wizard quand le serveur a retiré la grille tarifaire du référentiel faute de finance.grid.read (ADR-014) — à ne pas confondre avec « aucune charge »"

@@ -109,22 +109,28 @@ class StudentChargesStepController {
     return updates;
   }
 
-  /// [tariffsWithheld] : le compte n'a pas le droit de voir la grille
-  /// tarifaire, donc le référentiel local n'en porte pas — voir
-  /// `StudentChargesStepBody`. Une liste vide n'est alors PAS l'information
-  /// « cet élève ne doit rien » : c'est une absence de donnée, et
-  /// `every` sur une liste vide rendrait `true`, validant l'étape.
+  /// [tariffsWithheld] (le compte n'a pas le droit de voir la grille) et
+  /// [feeGridUnavailable] (la grille est absente de cet appareil) décrivent la
+  /// même absence de donnée par deux causes distinctes. Dans les deux cas, une
+  /// liste vide n'est PAS l'information « cet élève ne doit rien » — et `every`
+  /// sur une liste vide rendrait `true`, validant l'étape en annonçant 0 F.
+  ///
+  /// La seconde est indispensable : le droit détenu ne garantit pas la donnée
+  /// présente, puisque n'importe quel compte de la tablette a pu hydrater le
+  /// référentiel avant.
   bool recomputeFormState({
     required bool canFetch,
     required bool canEditAmounts,
     required StudentChargesStatus currentStatus,
     required double? Function(String rawValue) parseAmount,
     bool tariffsWithheld = false,
+    bool feeGridUnavailable = false,
   }) {
     bool nextValid = false;
     bool nextDirty = false;
 
-    final blocked = tariffsWithheld && _studentCharges.isEmpty;
+    final blocked =
+        (tariffsWithheld || feeGridUnavailable) && _studentCharges.isEmpty;
 
     if (!blocked && canFetch && currentStatus == StudentChargesStatus.success) {
       if (canEditAmounts) {

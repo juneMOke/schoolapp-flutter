@@ -215,6 +215,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       currentStatus: _studentChargesBloc.state.status,
       parseAmount: _parseAmount,
       tariffsWithheld: _tariffsWithheld,
+      feeGridUnavailable: _studentChargesBloc.state.feeGridUnavailable,
     );
 
     if (changed) {
@@ -346,6 +347,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
                 ? null
                 : l10n.studentChargesUnavailable,
             tariffsWithheld: _tariffsWithheld,
+            feeGridUnavailable: state.feeGridUnavailable,
           );
         },
       ),

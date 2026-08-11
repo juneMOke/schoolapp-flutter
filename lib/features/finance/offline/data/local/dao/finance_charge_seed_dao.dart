@@ -139,6 +139,29 @@ class FinanceChargeSeedDao {
   /// Tarifs applicables : ceux du niveau visé + ceux définis au CYCLE seul
   /// (`school_level_id` NULL), scopés année-du-wizard-ou-NULL (la grille peut
   /// conserver plusieurs saisons — purge du pull scopée par année).
+  /// La grille tarifaire est-elle présente **sur cet appareil** pour cette
+  /// année ? Distingue les deux causes d'une liste de créances vide, qui se
+  /// ressemblent à l'écran et pas au guichet :
+  ///  - table vide pour l'année → le référentiel n'a pas été hydraté (le
+  ///    serveur caviarde `feeTariffs` pour qui n'a pas `finance.grid.read`,
+  ///    et le pull laisse alors `ref_academic_years` peuplée mais la grille
+  ///    absente) → il n'y a rien à annoncer, il faut synchroniser ;
+  ///  - table peuplée mais aucun tarif pour ce niveau → information réelle,
+  ///    ce niveau n'a pas de frais.
+  ///
+  /// Même clause d'année que [_queryTariffs] : la grille conserve plusieurs
+  /// saisons, et un tarif à année NULL vaut pour toutes.
+  Future<bool> hasAnyTariffForYear(String academicYearId) async {
+    final rows = await _db.query(
+      'ref_fee_tariffs',
+      columns: ['id'],
+      where: 'academic_year_id = ? OR academic_year_id IS NULL',
+      whereArgs: [academicYearId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
   Future<List<Map<String, Object?>>> _queryTariffs(
     DatabaseExecutor txn, {
     required String academicYearId,

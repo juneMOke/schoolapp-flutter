@@ -2386,6 +2386,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No charges are available for this student.';
 
   @override
+  String get studentChargesFeeGridUnavailable =>
+      'The fee grid is not available on this device for this year. Synchronise before continuing.';
+
+  @override
   String get studentChargesTariffsWithheld =>
       'Fees cannot be computed: your account has no access to the fee grid. Ask an authorised account to synchronise this device.';
 

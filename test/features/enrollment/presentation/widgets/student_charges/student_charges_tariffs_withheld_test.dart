@@ -37,6 +37,7 @@ void main() {
   Widget host({
     required List<StudentCharge> charges,
     required bool tariffsWithheld,
+    bool feeGridUnavailable = false,
   }) => MaterialApp(
     locale: const Locale('fr'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -54,6 +55,7 @@ void main() {
           onRetry: () {},
           onAmountChanged: (_) {},
           tariffsWithheld: tariffsWithheld,
+          feeGridUnavailable: feeGridUnavailable,
         ),
       ),
     ),
@@ -104,13 +106,14 @@ void main() {
     setUp(() => controller = StudentChargesStepController());
     tearDown(() => controller.dispose());
 
-    bool recompute({required bool withheld}) {
+    bool recompute({bool withheld = false, bool gridUnavailable = false}) {
       controller.recomputeFormState(
         canFetch: true,
         canEditAmounts: true,
         currentStatus: StudentChargesStatus.success,
         parseAmount: (raw) => double.tryParse(raw),
         tariffsWithheld: withheld,
+        feeGridUnavailable: gridUnavailable,
       );
       return controller.isValid;
     }
@@ -121,8 +124,14 @@ void main() {
       expect(recompute(withheld: true), isFalse);
     });
 
-    test('liste vide + droit détenu → étape valide (rien à devoir)', () {
-      expect(recompute(withheld: false), isTrue);
+    test('liste vide + droit détenu + grille présente → étape valide', () {
+      expect(recompute(), isTrue);
+    });
+
+    // Droit détenu ne garantit pas donnée présente : sans cette branche,
+    // l'étape se validait et « Continuer » restait offert à 0 F.
+    test('liste vide + grille absente de l\'appareil → étape INVALIDE', () {
+      expect(recompute(gridUnavailable: true), isFalse);
     });
 
     test('créances présentes → le droit sur la grille ne bloque rien', () {
