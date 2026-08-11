@@ -68,6 +68,43 @@ class ConflictFailure extends Failure {
   const ConflictFailure([super.message = 'Conflict']);
 }
 
+/// L'imprimante thermique n'a pas pu recevoir le ticket, et **la raison est
+/// actionnable par le caissier**.
+///
+/// Les quatre cas sont distincts parce que le geste qu'ils appellent l'est :
+/// accorder une permission, allumer le Bluetooth, choisir une imprimante,
+/// rallumer la machine. Un message unique (« impression impossible ») ferait
+/// chercher au guichet la mauvaise cause.
+///
+/// ⚠️ Aucun de ces échecs n'est une perte : le versement est déjà écrit
+/// localement quand le ticket s'imprime. Ils ne coûtent que le papier, et le
+/// repli PDF reste ouvert.
+enum ThermalPrinterProblem {
+  /// `BLUETOOTH_CONNECT` non accordée (Android 12+). Le plugin ne la demande
+  /// pas lui-même — c'est l'application qui doit le faire.
+  permissionDenied,
+
+  /// L'adaptateur Bluetooth de la tablette est éteint.
+  bluetoothOff,
+
+  /// Aucune imprimante retenue pour cette tablette, ou celle qui l'était n'est
+  /// plus appairée.
+  noPrinterSelected,
+
+  /// Appairée mais injoignable : éteinte, hors de portée, ou déjà connectée à
+  /// un autre appareil.
+  unreachable,
+}
+
+class ThermalPrinterFailure extends Failure {
+  final ThermalPrinterProblem problem;
+
+  const ThermalPrinterFailure(this.problem, [super.message = 'Printer error']);
+
+  @override
+  List<Object?> get props => [message, problem];
+}
+
 /// Doublon de numéro de téléphone parent — contrainte APPLICATIVE (DAO),
 /// détectée avant toute écriture. Purement local, jamais de conflit réseau
 /// (distinct de [ConflictFailure], réservée aux 2 usages HTTP 409 ci-dessus).

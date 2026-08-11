@@ -121,6 +121,13 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_
 import 'package:school_app_flutter/features/documents/data/datasources/editique_remote_data_source.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/data/printing/permission_handler_thermal_permission.dart';
+import 'package:school_app_flutter/features/documents/data/printing/print_bluetooth_thermal_channel.dart';
+import 'package:school_app_flutter/features/documents/data/printing/selected_printer_store.dart';
+import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_adapter.dart';
+import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
+import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
@@ -868,6 +875,29 @@ Future<void> configureDependencies({
       emitFinancialClearanceUseCase: getIt<EmitFinancialClearanceUseCase>(),
       restituteDocumentUseCase: getIt<RestituteDocumentUseCase>(),
     ),
+  );
+
+  // ── Impression thermique du ticket provisoire (ADR-012 L2.4) ──────────────
+  // Tout est paresseux et rien n'est touché à l'enregistrement : construire ces
+  // objets ne réveille aucun adaptateur Bluetooth et ne lit aucune permission.
+  // Le premier contact avec la plateforme est l'appui sur « Imprimer ».
+  getIt.registerLazySingleton<ThermalPrinterChannel>(
+    () => const PrintBluetoothThermalChannel(),
+  );
+  getIt.registerLazySingleton<ThermalPrinterPermission>(
+    () => const PermissionHandlerThermalPermission(),
+  );
+  // L'adaptateur consulte la permission pour CONSTATER `BLUETOOTH_SCAN`, que le
+  // canal natif ne sait pas voir. Sans elle, il déclarerait tout prêt et
+  // l'impression échouerait en désignant la mauvaise cause.
+  getIt.registerLazySingleton<ThermalPrinterPort>(
+    () => ThermalPrinterAdapter(
+      getIt<ThermalPrinterChannel>(),
+      getIt<ThermalPrinterPermission>(),
+    ),
+  );
+  getIt.registerLazySingleton<SelectedPrinterStore>(
+    () => SelectedPrinterStore(getIt<FlutterSecureStorage>()),
   );
 
   // ── Attendance ────────────────────────────────────────────────────────────
