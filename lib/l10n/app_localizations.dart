@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get splashErrorRetry;
 
+  /// Home title when no permission set has ever been reported for this account on this device (ADR-014, unknown state)
+  ///
+  /// In en, this message translates to:
+  /// **'Rights not known'**
+  String get accueilUnknownRightsTitle;
+
+  /// Unknown-state message — signing in is enough, no need to contact the administration
+  ///
+  /// In en, this message translates to:
+  /// **'Your rights are not known on this device yet. Sign in online to retrieve them.'**
+  String get accueilUnknownRightsMessage;
+
   /// Home title when the effective permission set unlocks no module (ADR-014 fail-closed)
   ///
   /// In en, this message translates to:
@@ -367,12 +379,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.'**
   String get accueilNoAccessOfflineMessage;
-
-  /// The only useful action from this screen: go back to the sign-in screen
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get accueilNoAccessSignOut;
 
   /// Bootstrap screen title when the account lacks the permission to load the referential (403)
   ///
@@ -4825,6 +4831,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download receipt'**
   String get facturationPaymentDownloadReceiptLabel;
+
+  /// Reason shown under a disabled receipt button when editique.write is missing (ADR-014) — not to be confused with pending synchronisation
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to issue this document.'**
+  String get facturationPaymentReceiptForbiddenHint;
 
   /// No description provided for @facturationPaymentReceiptPendingSyncHint.
   ///

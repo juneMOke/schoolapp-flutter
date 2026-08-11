@@ -19,9 +19,12 @@ class LoginResponseModel {
   /// **Projection d'affichage, jamais une autorité** : le serveur re-dérive
   /// l'autorisation à chaque requête. Ensemble OUVERT de chaînes — toute valeur
   /// inconnue est conservée telle quelle et ignorée en silence côté usage, le
-  /// catalogue serveur pouvant grandir sans release. Liste vide = aucun droit
-  /// (fail-closed) : c'est aussi ce qu'on retient si le champ est absent.
-  final List<String> permissions;
+  /// catalogue serveur pouvant grandir sans release.
+  ///
+  /// **Nullable** : liste vide = aucun droit (le serveur l'a dit) ; `null` =
+  /// champ absent de la réponse, donc rien à en conclure. Un backend qui ne
+  /// connaît pas encore ADR-014 ne doit pas dépouiller l'agent au refresh.
+  final List<String>? permissions;
 
   final UserModel user;
 
@@ -32,7 +35,7 @@ class LoginResponseModel {
     required this.refreshToken,
     required this.refreshExpiresIn,
     required this.userVersion,
-    this.permissions = const <String>[],
+    this.permissions,
     required this.user,
   });
 
@@ -49,7 +52,7 @@ class LoginResponseModel {
       refreshToken: json['refreshToken'] as String?,
       refreshExpiresIn: (json['refreshExpiresIn'] as num?)?.toInt(),
       userVersion: (json['userVersion'] as num?)?.toInt() ?? 0,
-      permissions: SessionPermissions.sanitize(json['permissions']),
+      permissions: SessionPermissions.sanitizeOrNull(json['permissions']),
       user: userJson is Map<String, dynamic>
           ? UserModel.fromJson(userJson)
           : const UserModel(

@@ -22,8 +22,13 @@ class AuthSession extends Equatable {
   /// Permissions effectives portées par la session (ADR-014 §4). Elles ne
   /// voyagent que sur login/refresh, jamais sur les pages de sync : un
   /// [userVersion] qui bouge signale qu'il faut rafraîchir pour récupérer le
-  /// nouvel ensemble. Liste vide = aucun droit (fail-closed).
-  final List<String> permissions;
+  /// nouvel ensemble.
+  ///
+  /// Liste vide = aucun droit ; `null` = ensemble **inconnu** (session d'avant
+  /// ADR-014, ou réponse serveur sans le champ). Les deux ferment l'interface,
+  /// mais ne disent pas la même chose à l'utilisateur et n'ont pas le même
+  /// effet sur la synchronisation.
+  final List<String>? permissions;
 
   final AuthenticatedUser user;
 
@@ -36,7 +41,7 @@ class AuthSession extends Equatable {
     this.accessExpiresAt,
     this.refreshExpiresAt,
     this.userVersion = 0,
-    this.permissions = const <String>[],
+    this.permissions,
     required this.user,
   });
 

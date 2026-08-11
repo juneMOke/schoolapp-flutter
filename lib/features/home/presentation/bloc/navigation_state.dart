@@ -21,7 +21,7 @@ class NavigationState extends Equatable {
 
   factory NavigationState.initial(
     AppLocalizations l10n, {
-    required List<String> permissions,
+    required List<String>? permissions,
   }) {
     // Atterrissage post-connexion sur la page d'accueil (spec Accueil §00/§09) :
     // l'entrée feuille « Accueil » est l'item actif, le contenu affiché est la

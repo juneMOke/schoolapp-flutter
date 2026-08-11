@@ -14,6 +14,10 @@ import 'package:school_app_flutter/features/auth/domain/repositories/auth_reposi
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 
+/// Sentinelle du `copyWith` de [AuthState] : distingue « ne touche pas au
+/// champ » de « pose `null` », désormais une valeur significative.
+const Object _unchanged = Object();
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase _loginUseCase;
   final CheckAuthStatusUseCase _checkAuthStatusUseCase;
@@ -298,17 +302,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // Les permissions ne descendent qu'au login et au refresh (ADR-014 §4) : le
     // refresh se produit en arrière-plan, sans rien émettre ici. Sans cette
     // relecture, un changement de droits n'atteindrait l'écran qu'au prochain
-    // démarrage. `null` = pas de session locale → on garde l'existant (≠
-    // ensemble vide, qui est un retrait réel et doit, lui, s'appliquer).
+    // démarrage.
+    //
+    // `evaluateFreshness` a déjà rendu la main plus haut s'il n'y a pas de
+    // session locale : à ce point, un `null` vient donc de la COLONNE, et dit
+    // « jamais renseigné » — un état à propager tel quel, puisque l'écran qui
+    // en découle (« reconnectez-vous ») n'est pas celui du retrait de droits.
     final permissions = await _sessionManager.currentPermissions();
-    final permissionsChanged =
-        permissions != null && !listEquals(permissions, state.permissions);
+    final permissionsChanged = !listEquals(permissions, state.permissions);
     if (eval.mode != state.sessionMode || clearOffline || permissionsChanged) {
       emit(
         state.copyWith(
           sessionMode: eval.mode,
           isOffline: clearOffline ? false : null,
-          permissions: permissionsChanged ? permissions : null,
+          permissions: permissionsChanged ? permissions : _unchanged,
         ),
       );
     }

@@ -50,9 +50,13 @@ class TokenStorageService {
         key: AppConstants.userSchoolIdKey,
         value: session.user.schoolId,
       ),
-      _storage.write(
-        key: AppConstants.userPermissionsKey,
-        value: SessionPermissions.encode(session.permissions),
+      // Ensemble inconnu → on n'écrit rien et on efface : la clé absente est
+      // précisément la façon dont « jamais renseigné » se relit.
+      _writeOrDelete(
+        AppConstants.userPermissionsKey,
+        session.permissions == null
+            ? null
+            : SessionPermissions.encode(session.permissions!),
       ),
     ]);
   }
@@ -85,16 +89,19 @@ class TokenStorageService {
         AppConstants.refreshExpiresAtKey,
         session.refreshExpiresAt?.toString(),
       ),
-      // Les permissions, elles, sont réécrites SANS condition — écrasement par
-      // le dernier mot du serveur, ensemble vide compris. C'est tout le
-      // mécanisme d'ADR-014 §4 : elles ne voyagent que sur login/refresh, et le
-      // refresh est donc le seul moment où un retrait de droits peut se
-      // matérialiser. Les préserver « si absentes » (comme le refresh token
-      // non rotatif) laisserait un compte dépouillé continuer d'afficher ses
-      // anciens modules jusqu'à la prochaine reconnexion complète.
-      _storage.write(
-        key: AppConstants.userPermissionsKey,
-        value: SessionPermissions.encode(session.permissions),
+      // Un ensemble COMMUNIQUÉ est réécrit sans condition, vide compris :
+      // le refresh est le seul moment où un retrait de droits se matérialise,
+      // et préserver l'ancien laisserait un compte dépouillé afficher ses
+      // modules jusqu'à la prochaine reconnexion complète.
+      //
+      // Un ensemble ABSENT de la réponse (`null`) ne dit rien et ne doit rien
+      // écraser : un backend qui ne connaît pas encore ADR-014 dépouillerait
+      // sinon l'agent à chaque refresh, y compris hors ligne.
+      _writeIfPresent(
+        AppConstants.userPermissionsKey,
+        session.permissions == null
+            ? null
+            : SessionPermissions.encode(session.permissions!),
       ),
     ]);
   }
@@ -171,7 +178,7 @@ class TokenStorageService {
       refreshToken: refreshToken,
       accessExpiresAt: int.tryParse(accessExpiresAt ?? ''),
       refreshExpiresAt: int.tryParse(refreshExpiresAt ?? ''),
-      permissions: SessionPermissions.decode(permissions),
+      permissions: SessionPermissions.decodeOrNull(permissions),
       user: AuthenticatedUser(
         id: userId,
         email: userEmail,

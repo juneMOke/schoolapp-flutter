@@ -97,10 +97,15 @@ class AuthLocalDao {
   /// qui en porte — login online et refresh. Le dernier mot du serveur fait
   /// foi, y compris l'ensemble vide : un compte dépouillé de ses droits doit
   /// les perdre aussi hors ligne.
+  ///
+  /// Ne rien faire sur `null` : la réponse ne portait pas le champ, elle ne dit
+  /// donc rien de ce compte. Écrire ici effacerait une copie durable valide au
+  /// premier contact d'un backend qui ignore encore ADR-014.
   Future<void> updatePermissions(
     String userId,
-    List<String> permissions,
+    List<String>? permissions,
   ) async {
+    if (permissions == null) return;
     await _db.update(
       userTable,
       {'permissions': SessionPermissions.encode(permissions)},

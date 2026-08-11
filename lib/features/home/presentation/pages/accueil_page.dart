@@ -35,7 +35,7 @@ class AccueilPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     // `select` plutôt que `read` : un refresh porteur d'un nouvel ensemble de
     // droits recompose la grille sans rien d'impératif (ADR-014 §5).
-    final permissions = context.select<AuthBloc, List<String>>(
+    final permissions = context.select<AuthBloc, List<String>?>(
       (bloc) => bloc.state.permissions,
     );
     final modules = AccueilModulesFactory.create(
@@ -61,7 +61,10 @@ class AccueilPage extends StatelessWidget {
           if (modules.isEmpty)
             AccueilEntrance(
               index: _bannerEntranceIndex + 1,
-              child: AccueilNoAccessState(isOffline: isOffline),
+              child: AccueilNoAccessState(
+                isOffline: isOffline,
+                permissionsUnknown: permissions == null,
+              ),
             )
           else
             AccueilModulesSection(

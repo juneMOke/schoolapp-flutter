@@ -17,16 +17,33 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// **Anatomie 403** (règle des états partagés) : aucun « Réessayer », puisque
 /// rien de ce que l'utilisateur peut faire ici ne changera son périmètre.
 ///
-/// Deux variantes, et le discriminant est celui que le front connaît vraiment.
-/// Session ouverte **hors ligne** : ses droits viennent de la copie durable du
-/// dernier contact serveur, donc une reconnexion en ligne peut les rafraîchir —
-/// on le dit, sans offrir un bouton qui ne peut pas aboutir sans réseau. Sinon,
-/// le serveur a parlé : seule l'administration de l'école peut y changer
-/// quelque chose, et se reconnecter est la seule action utile à portée de main.
+/// Trois variantes, parce que trois causes différentes appellent trois gestes
+/// différents :
+///
+/// - **droits inconnus** ([permissionsUnknown]) : rien n'a jamais été
+///   communiqué pour ce compte sur cet appareil — session ouverte avant que
+///   l'application ne sache lire les permissions, ou réponse serveur sans le
+///   champ. Ce n'est pas un retrait de droits, et le dire évite d'envoyer
+///   l'agent réclamer à son administration ce qu'une reconnexion suffit à
+///   récupérer ;
+/// - **hors ligne** : les droits viennent de la copie durable du dernier
+///   contact serveur ; une reconnexion en ligne peut les rafraîchir — on le
+///   dit, sans offrir un bouton qui ne peut pas aboutir sans réseau ;
+/// - **en ligne, ensemble vide** : le serveur a parlé. Seule l'administration
+///   de l'école peut y changer quelque chose, et se reconnecter est la seule
+///   action utile à portée de main.
 class AccueilNoAccessState extends StatelessWidget {
-  const AccueilNoAccessState({super.key, required this.isOffline});
+  const AccueilNoAccessState({
+    super.key,
+    required this.isOffline,
+    this.permissionsUnknown = false,
+  });
 
   final bool isOffline;
+
+  /// L'ensemble effectif est `null` : jamais communiqué, à ne pas confondre
+  /// avec un ensemble vide, qui est une décision du serveur.
+  final bool permissionsUnknown;
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +52,23 @@ class AccueilNoAccessState extends StatelessWidget {
     return EteeloErrorResult(
       type: EteeloErrorType.forbidden,
       fullWidthCard: false,
-      title: l10n.accueilNoAccessTitle,
-      message: isOffline
+      title: permissionsUnknown
+          ? l10n.accueilUnknownRightsTitle
+          : l10n.accueilNoAccessTitle,
+      message: permissionsUnknown
+          ? l10n.accueilUnknownRightsMessage
+          : isOffline
           ? l10n.accueilNoAccessOfflineMessage
           : l10n.accueilNoAccessMessage,
+      // Hors ligne, se déconnecter ferait perdre la session sans pouvoir en
+      // rouvrir une : le bouton serait un piège, quelle que soit la cause.
       primaryAction: isOffline
           ? null
           : OutlinedButton.icon(
               onPressed: () =>
                   context.read<AuthBloc>().add(const AuthLogoutRequested()),
               icon: const Icon(Icons.logout_rounded),
-              label: Text(l10n.accueilNoAccessSignOut),
+              label: Text(l10n.signOutAction),
             ),
     );
   }

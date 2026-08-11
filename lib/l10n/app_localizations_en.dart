@@ -144,6 +144,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashErrorRetry => 'Retry';
 
   @override
+  String get accueilUnknownRightsTitle => 'Rights not known';
+
+  @override
+  String get accueilUnknownRightsMessage =>
+      'Your rights are not known on this device yet. Sign in online to retrieve them.';
+
+  @override
   String get accueilNoAccessTitle => 'No module available';
 
   @override
@@ -153,9 +160,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilNoAccessOfflineMessage =>
       'Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.';
-
-  @override
-  String get accueilNoAccessSignOut => 'Sign out';
 
   @override
   String get splashForbiddenTitle => 'Access not allowed';
@@ -2804,6 +2808,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationPaymentDownloadReceiptLabel => 'Download receipt';
+
+  @override
+  String get facturationPaymentReceiptForbiddenHint =>
+      'You are not allowed to issue this document.';
 
   @override
   String get facturationPaymentReceiptPendingSyncHint =>

@@ -9,7 +9,7 @@ part 'navigation_event.dart';
 part 'navigation_state.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-  NavigationBloc(AppLocalizations l10n, {required List<String> permissions})
+  NavigationBloc(AppLocalizations l10n, {required List<String>? permissions})
     : super(NavigationState.initial(l10n, permissions: permissions)) {
     on<MenuItemSelected>(_onMenuItemSelected);
     on<SubMenuItemSelected>(_onSubMenuItemSelected);

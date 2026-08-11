@@ -578,7 +578,13 @@ void main() {
         permissions: tPermissions,
       ),
       act: (bloc) => bloc.add(const AuthFreshnessTick()),
-      expect: () => const <AuthState>[],
+      expect: () => const [
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: null,
+        ),
+      ],
     );
 
     test('hasPermission lit l\'ensemble exposé, fail-closed par défaut', () {
@@ -590,7 +596,7 @@ void main() {
       expect(granted.hasPermission('attendance.read'), isTrue);
       expect(granted.hasPermission('finance.write'), isFalse);
 
-      // Hors session : aucun droit.
+      // Hors session, l'ensemble est inconnu (`null`) : aucun droit accordé.
       expect(
         const AuthState(
           status: AuthStatus.unauthenticated,

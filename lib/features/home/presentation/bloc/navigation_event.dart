@@ -51,7 +51,7 @@ class SidebarToggled extends NavigationEvent {
 /// continuerait d'offrir sa porte jusqu'au prochain démarrage.
 class NavigationPermissionsChanged extends NavigationEvent {
   final AppLocalizations l10n;
-  final List<String> permissions;
+  final List<String>? permissions;
 
   const NavigationPermissionsChanged({
     required this.l10n,

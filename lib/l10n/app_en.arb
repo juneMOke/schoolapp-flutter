@@ -64,6 +64,14 @@
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
   "splashErrorRetry": "Retry",
+  "accueilUnknownRightsTitle": "Rights not known",
+  "@accueilUnknownRightsTitle": {
+    "description": "Home title when no permission set has ever been reported for this account on this device (ADR-014, unknown state)"
+  },
+  "accueilUnknownRightsMessage": "Your rights are not known on this device yet. Sign in online to retrieve them.",
+  "@accueilUnknownRightsMessage": {
+    "description": "Unknown-state message — signing in is enough, no need to contact the administration"
+  },
   "accueilNoAccessTitle": "No module available",
   "@accueilNoAccessTitle": {
     "description": "Home title when the effective permission set unlocks no module (ADR-014 fail-closed)"
@@ -75,10 +83,6 @@
   "accueilNoAccessOfflineMessage": "Your session was opened offline and no rights are known for this account. Sign in online as soon as the network is available.",
   "@accueilNoAccessOfflineMessage": {
     "description": "Message when the session comes from the local durable copy — signing in online can refresh the rights"
-  },
-  "accueilNoAccessSignOut": "Sign out",
-  "@accueilNoAccessSignOut": {
-    "description": "The only useful action from this screen: go back to the sign-in screen"
   },
   "splashForbiddenTitle": "Access not allowed",
   "@splashForbiddenTitle": {
@@ -1535,6 +1539,10 @@
   "facturationPaymentReceiptLabel": "Receipt no.",
   "facturationPaymentStudentLabel": "Student",
   "facturationPaymentDownloadReceiptLabel": "Download receipt",
+  "facturationPaymentReceiptForbiddenHint": "You are not allowed to issue this document.",
+  "@facturationPaymentReceiptForbiddenHint": {
+    "description": "Reason shown under a disabled receipt button when editique.write is missing (ADR-014) — not to be confused with pending synchronisation"
+  },
   "facturationPaymentReceiptPendingSyncHint": "The receipt will be available once the payment has been synchronised.",
   "facturationPaymentReceiptNumberPending": "Awaiting synchronisation",
   "facturationPaymentCloseLabel": "Close",

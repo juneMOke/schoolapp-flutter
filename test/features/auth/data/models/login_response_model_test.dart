@@ -59,16 +59,28 @@ void main() {
       expect(model.permissions, <String>['module.futur.read']);
     });
 
-    test('fromJson retombe sur l\'ensemble vide si permissions absent', () {
+    // Champ absent ≠ ensemble vide : le premier ne dit rien, le second est une
+    // décision du serveur. Les confondre dépouillerait l'agent au premier
+    // contact d'un backend qui ignore encore ADR-014.
+    test('fromJson : permissions absent → inconnu (null)', () {
       final json = Map<String, dynamic>.from(tJson)..remove('permissions');
-      expect(LoginResponseModel.fromJson(json).permissions, isEmpty);
+      expect(LoginResponseModel.fromJson(json).permissions, isNull);
     });
 
-    test('fromJson retombe sur l\'ensemble vide si permissions null', () {
+    test('fromJson : permissions à null → inconnu', () {
       final model = LoginResponseModel.fromJson(<String, dynamic>{
         ...tJson,
         'permissions': null,
       });
+      expect(model.permissions, isNull);
+    });
+
+    test('fromJson : permissions à [] → ensemble vide, pas inconnu', () {
+      final model = LoginResponseModel.fromJson(<String, dynamic>{
+        ...tJson,
+        'permissions': <dynamic>[],
+      });
+      expect(model.permissions, isNotNull);
       expect(model.permissions, isEmpty);
     });
 
@@ -137,13 +149,16 @@ void main() {
       ]);
     });
 
-    test('toAuthSession fail-closed : aucune permission sur le fil', () {
+    test('toAuthSession propage l\'état inconnu tel quel', () {
       final json = Map<String, dynamic>.from(tJson)..remove('permissions');
       final session = LoginResponseModel.fromJson(
         json,
       ).toAuthSession(nowMs: 1_000_000);
 
-      expect(session.permissions, isEmpty);
+      // L'interface se fermera quand même — mais elle dira « reconnectez-vous »
+      // et non « contactez l'administrateur », et la synchro continuera de
+      // tirer plutôt que de s'arrêter net.
+      expect(session.permissions, isNull);
     });
   });
 }

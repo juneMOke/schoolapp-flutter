@@ -146,6 +146,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashErrorRetry => 'Réessayer';
 
   @override
+  String get accueilUnknownRightsTitle => 'Droits non connus';
+
+  @override
+  String get accueilUnknownRightsMessage =>
+      'Vos droits ne sont pas encore connus sur cet appareil. Reconnectez-vous en ligne pour les récupérer.';
+
+  @override
   String get accueilNoAccessTitle => 'Aucun module accessible';
 
   @override
@@ -155,9 +162,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilNoAccessOfflineMessage =>
       'Votre session a été ouverte hors ligne et aucun droit n\'est connu pour ce compte. Reconnectez-vous en ligne dès que le réseau est disponible.';
-
-  @override
-  String get accueilNoAccessSignOut => 'Se déconnecter';
 
   @override
   String get splashForbiddenTitle => 'Accès non autorisé';
@@ -2822,6 +2826,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationPaymentDownloadReceiptLabel => 'Télécharger le reçu';
+
+  @override
+  String get facturationPaymentReceiptForbiddenHint =>
+      'Vous n\'avez pas le droit d\'émettre cette pièce.';
 
   @override
   String get facturationPaymentReceiptPendingSyncHint =>

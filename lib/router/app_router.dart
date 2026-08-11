@@ -96,7 +96,11 @@ class RouterNotifier extends ChangeNotifier {
 /// Signature stable de l'ensemble effectif — triée, car l'ordre du serveur n'a
 /// aucun sens métier et une simple permutation ne doit pas passer pour un
 /// changement de droits.
-String _permissionsSignature(List<String> permissions) {
+String _permissionsSignature(List<String>? permissions) {
+  // Sentinelle distincte de l'ensemble vide : « inconnu » et « aucun droit »
+  // ferment tous deux les routes, mais passer de l'un à l'autre change l'écran
+  // affiché — le routeur doit donc rejouer son redirect.
+  if (permissions == null) return '\u0001inconnu';
   final sorted = [...permissions]..sort();
   return sorted.join('\u0000');
 }

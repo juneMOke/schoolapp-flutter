@@ -25,7 +25,7 @@ class AccueilModulesFactory {
   /// latérale : les deux surfaces montrent donc exactement le même périmètre.
   static List<AccueilModule> create(
     AppLocalizations l10n, {
-    required List<String> permissions,
+    required List<String>? permissions,
   }) {
     final all = [
       _inscriptions(l10n),

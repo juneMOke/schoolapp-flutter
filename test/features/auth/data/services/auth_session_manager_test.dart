@@ -21,7 +21,7 @@ AuthSession _session({
   required String uid,
   int userVersion = 0,
   int? refreshExpiresAt,
-  List<String> permissions = const <String>[],
+  List<String>? permissions,
 }) => AuthSession(
   accessToken: 'jwt',
   tokenType: 'Bearer',
@@ -819,11 +819,39 @@ void main() {
       );
       when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
 
+      // Ensemble vide EXPLICITE : le serveur a retiré les droits, la copie
+      // durable doit suivre. Un champ ABSENT, lui, ne toucherait à rien —
+      // couvert par le test suivant.
       await manager.applyRefresh(
-        _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const [],
+        ),
       );
 
       expect((await dao.getUser('u1'))?.permissions, isEmpty);
+    });
+
+    test('applyRefresh sans permissions (null) préserve la copie durable', () {
+      return () async {
+        final manager = build();
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        await manager.applyRefresh(
+          _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+        );
+
+        expect((await dao.getUser('u1'))?.permissions, ['attendance.read']);
+      }();
     });
 
     test(
@@ -947,11 +975,75 @@ void main() {
       },
     );
 
+    // Filtre d'identité (revue adversariale) : la garde anti-résurrection ne
+    // couvre que la fenêtre lecture→écriture, pas le vol réseau. Sur tablette
+    // partagée, la réponse tardive d'un AUTRE compte ne doit rien écrire.
     test(
-      'compte migré (jamais revu online) → aucun droit hors ligne',
+      'applyRefresh ignore une réponse qui n\'appartient pas à la session',
       () async {
-        // Après la migration v24 la colonne est NULL : fail-closed jusqu'au
-        // prochain contact serveur.
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        // B est la session active.
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'uB',
+            refreshExpiresAt: clock + 1000000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasseB',
+        );
+
+        // Réponse tardive du refresh de A, parti avant que B ne se connecte.
+        await manager.applyRefresh(
+          _session(
+            uid: 'uA',
+            userVersion: 99,
+            refreshExpiresAt: clock + 999999,
+            permissions: const ['finance.payment.write', 'editique.write'],
+          ),
+        );
+
+        // Rien n'a bougé : ni les jetons, ni les droits durables, ni le holder.
+        verifyNever(() => tokenStorage.updateTokens(any()));
+        expect((await dao.getUser('uB'))?.permissions, ['attendance.read']);
+        expect(holder.permissions, ['attendance.read']);
+        // Et surtout : le userVersion de A n'a pas été observé, sinon le
+        // guardian brûlerait la fenêtre offline de B.
+        expect(await manager.evaluateRevocation(), isFalse);
+        expect((await dao.getUser('uB'))?.refreshExpiresAt, isNotNull);
+      },
+    );
+
+    test('applyRefresh ignore une réponse sans uid (contrat hérité)', () async {
+      final manager = build();
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+      await manager.persistOnlineLogin(
+        _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
+        'MotDePasse123',
+      );
+
+      await manager.applyRefresh(
+        _session(uid: '', refreshExpiresAt: clock + 999999),
+      );
+
+      verifyNever(() => tokenStorage.updateTokens(any()));
+    });
+
+    test(
+      'compte migré (jamais revu online) → droits INCONNUS, pas vides',
+      () async {
+        // Après la migration v24 la colonne est NULL, et c'est tout ce qu'elle
+        // dit. La confondre avec un retrait de droits fermerait l'application
+        // ET couperait la synchronisation de tout le parc à la montée de
+        // version — l'écran dira « reconnectez-vous », la synchro continuera.
         final manager = build();
         await manager.persistOnlineLogin(
           _session(uid: 'u1', refreshExpiresAt: clock + 1000000),
@@ -965,7 +1057,7 @@ void main() {
         );
 
         res.fold((f) => fail('login offline refusé : $f'), (snap) {
-          expect(snap.session.permissions, isEmpty);
+          expect(snap.session.permissions, isNull);
         });
       },
     );

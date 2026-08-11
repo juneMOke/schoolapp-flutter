@@ -19,7 +19,7 @@ class MenuFactory {
   /// diverger.
   static List<MenuItem> createMenuItems(
     AppLocalizations l10n, {
-    required List<String> permissions,
+    required List<String>? permissions,
   }) {
     final all = [
       _createAccueilMenu(l10n),
