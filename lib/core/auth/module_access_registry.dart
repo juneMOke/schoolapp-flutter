@@ -157,19 +157,48 @@ bool canAccessMenu(String menuId, List<String>? permissions) {
   return subMenus.keys.any((id) => canAccessSubMenu(id, permissions));
 }
 
+/// Routes de premier niveau, **hors coquille** : leur second segment est un mot
+/// littéral (`detail`) et non un identifiant de sous-menu, si bien qu'elles
+/// échappaient à la garde ci-dessous.
+///
+/// Le détail/wizard d'inscription est la seule de la production à ce jour.
+/// Plancher `enrollment.read` et non l'exigence d'écriture : la même route sert
+/// la consultation d'un dossier finalisé, que la comptabilité détient
+/// légitimement. L'écriture reste gardée sur ses propres boutons, par
+/// [kEnrollmentSubmitAccess].
+///
+/// **Ne pas déclarer ces segments dans [kModuleAccessRegistry]** : le test
+/// d'accord menu↔garde exigerait alors qu'ils soient visibles au menu, où ils
+/// n'ont rien à faire.
+const Map<String, ModuleAccess> kStandaloneRouteAccess = {
+  'enrollments': ModuleAccess([Perm.enrollmentRead]),
+};
+
 /// Vrai si [location] est atteignable avec [permissions].
 ///
-/// Toutes les routes de la coquille ont la forme `/{menu}/{sousMenu}[/…]` : le
-/// second segment **est** l'identifiant de sous-menu de cette table. La garde
-/// de route n'a donc pas sa propre déclaration — elle interroge la même source
-/// que la grille d'accueil et la barre latérale, ce qu'exige l'invariant
-/// « une seule politique côté client » (ADR-014 §2.9).
+/// Les routes de la coquille ont la forme `/{menu}/{sousMenu}[/…]` : le second
+/// segment **est** l'identifiant de sous-menu de cette table. La garde de route
+/// n'a donc pas sa propre déclaration — elle interroge la même source que la
+/// grille d'accueil et la barre latérale, ce qu'exige l'invariant « une seule
+/// politique côté client » (ADR-014 §2.9). Les routes de premier niveau, elles,
+/// passent par [kStandaloneRouteAccess].
 ///
 /// Les chemins à un seul segment (`/home`, `/login`, `/splash`) et ceux dont le
-/// second segment n'est pas déclaré (galerie de composants en debug) passent :
-/// la table décrit ce qui est gardé, pas ce qui existe.
+/// second segment n'est déclaré nulle part (galerie de composants en debug)
+/// passent : les tables décrivent ce qui est gardé, pas ce qui existe.
 bool canAccessLocation(Uri location, List<String>? permissions) {
   final segments = location.pathSegments;
+  if (segments.isEmpty) return true;
+
+  final standalone = kStandaloneRouteAccess[segments.first];
+  if (standalone != null) {
+    return canAccess(
+      requires: standalone.requires,
+      permissions: permissions,
+      requiresAll: standalone.requiresAll,
+    );
+  }
+
   if (segments.length < 2) return true;
   return canAccessSubMenu(segments[1], permissions);
 }

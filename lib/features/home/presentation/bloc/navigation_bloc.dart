@@ -111,6 +111,23 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     SubMenuItemSelected event,
     Emitter<NavigationState> emit,
   ) {
+    // La coquille ne route pas par GoRouter pour ses écrans : elle bascule sur
+    // cet événement, que deux widgets émettent avec un identifiant EN DUR pour
+    // sauter d'un module à l'autre (tableau de bord présence → feuille d'appel,
+    // état vide de l'appel → composition des classes). Ces émetteurs ne passent
+    // par aucune liste filtrée : sans cette garde, la politique ne s'applique
+    // qu'aux chemins qui veulent bien la traverser.
+    //
+    // On teste l'appartenance à l'arborescence courante, déjà filtrée par les
+    // permissions — `menu.id` compris, car l'item feuille Accueil émet un
+    // `subMenuId` égal à son propre identifiant.
+    final atteignable = state.menuItems.any(
+      (menu) =>
+          menu.id == event.subMenuId ||
+          menu.subMenus.any((sub) => sub.id == event.subMenuId),
+    );
+    if (!atteignable) return;
+
     final updatedMenus = state.menuItems.map((menu) {
       final updatedSubMenus = menu.subMenus.map((subMenu) {
         return subMenu.copyWith(isActive: subMenu.id == event.subMenuId);

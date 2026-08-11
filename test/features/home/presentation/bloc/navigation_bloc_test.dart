@@ -213,4 +213,60 @@ void main() {
       ]),
     );
   });
+
+  // Deux widgets de production émettent cet événement avec un identifiant EN
+  // DUR pour sauter d'un module à l'autre, hors de toute liste filtrée. Sans
+  // garde, la politique ne s'appliquait qu'aux chemins qui voulaient bien la
+  // traverser.
+  group('SubMenuItemSelected — sauts inter-modules', () {
+    blocTest<NavigationBloc, NavigationState>(
+      'un sous-menu hors périmètre est ignoré',
+      build: () => NavigationBloc(l10n, permissions: const ['classroom.read']),
+      act: (bloc) => bloc.add(
+        SubMenuItemSelected(
+          menuId: MenuConstants.disciplinesMenuId,
+          subMenuId: MenuConstants.presencesId,
+          title: l10n.subMenuAttendance,
+        ),
+      ),
+      expect: () => const <NavigationState>[],
+      verify: (bloc) {
+        expect(bloc.state.selectedSubMenuId, MenuConstants.accueilId);
+        expect(bloc.state.currentTitle, l10n.home);
+      },
+    );
+
+    blocTest<NavigationBloc, NavigationState>(
+      'un sous-menu du périmètre passe normalement',
+      build: () => NavigationBloc(l10n, permissions: const ['classroom.read']),
+      act: (bloc) => bloc.add(
+        SubMenuItemSelected(
+          menuId: MenuConstants.classesMenuId,
+          subMenuId: MenuConstants.organisationId,
+          title: l10n.subMenuOrganization,
+        ),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.selectedSubMenuId, MenuConstants.organisationId);
+        expect(bloc.state.currentTitle, l10n.subMenuOrganization);
+      },
+    );
+
+    // L'item feuille Accueil émet un `subMenuId` égal à son propre id : le
+    // tester sur les seuls sous-menus l'aurait rendu inatteignable.
+    blocTest<NavigationBloc, NavigationState>(
+      'le retour à l\'Accueil reste possible sans aucun droit',
+      build: () => NavigationBloc(l10n, permissions: const []),
+      act: (bloc) => bloc
+        ..add(
+          SubMenuItemSelected(
+            menuId: MenuConstants.accueilId,
+            subMenuId: MenuConstants.accueilId,
+            title: l10n.home,
+          ),
+        ),
+      verify: (bloc) =>
+          expect(bloc.state.selectedSubMenuId, MenuConstants.accueilId),
+    );
+  });
 }

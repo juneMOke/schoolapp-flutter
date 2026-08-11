@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/domain/factories/accueil_modules_factory.dart';
 import 'package:school_app_flutter/features/home/domain/factories/menu_factory.dart';
@@ -262,6 +263,28 @@ void main() {
 
     test('une route non déclarée passe (galerie de composants en debug)', () {
       expect(allows('/dev/components', const []), isTrue);
+    });
+
+    // Route de PREMIER niveau : son second segment est le mot `detail`, pas un
+    // identifiant de sous-menu. Elle échappait donc entièrement à la garde, et
+    // deux routes sœurs se contredisaient — un refresh qui retire
+    // `enrollment.read` éjectait de la liste mais laissait sur le dossier.
+    test('le détail d\'inscription est gardé par kStandaloneRouteAccess', () {
+      const detail = '/enrollments/detail/e-1';
+      expect(allows(detail, const []), isFalse);
+      expect(allows(detail, _enseignant), isFalse);
+      expect(allows(detail, _comptabilite), isTrue);
+      // Le wizard de création emprunte la même route.
+      expect(allows('/enrollments/detail/new', _enseignant), isFalse);
+    });
+
+    // Ancrage anti-dérive : la clé littérale de la table doit rester celle de
+    // la route réelle, qui vit dans une constante d'un autre fichier.
+    test('la clé déclarée correspond à la route de production', () {
+      expect(
+        Uri.parse(EnrollmentConstants.enrollmentDetailRoute).pathSegments.first,
+        isIn(kStandaloneRouteAccess.keys),
+      );
     });
 
     test('aucun droit : toute route de module est refusée', () {
