@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
-import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -140,9 +140,12 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     }
   }
 
-  /// Imprime le ticket provisoire. Un échec est DIT — jamais avalé : sans
-  /// message, l'appui ne produirait rien du tout et le caissier croirait le
-  /// papier parti.
+  /// Imprime le ticket provisoire : la thermique d'abord, le PDF en filet.
+  ///
+  /// Toute la politique — choix de l'imprimante, causes annoncées, repli — vit
+  /// dans `printProvisionalTicketWithFallback`, avec le reste du chemin ticket.
+  /// Ici ne reste que ce qui appartient à cette modale : le verrou de geste et
+  /// l'état du bouton.
   Future<void> _printTicket() async {
     final paymentId = _paymentId;
     // Même invariant « un seul geste en vol » que `_confirm` : le rendu puis
@@ -152,16 +155,16 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     if (paymentId == null || _printing) return;
 
     final messenger = ScaffoldMessenger.maybeOf(context);
-    final message = AppLocalizations.of(context)!.ticketPrintFailed;
 
     setState(() => _printing = true);
-    final printed = await printProvisionalTicket(context, paymentId: paymentId);
+    await printProvisionalTicketWithFallback(
+      context,
+      paymentId: paymentId,
+      messenger: messenger,
+    );
     if (!mounted) return;
 
     setState(() => _printing = false);
-    if (printed) return;
-
-    messenger?.showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _generateIncidentCode() =>

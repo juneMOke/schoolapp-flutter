@@ -128,7 +128,13 @@ Future<bool> _print(WidgetTester tester) async {
     ),
   );
 
-  return printProvisionalTicket(captured, paymentId: 'pay-1');
+  // La composition et l'impression sont deux gestes depuis que le ticket a deux
+  // sorties : un modèle introuvable n'atteint jamais le spouleur, et c'est ce
+  // que vérifie le cas « encaissement introuvable » ci-dessus.
+  final model = await buildProvisionalTicket(captured, paymentId: 'pay-1');
+  if (model == null) return false;
+
+  return printProvisionalTicket(captured, model: model);
 }
 
 /// Occurrences du motif de pointillés — le marqueur des deux horizontales de
