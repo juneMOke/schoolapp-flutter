@@ -5965,6 +5965,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketCutNotice => 'Cut along the frame.';
 
   @override
+  String get ticketPrinterPickerTitle => 'Choose the printer';
+
+  @override
+  String get ticketPrinterUnnamed => 'Unnamed printer';
+
+  @override
+  String get ticketPrinterProblemPermission =>
+      'Nearby devices permission denied — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemBluetoothOff =>
+      'Bluetooth is off — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemNoPrinter =>
+      'No paired printer — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemUnreachable =>
+      'Printer unreachable, off or out of range — printing as PDF instead.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

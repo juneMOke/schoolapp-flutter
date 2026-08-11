@@ -10038,6 +10038,42 @@ abstract class AppLocalizations {
   /// **'Cut along the frame.'**
   String get ticketCutNotice;
 
+  /// No description provided for @ticketPrinterPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the printer'**
+  String get ticketPrinterPickerTitle;
+
+  /// No description provided for @ticketPrinterUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed printer'**
+  String get ticketPrinterUnnamed;
+
+  /// No description provided for @ticketPrinterProblemPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby devices permission denied — printing as PDF instead.'**
+  String get ticketPrinterProblemPermission;
+
+  /// No description provided for @ticketPrinterProblemBluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off — printing as PDF instead.'**
+  String get ticketPrinterProblemBluetoothOff;
+
+  /// No description provided for @ticketPrinterProblemNoPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired printer — printing as PDF instead.'**
+  String get ticketPrinterProblemNoPrinter;
+
+  /// No description provided for @ticketPrinterProblemUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer unreachable, off or out of range — printing as PDF instead.'**
+  String get ticketPrinterProblemUnreachable;
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

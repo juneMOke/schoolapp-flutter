@@ -6031,6 +6031,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketCutNotice => 'Découpez le long du cadre.';
 
   @override
+  String get ticketPrinterPickerTitle => 'Choisir l\'imprimante';
+
+  @override
+  String get ticketPrinterUnnamed => 'Imprimante sans nom';
+
+  @override
+  String get ticketPrinterProblemPermission =>
+      'Permission « Appareils à proximité » refusée — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemBluetoothOff =>
+      'Bluetooth éteint — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemNoPrinter =>
+      'Aucune imprimante appairée — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemUnreachable =>
+      'Imprimante injoignable, éteinte ou hors de portée — impression PDF à la place.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override
