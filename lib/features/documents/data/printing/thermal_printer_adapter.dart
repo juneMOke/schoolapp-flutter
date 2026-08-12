@@ -128,11 +128,28 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
     final ready = await ensureReady();
     if (ready.isLeft()) return ready;
 
+    // ⚠️ Fermeture d'hygiène AVANT d'ouvrir : c'est le seul geste qui sorte
+    // d'une liaison déjà empoisonnée, et il n'existe aucun autre point de
+    // réarmement dans l'application.
+    //
+    // Le canal natif garde son flux dans une variable de **portée fichier**, et
+    // son `connect` s'exécute dans une coroutine que notre délai n'interrompt
+    // pas : quand on abandonne à 15 s et que la socket s'ouvre trois secondes
+    // plus tard, la globale est affectée et plus personne ne la referme. Sa
+    // branche « déjà connecté » ne réassainit rien non plus — elle rend `false`
+    // sur-le-champ. Sans cette ligne, la première connexion lente de la journée
+    // condamne l'impression thermique jusqu'à la mort du processus, en
+    // annonçant au guichet une imprimante « hors de portée » posée à 30 cm.
+    await _silently(() => _channel.disconnect());
+
     final connected = await _guard(
       () => _channel.connect(macAddress),
       _connectTimeout,
     );
     if (connected != true) {
+      // Symétrique du `finally` de l'écriture : un `connect` qui a échoué peut
+      // tout de même avoir laissé un flux derrière lui.
+      await _silently(() => _channel.disconnect());
       return const Left(
         ThermalPrinterFailure(ThermalPrinterProblem.unreachable),
       );

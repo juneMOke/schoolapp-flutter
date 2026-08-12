@@ -311,8 +311,35 @@ void main() {
 
         expect(_problemOf(result), ThermalPrinterProblem.unreachable);
         expect(channel.written, isEmpty);
+        // La liaison est refermée même quand elle n'a pas pu s'ouvrir : le
+        // canal natif garde son flux dans une variable de portée fichier, et
+        // un `connect` échoué peut tout de même en laisser un derrière lui.
+        expect(channel.calls.last, 'disconnect');
       },
     );
+
+    /// Le pire cas du lot, et celui qu'aucun test ne couvrait : le délai de
+    /// connexion tombe, mais la coroutine native poursuit et finit par ouvrir
+    /// la socket. Sans fermeture d'hygiène en entrée, la liaison reste ouverte
+    /// pour la durée du processus et TOUTES les impressions suivantes échouent
+    /// instantanément — imprimante allumée, à portée, message trompeur.
+    test('un connect qui PEND laisse la liaison refermée', () async {
+      final channel = _FakeChannel(hangOn: {'connect'});
+
+      final result = await _adapter(
+        channel,
+      ).printBytes(_ticket, macAddress: mac);
+
+      expect(_problemOf(result), ThermalPrinterProblem.unreachable);
+      expect(channel.written, isEmpty);
+      expect(
+        channel.calls.where((call) => call == 'disconnect'),
+        hasLength(2),
+        reason:
+            'une fermeture en entrée pour désempoisonner, une en sortie pour '
+            'ne pas laisser la socket que le natif vient peut-être d\'ouvrir',
+      );
+    });
 
     test('la permission est constatée avant la moindre connexion', () async {
       final channel = _FakeChannel(permission: false);
