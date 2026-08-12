@@ -105,6 +105,22 @@ class LocalStudentCharge extends Equatable {
   /// Créance locale d'un nouvel élève, jamais poussée (FRONT §5.2).
   bool get isProvisional => syncState == SyncState.provisional;
 
+  /// Vrai si cette créance compte dans le périmètre de [academicYear].
+  ///
+  /// ⚠️ **Une créance sans année appartient à TOUTES les années.** Ce n'est pas
+  /// une tolérance de lecture : `academic_year_id` est nullable par
+  /// construction, et tout le domaine Facturation la rattache à l'année
+  /// demandée — lecture du grand-livre, garde-fou de génération
+  /// (`finance_charge_seed_dao`), paiements.
+  ///
+  /// La règle vit ici parce qu'elle avait déjà divergé : le solde du ticket
+  /// provisoire exigeait l'égalité stricte et imprimait donc une dette **plus
+  /// petite** que celle affichée à l'écran, sur un papier remis à un parent.
+  /// Un écart dans ce sens ne se rattrape jamais — `optimisticRemainingInCents`
+  /// est clampé à zéro, donc une créance écartée n'est compensée nulle part.
+  bool belongsToYear(String academicYear) =>
+      academicYearId == null || academicYearId == academicYear;
+
   @override
   List<Object?> get props => [
     id,

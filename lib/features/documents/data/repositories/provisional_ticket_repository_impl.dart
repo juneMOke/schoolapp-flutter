@@ -105,9 +105,12 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
     final charges = await _finance.getCharges(studentId);
 
     return charges.fold<int?>((_) => null, (list) {
+      // `belongsToYear` et pas une égalité stricte : une créance sans année
+      // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
+      // vivait ici imprimait une dette plus petite que celle de l'écran.
       final matching = list
           .where(
-            (c) => c.currency == currency && c.academicYearId == academicYearId,
+            (c) => c.currency == currency && c.belongsToYear(academicYearId),
           )
           .toList(growable: false);
       if (matching.isEmpty) return null;

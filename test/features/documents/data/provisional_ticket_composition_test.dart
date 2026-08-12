@@ -36,7 +36,9 @@ LocalStudentCharge _charge({
   required int expected,
   required int paid,
   String currency = 'CDF',
-  String academicYearId = 'y-1',
+  // Nullable : `academic_year_id` l'est en base par construction, et c'est
+  // précisément le cas que le solde imprimé oubliait.
+  String? academicYearId = 'y-1',
 }) => LocalStudentCharge(
   id: 'c-1',
   studentId: 's-1',
@@ -309,6 +311,33 @@ void main() {
     expect(
       result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
       250000,
+    );
+  });
+
+  /// Le pendant du test précédent, et le plus coûteux des deux s'il manque :
+  /// une créance SANS année compte dans toutes les années. C'est la règle que
+  /// suit tout le reste de Facturation — lecture du grand-livre, garde-fou de
+  /// génération, paiements — et l'égalité stricte qui vivait ici imprimait donc
+  /// une dette PLUS PETITE que celle affichée à l'écran, sur un papier remis à
+  /// un parent. L'écart ne se rattrape nulle part : le reste à payer est clampé
+  /// à zéro, donc une créance écartée disparaît purement et simplement.
+  test('compte les créances sans année dans le solde imprimé', () async {
+    await seedPayment();
+    when(() => finance.getCharges('s-1')).thenAnswer(
+      (_) async => Right([
+        _charge(expected: 400000, paid: 150000), // 250 000 sur l'année
+        _charge(expected: 100000, paid: 0, academicYearId: null), // 100 000
+      ]),
+    );
+
+    final result = await repository.buildForPayment(
+      paymentId: 'p-1',
+      labels: _labels,
+    );
+
+    expect(
+      result.getOrElse(() => throw StateError('échec')).remainingBalanceInCents,
+      350000,
     );
   });
 
