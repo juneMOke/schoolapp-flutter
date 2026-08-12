@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
 
@@ -39,10 +40,28 @@ class PrintBluetoothThermalChannel implements ThermalPrinterChannel {
   @override
   Future<bool> isBluetoothEnabled() => PrintBluetoothThermal.bluetoothEnabled;
 
+  /// ⚠️ **Lecture directe du canal de méthode, sans passer par le wrapper du
+  /// paquet** — le seul endroit du dépôt où c'est fait, et pour une raison
+  /// vérifiable dans son source.
+  ///
+  /// Le natif concatène `"$nom#$adresse"` **sans échapper le nom**, et le
+  /// wrapper Dart redécoupe sur le **premier** `#` (`item.split("#")`, puis
+  /// `info[0]`/`info[1]`). Une imprimante nommée « Guichet #1 » ressort donc
+  /// avec le nom « Guichet » et l'adresse « 1 » : on tenterait d'ouvrir une
+  /// liaison RFCOMM vers une adresse qui n'existe pas, et le guichet lirait
+  /// « imprimante injoignable » sur une machine allumée devant lui.
+  ///
+  /// En rendant les lignes brutes, le découpage revient à `ThermalPrinter
+  /// .tryParse`, qui coupe sur le **dernier** `#` — la seule lecture correcte,
+  /// une adresse MAC n'en contenant jamais.
   @override
   Future<List<String>> pairedDevices() async {
-    final devices = await PrintBluetoothThermal.pairedBluetooths;
-    return [for (final device in devices) '${device.name}#${device.macAdress}'];
+    const channel = MethodChannel('groons.web.app/print');
+    final raw = await channel.invokeMethod<List<Object?>>('pairedbluetooths');
+    return [
+      for (final line in raw ?? const <Object?>[])
+        if (line is String) line,
+    ];
   }
 
   @override

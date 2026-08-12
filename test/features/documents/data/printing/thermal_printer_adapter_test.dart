@@ -219,6 +219,11 @@ void main() {
       expect(printers.single.macAddress, 'DC:0D:30:11:22:33');
     });
 
+    /// ⚠️ Ce test ne vaut que parce que le canal rend désormais les lignes
+    /// **brutes**. Tant qu'il recomposait `'<nom>#<mac>'` depuis l'objet du
+    /// paquet — lequel avait déjà découpé sur le PREMIER `#` —, « Guichet #1 »
+    /// arrivait ici en `'Guichet #1'` avec l'adresse « 1 », et ce test restait
+    /// vert en ne prouvant rien du chemin réel.
     test('un nom contenant « # » ne casse pas l\'adresse', () async {
       final channel = _FakeChannel(paired: const ['POS#2#DC:0D:30:11:22:33']);
 
