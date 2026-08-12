@@ -5987,6 +5987,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get ticketDocumentTitle => 'Ticket de perception';
+
+  @override
   String get ticketProvisionalBanner => 'Provisoire';
 
   @override
@@ -6024,7 +6027,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.';
 
   @override
-  String get ticketPrintLabel => 'Imprimer le ticket';
+  String get ticketPrintLabel => 'Imprimer le ticket de perception';
 
   @override
   String get ticketPrintFailed =>

@@ -17,6 +17,7 @@ class _MockFinanceOfflineRepository extends Mock
     implements FinanceOfflineRepository {}
 
 const _labels = TicketLabels(
+  documentTitle: 'Ticket de perception',
   provisionalBanner: 'Provisoire',
   referenceLabel: 'Réf.',
   cashierLabel: 'Caissier :',

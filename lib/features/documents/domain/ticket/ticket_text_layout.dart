@@ -36,6 +36,12 @@ abstract final class TicketTextLayout {
     }
     lines.add(_rule(width));
 
+    // Nature de la pièce, avant tout le reste : quelqu'un qui trie une liasse
+    // de fin de journée doit pouvoir l'identifier sans lire le corps. Elle
+    // précède le bandeau, qui la qualifie — « ticket de perception », et il est
+    // provisoire.
+    lines.addAll(_centered(model.labels.documentTitle.toUpperCase(), width));
+
     // ── Z4 — le bandeau. Placé HAUT et pleine largeur : la dissemblance doit
     // se lire avant le contenu, y compris par quelqu'un qui lit peu le français.
     lines.add(_banner(model.labels.provisionalBanner, width));

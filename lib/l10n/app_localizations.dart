@@ -9954,6 +9954,12 @@ abstract class AppLocalizations {
     String reason,
   );
 
+  /// No description provided for @ticketDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection ticket'**
+  String get ticketDocumentTitle;
+
   /// No description provided for @ticketProvisionalBanner.
   ///
   /// In en, this message translates to:
@@ -10029,7 +10035,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketPrintLabel.
   ///
   /// In en, this message translates to:
-  /// **'Print ticket'**
+  /// **'Print collection ticket'**
   String get ticketPrintLabel;
 
   /// No description provided for @ticketPrintFailed.

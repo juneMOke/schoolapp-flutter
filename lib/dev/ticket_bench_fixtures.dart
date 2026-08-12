@@ -17,6 +17,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 /// et ne se traduit pas.
 abstract final class TicketBenchFixtures {
   static const TicketLabels labels = TicketLabels(
+    documentTitle: 'Ticket de perception',
     provisionalBanner: 'Provisoire',
     referenceLabel: 'Réf.',
     cashierLabel: 'Caissier :',

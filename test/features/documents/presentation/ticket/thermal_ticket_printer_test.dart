@@ -89,6 +89,7 @@ final TicketReceiptModel _model = TicketReceiptModel(
   amountReceivedInCents: 2500000,
   currency: 'CDF',
   labels: const TicketLabels(
+    documentTitle: 'Ticket de perception',
     provisionalBanner: 'Provisoire',
     referenceLabel: 'Réf.',
     cashierLabel: 'Caissier :',

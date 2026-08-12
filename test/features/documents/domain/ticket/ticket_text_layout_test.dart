@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
 const _labels = TicketLabels(
+  documentTitle: 'Ticket de perception',
   provisionalBanner: 'Provisoire',
   referenceLabel: 'Réf.',
   cashierLabel: 'Caissier :',
@@ -117,6 +118,25 @@ void main() {
         _flat(TicketTextLayout.render(_model())),
         contains('Conservez ce ticket'),
       );
+    });
+
+    /// La pièce se nomme, et se nomme **avant** de se qualifier : le titre dit
+    /// ce que c'est, le bandeau dit dans quel état c'est. Quelqu'un qui trie une
+    /// liasse de fin de journée doit l'identifier sans lire le corps.
+    ///
+    /// ⚠️ « Ticket de perception », **jamais « note de perception »** — ce
+    /// dernier nom désigne déjà une pièce annuelle scellée au niveau élève
+    /// (`EditiqueDocumentType.notePerception`).
+    test('se nomme en tête, avant le bandeau', () {
+      final lines = TicketTextLayout.render(_model(), columns: 48);
+      final titleIndex = lines.indexWhere(
+        (l) => l.contains('TICKET DE PERCEPTION'),
+      );
+      final bannerIndex = lines.indexWhere((l) => l.contains('PROVISOIRE'));
+      final schoolIndex = lines.indexWhere((l) => l.contains('LA COLOMBE'));
+
+      expect(titleIndex, greaterThan(schoolIndex));
+      expect(titleIndex, lessThan(bannerIndex));
     });
 
     // Zone Z4 : aucun QR, jamais. Un code vérifiable sur une pièce non scellée

@@ -20,6 +20,14 @@ class TicketAllocationLine extends Equatable {
 /// dépendance Flutter — tout en respectant l'interdiction des chaînes en dur :
 /// c'est l'appelant qui traduit, le gabarit qui arrange.
 class TicketLabels extends Equatable {
+  /// Nature de la pièce, imprimée en tête : « Ticket de perception ».
+  ///
+  /// ⚠️ **Distinct de la « note de perception »** (`EditiqueDocumentType.NP`),
+  /// qui est une pièce **annuelle scellée** au niveau élève. Deux objets
+  /// différents : celui-ci atteste **le montant reçu** lors d'un encaissement,
+  /// trop-perçu ou non — l'imputation exacte appartient au reçu scellé.
+  final String documentTitle;
+
   final String provisionalBanner;
   final String referenceLabel;
   final String cashierLabel;
@@ -46,6 +54,7 @@ class TicketLabels extends Equatable {
   final String keepTicketNotice;
 
   const TicketLabels({
+    required this.documentTitle,
     required this.provisionalBanner,
     required this.referenceLabel,
     required this.cashierLabel,

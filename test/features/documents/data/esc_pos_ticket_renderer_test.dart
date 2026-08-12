@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
 const _labels = TicketLabels(
+  documentTitle: 'Ticket de perception',
   provisionalBanner: 'Provisoire',
   referenceLabel: 'Réf.',
   cashierLabel: 'Caissier :',

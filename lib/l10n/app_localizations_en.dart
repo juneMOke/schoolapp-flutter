@@ -5921,6 +5921,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get ticketDocumentTitle => 'Collection ticket';
+
+  @override
   String get ticketProvisionalBanner => 'Provisional';
 
   @override
@@ -5958,7 +5961,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep this ticket until you receive your final receipt.';
 
   @override
-  String get ticketPrintLabel => 'Print ticket';
+  String get ticketPrintLabel => 'Print collection ticket';
 
   @override
   String get ticketPrintFailed =>
