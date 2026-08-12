@@ -92,6 +92,18 @@ class TicketReceiptModel extends Equatable {
   // ── Z3 : la traçabilité ─────────────────────────────────────────────────────
   /// `PROV-<idAppareil>-<uuid>`, en clair. Jamais de QR (Z4) : un code
   /// vérifiable sur une pièce non scellée serait un mensonge.
+  ///
+  /// ⚠️ **Arbitré le 2026-08-12, ne pas rouvrir sur la seule lecture de
+  /// l'ADR-013.** Celui-ci demande un QR portant l'UUID du `Payment`, comme
+  /// invariant de construction — « référence, jamais un sceau », donc un
+  /// pointeur vers le portail parent, pas une preuve d'authenticité. La
+  /// décision retenue est **D-4 (ADR-012)** : le ticket doit rester
+  /// délibérément dissemblable du scellé. Un parent qui voit un QR conclut que
+  /// le papier est officiel, et la mention « Conservez ce ticket jusqu'à la
+  /// remise de votre reçu définitif » perd alors son sens.
+  ///
+  /// Ajouter un QR ici ne se fait donc qu'après avoir tranché **ce
+  /// conflit-là**, pas en appliquant l'ADR-013 à la lettre.
   final String provisionalReference;
   final DateTime paidAt;
   final String? cashierFullName;
