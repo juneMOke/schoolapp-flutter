@@ -28,6 +28,15 @@ class TicketLabels extends Equatable {
   final String classroomLabel;
   final String amountReceivedLabel;
   final String allocationsLabel;
+
+  /// Part du montant reçu qu'aucune créance n'absorbe — imprimée comme dernière
+  /// ligne de la répartition, et seulement quand elle est strictement positive.
+  ///
+  /// Le ticket **atteste le montant perçu**, il n'arbitre pas son imputation :
+  /// c'est le reçu scellé qui fait apparaître le trop-perçu. Ce libellé n'est là
+  /// que pour empêcher un écart muet entre le reçu et la ventilation.
+  final String advanceLabel;
+
   final String balanceLabel;
 
   /// « sous réserve de synchronisation » — n'accompagne QUE le solde.
@@ -45,6 +54,7 @@ class TicketLabels extends Equatable {
     required this.classroomLabel,
     required this.amountReceivedLabel,
     required this.allocationsLabel,
+    required this.advanceLabel,
     required this.balanceLabel,
     required this.balanceReservation,
     required this.keepTicketNotice,
@@ -135,6 +145,15 @@ class TicketReceiptModel extends Equatable {
     required this.currency,
     required this.labels,
   });
+
+  /// Somme des lignes de répartition. Dérivée, jamais stockée.
+  ///
+  /// ⚠️ **Peut être inférieure à [amountReceivedInCents]**, et ce n'est pas une
+  /// anomalie de composition : un versement qui dépasse le dû est accepté
+  /// (`PaymentAnomalyKind.overpayment`), le reçu définitif est scellé, et le
+  /// ticket remis au parent reste valide. L'écart s'imprime en « avance ».
+  int get allocatedInCents =>
+      allocations.fold<int>(0, (sum, line) => sum + line.amountInCents);
 
   @override
   List<Object?> get props => [

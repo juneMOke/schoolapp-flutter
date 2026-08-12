@@ -3086,6 +3086,7 @@
   "ticketClassroomLabel": "Class:",
   "ticketAmountReceivedLabel": "Amount received",
   "ticketAllocationsLabel": "Breakdown",
+  "ticketAdvanceLabel": "Advance (unallocated)",
   "ticketBalanceLabel": "Balance",
   "ticketBalanceReservation": "subject to synchronisation",
   "ticketKeepNotice": "Keep this ticket until you receive your final receipt.",

@@ -90,6 +90,21 @@ abstract final class TicketTextLayout {
       width,
     );
 
+    // Part du montant reçu qu'aucune créance n'absorbe. Elle EXISTE : un
+    // versement peut dépasser le dû (`isOptimisticallyOverpaid`), le paiement
+    // est alors accepté et le ticket reste valide.
+    //
+    // Elle s'imprime comme une ligne de répartition, et pas à part, pour une
+    // raison de lecture : la ventilation somme alors exactement au montant
+    // reçu. Sans elle, un parent qui additionne trouve un écart que rien
+    // n'explique — le pire des trois cas, puisque le silence se lit comme une
+    // erreur de caisse. Ce qu'elle ne fait PAS, c'est arbitrer le trop-perçu :
+    // l'imputation définitive appartient au reçu scellé.
+    // ⚠️ Uniquement quand une ventilation est IMPRIMÉE : c'est un écart visible
+    // qu'on ferme, pas une comptabilité qu'on tient. Sans bloc « Répartition »,
+    // le lecteur n'a aucune soustraction à faire, et une ligne d'avance seule
+    // ne ferait que dupliquer le montant reçu deux lignes plus haut.
+    final advance = model.amountReceivedInCents - model.allocatedInCents;
     if (model.allocations.isNotEmpty) {
       lines.add('');
       lines.add(TicketCharset.printable(model.labels.allocationsLabel));
@@ -98,6 +113,17 @@ abstract final class TicketTextLayout {
           lines,
           '  ${allocation.label}',
           formatAmount(allocation.amountInCents, model.currency),
+          width,
+        );
+      }
+      // Un écart NÉGATIF (ventilation supérieure au reçu) est une saisie
+      // incohérente, pas une avance : on ne l'habille pas d'un libellé qui la
+      // ferait passer pour normale.
+      if (advance > 0) {
+        _addPair(
+          lines,
+          '  ${model.labels.advanceLabel}',
+          formatAmount(advance, model.currency),
           width,
         );
       }

@@ -3044,6 +3044,7 @@
   "ticketClassroomLabel": "Classe :",
   "ticketAmountReceivedLabel": "Montant reçu",
   "ticketAllocationsLabel": "Répartition",
+  "ticketAdvanceLabel": "Avance (non imputée)",
   "ticketBalanceLabel": "Solde",
   "ticketBalanceReservation": "sous réserve de synchronisation",
   "ticketKeepNotice": "Conservez ce ticket jusqu'à la remise de votre reçu définitif.",

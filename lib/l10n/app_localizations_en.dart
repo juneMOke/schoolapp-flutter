@@ -5945,6 +5945,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAllocationsLabel => 'Breakdown';
 
   @override
+  String get ticketAdvanceLabel => 'Advance (unallocated)';
+
+  @override
   String get ticketBalanceLabel => 'Balance';
 
   @override

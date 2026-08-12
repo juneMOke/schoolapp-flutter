@@ -97,6 +97,7 @@ final TicketReceiptModel _model = TicketReceiptModel(
     classroomLabel: 'Classe :',
     amountReceivedLabel: 'Montant reçu',
     allocationsLabel: 'Répartition',
+    advanceLabel: 'Avance',
     balanceLabel: 'Solde',
     balanceReservation: 'sous réserve',
     keepTicketNotice: 'Conservez ce ticket.',

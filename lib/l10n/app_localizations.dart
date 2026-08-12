@@ -10002,6 +10002,12 @@ abstract class AppLocalizations {
   /// **'Breakdown'**
   String get ticketAllocationsLabel;
 
+  /// No description provided for @ticketAdvanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance (unallocated)'**
+  String get ticketAdvanceLabel;
+
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:

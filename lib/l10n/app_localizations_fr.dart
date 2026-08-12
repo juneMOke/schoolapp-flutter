@@ -6011,6 +6011,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAllocationsLabel => 'Répartition';
 
   @override
+  String get ticketAdvanceLabel => 'Avance (non imputée)';
+
+  @override
   String get ticketBalanceLabel => 'Solde';
 
   @override

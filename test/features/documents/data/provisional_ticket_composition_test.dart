@@ -25,6 +25,7 @@ const _labels = TicketLabels(
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   allocationsLabel: 'Répartition',
+  advanceLabel: 'Avance',
   balanceLabel: 'Solde',
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice: 'Conservez ce ticket.',
