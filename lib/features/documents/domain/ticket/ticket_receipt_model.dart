@@ -71,6 +71,7 @@ class TicketLabels extends Equatable {
 
   @override
   List<Object?> get props => [
+    documentTitle,
     provisionalBanner,
     referenceLabel,
     cashierLabel,
@@ -79,6 +80,7 @@ class TicketLabels extends Equatable {
     classroomLabel,
     amountReceivedLabel,
     allocationsLabel,
+    advanceLabel,
     balanceLabel,
     balanceReservation,
     keepTicketNotice,
