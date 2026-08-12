@@ -292,7 +292,12 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                         FinanceKeyValueRow(
                           icon: Icons.person_outline_rounded,
                           label: l10n.facturationPaymentCollectedByLabel,
-                          value: '',
+                          // Vide pour tout versement venu d'un autre guichet :
+                          // le nom n'est stampé que par le poste qui encaisse,
+                          // et aucun contrat de synchronisation ne le
+                          // transporte. La ligne garde alors son tiret, comme
+                          // les autres champs inconnus de cette modale.
+                          value: intent.cashierFullName ?? '',
                         ),
                         FinanceKeyValueRow(
                           icon: Icons.school_outlined,

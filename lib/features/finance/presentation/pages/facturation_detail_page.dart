@@ -144,6 +144,7 @@ class FacturationDetailPage extends StatelessWidget {
         // Garde du reçu : tant que l'encaissement n'est pas remonté, son uuid
         // est inconnu du serveur et la demande de pièce répondrait 404.
         isPendingSync: payment.isPendingSync,
+        cashierFullName: payment.cashierFullName,
       ),
     );
   }

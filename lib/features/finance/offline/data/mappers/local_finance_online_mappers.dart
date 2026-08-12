@@ -43,6 +43,11 @@ extension LocalPaymentToOnline on LocalPayment {
     paidAt: DateTime.tryParse(paidAt) ?? DateTime.fromMillisecondsSinceEpoch(0),
     // PENDING_SYNC (ou SYNC_ERROR) = pas encore remonté au serveur (FRONT §3).
     isPendingSync: !syncState.isSynced,
+    // Stampés à l'encaissement (v19) et jusqu'ici perdus ici même : le DAO les
+    // ramène, ce mapper les laissait tomber, et l'écran de détail affichait un
+    // « Encaissé par » vide sur une donnée pourtant présente en base.
+    cashierFirstName: cashierFirstName,
+    cashierLastName: cashierLastName,
   );
 }
 
