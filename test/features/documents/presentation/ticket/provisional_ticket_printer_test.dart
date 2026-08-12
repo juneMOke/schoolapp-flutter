@@ -134,7 +134,12 @@ Future<bool> _print(WidgetTester tester) async {
   final model = await buildProvisionalTicket(captured, paymentId: 'pay-1');
   if (model == null) return false;
 
-  return printProvisionalTicket(captured, model: model);
+  // Le repli ne prend plus de `BuildContext` : il doit pouvoir se déployer
+  // après la fermeture de la modale d'encaissement.
+  return printProvisionalTicket(
+    model: model,
+    cutNotice: AppLocalizations.of(captured)!.ticketCutNotice,
+  );
 }
 
 /// Occurrences du motif de pointillés — le marqueur des deux horizontales de

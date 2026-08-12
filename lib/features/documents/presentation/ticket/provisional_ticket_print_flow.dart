@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
@@ -38,29 +40,69 @@ Future<void> printProvisionalTicketWithFallback(
   required ScaffoldMessengerState? messenger,
 }) async {
   final l10n = AppLocalizations.of(context)!;
+  // Tout ce qui vient du contexte est prélevé MAINTENANT. Ce qui suit doit
+  // pouvoir aboutir alors que la modale a disparu : l'envoi thermique peut
+  // rester en vol une trentaine de secondes (15 s de connexion + 20 s
+  // d'écriture), sans indicateur à l'écran, et un caissier qui referme pour
+  // servir le parent suivant ne doit pas perdre le ticket d'un versement déjà
+  // encaissé — il n'existe aucun chemin de réimpression.
+  final cutNotice = l10n.ticketCutNotice;
 
   final model = await buildProvisionalTicket(context, paymentId: paymentId);
-  if (!context.mounted) return;
 
   if (model == null) {
     messenger?.showSnackBar(SnackBar(content: Text(l10n.ticketPrintFailed)));
     return;
   }
 
+  // Même raison qu'au-dessus, un cran plus tôt : sans surface, on ne peut plus
+  // demander l'imprimante, mais on peut encore remettre un papier.
+  if (!context.mounted) {
+    await printProvisionalTicket(model: model, cutNotice: cutNotice);
+    return;
+  }
+
   final outcome = await printThermalTicket(context, model: model);
-  if (!context.mounted) return;
 
   switch (outcome) {
     case ThermalTicketPrinted():
     case ThermalTicketCancelled():
       return;
 
+    // Personne n'a renoncé : la modale s'est fermée pendant la préparation.
+    // Le repli, silencieux — il n'y a aucune cause à annoncer, et plus d'écran
+    // pour la lire.
+    case ThermalTicketNoSurface():
+      await printProvisionalTicket(model: model, cutNotice: cutNotice);
+
     case ThermalTicketFailed(problem: final problem):
       messenger?.showSnackBar(
-        SnackBar(content: Text(_problemMessage(l10n, problem))),
+        SnackBar(
+          content: Text(_problemMessage(l10n, problem)),
+          // Une permission refusée définitivement ne se redemande plus : Android
+          // ne réaffiche jamais la boîte de dialogue, et sans ce raccourci le
+          // caissier n'a plus aucun chemin vers les réglages depuis
+          // l'application. L'action est portée par le message plutôt que
+          // déclenchée d'office : le papier passe d'abord, la maintenance
+          // ensuite — basculer sur les réglages ferait sortir le spouleur
+          // derrière une application passée en arrière-plan.
+          action: problem == ThermalPrinterProblem.permissionDenied
+              ? SnackBarAction(
+                  label: l10n.settings,
+                  onPressed: () =>
+                      getIt<ThermalPrinterPermission>().openSettings(),
+                )
+              : null,
+        ),
       );
 
-      final printed = await printProvisionalTicket(context, model: model);
+      // Le messenger vient du `ScaffoldMessenger` de l'application, jamais
+      // démonté : il a été capturé avant le premier await précisément pour
+      // survivre à la modale. Le spouleur, lui, n'a besoin d'aucun widget.
+      final printed = await printProvisionalTicket(
+        model: model,
+        cutNotice: cutNotice,
+      );
       // Le filet a lâché à son tour : le dire, plutôt que laisser le caissier
       // croire le papier parti. Un appui qui ne produit rien du tout est le
       // seul cas vraiment intenable au guichet.

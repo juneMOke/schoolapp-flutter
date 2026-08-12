@@ -25,6 +25,20 @@ class ThermalTicketCancelled extends ThermalTicketOutcome {
   const ThermalTicketCancelled();
 }
 
+/// Il n'y a plus d'interface pour demander au caissier quelle imprimante.
+///
+/// Distinct de [ThermalTicketCancelled] : personne n'a renoncé, c'est la modale
+/// qui a disparu pendant la préparation. Le geste demandé — imprimer — tient
+/// toujours, et le repli PDF n'a besoin d'aucun widget pour l'honorer. Sans ce
+/// cas, l'appui ne produisait **rien du tout**, sur un versement déjà encaissé
+/// et sans chemin de réimpression.
+///
+/// Aucune cause n'est annoncée : il n'y a rien à reprocher au matériel, et le
+/// caissier n'a plus l'écran sous les yeux.
+class ThermalTicketNoSurface extends ThermalTicketOutcome {
+  const ThermalTicketNoSurface();
+}
+
 /// La thermique n'a pas pu recevoir le ticket.
 ///
 /// [problem] porte la cause exacte, parce que le geste qu'elle appelle diffère :

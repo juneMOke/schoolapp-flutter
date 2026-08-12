@@ -49,7 +49,11 @@ Future<ThermalTicketOutcome> printThermalTicket(
     return const ThermalTicketFailed(ThermalPrinterProblem.noPrinterSelected);
   }
 
-  if (!context.mounted) return const ThermalTicketCancelled();
+  // La modale a disparu pendant la préparation : plus personne à qui demander
+  // l'imprimante. Ce n'est PAS une renonciation — l'appelant doit encore
+  // produire un papier, par le repli.
+  if (!context.mounted) return const ThermalTicketNoSurface();
+
   final chosen = await showThermalPrinterPicker(context, printers: printers);
   if (chosen == null) return const ThermalTicketCancelled();
 
@@ -87,7 +91,15 @@ Future<ThermalPrinterProblem?> _ensurePermitted(ThermalPrinterPort port) async {
   final permission = getIt<ThermalPrinterPermission>();
   final state = await permission.request();
   if (state == ThermalPrinterPermissionState.permanentlyDenied) {
-    await permission.openSettings();
+    // ⚠️ On n'ouvre PAS les réglages ici. Ce fut le cas, et l'enchaînement
+    // était intenable : `openAppSettings` bascule sur une autre activité et
+    // rend la main aussitôt, si bien que le message de cause puis le spouleur
+    // PDF s'ouvraient derrière, dans une application passée en arrière-plan.
+    // Le caissier revenait des réglages sur un ticket qu'il n'avait pas vu
+    // partir, ou pas partir du tout.
+    //
+    // L'appelant décide : il annonce la cause pendant que l'écran est encore
+    // là, puis propose les réglages comme geste terminal.
     return ThermalPrinterProblem.permissionDenied;
   }
   if (state != ThermalPrinterPermissionState.granted) {

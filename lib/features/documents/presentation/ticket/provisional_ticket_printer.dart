@@ -50,12 +50,16 @@ Future<TicketReceiptModel?> buildProvisionalTicket(
   return built.fold((_) => null, (model) => model);
 }
 
-Future<bool> printProvisionalTicket(
-  BuildContext context, {
+/// ⚠️ [cutNotice] est passée, pas lue d'un `BuildContext`. Le repli doit
+/// pouvoir se déployer **après** la fermeture de la modale d'encaissement :
+/// l'envoi thermique peut rester en vol une trentaine de secondes, et un
+/// caissier qui referme entre-temps ne doit pas perdre le ticket d'un versement
+/// déjà encaissé. Aucun élément d'interface n'est requis ici — le spouleur est
+/// une surface système.
+Future<bool> printProvisionalTicket({
   required TicketReceiptModel model,
+  required String cutNotice,
 }) async {
-  final cutNotice = AppLocalizations.of(context)!.ticketCutNotice;
-
   {
     try {
       // Rendu de référence produit AVANT de solliciter le spouleur : une

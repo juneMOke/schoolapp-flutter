@@ -258,15 +258,28 @@ void main() {
       expect(permission.settingsOpened, isZero);
     });
 
-    testWidgets('un refus définitif ouvre les réglages', (tester) async {
+    /// Le refus définitif se **dit**, il ne détourne pas.
+    ///
+    /// Ce geste a été retiré d'ici : `openAppSettings` bascule sur une autre
+    /// activité et rend la main aussitôt, si bien que le message de cause puis
+    /// le spouleur PDF s'ouvraient derrière une application déjà passée en
+    /// arrière-plan. Le caissier revenait des réglages sur un ticket qu'il
+    /// n'avait pas vu partir. Les réglages sont désormais une **action portée
+    /// par le message** (cf. provisional_ticket_print_flow), donc un choix.
+    testWidgets('un refus définitif ne détourne pas vers les réglages', (
+      tester,
+    ) async {
       port.readyProblem = ThermalPrinterProblem.permissionDenied;
       permission.state = ThermalPrinterPermissionState.permanentlyDenied;
 
-      await print(tester);
+      final outcome = await print(tester);
 
-      // Android ne réaffiche plus la boîte de dialogue : redemander ne
-      // produirait plus rien du tout, les réglages sont le seul recours.
-      expect(permission.settingsOpened, 1);
+      expect(permission.settingsOpened, isZero);
+      // La cause remonte quand même : c'est elle qui portera l'action.
+      expect(
+        (outcome as ThermalTicketFailed).problem,
+        ThermalPrinterProblem.permissionDenied,
+      );
     });
   });
 }

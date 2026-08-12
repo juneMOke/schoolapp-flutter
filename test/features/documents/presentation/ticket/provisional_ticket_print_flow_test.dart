@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
@@ -57,36 +58,111 @@ void main() {
 
   tearDown(getIt.reset);
 
-  /// Lance le flux, et joue le choix de l'imprimante s'il est proposé.
-  Future<void> run(WidgetTester tester, {String? choose = 'NT-8003DD'}) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('fr'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => printProvisionalTicketWithFallback(
-                context,
-                paymentId: 'pay-1',
-                messenger: ScaffoldMessenger.maybeOf(context),
+  /// Le même `MaterialApp` dans les deux états, pour que Flutter réutilise son
+  /// élément — et donc son `ScaffoldMessenger`. C'est tout l'enjeu du cas
+  /// « modale fermée » : le widget appelant meurt, le messenger de
+  /// l'application survit, exactement comme sur la tablette.
+  Widget harness({required bool withTrigger}) => MaterialApp(
+    locale: const Locale('fr'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(
+      body: withTrigger
+          ? Builder(
+              builder: (context) => TextButton(
+                onPressed: () => printProvisionalTicketWithFallback(
+                  context,
+                  paymentId: 'pay-1',
+                  messenger: ScaffoldMessenger.maybeOf(context),
+                ),
+                child: const Text('go'),
               ),
-              child: const Text('go'),
-            ),
-          ),
-        ),
-      ),
-    );
+            )
+          : const SizedBox.shrink(),
+    ),
+  );
+
+  /// Lance le flux, et joue le choix de l'imprimante s'il est proposé.
+  ///
+  /// [dismissAfterChoice] démonte le widget appelant **pendant** l'envoi, une
+  /// fois l'imprimante choisie : c'est le caissier qui referme pour servir le
+  /// parent suivant.
+  Future<void> run(
+    WidgetTester tester, {
+    String? choose = 'NT-8003DD',
+    bool dismissAfterChoice = false,
+  }) async {
+    if (dismissAfterChoice) port.gate = Completer<void>();
+
+    await tester.pumpWidget(harness(withTrigger: true));
 
     await tester.tap(find.text('go'));
     await tester.pumpAndSettle();
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
       await tester.tap(find.text(choose ?? 'Annuler'));
+      if (dismissAfterChoice) {
+        await tester.pump(); // le picker se referme, l'envoi part
+      } else {
+        await tester.pumpAndSettle();
+      }
+    }
+
+    if (dismissAfterChoice) {
+      await tester.pumpWidget(harness(withTrigger: false));
+      port.gate!.complete();
       await tester.pumpAndSettle();
     }
   }
+
+  /// Le trou que la revue a trouvé : l'envoi peut rester en vol une trentaine
+  /// de secondes (15 s de connexion + 20 s d'écriture) sans rien montrer à
+  /// l'écran, et le caissier ferme la modale pour servir le parent suivant.
+  /// Tant que l'issue dépendait du widget, l'appui ne produisait alors **rien
+  /// du tout** — ni cause annoncée, ni repli — sur un versement déjà encaissé
+  /// et sans chemin de réimpression.
+  testWidgets('la modale fermée pendant l\'envoi ne perd pas le ticket', (
+    tester,
+  ) async {
+    port.sendProblem = ThermalPrinterProblem.unreachable;
+    await run(tester, dismissAfterChoice: true);
+
+    // Le messenger est celui de l'application, jamais démonté : il porte
+    // encore la cause.
+    expect(
+      find.text(
+        'Imprimante injoignable, éteinte ou hors de portée — impression PDF à '
+        'la place.',
+      ),
+      findsOne,
+    );
+    // Et surtout : le papier sort quand même.
+    expect(printing.laidOut, isNotEmpty);
+  });
+
+  /// Une permission refusée définitivement ne se redemande plus : Android ne
+  /// réaffiche jamais la boîte de dialogue. Sans ce raccourci, le caissier
+  /// n'aurait plus aucun chemin vers les réglages depuis l'application — mais
+  /// le papier passe d'abord, donc c'est une action offerte, pas une bascule
+  /// imposée qui ferait sortir le spouleur en arrière-plan.
+  testWidgets('permission verrouillée : le message porte les réglages', (
+    tester,
+  ) async {
+    port.readyProblem = ThermalPrinterProblem.permissionDenied;
+    permission.state = ThermalPrinterPermissionState.permanentlyDenied;
+
+    await run(tester);
+
+    expect(find.byType(SnackBarAction), findsOne);
+    expect(permission.settingsOpened, isZero);
+
+    await tester.tap(find.byType(SnackBarAction));
+    await tester.pumpAndSettle();
+    expect(permission.settingsOpened, 1);
+
+    // Le filet s'est déployé sans attendre ce geste.
+    expect(printing.laidOut, isNotEmpty);
+  });
 
   testWidgets('thermique servie : ni message, ni spouleur', (tester) async {
     await run(tester);
@@ -176,6 +252,12 @@ class _FakePort implements ThermalPrinterPort {
   List<ThermalPrinter> printers = const [_netum];
   final List<String> sentTo = [];
 
+  /// Retient l'envoi jusqu'à ce que le test l'ouvre. Sans ce verrou, impossible
+  /// de reproduire le vrai cas : sur la tablette, `printBytes` peut rester en
+  /// vol une trentaine de secondes, et c'est PENDANT ce temps que le caissier
+  /// referme la modale.
+  Completer<void>? gate;
+
   @override
   Future<Either<Failure, Unit>> ensureReady() async {
     final problem = readyProblem;
@@ -197,6 +279,7 @@ class _FakePort implements ThermalPrinterPort {
     Uint8List bytes, {
     required String macAddress,
   }) async {
+    if (gate != null) await gate!.future;
     final problem = sendProblem;
     if (problem != null) return Left(ThermalPrinterFailure(problem));
     sentTo.add(macAddress);
@@ -205,15 +288,17 @@ class _FakePort implements ThermalPrinterPort {
 }
 
 class _FakePermission implements ThermalPrinterPermission {
+  ThermalPrinterPermissionState state = ThermalPrinterPermissionState.granted;
+  int settingsOpened = 0;
+
   @override
   Future<bool> isGranted() async => true;
 
   @override
-  Future<ThermalPrinterPermissionState> request() async =>
-      ThermalPrinterPermissionState.granted;
+  Future<ThermalPrinterPermissionState> request() async => state;
 
   @override
-  Future<void> openSettings() async {}
+  Future<void> openSettings() async => settingsOpened++;
 }
 
 class _FakeTicketRepository implements ProvisionalTicketRepository {
