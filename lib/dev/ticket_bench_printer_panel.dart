@@ -81,6 +81,8 @@ class _TicketBenchPrinterPanelState extends State<TicketBenchPrinterPanel> {
       }
 
       return result.fold(_describe, (printers) {
+        // Règle #8 : ce `fold` s'exécute après un à trois `await`.
+        if (!mounted) return 'Panneau fermé.';
         setState(() {
           _printers = printers;
           // Une imprimante retenue qui n'est plus appairée doit être OUBLIÉE :
