@@ -2770,6 +2770,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Collected by';
 
   @override
+  String get facturationPaymentTicketNotPrinted => 'Ticket not printed';
+
+  @override
+  String get facturationPaymentPrintTicketAction => 'Print now';
+
+  @override
   String get facturationPaymentReceiptLabel => 'Receipt no.';
 
   @override

@@ -4760,6 +4760,18 @@ abstract class AppLocalizations {
   /// **'Collected by'**
   String get facturationPaymentCollectedByLabel;
 
+  /// No description provided for @facturationPaymentTicketNotPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket not printed'**
+  String get facturationPaymentTicketNotPrinted;
+
+  /// No description provided for @facturationPaymentPrintTicketAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Print now'**
+  String get facturationPaymentPrintTicketAction;
+
   /// No description provided for @facturationPaymentReceiptLabel.
   ///
   /// In en, this message translates to:

@@ -13,7 +13,9 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_allocations_section.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ticket_print_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que « Télécharger le reçu » fait réellement quand on appuie dessus.
@@ -95,47 +97,65 @@ Future<void> showFacturationPaymentDetailDialog(
         BlocProvider<PaymentReceiptCubit>(
           create: (_) => getIt<PaymentReceiptCubit>()..load(intent.paymentId),
         ),
+        // Le versement attend-il encore son premier papier ? Lu une fois à
+        // l'ouverture ; la ligne se retire d'elle-même dès qu'un tirage sort.
+        BlocProvider<TicketPrintStatusCubit>(
+          create: (_) =>
+              getIt<TicketPrintStatusCubit>()..load(intent.paymentId),
+        ),
       ],
       child: BlocBuilder<PaymentReceiptCubit, PaymentReceiptState>(
-        builder: (_, receipt) => FacturationPaymentDetailDialogView(
-          intent: intent,
-          allocations: FacturationPaymentAllocationsSection(
-            paymentId: intent.paymentId,
-            currency: intent.currency,
+        builder: (_, receipt) => BlocBuilder<TicketPrintStatusCubit, TicketPrintStatusState>(
+          builder: (_, ticket) => FacturationPaymentDetailDialogView(
+            intent: intent,
+            allocations: FacturationPaymentAllocationsSection(
+              paymentId: intent.paymentId,
+              currency: intent.currency,
+            ),
+            receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
+            receiptPending:
+                intent.isPendingSync || receipt.hasProvisionalNumber,
+            // Le retrait se dit toujours, quel que soit le geste offert : c'est
+            // ce que le guichet doit pouvoir expliquer à la famille qui présente
+            // le papier.
+            cancelledReceipt: receipt.cached?.isCancelled ?? false
+                ? receipt.cached
+                : null,
+            // Le geste est décidé par `facturationReceiptGesture`, qui porte la
+            // règle et son pourquoi. La copie annulée est bien servie (arbitrage
+            // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
+            // d'une famille le papier qu'elle présente pour lui expliquer
+            // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
+            // la pièce ne trompe personne.
+            onDownloadReceipt: switch (facturationReceiptGesture(
+              cached: receipt.cached,
+              isPendingSync: intent.isPendingSync,
+            )) {
+              FacturationReceiptGesture.restitute =>
+                () => showEditiqueRestitutionDialog(
+                  context,
+                  type: EditiqueDocumentType.paymentReceipt,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.editiqueViewerReceiptTitle,
+                  documentId: receipt.cached?.documentId,
+                  documentNumber: receipt.cached?.documentNumber,
+                ),
+              FacturationReceiptGesture.emit =>
+                () => showEditiquePaymentReceiptDialog(
+                  context,
+                  paymentId: intent.paymentId,
+                ),
+              FacturationReceiptGesture.none => null,
+            },
+            // Trois conditions, et la troisième est jugée ICI parce que seule la
+            // modale connaît l'annulation : un reçu retiré ne doit jamais
+            // ressortir sous forme de ticket.
+            ticketPrint:
+                ticket.awaitsPrint && !(receipt.cached?.isCancelled ?? false)
+                ? FacturationTicketPrintRow(paymentId: intent.paymentId)
+                : null,
           ),
-          receiptNumber: receipt.hasDefinitiveNumber ? receipt.number : null,
-          receiptPending: intent.isPendingSync || receipt.hasProvisionalNumber,
-          // Le retrait se dit toujours, quel que soit le geste offert : c'est
-          // ce que le guichet doit pouvoir expliquer à la famille qui présente
-          // le papier.
-          cancelledReceipt: receipt.cached?.isCancelled ?? false
-              ? receipt.cached
-              : null,
-          // Le geste est décidé par `facturationReceiptGesture`, qui porte la
-          // règle et son pourquoi. La copie annulée est bien servie (arbitrage
-          // du 2026-08-06) : un guichet doit pouvoir remettre sous les yeux
-          // d'une famille le papier qu'elle présente pour lui expliquer
-          // pourquoi il n'a plus cours. La rature et le motif sont à l'écran,
-          // la pièce ne trompe personne.
-          onDownloadReceipt: switch (facturationReceiptGesture(
-            cached: receipt.cached,
-            isPendingSync: intent.isPendingSync,
-          )) {
-            FacturationReceiptGesture.restitute =>
-              () => showEditiqueRestitutionDialog(
-                context,
-                type: EditiqueDocumentType.paymentReceipt,
-                title: AppLocalizations.of(context)!.editiqueViewerReceiptTitle,
-                documentId: receipt.cached?.documentId,
-                documentNumber: receipt.cached?.documentNumber,
-              ),
-            FacturationReceiptGesture.emit =>
-              () => showEditiquePaymentReceiptDialog(
-                context,
-                paymentId: intent.paymentId,
-              ),
-            FacturationReceiptGesture.none => null,
-          },
         ),
       ),
     ),
@@ -160,6 +180,10 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   /// remonté, dont l'identifiant est inconnu du serveur.
   final VoidCallback? onDownloadReceipt;
 
+  /// Ligne de rattrapage d'impression, `null` quand le versement n'attend aucun
+  /// papier : déjà servi, encaissé sur une autre tablette, ou reçu annulé.
+  final Widget? ticketPrint;
+
   /// Reçu que l'établissement a **retiré**, `null` tant qu'il tient.
   ///
   /// Barre son numéro et porte le motif. Un numéro barré seul ne dirait pas
@@ -175,6 +199,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     this.receiptPending = false,
     this.onDownloadReceipt,
     this.cancelledReceipt,
+    this.ticketPrint,
   });
 
   /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
@@ -341,6 +366,11 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
                       ),
                     const SizedBox(height: AppDimensions.spacingM),
                     allocations,
+                    // Rattrapage d'un ticket jamais sorti. Sous la répartition
+                    // parce qu'il porte sur le versement entier, et pas au pied
+                    // — un bouton qui n'apparaît que parfois ne dit pas
+                    // pourquoi il est là.
+                    ?ticketPrint,
                   ],
                 ),
               ),

@@ -1466,6 +1466,8 @@
   "facturationPaymentAmountPaidLabel": "Montant versé",
   "facturationPaymentMethodLabel": "Moyen de paiement",
   "facturationPaymentCollectedByLabel": "Encaissé par",
+  "facturationPaymentTicketNotPrinted": "Ticket non imprimé",
+  "facturationPaymentPrintTicketAction": "Imprimer maintenant",
   "facturationPaymentReceiptLabel": "Reçu n°",
   "facturationPaymentStudentLabel": "Élève",
   "facturationPaymentDownloadReceiptLabel": "Télécharger le reçu",

@@ -35,6 +35,7 @@ Future<void> _pump(
   bool receiptPending = false,
   EditiqueCacheEntry? cancelledReceipt,
   String? cashierFullName,
+  Widget? ticketPrint,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -53,6 +54,7 @@ Future<void> _pump(
             receiptPending: receiptPending,
             onDownloadReceipt: onDownload,
             cancelledReceipt: cancelledReceipt,
+            ticketPrint: ticketPrint,
           ),
         ),
       ),
@@ -113,6 +115,32 @@ void main() {
     expect(find.text('Jean Kabeya'), findsOneWidget);
     // Un seul tiret restant : « Reçu n° ». La ligne de l'encaisseur est servie.
     expect(find.text('—'), findsOneWidget);
+  });
+
+  /// Le rattrapage n'est offert que sur un versement dont AUCUN papier n'est
+  /// sorti. La modale ne juge que la dernière des trois conditions — le reçu
+  /// annulé —, les deux autres étant métier et tenues par le repository. Un
+  /// reçu retiré ne doit jamais ressortir sous forme de ticket.
+  group('rattrapage d\'impression', () {
+    testWidgets('la ligne prend place sous la répartition', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        ticketPrint: const Text('TICKET_SLOT'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TICKET_SLOT'), findsOneWidget);
+    });
+
+    testWidgets('rien du tout quand le versement a déjà son papier', (
+      tester,
+    ) async {
+      await _pump(tester, onDownload: () {});
+      await tester.pumpAndSettle();
+
+      expect(find.text('TICKET_SLOT'), findsNothing);
+    });
   });
 
   testWidgets('« Télécharger le reçu » déclenche le callback', (tester) async {

@@ -100,6 +100,10 @@ class AppDimensions {
   /// nouvel écran plutôt que comme un choix.
   static const ticketPrinterPickerWidth = 360.0;
 
+  /// Icône d'une ligne de détail des modales Facturation — même chasse que les
+  /// lignes clé/valeur au-dessus desquelles elle s'aligne.
+  static const financeRowIconSize = 18.0;
+
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
   static const guardianSearchResultsMinHeight = 200.0;

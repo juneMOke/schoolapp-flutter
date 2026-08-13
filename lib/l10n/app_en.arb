@@ -1506,6 +1506,8 @@
   "facturationPaymentAmountPaidLabel": "Amount paid",
   "facturationPaymentMethodLabel": "Payment method",
   "facturationPaymentCollectedByLabel": "Collected by",
+  "facturationPaymentTicketNotPrinted": "Ticket not printed",
+  "facturationPaymentPrintTicketAction": "Print now",
   "facturationPaymentReceiptLabel": "Receipt no.",
   "facturationPaymentStudentLabel": "Student",
   "facturationPaymentDownloadReceiptLabel": "Download receipt",

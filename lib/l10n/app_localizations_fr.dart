@@ -2788,6 +2788,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Encaissé par';
 
   @override
+  String get facturationPaymentTicketNotPrinted => 'Ticket non imprimé';
+
+  @override
+  String get facturationPaymentPrintTicketAction => 'Imprimer maintenant';
+
+  @override
   String get facturationPaymentReceiptLabel => 'Reçu n°';
 
   @override
