@@ -5,24 +5,27 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-FacturationPaymentDetailIntent _intent({bool isPendingSync = false}) =>
-    FacturationPaymentDetailIntent(
-      paymentId: 'pay-1',
-      studentId: 'stu-1',
-      academicYearId: 'ay-1',
-      firstName: 'Daniel',
-      lastName: 'Kabongo',
-      surname: 'Mwamba',
-      levelName: '6e A',
-      levelGroupName: 'Secondaire',
-      payerFirstName: 'Joseph',
-      payerLastName: 'Kabongo',
-      payerMiddleName: 'Mwamba',
-      amountInCents: 15000,
-      currency: 'USD',
-      paidAt: DateTime(2025, 11, 8),
-      isPendingSync: isPendingSync,
-    );
+FacturationPaymentDetailIntent _intent({
+  bool isPendingSync = false,
+  String? cashierFullName,
+}) => FacturationPaymentDetailIntent(
+  paymentId: 'pay-1',
+  studentId: 'stu-1',
+  academicYearId: 'ay-1',
+  firstName: 'Daniel',
+  lastName: 'Kabongo',
+  surname: 'Mwamba',
+  levelName: '6e A',
+  levelGroupName: 'Secondaire',
+  payerFirstName: 'Joseph',
+  payerLastName: 'Kabongo',
+  payerMiddleName: 'Mwamba',
+  amountInCents: 15000,
+  currency: 'USD',
+  paidAt: DateTime(2025, 11, 8),
+  isPendingSync: isPendingSync,
+  cashierFullName: cashierFullName,
+);
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -31,6 +34,8 @@ Future<void> _pump(
   String? receiptNumber,
   bool receiptPending = false,
   EditiqueCacheEntry? cancelledReceipt,
+  String? cashierFullName,
+  Widget? ticketPrint,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -40,12 +45,16 @@ Future<void> _pump(
       home: Scaffold(
         body: Center(
           child: FacturationPaymentDetailDialogView(
-            intent: _intent(isPendingSync: isPendingSync),
+            intent: _intent(
+              isPendingSync: isPendingSync,
+              cashierFullName: cashierFullName,
+            ),
             allocations: const Text('ALLOC_SLOT'),
             receiptNumber: receiptNumber,
             receiptPending: receiptPending,
             onDownloadReceipt: onDownload,
             cancelledReceipt: cancelledReceipt,
+            ticketPrint: ticketPrint,
           ),
         ),
       ),
@@ -81,7 +90,9 @@ void main() {
     expect(find.text('Élève'), findsOneWidget);
     expect(find.text('Kabongo Mwamba Daniel'), findsOneWidget);
     expect(find.text('Reçu n°'), findsOneWidget);
-    // Valeurs vides (Encaissé par / Reçu n°) → tiret.
+    // Deux tirets : « Encaissé par » et « Reçu n° ». Le premier est un état
+    // NORMAL — le nom n'est stampé que par le poste qui encaisse, et aucun
+    // contrat de synchronisation ne le descend depuis un autre guichet.
     expect(find.text('—'), findsNWidgets(2));
 
     // Emplacement de la répartition par frais.
@@ -91,6 +102,45 @@ void main() {
     expect(find.text('Télécharger le reçu'), findsOneWidget);
     expect(find.text('Fermer'), findsOneWidget);
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+  });
+
+  /// Le nom vient des colonnes stampées à l'encaissement (v19). Il traverse
+  /// désormais toute la chaîne : le DAO les lisait déjà, mais le mapper vers
+  /// l'entité `Payment` les jetait — le guichet voyait un tiret sur une donnée
+  /// présente en base.
+  testWidgets('nomme l encaisseur quand le poste l a stampé', (tester) async {
+    await _pump(tester, onDownload: () {}, cashierFullName: 'Jean Kabeya');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jean Kabeya'), findsOneWidget);
+    // Un seul tiret restant : « Reçu n° ». La ligne de l'encaisseur est servie.
+    expect(find.text('—'), findsOneWidget);
+  });
+
+  /// Le rattrapage n'est offert que sur un versement dont AUCUN papier n'est
+  /// sorti. La modale ne juge que la dernière des trois conditions — le reçu
+  /// annulé —, les deux autres étant métier et tenues par le repository. Un
+  /// reçu retiré ne doit jamais ressortir sous forme de ticket.
+  group('rattrapage d\'impression', () {
+    testWidgets('la ligne prend place sous la répartition', (tester) async {
+      await _pump(
+        tester,
+        onDownload: () {},
+        ticketPrint: const Text('TICKET_SLOT'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TICKET_SLOT'), findsOneWidget);
+    });
+
+    testWidgets('rien du tout quand le versement a déjà son papier', (
+      tester,
+    ) async {
+      await _pump(tester, onDownload: () {});
+      await tester.pumpAndSettle();
+
+      expect(find.text('TICKET_SLOT'), findsNothing);
+    });
   });
 
   testWidgets('« Télécharger le reçu » déclenche le callback', (tester) async {
@@ -149,7 +199,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('ETL-RC-2526-000212'), findsOneWidget);
-      // Seule « Encaissé par » reste vide.
+      // Seule « Encaissé par » reste vide : ce paiement vient d'un autre poste.
       expect(find.text('—'), findsOneWidget);
     });
 

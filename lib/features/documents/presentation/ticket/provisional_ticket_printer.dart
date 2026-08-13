@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -28,20 +29,38 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// Renvoie `false` si rien n'a pu être produit ou remis au spouleur ; l'appelant
 /// est responsable de le dire à l'utilisateur, jamais d'échouer en silence.
-Future<bool> printProvisionalTicket(
+/// Compose le ticket du versement [paymentId], ou `null` s'il est introuvable.
+///
+/// Séparé de l'impression depuis que le ticket a **deux sorties possibles** :
+/// la thermique d'abord, ce PDF en filet. Les deux doivent rendre le **même**
+/// ticket — un repli qui recomposerait le sien pourrait, à la faveur d'une
+/// écriture concurrente, remettre au parent un papier qui ne dit pas ce que la
+/// thermique n'a pas réussi à imprimer.
+Future<TicketReceiptModel?> buildProvisionalTicket(
   BuildContext context, {
   required String paymentId,
 }) async {
-  final l10n = AppLocalizations.of(context)!;
-  final labels = provisionalTicketLabels(l10n);
-  final cutNotice = l10n.ticketCutNotice;
+  final labels = provisionalTicketLabels(AppLocalizations.of(context)!);
 
   final built = await getIt<BuildProvisionalTicketUseCase>()(
     paymentId: paymentId,
     labels: labels,
   );
 
-  return built.fold((_) async => false, (model) async {
+  return built.fold((_) => null, (model) => model);
+}
+
+/// ⚠️ [cutNotice] est passée, pas lue d'un `BuildContext`. Le repli doit
+/// pouvoir se déployer **après** la fermeture de la modale d'encaissement :
+/// l'envoi thermique peut rester en vol une trentaine de secondes, et un
+/// caissier qui referme entre-temps ne doit pas perdre le ticket d'un versement
+/// déjà encaissé. Aucun élément d'interface n'est requis ici — le spouleur est
+/// une surface système.
+Future<bool> printProvisionalTicket({
+  required TicketReceiptModel model,
+  required String cutNotice,
+}) async {
+  {
     try {
       // Rendu de référence produit AVANT de solliciter le spouleur : une
       // composition impossible se dit tout de suite, plutôt qu'après avoir
@@ -78,7 +97,7 @@ Future<bool> printProvisionalTicket(
       // pièce est intacte, seul le geste a échoué.
       return false;
     }
-  });
+  }
 }
 
 /// Proposition initiale de la boîte de dialogue — jamais une contrainte : c'est

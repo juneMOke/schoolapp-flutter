@@ -53,13 +53,7 @@ class StudentChargesOfflineFirstRepository implements StudentChargesRepository {
       final local = await _dao.getChargesByStudent(studentId);
       final scoped = academicYearId == null
           ? local
-          : local
-                .where(
-                  (c) =>
-                      c.academicYearId == null ||
-                      c.academicYearId == academicYearId,
-                )
-                .toList();
+          : local.where((c) => c.belongsToYear(academicYearId)).toList();
       return Right(scoped.map((c) => c.toOnlineEntity()).toList());
     } catch (e) {
       return Left(

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
@@ -14,12 +15,60 @@ import 'package:school_app_flutter/features/finance/offline/domain/repositories/
 class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
   final ProvisionalTicketDao _dao;
   final FinanceOfflineRepository _finance;
+  final DeviceIdentityService _deviceIdentity;
 
   const ProvisionalTicketRepositoryImpl({
     required ProvisionalTicketDao dao,
     required FinanceOfflineRepository finance,
+    required DeviceIdentityService deviceIdentity,
   }) : _dao = dao,
-       _finance = finance;
+       _finance = finance,
+       _deviceIdentity = deviceIdentity;
+
+  @override
+  Future<void> markTicketPrinted(String paymentId) async {
+    try {
+      await _dao.markTicketPrinted(paymentId, DateTime.now());
+    } catch (_) {
+      // Muet par contrat : le papier est déjà dans la main du parent quand
+      // cette écriture a lieu. La faire échouer bruyamment ferait croire à une
+      // impression ratée ; la perdre en silence fera au pire réapparaître le
+      // rattrapage sur un versement déjà servi.
+    }
+  }
+
+  @override
+  Future<bool> hasPrintedTicket(String paymentId) async {
+    try {
+      return await _dao.hasPrintedTicket(paymentId);
+    } catch (_) {
+      // Lecture illisible : on répond « pas imprimé ». Offrir un rattrapage
+      // inutile vaut mieux que masquer le seul chemin vers un papier manquant.
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> awaitsTicketPrint(String paymentId) async {
+    try {
+      final payment = await _dao.findPayment(paymentId);
+      if (payment == null) return false;
+
+      // Encaissé ailleurs : le ticket sortirait sans référence provisoire et
+      // avec les codes de frais en guise de libellés. Un papier illisible
+      // remis à une famille vaut moins que pas de papier du tout.
+      final deviceId = payment.deviceId?.trim();
+      if (deviceId == null || deviceId.isEmpty) return false;
+      if (deviceId != await _deviceIdentity.getOrCreateDeviceId()) return false;
+
+      return !await _dao.hasPrintedTicket(paymentId);
+    } catch (_) {
+      // Rien de lisible : on n'offre pas un geste dont on ne sait pas s'il est
+      // légitime. Le silence vaut mieux qu'un bouton qui ressortirait un ticket
+      // déjà remis.
+      return false;
+    }
+  }
 
   @override
   Future<Either<Failure, TicketReceiptModel>> buildForPayment({
@@ -105,9 +154,12 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
     final charges = await _finance.getCharges(studentId);
 
     return charges.fold<int?>((_) => null, (list) {
+      // `belongsToYear` et pas une égalité stricte : une créance sans année
+      // compte dans TOUTES les années (cf. sa note). L'égalité stricte qui
+      // vivait ici imprimait une dette plus petite que celle de l'écran.
       final matching = list
           .where(
-            (c) => c.currency == currency && c.academicYearId == academicYearId,
+            (c) => c.currency == currency && c.belongsToYear(academicYearId),
           )
           .toList(growable: false);
       if (matching.isEmpty) return null;

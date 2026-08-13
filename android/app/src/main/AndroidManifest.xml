@@ -1,5 +1,64 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!--
+      Impression thermique du ticket provisoire (ADR-012 L2.4).
+
+      Le plugin `print_bluetooth_thermal` déclare CINQ permissions dans son
+      propre manifeste (BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT,
+      BLUETOOTH_SCAN, INTERNET) sans aucune borne de version. Elles arrivent ici
+      par la fusion des manifestes, qu'on le veuille ou non — les trois blocs
+      ci-dessous sont là pour reprendre la main dessus.
+
+      Ce que l'application fait réellement : elle lit les appareils DÉJÀ
+      APPAIRÉS (`bondedDevices`) et ouvre une liaison RFCOMM. Elle ne découvre
+      jamais — mais cela ne suffit PAS à se passer de BLUETOOTH_SCAN, voir le
+      bloc correspondant plus bas.
+    -->
+
+    <!--
+      Legacy : remplacées par BLUETOOTH_CONNECT à partir d'Android 12. Le plugin
+      les déclare sans `maxSdkVersion`, donc sans ce `tools:node="replace"`
+      elles seraient demandées sur TOUTES les versions. `replace` porte sur
+      l'élément entier — plus sûr qu'un `tools:replace` d'attribut, qui suppose
+      que l'attribut existe déjà côté bibliothèque.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30"
+        tools:node="replace" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30"
+        tools:node="replace" />
+
+    <!-- Android 12+ : la seule permission réellement sollicitée à l'exécution. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!--
+      ⚠️ REQUISE, malgré le fait que nous ne découvrons jamais. Elle avait été
+      retirée sur ce raisonnement — l'impression échouait alors sur tablette,
+      avec « Need android.permission.BLUETOOTH_SCAN permission » au niveau
+      natif, et « imprimante injoignable » au guichet.
+
+      La cause est dans le plugin : `connect()` appelle
+      `bluetoothAdapter.cancelDiscovery()` AVANT `socket.connect()`, dans le
+      même `try` (PrintBluetoothThermalPlugin.kt:288). Or `cancelDiscovery()`
+      relève de BLUETOOTH_SCAN, pas de BLUETOOTH_CONNECT. Sans elle, la
+      SecurityException part dans le `catch`, le flux reste `null`, et la
+      liaison n'est jamais ouverte. Annuler une découverte avant de connecter
+      est d'ailleurs la pratique recommandée par Android : ce n'est pas une
+      bizarrerie du plugin, et aucune mise à jour ne la retirera.
+
+      `neverForLocation` préserve ce qui comptait dans la décision d'origine :
+      nous ne dérivons aucune position des résultats de scan, donc
+      ACCESS_FINE_LOCATION reste hors du périmètre, sur toutes les versions.
+      `tools:node="replace"` parce que le plugin déclare la permission SANS ce
+      drapeau — sans remplacement, la fusion garderait sa version nue.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:node="replace" />
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"

@@ -363,7 +363,7 @@ class AppConstants {
   // expliquer pourquoi il n'a plus cours. Deux `ALTER` nullables, sans backfill
   // — une pièce déjà en cache n'a jamais connu son annulation, et le prochain
   // cycle la lui apprendra.
-  static const int offlineDbSchemaVersion = 23;
+  static const int offlineDbSchemaVersion = 25;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).

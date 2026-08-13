@@ -508,6 +508,43 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
+  // ⚠️ v24 est DÉLIBÉRÉMENT SAUTÉE : la branche `feature/auth_permissions`,
+  // livrée et poussée avant celle-ci, la consomme déjà. Deux migrations
+  // différentes sous un même numéro seraient invisibles jusqu'au terrain — une
+  // tablette ayant reçu l'autre v24 verrait sa base marquée à jour et NE
+  // REJOUERAIT JAMAIS celle-ci, jusqu'au premier SQL qui lit la colonne
+  // absente. Un trou de numéro ne coûte rien ; un doublon coûte une base.
+  //
+  // ⚠️ **Celle des deux branches qui fusionne en SECOND doit renuméroter
+  // au-dessus de la version déjà en place**, quelle qu'elle soit. Le saut
+  // ci-dessous ne dispense pas de cette vérification, il la rend seulement
+  // inutile si les permissions fusionnent en premier.
+  if (oldVersion < 25) {
+    // v25 — Rattrapage d'impression du ticket de perception : retenir qu'un
+    // papier est SORTI pour ce versement.
+    //
+    // Rien ne le savait jusqu'ici. La ligne de `generated_documents` d'un
+    // paiement n'est créée qu'au scellement serveur, donc un encaissement
+    // fraîchement écrit n'a aucune trace d'impression — et sans trace, offrir
+    // « imprimer » sur un paiement déjà servi reviendrait à ouvrir la
+    // réimpression, que l'ADR-013 interdit.
+    //
+    // Colonne **strictement locale**, jamais poussée ni descendue : « ce poste
+    // a sorti le papier » est un fait d'appareil, pas une donnée métier. Aucun
+    // backfill possible ni souhaitable — les versements antérieurs ont été
+    // servis ou non, et personne ne peut plus le dire ; ils restent donc
+    // éligibles au rattrapage, ce qui est le pire cas acceptable.
+    // ⚠️ `_hasTable` AVANT `_hasColumn`, comme la v23 : ce migrateur s'exerce
+    // aussi sur des bases partielles — chaque test de palier ne crée que les
+    // tables qui le concernent. Sans cette garde, un `ALTER` sur une table
+    // absente fait échouer l'escalier entier, et donc tous les autres paliers.
+    if (await _hasTable(db, 'payments') &&
+        !await _hasColumn(db, 'payments', 'ticket_printed_at')) {
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN ticket_printed_at INTEGER',
+      );
+    }
+  }
 }
 
 /// Étape v22 : `editique_cache_entries.content_sha256` devient nullable.

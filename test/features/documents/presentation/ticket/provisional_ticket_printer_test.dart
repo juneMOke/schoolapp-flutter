@@ -128,7 +128,18 @@ Future<bool> _print(WidgetTester tester) async {
     ),
   );
 
-  return printProvisionalTicket(captured, paymentId: 'pay-1');
+  // La composition et l'impression sont deux gestes depuis que le ticket a deux
+  // sorties : un modèle introuvable n'atteint jamais le spouleur, et c'est ce
+  // que vérifie le cas « encaissement introuvable » ci-dessus.
+  final model = await buildProvisionalTicket(captured, paymentId: 'pay-1');
+  if (model == null) return false;
+
+  // Le repli ne prend plus de `BuildContext` : il doit pouvoir se déployer
+  // après la fermeture de la modale d'encaissement.
+  return printProvisionalTicket(
+    model: model,
+    cutNotice: AppLocalizations.of(captured)!.ticketCutNotice,
+  );
 }
 
 /// Occurrences du motif de pointillés — le marqueur des deux horizontales de
@@ -175,6 +186,21 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
     required String paymentId,
     required TicketLabels labels,
   }) async => result ?? Right(_model(labels));
+  int marked = 0;
+  final Set<String> printed = {};
+
+  @override
+  Future<void> markTicketPrinted(String paymentId) async {
+    marked++;
+    printed.add(paymentId);
+  }
+
+  @override
+  Future<bool> hasPrintedTicket(String paymentId) async =>
+      printed.contains(paymentId);
+  @override
+  Future<bool> awaitsTicketPrint(String paymentId) async =>
+      !printed.contains(paymentId);
 }
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(

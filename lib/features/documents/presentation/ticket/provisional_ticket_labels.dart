@@ -8,6 +8,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// `BuildContext`, sans données de locale à initialiser — tout en respectant
 /// l'interdiction des chaînes en dur.
 TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
+  documentTitle: l10n.ticketDocumentTitle,
   provisionalBanner: l10n.ticketProvisionalBanner,
   referenceLabel: l10n.ticketReferenceLabel,
   cashierLabel: l10n.ticketCashierLabel,
@@ -16,6 +17,7 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   classroomLabel: l10n.ticketClassroomLabel,
   amountReceivedLabel: l10n.ticketAmountReceivedLabel,
   allocationsLabel: l10n.ticketAllocationsLabel,
+  advanceLabel: l10n.ticketAdvanceLabel,
   balanceLabel: l10n.ticketBalanceLabel,
   balanceReservation: l10n.ticketBalanceReservation,
   keepTicketNotice: l10n.ticketKeepNotice,

@@ -2770,6 +2770,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Collected by';
 
   @override
+  String get facturationPaymentTicketNotPrinted => 'Ticket not printed';
+
+  @override
+  String get facturationPaymentPrintTicketAction => 'Print now';
+
+  @override
   String get facturationPaymentReceiptLabel => 'Receipt no.';
 
   @override
@@ -5921,6 +5927,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get ticketDocumentTitle => 'Collection ticket';
+
+  @override
   String get ticketProvisionalBanner => 'Provisional';
 
   @override
@@ -5945,6 +5954,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAllocationsLabel => 'Breakdown';
 
   @override
+  String get ticketAdvanceLabel => 'Advance (unallocated)';
+
+  @override
   String get ticketBalanceLabel => 'Balance';
 
   @override
@@ -5955,7 +5967,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep this ticket until you receive your final receipt.';
 
   @override
-  String get ticketPrintLabel => 'Print ticket';
+  String get ticketPrintLabel => 'Print collection ticket';
 
   @override
   String get ticketPrintFailed =>
@@ -5963,6 +5975,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketCutNotice => 'Cut along the frame.';
+
+  @override
+  String get ticketPrinterPickerTitle => 'Choose the printer';
+
+  @override
+  String get ticketPrinterUnnamed => 'Unnamed printer';
+
+  @override
+  String get ticketPrinterProblemPermission =>
+      'Nearby devices permission denied — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemBluetoothOff =>
+      'Bluetooth is off — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemNoPrinter =>
+      'No paired printer — printing as PDF instead.';
+
+  @override
+  String get ticketPrinterProblemUnreachable =>
+      'Printer unreachable, off or out of range — printing as PDF instead.';
 
   @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';

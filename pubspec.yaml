@@ -90,6 +90,47 @@ dependencies:
   # par `printing` pour que les deux ne divergent jamais.
   pdf: 3.12.0
 
+  # ── Impression thermique ESC/POS (ADR-012 L2.4) ──────────────────────────
+  # Envoi d'octets bruts à une imprimante Bluetooth Classic (RFCOMM/SPP), pour
+  # le ticket provisoire 80 mm. Retenu contre `flutter_bluetooth_serial` et
+  # `blue_thermal_printer`, tous deux sans mise à jour depuis quatre ans.
+  #
+  # ⚠️ PINÉ SOUS LA DERNIÈRE VERSION : la 1.2.2 exige Flutter >= 3.44.0, le
+  # projet est en 3.41.6. Elle n'apporte de toute façon qu'une migration Swift
+  # d'iOS/macOS — hors périmètre, puisque l'impression thermique est Android
+  # seul. Le code natif Android des deux versions est IDENTIQUE (diffé dans le
+  # cache pub, pas déduit du journal des modifications).
+  #
+  # ⚠️ Ne JAMAIS l'importer hors de `PrintBluetoothThermalChannel` : le paquet
+  # n'expose que des méthodes statiques, donc tout appelant direct devient
+  # intestable. Trois comportements vérifiés dans le source Kotlin de la version
+  # RÉSOLUE (1.2.1) et documentés sur ce fichier :
+  #   1. `writeBytes` préfixe le flux d'un `\n` → un seul envoi par ticket ;
+  #   2. `connectionStatus` ÉCRIT une espace sur le flux pour sonder la liaison ;
+  #   3. sans `BLUETOOTH_CONNECT` sur Android 12+, le gestionnaire natif rend la
+  #      main sans terminer le `Future` → l'appel PEND. D'où l'ordre imposé par
+  #      `ThermalPrinterAdapter` (permission d'abord) et ses délais.
+  #
+  # Son manifeste déclare 5 permissions qui se fusionnent dans le nôtre : voir
+  # `android/app/src/main/AndroidManifest.xml`, qui en borne deux et en requalifie
+  # une. ⚠️ `BLUETOOTH_SCAN` en fait partie et est INDISPENSABLE bien qu'on ne
+  # découvre jamais : `connect()` appelle `cancelDiscovery()`, qui en relève.
+  print_bluetooth_thermal: ^1.2.1
+  # `BLUETOOTH_CONNECT` est une permission RUNTIME depuis Android 12, et le
+  # paquet ci-dessus sait seulement la CONSTATER — son code de sollicitation est
+  # commenté. Sans ce paquet, aucune tablette récente ne pourrait accorder la
+  # permission depuis l'application. C'est la première permission runtime du
+  # dépôt : le manifeste ne déclarait que `INTERNET` avant ce lot.
+  #
+  # ⚠️ PINÉ SOUS LA DERNIÈRE VERSION, et le motif est dans la chaîne de build,
+  # pas dans Dart : `permission_handler_android` 14 déclare AGP 9.0.1 +
+  # Kotlin 2.3.20 dans son `buildscript` et appelle `kotlin { compilerOptions }`
+  # sans jamais appliquer le plugin Kotlin — le script échoue à compiler sur la
+  # chaîne du projet (AGP 8.11.1, Kotlin 2.2.20, Gradle 8.14). Monter AGP à 9
+  # est un chantier à part entière. Constaté par un `flutter build apk` réel,
+  # pas déduit d'un journal des modifications.
+  permission_handler: ^12.0.1
+
 
 dev_dependencies:
   flutter_test:

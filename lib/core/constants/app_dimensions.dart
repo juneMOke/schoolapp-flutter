@@ -94,6 +94,16 @@ class AppDimensions {
   static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
 
+  /// Sélecteur d'imprimante thermique du ticket provisoire. Étroit à dessein :
+  /// il ne porte qu'un nom et une adresse MAC par ligne, et s'ouvre par-dessus
+  /// la modale d'encaissement (440) — le déborder le ferait lire comme un
+  /// nouvel écran plutôt que comme un choix.
+  static const ticketPrinterPickerWidth = 360.0;
+
+  /// Icône d'une ligne de détail des modales Facturation — même chasse que les
+  /// lignes clé/valeur au-dessus desquelles elle s'aligne.
+  static const financeRowIconSize = 18.0;
+
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
   static const guardianSearchResultsMinHeight = 200.0;

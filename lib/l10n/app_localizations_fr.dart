@@ -2788,6 +2788,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentCollectedByLabel => 'Encaissé par';
 
   @override
+  String get facturationPaymentTicketNotPrinted => 'Ticket non imprimé';
+
+  @override
+  String get facturationPaymentPrintTicketAction => 'Imprimer maintenant';
+
+  @override
   String get facturationPaymentReceiptLabel => 'Reçu n°';
 
   @override
@@ -5987,6 +5993,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get ticketDocumentTitle => 'Ticket de perception';
+
+  @override
   String get ticketProvisionalBanner => 'Provisoire';
 
   @override
@@ -6011,6 +6020,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketAllocationsLabel => 'Répartition';
 
   @override
+  String get ticketAdvanceLabel => 'Avance (non imputée)';
+
+  @override
   String get ticketBalanceLabel => 'Solde';
 
   @override
@@ -6021,7 +6033,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Conservez ce ticket jusqu\'à la remise de votre reçu définitif.';
 
   @override
-  String get ticketPrintLabel => 'Imprimer le ticket';
+  String get ticketPrintLabel => 'Imprimer le ticket de perception';
 
   @override
   String get ticketPrintFailed =>
@@ -6029,6 +6041,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ticketCutNotice => 'Découpez le long du cadre.';
+
+  @override
+  String get ticketPrinterPickerTitle => 'Choisir l\'imprimante';
+
+  @override
+  String get ticketPrinterUnnamed => 'Imprimante sans nom';
+
+  @override
+  String get ticketPrinterProblemPermission =>
+      'Permission « Appareils à proximité » refusée — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemBluetoothOff =>
+      'Bluetooth éteint — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemNoPrinter =>
+      'Aucune imprimante appairée — impression PDF à la place.';
+
+  @override
+  String get ticketPrinterProblemUnreachable =>
+      'Imprimante injoignable, éteinte ou hors de portée — impression PDF à la place.';
 
   @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';

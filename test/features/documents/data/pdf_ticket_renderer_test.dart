@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/documents/data/ticket/ticket_block_g
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 
 const _labels = TicketLabels(
+  documentTitle: 'Ticket de perception',
   provisionalBanner: 'Provisoire',
   referenceLabel: 'Réf.',
   cashierLabel: 'Caissier :',
@@ -16,6 +17,7 @@ const _labels = TicketLabels(
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   allocationsLabel: 'Répartition',
+  advanceLabel: 'Avance',
   balanceLabel: 'Solde',
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice: 'Conservez ce ticket.',

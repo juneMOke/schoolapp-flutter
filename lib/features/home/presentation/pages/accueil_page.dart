@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+// Import debug — uniquement atteint sous kDebugMode (cf. bas de la page).
+import 'package:school_app_flutter/dev/dev_tools_entry.dart';
 import 'package:school_app_flutter/features/home/domain/factories/accueil_modules_factory.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_brand_banner.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_entrance.dart';
@@ -44,6 +47,12 @@ class AccueilPage extends StatelessWidget {
           ),
           const SizedBox(height: AccueilUiTokens.modulesToSignatureGap),
           const AccueilSignature(),
+          // Seul endroit de l'application d'où l'on atteint `/dev/components` et
+          // `/dev/ticket-print` : les deux routes existent depuis toujours mais
+          // n'étaient référencées nulle part. `kDebugMode` étant une constante
+          // de compilation, la branche entière disparaît du build release —
+          // même mécanisme que les `GoRoute` correspondantes.
+          if (kDebugMode) const DevToolsEntry(),
         ],
       ),
     );

@@ -27,6 +27,13 @@ class FacturationPaymentDetailIntent extends Equatable {
   /// vient forcément du serveur, donc il est synchronisé.
   final bool isPendingSync;
 
+  /// Qui a encaissé, déjà composé. `null` quand rien n'a été stampé — et c'est
+  /// un état **normal et durable**, pas un chargement : seul le poste qui
+  /// encaisse écrit ce nom, aucun contrat de synchronisation ne le transporte.
+  /// Un versement pris au guichet d'à côté n'en portera donc jamais, tant que
+  /// `PaymentDelta`/`PaymentDto` ne l'auront pas descendu.
+  final String? cashierFullName;
+
   const FacturationPaymentDetailIntent({
     required this.paymentId,
     required this.studentId,
@@ -43,6 +50,7 @@ class FacturationPaymentDetailIntent extends Equatable {
     required this.currency,
     required this.paidAt,
     this.isPendingSync = false,
+    this.cashierFullName,
   });
 
   FacturationPaymentDetailIntent.invalid({
@@ -93,6 +101,9 @@ class FacturationPaymentDetailIntent extends Equatable {
     currency: currency,
     paidAt: paidAt,
     isPendingSync: isPendingSync,
+    // Reconduit : un rechargement de route ne doit pas vider une ligne que
+    // l'écran affichait l'instant d'avant.
+    cashierFullName: cashierFullName,
   );
 
   static FacturationPaymentDetailIntent fromRouteContext({
@@ -133,5 +144,6 @@ class FacturationPaymentDetailIntent extends Equatable {
     currency,
     paidAt,
     isPendingSync,
+    cashierFullName,
   ];
 }

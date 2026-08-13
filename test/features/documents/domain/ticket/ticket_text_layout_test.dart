@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 
 const _labels = TicketLabels(
+  documentTitle: 'Ticket de perception',
   provisionalBanner: 'Provisoire',
   referenceLabel: 'Réf.',
   cashierLabel: 'Caissier :',
@@ -12,6 +13,7 @@ const _labels = TicketLabels(
   classroomLabel: 'Classe :',
   amountReceivedLabel: 'Montant reçu',
   allocationsLabel: 'Répartition',
+  advanceLabel: 'Avance',
   balanceLabel: 'Solde',
   balanceReservation: 'sous réserve de synchronisation',
   keepTicketNotice:
@@ -44,6 +46,26 @@ TicketReceiptModel _model({
 );
 
 String _flat(List<String> lines) => lines.join('\n');
+
+/// Les montants imprimés dans le bloc ouvert par [heading], en centimes.
+///
+/// Relit le papier plutôt que le modèle : c'est la seule façon de vérifier que
+/// ce qu'un parent additionne redonne bien ce qu'il a versé. Le bloc s'arrête à
+/// la première ligne de séparation, celle qui précède le solde.
+List<int> _amountsUnder(List<String> lines, String heading) {
+  final start = lines.indexWhere((line) => line.trim() == heading);
+  if (start < 0) return const [];
+
+  final amounts = <int>[];
+  for (final line in lines.skip(start + 1)) {
+    if (line.startsWith('-') || line.trim().isEmpty) break;
+    final match = RegExp(r'([\d ]+),(\d{2})\s+CDF\s*$').firstMatch(line);
+    if (match == null) continue;
+    final units = int.parse(match.group(1)!.replaceAll(' ', ''));
+    amounts.add(units * 100 + int.parse(match.group(2)!));
+  }
+  return amounts;
+}
 
 void main() {
   group('formatAmount', () {
@@ -96,6 +118,25 @@ void main() {
         _flat(TicketTextLayout.render(_model())),
         contains('Conservez ce ticket'),
       );
+    });
+
+    /// La pièce se nomme, et se nomme **avant** de se qualifier : le titre dit
+    /// ce que c'est, le bandeau dit dans quel état c'est. Quelqu'un qui trie une
+    /// liasse de fin de journée doit l'identifier sans lire le corps.
+    ///
+    /// ⚠️ « Ticket de perception », **jamais « note de perception »** — ce
+    /// dernier nom désigne déjà une pièce annuelle scellée au niveau élève
+    /// (`EditiqueDocumentType.notePerception`).
+    test('se nomme en tête, avant le bandeau', () {
+      final lines = TicketTextLayout.render(_model(), columns: 48);
+      final titleIndex = lines.indexWhere(
+        (l) => l.contains('TICKET DE PERCEPTION'),
+      );
+      final bannerIndex = lines.indexWhere((l) => l.contains('PROVISOIRE'));
+      final schoolIndex = lines.indexWhere((l) => l.contains('LA COLOMBE'));
+
+      expect(titleIndex, greaterThan(schoolIndex));
+      expect(titleIndex, lessThan(bannerIndex));
     });
 
     // Zone Z4 : aucun QR, jamais. Un code vérifiable sur une pièce non scellée
@@ -185,6 +226,78 @@ void main() {
 
       expect(out, isNot(contains('Répartition')));
       expect(out, contains('Montant reçu'));
+    });
+  });
+
+  /// Le ticket **atteste le montant perçu** ; il n'arbitre pas son imputation,
+  /// c'est le reçu scellé qui fait apparaître le trop-perçu. Reste qu'un écart
+  /// entre le reçu et la ventilation imprimée ne peut pas être MUET : un parent
+  /// qui additionne trouverait un trou, et un trou se lit comme une erreur de
+  /// caisse.
+  group('avance — la part reçue que rien n\'absorbe', () {
+    test('un versement supérieur au dû imprime son avance', () {
+      final out = _flat(
+        TicketTextLayout.render(
+          // 150 000 reçus, 120 000 imputés.
+          _model(
+            allocations: const [
+              TicketAllocationLine(label: 'Minerval', amountInCents: 120000),
+            ],
+          ),
+        ),
+      );
+
+      expect(out, contains('Avance'));
+      expect(out, contains('300,00 CDF'));
+    });
+
+    test('la ventilation imprimée somme au montant reçu', () {
+      final lines = TicketTextLayout.render(
+        _model(
+          allocations: const [
+            TicketAllocationLine(label: 'Minerval', amountInCents: 100000),
+            TicketAllocationLine(label: 'Assurance', amountInCents: 20000),
+          ],
+        ),
+      );
+
+      // C'est tout l'intérêt de la poser DANS la répartition plutôt qu'à côté :
+      // additionner ce qui est imprimé redonne exactement le montant reçu.
+      final printed = _amountsUnder(lines, 'Répartition');
+      expect(printed.fold<int>(0, (sum, cents) => sum + cents), 150000);
+    });
+
+    test('rien à dire quand tout est imputé', () {
+      final out = _flat(
+        TicketTextLayout.render(
+          _model(
+            allocations: const [
+              TicketAllocationLine(label: 'Minerval', amountInCents: 150000),
+            ],
+          ),
+        ),
+      );
+
+      expect(out, isNot(contains('Avance')));
+    });
+
+    test('une ventilation SUPÉRIEURE au reçu n\'invente pas d\'avance', () {
+      final out = _flat(
+        TicketTextLayout.render(
+          _model(
+            allocations: const [
+              TicketAllocationLine(label: 'Minerval', amountInCents: 200000),
+            ],
+          ),
+        ),
+      );
+
+      // Saisie incohérente : on ne l'habille pas d'un libellé qui la ferait
+      // passer pour normale, et surtout pas d'une avance négative. Le test vise
+      // les MONTANTS : les lignes de séparation du gabarit sont faites de
+      // tirets, et les compter comme des signes moins ne prouverait rien.
+      expect(out, isNot(contains('Avance')));
+      expect(RegExp(r'-\d[\d ]*,\d{2}').hasMatch(out), isFalse);
     });
   });
 

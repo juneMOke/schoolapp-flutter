@@ -4760,6 +4760,18 @@ abstract class AppLocalizations {
   /// **'Collected by'**
   String get facturationPaymentCollectedByLabel;
 
+  /// No description provided for @facturationPaymentTicketNotPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket not printed'**
+  String get facturationPaymentTicketNotPrinted;
+
+  /// No description provided for @facturationPaymentPrintTicketAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Print now'**
+  String get facturationPaymentPrintTicketAction;
+
   /// No description provided for @facturationPaymentReceiptLabel.
   ///
   /// In en, this message translates to:
@@ -9954,6 +9966,12 @@ abstract class AppLocalizations {
     String reason,
   );
 
+  /// No description provided for @ticketDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection ticket'**
+  String get ticketDocumentTitle;
+
   /// No description provided for @ticketProvisionalBanner.
   ///
   /// In en, this message translates to:
@@ -10002,6 +10020,12 @@ abstract class AppLocalizations {
   /// **'Breakdown'**
   String get ticketAllocationsLabel;
 
+  /// No description provided for @ticketAdvanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance (unallocated)'**
+  String get ticketAdvanceLabel;
+
   /// No description provided for @ticketBalanceLabel.
   ///
   /// In en, this message translates to:
@@ -10023,7 +10047,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketPrintLabel.
   ///
   /// In en, this message translates to:
-  /// **'Print ticket'**
+  /// **'Print collection ticket'**
   String get ticketPrintLabel;
 
   /// No description provided for @ticketPrintFailed.
@@ -10037,6 +10061,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cut along the frame.'**
   String get ticketCutNotice;
+
+  /// No description provided for @ticketPrinterPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the printer'**
+  String get ticketPrinterPickerTitle;
+
+  /// No description provided for @ticketPrinterUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed printer'**
+  String get ticketPrinterUnnamed;
+
+  /// No description provided for @ticketPrinterProblemPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby devices permission denied — printing as PDF instead.'**
+  String get ticketPrinterProblemPermission;
+
+  /// No description provided for @ticketPrinterProblemBluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off — printing as PDF instead.'**
+  String get ticketPrinterProblemBluetoothOff;
+
+  /// No description provided for @ticketPrinterProblemNoPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired printer — printing as PDF instead.'**
+  String get ticketPrinterProblemNoPrinter;
+
+  /// No description provided for @ticketPrinterProblemUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer unreachable, off or out of range — printing as PDF instead.'**
+  String get ticketPrinterProblemUnreachable;
 
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
