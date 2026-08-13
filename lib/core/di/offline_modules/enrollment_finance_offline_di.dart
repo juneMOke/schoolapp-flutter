@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/documents/data/local/provisional_tic
 import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/documents_local_dossier_cubit.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/find_cached_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/list_cached_documents_use_case.dart';
@@ -82,6 +83,7 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pu
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_handler.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payment_receipt_document_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 
@@ -297,7 +299,16 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       // Le solde vient du domaine Facturation, seul détenteur de la sémantique
       // money-grade du reste à payer — jamais recomposé ici.
       finance: getIt<FinanceOfflineRepository>(),
+      // Sert à ne proposer le rattrapage d'impression que sur les versements
+      // encaissés par CETTE tablette.
+      deviceIdentity: getIt<DeviceIdentityService>(),
     ),
+  );
+  getIt.registerFactory<AwaitsTicketPrintUseCase>(
+    () => AwaitsTicketPrintUseCase(getIt<ProvisionalTicketRepository>()),
+  );
+  getIt.registerFactory<MarkTicketPrintedUseCase>(
+    () => MarkTicketPrintedUseCase(getIt<ProvisionalTicketRepository>()),
   );
   getIt.registerFactory<BuildProvisionalTicketUseCase>(
     () => BuildProvisionalTicketUseCase(getIt<ProvisionalTicketRepository>()),
@@ -420,6 +431,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<LedgerFreshnessCubit>(
     () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),
+  );
+  // Factory : la ligne de rattrapage vit et meurt avec la modale de détail.
+  getIt.registerFactory<TicketPrintStatusCubit>(
+    () => TicketPrintStatusCubit(getIt<AwaitsTicketPrintUseCase>()),
   );
   getIt.registerFactory<PaymentReceiptCubit>(
     () => PaymentReceiptCubit(

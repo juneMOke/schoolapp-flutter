@@ -76,6 +76,41 @@ class ProvisionalTicketDao {
         .toList(growable: false);
   }
 
+  /// Retient qu'un papier est SORTI pour ce versement.
+  ///
+  /// Écrit **uniquement** après une impression thermique réussie : c'est le seul
+  /// signal qui prouve qu'un ticket existe physiquement. Le repli PDF, lui, rend
+  /// la main dès que le spouleur a accepté le document — le caissier peut encore
+  /// annuler la boîte système ou choisir « Enregistrer en PDF », et marquer sur
+  /// ce signal-là déclarerait imprimé un ticket qui n'a jamais été tiré.
+  ///
+  /// Purement local : jamais poussé, jamais descendu. « Ce poste a servi le
+  /// papier » est un fait d'appareil.
+  Future<void> markTicketPrinted(String paymentId, DateTime at) async {
+    await _db.update(
+      'payments',
+      {'ticket_printed_at': at.millisecondsSinceEpoch},
+      where: 'id = ?',
+      whereArgs: [paymentId],
+    );
+  }
+
+  /// Vrai si un ticket est déjà sorti de CE poste pour ce versement.
+  ///
+  /// Rend `false` quand la ligne est introuvable : mieux vaut offrir un
+  /// rattrapage inutile que refuser le seul chemin vers un papier qui manque.
+  Future<bool> hasPrintedTicket(String paymentId) async {
+    final rows = await _db.query(
+      'payments',
+      columns: const ['ticket_printed_at'],
+      where: 'id = ?',
+      whereArgs: [paymentId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return false;
+    return rows.first['ticket_printed_at'] != null;
+  }
+
   /// Numéro provisoire du reçu. On lit `provisional_number` **puis** `number` :
   /// la première colonne survit au scellement, la seconde est écrasée par le
   /// numéro définitif.

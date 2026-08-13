@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/documents/domain/printing/thermal_pr
 import 'package:school_app_flutter/features/documents/domain/repositories/provisional_ticket_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -53,6 +54,11 @@ void main() {
       ..registerSingleton<ThermalPrinterPermission>(permission)
       ..registerFactory<BuildProvisionalTicketUseCase>(
         () => BuildProvisionalTicketUseCase(repository),
+      )
+      // La trace passe par son cas d'usage, comme la composition juste
+      // au-dessus : la présentation ne parle jamais à la couche de données.
+      ..registerFactory<MarkTicketPrintedUseCase>(
+        () => MarkTicketPrintedUseCase(repository),
       );
   });
 
@@ -162,6 +168,35 @@ void main() {
 
     // Le filet s'est déployé sans attendre ce geste.
     expect(printing.laidOut, isNotEmpty);
+  });
+
+  /// La trace conditionne le rattrapage d'impression : elle ne doit se poser
+  /// que sur un papier RÉELLEMENT sorti. `Printing.layoutPdf` rend la main dès
+  /// que le spouleur accepte le document — le caissier peut encore annuler la
+  /// boîte système ou choisir « Enregistrer en PDF » —, donc le repli ne prouve
+  /// rien et ne marque rien. Marquer sur lui retirerait le rattrapage d'un
+  /// versement que personne n'a servi.
+  group('trace d\'impression', () {
+    testWidgets('la thermique servie marque le versement', (tester) async {
+      await run(tester);
+
+      expect(repository.printed, contains('pay-1'));
+    });
+
+    testWidgets('un repli PDF ne marque rien', (tester) async {
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      await run(tester);
+
+      expect(printing.laidOut, isNotEmpty);
+      expect(repository.marked, isZero);
+    });
+
+    testWidgets('un caissier qui renonce ne marque rien', (tester) async {
+      await run(tester, choose: null);
+
+      expect(repository.marked, isZero);
+    });
   });
 
   testWidgets('thermique servie : ni message, ni spouleur', (tester) async {
@@ -313,6 +348,22 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
     builds++;
     return result ?? Right(_model(labels));
   }
+
+  int marked = 0;
+  final Set<String> printed = {};
+
+  @override
+  Future<void> markTicketPrinted(String paymentId) async {
+    marked++;
+    printed.add(paymentId);
+  }
+
+  @override
+  Future<bool> hasPrintedTicket(String paymentId) async =>
+      printed.contains(paymentId);
+  @override
+  Future<bool> awaitsTicketPrint(String paymentId) async =>
+      !printed.contains(paymentId);
 }
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(

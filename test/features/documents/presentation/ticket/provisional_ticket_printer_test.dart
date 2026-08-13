@@ -186,6 +186,21 @@ class _FakeTicketRepository implements ProvisionalTicketRepository {
     required String paymentId,
     required TicketLabels labels,
   }) async => result ?? Right(_model(labels));
+  int marked = 0;
+  final Set<String> printed = {};
+
+  @override
+  Future<void> markTicketPrinted(String paymentId) async {
+    marked++;
+    printed.add(paymentId);
+  }
+
+  @override
+  Future<bool> hasPrintedTicket(String paymentId) async =>
+      printed.contains(paymentId);
+  @override
+  Future<bool> awaitsTicketPrint(String paymentId) async =>
+      !printed.contains(paymentId);
 }
 
 TicketReceiptModel _model(TicketLabels labels) => TicketReceiptModel(

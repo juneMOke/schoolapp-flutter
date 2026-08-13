@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
@@ -65,7 +66,13 @@ Future<void> printProvisionalTicketWithFallback(
   final outcome = await printThermalTicket(context, model: model);
 
   switch (outcome) {
+    // Le seul signal qui prouve qu'un papier existe. On le retient ici, et
+    // nulle part ailleurs : c'est lui qui retirera le rattrapage d'impression
+    // du détail de ce versement.
     case ThermalTicketPrinted():
+      await getIt<MarkTicketPrintedUseCase>()(paymentId);
+      return;
+
     case ThermalTicketCancelled():
       return;
 

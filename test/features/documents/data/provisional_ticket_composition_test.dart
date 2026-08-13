@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/provisional_ticket_repository_impl.dart';
@@ -65,7 +66,11 @@ void main() {
     when(
       () => finance.getCharges(any()),
     ).thenAnswer((_) async => const Right(<LocalStudentCharge>[]));
-    repository = ProvisionalTicketRepositoryImpl(dao: dao, finance: finance);
+    repository = ProvisionalTicketRepositoryImpl(
+      dao: dao,
+      finance: finance,
+      deviceIdentity: _FakeDeviceIdentity(),
+    );
   });
 
   tearDown(() async => db.close());
@@ -125,6 +130,46 @@ void main() {
       'created_at': 10,
     });
   }
+
+  /// Le rattrapage d'impression n'est PAS une réimpression : il ne s'offre que
+  /// sur un versement dont aucun papier n'est sorti, encaissé sur CETTE
+  /// tablette. Ces deux conditions vivent dans le repository parce qu'elles
+  /// sont métier — l'écran, lui, n'ajoute que l'annulation du reçu.
+  group('rattrapage d\'impression', () {
+    test('un versement de ce poste jamais imprimé l attend', () async {
+      await seedPayment(deviceId: 'device-1');
+
+      expect(await repository.awaitsTicketPrint('p-1'), isTrue);
+    });
+
+    test('une fois le papier sorti, plus jamais', () async {
+      await seedPayment(deviceId: 'device-1');
+      await repository.markTicketPrinted('p-1');
+
+      // C'est ce qui empêche le rattrapage de devenir une réimpression, que
+      // l'ADR-013 interdit.
+      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+      expect(await repository.hasPrintedTicket('p-1'), isTrue);
+    });
+
+    test('un versement encaissé ailleurs n est pas proposé', () async {
+      await seedPayment(deviceId: 'autre-tablette');
+
+      // Le ticket sortirait sans référence provisoire locale et avec les codes
+      // de frais en guise de libellés : un papier illisible pour la famille.
+      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+    });
+
+    test('un versement sans appareil connu n est pas proposé', () async {
+      await seedPayment(deviceId: null);
+
+      expect(await repository.awaitsTicketPrint('p-1'), isFalse);
+    });
+
+    test('un versement introuvable n est pas proposé', () async {
+      expect(await repository.awaitsTicketPrint('inconnu'), isFalse);
+    });
+  });
 
   test('compose le ticket depuis les seules lignes locales', () async {
     await seedPayment();
@@ -363,4 +408,14 @@ void main() {
       isNull,
     );
   });
+}
+
+/// L'identité d'appareil ne sert qu'au rattrapage d'impression : la composition
+/// du ticket ne la consulte jamais.
+class _FakeDeviceIdentity implements DeviceIdentityService {
+  @override
+  Future<String> getOrCreateDeviceId() async => 'device-1';
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
