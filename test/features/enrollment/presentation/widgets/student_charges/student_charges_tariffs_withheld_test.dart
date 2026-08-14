@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_empty_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_list.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step_body.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charges_step_controller.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -97,6 +98,32 @@ void main() {
 
       expect(find.textContaining('grille tarifaire'), findsNothing);
       expect(find.byType(StudentChargesList), findsOneWidget);
+    });
+  });
+
+  // Le corps et le contrôleur ci-dessus sont exercés isolément : ils ne voient
+  // pas le câblage qui les alimente. Or `feeGridUnavailable` arrive dans un
+  // SECOND emit qui ne change que lui — statut déjà `success`, même instance de
+  // liste, type d'erreur inchangé. Un prédicat qui l'ignore n'affiche jamais le
+  // message et ne recalcule jamais la validité : l'étape se validait à 0 F.
+  group('réactivité de l\'étape à l\'état', () {
+    const settled = StudentChargesState(
+      status: StudentChargesStatus.success,
+      studentCharges: <StudentCharge>[],
+    );
+
+    test('le seul basculement de feeGridUnavailable réveille l\'étape', () {
+      expect(
+        StudentChargesStepState.shouldReactTo(
+          settled,
+          settled.copyWith(feeGridUnavailable: true),
+        ),
+        isTrue,
+      );
+    });
+
+    test('un état identique ne réveille rien', () {
+      expect(StudentChargesStepState.shouldReactTo(settled, settled), isFalse);
     });
   });
 

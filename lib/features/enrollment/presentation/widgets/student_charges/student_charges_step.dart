@@ -70,6 +70,26 @@ class StudentChargesStepState extends State<StudentChargesStep> {
 
   void submitForm() => _onSave();
 
+  /// Les champs de l'état dont l'étape dépend — pour reconstruire le corps
+  /// **et** pour rejouer `_recomputeFormState`. Un seul prédicat pour les deux :
+  /// `listenWhen` et `buildWhen` en portaient chacun une copie, et c'est
+  /// précisément cette duplication qui a laissé passer l'oubli ci-dessous.
+  ///
+  /// `feeGridUnavailable` en fait partie et ne va pas de soi : il arrive dans un
+  /// **second** `emit` qui ne touche à rien d'autre — le statut vaut déjà
+  /// `success`, la liste de créances est la même instance, le type d'erreur est
+  /// inchangé. L'omettre revient à ne jamais l'afficher ET à ne jamais
+  /// recalculer la validité de l'étape : le secrétariat validait alors à 0 F sur
+  /// une grille absente, ce que la garde était censée bloquer.
+  static bool shouldReactTo(
+    StudentChargesState prev,
+    StudentChargesState curr,
+  ) =>
+      prev.status != curr.status ||
+      prev.studentCharges != curr.studentCharges ||
+      prev.errorType != curr.errorType ||
+      prev.feeGridUnavailable != curr.feeGridUnavailable;
+
   @override
   void initState() {
     super.initState();
@@ -283,10 +303,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
     return BlocProvider<StudentChargesBloc>.value(
       value: _studentChargesBloc,
       child: BlocConsumer<StudentChargesBloc, StudentChargesState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status ||
-            prev.studentCharges != curr.studentCharges ||
-            prev.errorType != curr.errorType,
+        listenWhen: shouldReactTo,
         listener: (context, state) {
           final l10n = AppLocalizations.of(context)!;
 
@@ -328,10 +345,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
             _recomputeFormState();
           }
         },
-        buildWhen: (prev, curr) =>
-            prev.status != curr.status ||
-            prev.studentCharges != curr.studentCharges ||
-            prev.errorType != curr.errorType,
+        buildWhen: shouldReactTo,
         builder: (context, state) {
           return StudentChargesStepBody(
             l10n: l10n,
