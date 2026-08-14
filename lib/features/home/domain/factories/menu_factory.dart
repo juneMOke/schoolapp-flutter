@@ -124,6 +124,11 @@ class MenuFactory {
           title: l10n.subMenuBilling,
           route: AppRoutesNames.facturations,
         ),
+        SubMenuItem(
+          id: MenuConstants.feeControlId,
+          title: l10n.subMenuFeeControl,
+          route: AppRoutesNames.feeControl,
+        ),
       ],
     );
   }

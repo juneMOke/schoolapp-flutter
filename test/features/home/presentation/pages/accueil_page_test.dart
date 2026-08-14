@@ -125,10 +125,11 @@ void main() {
     // singulier.
     expect(find.text('4 pages'), findsOneWidget);
     expect(find.text('1 page'), findsOneWidget);
-    // Finances et Cours ont deux pages chacun.
-    expect(find.text('2 pages'), findsNWidgets(2));
-    // Classes et Disciplines en ont trois.
-    expect(find.text('3 pages'), findsNWidgets(2));
+    // Cours a deux pages.
+    expect(find.text('2 pages'), findsOneWidget);
+    // Finances (tableau de bord + Facturations + Contrôle des frais), Classes
+    // et Disciplines en ont trois.
+    expect(find.text('3 pages'), findsNWidgets(3));
   });
 
   testWidgets('l\'en-tête d\'une carte ouvre le tableau de bord du module', (
@@ -184,8 +185,9 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    // 4 + 2 + 3 + 2 + 1 + 3 sous-modules (spec §03).
-    expect(find.byType(AccueilSubModuleRow), findsNWidgets(15));
+    // 4 + 3 + 3 + 2 + 1 + 3 sous-modules (spec §03, Finances passée à 3 avec
+    // le Contrôle des frais).
+    expect(find.byType(AccueilSubModuleRow), findsNWidgets(16));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_re
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -304,6 +305,10 @@ class AppRouter {
               },
             ),
           ],
+        ),
+        GoRoute(
+          path: AppRoutesNames.feeControl,
+          builder: (context, state) => const FeeControlPage(),
         ),
       ],
     ),

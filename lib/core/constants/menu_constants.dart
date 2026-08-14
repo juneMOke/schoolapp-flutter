@@ -27,6 +27,7 @@ class MenuConstants {
 
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
+  static const String feeControlId = 'controle-frais';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';

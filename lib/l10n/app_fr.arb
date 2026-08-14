@@ -179,6 +179,7 @@
   "subMenuReRegistrations": "Réinscriptions",
   "subMenuFirstRegistration": "Première inscription",
   "subMenuBilling": "Facturations",
+  "subMenuFeeControl": "Contrôle des frais",
   "subMenuOrganization": "Composition\ndes classes",
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
@@ -1396,6 +1397,61 @@
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Niveau",
   "facturationSearchLevelPlaceholder": "Choisissez un cycle",
+  "feeControlSearchTitle": "Contrôler un frais",
+  "feeControlSearchHelpBanner": "Choisissez la classe puis le frais à contrôler. Le statut de paiement porte sur ce frais uniquement.",
+  "feeControlSearchClassGroupTitle": "Classe et frais",
+  "feeControlSearchStudentGroupTitle": "Affiner par élève",
+  "feeControlSearchStudentGroupHint": "Facultatif",
+  "feeControlSearchCycleLabel": "Cycle",
+  "feeControlSearchLevelLabel": "Niveau",
+  "feeControlSearchLevelPlaceholder": "Choisissez un cycle",
+  "feeControlClassroomLabel": "Classe",
+  "feeControlClassroomPlaceholder": "Choisissez un niveau",
+  "feeControlClassroomAll": "Toutes les classes du niveau",
+  "feeControlClassroomEmptyForLevel": "Aucune classe n'est composée pour ce niveau : le contrôle porte sur tout le niveau.",
+  "feeControlFeeLabel": "Frais",
+  "feeControlFeePlaceholder": "Choisissez un niveau",
+  "feeControlFeeEmptyForLevel": "Aucun frais n'est défini pour ce niveau.",
+  "feeControlFeeGridMissing": "La grille tarifaire n'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.",
+  "feeControlPaymentStatusLabel": "Statut de paiement",
+  "feeControlPaymentStatusAll": "Tous",
+  "feeControlViewDetailLabel": "Voir la fiche financière",
+  "feeControlSummaryA11yLabel": "Synthèse du contrôle des frais",
+  "feeControlSummaryStudents": "Élèves concernés",
+  "feeControlInvitationTitle": "Aucun contrôle en cours",
+  "feeControlInvitationMessage": "Choisissez une classe puis un frais ci-dessus pour voir qui l'a réglé.",
+  "feeControlEmptyTitle": "Aucun élève trouvé",
+  "feeControlNoResultsDescription": "Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.",
+  "feeControlEmptyRosterMissing": "La liste des élèves de cette classe n'est pas encore descendue sur cet appareil. Synchronisez, puis relancez le contrôle.",
+  "feeControlEmptyNoLocalEnrollment": "Aucun élève de cette classe n'a de dossier d'inscription local sur cette année. Synchronisez les inscriptions, puis relancez le contrôle.",
+  "feeControlNoChargeDescription": "Aucun élève de cette classe ne porte ce frais : il n'a pas encore été généré pour eux, ou il ne s'applique pas à ce niveau.",
+  "feeControlCriteriaFee": "Frais : {label}",
+  "@feeControlCriteriaFee": {
+    "description": "Puce de critère rappelant le frais contrôlé.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaClassroom": "Classe : {label}",
+  "@feeControlCriteriaClassroom": {
+    "description": "Puce de critère rappelant la classe contrôlée.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaStatus": "Statut : {label}",
+  "@feeControlCriteriaStatus": {
+    "description": "Puce de critère rappelant le statut de paiement demandé.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "facturationBalanceDuePill": "{amount} dû",
   "@facturationBalanceDuePill": {
     "description": "Pastille AppBar facturation lorsque le solde est dû.",

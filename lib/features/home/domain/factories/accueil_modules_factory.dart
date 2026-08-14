@@ -137,6 +137,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.facturationsId,
           title: l10n.subMenuBilling,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.feeControlId,
+          title: l10n.subMenuFeeControl,
+        ),
       ],
     );
   }

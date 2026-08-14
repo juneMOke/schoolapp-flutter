@@ -306,6 +306,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuBilling => 'Facturations';
 
   @override
+  String get subMenuFeeControl => 'Contrôle des frais';
+
+  @override
   String get subMenuOrganization => 'Composition\ndes classes';
 
   @override
@@ -2629,6 +2632,114 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get feeControlSearchTitle => 'Contrôler un frais';
+
+  @override
+  String get feeControlSearchHelpBanner =>
+      'Choisissez la classe puis le frais à contrôler. Le statut de paiement porte sur ce frais uniquement.';
+
+  @override
+  String get feeControlSearchClassGroupTitle => 'Classe et frais';
+
+  @override
+  String get feeControlSearchStudentGroupTitle => 'Affiner par élève';
+
+  @override
+  String get feeControlSearchStudentGroupHint => 'Facultatif';
+
+  @override
+  String get feeControlSearchCycleLabel => 'Cycle';
+
+  @override
+  String get feeControlSearchLevelLabel => 'Niveau';
+
+  @override
+  String get feeControlSearchLevelPlaceholder => 'Choisissez un cycle';
+
+  @override
+  String get feeControlClassroomLabel => 'Classe';
+
+  @override
+  String get feeControlClassroomPlaceholder => 'Choisissez un niveau';
+
+  @override
+  String get feeControlClassroomAll => 'Toutes les classes du niveau';
+
+  @override
+  String get feeControlClassroomEmptyForLevel =>
+      'Aucune classe n\'est composée pour ce niveau : le contrôle porte sur tout le niveau.';
+
+  @override
+  String get feeControlFeeLabel => 'Frais';
+
+  @override
+  String get feeControlFeePlaceholder => 'Choisissez un niveau';
+
+  @override
+  String get feeControlFeeEmptyForLevel =>
+      'Aucun frais n\'est défini pour ce niveau.';
+
+  @override
+  String get feeControlFeeGridMissing =>
+      'La grille tarifaire n\'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.';
+
+  @override
+  String get feeControlPaymentStatusLabel => 'Statut de paiement';
+
+  @override
+  String get feeControlPaymentStatusAll => 'Tous';
+
+  @override
+  String get feeControlViewDetailLabel => 'Voir la fiche financière';
+
+  @override
+  String get feeControlSummaryA11yLabel => 'Synthèse du contrôle des frais';
+
+  @override
+  String get feeControlSummaryStudents => 'Élèves concernés';
+
+  @override
+  String get feeControlInvitationTitle => 'Aucun contrôle en cours';
+
+  @override
+  String get feeControlInvitationMessage =>
+      'Choisissez une classe puis un frais ci-dessus pour voir qui l\'a réglé.';
+
+  @override
+  String get feeControlEmptyTitle => 'Aucun élève trouvé';
+
+  @override
+  String get feeControlNoResultsDescription =>
+      'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
+
+  @override
+  String get feeControlEmptyRosterMissing =>
+      'La liste des élèves de cette classe n\'est pas encore descendue sur cet appareil. Synchronisez, puis relancez le contrôle.';
+
+  @override
+  String get feeControlEmptyNoLocalEnrollment =>
+      'Aucun élève de cette classe n\'a de dossier d\'inscription local sur cette année. Synchronisez les inscriptions, puis relancez le contrôle.';
+
+  @override
+  String get feeControlNoChargeDescription =>
+      'Aucun élève de cette classe ne porte ce frais : il n\'a pas encore été généré pour eux, ou il ne s\'applique pas à ce niveau.';
+
+  @override
+  String feeControlCriteriaFee(String label) {
+    return 'Frais : $label';
+  }
+
+  @override
+  String feeControlCriteriaClassroom(String label) {
+    return 'Classe : $label';
+  }
+
+  @override
+  String feeControlCriteriaStatus(String label) {
+    return 'Statut : $label';
+  }
 
   @override
   String facturationBalanceDuePill(String amount) {

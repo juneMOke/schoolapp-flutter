@@ -209,6 +209,10 @@
   "@subMenuBilling": {
     "description": "Billing sub-menu title"
   },
+  "subMenuFeeControl": "Fee control",
+  "@subMenuFeeControl": {
+    "description": "Fee control sub-menu title"
+  },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
     "description": "Organization sub-menu title"
@@ -1436,6 +1440,61 @@
   "facturationSearchCycleLabel": "Cycle",
   "facturationSearchLevelLabel": "Level",
   "facturationSearchLevelPlaceholder": "Pick a cycle first",
+  "feeControlSearchTitle": "Control a fee",
+  "feeControlSearchHelpBanner": "Pick the class, then the fee to control. The payment status applies to that fee only.",
+  "feeControlSearchClassGroupTitle": "Class and fee",
+  "feeControlSearchStudentGroupTitle": "Narrow by student",
+  "feeControlSearchStudentGroupHint": "Optional",
+  "feeControlSearchCycleLabel": "Cycle",
+  "feeControlSearchLevelLabel": "Level",
+  "feeControlSearchLevelPlaceholder": "Pick a cycle first",
+  "feeControlClassroomLabel": "Class",
+  "feeControlClassroomPlaceholder": "Pick a level first",
+  "feeControlClassroomAll": "All classes of the level",
+  "feeControlClassroomEmptyForLevel": "No class has been composed for this level: the control covers the whole level.",
+  "feeControlFeeLabel": "Fee",
+  "feeControlFeePlaceholder": "Pick a level first",
+  "feeControlFeeEmptyForLevel": "No fee is defined for this level.",
+  "feeControlFeeGridMissing": "The fee schedule has not reached this device yet. Sync to control a fee.",
+  "feeControlPaymentStatusLabel": "Payment status",
+  "feeControlPaymentStatusAll": "All",
+  "feeControlViewDetailLabel": "Open the financial record",
+  "feeControlSummaryA11yLabel": "Fee control summary",
+  "feeControlSummaryStudents": "Students concerned",
+  "feeControlInvitationTitle": "No control under way",
+  "feeControlInvitationMessage": "Pick a class then a fee above to see who has settled it.",
+  "feeControlEmptyTitle": "No student found",
+  "feeControlNoResultsDescription": "No student matches these criteria. Adjust the form and search again.",
+  "feeControlEmptyRosterMissing": "This class's student list has not reached this device yet. Sync, then run the control again.",
+  "feeControlEmptyNoLocalEnrollment": "No student in this class has a local enrollment record for this year. Sync enrollments, then run the control again.",
+  "feeControlNoChargeDescription": "No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.",
+  "feeControlCriteriaFee": "Fee: {label}",
+  "@feeControlCriteriaFee": {
+    "description": "Criteria chip recalling the controlled fee.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaClassroom": "Class: {label}",
+  "@feeControlCriteriaClassroom": {
+    "description": "Criteria chip recalling the controlled class.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "feeControlCriteriaStatus": "Status: {label}",
+  "@feeControlCriteriaStatus": {
+    "description": "Criteria chip recalling the requested payment status.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "facturationBalanceDuePill": "{amount} due",
   "@facturationBalanceDuePill": {
     "description": "Billing AppBar pill when the balance is outstanding.",

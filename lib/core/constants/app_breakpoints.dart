@@ -47,6 +47,14 @@ class AppBreakpoints {
   static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
+  // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
+  // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
+  // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
+  //
+  // ⚠️ Plafond dur : `AppPageBackground` borne son contenu à
+  // `AppDimensions.detailContentMaxWidth` (1180) — un seuil au-delà rendrait la
+  // disposition large **inatteignable**, quelle que soit la taille de l'écran.
+  static const double feeControlTableWideMin = financeDetailTwoColMin; // 1024
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.

@@ -638,6 +638,12 @@ abstract class AppLocalizations {
   /// **'Billing'**
   String get subMenuBilling;
 
+  /// Fee control sub-menu title
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control'**
+  String get subMenuFeeControl;
+
   /// Organization sub-menu title
   ///
   /// In en, this message translates to:
@@ -4501,6 +4507,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a cycle first'**
   String get facturationSearchLevelPlaceholder;
+
+  /// No description provided for @feeControlSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control a fee'**
+  String get feeControlSearchTitle;
+
+  /// No description provided for @feeControlSearchHelpBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the class, then the fee to control. The payment status applies to that fee only.'**
+  String get feeControlSearchHelpBanner;
+
+  /// No description provided for @feeControlSearchClassGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class and fee'**
+  String get feeControlSearchClassGroupTitle;
+
+  /// No description provided for @feeControlSearchStudentGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow by student'**
+  String get feeControlSearchStudentGroupTitle;
+
+  /// No description provided for @feeControlSearchStudentGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get feeControlSearchStudentGroupHint;
+
+  /// No description provided for @feeControlSearchCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get feeControlSearchCycleLabel;
+
+  /// No description provided for @feeControlSearchLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get feeControlSearchLevelLabel;
+
+  /// No description provided for @feeControlSearchLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle first'**
+  String get feeControlSearchLevelPlaceholder;
+
+  /// No description provided for @feeControlClassroomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get feeControlClassroomLabel;
+
+  /// No description provided for @feeControlClassroomPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level first'**
+  String get feeControlClassroomPlaceholder;
+
+  /// No description provided for @feeControlClassroomAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All classes of the level'**
+  String get feeControlClassroomAll;
+
+  /// No description provided for @feeControlClassroomEmptyForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No class has been composed for this level: the control covers the whole level.'**
+  String get feeControlClassroomEmptyForLevel;
+
+  /// No description provided for @feeControlFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get feeControlFeeLabel;
+
+  /// No description provided for @feeControlFeePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a level first'**
+  String get feeControlFeePlaceholder;
+
+  /// No description provided for @feeControlFeeEmptyForLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee is defined for this level.'**
+  String get feeControlFeeEmptyForLevel;
+
+  /// No description provided for @feeControlFeeGridMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee schedule has not reached this device yet. Sync to control a fee.'**
+  String get feeControlFeeGridMissing;
+
+  /// No description provided for @feeControlPaymentStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment status'**
+  String get feeControlPaymentStatusLabel;
+
+  /// No description provided for @feeControlPaymentStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get feeControlPaymentStatusAll;
+
+  /// No description provided for @feeControlViewDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the financial record'**
+  String get feeControlViewDetailLabel;
+
+  /// No description provided for @feeControlSummaryA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control summary'**
+  String get feeControlSummaryA11yLabel;
+
+  /// No description provided for @feeControlSummaryStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students concerned'**
+  String get feeControlSummaryStudents;
+
+  /// No description provided for @feeControlInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No control under way'**
+  String get feeControlInvitationTitle;
+
+  /// No description provided for @feeControlInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a class then a fee above to see who has settled it.'**
+  String get feeControlInvitationMessage;
+
+  /// No description provided for @feeControlEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get feeControlEmptyTitle;
+
+  /// No description provided for @feeControlNoResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches these criteria. Adjust the form and search again.'**
+  String get feeControlNoResultsDescription;
+
+  /// No description provided for @feeControlEmptyRosterMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This class\'s student list has not reached this device yet. Sync, then run the control again.'**
+  String get feeControlEmptyRosterMissing;
+
+  /// No description provided for @feeControlEmptyNoLocalEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this class has a local enrollment record for this year. Sync enrollments, then run the control again.'**
+  String get feeControlEmptyNoLocalEnrollment;
+
+  /// No description provided for @feeControlNoChargeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this class carries this fee: it has not been generated for them yet, or it does not apply to this level.'**
+  String get feeControlNoChargeDescription;
+
+  /// Criteria chip recalling the controlled fee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee: {label}'**
+  String feeControlCriteriaFee(String label);
+
+  /// Criteria chip recalling the controlled class.
+  ///
+  /// In en, this message translates to:
+  /// **'Class: {label}'**
+  String feeControlCriteriaClassroom(String label);
+
+  /// Criteria chip recalling the requested payment status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {label}'**
+  String feeControlCriteriaStatus(String label);
 
   /// Billing AppBar pill when the balance is outstanding.
   ///
