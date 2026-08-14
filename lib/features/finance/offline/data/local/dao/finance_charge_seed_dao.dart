@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
@@ -168,15 +169,16 @@ class FinanceChargeSeedDao {
     required String schoolLevelId,
     String? schoolLevelGroupId,
   }) {
-    final levelClause = schoolLevelGroupId == null
-        ? 'school_level_id = ?'
-        : '(school_level_id = ? OR '
-              '(school_level_id IS NULL AND school_level_group_id = ?))';
+    // Périmètre partagé avec la lecture du Contrôle des frais : ce que l'élève
+    // DOIT et ce que l'on peut CONTRÔLER se lisent sur la même clause.
     return txn.query(
       'ref_fee_tariffs',
-      where:
-          '$levelClause AND (academic_year_id = ? OR academic_year_id IS NULL)',
-      whereArgs: [schoolLevelId, ?schoolLevelGroupId, academicYearId],
+      where: FeeTariffScope.whereClause(schoolLevelGroupId: schoolLevelGroupId),
+      whereArgs: FeeTariffScope.whereArgs(
+        schoolLevelId: schoolLevelId,
+        academicYearId: academicYearId,
+        schoolLevelGroupId: schoolLevelGroupId,
+      ),
     );
   }
 

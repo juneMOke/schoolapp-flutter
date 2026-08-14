@@ -62,6 +62,8 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/payment_ou
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_charge_aggregates_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
@@ -380,6 +382,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<HasFeeGridUseCase>(
     () => HasFeeGridUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeTariffsForLevelUseCase>(
+    () => GetFeeTariffsForLevelUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeChargeAggregatesUseCase>(
+    () => GetFeeChargeAggregatesUseCase(getIt<FinanceOfflineRepository>()),
   );
 
   getIt.registerFactory<InitializeChargesUseCase>(

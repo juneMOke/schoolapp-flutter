@@ -2,7 +2,9 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/generated_document_local_model.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/fee_tariff_scope.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
 /// Lectures du grand-livre Facturation (sqflite). Aucune écriture, aucune
@@ -156,4 +158,98 @@ class FinanceLedgerReadDao {
     );
     return rows.map((r) => FeeTariffLocalModel.fromMap(r).toEntity()).toList();
   }
+
+  /// Grille applicable à un niveau **sur une année** (Contrôle des frais).
+  ///
+  /// Contrairement à [getTariffsByLevel], qui ne connaît que le niveau exact,
+  /// cette lecture applique le périmètre complet ([FeeTariffScope]) : tarifs de
+  /// cycle inclus, année-ou-NULL. C'est le MÊME périmètre que celui qui a généré
+  /// les créances — sans quoi l'écran offrirait un frais que personne ne doit.
+  Future<List<LocalFeeTariff>> getTariffsForLevel({
+    required String academicYearId,
+    required String schoolLevelId,
+    String? schoolLevelGroupId,
+  }) async {
+    final rows = await _db.query(
+      'ref_fee_tariffs',
+      where: FeeTariffScope.whereClause(schoolLevelGroupId: schoolLevelGroupId),
+      whereArgs: FeeTariffScope.whereArgs(
+        schoolLevelId: schoolLevelId,
+        academicYearId: academicYearId,
+        schoolLevelGroupId: schoolLevelGroupId,
+      ),
+      orderBy: 'fee_code ASC',
+    );
+    return rows.map((r) => FeeTariffLocalModel.fromMap(r).toEntity()).toList();
+  }
+
+  /// Position des élèves [studentIds] sur le frais [feeCode] (Contrôle des
+  /// frais) : attendu, miroir serveur et **payé en attente composé à la
+  /// lecture** — mêmes règles que [getChargesByStudent], une seule requête.
+  ///
+  /// Le frais est joint par `fee_code` et non par `fee_tariff_id` : ce dernier
+  /// est nullable au pull, alors que `fee_code` est l'invariant « unique dans
+  /// une année » sur lequel repose déjà la génération des créances.
+  ///
+  /// `academic_year_id IS NULL` est inclus : une créance sans année appartient à
+  /// toutes les années (cf. `LocalStudentCharge.belongsToYear`).
+  ///
+  /// Bornée par `student_id IN (…)` — l'index `idx_student_charges_student_fee`
+  /// travaille, et aucun bump de schéma n'est nécessaire. Les identifiants sont
+  /// envoyés par lots pour rester sous la limite de variables liées de SQLite.
+  Future<List<LocalFeeChargeAggregate>> getFeeChargeAggregates({
+    required String academicYearId,
+    required String feeCode,
+    required List<String> studentIds,
+  }) async {
+    if (studentIds.isEmpty) return const <LocalFeeChargeAggregate>[];
+
+    final aggregates = <LocalFeeChargeAggregate>[];
+    for (var start = 0; start < studentIds.length; start += _idBatchSize) {
+      final end = start + _idBatchSize < studentIds.length
+          ? start + _idBatchSize
+          : studentIds.length;
+      final batch = studentIds.sublist(start, end);
+      final placeholders = List.filled(batch.length, '?').join(', ');
+
+      final rows = await _db.rawQuery(
+        '''
+        SELECT sc.student_id                    AS student_id,
+               SUM(sc.expected_amount_in_cents) AS expected,
+               SUM(sc.amount_paid_in_cents)     AS paid_mirror,
+               SUM(COALESCE((
+                 SELECT SUM(pa.amount_in_cents)
+                 FROM payment_allocations pa
+                 JOIN payments p ON p.id = pa.payment_id
+                 WHERE pa.student_charge_id = sc.id
+                   AND p.sync_status <> ?
+               ), 0))                           AS paid_pending,
+               MIN(sc.currency)                 AS currency
+        FROM student_charges sc
+        WHERE sc.fee_code = ?
+          AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
+          AND sc.student_id IN ($placeholders)
+        GROUP BY sc.student_id
+        ''',
+        [SyncState.synced.dbValue, feeCode, academicYearId, ...batch],
+      );
+
+      aggregates.addAll(
+        rows.map(
+          (r) => LocalFeeChargeAggregate(
+            studentId: r['student_id'] as String,
+            expectedInCents: (r['expected'] as int?) ?? 0,
+            paidMirrorInCents: (r['paid_mirror'] as int?) ?? 0,
+            paidPendingInCents: (r['paid_pending'] as int?) ?? 0,
+            currency: (r['currency'] as String?) ?? '',
+          ),
+        ),
+      );
+    }
+    return aggregates;
+  }
+
+  /// Taille des lots d'identifiants. SQLite plafonne les variables liées d'une
+  /// requête (999 par défaut) : on garde de la marge pour les 3 autres.
+  static const int _idBatchSize = 500;
 }

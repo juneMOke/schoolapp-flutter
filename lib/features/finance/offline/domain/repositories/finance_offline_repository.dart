@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_generated_document.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
 /// Draft d'une imputation (le repo générera l'uuid client honoré).
@@ -83,4 +84,20 @@ abstract class FinanceOfflineRepository {
   Future<Either<Failure, LocalGeneratedDocument?>> getPaymentReceipt(
     String paymentId,
   );
+
+  /// Grille applicable à un niveau sur une année (Contrôle des frais) : tarifs
+  /// du niveau **et** tarifs définis au cycle seul.
+  Future<Either<Failure, List<LocalFeeTariff>>> getFeeTariffsForLevel({
+    required String academicYearId,
+    required String schoolLevelId,
+    String? schoolLevelGroupId,
+  });
+
+  /// Position des élèves [studentIds] sur le frais [feeCode] : attendu, payé
+  /// (miroir + encaissements non remontés) et reste composé.
+  Future<Either<Failure, List<LocalFeeChargeAggregate>>> getFeeChargeAggregates({
+    required String academicYearId,
+    required String feeCode,
+    required List<String> studentIds,
+  });
 }

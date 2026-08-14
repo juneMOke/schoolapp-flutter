@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/finan
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 
 /// DAO local du module Facturation (sqflite) — **coordinateur**. Chaque
@@ -126,4 +127,24 @@ class FinanceLocalDao {
 
   Future<List<LocalFeeTariff>> getTariffsByLevel(String schoolLevelId) =>
       _read.getTariffsByLevel(schoolLevelId);
+
+  Future<List<LocalFeeTariff>> getTariffsForLevel({
+    required String academicYearId,
+    required String schoolLevelId,
+    String? schoolLevelGroupId,
+  }) => _read.getTariffsForLevel(
+    academicYearId: academicYearId,
+    schoolLevelId: schoolLevelId,
+    schoolLevelGroupId: schoolLevelGroupId,
+  );
+
+  Future<List<LocalFeeChargeAggregate>> getFeeChargeAggregates({
+    required String academicYearId,
+    required String feeCode,
+    required List<String> studentIds,
+  }) => _read.getFeeChargeAggregates(
+    academicYearId: academicYearId,
+    feeCode: feeCode,
+    studentIds: studentIds,
+  );
 }
