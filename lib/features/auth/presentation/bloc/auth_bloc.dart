@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/auth/domain/entities/auth_session.dart';
 import 'package:school_app_flutter/features/auth/domain/entities/session_mode.dart';
 import 'package:school_app_flutter/features/auth/domain/session_revocation_bus.dart';
 import 'package:school_app_flutter/features/auth/domain/usecases/check_auth_status_use_case.dart';
@@ -123,12 +124,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             status: AuthStatus.authenticated,
             user: session.user,
             sessionMode: eval?.mode ?? SessionMode.normal,
-            permissions: session.permissions,
+            permissions: await _effectivePermissions(session),
           ),
         );
         _startFreshnessTimer();
       },
     );
+  }
+
+  /// Ensemble à afficher pour cette session : celui de la réponse s'il a été
+  /// COMMUNIQUÉ, sinon la copie durable du compte.
+  ///
+  /// Applique à l'écran la règle « absent ≠ vide » que toutes les couches de
+  /// persistance appliquent déjà (`recordOnlineLogin` fusionne avec l'existant,
+  /// `updatePermissions` et `updateTokens` ne font rien sur `null`). Sans elle,
+  /// une réponse qui omet le champ vidait la grille de modules et faisait
+  /// rediriger toutes les routes de la coquille vers l'accueil, jusqu'à ce que
+  /// le tick de fraîcheur relise la base — jusqu'à cinq minutes plus tard.
+  ///
+  /// Un `null` qui SURVIT à ce repli dit « jamais renseigné », et se propage
+  /// tel quel : c'est l'état tri-état attendu (ADR-014), pas un retrait.
+  Future<List<String>?> _effectivePermissions(AuthSession session) async {
+    final communicated = session.permissions;
+    if (communicated != null) return communicated;
+    return _sessionManager.currentPermissions();
   }
 
   /// Plancher d'affichage du spinner de connexion (spec Connexion §07).
@@ -153,7 +172,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           AuthState(
             status: AuthStatus.authenticated,
             user: session.user,
-            permissions: session.permissions,
+            permissions: await _effectivePermissions(session),
           ),
         );
         _startFreshnessTimer();

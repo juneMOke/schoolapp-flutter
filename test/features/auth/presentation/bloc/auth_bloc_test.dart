@@ -67,6 +67,11 @@ void main() {
     ).thenAnswer((_) async => null);
     when(() => mockSessionManager.wipeSession()).thenAnswer((_) async {});
     when(() => mockSessionManager.primeCurrentUser(any())).thenReturn(null);
+    // Par défaut : aucune copie durable — l'état reste « jamais renseigné »
+    // quand la réponse ne communique pas d'ensemble.
+    when(
+      () => mockSessionManager.currentPermissions(),
+    ).thenAnswer((_) async => null);
   });
 
   AuthBloc buildBloc() => AuthBloc(
@@ -379,6 +384,108 @@ void main() {
       expiresIn: 86400,
       permissions: tPermissions,
       user: tUser,
+    );
+
+    // « Absent » n'est pas « vide » — règle que toutes les couches de
+    // persistance appliquent déjà (`recordOnlineLogin` fusionne avec
+    // l'existant, `updatePermissions` et `updateTokens` ne font rien sur
+    // `null`). Sans elle dans le bloc, une réponse qui omet le champ vidait la
+    // grille de modules et faisait rediriger la coquille vers l'accueil,
+    // jusqu'au tick de fraîcheur — cinq minutes plus tard.
+    blocTest<AuthBloc, AuthState>(
+      'login sans ensemble communiqué : la copie durable tient l\'état',
+      setUp: () {
+        when(
+          () => mockLoginUseCase(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => const Right(tSession));
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => tPermissions);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 500),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: tPermissions,
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'cold start sans ensemble en storage : la copie durable tient l\'état',
+      setUp: () {
+        when(
+          () => mockCheckAuthStatusUseCase(),
+        ).thenAnswer((_) async => const Right(tSession));
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => tPermissions);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(const AuthCheckRequested()),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: tPermissions,
+        ),
+      ],
+    );
+
+    // Le pendant : un ensemble VIDE communiqué est un retrait de droits, il
+    // écrase la copie durable au lieu de la laisser reprendre la main.
+    blocTest<AuthBloc, AuthState>(
+      'login avec un ensemble VIDE : le retrait prime sur la copie durable',
+      setUp: () {
+        when(
+          () => mockLoginUseCase(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer(
+          (_) async => const Right(
+            AuthSession(
+              accessToken: 'token123',
+              tokenType: 'Bearer',
+              expiresIn: 86400,
+              permissions: <String>[],
+              user: tUser,
+            ),
+          ),
+        );
+        when(
+          () => mockSessionManager.currentPermissions(),
+        ).thenAnswer((_) async => tPermissions);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ),
+      wait: const Duration(milliseconds: 500),
+      expect: () => const [
+        AuthState(status: AuthStatus.loading),
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: tUser,
+          permissions: <String>[],
+        ),
+      ],
     );
 
     blocTest<AuthBloc, AuthState>(

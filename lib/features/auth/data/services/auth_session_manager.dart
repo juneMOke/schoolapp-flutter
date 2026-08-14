@@ -443,7 +443,13 @@ class AuthSessionManager
     // à `user_version`, il n'y a rien à blanchir ici — les permissions ne sont
     // qu'une projection d'affichage, jamais l'autorité.
     await _authLocalDao.updatePermissions(user.userId, session.permissions);
-    _currentPermissions?.set(session.permissions);
+    // Même règle que la ligne au-dessus, qui ne fait rien sur `null` : un
+    // ensemble ABSENT ne dit rien et ne doit pas reposer l'état « inconnu » en
+    // mémoire, sinon le holder et la copie durable se contredisent — le premier
+    // cesse de filtrer la boucle de synchro pendant que la seconde sait encore.
+    if (session.permissions != null) {
+      _currentPermissions?.set(session.permissions);
+    }
     _observedUserVersion = session.userVersion;
 
     final sessionRow = await _authLocalDao.getSession();

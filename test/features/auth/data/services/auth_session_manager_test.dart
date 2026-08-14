@@ -919,6 +919,73 @@ void main() {
       }();
     });
 
+    // Le pendant EN MÉMOIRE du test ci-dessus. `updatePermissions` ne fait rien
+    // sur `null` ; si le holder, lui, repose l'état « inconnu », les deux se
+    // contredisent : la boucle de synchro cesse de filtrer (repli documenté,
+    // donc sans perte de donnée) pendant que la base sait encore.
+    test(
+      'applyRefresh sans permissions (null) ne vide pas le holder mémoire',
+      () async {
+        final holder = CurrentPermissions();
+        final manager = AuthSessionManager(
+          tokenStorage: tokenStorage,
+          authLocalDao: dao,
+          verifier: const PasswordVerifierService(),
+          currentPermissions: holder,
+          now: () => clock,
+        );
+        await manager.persistOnlineLogin(
+          _session(
+            uid: 'u1',
+            refreshExpiresAt: clock + 1000,
+            permissions: const ['attendance.read'],
+          ),
+          'MotDePasse123',
+        );
+        when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+        await manager.applyRefresh(
+          _session(uid: 'u1', refreshExpiresAt: clock + 555555),
+        );
+
+        expect(holder.permissions, ['attendance.read']);
+        expect((await dao.getUser('u1'))?.permissions, ['attendance.read']);
+      },
+    );
+
+    // Symétrique : un ensemble VIDE communiqué au refresh est un retrait, il
+    // doit atteindre le holder comme il atteint la colonne.
+    test('applyRefresh avec un ensemble VIDE vide aussi le holder', () async {
+      final holder = CurrentPermissions();
+      final manager = AuthSessionManager(
+        tokenStorage: tokenStorage,
+        authLocalDao: dao,
+        verifier: const PasswordVerifierService(),
+        currentPermissions: holder,
+        now: () => clock,
+      );
+      await manager.persistOnlineLogin(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 1000,
+          permissions: const ['attendance.read'],
+        ),
+        'MotDePasse123',
+      );
+      when(() => tokenStorage.updateTokens(any())).thenAnswer((_) async {});
+
+      await manager.applyRefresh(
+        _session(
+          uid: 'u1',
+          refreshExpiresAt: clock + 555555,
+          permissions: const <String>[],
+        ),
+      );
+
+      expect(holder.permissions, isEmpty);
+      expect((await dao.getUser('u1'))?.permissions, isEmpty);
+    });
+
     test(
       'loginOffline après logout rouvre la session AVEC les droits',
       () async {
