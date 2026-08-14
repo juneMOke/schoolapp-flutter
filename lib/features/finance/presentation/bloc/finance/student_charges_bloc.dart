@@ -144,6 +144,12 @@ class StudentChargesBloc
         state.status != StudentChargesStatus.success ||
         state.studentCharges.isNotEmpty ||
         event.academicYearId.trim().isEmpty) {
+      // Le verdict d'une lecture précédente ne survit pas à celle-ci : ce bloc
+      // sert plusieurs élèves et plusieurs niveaux au fil du wizard, et un
+      // `true` conservé ferait porter à l'un l'absence de grille de l'autre.
+      if (state.feeGridUnavailable) {
+        emit(state.copyWith(feeGridUnavailable: false));
+      }
       return;
     }
     final hasGrid = await probe(event.academicYearId);

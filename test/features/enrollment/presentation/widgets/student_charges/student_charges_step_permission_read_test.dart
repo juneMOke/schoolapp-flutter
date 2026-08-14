@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -112,6 +114,60 @@ void main() {
 
     expect(find.byType(StudentChargesEmptyState), findsNothing);
     expect(find.textContaining('grille tarifaire'), findsOneWidget);
+  });
+
+  // La lecture est ponctuelle (`PermissionGate.allows` ne s'abonne à rien) et la
+  // valeur vit hors `build`, puisque la validité de l'étape en dépend. Sans
+  // abonnement explicite au changement de droits, le verdict restait figé à
+  // celui du montage : un refresh en arrière-plan accordait `finance.grid.read`
+  // sans que l'étape s'en aperçoive.
+  testWidgets('un droit accordé en cours de session débloque l\'étape', (
+    tester,
+  ) async {
+    final emissions = StreamController<AuthState>.broadcast();
+    addTearDown(emissions.close);
+
+    var current = const AuthState(
+      status: AuthStatus.authenticated,
+      permissions: ['enrollment.read'],
+    );
+    final authBloc = _MockAuthBloc();
+    when(() => authBloc.state).thenAnswer((_) => current);
+    whenListen(authBloc, emissions.stream, initialState: current);
+    addTearDown(authBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BlocProvider<AuthBloc>.value(
+          value: authBloc,
+          child: const Scaffold(
+            body: StudentChargesStep(
+              studentId: 'stu-1',
+              levelId: 'lvl-1',
+              enrollmentStatus: EnrollmentStatus.inProgress,
+              isEditable: false,
+              showInlineSaveButton: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('grille tarifaire'), findsOneWidget);
+
+    current = const AuthState(
+      status: AuthStatus.authenticated,
+      permissions: ['enrollment.read', 'finance.grid.read'],
+    );
+    emissions.add(current);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('grille tarifaire'), findsNothing);
+    expect(find.byType(StudentChargesEmptyState), findsOneWidget);
   });
 
   // Le piège que ce test existe pour attraper : lire la mauvaise permission.

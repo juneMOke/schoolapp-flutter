@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -113,6 +116,18 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncTariffsWithheld();
+  }
+
+  /// Relit le droit sur la grille et, s'il a changé, recalcule la validité.
+  ///
+  /// Appelé au montage **et** à chaque changement de droits : un refresh en
+  /// arrière-plan peut accorder ou retirer `finance.grid.read` pendant que le
+  /// wizard est ouvert. [PermissionGate.allows] ne s'abonne à rien (lecture
+  /// ponctuelle), et la valeur vit hors `build` puisque la validité de l'étape
+  /// en dépend — sans l'abonnement ci-dessous, le verdict restait celui du
+  /// montage.
+  void _syncTariffsWithheld() {
     final withheld = !PermissionGate.allows(context, const [
       Perm.financeGridRead,
     ]);
@@ -300,6 +315,26 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    return _withPermissionWatch(child: _buildStep(context, l10n));
+  }
+
+  /// Rebranche [_syncTariffsWithheld] sur les changements de droits. Absent de
+  /// l'arbre en test, l'[AuthBloc] rend l'enveloppe transparente — même
+  /// convention que `PermissionGate`.
+  Widget _withPermissionWatch({required Widget child}) {
+    final authBloc = PermissionGate.maybeBlocOf(context);
+    if (authBloc == null) return child;
+
+    return BlocListener<AuthBloc, AuthState>(
+      bloc: authBloc,
+      listenWhen: (prev, curr) =>
+          !listEquals(prev.permissions, curr.permissions),
+      listener: (_, _) => _syncTariffsWithheld(),
+      child: child,
+    );
+  }
+
+  Widget _buildStep(BuildContext context, AppLocalizations l10n) {
     return BlocProvider<StudentChargesBloc>.value(
       value: _studentChargesBloc,
       child: BlocConsumer<StudentChargesBloc, StudentChargesState>(

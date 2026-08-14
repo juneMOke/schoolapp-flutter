@@ -442,6 +442,23 @@ void main() {
       ],
     );
 
+    // Le bloc sert plusieurs élèves et plusieurs niveaux au fil du wizard. Un
+    // verdict « grille absente » posé pour l'un ne doit pas survivre à la
+    // lecture du suivant : il bloquerait une étape qui, elle, a bien ses frais.
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'un verdict « grille absente » ne survit pas à la lecture suivante',
+      setUp: () {
+        stubInitialize(const Right(<LocalStudentCharge>[]));
+        when(
+          () => mockGetStudentChargesUseCase(tParams),
+        ).thenAnswer((_) async => const Right([tCharge]));
+      },
+      build: buildDraftBloc,
+      seed: () => const StudentChargesState(feeGridUnavailable: true),
+      act: (bloc) => bloc.add(tDraftEvent),
+      verify: (bloc) => expect(bloc.state.feeGridUnavailable, isFalse),
+    );
+
     blocTest<StudentChargesBloc, StudentChargesState>(
       'usecase FF5 absent (bloc hors wizard) → dégrade en simple lecture',
       setUp: () {

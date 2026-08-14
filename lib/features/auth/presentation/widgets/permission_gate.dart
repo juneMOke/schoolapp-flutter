@@ -97,6 +97,16 @@ class PermissionGate extends StatelessWidget {
     );
   }
 
+  /// Le [AuthBloc] de l'arbre, ou `null` s'il n'y en a pas — même convention de
+  /// transparence que [allows] et que le rendu.
+  ///
+  /// Pour les états qui doivent **suivre** un changement de droits sans être
+  /// rendus : une validité d'étape se recalcule hors `build`, elle ne se
+  /// reconstruit pas, donc [allows] seul la fige à sa première lecture.
+  /// L'appelant s'abonne lui-même (`BlocListener`) ; la tolérance à l'absence
+  /// reste ici, en un seul endroit.
+  static AuthBloc? maybeBlocOf(BuildContext context) => _maybeAuthBloc(context);
+
   static bool _sameSet(List<String>? a, List<String>? b) {
     if (identical(a, b)) return true;
     if (a == null || b == null) return false;
