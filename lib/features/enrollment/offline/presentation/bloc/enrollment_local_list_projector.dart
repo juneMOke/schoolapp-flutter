@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/helpers/client_side_paginator.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
@@ -134,30 +135,23 @@ class EnrollmentLocalListProjector {
   }
 
   /// Découpe la page [page] (bornée) d'une liste déjà filtrée/projetée.
+  ///
+  /// Le bornage lui-même vit dans [ClientSidePaginator] : le Contrôle des frais
+  /// pagine ses propres lignes de la même façon, et les deux pièges (liste vide
+  /// → `clamp` invalide, taille nulle → division par zéro) ne doivent être
+  /// résolus qu'une fois.
   static EnrollmentLocalPage paginate(
     List<EnrollmentSummary> all, {
     required int page,
     required int size,
   }) {
-    final effectiveSize = size > 0 ? size : 1;
-    final totalElements = all.length;
-    final totalPages = totalElements == 0
-        ? 0
-        : (totalElements + effectiveSize - 1) ~/ effectiveSize;
-    final clampedPage = totalPages == 0 ? 0 : page.clamp(0, totalPages - 1);
-    final start = clampedPage * effectiveSize;
-    final end = start + effectiveSize < totalElements
-        ? start + effectiveSize
-        : totalElements;
-    final content = start >= totalElements
-        ? const <EnrollmentSummary>[]
-        : all.sublist(start, end);
+    final result = ClientSidePaginator.paginate(all, page: page, size: size);
     return EnrollmentLocalPage(
-      content: content,
-      page: clampedPage,
-      size: effectiveSize,
-      totalElements: totalElements,
-      totalPages: totalPages,
+      content: result.content,
+      page: result.page,
+      size: result.size,
+      totalElements: result.totalElements,
+      totalPages: result.totalPages,
     );
   }
 }

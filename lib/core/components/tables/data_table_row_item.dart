@@ -138,7 +138,7 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                       textAlign: cell.textAlign,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _resolveCellStyle(cell.variant),
+                      style: _resolveCellStyle(cell.variant, cell.color),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -146,7 +146,10 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                       textAlign: cell.textAlign,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _resolveCellStyle(cell.secondaryVariant),
+                      style: _resolveCellStyle(
+                        cell.secondaryVariant,
+                        cell.secondaryColor,
+                      ),
                     ),
                   ],
                 )
@@ -154,7 +157,7 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                   cell.text.isNotEmpty ? cell.text : '—',
                   textAlign: cell.textAlign,
                   overflow: TextOverflow.ellipsis,
-                  style: _resolveCellStyle(cell.variant),
+                  style: _resolveCellStyle(cell.variant, cell.color),
                 ),
         ),
       );
@@ -167,11 +170,12 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
     return widgets;
   }
 
-  TextStyle _resolveCellStyle(DataTableCellTextVariant variant) {
-    return switch (variant) {
+  TextStyle _resolveCellStyle(DataTableCellTextVariant variant, [Color? color]) {
+    final style = switch (variant) {
       DataTableCellTextVariant.strong => EteeloDataTableTheme.cellStrongStyle,
       DataTableCellTextVariant.mono => EteeloDataTableTheme.cellMonoStyle,
       DataTableCellTextVariant.regular => EteeloDataTableTheme.cellRegularStyle,
     };
+    return color == null ? style : style.copyWith(color: color);
   }
 }
