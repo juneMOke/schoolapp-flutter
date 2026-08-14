@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/classes/domain/repositories/offline/
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/assign_enrollment_to_classroom_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classroom_referential_use_case.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_unassigned_level_enrollments_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/record_classroom_transfer_usecase.dart';
@@ -200,6 +201,17 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     () => SyncClassroomsUseCase(
       getIt<ClassroomOfflineRepository>(),
       getIt<ConnectivityService>(),
+    ),
+  );
+  // Hydratation du référentiel Classe sans contexte d'année — pour les modules
+  // qui CONSOMMENT le roster sans l'afficher (Contrôle des frais).
+  getIt.registerFactory<SyncClassroomReferentialUseCase>(
+    () => SyncClassroomReferentialUseCase(
+      repository: getIt<ClassroomOfflineRepository>(),
+      referentialDao: getIt<EnrollmentReferentialDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      credentialsProbe: getIt<AuthSessionManager>(),
+      connectivity: getIt<ConnectivityService>(),
     ),
   );
   getIt.registerFactory<GetOfflineClassroomsUseCase>(
