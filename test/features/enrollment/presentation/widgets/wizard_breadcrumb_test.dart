@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_progress_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/breadcrumb/wizard_step_dot.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -9,6 +10,7 @@ void main() {
     required int currentStep,
     required int totalSteps,
     ValueChanged<int>? onStepTap,
+    bool compact = false,
   }) {
     final titles = List.generate(totalSteps, (i) => 'Étape ${i + 1}');
 
@@ -27,6 +29,7 @@ void main() {
               currentStep: currentStep,
               progress: (currentStep + 1) / totalSteps,
               onStepTap: onStepTap ?? (int _) {},
+              compact: compact,
             ),
           ),
         ),
@@ -136,5 +139,34 @@ void main() {
 
     expect(find.text('Étape 1'), findsWidgets);
     expect(find.text('Étape 7'), findsWidgets);
+  });
+
+  // Hauteur disponible réduite (clavier ouvert, petit écran) : la bande garde
+  // sa progression mais rend ses steps — une dizaine de dp au lieu d'une
+  // centaine, sans quoi la colonne du stepper déborde.
+  testWidgets('Wizard breadcrumb compact keeps only its progress bar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildHarness(currentStep: 2, totalSteps: 7, compact: true),
+    );
+
+    expect(find.byType(WizardProgressBar), findsOneWidget);
+    expect(find.byType(WizardStepDot), findsNothing);
+    expect(find.text('Étape 1'), findsNothing);
+  });
+
+  testWidgets('Wizard breadcrumb compact is far shorter than the full bar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildHarness(currentStep: 2, totalSteps: 7));
+    final fullHeight = tester.getSize(find.byType(WizardBreadcrumb)).height;
+
+    await tester.pumpWidget(
+      buildHarness(currentStep: 2, totalSteps: 7, compact: true),
+    );
+    final compactHeight = tester.getSize(find.byType(WizardBreadcrumb)).height;
+
+    expect(compactHeight, lessThan(fullHeight / 4));
   });
 }

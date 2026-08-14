@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
@@ -20,8 +17,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/context/enro
 import 'package:school_app_flutter/features/enrollment/presentation/step_handlers/enrollment_step_handler.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_read_only_banner.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/step_page_card.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/wizard_breadcrumb.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentStepper extends StatefulWidget {
@@ -166,7 +162,7 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               },
             );
 
-            return _EnrollmentStepperLayout(
+            return EnrollmentStepperLayout(
               stepTitles: breadcrumbTitles,
               currentStep: currentStep,
               progress: progress,
@@ -326,111 +322,5 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
       EnrollmentWizardStep.guardian => Icons.family_restroom_outlined,
       EnrollmentWizardStep.summary => Icons.fact_check_outlined,
     };
-  }
-}
-
-class _EnrollmentStepperLayout extends StatelessWidget {
-  final List<String> stepTitles;
-  final int currentStep;
-  final double progress;
-  final ValueChanged<int> onStepTap;
-  final String stepTitle;
-  final String stepSubtitle;
-  final String stepEyebrow;
-  final Color stepAccentColor;
-  final IconData stepIcon;
-  final Widget stepContent;
-  final Widget? stepBanner;
-  final Widget controls;
-
-  const _EnrollmentStepperLayout({
-    required this.stepTitles,
-    required this.currentStep,
-    required this.progress,
-    required this.onStepTap,
-    required this.stepTitle,
-    required this.stepSubtitle,
-    required this.stepEyebrow,
-    required this.stepAccentColor,
-    required this.stepIcon,
-    required this.stepContent,
-    required this.controls,
-    this.stepBanner,
-  });
-
-  // Largeur max de la carte d'étape : large, bornée sur très grand écran (au-delà
-  // elle reste centrée). Les champs s'organisent en 1/2/3 colonnes selon la
-  // largeur disponible (voir WizardFieldsGrid) → carte large, hauteur modérée.
-  static const double _stepCardMaxWidth = 1100;
-
-  @override
-  Widget build(BuildContext context) {
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    return Padding(
-      // Barre de steps + pied à pleine largeur (collés aux bords) ; seule une
-      // marge basse subsiste. La barre est collée sous l'AppBar (top = 0).
-      padding: const EdgeInsets.only(bottom: AppTheme.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          WizardBreadcrumb(
-            titles: stepTitles,
-            currentStep: currentStep,
-            progress: progress,
-            onStepTap: onStepTap,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            // Carte d'étape large, centrée horizontalement, avec de l'espace
-            // tout autour. Défile si son contenu dépasse la hauteur disponible.
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppTheme.defaultPadding),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: _stepCardMaxWidth,
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, animation) {
-                      if (reduceMotion) return child;
-                      // etStepIn : fondu + glissement translateY 10 → 0.
-                      return FadeTransition(
-                        opacity: animation,
-                        child: AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, inner) => Transform.translate(
-                            offset: Offset(0, (1 - animation.value) * 10),
-                            child: inner,
-                          ),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: StepPageCard(
-                      key: ValueKey(currentStep),
-                      eyebrow: stepEyebrow,
-                      title: stepTitle,
-                      subtitle: stepSubtitle,
-                      accentColor: stepAccentColor,
-                      icon: stepIcon,
-                      banner: stepBanner,
-                      child: stepContent,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Pied fixe : barre d'actions ancrée hors du défilement, identique
-          // pour toutes les étapes (PARCOURS 21).
-          controls,
-        ],
-      ),
-    );
   }
 }

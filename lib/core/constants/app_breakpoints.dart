@@ -86,4 +86,19 @@ class AppBreakpoints {
   // en mode Jour : la grille hebdomadaire (5 jours) y est trop serrée. Au-delà,
   // mode Semaine. L'utilisateur peut toujours basculer via la barre.
   static const double scheduleWeekDefaultMin = dataTableCardsMax; // 600
+
+  // ---------------------------------------------------------------------------
+  // Seuils de HAUTEUR (les seuls du fichier — tous les autres portent sur la
+  // largeur). Le clavier logiciel n'ouvre pas un panneau par-dessus l'écran :
+  // il retire sa hauteur au body (`resizeToAvoidBottomInset`). En paysage il ne
+  // reste qu'une centaine de dp au parcours d'inscription, quand sa barre
+  // d'étapes, ses marges et son pied en coûtent près de deux cents.
+  // ---------------------------------------------------------------------------
+
+  // Parcours d'inscription — au-dessus, chrome complet (barre d'étapes avec
+  // chips et libellés, marges pleines).
+  static const double wizardStepperFullChromeMinHeight = 420.0;
+  // En deçà, même la barre réduite à sa progression prend la place du champ en
+  // cours de saisie : elle disparaît et seul le pied d'actions subsiste.
+  static const double wizardStepperBreadcrumbMinHeight = 150.0;
 }
