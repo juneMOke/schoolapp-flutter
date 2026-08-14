@@ -101,4 +101,11 @@ class AppBreakpoints {
   // En deçà, même la barre réduite à sa progression prend la place du champ en
   // cours de saisie : elle disparaît et seul le pied d'actions subsiste.
   static const double wizardStepperBreadcrumbMinHeight = 150.0;
+
+  // Modale « Rechercher un parent » (étape Tuteurs) — au-dessus, les critères
+  // restent figés au-dessus des résultats qui défilent. En deçà (clavier
+  // ouvert : `Dialog` retire les `viewInsets` de sa hauteur), l'en-tête et le
+  // formulaire débordaient à eux seuls : le formulaire rejoint alors le
+  // défilement. On perd les critères de vue en défilant, pas la modale.
+  static const double guardianSearchPinnedFormMinHeight = 480.0;
 }

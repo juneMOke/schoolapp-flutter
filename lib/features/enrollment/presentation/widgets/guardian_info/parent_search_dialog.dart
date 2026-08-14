@@ -118,28 +118,55 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
           maxWidth: AppDimensions.guardianSearchModalMaxWidth,
           maxHeight: maxHeight,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(l10n),
-            const Divider(height: 1, color: AppColors.border),
-            Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacingL),
-              child: _buildSearchForm(l10n),
-            ),
-            const Divider(height: 1, color: AppColors.border),
-            // Flexible + scroll : la zone résultats (squelette/vide/erreur/
-            // liste) doit pouvoir se réduire OU défiler sans jamais déborder,
-            // le budget vertical restant dépendant du nombre de lignes prises
-            // par le formulaire de recherche (Wrap responsive).
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.spacingL),
-                child: _buildResults(l10n),
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // `Dialog` retire les `viewInsets` du clavier à la hauteur offerte :
+            // en paysage il n'en reste qu'une centaine de dp, quand l'en-tête et
+            // le formulaire figés en coûtent trois fois plus. Sous ce seuil, les
+            // critères rejoignent le défilement des résultats.
+            final pinsForm =
+                constraints.maxHeight >=
+                AppBreakpoints.guardianSearchPinnedFormMinHeight;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(l10n),
+                const Divider(height: 1, color: AppColors.border),
+                if (pinsForm) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(AppDimensions.spacingL),
+                    child: _buildSearchForm(l10n),
+                  ),
+                  const Divider(height: 1, color: AppColors.border),
+                ],
+                // Flexible + scroll : la zone résultats (squelette/vide/erreur/
+                // liste) doit pouvoir se réduire OU défiler sans jamais
+                // déborder, le budget vertical restant dépendant du nombre de
+                // lignes prises par le formulaire de recherche (Wrap
+                // responsive).
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppDimensions.spacingL),
+                    child: pinsForm
+                        ? _buildResults(l10n)
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildSearchForm(l10n),
+                              const SizedBox(height: AppDimensions.spacingL),
+                              const Divider(height: 1, color: AppColors.border),
+                              const SizedBox(height: AppDimensions.spacingL),
+                              _buildResults(l10n),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
