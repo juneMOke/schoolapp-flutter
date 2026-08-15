@@ -208,6 +208,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   getIt.registerFactory<SyncClassroomReferentialUseCase>(
     () => SyncClassroomReferentialUseCase(
       repository: getIt<ClassroomOfflineRepository>(),
+      transferRepository: getIt<ClassroomTransferPullRepository>(),
       referentialDao: getIt<EnrollmentReferentialDao>(),
       currentUser: getIt<CurrentUserContext>(),
       credentialsProbe: getIt<AuthSessionManager>(),
