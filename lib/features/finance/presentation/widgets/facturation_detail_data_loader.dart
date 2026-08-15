@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
@@ -45,12 +47,19 @@ class _FacturationDetailDataLoaderState
   }
 
   void _requestData() {
-    context.read<PaymentsBloc>().add(
-      PaymentsRequested(
-        studentId: widget.intent.studentId,
-        academicYearId: widget.intent.academicYearId,
-      ),
-    );
+    // Les encaissements ne sont demandés que si la session a le droit de les
+    // lire. Sans cette garde, un profil « créances seules » (le secrétariat)
+    // déclenchait une lecture qui ne pouvait rien rendre, et la section
+    // affichait « Aucun versement enregistré » — faux, et contredit par le
+    // « Déjà payé » du bandeau juste au-dessus (ADR-015 §6-C).
+    if (PermissionGate.allows(context, const [Perm.financePaymentRead])) {
+      context.read<PaymentsBloc>().add(
+        PaymentsRequested(
+          studentId: widget.intent.studentId,
+          academicYearId: widget.intent.academicYearId,
+        ),
+      );
+    }
 
     context.read<StudentChargesBloc>().add(
       StudentChargesByAcademicYearRequested(

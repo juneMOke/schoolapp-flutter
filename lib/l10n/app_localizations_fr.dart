@@ -2886,6 +2886,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun paiement n\'a été enregistré pour cet élève.';
 
   @override
+  String get facturationDetailPaymentsWithheldSubtitle =>
+      'Suivi tenu par la caisse.';
+
+  @override
+  String get facturationDetailPaymentsWithheld =>
+      'Le détail des encaissements relève de la caisse : il n\'est pas affiché sur ce profil. Le total déjà payé, en haut de la fiche, reste exact.';
+
+  @override
   String get facturationDetailPaymentPayerColumn => 'Payeur';
 
   @override
@@ -3165,6 +3173,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get facturationChargeDetailAllocationsEmpty =>
       'Aucune allocation n\'a été trouvée pour cette charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsWithheld =>
+      'L\'imputation des versements relève de la caisse : elle n\'est pas détaillée sur ce profil. Le montant déjà payé, ci-dessus, reste exact.';
 
   @override
   String get facturationChargeDetailAllocationsRetry => 'Réessayer';

@@ -2867,6 +2867,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'No payment has been recorded for this student.';
 
   @override
+  String get facturationDetailPaymentsWithheldSubtitle =>
+      'Tracked by the cash desk.';
+
+  @override
+  String get facturationDetailPaymentsWithheld =>
+      'Payment detail belongs to the cash desk: it is not shown for this profile. The already-paid total at the top of the record is still accurate.';
+
+  @override
   String get facturationDetailPaymentPayerColumn => 'Payer';
 
   @override
@@ -3143,6 +3151,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get facturationChargeDetailAllocationsEmpty =>
       'No allocation was found for this charge.';
+
+  @override
+  String get facturationChargeDetailAllocationsWithheld =>
+      'Payment allocation belongs to the cash desk: it is not detailed for this profile. The already-paid amount above is still accurate.';
 
   @override
   String get facturationChargeDetailAllocationsRetry => 'Retry';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -41,6 +42,13 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Séparation charge / caisse (ADR-014) : le secrétariat lit ce qu'un élève
+    // DOIT sans avoir le droit de voir les encaissements. La section ne doit
+    // alors pas affirmer « aucun versement » — elle n'en sait rien. Elle se
+    // tait (ADR-015 §6-C).
+    final canReadPayments = PermissionGate.allows(context, const [
+      Perm.financePaymentRead,
+    ]);
 
     return FinanceSectionCard(
       backgroundColor: AppColors.surfaceRaised,
@@ -71,15 +79,20 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
               final currency = state.payments.isNotEmpty
                   ? state.payments.first.currency
                   : '';
-              final subtitle = state.status == PaymentsStatus.success
-                  ? l10n.facturationDetailPaymentsRecordedWithTotal(
-                      state.payments.length,
-                      formatMonetaryAmountWithCurrency(
-                        amount: totalPaidInCents / 100,
-                        currency: currency,
-                      ),
-                    )
-                  : l10n.facturationDetailPaymentsSectionSubtitle;
+              final String subtitle;
+              if (!canReadPayments) {
+                subtitle = l10n.facturationDetailPaymentsWithheldSubtitle;
+              } else if (state.status == PaymentsStatus.success) {
+                subtitle = l10n.facturationDetailPaymentsRecordedWithTotal(
+                  state.payments.length,
+                  formatMonetaryAmountWithCurrency(
+                    amount: totalPaidInCents / 100,
+                    currency: currency,
+                  ),
+                );
+              } else {
+                subtitle = l10n.facturationDetailPaymentsSectionSubtitle;
+              }
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,6 +111,18 @@ class FacturationDetailPaymentsSection extends StatelessWidget {
                     switchInCurve: FinanceMotion.outCurve,
                     switchOutCurve: FinanceMotion.inCurve,
                     child: () {
+                      // En premier : la lecture n'a pas eu lieu, il n'y a rien
+                      // à relancer. Un vide honnête, pas un vide affirmatif.
+                      if (!canReadPayments) {
+                        return StateCard(
+                          key: const ValueKey('payments-withheld'),
+                          message: l10n.facturationDetailPaymentsWithheld,
+                          icon: Icons.lock_outline,
+                          accent: AppColors.textSecondary,
+                          accentSoft: AppColors.surfaceAlt,
+                        );
+                      }
+
                       if (state.status == PaymentsStatus.loading) {
                         return const Center(
                           key: ValueKey('payments-loading'),

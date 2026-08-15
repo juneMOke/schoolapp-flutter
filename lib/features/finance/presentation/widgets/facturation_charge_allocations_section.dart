@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/state_card.dart';
@@ -65,6 +67,23 @@ class FacturationChargeAllocationsSection extends StatelessWidget {
           switchInCurve: FinanceMotion.outCurve,
           switchOutCurve: FinanceMotion.inCurve,
           child: () {
+            // Même règle que la section Versements : `payment_allocations`
+            // n'est peuplée que par le flux paiements. Sans le droit de le
+            // lire, la table est vide par construction — le dire « aucune
+            // imputation » serait affirmer ce qu'on ne sait pas
+            // (ADR-015 §6-C).
+            if (!PermissionGate.allows(context, const [
+              Perm.financePaymentRead,
+            ])) {
+              return StateCard(
+                key: const ValueKey('charge-allocations-withheld'),
+                message: l10n.facturationChargeDetailAllocationsWithheld,
+                icon: Icons.lock_outline,
+                accent: AppColors.textSecondary,
+                accentSoft: AppColors.financeDetailMutedSurface,
+              );
+            }
+
             if (state.allocationsStatus == StudentChargesStatus.loading &&
                 allocations.isEmpty) {
               return StateCard(

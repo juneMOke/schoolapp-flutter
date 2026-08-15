@@ -4916,6 +4916,18 @@ abstract class AppLocalizations {
   /// **'No payment has been recorded for this student.'**
   String get facturationDetailPaymentsEmpty;
 
+  /// No description provided for @facturationDetailPaymentsWithheldSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked by the cash desk.'**
+  String get facturationDetailPaymentsWithheldSubtitle;
+
+  /// No description provided for @facturationDetailPaymentsWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment detail belongs to the cash desk: it is not shown for this profile. The already-paid total at the top of the record is still accurate.'**
+  String get facturationDetailPaymentsWithheld;
+
   /// No description provided for @facturationDetailPaymentPayerColumn.
   ///
   /// In en, this message translates to:
@@ -5381,6 +5393,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No allocation was found for this charge.'**
   String get facturationChargeDetailAllocationsEmpty;
+
+  /// No description provided for @facturationChargeDetailAllocationsWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment allocation belongs to the cash desk: it is not detailed for this profile. The already-paid amount above is still accurate.'**
+  String get facturationChargeDetailAllocationsWithheld;
 
   /// No description provided for @facturationChargeDetailAllocationsRetry.
   ///

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -29,7 +31,11 @@ Future<void> showFacturationChargeDetailDialog(
     builder: (_) => BlocProvider<StudentChargesBloc>(
       create: (_) {
         final bloc = getIt<StudentChargesBloc>();
-        if (intent.chargeId.trim().isNotEmpty) {
+        // Les imputations ne sont demandées que si la session peut les lire :
+        // `payment_allocations` n'est peuplée que par le flux paiements
+        // (ADR-015 §6-C).
+        if (intent.chargeId.trim().isNotEmpty &&
+            PermissionGate.allows(context, const [Perm.financePaymentRead])) {
           bloc.add(
             StudentChargePaymentAllocationsRequested(chargeId: intent.chargeId),
           );
