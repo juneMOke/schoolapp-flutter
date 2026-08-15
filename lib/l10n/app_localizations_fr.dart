@@ -2600,6 +2600,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
 
   @override
+  String get facturationEmptyEnrollmentWithheld =>
+      'La liste des élèves relève du module Inscription, auquel ce profil n\'a pas accès : aucun élève ne peut être affiché ici, quels que soient les critères. Votre administrateur peut ouvrir cet accès.';
+
+  @override
   String get facturationEmptyTitle => 'Aucun élève trouvé';
 
   @override
@@ -2672,6 +2676,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune classe n\'est composée pour ce niveau : le contrôle porte sur tout le niveau.';
 
   @override
+  String get feeControlClassroomWithheld =>
+      'Les classes relèvent d\'un module auquel ce profil n\'a pas accès : le contrôle porte sur tout le niveau.';
+
+  @override
   String get feeControlFeeLabel => 'Frais';
 
   @override
@@ -2684,6 +2692,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get feeControlFeeGridMissing =>
       'La grille tarifaire n\'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.';
+
+  @override
+  String get feeControlFeeGridWithheld =>
+      'La grille tarifaire relève d\'un module auquel ce profil n\'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.';
 
   @override
   String get feeControlPaymentStatusLabel => 'Statut de paiement';
@@ -2713,6 +2725,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get feeControlNoResultsDescription =>
       'Aucun élève ne correspond à ces critères. Modifiez le formulaire et relancez la recherche.';
+
+  @override
+  String get feeControlEmptyEnrollmentWithheld =>
+      'Les élèves relèvent du module Inscription, auquel ce profil n\'a pas accès : le contrôle ne peut porter sur personne, quels que soient les critères. Votre administrateur peut ouvrir cet accès.';
+
+  @override
+  String get feeControlEmptyClassroomWithheld =>
+      'La composition des classes relève d\'un module auquel ce profil n\'a pas accès : le contrôle par classe est impossible. Relancez sans filtrer par classe pour porter sur tout le niveau.';
 
   @override
   String get feeControlEmptyRosterMissing =>
@@ -4507,6 +4527,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusSynced => 'À jour';
 
   @override
+  String get statusPartiallySynced => 'Partiellement à jour';
+
+  @override
   String get statusSyncing => 'Synchro…';
 
   @override
@@ -5835,6 +5858,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'Écriture d\'un autre compte — elle devra être reprise depuis sa propre session.';
 
   @override
+  String get syncSheetStatusTitle => 'État de la synchronisation';
+
+  @override
+  String get syncSheetStatusSubtitle =>
+      'Ce que cette tablette n\'a pas reçu, et les écritures que le serveur a refusées — celles-ci ne repartiront pas d\'elles-mêmes.';
+
+  @override
+  String get syncIncompleteReadTitle => 'Certaines données ne descendent pas';
+
+  @override
+  String get syncIncompleteReadDescription =>
+      'La dernière mise à jour n\'a pas tout ramené. Des écrans peuvent donc paraître vides sans l\'être vraiment. Rien de ce que vous avez saisi n\'est perdu. Si cela dure, votre administrateur peut vérifier les accès de votre compte.';
+
+  @override
+  String get syncIncompleteReadRetriableDescription =>
+      'La dernière mise à jour s\'est interrompue avant d\'avoir tout ramené. Des écrans peuvent donc paraître vides sans l\'être vraiment. Rien de ce que vous avez saisi n\'est perdu.';
+
+  @override
+  String get syncIncompleteReadRetry => 'Réessayer';
+
+  @override
   String get syncErrorsHeldTitle => 'En attente';
 
   @override
@@ -6198,6 +6242,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ticketPrintFailed =>
       'Impression indisponible : le ticket n\'a pas pu être produit.';
+
+  @override
+  String get ticketRefusedUnknownStudent =>
+      'Impression refusée : le nom de l\'élève n\'est pas connu de cette tablette. Le versement est bien enregistré — réimprimez après la prochaine synchronisation.';
 
   @override
   String get ticketCutNotice => 'Découpez le long du cadre.';

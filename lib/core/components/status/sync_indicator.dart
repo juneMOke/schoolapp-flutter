@@ -9,8 +9,16 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// authentifier ses appels (session ouverte offline sans jetons ni consigne) —
 /// la boucle ne flushe PAS (zéro 401, zéro tentative consommée) tant qu'un
 /// login online n'a pas eu lieu.
+///
+/// [partiallySynced] (ADR-015 F1) : la file de push est vide, mais le dernier
+/// cycle de **lecture** n'a pas tout ramené. Ce n'est **pas** une panne, et
+/// c'est ce qui le distingue de [syncConflict] : rien n'est perdu, rien n'est à
+/// reprendre, des domaines entiers sont simplement absents du cache local. Sans
+/// ce statut la pastille affichait « À jour » pendant qu'un écran voisin
+/// expliquait un vide par une synchronisation à venir qui n'arriverait jamais.
 enum SyncStatus {
   synced,
+  partiallySynced,
   syncing,
   offline,
   pendingUpload,
@@ -119,6 +127,14 @@ class SyncIndicator extends StatelessWidget {
         icon: Icons.cloud_done,
         label: l10n.statusSynced,
         color: AppColors.success,
+      ),
+      // Teinte NEUTRE, jamais l'ambre ni le rouge : un compte au périmètre
+      // étroit est dans cet état en permanence et tout va bien pour lui. La
+      // pastille dit qu'il manque quelque chose, elle n'accuse pas une panne.
+      SyncStatus.partiallySynced => _SyncAppearance(
+        icon: Icons.cloud_done_outlined,
+        label: l10n.statusPartiallySynced,
+        color: AppColors.textMuted,
       ),
       SyncStatus.syncing => _SyncAppearance(
         icon: Icons.cloud_sync,

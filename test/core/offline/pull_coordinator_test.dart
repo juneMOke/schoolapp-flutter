@@ -333,4 +333,175 @@ void main() {
       expect(handler.calls, 0);
     });
   });
+
+  // ADR-015 F1a — les trois compteurs de ressources *sautées* du rapport
+  // (`forbidden`, `outOfPlan`, `plannedNotPulled`) et le verdict `isDegraded`
+  // qu'ils alimentent. Ce sont eux que la pastille de synchro consommera : ils
+  // doivent rester séparés des ressources réellement tirées, et seuls ceux qui
+  // dénoncent un *manque* doivent dégrader.
+  group('compteurs de ressources sautées (ADR-015 F1a)', () {
+    PullCoordinator buildWith(CurrentPermissions permissions) =>
+        PullCoordinator(connectivity: service, permissions: permissions);
+
+    // Ces deux compteurs ont une destination, pas encore de source : rien dans
+    // `pullAll()` ne les alimente tant que le plan de synchro n'existe pas
+    // (lots F2/F5). Le test fige cette attente pour que leur première montée en
+    // charge soit un changement délibéré, jamais un effet de bord.
+    test('cycle nominal : outOfPlan et plannedNotPulled restent à zéro, '
+        'plannedNotPulledKeys vide — le plan n\'existe pas encore', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler('a', const PullOutcome.updated(upserted: 2)),
+        )
+        ..registerHandler(
+          FakePullHandler('b', const PullOutcome.notModified()),
+        );
+
+      final report = await coord.pullAll();
+
+      expect(report.updated, 1);
+      expect(report.notModified, 1);
+      expect(report.outOfPlan, 0);
+      expect(report.plannedNotPulled, 0);
+      expect(report.plannedNotPulledKeys, isEmpty);
+    });
+
+    test('processed ne compte que les ressources réellement tirées, '
+        'jamais celles sautées faute de permission', () async {
+      goOnline();
+      final autorise = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final aussiAutorise = FakePullHandler(
+        'classroom-members',
+        const PullOutcome.notModified(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final interdit = FakePullHandler(
+        'payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          buildWith(CurrentPermissions()..set(const ['classroom.read']))
+            ..registerHandler(autorise)
+            ..registerHandler(aussiAutorise)
+            ..registerHandler(interdit);
+
+      final report = await coord.pullAll();
+
+      expect(interdit.calls, 0);
+      expect(report.forbidden, 1);
+      // Trois handlers enregistrés, deux tirés : la ressource sautée n'a
+      // produit ni donnée ni échec, elle n'a rien à faire dans `processed`.
+      expect(report.processed, 2);
+      expect(
+        report.processed,
+        report.updated + report.notModified + report.failed,
+      );
+    });
+
+    // Les deux autres compteurs n'ayant pas encore de source dans `pullAll()`,
+    // leur exclusion de `processed` se vérifie sur le rapport lui-même.
+    test('aucun des trois compteurs de sautées n\'entre dans processed', () {
+      const report = PullRunReport(
+        updated: 2,
+        notModified: 1,
+        failed: 1,
+        forbidden: 3,
+        outOfPlan: 4,
+        plannedNotPulled: 5,
+        plannedNotPulledKeys: {'grades', 'timetable'},
+      );
+
+      expect(report.processed, 4); // 2 + 1 + 1, et rien d'autre.
+    });
+
+    group('isDegraded — table de vérité', () {
+      // Un cycle déjà en vol n'a rien observé : il ne dit ni sain ni dégradé.
+      test('rapport skipped ⇒ false', () {
+        expect(const PullRunReport.skipped().isDegraded, isFalse);
+      });
+
+      // Même raison : hors ligne, rien n'a été tenté, donc rien n'est constaté.
+      test('rapport offline ⇒ false', () {
+        expect(const PullRunReport.offline().isDegraded, isFalse);
+      });
+
+      test('failed > 0 ⇒ true', () {
+        expect(const PullRunReport(updated: 1, failed: 1).isDegraded, isTrue);
+      });
+
+      test('forbidden > 0 ⇒ true', () {
+        expect(
+          const PullRunReport(updated: 1, forbidden: 1).isDegraded,
+          isTrue,
+        );
+      });
+
+      test('plannedNotPulled > 0 ⇒ true', () {
+        expect(
+          const PullRunReport(
+            updated: 1,
+            plannedNotPulled: 1,
+            plannedNotPulledKeys: {'grades'},
+          ).isDegraded,
+          isTrue,
+        );
+      });
+
+      // Le cas le plus important du groupe : un flux hors du plan d'un profil
+      // est le périmètre CORRECT de ce profil, pas un manque. L'y compter
+      // afficherait une dégradation permanente à tout compte au périmètre
+      // étroit — un enseignant verrait « partiellement à jour » à vie alors
+      // que tout ce qui le concerne est descendu.
+      test('outOfPlan > 0 SEUL ⇒ false', () {
+        expect(
+          const PullRunReport(updated: 3, outOfPlan: 7).isDegraded,
+          isFalse,
+        );
+      });
+
+      test('cycle entièrement sain (updated / notModified) ⇒ false', () {
+        expect(
+          const PullRunReport(updated: 4, notModified: 2).isDegraded,
+          isFalse,
+        );
+      });
+    });
+
+    // Le chemin réel que la pastille consommera : une permission manquante
+    // produit un rapport dégradé sans qu'aucun échec ne soit compté.
+    test(
+      'cycle réel avec une ressource sautée : forbidden == 1 et isDegraded',
+      () async {
+        goOnline();
+        final autorise = FakePullHandler(
+          'classrooms',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.classroomRead],
+        );
+        final interdit = FakePullHandler(
+          'payments',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.financePaymentRead],
+        );
+        final coord =
+            buildWith(CurrentPermissions()..set(const ['classroom.read']))
+              ..registerHandler(autorise)
+              ..registerHandler(interdit);
+
+        final report = await coord.pullAll();
+
+        expect(report.forbidden, 1);
+        expect(report.failed, 0);
+        expect(report.skipped, isFalse);
+        expect(report.offline, isFalse);
+        expect(report.isDegraded, isTrue);
+      },
+    );
+  });
 }

@@ -24,10 +24,11 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 ///    [SyncStatus.pendingUpload] ;
 ///  - sinon → [SyncStatus.synced].
 ///
-/// Sert aussi de colle du « sync loop » : à chaque passage à *online* il
-/// déclenche un flush opportuniste de l'outbox **puis un pull delta**
-/// ([PullCoordinator], optionnel) des ressources de référence — aucun autre
-/// déclencheur global n'existe. Les écrans qui écrivent en local appellent
+/// Sert aussi de colle du « sync loop » : à chaque passage à *online*, **et à
+/// l'ouverture de session** ([syncOnLogin], ADR-015 F0), il déclenche un flush
+/// opportuniste de l'outbox **puis un pull delta** ([PullCoordinator],
+/// optionnel) des ressources de référence — ce sont les deux seuls
+/// déclencheurs globaux. Les écrans qui écrivent en local appellent
 /// [notifyLocalWrite] après une écriture réussie pour rafraîchir immédiatement
 /// la pastille (push seul, **sans** pull).
 ///
@@ -59,6 +60,30 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// relisent pas la file (offline, syncing), et le drapeau ne doit pas
   /// clignoter à chaque transition d'état.
   bool _hasHeldWork = false;
+
+  /// Dernier cycle de **lecture** connu n'a pas tout ramené (ADR-015 F1).
+  ///
+  /// Mémorisé comme [_lastSyncAtMs] et [_hasHeldWork], et pour la même raison
+  /// en plus forte : [refresh] est appelé depuis neuf chemins qui n'ont fait
+  /// AUCUN pull (fin de flush, hydratation, gates, écriture locale, fermeture
+  /// de la feuille). Recalculé là, le drapeau s'éteindrait à la première
+  /// écriture de l'utilisateur — quelques secondes après s'être allumé.
+  ///
+  /// N'est écrit que par un cycle qui a réellement observé quelque chose : un
+  /// rapport `skipped` (cycle déjà en vol) ou `offline` ne dit rien, et
+  /// l'écraser avec « sain » effacerait une dégradation bien réelle.
+  bool _pullDegraded = false;
+
+  /// Parmi les causes de [_pullDegraded], au moins une est un **échec de
+  /// transport** et non un refus de droits.
+  ///
+  /// La nuance décide s'il existe un geste à offrir. Un droit manquant est
+  /// sauté à chaque cycle : proposer « Réessayer » promettrait de lever une
+  /// condition que le geste ne touche pas. Un timeout, lui, se réessaie — et
+  /// sans ce bouton personne ne le pourrait, puisque le pull n'a que deux
+  /// déclencheurs et qu'une tablette en Wi-Fi permanent n'en voit aucun de la
+  /// journée. Mémorisé comme [_pullDegraded], et pour la même raison.
+  bool _pullRetriable = false;
 
   StreamSubscription<bool>? _connectivitySub;
 
@@ -180,6 +205,10 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     if (!revoked) {
       try {
         final report = await _pullCoordinator?.pullAll();
+        if (report != null && !report.skipped && !report.offline) {
+          _pullDegraded = report.isDegraded;
+          _pullRetriable = report.failed > 0;
+        }
         final observed = report?.latestServerTimeMs;
         if (observed != null) await _advanceLastSync(observed);
       } catch (_) {
@@ -187,6 +216,43 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       }
     }
     await refresh();
+  }
+
+  /// Cycle complet à l'ouverture de session (ADR-015 F0).
+  ///
+  /// Jusqu'ici [_syncOnReconnect] n'avait qu'un déclencheur — la transition
+  /// hors-ligne → en ligne. Une tablette allumée le matin dans une école déjà
+  /// couverte en Wi-Fi n'exécutait donc **aucun** cycle de coordinateur de la
+  /// journée : le cache n'était hydraté que par les pulls lancés directement
+  /// par les écrans, chacun aveugle à l'ordre, aux droits et aux curseurs des
+  /// autres.
+  ///
+  /// Emprunte la **même** séquence que le retour réseau (`flush → evaluate →
+  /// pull`, ADR-010 D-11) au lieu d'appeler `pullAll()` en direct : le
+  /// coordinateur ne connaît ni la sonde de crédentiels ni la
+  /// ré-authentification, et un login offline laisse un access vide — chaque
+  /// ressource partirait alors en 401, une tentative consommée par entrée.
+  Future<void> syncOnLogin() => syncNow();
+
+  /// Un cycle complet à la demande — l'ouverture de session ([syncOnLogin]) et
+  /// la reprise après un échec de transport (bandeau de la feuille de synchro).
+  ///
+  /// Sans ce point d'entrée public, un cycle qui échoue sur une ressource
+  /// laisserait la pastille en « Partiellement à jour » jusqu'au redémarrage de
+  /// l'application : les deux autres déclencheurs sont l'ouverture de session,
+  /// qui n'arrive qu'une fois, et le retour de la radio, qu'une tablette posée
+  /// sur le Wi-Fi de l'école ne verra jamais.
+  Future<void> syncNow() async {
+    // La pastille reflète la file AVANT le premier appel réseau : la suite du
+    // cycle peut durer, l'utilisateur n'a pas à l'attendre pour voir qu'il a
+    // des écritures en attente.
+    await refresh();
+    // Session **rouverte** hors connexion : ne rien tenter. Cette pré-garde ne
+    // lit que la radio et ne suffit donc pas à elle seule — un login offline
+    // survient typiquement radio allumée, serveur injoignable. C'est
+    // `_ensureFreshAccess`, un cran plus bas, qui arrête ce cas-là.
+    if (!await _isOnline()) return;
+    await _syncOnReconnect();
   }
 
   /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
@@ -247,7 +313,17 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
         _safeEmit(SyncStatus.syncConflict);
         return;
       }
-      _safeEmit(pending > 0 ? SyncStatus.pendingUpload : SyncStatus.synced);
+      // « À envoyer » prime sur « partiellement à jour » : le travail de
+      // l'utilisateur qui attend est actionnable, une lecture incomplète ne
+      // l'est pas. Même raison que les quatre sorties anticipées ci-dessus —
+      // hors-ligne, flush, reconnexion et conflit masquent également la
+      // dégradation de lecture, et c'est voulu : chacun est une condition plus
+      // urgente, et chacun se lève avant qu'elle ne redevienne visible.
+      if (pending > 0) {
+        _safeEmit(SyncStatus.pendingUpload);
+        return;
+      }
+      _safeEmit(_pullDegraded ? SyncStatus.partiallySynced : SyncStatus.synced);
     } catch (_) {
       // Base/plugin indisponible : on n'écrase pas le dernier état connu.
     }
@@ -329,6 +405,8 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       status: status,
       lastSyncAtMs: _lastSyncAtMs,
       hasHeldWork: _hasHeldWork,
+      hasIncompleteRead: _pullDegraded,
+      hasRetriableRead: _pullDegraded && _pullRetriable,
     );
     if (state != next) emit(next);
   }

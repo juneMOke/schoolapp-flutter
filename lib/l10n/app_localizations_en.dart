@@ -2583,6 +2583,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No student matches these criteria. Update the form and try again.';
 
   @override
+  String get facturationEmptyEnrollmentWithheld =>
+      'The student list belongs to the Enrolment module, which this profile cannot access: no student can be shown here, whatever the criteria. Your administrator can grant that access.';
+
+  @override
   String get facturationEmptyTitle => 'No student found';
 
   @override
@@ -2655,6 +2659,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No class has been composed for this level: the control covers the whole level.';
 
   @override
+  String get feeControlClassroomWithheld =>
+      'Classes belong to a module this profile cannot access: the control covers the whole level.';
+
+  @override
   String get feeControlFeeLabel => 'Fee';
 
   @override
@@ -2666,6 +2674,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feeControlFeeGridMissing =>
       'The fee schedule has not reached this device yet. Sync to control a fee.';
+
+  @override
+  String get feeControlFeeGridWithheld =>
+      'The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.';
 
   @override
   String get feeControlPaymentStatusLabel => 'Payment status';
@@ -2695,6 +2707,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feeControlNoResultsDescription =>
       'No student matches these criteria. Adjust the form and search again.';
+
+  @override
+  String get feeControlEmptyEnrollmentWithheld =>
+      'Students belong to the Enrolment module, which this profile cannot access: the control cannot cover anyone, whatever the criteria. Your administrator can grant that access.';
+
+  @override
+  String get feeControlEmptyClassroomWithheld =>
+      'Class composition belongs to a module this profile cannot access: checking by class is not possible. Search again without a class filter to cover the whole level.';
 
   @override
   String get feeControlEmptyRosterMissing =>
@@ -4462,6 +4482,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSynced => 'Up to date';
 
   @override
+  String get statusPartiallySynced => 'Partly up to date';
+
+  @override
   String get statusSyncing => 'Syncing…';
 
   @override
@@ -5768,6 +5791,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Written by another account — it has to be retried from that session.';
 
   @override
+  String get syncSheetStatusTitle => 'Sync status';
+
+  @override
+  String get syncSheetStatusSubtitle =>
+      'What this tablet has not received, and the writes the server refused — those will not go back on their own.';
+
+  @override
+  String get syncIncompleteReadTitle => 'Some data is not coming down';
+
+  @override
+  String get syncIncompleteReadDescription =>
+      'The last update did not bring everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost. If this persists, your administrator can check your account\'s access rights.';
+
+  @override
+  String get syncIncompleteReadRetriableDescription =>
+      'The last update stopped before bringing everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost.';
+
+  @override
+  String get syncIncompleteReadRetry => 'Try again';
+
+  @override
   String get syncErrorsHeldTitle => 'Waiting';
 
   @override
@@ -6131,6 +6175,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ticketPrintFailed =>
       'Printing unavailable: the ticket could not be produced.';
+
+  @override
+  String get ticketRefusedUnknownStudent =>
+      'Printing refused: this tablet does not know the student\'s name. The payment is recorded — print again after the next sync.';
 
   @override
   String get ticketCutNotice => 'Cut along the frame.';

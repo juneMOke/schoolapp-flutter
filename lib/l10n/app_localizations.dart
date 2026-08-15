@@ -4442,6 +4442,12 @@ abstract class AppLocalizations {
   /// **'No student matches these criteria. Update the form and try again.'**
   String get facturationNoResultsDescription;
 
+  /// No description provided for @facturationEmptyEnrollmentWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'The student list belongs to the Enrolment module, which this profile cannot access: no student can be shown here, whatever the criteria. Your administrator can grant that access.'**
+  String get facturationEmptyEnrollmentWithheld;
+
   /// No description provided for @facturationEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -4580,6 +4586,12 @@ abstract class AppLocalizations {
   /// **'No class has been composed for this level: the control covers the whole level.'**
   String get feeControlClassroomEmptyForLevel;
 
+  /// No description provided for @feeControlClassroomWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes belong to a module this profile cannot access: the control covers the whole level.'**
+  String get feeControlClassroomWithheld;
+
   /// No description provided for @feeControlFeeLabel.
   ///
   /// In en, this message translates to:
@@ -4603,6 +4615,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The fee schedule has not reached this device yet. Sync to control a fee.'**
   String get feeControlFeeGridMissing;
+
+  /// No description provided for @feeControlFeeGridWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.'**
+  String get feeControlFeeGridWithheld;
 
   /// No description provided for @feeControlPaymentStatusLabel.
   ///
@@ -4657,6 +4675,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student matches these criteria. Adjust the form and search again.'**
   String get feeControlNoResultsDescription;
+
+  /// No description provided for @feeControlEmptyEnrollmentWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Students belong to the Enrolment module, which this profile cannot access: the control cannot cover anyone, whatever the criteria. Your administrator can grant that access.'**
+  String get feeControlEmptyEnrollmentWithheld;
+
+  /// No description provided for @feeControlEmptyClassroomWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Class composition belongs to a module this profile cannot access: checking by class is not possible. Search again without a class filter to cover the whole level.'**
+  String get feeControlEmptyClassroomWithheld;
 
   /// No description provided for @feeControlEmptyRosterMissing.
   ///
@@ -7608,6 +7638,12 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get statusSynced;
 
+  /// No description provided for @statusPartiallySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly up to date'**
+  String get statusPartiallySynced;
+
   /// No description provided for @statusSyncing.
   ///
   /// In en, this message translates to:
@@ -9699,6 +9735,42 @@ abstract class AppLocalizations {
   /// **'Written by another account — it has to be retried from that session.'**
   String get syncErrorsForeignEntryAnonymous;
 
+  /// No description provided for @syncSheetStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync status'**
+  String get syncSheetStatusTitle;
+
+  /// No description provided for @syncSheetStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What this tablet has not received, and the writes the server refused — those will not go back on their own.'**
+  String get syncSheetStatusSubtitle;
+
+  /// No description provided for @syncIncompleteReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some data is not coming down'**
+  String get syncIncompleteReadTitle;
+
+  /// No description provided for @syncIncompleteReadDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The last update did not bring everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost. If this persists, your administrator can check your account\'s access rights.'**
+  String get syncIncompleteReadDescription;
+
+  /// No description provided for @syncIncompleteReadRetriableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The last update stopped before bringing everything back. Some screens may therefore look empty without really being so. Nothing you have entered is lost.'**
+  String get syncIncompleteReadRetriableDescription;
+
+  /// No description provided for @syncIncompleteReadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get syncIncompleteReadRetry;
+
   /// No description provided for @syncErrorsHeldTitle.
   ///
   /// In en, this message translates to:
@@ -10325,6 +10397,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Printing unavailable: the ticket could not be produced.'**
   String get ticketPrintFailed;
+
+  /// No description provided for @ticketRefusedUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing refused: this tablet does not know the student\'s name. The payment is recorded — print again after the next sync.'**
+  String get ticketRefusedUnknownStudent;
 
   /// No description provided for @ticketCutNotice.
   ///

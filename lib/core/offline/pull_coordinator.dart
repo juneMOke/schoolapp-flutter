@@ -17,7 +17,40 @@ class PullRunReport {
   /// fonctionnement normal d'un compte au périmètre plus étroit. Les confondre
   /// afficherait une synchronisation « en erreur » à un enseignant dont tout
   /// va bien.
+  ///
+  /// **Mode dégradé seulement** (ADR-015 F1/O). Quand un plan de synchro
+  /// valide gouverne le pull, c'est [outOfPlan] qui porte le périmètre du
+  /// profil et ce compteur retombe à zéro : `requiredPermissions` cesse d'être
+  /// l'autorité pour redevenir le filtre du seul repli local.
   final int forbidden;
+
+  /// Ressources écartées parce qu'elles ne figurent pas au plan du profil
+  /// (ADR-015 F5). **Ce n'est pas une dégradation** : c'est le périmètre
+  /// correct, décidé par le serveur qui, lui, connaît le profil. À ne jamais
+  /// agréger avec [forbidden] — l'un dit « ce compte n'y a pas droit », l'autre
+  /// « ce compte n'en a pas l'usage », et seul le premier mérite d'être signalé.
+  ///
+  /// Reste à zéro tant que le plan n'existe pas (lots F2/F5).
+  final int outOfPlan;
+
+  /// Flux inscrits au plan pour lesquels **aucun handler n'est enregistré**
+  /// (ADR-015 F1/F3). Défaut de contrat, pas de droits : le serveur annonce un
+  /// flux que ce client ne sait pas tirer — une clé mal orthographiée de part
+  /// et d'autre suffit, et sous F5 ce n'est plus une dégradation mais l'arrêt
+  /// total de ce flux.
+  ///
+  /// Reste à zéro tant que le plan n'existe pas (lots F2/F5).
+  final int plannedNotPulled;
+
+  /// Les clés fautives de [plannedNotPulled], **nommément**.
+  ///
+  /// Le compteur seul ne serait pas diagnosticable : « un flux manque » n'a
+  /// jamais permis de trouver lequel. Portées dans le rapport plutôt que
+  /// journalisées — le dépôt n'a pas de canal de log (`avoid_print` est actif)
+  /// et sa convention est de faire porter le diagnostic par l'objet valeur,
+  /// comme `PullOutcome.error` ou `OutboxEntry.lastError`. Ce sont des clés de
+  /// ressource, jamais une donnée métier : rien d'un élève ni d'un montant.
+  final Set<String> plannedNotPulledKeys;
 
   /// Horloge **serveur** (epoch ms) la plus récente observée ce cycle, tous
   /// handlers confondus (max des [PullOutcome.serverTimeMs] non-null) — sert
@@ -33,15 +66,33 @@ class PullRunReport {
     this.notModified = 0,
     this.failed = 0,
     this.forbidden = 0,
+    this.outOfPlan = 0,
+    this.plannedNotPulled = 0,
+    this.plannedNotPulledKeys = const <String>{},
     this.latestServerTimeMs,
   });
 
   const PullRunReport.skipped() : this(skipped: true);
   const PullRunReport.offline() : this(offline: true);
 
-  /// Ressources réellement tirées. [forbidden] en est exclu : une ressource
-  /// sautée n'a produit ni donnée ni échec.
+  /// Ressources réellement tirées. Les trois compteurs de ressources **sautées**
+  /// en sont exclus : une ressource sautée n'a produit ni donnée ni échec.
   int get processed => updated + notModified + failed;
+
+  /// Vrai quand ce cycle **n'a pas couvert tout ce qu'il aurait dû** — la seule
+  /// question à laquelle la pastille de synchro doit répondre (ADR-015 F1).
+  ///
+  /// [outOfPlan] en est délibérément absent : un flux hors du plan d'un profil
+  /// est le périmètre correct de ce profil, pas un manque. L'y compter
+  /// afficherait une dégradation permanente à tout compte au périmètre étroit —
+  /// exactement le contresens que la docstring de [forbidden] écarte.
+  ///
+  /// Un rapport [skipped] ou [offline] n'a rien observé : il ne dit ni dégradé
+  /// ni sain, et l'appelant ne doit rien en conclure.
+  bool get isDegraded =>
+      !skipped &&
+      !offline &&
+      (failed > 0 || forbidden > 0 || plannedNotPulled > 0);
 }
 
 /// Orchestrateur du **pull delta** (SOC-1) — pendant *lecture* du `SyncEngine`

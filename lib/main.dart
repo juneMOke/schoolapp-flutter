@@ -154,8 +154,16 @@ class _MyAppState extends State<MyApp> {
                 // Jetons frais ou repli offline : dans les deux cas, pousse
                 // l'outbox en attente et recalcule la pastille de synchro
                 // (D-05, réconciliation silencieuse au retour réseau si
-                // offline).
-                _syncStatusCubit.notifyLocalWrite();
+                // offline) — puis TIRE (ADR-015 F0).
+                //
+                // Le cycle de pull n'avait qu'un seul déclencheur, la
+                // transition hors-ligne → en ligne : une tablette allumée le
+                // matin dans une école déjà couverte en Wi-Fi n'exécutait
+                // aucun cycle de coordinateur de toute la journée. En
+                // `unawaited` : la porte de navigation ne dépend que du
+                // contexte académique demandé juste au-dessus, et rien de
+                // réseau ne doit la retarder.
+                unawaited(_syncStatusCubit.syncOnLogin());
                 // Entretien du cache de restitution éditique (ADR-012 D-7) :
                 // réclame les fichiers chiffrés qu'aucune ligne d'index ne
                 // désigne plus. Une purge d'école interrompue en laisse — des
