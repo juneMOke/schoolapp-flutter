@@ -354,8 +354,15 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
               label: bucketLabel(l10n, bucket),
               bucket: bucket,
             ),
-            onOpenEval: (eval) =>
-                _openEvalSaisie(eval, periode, bucket, detail),
+            // La grille de saisie est NOMINATIVE : elle exige le droit de
+            // lire les notes, que la porte d'entrée soit « Mes cours » ou
+            // l'emploi du temps (ADR-015 §6-B). Sans lui, les évaluations
+            // restent listées mais la ligne n'ouvre rien — l'affordance est
+            // retirée, pas remplacée par un refus au dernier moment.
+            onOpenEval:
+                PermissionGate.allows(context, const [Perm.academicsGradeRead])
+                ? (eval) => _openEvalSaisie(eval, periode, bucket, detail)
+                : null,
           ),
       ],
     );
