@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
@@ -20,6 +25,28 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class MockFeeControlBloc extends MockBloc<FeeControlEvent, FeeControlState>
     implements FeeControlBloc {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+/// Ce que la session détient. `null` = ensemble jamais communiqué ; l'absence
+/// d'instance = aucun `AuthBloc` dans l'arbre. Les deux valent « inconnu ».
+class _Session {
+  const _Session(this.permissions);
+  const _Session.unknown() : permissions = null;
+
+  final List<String>? permissions;
+}
+
+/// Le contrôle des frais s'ouvre sur `finance.*` — mais ses lignes viennent du
+/// flux Inscription, et sa maille « classe » du flux Classe.
+const _sansRien = _Session(['finance.charge.read']);
+const _sansClasse = _Session(['finance.charge.read', 'enrollment.read']);
+const _complet = _Session([
+  'finance.charge.read',
+  'enrollment.read',
+  'classroom.read',
+]);
 
 const tQuery = FeeControlQuery(
   academicYearId: 'ay-1',
@@ -42,6 +69,23 @@ const tClassroomQuery = FeeControlQuery(
   classroomId: 'cls-1',
   feeCode: 'TUITION',
   statusFilter: FeeControlPaymentFilter.settled,
+  firstName: '',
+  lastName: '',
+  surname: '',
+  page: 0,
+  size: 10,
+);
+
+/// La même recherche relancée sur un autre statut. Rien de ce qui décide du
+/// message de vide ne change (ni la maille, ni le périmètre, ni la
+/// répartition) : seule la puce de critère bouge. Une différence dans le
+/// message ne peut donc venir que du verdict de droits.
+const tRelanceQuery = FeeControlQuery(
+  academicYearId: 'ay-1',
+  schoolLevelGroupId: 'g1',
+  schoolLevelId: 'l1',
+  feeCode: 'TUITION',
+  statusFilter: FeeControlPaymentFilter.none,
   firstName: '',
   lastName: '',
   surname: '',
@@ -73,22 +117,45 @@ const tRow = FeeControlRow(
   ),
 );
 
-Future<void> _pumpView(WidgetTester tester, FeeControlState state) async {
+/// [session] omise = pas d'`AuthBloc` du tout : c'est le cas de tous les tests
+/// historiques de ce fichier, et il vaut « droits inconnus ».
+Future<void> _pumpView(
+  WidgetTester tester,
+  FeeControlState state, {
+  _Session? session,
+}) async {
   final bloc = MockFeeControlBloc();
   when(() => bloc.state).thenReturn(state);
   whenListen(bloc, const Stream<FeeControlState>.empty(), initialState: state);
+
+  Widget child = BlocProvider<FeeControlBloc>.value(
+    value: bloc,
+    child: AppPageBackground(
+      child: FeeControlResultsView(onViewRequested: (_) {}),
+    ),
+  );
+
+  if (session != null) {
+    final authBloc = _MockAuthBloc();
+    final authState = AuthState(
+      status: AuthStatus.authenticated,
+      permissions: session.permissions,
+    );
+    when(() => authBloc.state).thenReturn(authState);
+    whenListen(
+      authBloc,
+      Stream<AuthState>.value(authState),
+      initialState: authState,
+    );
+    child = BlocProvider<AuthBloc>.value(value: authBloc, child: child);
+  }
 
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: BlocProvider<FeeControlBloc>.value(
-        value: bloc,
-        child: AppPageBackground(
-          child: FeeControlResultsView(onViewRequested: (_) {}),
-        ),
-      ),
+      home: child,
     ),
   );
   await tester.pumpAndSettle();
@@ -268,5 +335,307 @@ void main() {
     );
 
     expect(find.byType(EnrollmentResultsErrorState), findsOneWidget);
+  });
+
+  // ADR-015 F1c — ce module s'ouvre sur `finance.*`, mais toutes ses lignes
+  // viennent du flux Inscription, sauté à chaque cycle de pull faute de
+  // `enrollment.read`. Les messages de synchronisation promettent alors une
+  // mise à jour qui n'arrivera jamais.
+  group('le vide vient d\'un droit, pas d\'une synchro', () {
+    /// Roster absent ET droit absent : les deux causes candidates sont vraies
+    /// en même temps. C'est le cas qui verrouille l'ORDRE des branches.
+    const rosterEtDroitAbsents = FeeControlState(
+      status: EnrollmentLoadStatus.success,
+      studentsInScope: 0,
+      classroomRosterSize: 0,
+      lastQuery: tClassroomQuery,
+    );
+
+    testWidgets(
+      'sans enrollment.read, le droit prime sur « roster non descendu »',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpView(tester, rosterEtDroitAbsents, session: _sansRien);
+
+        expect(
+          find.textContaining('le contrôle ne peut porter sur personne'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('n\'est pas encore descendue sur cet appareil'),
+          findsNothing,
+          reason:
+              'placée après, la branche de droit ne se déclencherait '
+              'jamais : le roster manquant la préempterait et enverrait '
+              'attendre un pull qui a déjà eu lieu et qui a sauté ce flux',
+        );
+      },
+    );
+
+    testWidgets(
+      'sans enrollment.read, le droit prime aussi sur « aucun dossier local »',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpView(
+          tester,
+          const FeeControlState(
+            status: EnrollmentLoadStatus.success,
+            studentsInScope: 0,
+            classroomRosterSize: 24,
+            lastQuery: tClassroomQuery,
+          ),
+          session: _sansRien,
+        );
+
+        expect(
+          find.textContaining('le contrôle ne peut porter sur personne'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('n\'a de dossier d\'inscription local'),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets('sans classroom.read, la recherche par classe le dit', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(tester, rosterEtDroitAbsents, session: _sansClasse);
+
+      expect(
+        find.textContaining('le contrôle par classe est impossible'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('n\'est pas encore descendue sur cet appareil'),
+        findsNothing,
+      );
+    });
+
+    // Le droit sur les classes n'explique un vide que si la requête filtre par
+    // classe : à la maille niveau, il n'a rien à voir avec le résultat.
+    testWidgets(
+      'sans classroom.read mais sans filtre de classe : rien à dire',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpView(
+          tester,
+          const FeeControlState(
+            status: EnrollmentLoadStatus.success,
+            studentsInScope: 12,
+            breakdown: FeeControlBreakdown(settled: 12),
+            lastQuery: tQuery,
+          ),
+          session: _sansClasse,
+        );
+
+        expect(
+          find.textContaining('le contrôle par classe est impossible'),
+          findsNothing,
+        );
+        expect(
+          find.textContaining('Aucun élève ne correspond à ces critères'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('droits complets : les messages de synchro reviennent', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(tester, rosterEtDroitAbsents, session: _complet);
+
+      expect(
+        find.textContaining('n\'est pas encore descendue sur cet appareil'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('le contrôle ne peut porter sur personne'),
+        findsNothing,
+      );
+    });
+
+    // LE PIÈGE : `canAccess` refuse sur un ensemble `null`, mais un parc de
+    // sessions ouvertes avant la migration est ENTIÈREMENT en `null` — ces
+    // comptes ont tous les droits et leurs données descendent normalement. Les
+    // accuser transformerait un message faux en un message pire.
+    testWidgets(
+      'droits inconnus (null) → l\'ancien message, jamais l\'accusation',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpView(
+          tester,
+          rosterEtDroitAbsents,
+          session: const _Session.unknown(),
+        );
+
+        expect(
+          find.textContaining('n\'est pas encore descendue sur cet appareil'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('le contrôle ne peut porter sur personne'),
+          findsNothing,
+        );
+        expect(
+          find.textContaining('le contrôle par classe est impossible'),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets('sans AuthBloc dans l\'arbre → l\'ancien message aussi', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(tester, rosterEtDroitAbsents);
+
+      expect(
+        find.textContaining('n\'est pas encore descendue sur cet appareil'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('n\'a pas accès'), findsNothing);
+    });
+
+    // Le tableau porte son propre libellé de vide : sans ce relais, la carte
+    // dirait la vérité pendant que la table annoncerait encore une
+    // non-correspondance.
+    testWidgets('le libellé de vide du tableau dit la même chose', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        // Recherche lancée, résultats pas encore posés : c'est le tableau qui
+        // est rendu, avec ses lignes vides.
+        const FeeControlState(lastQuery: tClassroomQuery),
+        session: _sansRien,
+      );
+
+      expect(find.byType(FeeControlDataTable), findsOneWidget);
+      expect(
+        find.textContaining('le contrôle ne peut porter sur personne'),
+        findsOneWidget,
+      );
+    });
+
+    // Le verdict se lit EN TÊTE du `builder`, pas dans le `build` extérieur.
+    // Depuis le `build`, il serait capturé par la closure du `BlocBuilder` :
+    // le `builder` rejoué ne relirait jamais les droits, et la phrase resterait
+    // celle de la première seconde pour toute la vie de l'écran — un droit
+    // élargi en séance (ou simplement lu après coup, l'ensemble arrivant en
+    // `null` au premier rendu) continuerait d'accuser le compte.
+    testWidgets('un droit élargi en séance change la phrase au rebuild suivant', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      const vide = FeeControlState(
+        status: EnrollmentLoadStatus.success,
+        studentsInScope: 12,
+        breakdown: FeeControlBreakdown(settled: 12),
+        lastQuery: tQuery,
+      );
+      const videRelance = FeeControlState(
+        status: EnrollmentLoadStatus.success,
+        studentsInScope: 12,
+        breakdown: FeeControlBreakdown(settled: 12),
+        lastQuery: tRelanceQuery,
+      );
+
+      // Un vrai flux piloté par le test : un second `pumpWidget` ne rejouerait
+      // pas le `create` d'un provider sur un élément réutilisé, et ne prouverait
+      // donc rien.
+      final states = StreamController<FeeControlState>.broadcast();
+      addTearDown(states.close);
+      final bloc = MockFeeControlBloc();
+      whenListen(bloc, states.stream, initialState: vide);
+
+      // La vue ne s'abonne PAS à l'`AuthBloc` — c'est documenté et voulu. On
+      // pilote donc la session par le getter d'état, exactement comme
+      // `permissionHolding` la lit, et c'est bien l'émission du `FeeControlBloc`
+      // qui déclenche la reconstruction.
+      var permissions = _sansRien.permissions;
+      final authBloc = _MockAuthBloc();
+      when(() => authBloc.state).thenAnswer(
+        (_) => AuthState(
+          status: AuthStatus.authenticated,
+          permissions: permissions,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BlocProvider<AuthBloc>.value(
+            value: authBloc,
+            child: BlocProvider<FeeControlBloc>.value(
+              value: bloc,
+              child: AppPageBackground(
+                child: FeeControlResultsView(onViewRequested: (_) {}),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('le contrôle ne peut porter sur personne'),
+        findsOneWidget,
+      );
+
+      permissions = _complet.permissions;
+      states.add(videRelance);
+      await tester.pumpAndSettle();
+
+      // Témoin : sans reconstruction effective des résultats, la suite ne
+      // prouverait rien.
+      expect(
+        find.text('Statut : À régler'),
+        findsOneWidget,
+        reason: 'la puce de critère doit avoir suivi la nouvelle recherche',
+      );
+      expect(
+        find.textContaining('le contrôle ne peut porter sur personne'),
+        findsNothing,
+        reason: 'le verdict de droits était figé par la closure du BlocBuilder',
+      );
+      expect(
+        find.textContaining('Aucun élève ne correspond à ces critères'),
+        findsOneWidget,
+      );
+    });
   });
 }

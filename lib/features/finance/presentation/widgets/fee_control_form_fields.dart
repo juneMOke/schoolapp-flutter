@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/search/search_group_box.dart';
 import 'package:school_app_flutter/core/components/search/search_level_cascade.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
@@ -6,6 +7,7 @@ import 'package:school_app_flutter/core/components/search/search_name_fields.dar
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
@@ -58,7 +60,17 @@ class FeeControlFeeField extends StatelessWidget {
     if (!hasLevel || isLoading || items.isNotEmpty) {
       errorText = null;
     } else if (feeGridMissing) {
-      errorText = l10n.feeControlFeeGridMissing;
+      // Même défaut que le sélecteur de classe, et c'est le seul des trois
+      // qu'un gabarit de rôle serveur produise réellement : le référentiel
+      // descend sur `school.read`, mais le serveur en ampute la portion
+      // tarifaire quand la session n'a pas `finance.grid.read`. « Synchronisez »
+      // promet alors une mise à jour déjà faite, qui reviendra tout aussi
+      // caviardée. Le wizard d'inscription traite déjà ce cas correctement.
+      errorText =
+          permissionHolding(context, const [Perm.financeGridRead]) ==
+              PermissionHolding.missing
+          ? l10n.feeControlFeeGridWithheld
+          : l10n.feeControlFeeGridMissing;
     } else {
       errorText = l10n.feeControlFeeEmptyForLevel;
     }
@@ -268,6 +280,14 @@ class FeeControlClassroomField extends StatelessWidget {
     // à la maille niveau. Le message dit pourquoi la liste est courte.
     final enabled = hasLevel && !isLoading;
     final known = classrooms.any((c) => c.id == selectedClassroomId);
+    // Une liste vide a deux causes, et une seule des deux se résoudra
+    // (ADR-015 F1). Sans `classroom.read`, le roster n'est jamais tiré : dire
+    // « aucune classe n'est composée pour ce niveau » affirme une chose sur
+    // l'école alors qu'on ne sait rien d'elle — et laisse chercher côté
+    // organisation des classes un manque qui est côté droits.
+    final rosterWithheld =
+        permissionHolding(context, const [Perm.classroomRead]) ==
+        PermissionHolding.missing;
 
     return EteeloSelectInput<String>(
       label: l10n.feeControlClassroomLabel,
@@ -275,7 +295,9 @@ class FeeControlClassroomField extends StatelessWidget {
       value: known ? selectedClassroomId : allClassroomsValue,
       enabled: enabled,
       errorText: hasLevel && !isLoading && classrooms.isEmpty
-          ? l10n.feeControlClassroomEmptyForLevel
+          ? (rosterWithheld
+                ? l10n.feeControlClassroomWithheld
+                : l10n.feeControlClassroomEmptyForLevel)
           : null,
       onChanged: onChanged,
       items: [
@@ -284,10 +306,7 @@ class FeeControlClassroomField extends StatelessWidget {
           label: l10n.feeControlClassroomAll,
         ),
         for (final classroom in classrooms)
-          EteeloSelectItem<String>(
-            value: classroom.id,
-            label: classroom.name,
-          ),
+          EteeloSelectItem<String>(value: classroom.id, label: classroom.name),
       ],
     );
   }

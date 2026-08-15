@@ -1,10 +1,16 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/presentation/contracts/fee_control_contracts.dart';
@@ -47,6 +53,44 @@ const _classrooms = [
   ),
 ];
 
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+/// Ce que la session détient. `null` = ensemble jamais communiqué ; l'absence
+/// d'instance = aucun `AuthBloc` dans l'arbre. Les deux valent « inconnu ».
+class _Session {
+  const _Session(this.permissions);
+  const _Session.unknown() : permissions = null;
+
+  final List<String>? permissions;
+}
+
+const _sansClasse = _Session(['finance.charge.read', 'enrollment.read']);
+const _avecClasse = _Session([
+  'finance.charge.read',
+  'enrollment.read',
+  'classroom.read',
+]);
+
+/// Profil sans `finance.grid.read`. Le référentiel descend bien (il tient à
+/// `school.read`), mais le serveur en ampute la portion tarifaire : c'est le
+/// SEUL des trois cas de ce lot qu'un gabarit de rôle serveur produise
+/// réellement. `classroom.read` y figure pour que le sélecteur de classe reste
+/// muet et n'introduise pas un second message dans l'écran.
+const _sansGrille = _Session([
+  'finance.charge.read',
+  'enrollment.read',
+  'classroom.read',
+]);
+const _avecGrille = _Session([
+  'finance.charge.read',
+  'enrollment.read',
+  'classroom.read',
+  'finance.grid.read',
+]);
+
+/// [session] omise = pas d'`AuthBloc` du tout, comme dans tous les tests
+/// historiques de ce fichier.
 Future<void> _pumpForm(
   WidgetTester tester, {
   List<LocalFeeTariff> tariffs = const <LocalFeeTariff>[],
@@ -54,26 +98,44 @@ Future<void> _pumpForm(
   bool feeGridMissing = false,
   void Function(String, String)? onLevelSelected,
   ValueChanged<FeeControlSearchRequest>? onSearch,
+  _Session? session,
 }) async {
+  Widget child = AppPageBackground(
+    child: FeeControlSearchForm(
+      options: _options,
+      tariffs: tariffs,
+      classrooms: classrooms,
+      isTariffsLoading: false,
+      isClassroomsLoading: false,
+      feeGridMissing: feeGridMissing,
+      isLoading: false,
+      onLevelSelected: onLevelSelected ?? (_, _) {},
+      onSearch: onSearch ?? (_) {},
+      onClear: () {},
+    ),
+  );
+
+  if (session != null) {
+    final authBloc = _MockAuthBloc();
+    final authState = AuthState(
+      status: AuthStatus.authenticated,
+      permissions: session.permissions,
+    );
+    when(() => authBloc.state).thenReturn(authState);
+    whenListen(
+      authBloc,
+      Stream<AuthState>.value(authState),
+      initialState: authState,
+    );
+    child = BlocProvider<AuthBloc>.value(value: authBloc, child: child);
+  }
+
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: AppPageBackground(
-        child: FeeControlSearchForm(
-          options: _options,
-          tariffs: tariffs,
-          classrooms: classrooms,
-          isTariffsLoading: false,
-          isClassroomsLoading: false,
-          feeGridMissing: feeGridMissing,
-          isLoading: false,
-          onLevelSelected: onLevelSelected ?? (_, _) {},
-          onSearch: onSearch ?? (_) {},
-          onClear: () {},
-        ),
-      ),
+      home: child,
     ),
   );
   await tester.pumpAndSettle();
@@ -130,27 +192,25 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
-  testWidgets(
-    'choisir un cycle puis un niveau demande la grille du niveau',
-    (tester) async {
-      tester.view.physicalSize = const Size(1400, 1200);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
+  testWidgets('choisir un cycle puis un niveau demande la grille du niveau', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-      final selected = <String>[];
-      await _pumpForm(
-        tester,
-        onLevelSelected: (groupId, levelId) =>
-            selected.add('$groupId::$levelId'),
-      );
+    final selected = <String>[];
+    await _pumpForm(
+      tester,
+      onLevelSelected: (groupId, levelId) => selected.add('$groupId::$levelId'),
+    );
 
-      await _selectCycle(tester, 'g1');
-      expect(selected, isEmpty, reason: 'un cycle seul ne charge pas la grille');
+    await _selectCycle(tester, 'g1');
+    expect(selected, isEmpty, reason: 'un cycle seul ne charge pas la grille');
 
-      await _selectLevel(tester, 'g1::l1');
-      expect(selected, ['g1::l1']);
-    },
-  );
+    await _selectLevel(tester, 'g1::l1');
+    expect(selected, ['g1::l1']);
+  });
 
   testWidgets('un frais choisi arme Rechercher et remonte le code', (
     tester,
@@ -210,10 +270,7 @@ void main() {
     expect(emitted!.classroomId, 'cls-1');
 
     // La sentinelle « toutes les classes » revient bien à null.
-    await _selectClassroom(
-      tester,
-      FeeControlClassroomField.allClassroomsValue,
-    );
+    await _selectClassroom(tester, FeeControlClassroomField.allClassroomsValue);
     await tester.tap(_searchButton);
     await tester.pumpAndSettle();
     expect(emitted!.classroomId, isNull);
@@ -271,6 +328,197 @@ void main() {
     await _selectLevel(tester, 'g1::l1');
 
     expect(find.textContaining('Aucun frais n\'est défini'), findsOneWidget);
+  });
+
+  // ADR-015 F1c — une liste de classes vide a deux causes, et une seule des
+  // deux se résoudra. Sans `classroom.read`, le roster n'est jamais tiré :
+  // « aucune classe n'est composée » affirme alors quelque chose sur l'école
+  // dont on ne sait rien, et fait chercher côté organisation des classes un
+  // manque qui est côté droits.
+  group('classe : liste vide, deux causes', () {
+    const withheld =
+        'Les classes relèvent d\'un module auquel ce profil n\'a '
+        'pas accès';
+    const empty = 'Aucune classe n\'est composée pour ce niveau';
+
+    testWidgets('sans classroom.read → dit le droit', (tester) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, session: _sansClasse);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(withheld), findsOneWidget);
+      expect(find.textContaining(empty), findsNothing);
+    });
+
+    testWidgets('avec classroom.read → dit l\'école', (tester) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, session: _avecClasse);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(empty), findsOneWidget);
+      expect(find.textContaining(withheld), findsNothing);
+    });
+
+    // LE PIÈGE : un parc de sessions ouvertes avant la migration des
+    // permissions est entièrement en `null`. Ces comptes ont TOUS les droits et
+    // leurs classes descendent normalement — leur dire « ce profil n'a pas
+    // accès » remplacerait un message discutable par un message faux.
+    testWidgets(
+      'droits inconnus (null) → l\'ancien message, pas l\'accusation',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpForm(tester, session: const _Session.unknown());
+        await _selectCycle(tester, 'g1');
+        await _selectLevel(tester, 'g1::l1');
+
+        expect(find.textContaining(empty), findsOneWidget);
+        expect(find.textContaining(withheld), findsNothing);
+      },
+    );
+
+    testWidgets('sans AuthBloc dans l\'arbre → l\'ancien message aussi', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(empty), findsOneWidget);
+      expect(find.textContaining(withheld), findsNothing);
+    });
+
+    // Le message ne porte que sur la liste vide : des classes connues sans le
+    // droit (roster déjà descendu, droit retiré depuis) n'ont rien à expliquer.
+    testWidgets('des classes connues → aucun message, même sans le droit', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, classrooms: _classrooms, session: _sansClasse);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(withheld), findsNothing);
+      expect(find.textContaining(empty), findsNothing);
+    });
+  });
+
+  // ADR-015 F1c — la grille absente a elle aussi deux causes, et celle-ci est
+  // la seule des trois du lot qu'un gabarit de rôle serveur produise vraiment :
+  // le référentiel descend sur `school.read`, mais le serveur en ampute la
+  // portion tarifaire quand la session n'a pas `finance.grid.read`.
+  // « Synchronisez » promet alors une mise à jour déjà faite, et qui reviendra
+  // tout aussi caviardée.
+  group('frais : grille absente, deux causes', () {
+    const withheld = 'elle ne descendra pas sur cet appareil';
+    const missing = 'n\'est pas encore descendue sur cet appareil';
+
+    testWidgets('sans finance.grid.read → dit le droit, sans promesse vaine', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, feeGridMissing: true, session: _sansGrille);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(withheld), findsOneWidget);
+      expect(find.textContaining(missing), findsNothing);
+      // Le geste promis est le cœur du défaut : une synchronisation de plus ne
+      // ramènera jamais une grille que le serveur ampute à chaque envoi.
+      expect(find.textContaining('Synchronisez'), findsNothing);
+    });
+
+    testWidgets('avec finance.grid.read → le vrai « pas encore descendue »', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, feeGridMissing: true, session: _avecGrille);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(missing), findsOneWidget);
+      expect(find.textContaining('Synchronisez'), findsOneWidget);
+      expect(find.textContaining(withheld), findsNothing);
+    });
+
+    // LE PIÈGE : le parc de sessions ouvertes avant la migration des
+    // permissions est ENTIÈREMENT en `null`. Ces comptes ont tous les droits et
+    // leur grille descend normalement — les accuser serait pire que le défaut
+    // d'origine, qui se contentait de promettre une synchronisation inutile.
+    testWidgets(
+      'droits inconnus (null) → l\'ancien message, pas l\'accusation',
+      (tester) async {
+        tester.view.physicalSize = const Size(1400, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await _pumpForm(
+          tester,
+          feeGridMissing: true,
+          session: const _Session.unknown(),
+        );
+        await _selectCycle(tester, 'g1');
+        await _selectLevel(tester, 'g1::l1');
+
+        expect(find.textContaining(missing), findsOneWidget);
+        expect(find.textContaining(withheld), findsNothing);
+      },
+    );
+
+    testWidgets('sans AuthBloc dans l\'arbre → l\'ancien message aussi', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, feeGridMissing: true);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(missing), findsOneWidget);
+      expect(find.textContaining(withheld), findsNothing);
+    });
+
+    // Le message ne porte que sur la grille absente : une grille présente n'a
+    // rien à expliquer, même sans le droit.
+    testWidgets('une grille présente → aucun des deux messages', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, tariffs: _tariffs, session: _sansGrille);
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(withheld), findsNothing);
+      expect(find.textContaining(missing), findsNothing);
+    });
   });
 }
 

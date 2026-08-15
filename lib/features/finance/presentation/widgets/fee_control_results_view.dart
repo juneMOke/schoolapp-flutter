@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/student_charges/student_charge_fee_code_l10n_extension.dart';
@@ -30,6 +32,21 @@ class FeeControlResultsView extends StatelessWidget {
     return BlocBuilder<FeeControlBloc, FeeControlState>(
       buildWhen: _shouldBuild,
       builder: (context, state) {
+        // Relu à CHAQUE reconstruction des résultats, jamais capturé dans la
+        // closure : `permissionHolding` ne s'abonne pas, et lu une seule fois
+        // dans le `build` extérieur le verdict resterait figé pour toute la vie
+        // de l'écran — un droit élargi en séance ne changerait plus la phrase.
+        //
+        // Ce module s'ouvre sur `finance.*`, mais sa seule source de lignes est
+        // le flux Inscription : un compte sans `enrollment.read` n'aura jamais
+        // d'élève à croiser, quels que soient les critères.
+        final enrollment = permissionHolding(context, const [
+          Perm.enrollmentRead,
+        ]);
+        final classroom = permissionHolding(context, const [
+          Perm.classroomRead,
+        ]);
+
         if (!state.hasSearched) {
           return const FeeControlSearchInvitationCard();
         }
@@ -68,7 +85,12 @@ class FeeControlResultsView extends StatelessWidget {
             // se fait depuis le formulaire, qui la porte déjà.
             child: FeeControlResultsEmptyState(
               key: const ValueKey('fee-control-results-empty'),
-              description: _emptyDescription(state, l10n),
+              description: _emptyDescription(
+                state,
+                l10n,
+                enrollment: enrollment,
+                classroom: classroom,
+              ),
               criteria: _buildCriteria(state, l10n),
             ),
           );
@@ -86,7 +108,15 @@ class FeeControlResultsView extends StatelessWidget {
             isError: isError,
             loadingLabel: l10n.loadingStudents,
             errorLabel: state.errorMessage,
-            emptyLabel: l10n.feeControlNoResultsDescription,
+            // Même cause, même phrase : sans ce relais le tableau continuerait
+            // d'annoncer « aucun élève ne correspond » là où la carte de vide
+            // dit désormais la vérité.
+            emptyLabel: _emptyDescription(
+              state,
+              l10n,
+              enrollment: enrollment,
+              classroom: classroom,
+            ),
             showPagination: true,
             currentPage: state.page + 1,
             totalPages: state.totalPages,
@@ -106,13 +136,28 @@ class FeeControlResultsView extends StatelessWidget {
     );
   }
 
-  /// Une liste vide a quatre causes qui appellent quatre gestes différents. Les
+  /// Une liste vide a plusieurs causes qui appellent des gestes différents. Les
   /// confondre envoie chercher une erreur de saisie là où il manque une
   /// synchronisation — ou l'inverse.
+  ///
+  /// **Le droit manquant passe en tête** (ADR-015 F1). Les deux messages de
+  /// synchronisation ci-dessous promettent une mise à jour qui n'arrivera
+  /// jamais : le flux qui remplirait ces tables est sauté à chaque cycle faute
+  /// de permission. Placés avant, ils enverraient le caissier attendre
+  /// indéfiniment un pull qui a déjà eu lieu et qui l'a délibérément sauté.
   static String _emptyDescription(
     FeeControlState state,
-    AppLocalizations l10n,
-  ) {
+    AppLocalizations l10n, {
+    required PermissionHolding enrollment,
+    required PermissionHolding classroom,
+  }) {
+    if (enrollment == PermissionHolding.missing) {
+      return l10n.feeControlEmptyEnrollmentWithheld;
+    }
+    if (state.lastQuery?.classroomId != null &&
+        classroom == PermissionHolding.missing) {
+      return l10n.feeControlEmptyClassroomWithheld;
+    }
     if (state.lastQuery?.classroomId != null) {
       // Le roster de cette classe n'est pas descendu sur l'appareil : rien à
       // croiser, quels que soient les critères.

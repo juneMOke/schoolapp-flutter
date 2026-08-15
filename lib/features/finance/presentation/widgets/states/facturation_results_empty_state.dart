@@ -12,10 +12,16 @@ class FacturationResultsEmptyState extends StatelessWidget {
   final List<String> criteria;
   final VoidCallback? onReset;
 
+  /// Substitue le message par défaut quand l'appelant connaît une cause plus
+  /// précise du vide — un droit manquant, typiquement, qu'aucun changement de
+  /// critères ne lèvera (ADR-015 F1). `null` = « aucun résultat » ordinaire.
+  final String? description;
+
   const FacturationResultsEmptyState({
     super.key,
     this.criteria = const <String>[],
     this.onReset,
+    this.description,
   });
 
   @override
@@ -39,7 +45,7 @@ class FacturationResultsEmptyState extends StatelessWidget {
 
     return EteeloEmptyResult(
       label: l10n.facturationEmptyTitle,
-      description: l10n.facturationNoResultsDescription,
+      description: description ?? l10n.facturationNoResultsDescription,
       criteriaChips: criteriaChips,
       medallionIcon: Icons.search_off_rounded,
       cornerBadgeIcon: hasCriteria ? Icons.filter_list_rounded : null,

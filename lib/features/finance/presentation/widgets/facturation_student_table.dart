@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
@@ -75,6 +77,7 @@ class FacturationStudentTable extends StatelessWidget {
             child: FacturationResultsEmptyState(
               key: const ValueKey('facturation-results-empty'),
               criteria: _buildCriteria(state, l10n),
+              description: _withheldDescription(context, l10n),
             ),
           );
         }
@@ -91,7 +94,7 @@ class FacturationStudentTable extends StatelessWidget {
             isError: isError,
             loadingLabel: l10n.loadingStudents,
             errorLabel: state.errorMessage,
-            emptyLabel: _buildEmptyLabel(state, l10n),
+            emptyLabel: _buildEmptyLabel(context, state, l10n),
             showPagination: true,
             currentPage: state.summariesPage + 1,
             totalPages: state.summariesTotalPages,
@@ -136,10 +139,30 @@ class FacturationStudentTable extends StatelessWidget {
     return chips;
   }
 
+  /// La cause du vide quand ce n'est pas la recherche (ADR-015 F1).
+  ///
+  /// Facturation s'ouvre sur `finance.*`, mais toutes ses lignes viennent du
+  /// flux Inscription : sans `enrollment.read`, la table locale reste vide à
+  /// jamais et « aucun élève ne correspond à ces critères » est faux — il n'y a
+  /// pas d'élève à faire correspondre, et changer les critères n'y fera rien.
+  ///
+  /// `null` sur droits **inconnus** comme sur droits détenus : on ne remplace un
+  /// message que quand on sait, sinon on accuserait un compte au hasard.
+  String? _withheldDescription(BuildContext context, AppLocalizations l10n) =>
+      permissionHolding(context, const [Perm.enrollmentRead]) ==
+          PermissionHolding.missing
+      ? l10n.facturationEmptyEnrollmentWithheld
+      : null;
+
   String _buildEmptyLabel(
+    BuildContext context,
     EnrollmentLocalListState state,
     AppLocalizations l10n,
   ) {
+    // Même cause, même phrase que la carte de vide : sans ce relais le tableau
+    // continuerait d'annoncer une non-correspondance.
+    final withheld = _withheldDescription(context, l10n);
+    if (withheld != null) return withheld;
     return switch (state.summariesStatus) {
       EnrollmentLoadStatus.initial => l10n.noResultsFound,
       EnrollmentLoadStatus.success => l10n.facturationNoResultsDescription,
