@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -15,7 +16,10 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/sync/data/datasources/sync_plan_api.dart';
+import 'package:school_app_flutter/features/sync/data/repositories/sync_plan_repository_impl.dart';
 import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -167,8 +171,34 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
 /// Appelé en fin de `configureDependencies()` (après les features online, dont
 /// les DataSources distantes réutilisées par les handlers).
 void registerOfflineModules(GetIt getIt) {
+  _registerSyncPlan(getIt);
   registerEnrollmentFinanceOffline(getIt); // branche A
   registerClassroomAttendanceOffline(getIt); // branche B
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
+}
+
+/// Plan de synchronisation par profil (ADR-015 F2).
+///
+/// Enregistré ici plutôt que dans `registerOfflineCore` : celui-ci s'exécute
+/// **avant** que `Dio` et la map d'extras d'authentification ne soient dans le
+/// conteneur. Tout est de toute façon résolu depuis l'intérieur de la closure —
+/// même précaution que `SyncEngine` avec `AuthSessionManager`.
+///
+/// ⚠️ **Aucun consommateur pour l'instant, et c'est voulu.** Le plan est lu et
+/// mis en cache, mais il ne gouverne rien : `PullCoordinator` continue de tirer
+/// dans l'ordre d'enregistrement, filtré par `requiredPermissions`. Le plan ne
+/// devient l'autorité qu'au lot F5, lui-même conditionné à l'unification des
+/// points de pull (F6) — sans quoi il ne gouvernerait que le seul chemin déjà
+/// gouverné pendant que les douze autres continuent.
+void _registerSyncPlan(GetIt getIt) {
+  getIt.registerLazySingleton<SyncPlanApi>(() => SyncPlanApi(getIt<Dio>()));
+  getIt.registerLazySingleton<SyncPlanRepository>(
+    () => SyncPlanRepositoryImpl(
+      api: getIt<SyncPlanApi>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
 }

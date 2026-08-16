@@ -457,6 +457,16 @@ class AppConstants {
   // Le pull HYDRATANT (agrégats complets, tablette neuve) est servi à part par
   // `syncEnrollmentSnapshotsEndpoint` (/api/v1/sync/enrollments/snapshots).
 
+  /// Plan de synchronisation du porteur de session (ADR-015 D-03) : quels flux
+  /// tirer, dans quel ordre, et pourquoi. GET /api/v1/sync/plan.
+  ///
+  /// Authentifiée mais **sans permission, et jamais 403** — la garder serait
+  /// circulaire : il faudrait un droit pour savoir à quoi on a droit. Un compte
+  /// sans aucune permission reçoit 200 et le socle : le plan n'est jamais vide.
+  /// **Aucun ETag** délibérément — un bump de `userVersion` efface la session au
+  /// lieu de déclencher une relecture.
+  static const String syncPlanEndpoint = '/api/v1/sync/plan';
+
   /// Pull du socle référentiel (années, cycles, niveaux, tarifs) — bundle
   /// conditionnel ETag/304. GET /api/v1/sync/referential.
   static const String syncReferentialEndpoint = '/api/v1/sync/referential';
