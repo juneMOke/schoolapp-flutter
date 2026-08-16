@@ -15,11 +15,13 @@ import 'package:school_app_flutter/features/schedule/data/repositories/offline/s
 /// (Même rôle que `SyncAttendancePullUseCase` / `SyncFinancePullsUseCase`.)
 ///
 /// **Best-effort et ordonné** : réf emploi du temps (créneaux + séances), puis
-/// cours (scopé enseignant, DF-K — plus de dépendance à l'année/bootstrap
-/// depuis le commit back `1ec6be3`), puis le bundle `grades-referential`
-/// (branches/plafonds/chapitres/périodes, cadré prof — condition de la
-/// prévention offline et de la composition du détail cours, MAJ-4), puis
-/// évaluations/notes (qui itèrent `ref_cours` — d'où l'ordre). Chaque étape
+/// le bundle `grades-referential` (branches/plafonds/chapitres/périodes, cadré
+/// prof — condition de la prévention offline et de la composition du détail
+/// cours, MAJ-4), puis cours (scopé enseignant, DF-K — plus de dépendance à
+/// l'année/bootstrap depuis le commit back `1ec6be3`), puis évaluations/notes
+/// (qui itèrent `ref_cours` — d'où l'ordre). Le barème AVANT les cours : le
+/// détail d'un cours le lit, et le graphe serveur pose la même arête
+/// (ADR-015 K). Chaque étape
 /// avale ses échecs (les repos ne lèvent jamais ; la lecture UI est locale de
 /// toute façon et sera resservie au prochain cycle).
 ///
@@ -78,18 +80,22 @@ class SyncAcademicsPullsUseCase {
       (o) => o.upserted,
     );
 
+    // Bundle grades-referential (ETag, cadré prof) — AVANT les cours, et non
+    // après : le détail d'un cours et la composition des évaluations le lisent,
+    // et le graphe de dépendances serveur pose la même arête (ADR-015 K). Il
+    // était tiré après `syncCours`, ce qui coûtait un cycle sur une tablette
+    // neuve. La DI le place plus tôt encore (en tête des six) : les deux
+    // séquences ne sont pas identiques, elles honorent la même arête.
+    _notify(
+      kGradesReferentialResource,
+      await _gradesReferentialPull.syncGradesReferential(),
+      (o) => o.upserted,
+    );
+
     // Cours du prof connecté (scope token, aucun classroomId/année requis).
     _notify(
       kAcademicsCoursResourcePrefix,
       await _coursPull.syncCours(),
-      (o) => o.upserted,
-    );
-
-    // Bundle grades-referential (ETag, cadré prof) — avant les lectures qui en
-    // dépendent (prévention offline, composition du détail cours, MAJ-4).
-    _notify(
-      kGradesReferentialResource,
-      await _gradesReferentialPull.syncGradesReferential(),
       (o) => o.upserted,
     );
 

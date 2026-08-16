@@ -179,11 +179,16 @@ void main() {
       await useCase();
       await Future<void>.delayed(Duration.zero);
 
+      // L'ORDRE EST PORTEUR, et cette liste le fige (ADR-015 K).
+      // `academics_grades_referential` passe AVANT `academics_cours` : le détail
+      // d'un cours et la composition des évaluations lisent le barème, et le
+      // graphe de dépendances serveur pose la même arête. Il était tiré après,
+      // ce qui coûtait un cycle sur une tablette neuve.
       expect(notified, [
         {'schedule_time_slots'},
         {'schedule_sessions'},
-        {'academics_cours'},
         {'academics_grades_referential'},
+        {'academics_cours'},
         {'academics_evaluations'},
         {'academics_notes'},
       ]);

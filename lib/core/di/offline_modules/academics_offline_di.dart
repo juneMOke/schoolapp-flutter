@@ -214,6 +214,18 @@ void registerAcademicsOffline(GetIt getIt) {
   );
 
   // ── Handlers de pull delta (routés par ressource) ──
+  //
+  // ⚠️ L'ORDRE D'ENREGISTREMENT EST L'ORDRE D'EXÉCUTION : le coordinateur itère
+  // `_handlers.values`, et une `LinkedHashMap` conserve la position
+  // d'insertion. Le référentiel de notes vient donc EN PREMIER — il était
+  // enregistré dernier des six, à rebours du graphe de dépendances (ADR-015 K),
+  // alors que le détail d'un cours et la composition des évaluations le lisent.
+  // Le même ordre est tenu à la main dans `SyncAcademicsPullsUseCase`, qui est
+  // le chemin emprunté par les FeatureScope : les deux doivent rester d'accord
+  // jusqu'à ce que le lot F6 les replie sur `pullSubset`.
+  getIt<PullCoordinator>().registerHandler(
+    GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
+  );
   getIt<PullCoordinator>().registerHandler(
     TimeSlotsPullHandler(getIt<SchedulePullRepositoryImpl>()),
   );
@@ -228,8 +240,5 @@ void registerAcademicsOffline(GetIt getIt) {
   );
   getIt<PullCoordinator>().registerHandler(
     NotesPullHandler(getIt<AcademicsMetierPullRepositoryImpl>()),
-  );
-  getIt<PullCoordinator>().registerHandler(
-    GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
   );
 }
