@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
@@ -126,7 +127,9 @@ class SyncAcademicsPullsUseCase {
     int Function(T) upsertedOf,
   ) {
     result.fold((_) {}, (outcome) {
-      if (upsertedOf(outcome) > 0) _completionBus?.notifyUpdated({resource});
+      if (upsertedOf(outcome) > 0) {
+        _completionBus?.notifyUpdated(pullCompletionSubjectsOf(resource));
+      }
     });
   }
 

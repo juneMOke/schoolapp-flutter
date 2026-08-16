@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 
@@ -159,7 +160,12 @@ class PullCoordinator {
               // cycle complet enchaîne des ressources lentes, attendre la fin
               // laisserait un écran affiché vide alors que SES données sont
               // déjà en base (cf. `PullCompletionBus`).
-              _completionBus?.notifyUpdated({handler.resource});
+              // TOUTES les ressources de la clé de ce flux, pas la seule que le
+              // handler déclare : deux flux du contrat partagent une clé et
+              // écrivent les mêmes tables (cf. `pullCompletionSubjectsOf`).
+              _completionBus?.notifyUpdated(
+                pullCompletionSubjectsOf(handler.resource),
+              );
             case PullResult.notModified:
               notModified++;
             case PullResult.error:

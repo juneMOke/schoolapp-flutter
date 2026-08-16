@@ -32,6 +32,33 @@
 /// Le serveur les a fusionnées sous une clé unique précisément pour rendre leur
 /// arête d'ordre indéclarable, donc incassable.
 ///
+/// ## Pourquoi le front ne fusionne PAS ses deux handlers pour autant
+///
+/// La fusion serveur rend l'arête indéclarable **dans le plan** ; elle n'impose
+/// rien au registre local, et le front tient déjà cet ordre à deux endroits,
+/// tous deux verrouillés par des tests : l'ordre d'enregistrement en DI, et
+/// `PullSequencer` qui impose l'ordre de cette liste contre celui du plan.
+///
+/// Fusionner les deux handlers coûterait plus qu'il ne rapporterait. Le
+/// coordinateur isole les échecs **par handler** — aujourd'hui, un hydratant en
+/// panne n'empêche pas le delta de tourner. Sous un handler unique, il faudrait
+/// replier deux issues sur un seul `PullOutcome`, et aucune combinaison n'est
+/// sans perte : `PullOutcome.error` ne porte ni `upserted` ni `serverTimeMs`,
+/// donc « l'erreur gagne » cacherait des lignes réellement écrites ; « le succès
+/// gagne » ferait retomber `failed` à zéro et afficherait une pastille verte sur
+/// un flux qui n'est pas passé.
+///
+/// Et la fusion ne toucherait même pas le chemin le plus emprunté :
+/// `SyncEnrollmentPullsUseCase` appelle le repository **directement** au montage
+/// des FeatureScope, sans passer par aucun handler.
+///
+/// ⚠️ Conséquence à ne pas défaire : `enrollments` est déclarée par un handler
+/// **et** portée par cette liste. Le jour où l'un des deux disparaîtrait, elle
+/// deviendrait une clé de curseur pure — encore écrite en base par le
+/// repository, mais absente du routage et du bus de complétion. La supprimer
+/// d'ici au motif qu'« aucun handler ne la déclare » orphelinerait son curseur
+/// et rebootstraperait ce flux sur tout le parc.
+///
 /// ⚠️ `enrollment.deltas` **n'existe pas** dans le contrat déployé. Le catalogue
 /// V1.2 le liste encore comme un flux à part ; l'énumération serveur l'a
 /// fusionné. L'inscrire ici produirait exactement le défaut que ce fichier
@@ -124,6 +151,33 @@ String? planKeyOf(String resource) => _planKeyByResource[resource];
 /// seulement laisser une trace.
 List<String> resourcesOf(String planKey) =>
     kSyncPlanAliases[planKey] ?? const <String>[];
+
+/// Les sujets à diffuser sur le `PullCompletionBus` quand cette ressource a
+/// appliqué des lignes : **toutes celles de sa clé de plan**, pas elle seule.
+///
+/// Deux flux du contrat partagent une clé — l'hydratant d'Inscription et son
+/// delta — et ils écrivent les mêmes tables. Ne diffuser que le nom du flux qui
+/// a tiré laisserait un écran abonné à l'autre nom sur un cache froid, après un
+/// pull qui a pourtant rempli sa table.
+///
+/// Aucun écran n'est dans ce cas aujourd'hui : les deux seuls abonnés
+/// surveillent academics et schedule, dont toutes les clés sont
+/// mono-ressource. C'est une trappe qu'on referme avant qu'elle ne serve.
+///
+/// Vit ici plutôt que dans le coordinateur parce que **le coordinateur n'est
+/// pas la seule bouche du bus** : les use cases d'hydratation des FeatureScope
+/// diffusent aussi, hors de tout cycle de coordinateur. Deux définitions
+/// divergeraient, et la seconde rouvrirait la trappe sans que les tests de la
+/// première ne bronchent.
+///
+/// Une ressource inconnue de la table est diffusée seule : un handler neuf, pas
+/// encore inscrit ici, doit continuer de réveiller ses écrans plutôt que de
+/// devenir muet.
+Set<String> pullCompletionSubjectsOf(String resource) {
+  final key = planKeyOf(resource);
+  if (key == null) return {resource};
+  return {resource, ...resourcesOf(key)};
+}
 
 /// Vrai si la ressource n'est qu'un **préfixe** de clé de curseur, jamais une
 /// clé complète — auquel cas interroger `sync_meta` sur la ressource nue rend
