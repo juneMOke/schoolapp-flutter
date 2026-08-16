@@ -17,6 +17,9 @@ class EvaluationsPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.academicsGradeRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncEvaluations();
     return result.fold(
@@ -43,6 +46,9 @@ class NotesPullHandler implements PullHandler {
   /// GET /sync/academics/notes — gardé sur `academics.grade.read` côté serveur.
   @override
   List<Perm> get requiredPermissions => const [Perm.academicsGradeRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async {

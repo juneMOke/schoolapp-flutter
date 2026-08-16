@@ -24,6 +24,9 @@ class AcademicsCoursPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.academicsCourseRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncCours();
     return result.fold(

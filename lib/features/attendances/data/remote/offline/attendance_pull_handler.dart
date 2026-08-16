@@ -19,6 +19,9 @@ class AttendancePullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.attendanceRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncAttendance();
     return result.fold(

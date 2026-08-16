@@ -24,6 +24,9 @@ class _StubHandler implements PullHandler {
   @override
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
 
+  @override
+  bool get isBaseline => false;
+
   const _StubHandler(this.resource, this.outcome);
 
   @override
@@ -36,6 +39,9 @@ class _ThrowingHandler implements PullHandler {
 
   @override
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
+  bool get isBaseline => false;
 
   const _ThrowingHandler(this.resource);
 

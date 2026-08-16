@@ -17,6 +17,8 @@ class FakePullHandler implements PullHandler {
     this.resource,
     this._outcome, {
     this.requiredPermissions = const [Perm.schoolRead],
+    this.isBaseline = false,
+    this.journal,
   });
 
   @override
@@ -24,12 +26,24 @@ class FakePullHandler implements PullHandler {
 
   @override
   final List<Perm> requiredPermissions;
+
+  /// Porté en CHAMP plutôt qu'en getter surchargé — comme
+  /// `EnrollmentPullHandler`, seul porteur réel du drapeau. C'est ce qui permet
+  /// d'opposer deux handlers identiques à ce seul détail près.
+  @override
+  final bool isBaseline;
+
+  /// Journal partagé : chaque pull y inscrit sa ressource. Seule façon
+  /// d'observer l'ordre RÉEL d'invocation — `calls` dit combien, jamais quand.
+  final List<String>? journal;
+
   final PullOutcome _outcome;
   int calls = 0;
 
   @override
   Future<PullOutcome> pull() async {
     calls++;
+    journal?.add(resource);
     return _outcome;
   }
 }
@@ -41,6 +55,9 @@ class ThrowingPullHandler implements PullHandler {
 
   @override
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async => throw StateError('réseau coupé');
@@ -57,6 +74,9 @@ class SlowPullHandler implements PullHandler {
 
   @override
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async {
@@ -140,6 +160,160 @@ void main() {
     expect(first.calls, 0);
     expect(second.calls, 1);
     expect(report.notModified, 1);
+  });
+
+  // ADR-015 K — l'ordre d'enregistrement EST l'ordre d'exécution, et c'est ce
+  // que la DI offline exploite pour poser ses arêtes de dépendance (référentiel
+  // avant les classes, créances avant paiements, barème avant les cours…). Rien
+  // ne l'observait : le coordinateur pouvait passer à un `Set`, à un tri par
+  // ressource ou à un `Future.wait` sans faire rougir un seul test, pendant que
+  // quatre arêtes money-grade se cassaient en silence.
+  group('ordre d\'exécution', () {
+    test('les handlers sont tirés dans leur ordre d\'enregistrement', () async {
+      goOnline();
+      final journal = <String>[];
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler(
+            'referentiel',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'creances',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'paiements',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        );
+
+      await coord.pullAll();
+
+      expect(journal, ['referentiel', 'creances', 'paiements']);
+    });
+
+    // Contre-épreuve indispensable : sans elle, le test ci-dessus resterait vert
+    // si le coordinateur triait ses ressources par ordre alphabétique — les
+    // trois noms y sont déjà. Ici l'ordre alphabétique donnerait l'inverse.
+    test('ordre d\'enregistrement inverse ⇒ ordre de tir inverse '
+        '(aucun tri caché)', () async {
+      goOnline();
+      final journal = <String>[];
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler(
+            'paiements',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'creances',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        )
+        ..registerHandler(
+          FakePullHandler(
+            'referentiel',
+            const PullOutcome.updated(),
+            journal: journal,
+          ),
+        );
+
+      await coord.pullAll();
+
+      expect(journal, ['paiements', 'creances', 'referentiel']);
+    });
+
+    // Le registre est une `LinkedHashMap` : réécrire une clé existante remplace
+    // la valeur SANS la déplacer. Un registrar qui ré-enregistre une ressource
+    // (rebinding, double appel) ne peut donc pas la faire remonter en tête — ce
+    // qui déplacerait silencieusement une arête de dépendance.
+    test(
+      'un ré-enregistrement remplace le handler mais garde sa PLACE',
+      () async {
+        goOnline();
+        final journal = <String>[];
+        final premier = FakePullHandler(
+          'creances',
+          const PullOutcome.updated(),
+          journal: journal,
+        );
+        final second = FakePullHandler(
+          'creances',
+          const PullOutcome.updated(),
+          journal: journal,
+        );
+        final coord = build()
+          ..registerHandler(premier)
+          ..registerHandler(
+            FakePullHandler(
+              'paiements',
+              const PullOutcome.updated(),
+              journal: journal,
+            ),
+          )
+          // Ré-enregistré APRÈS `paiements` : c'est bien le second qui tire, mais
+          // toujours à la position du premier.
+          ..registerHandler(second);
+
+        await coord.pullAll();
+
+        expect(journal, ['creances', 'paiements']);
+        expect(premier.calls, 0);
+        expect(second.calls, 1);
+      },
+    );
+
+    // Une ressource sautée ne doit pas décaler les suivantes : le filtre retire
+    // un maillon, il ne réordonne pas la chaîne.
+    test('une ressource sautée ne réordonne pas les autres', () async {
+      goOnline();
+      final journal = <String>[];
+      final coord =
+          PullCoordinator(
+              connectivity: service,
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+                journal: journal,
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'paiements',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.financePaymentRead],
+                journal: journal,
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classroom_members',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+                journal: journal,
+              ),
+            );
+
+      await coord.pullAll();
+
+      expect(journal, ['classrooms', 'classroom_members']);
+    });
   });
 
   group('latestServerTimeMs (date de dernière synchro, badge)', () {
@@ -331,6 +505,145 @@ void main() {
 
       expect((await coord.pullAll()).forbidden, 1);
       expect(handler.calls, 0);
+    });
+
+    // ── Le socle hors filtre (ADR-015 M) ──
+    //
+    // Le défaut corrigé : un compte dépourvu de `school.read` sautait le
+    // référentiel Inscription. Sans années de référence en base, la porte de
+    // navigation ne s'ouvre jamais — l'utilisateur reste sur l'écran d'amorçage
+    // et la seule sortie est la déconnexion. La panne était totale et muette :
+    // aucun échec, juste une ressource « sautée » de plus.
+    //
+    // Le socle se construit ici comme en production : `requiredPermissions`
+    // reste déclaré (`school.read`), seul `isBaseline` change. Le traduire par
+    // une exigence VIDE ferait l'inverse de ce qu'on attend — `canAccess`
+    // refuse sur exigence vide, délibérément.
+    FakePullHandler socle({
+      PullOutcome outcome = const PullOutcome.updated(),
+    }) => FakePullHandler(
+      'enrollment_referential',
+      outcome,
+      requiredPermissions: const [Perm.schoolRead],
+      isBaseline: true,
+    );
+
+    // LE test qui porte le correctif : l'ensemble VIDE est le cas où TOUT le
+    // reste est sauté, donc celui où plus rien ne rattrape le socle.
+    test(
+      'socle : tiré alors que l\'ensemble des permissions est VIDE',
+      () async {
+        goOnline();
+        final referentiel = socle(
+          outcome: const PullOutcome.updated(upserted: 12),
+        );
+        final coord = buildWith(CurrentPermissions()..set(const []))
+          ..registerHandler(referentiel);
+
+        final report = await coord.pullAll();
+
+        expect(referentiel.calls, 1);
+        expect(report.updated, 1);
+        expect(report.forbidden, 0);
+      },
+    );
+
+    test(
+      'socle : tiré alors que l\'ensemble ne contient pas son exigence',
+      () async {
+        goOnline();
+        final referentiel = socle();
+        // Un périmètre étroit mais non vide : ce compte lit les classes, pas
+        // l'école. Il lui faut quand même son année de référence.
+        final coord = buildWith(
+          CurrentPermissions()..set(const ['classroom.read']),
+        )..registerHandler(referentiel);
+
+        final report = await coord.pullAll();
+
+        expect(referentiel.calls, 1);
+        expect(report.forbidden, 0);
+      },
+    );
+
+    // Contre-épreuve : sans elle, les deux tests ci-dessus passeraient tout
+    // aussi bien si le filtre de permission avait disparu ENTIÈREMENT. Les deux
+    // handlers ne diffèrent que par `isBaseline` — même exigence, même ensemble
+    // détenu, même cycle.
+    test(
+      'contre-épreuve : à exigence identique, le NON-socle est bien sauté',
+      () async {
+        goOnline();
+        final referentiel = socle();
+        final ordinaire = FakePullHandler(
+          'enrollment_reenrollment_cohort',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.schoolRead],
+        );
+        final coord = buildWith(CurrentPermissions()..set(const []))
+          ..registerHandler(referentiel)
+          ..registerHandler(ordinaire);
+
+        final report = await coord.pullAll();
+
+        expect(referentiel.calls, 1);
+        expect(ordinaire.calls, 0);
+        expect(report.updated, 1);
+        expect(report.forbidden, 1);
+      },
+    );
+
+    // Le socle ne doit pas fausser le bilan : il est TIRÉ, pas toléré. Le
+    // compter en `forbidden` afficherait une synchro dégradée à vie sur un
+    // compte dont tout va bien — exactement le contresens que la docstring de
+    // `forbidden` écarte.
+    test('socle : compté dans processed, jamais dans forbidden, et un compte '
+        'sans aucun droit n\'en devient pas dégradé', () async {
+      goOnline();
+      final referentiel = socle();
+      final coord = buildWith(CurrentPermissions()..set(const []))
+        ..registerHandler(referentiel);
+
+      final report = await coord.pullAll();
+
+      expect(report.processed, 1);
+      expect(report.forbidden, 0);
+      expect(report.failed, 0);
+      expect(report.isDegraded, isFalse);
+    });
+
+    // Hors du filtre ne veut pas dire hors du reste : un socle qui échoue reste
+    // un échec, il n'est pas absous par son drapeau.
+    test(
+      'socle en échec : compté en failed comme n\'importe quel flux',
+      () async {
+        goOnline();
+        final referentiel = socle(outcome: const PullOutcome.error('KO'));
+        final coord = buildWith(CurrentPermissions()..set(const []))
+          ..registerHandler(referentiel);
+
+        final report = await coord.pullAll();
+
+        expect(referentiel.calls, 1);
+        expect(report.failed, 1);
+        expect(report.forbidden, 0);
+        expect(report.isDegraded, isTrue);
+      },
+    );
+
+    // Le drapeau lève la garde de PERMISSION, pas celle de connectivité : hors
+    // ligne, on ne tire rien, socle compris. Une exception qui déborderait sur
+    // la radio taperait le réseau à chaque cycle en mode avion.
+    test('hors ligne : le socle ne fait pas exception non plus', () async {
+      goOffline();
+      final referentiel = socle();
+      final coord = buildWith(CurrentPermissions()..set(const []))
+        ..registerHandler(referentiel);
+
+      final report = await coord.pullAll();
+
+      expect(report.offline, isTrue);
+      expect(referentiel.calls, 0);
     });
   });
 

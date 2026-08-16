@@ -19,6 +19,9 @@ class ClassroomTransferPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.classroomRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncTransfers();
     return result.fold(

@@ -20,6 +20,9 @@ class DisciplinaryPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.disciplineRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncDisciplinaryCases();
     return result.fold(

@@ -17,6 +17,9 @@ class GradesReferentialPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.academicsReferentialRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncGradesReferential();
     return result.fold(

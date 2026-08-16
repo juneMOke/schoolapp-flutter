@@ -79,6 +79,27 @@ abstract class PullHandler {
   /// compilation plutôt qu'une ressource silencieusement non filtrée.
   List<Perm> get requiredPermissions;
 
+  /// Flux **socle** : garanti à tout compte authentifié, hors de tout filtre de
+  /// permission (ADR-015 M).
+  ///
+  /// Un seul handler le surcharge — le référentiel de l'école. La porte de
+  /// navigation en dépend : sans les années de référence, l'utilisateur reste
+  /// sur l'écran d'amorçage et **la seule sortie est la déconnexion**. Le
+  /// serveur l'a d'ailleurs tranché dans le même sens, en faisant du plan le
+  /// seul flux sans garde de permission.
+  ///
+  /// ⚠️ **Ne JAMAIS traduire ce statut par `requiredPermissions: const []`.**
+  /// `canAccess` rend `false` sur exigence vide, délibérément — « une exigence
+  /// vide est presque toujours une déclaration oubliée, et un oubli doit
+  /// refuser ». Le socle cesserait de descendre pour tout le parc. D'où un
+  /// drapeau explicite, qui dit la chose plutôt que de la coder par une absence.
+  ///
+  /// Le drapeau est **permanent**, et non un échafaudage en attendant que le
+  /// plan gouverne : quand le plan est illisible, `requiredPermissions` reprend
+  /// la main, et sans ce drapeau le socle serait de nouveau sauté — au pire
+  /// moment, celui où plus rien d'autre ne rattrape.
+  bool get isBaseline => false;
+
   /// Exécute le pull delta et peuple le cache local. Ne lève pas.
   Future<PullOutcome> pull();
 }

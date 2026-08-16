@@ -47,6 +47,9 @@ class SlowPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     calls++;
     await gate.future;

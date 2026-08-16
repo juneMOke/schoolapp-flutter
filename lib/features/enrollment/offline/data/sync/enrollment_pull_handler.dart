@@ -19,13 +19,19 @@ class EnrollmentPullHandler implements PullHandler {
   @override
   final List<Perm> requiredPermissions;
 
+  /// Porté en champ plutôt qu'en surcharge : la classe est paramétrée, ses cinq
+  /// constructeurs partagent le même corps. Vrai pour un seul, le référentiel.
+  @override
+  final bool isBaseline;
+
   final Future<Either<Failure, EnrollmentPullOutcome>> Function() _pull;
 
   const EnrollmentPullHandler._(
     this.resource,
     this.requiredPermissions,
-    this._pull,
-  );
+    this._pull, {
+    this.isBaseline = false,
+  });
 
   /// Socle référentiel (années, cycles, niveaux, grille tarifaire).
   ///
@@ -33,10 +39,20 @@ class EnrollmentPullHandler implements PullHandler {
   /// ouvert cette route à tous, quitte à retirer la seule portion tarifaire de
   /// la réponse. Exiger la permission de la grille ici fermerait l'amorçage de
   /// l'application à tout profil qui n'a pas à voir les montants.
+  ///
+  /// **Le seul flux socle du dépôt** (ADR-015 M) : `isBaseline` le sort du
+  /// filtre de permission, et `school.read` ne reste déclaré que par honnêteté
+  /// documentaire — le serveur, lui, a fini par ouvrir cette route sans aucune
+  /// garde. Sans ce drapeau, un profil dépourvu de `school.read` sautait le
+  /// socle et restait bloqué sur l'écran d'amorçage, sans autre issue que la
+  /// déconnexion.
   EnrollmentPullHandler.referential(EnrollmentPullRepository repository)
-    : this._(EnrollmentPullRepositoryImpl.referentialResource, const [
-        Perm.schoolRead,
-      ], repository.syncReferential);
+    : this._(
+        EnrollmentPullRepositoryImpl.referentialResource,
+        const [Perm.schoolRead],
+        repository.syncReferential,
+        isBaseline: true,
+      );
 
   /// Cohorte de réinscription N-1 (`ref_previous_year_students`).
   EnrollmentPullHandler.reenrollmentCohort(EnrollmentPullRepository repository)

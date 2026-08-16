@@ -18,6 +18,9 @@ class TimeSlotsPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.scheduleRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncTimeSlots();
     return result.fold(
@@ -44,6 +47,9 @@ class SessionsPullHandler implements PullHandler {
   /// GET /sync/schedule/sessions — gardé sur `schedule.read` côté serveur.
   @override
   List<Perm> get requiredPermissions => const [Perm.scheduleRead];
+
+  @override
+  bool get isBaseline => false;
 
   @override
   Future<PullOutcome> pull() async {

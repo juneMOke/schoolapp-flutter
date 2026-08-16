@@ -18,6 +18,9 @@ class FinancePullHandler implements PullHandler {
   @override
   final List<Perm> requiredPermissions;
 
+  @override
+  bool get isBaseline => false;
+
   final Future<Either<Failure, FinancePullOutcome>> Function() _pull;
 
   const FinancePullHandler._(

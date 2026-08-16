@@ -198,6 +198,11 @@ class PullCoordinator {
   /// frontière. L'ensemble **vide**, lui, est une information : aucun droit,
   /// donc aucune ressource tirée.
   bool _isReadable(PullHandler handler) {
+    // Le socle échappe au filtre (ADR-015 M) : sans le référentiel, la porte de
+    // navigation ne s'ouvre pas et la seule sortie est la déconnexion. Le
+    // sauter faute de droit gèlerait l'année en silence — la panne exacte que
+    // ce drapeau existe à écarter.
+    if (handler.isBaseline) return true;
     final held = _permissions?.permissions;
     if (held == null) return true;
     return canAccess(

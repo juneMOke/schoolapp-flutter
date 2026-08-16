@@ -23,6 +23,9 @@ class EditiqueDocumentPullHandler implements PullHandler {
   List<Perm> get requiredPermissions => const [Perm.editiqueRead];
 
   @override
+  bool get isBaseline => false;
+
+  @override
   Future<PullOutcome> pull() async {
     final result = await _repository.syncDocuments();
     return result.fold(
