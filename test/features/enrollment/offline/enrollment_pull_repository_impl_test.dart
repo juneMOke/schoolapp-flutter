@@ -878,6 +878,15 @@ void main() {
 
   group('syncEnrollmentDelta (keyset, UPDATE-only)', () {
     setUp(() async {
+      // PRÉCONDITION DU DELTA : la base a déjà été hydratée. Le curseur de
+      // l'hydratant en est le témoin, et le delta refuse désormais de partir
+      // sans lui — sans quoi il consommerait son backlog sur une base vide,
+      // en silence (cf. le groupe « garde d'hydratation » plus bas).
+      await syncMeta.setCursor(
+        EnrollmentPullRepositoryImpl.snapshotsResource,
+        cursor: 'WM-SNAP',
+        syncedAt: 1000,
+      );
       await db.insert('enrollments', {
         'id': 'e1',
         'student_id': 'stu-1',
@@ -981,6 +990,86 @@ void main() {
         () => api.pullEnrollmentDelta(auth, 'CUR-DELTA', null, limit),
       ).called(1);
     });
+  });
+
+  // Le delta est maigre : il ne fait qu'UPDATE des lignes que seul l'hydratant
+  // INSERT. Sur une base jamais hydratée il n'est donc pas seulement inutile —
+  // il est DESTRUCTEUR : `_keysetPull` mémorise le jeton à chaque page sans
+  // regarder `upserted`, donc le backlog serveur est consommé et le curseur
+  // avancé au-delà de dossiers que plus rien ne redemandera. Et zéro ligne
+  // appliquée est replié en `notModified`, exactement comme un cycle sain :
+  // aucune erreur, aucun compteur, rien qui trahisse la perte.
+  group('syncEnrollmentDelta — garde d\'hydratation', () {
+    test('base jamais hydratée : aucun appel réseau', () async {
+      final result = await repo.syncEnrollmentDelta();
+
+      verifyNever(() => api.pullEnrollmentDelta(any(), any(), any(), any()));
+      expect(result.isRight(), isTrue);
+    });
+
+    test('base jamais hydratée : le curseur du delta NE BOUGE PAS — c\'est '
+        'l\'invariant du lot, tout le reste n\'est que confort', () async {
+      await syncMeta.setCursor(
+        EnrollmentPullRepositoryImpl.deltaResource,
+        cursor: 'CUR-INTACT',
+        syncedAt: 500,
+      );
+
+      await repo.syncEnrollmentDelta();
+
+      expect(
+        await syncMeta.getCursor(EnrollmentPullRepositoryImpl.deltaResource),
+        'CUR-INTACT',
+      );
+      // Ni la fraîcheur : bumper `syncedAt` ferait lire « à jour » à une
+      // ressource qu'on vient délibérément de ne pas demander.
+      expect(
+        await syncMeta.getSyncedAt(EnrollmentPullRepositoryImpl.deltaResource),
+        500,
+      );
+    });
+
+    test(
+      'base jamais hydratée : rend notModified, jamais une erreur',
+      () async {
+        final result = await repo.syncEnrollmentDelta();
+
+        final outcome = result.getOrElse(() => throw StateError('left'));
+        expect(outcome.notModified, isTrue);
+        expect(outcome.upserted, 0);
+        // Pas d'échec : le cycle qui hydrate tourne dans la même passe, et
+        // compter ceci en panne ferait virer la pastille de synchro au motif
+        // d'une précondition qui se lèvera d'elle-même.
+        expect(outcome.serverTimeMs, isNull);
+      },
+    );
+
+    test(
+      'CONTRE-ÉPREUVE — dès que l\'hydratant a posé son curseur, le delta part',
+      () async {
+        await syncMeta.setCursor(
+          EnrollmentPullRepositoryImpl.snapshotsResource,
+          cursor: 'WM-SNAP',
+          syncedAt: 1000,
+        );
+        when(
+          () => api.pullEnrollmentDelta(any(), any(), any(), any()),
+        ).thenAnswer(
+          (_) async => httpOk(
+            EnrollmentDeltaPageDto(
+              items: const [],
+              page: env(nextWatermark: 'WM-DELTA'),
+            ),
+          ),
+        );
+
+        await repo.syncEnrollmentDelta();
+
+        verify(
+          () => api.pullEnrollmentDelta(any(), any(), any(), any()),
+        ).called(1);
+      },
+    );
   });
 
   group('syncEnrollmentSnapshots (keyset, hydratant)', () {

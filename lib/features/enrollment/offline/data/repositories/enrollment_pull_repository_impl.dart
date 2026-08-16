@@ -181,14 +181,67 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       );
 
   @override
-  Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentDelta() =>
-      _keysetPull<EnrollmentDeltaDto, EnrollmentDeltaPageDto>(
-        resource: deltaResource,
-        request: (cursor) =>
-            api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
-        apply: (items, syncedAt) =>
-            reconciliationDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
-      );
+  Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentDelta() async {
+    // ⚠️ LE DELTA NE PART PAS SUR UNE BASE JAMAIS HYDRATÉE — il y brûlerait son
+    // backlog, en silence.
+    //
+    // Le delta est maigre : `applyEnrollmentDelta` ne fait qu'UPDATE des lignes
+    // que seul l'hydratant INSERT. Sans hydratation, chaque page ne met à jour
+    // rien du tout — mais `_keysetPull` mémorise le jeton à CHAQUE page, sans
+    // jamais regarder `upserted`. Le backlog serveur est donc consommé et le
+    // curseur avancé au-delà de dossiers que plus rien ne redemandera : les
+    // modifications de cette fenêtre sont perdues jusqu'à un rebootstrap.
+    //
+    // Et l'incident est invisible : zéro ligne appliquée est replié en
+    // `notModified` par `_outcome`, exactement comme un cycle sain. Pas
+    // d'erreur, pas de compteur, aucun événement de bus — rien à quoi
+    // s'accrocher pour comprendre pourquoi des dossiers sont figés.
+    //
+    // La garde vit ICI, dans le repository, et non dans le `PullHandler` :
+    // `SyncEnrollmentPullsUseCase` appelle ces méthodes EN DIRECT au montage
+    // des FeatureScope Inscription, Facturation et Documents — c'est le chemin
+    // le plus emprunté, bien plus que le coordinateur qui n'a que deux
+    // déclencheurs. Une garde posée dans le handler l'aurait laissé passer.
+    //
+    // Le curseur de l'hydratant fait office de témoin : il n'existe qu'après
+    // une première page appliquée. Ce n'est pas un drapeau de bootstrap
+    // COMPLET — cette paire n'en a pas, contrairement à `attendance` ou
+    // `schedule` — mais il suffit à distinguer « jamais hydraté » du reste, qui
+    // est le seul cas où le delta détruit.
+    //
+    // Dans un cycle normal l'ordre d'enregistrement fait passer l'hydratant en
+    // premier : au moment où le delta s'exécute, le curseur est déjà posé et la
+    // garde laisse passer. Elle ne mord donc que sur un ordre inversé, ou sur
+    // un chemin qui tirerait le delta seul.
+    final hydrated = await _hasEverHydrated();
+    if (!hydrated) {
+      // NI appel réseau, NI écriture : surtout pas de `setCursor`, qui
+      // bumperait la fraîcheur et ferait lire « à jour » à une ressource qu'on
+      // vient délibérément de ne pas demander.
+      return Right(EnrollmentPullOutcome.notModifiedAt(now(), null));
+    }
+    return _keysetPull<EnrollmentDeltaDto, EnrollmentDeltaPageDto>(
+      resource: deltaResource,
+      request: (cursor) =>
+          api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
+      apply: (items, syncedAt) =>
+          reconciliationDao.applyEnrollmentDelta(items, syncedAt: syncedAt),
+    );
+  }
+
+  /// L'hydratant a-t-il déjà posé son curseur ?
+  ///
+  /// Défensif comme le reste de la couche : une base indisponible rend `true`,
+  /// pour que la garde ne puisse jamais devenir elle-même la cause d'un flux
+  /// qui ne descend plus. Le pire qu'elle risque alors est de laisser passer un
+  /// delta qu'elle aurait retenu — le comportement d'avant cette garde.
+  Future<bool> _hasEverHydrated() async {
+    try {
+      return await syncMetaDao.getCursor(snapshotsResource) != null;
+    } catch (_) {
+      return true;
+    }
+  }
 
   @override
   Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentSnapshots() =>
