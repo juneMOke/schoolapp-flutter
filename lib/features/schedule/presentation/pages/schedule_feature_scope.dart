@@ -46,7 +46,9 @@ class _ScheduleFeatureScopeState extends State<ScheduleFeatureScope> {
     // l'utilisateur sorte de la feature et y revienne (cf. PullCompletionBus).
     _listenPullCompletion();
     // Hydratation best-effort des caches emploi du temps / cours (le
-    // PullCoordinator ne se déclenche qu'au retour online).
+    // cycle complet du coordinateur ne part qu'à l'ouverture de session et au
+    // retour online, jamais au montage d'un écran). Passe PAR le coordinateur
+    // depuis ADR-015 F6.
     unawaited(GetIt.instance<SyncAcademicsPullsUseCase>()());
   }
 

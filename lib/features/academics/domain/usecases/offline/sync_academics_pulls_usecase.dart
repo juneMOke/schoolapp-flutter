@@ -1,145 +1,60 @@
-import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
-import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
 
-/// Hydratation des caches Notes/Cours au montage des FeatureScopes academics et
-/// schedule. Le `PullCoordinator` ne se déclenche qu'au RETOUR online : une
-/// tablette démarrée déjà connectée ne tirerait jamais — « Mes cours » et
-/// l'emploi du temps resteraient vides jusqu'à une coupure réseau fortuite.
-/// (Même rôle que `SyncAttendancePullUseCase` / `SyncFinancePullsUseCase`.)
+/// Hydrate les caches Notes/Cours au montage des FeatureScopes `academics` et
+/// `schedule` (ADR-015 F6).
 ///
-/// **Best-effort et ordonné** : réf emploi du temps (créneaux + séances), puis
-/// le bundle `grades-referential` (branches/plafonds/chapitres/périodes, cadré
-/// prof — condition de la prévention offline et de la composition du détail
-/// cours, MAJ-4), puis cours (scopé enseignant, DF-K — plus de dépendance à
-/// l'année/bootstrap depuis le commit back `1ec6be3`), puis évaluations/notes
-/// (qui itèrent `ref_cours` — d'où l'ordre). Le barème AVANT les cours : le
-/// détail d'un cours le lit, et le graphe serveur pose la même arête
-/// (ADR-015 K). Chaque étape
-/// avale ses échecs (les repos ne lèvent jamais ; la lecture UI est locale de
-/// toute façon et sera resservie au prochain cycle).
+/// **Ne tire plus les repositories en direct.** Ce déclencheur passe désormais
+/// par le `PullCoordinator`, qui reste seul à connaître l'ordre, les droits et —
+/// bientôt — le plan de synchronisation. Tant que des écrans tiraient à côté, la
+/// largeur effective du pull était l'union du coordinateur et d'une douzaine de
+/// portes dérobées, aucune filtrée par une permission : faire du plan l'autorité
+/// du seul coordinateur n'aurait rien resserré.
 ///
-/// **Gate crédentiels** : ce déclencheur contourne le `PullCoordinator`
-/// (justement pour tirer sans attendre un cycle online→offline→online), donc
-/// il n'hérite pas de son gate `SessionCredentialsProbe`. Sans lui, une
-/// tablette jamais connectée (ou déconnectée) taperait le réseau à chaque
-/// montage du scope Cours — 401 systématiques, silencieux mais inutiles.
+/// Ce qui vivait ici et vit maintenant dans le socle, pour tout le monde : la
+/// pré-garde de connectivité, la sonde de crédentiels, le filtre de permission,
+/// l'abandon sur dépendance bloquée, l'isolation des échecs et la diffusion sur
+/// le `PullCompletionBus`. Ce use case ne porte plus qu'une chose — **de quelles
+/// ressources ces écrans ont besoin** — et c'est la seule qui lui appartienne
+/// vraiment. En particulier, la diffusion n'a plus lieu qu'**une fois** : la
+/// notifier ici en plus du cycle ferait relire chaque écran deux fois par pull.
 ///
-/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
-/// tablette hors-ligne taperait quand même le réseau à chaque montage.
+/// **L'ordre change, et il vient d'ailleurs.** Ce use case tenait sa propre
+/// séquence (créneaux → séances → barème → cours → évaluations → notes) ;
+/// `pullSubset` itère le REGISTRE, où le barème est enregistré en tête des six.
+/// Les deux honorent l'arête barème → cours (ADR-015 K) — le détail d'un cours
+/// et la composition des évaluations lisent le barème — mais ce n'est plus la
+/// même séquence, et c'est celle de la DI qui fait foi désormais (figée par
+/// `test/core/di/offline_pull_registration_order_test.dart`).
 ///
-/// **Réveil de l'UI** : les ressources effectivement rafraîchies sont diffusées
-/// en fin d'hydratation sur le [PullCompletionBus]. Sans ce signal, l'écran a
-/// déjà lu le cache local (froid, donc vide) bien avant que le réseau réponde,
-/// et rien ne le relit ensuite — cf. la doc du bus.
+/// Le second déclencheur reste le cycle complet du coordinateur (ouverture de
+/// session, retour online). Les deux sont nécessaires : une tablette posée sur
+/// le Wi-Fi de l'école ne verrait aucun retour online de la journée.
 class SyncAcademicsPullsUseCase {
-  final SchedulePullRepositoryImpl _schedulePull;
-  final AcademicsCoursPullRepositoryImpl _coursPull;
-  final AcademicsMetierPullRepositoryImpl _metierPull;
-  final GradesReferentialPullRepositoryImpl _gradesReferentialPull;
-  final SessionCredentialsProbe _credentialsProbe;
-  final ConnectivityService _connectivity;
-  final PullCompletionBus? _completionBus;
+  final PullCoordinator _coordinator;
 
-  const SyncAcademicsPullsUseCase({
-    required SchedulePullRepositoryImpl schedulePullRepository,
-    required AcademicsCoursPullRepositoryImpl coursPullRepository,
-    required AcademicsMetierPullRepositoryImpl metierPullRepository,
-    required GradesReferentialPullRepositoryImpl
-    gradesReferentialPullRepository,
-    required SessionCredentialsProbe credentialsProbe,
-    required ConnectivityService connectivity,
-    PullCompletionBus? completionBus,
-  }) : _schedulePull = schedulePullRepository,
-       _coursPull = coursPullRepository,
-       _metierPull = metierPullRepository,
-       _gradesReferentialPull = gradesReferentialPullRepository,
-       _credentialsProbe = credentialsProbe,
-       _connectivity = connectivity,
-       _completionBus = completionBus;
+  const SyncAcademicsPullsUseCase(this._coordinator);
 
-  Future<void> call() async {
-    if (!await _connectivity.isOnline()) return;
-    if (!await _canAuthenticate()) return;
-
-    // Réf emploi du temps (créneaux école + séances de l'enseignant connecté).
-    _notify(
-      kScheduleTimeSlotsResource,
-      await _schedulePull.syncTimeSlots(),
-      (o) => o.upserted,
-    );
-    _notify(
-      kScheduleSessionsResource,
-      await _schedulePull.syncSessions(),
-      (o) => o.upserted,
-    );
-
-    // Bundle grades-referential (ETag, cadré prof) — AVANT les cours, et non
-    // après : le détail d'un cours et la composition des évaluations le lisent,
-    // et le graphe de dépendances serveur pose la même arête (ADR-015 K). Il
-    // était tiré après `syncCours`, ce qui coûtait un cycle sur une tablette
-    // neuve. La DI le place plus tôt encore (en tête des six) : les deux
-    // séquences ne sont pas identiques, elles honorent la même arête.
-    _notify(
-      kGradesReferentialResource,
-      await _gradesReferentialPull.syncGradesReferential(),
-      (o) => o.upserted,
-    );
-
-    // Cours du prof connecté (scope token, aucun classroomId/année requis).
-    _notify(
-      kAcademicsCoursResourcePrefix,
-      await _coursPull.syncCours(),
-      (o) => o.upserted,
-    );
-
-    // Métier (évaluations, notes) — itèrent ref_cours.
-    _notify(
-      kAcademicsEvaluationsResourcePrefix,
-      await _metierPull.syncEvaluations(),
-      (o) => o.upserted,
-    );
-    _notify(
-      kAcademicsNotesResourcePrefix,
-      await _metierPull.syncNotes(),
-      (o) => o.upserted,
-    );
-  }
-
-  /// Réveille les écrans dès que [resource] a réellement appliqué des lignes,
-  /// **sans attendre la fin de l'hydratation**. Grouper les six notifications à
-  /// la fin ferait patienter l'emploi du temps derrière la synchro des notes,
-  /// qui itère tous les cours et peut durer — l'écran resterait vide plusieurs
-  /// secondes de plus alors que ses séances sont déjà en base.
+  /// Les six ressources que ces écrans lisent — **un ensemble, jamais une
+  /// séquence** : l'ordre d'exécution est celui du registre, pas celui de ces
+  /// accolades (cf. `PullCoordinator.pullSubset`).
   ///
-  /// Un `Left` (échec réseau) ou un cycle `304` ne réveille personne : rien n'a
-  /// changé en local, relire ne ferait que du bruit.
-  void _notify<T>(
-    String resource,
-    Either<Failure, T> result,
-    int Function(T) upsertedOf,
-  ) {
-    result.fold((_) {}, (outcome) {
-      if (upsertedOf(outcome) > 0) {
-        _completionBus?.notifyUpdated(pullCompletionSubjectsOf(resource));
-      }
-    });
-  }
+  /// Les deux scopes demandent les six, et c'est justifié des deux côtés :
+  /// l'emploi du temps ouvre le détail d'un cours dans son propre volet
+  /// (`ScheduleCoordinatorPage`), qui compose `ref_cours` × barème ×
+  /// évaluations, puis la saisie qui lit les notes. Restreindre `schedule` aux
+  /// deux ressources de la grille laisserait ce détail sur un cache froid.
+  static const Set<String> resources = {
+    kScheduleTimeSlotsResource,
+    kScheduleSessionsResource,
+    kGradesReferentialResource,
+    kAcademicsCoursResourcePrefix,
+    kAcademicsEvaluationsResourcePrefix,
+    kAcademicsNotesResourcePrefix,
+  };
 
-  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
-  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
-  Future<bool> _canAuthenticate() async {
-    try {
-      return await _credentialsProbe.canAuthenticate();
-    } catch (_) {
-      return true;
-    }
-  }
+  Future<PullRunReport> call() => _coordinator.pullSubset(resources);
 }

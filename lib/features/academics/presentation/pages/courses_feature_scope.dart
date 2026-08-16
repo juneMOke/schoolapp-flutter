@@ -15,7 +15,10 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/course_e
 ///
 /// Déclenche aussi, au montage, l'hydratation des caches Notes/Cours
 /// ([SyncAcademicsPullsUseCase]) : le `PullCoordinator` ne se déclenche qu'au
-/// RETOUR online — une tablette démarrée déjà connectée ne tirerait jamais.
+/// cycle COMPLET du coordinateur — qui part à l'ouverture de session et au
+/// retour online, mais pas au montage d'un écran. Les deux déclencheurs sont
+/// nécessaires : sans celui-ci, ouvrir « Mes cours » en cours de session
+/// n'hydraterait rien. Ce pull passe désormais PAR le coordinateur (ADR-015 F6).
 /// **Best-effort** : lancé sans attendre, aucun échec ne remonte à l'UI (qui
 /// lit le local de toute façon).
 class CoursesFeatureScope extends StatefulWidget {

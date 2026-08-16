@@ -1,236 +1,246 @@
-import 'package:dartz/dartz.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/academics/domain/entities/offline/academics_delta_pull_outcome.dart';
-import 'package:school_app_flutter/features/academics/domain/entities/offline/cours_pull_outcome.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
-import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/offline/ref_pull_outcome.dart';
 
-class MockSchedulePullRepositoryImpl extends Mock
-    implements SchedulePullRepositoryImpl {}
+/// Toujours en ligne : la pré-garde de connectivité et le gate de crédentiels
+/// sont passés dans le socle au lot F6 et sont testés là-bas
+/// (`test/core/offline/pull_coordinator_test.dart`). Ici, ils ne doivent
+/// qu'être franchis.
+class _AlwaysOnline implements ConnectivityService {
+  @override
+  Future<bool> isOnline() async => true;
 
-class MockAcademicsCoursPullRepositoryImpl extends Mock
-    implements AcademicsCoursPullRepositoryImpl {}
+  @override
+  Stream<bool> get onStatusChange => const Stream<bool>.empty();
+}
 
-class MockAcademicsMetierPullRepositoryImpl extends Mock
-    implements AcademicsMetierPullRepositoryImpl {}
+/// Handler qui note son passage dans un journal partagé — seule façon
+/// d'observer l'ordre RÉEL d'invocation (`calls` dit combien, jamais quand).
+class _FakeHandler implements PullHandler {
+  _FakeHandler(this.resource, this._journal, this.outcome);
 
-class MockGradesReferentialPullRepositoryImpl extends Mock
-    implements GradesReferentialPullRepositoryImpl {}
+  @override
+  final String resource;
 
-class MockCredentialsProbe extends Mock implements SessionCredentialsProbe {}
+  final List<String> _journal;
+  final PullOutcome outcome;
 
-class MockConnectivityService extends Mock implements ConnectivityService {}
+  int calls = 0;
+
+  @override
+  List<Perm> get requiredPermissions => const [Perm.schoolRead];
+
+  @override
+  bool get isBaseline => false;
+
+  @override
+  Future<PullOutcome> pull() async {
+    calls++;
+    _journal.add(resource);
+    return outcome;
+  }
+}
+
+/// Coordinateur qui retient le sous-ensemble demandé — pour observer ce que le
+/// use case DEMANDE, indépendamment de ce que le registre sait tirer.
+class _RecordingCoordinator extends PullCoordinator {
+  _RecordingCoordinator(PullCompletionBus bus)
+    : super(connectivity: _AlwaysOnline(), completionBus: bus);
+
+  final List<Set<String>> requested = [];
+
+  @override
+  Future<PullRunReport> pullSubset(Set<String> resources) {
+    requested.add(resources);
+    return super.pullSubset(resources);
+  }
+}
 
 void main() {
-  late MockSchedulePullRepositoryImpl schedulePull;
-  late MockAcademicsCoursPullRepositoryImpl coursPull;
-  late MockAcademicsMetierPullRepositoryImpl metierPull;
-  late MockGradesReferentialPullRepositoryImpl gradesReferentialPull;
-  late MockCredentialsProbe credentialsProbe;
-  late MockConnectivityService connectivity;
+  /// L'ordre d'enregistrement des six handlers dans
+  /// `lib/core/di/offline_modules/academics_offline_di.dart`, recopié ici parce
+  /// qu'un test unitaire ne peut pas monter la DI réelle (base, Dio, réseau).
+  ///
+  /// Ce n'est pas cette liste qui fait autorité : `test/core/di/
+  /// offline_pull_registration_order_test.dart` monte la DI réelle et vérifie
+  /// ses arêtes sur elle. Si les deux divergeaient, c'est là-bas qu'il faut
+  /// regarder.
+  const ordreDeLaDi = <String>[
+    'academics_grades_referential',
+    'schedule_time_slots',
+    'schedule_sessions',
+    'academics_cours',
+    'academics_evaluations',
+    'academics_notes',
+  ];
+  const applique = PullOutcome.updated(upserted: 1);
+
   late PullCompletionBus completionBus;
+  late _RecordingCoordinator coordinator;
+  late List<String> journal;
+  late Map<String, _FakeHandler> handlers;
   late List<Set<String>> notified;
   late SyncAcademicsPullsUseCase useCase;
 
-  const refOutcome = RefPullOutcome(
-    upserted: 1,
-    notModified: false,
-    bootstrapComplete: true,
-    syncedAt: 10000,
-    cursor: 'wWM1',
-  );
-  const coursOutcome = CoursPullOutcome(
-    upserted: 1,
-    notModified: false,
-    bootstrapComplete: true,
-    syncedAt: 10000,
-  );
-  const deltaOutcome = AcademicsDeltaPullOutcome(
-    upserted: 1,
-    notModified: false,
-    bootstrapComplete: true,
-    syncedAt: 10000,
-  );
-
-  void stubAllPullsSucceed() {
-    when(
-      () => schedulePull.syncTimeSlots(),
-    ).thenAnswer((_) async => const Right(refOutcome));
-    when(
-      () => schedulePull.syncSessions(),
-    ).thenAnswer((_) async => const Right(refOutcome));
-    when(
-      () => coursPull.syncCours(),
-    ).thenAnswer((_) async => const Right(coursOutcome));
-    when(
-      () => gradesReferentialPull.syncGradesReferential(),
-    ).thenAnswer((_) async => const Right(coursOutcome));
-    when(
-      () => metierPull.syncEvaluations(),
-    ).thenAnswer((_) async => const Right(deltaOutcome));
-    when(
-      () => metierPull.syncNotes(),
-    ).thenAnswer((_) async => const Right(deltaOutcome));
+  /// Monte un registre portant [resources], chacune rendant [applique] sauf
+  /// celles listées dans [issues].
+  void mountRegistry(
+    List<String> resources, {
+    Map<String, PullOutcome> issues = const {},
+  }) {
+    for (final resource in resources) {
+      final handler = _FakeHandler(
+        resource,
+        journal,
+        issues[resource] ?? applique,
+      );
+      handlers[resource] = handler;
+      coordinator.registerHandler(handler);
+    }
   }
 
   setUp(() {
-    schedulePull = MockSchedulePullRepositoryImpl();
-    coursPull = MockAcademicsCoursPullRepositoryImpl();
-    metierPull = MockAcademicsMetierPullRepositoryImpl();
-    gradesReferentialPull = MockGradesReferentialPullRepositoryImpl();
-    credentialsProbe = MockCredentialsProbe();
-    connectivity = MockConnectivityService();
     completionBus = PullCompletionBus();
+    coordinator = _RecordingCoordinator(completionBus);
+    journal = <String>[];
+    handlers = <String, _FakeHandler>{};
     notified = <Set<String>>[];
     completionBus.stream.listen(notified.add);
-    when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenAnswer((_) async => true);
-    when(() => connectivity.isOnline()).thenAnswer((_) async => true);
-    useCase = SyncAcademicsPullsUseCase(
-      schedulePullRepository: schedulePull,
-      coursPullRepository: coursPull,
-      metierPullRepository: metierPull,
-      gradesReferentialPullRepository: gradesReferentialPull,
-      credentialsProbe: credentialsProbe,
-      connectivity: connectivity,
-      completionBus: completionBus,
-    );
+    useCase = SyncAcademicsPullsUseCase(coordinator);
   });
 
   tearDown(() async => completionBus.dispose());
 
-  test(
-    'authentifié : les pulls partent dans l\'ordre PORTEUR (emploi du temps → '
-    'cours → grades-referential → métier)',
-    () async {
-      stubAllPullsSucceed();
+  group('périmètre demandé', () {
+    test('les six ressources des deux écrans, et elles seules', () async {
+      mountRegistry(ordreDeLaDi);
 
       await useCase();
 
-      verify(() => schedulePull.syncTimeSlots()).called(1);
-      verify(() => schedulePull.syncSessions()).called(1);
-      verify(() => coursPull.syncCours()).called(1);
-      verify(() => gradesReferentialPull.syncGradesReferential()).called(1);
-      verify(() => metierPull.syncEvaluations()).called(1);
-      verify(() => metierPull.syncNotes()).called(1);
-    },
-  );
+      expect(coordinator.requested, hasLength(1));
+      expect(coordinator.requested.single, {
+        'schedule_time_slots',
+        'schedule_sessions',
+        'academics_grades_referential',
+        'academics_cours',
+        'academics_evaluations',
+        'academics_notes',
+      });
+    });
 
-  test('gate connectivité : hors-ligne, aucun des pulls n\'est déclenché '
-      '(aucune requête HTTP émise)', () async {
-    stubAllPullsSucceed();
-    when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+    test('aucune ressource étrangère n\'est tirée dans leur sillage', () async {
+      mountRegistry([...ordreDeLaDi, 'finance_payments']);
 
-    await useCase();
+      await useCase();
 
-    verifyNever(() => schedulePull.syncTimeSlots());
-    verifyNever(() => schedulePull.syncSessions());
-    verifyNever(() => coursPull.syncCours());
-    verifyNever(() => gradesReferentialPull.syncGradesReferential());
-    verifyNever(() => metierPull.syncEvaluations());
-    verifyNever(() => metierPull.syncNotes());
-  });
+      expect(handlers['finance_payments']!.calls, 0);
+      expect(journal, hasLength(6));
+    });
 
-  test('gate crédentiels : sans session authentifiable, aucun des pulls '
-      'n\'est déclenché', () async {
-    stubAllPullsSucceed();
-    when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenAnswer((_) async => false);
+    test('le rapport rend compte de CHAQUE ressource demandée', () async {
+      mountRegistry(ordreDeLaDi);
 
-    await useCase();
+      final rapport = await useCase();
 
-    verifyNever(() => schedulePull.syncTimeSlots());
-    verifyNever(() => schedulePull.syncSessions());
-    verifyNever(() => coursPull.syncCours());
-    verifyNever(() => gradesReferentialPull.syncGradesReferential());
-    verifyNever(() => metierPull.syncEvaluations());
-    verifyNever(() => metierPull.syncNotes());
-  });
+      // Un écran veut savoir si SA ressource est passée, pas si le cycle global
+      // s'est bien terminé.
+      for (final resource in ordreDeLaDi) {
+        expect(rapport.succeeded(resource), isTrue, reason: resource);
+      }
+      expect(rapport.isDegraded, isFalse);
+    });
 
-  test('gate crédentiels : une sonde en échec ne bloque pas l\'hydratation '
-      '(fail-open, même politique que SyncStatusCubit)', () async {
-    stubAllPullsSucceed();
-    when(
-      () => credentialsProbe.canAuthenticate(),
-    ).thenThrow(Exception('storage indisponible'));
+    test('une ressource demandée mais non enregistrée est ignorée en silence '
+        '(un APK plus ancien que l\'écran)', () async {
+      mountRegistry(const ['schedule_time_slots', 'schedule_sessions']);
 
-    await useCase();
+      final rapport = await useCase();
 
-    verify(() => schedulePull.syncTimeSlots()).called(1);
-    verify(() => metierPull.syncNotes()).called(1);
+      expect(journal, ['schedule_time_slots', 'schedule_sessions']);
+      expect(rapport.failed, 0);
+      expect(rapport.isDegraded, isFalse);
+    });
   });
 
   group('réveil de l\'UI (PullCompletionBus)', () {
-    test('chaque ressource appliquée est diffusée SÉPARÉMENT : l\'emploi du '
-        'temps ne patiente pas derrière la synchro des notes', () async {
-      stubAllPullsSucceed();
+    test('chaque ressource appliquée est diffusée SÉPARÉMENT, et dans l\'ordre '
+        'du REGISTRE', () async {
+      mountRegistry(ordreDeLaDi);
 
       await useCase();
       await Future<void>.delayed(Duration.zero);
 
-      // L'ORDRE EST PORTEUR, et cette liste le fige (ADR-015 K).
-      // `academics_grades_referential` passe AVANT `academics_cours` : le détail
-      // d'un cours et la composition des évaluations lisent le barème, et le
-      // graphe de dépendances serveur pose la même arête. Il était tiré après,
-      // ce qui coûtait un cycle sur une tablette neuve.
+      // L'ORDRE EST PORTEUR, et cette liste le fige (ADR-015 K). Il a CHANGÉ au
+      // lot F6 : le use case tenait sa propre séquence (créneaux → séances →
+      // barème → cours → …), `pullSubset` prend celle du REGISTRE, où le barème
+      // est enregistré en TÊTE des six. L'ensemble que passe le use case n'a,
+      // lui, aucun ordre : le permuter ne changerait rien ici.
+      //
+      // L'arête qui compte est tenue par les deux séquences —
+      // `academics_grades_referential` reste AVANT `academics_cours`, parce que
+      // le détail d'un cours et la composition des évaluations lisent le barème.
       expect(notified, [
+        {'academics_grades_referential'},
         {'schedule_time_slots'},
         {'schedule_sessions'},
-        {'academics_grades_referential'},
         {'academics_cours'},
         {'academics_evaluations'},
         {'academics_notes'},
       ]);
     });
 
+    test('la diffusion a lieu UNE fois par ressource : le use case ne double '
+        'plus celle du coordinateur', () async {
+      mountRegistry(ordreDeLaDi);
+
+      await useCase();
+      await Future<void>.delayed(Duration.zero);
+
+      // Aplati, parce que c'est la RESSOURCE qui doit être unique : le use case
+      // diffusait lui aussi, et rien n'aurait fait rougir un écran relu deux
+      // fois par pull si on ne comptait que les messages.
+      final diffusees = notified.expand((sujets) => sujets).toList();
+      expect(diffusees, hasLength(6));
+      expect(
+        diffusees.toSet(),
+        hasLength(6),
+        reason: 'ressource diffusée deux fois : $diffusees',
+      );
+    });
+
     test('un cycle 304 (rien appliqué) ne réveille personne', () async {
-      stubAllPullsSucceed();
-      when(() => schedulePull.syncSessions()).thenAnswer(
-        (_) async => Right(
-          RefPullOutcome.notModifiedAt(1, 'wm', bootstrapComplete: true),
-        ),
+      mountRegistry(
+        ordreDeLaDi,
+        issues: const {'schedule_sessions': PullOutcome.notModified()},
       );
 
       await useCase();
       await Future<void>.delayed(Duration.zero);
 
       expect(notified, isNot(contains({'schedule_sessions'})));
+      expect(notified, hasLength(5));
     });
 
     test(
-      'un pull en échec ne réveille personne (rien n\'a changé en local)',
+      'un pull en échec ne réveille personne et n\'empêche pas les autres',
       () async {
-        stubAllPullsSucceed();
-        when(
-          () => schedulePull.syncSessions(),
-        ).thenAnswer((_) async => const Left(ServerFailure('réseau')));
+        mountRegistry(
+          ordreDeLaDi,
+          issues: const {'schedule_sessions': PullOutcome.error('réseau')},
+        );
 
-        await useCase();
+        final rapport = await useCase();
         await Future<void>.delayed(Duration.zero);
 
         expect(notified, isNot(contains({'schedule_sessions'})));
+        expect(notified, hasLength(5));
+        expect(rapport.succeeded('schedule_sessions'), isFalse);
+        expect(rapport.succeeded('academics_notes'), isTrue);
       },
     );
-
-    test('hors-ligne : aucune diffusion', () async {
-      stubAllPullsSucceed();
-      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
-
-      await useCase();
-      await Future<void>.delayed(Duration.zero);
-
-      expect(notified, isEmpty);
-    });
   });
 }
