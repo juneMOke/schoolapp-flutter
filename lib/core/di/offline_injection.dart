@@ -121,6 +121,16 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       connectivity: getIt<ConnectivityService>(),
       completionBus: getIt<PullCompletionBus>(),
       permissions: getIt<CurrentPermissions>(),
+      // Gate crédentiels (ADR-010 V1.1, ADR-015 F6). Les cinq use cases
+      // d'hydratation le portaient chacun tant qu'ils tiraient hors
+      // coordinateur ; il remonte ici avec eux. **Sans cette ligne le gate est
+      // fail-open pour tout le monde** : le paramètre est optionnel, et cinq
+      // gardes auraient été retirées pour n'en rétablir aucune — une session
+      // rouverte hors ligne sans jetons repartirait taper le réseau à chaque
+      // montage d'écran, dix 401 par ouverture de la Facturation.
+      // Lazy comme `SyncEngine` ci-dessus : `AuthSessionManager` est enregistré
+      // plus tard dans `configureDependencies()`, résolu au premier cycle.
+      credentialsProbe: getIt<AuthSessionManager>(),
     ),
   );
 

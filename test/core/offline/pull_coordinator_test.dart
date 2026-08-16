@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 
 class MockConnectivity extends Mock implements Connectivity {}
 
@@ -49,9 +50,16 @@ class FakePullHandler implements PullHandler {
 }
 
 /// Handler qui lève, pour vérifier l'isolation par ressource.
+///
+/// La ressource est paramétrable : l'abandon sur dépendance bloquante doit
+/// valoir aussi bien pour un handler qui rend `error` que pour un handler qui
+/// lève — le coordinateur inscrit les deux au même registre d'échecs, et une
+/// seule des deux branches testée laisserait l'autre libre de diverger.
 class ThrowingPullHandler implements PullHandler {
+  ThrowingPullHandler([this.resource = 'boom']);
+
   @override
-  String get resource => 'boom';
+  final String resource;
 
   @override
   List<Perm> get requiredPermissions => const [Perm.schoolRead];
@@ -61,6 +69,30 @@ class ThrowingPullHandler implements PullHandler {
 
   @override
   Future<PullOutcome> pull() async => throw StateError('réseau coupé');
+}
+
+/// Sonde de crédentiels de test — répond, ou lève.
+///
+/// Le gate qu'elle alimente vivait dans cinq use cases d'hydratation, qui
+/// s'en servaient pour justifier de contourner le coordinateur. Il a remonté
+/// dans le corps de cycle avec eux ; sans fake ici, plus rien ne l'observerait.
+class FakeCredentialsProbe implements SessionCredentialsProbe {
+  FakeCredentialsProbe.answering(bool answer)
+    : _answer = answer,
+      _throws = false;
+
+  FakeCredentialsProbe.throwing() : _answer = false, _throws = true;
+
+  final bool _answer;
+  final bool _throws;
+  int calls = 0;
+
+  @override
+  Future<bool> canAuthenticate() async {
+    calls++;
+    if (_throws) throw StateError('coffre verrouillé');
+    return _answer;
+  }
 }
 
 /// Handler lent (bloque sur un [Completer]) — pour tester le verrou concurrent.
@@ -814,6 +846,679 @@ void main() {
         expect(report.skipped, isFalse);
         expect(report.offline, isFalse);
         expect(report.isDegraded, isTrue);
+      },
+    );
+  });
+
+  // ADR-015 F6 — le chemin des écrans. Ces pulls-là partaient jusqu'ici en
+  // direct sur les repositories : filtrés par AUCUN droit, hors de l'ordre
+  // money-grade, sans rien diffuser. Ils passent maintenant par le même corps de
+  // cycle que `pullAll`, et ce groupe est la preuve qu'ils n'ont pas emporté de
+  // régime d'exception au passage.
+  group('pullSubset (le chemin des écrans, ADR-015 F6)', () {
+    test('ne tire QUE les ressources demandées', () async {
+      goOnline();
+      final demande = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final voisin = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(demande)
+        ..registerHandler(voisin);
+
+      final report = await coord.pullSubset(const {'classrooms'});
+
+      expect(demande.calls, 1);
+      expect(voisin.calls, 0);
+      expect(report.updated, 1);
+      expect(report.processed, 1);
+    });
+
+    // LE test de ce groupe. Un `Set` littéral au site d'appel n'a pas d'ordre
+    // porteur : si le coordinateur itérait l'ensemble reçu, l'arête
+    // créances → paiements dépendrait de la façon dont un développeur a tapé ses
+    // accolades — et personne ne verrait jamais que l'ordre s'est inversé.
+    // L'ensemble est donc écrit À L'ENVERS ici, exprès.
+    test(
+      'l\'ordre est celui du REGISTRE, jamais celui de l\'ensemble reçu',
+      () async {
+        goOnline();
+        final journal = <String>[];
+        final coord = build()
+          ..registerHandler(
+            FakePullHandler(
+              'finance_student_charges',
+              const PullOutcome.updated(),
+              journal: journal,
+            ),
+          )
+          ..registerHandler(
+            FakePullHandler(
+              'finance_payments',
+              const PullOutcome.updated(),
+              journal: journal,
+            ),
+          );
+
+        await coord.pullSubset(const {
+          'finance_payments',
+          'finance_student_charges',
+        });
+
+        expect(journal, ['finance_student_charges', 'finance_payments']);
+      },
+    );
+
+    // Un écran qui demande plus que ce que son APK sait tirer n'est pas une
+    // panne : c'est un binaire en retard sur son plan. Il ne doit ni lever, ni
+    // dégrader le rapport.
+    test('une ressource demandée mais NON enregistrée est ignorée en '
+        'silence', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = build()..registerHandler(handler);
+
+      final report = await coord.pullSubset(const {
+        'classrooms',
+        'ressource_dun_apk_plus_recent',
+      });
+
+      expect(report.updated, 1);
+      expect(report.failed, 0);
+      expect(report.forbidden, 0);
+      expect(report.blocked, 0);
+      expect(report.plannedNotPulled, 0);
+      expect(report.outcomes.keys, ['classrooms']);
+      expect(report.isDegraded, isFalse);
+    });
+
+    // Pas même la pré-garde de connectivité : un écran dont aucune ressource
+    // n'est enregistrée ne doit pas réveiller la radio à chaque montage.
+    test('ensemble vide : aucun appel réseau', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = build()..registerHandler(handler);
+
+      final report = await coord.pullSubset(const {});
+
+      expect(handler.calls, 0);
+      expect(report.processed, 0);
+      verifyNever(() => connectivity.checkConnectivity());
+    });
+
+    test('ensemble dont aucune ressource n\'est enregistrée : aucun appel '
+        'réseau non plus', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = build()..registerHandler(handler);
+
+      final report = await coord.pullSubset(const {'inconnue', 'autre'});
+
+      expect(handler.calls, 0);
+      expect(report.processed, 0);
+      verifyNever(() => connectivity.checkConnectivity());
+    });
+
+    // Le cœur du lot : ces pulls n'étaient filtrés par RIEN. Un enseignant qui
+    // ouvrait un écran de caisse tirait les paiements, droits ou pas.
+    test('le filtre de permission s\'applique aussi à pullSubset', () async {
+      goOnline();
+      final autorise = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final interdit = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          PullCoordinator(
+              connectivity: service,
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(autorise)
+            ..registerHandler(interdit);
+
+      final report = await coord.pullSubset(const {
+        'classrooms',
+        'finance_payments',
+      });
+
+      expect(interdit.calls, 0);
+      expect(report.forbidden, 1);
+      expect(autorise.calls, 1);
+      expect(report.updated, 1);
+      expect(report.outcomes.containsKey('finance_payments'), isFalse);
+    });
+
+    // Et le socle y échappe, exactement comme dans `pullAll` : un écran monté
+    // par un compte sans `school.read` doit quand même obtenir son année de
+    // référence, faute de quoi la porte de navigation ne s'ouvre pas.
+    test('le socle échappe au filtre dans pullSubset aussi', () async {
+      goOnline();
+      final referentiel = FakePullHandler(
+        'enrollment_referential',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.schoolRead],
+        isBaseline: true,
+      );
+      final ordinaire = FakePullHandler(
+        'enrollment_reenrollment_cohort',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.schoolRead],
+      );
+      final coord =
+          PullCoordinator(
+              connectivity: service,
+              permissions: CurrentPermissions()..set(const []),
+            )
+            ..registerHandler(referentiel)
+            ..registerHandler(ordinaire);
+
+      final report = await coord.pullSubset(const {
+        'enrollment_referential',
+        'enrollment_reenrollment_cohort',
+      });
+
+      expect(referentiel.calls, 1);
+      expect(ordinaire.calls, 0);
+      expect(report.updated, 1);
+      expect(report.forbidden, 1);
+    });
+
+    // LE test qui garde la raison d'être du lot. Prendre le verrou de cycle
+    // complet ici ferait qu'un écran monté pendant le cycle d'ouverture de
+    // session recevrait « sauté » et resterait sur un cache froid — et cette
+    // fenêtre tombe pile au démarrage, quand l'utilisateur ouvre son premier
+    // écran.
+    test('pullSubset ne prend PAS le verrou de cycle complet : un écran monté '
+        'pendant un pullAll en vol tire quand même', () async {
+      goOnline();
+      final gate = Completer<void>();
+      final lent = SlowPullHandler(gate);
+      final ecran = FakePullHandler('classrooms', const PullOutcome.updated());
+      final coord = build()
+        ..registerHandler(lent)
+        ..registerHandler(ecran);
+
+      // Le cycle complet est en vol, bloqué sur son handler lent.
+      final complet = coord.pullAll();
+      expect(coord.isPulling, isTrue);
+
+      final cible = await coord.pullSubset(const {'classrooms'});
+
+      expect(cible.skipped, isFalse);
+      expect(cible.updated, 1);
+      expect(ecran.calls, 1);
+
+      gate.complete();
+      final rapportComplet = await complet;
+      // Et le cycle complet a poursuivi sa route : deux tirs au total.
+      expect(rapportComplet.updated, 2);
+      expect(ecran.calls, 2);
+    });
+  });
+
+  // ADR-015 F6 — le gate de crédentiels vivait dans cinq use cases
+  // d'hydratation. Sans jetons utilisables, chaque ressource partirait en 401
+  // pour rien ; il remonte ici avec eux, et vaut donc pour les deux points
+  // d'entrée.
+  group('gate crédentiels (ADR-015 F6)', () {
+    PullCoordinator buildWith(SessionCredentialsProbe probe) =>
+        PullCoordinator(connectivity: service, credentialsProbe: probe);
+
+    test(
+      'sonde à false : aucun handler appelé, rapport skipped (pullAll)',
+      () async {
+        goOnline();
+        final handler = FakePullHandler(
+          'classrooms',
+          const PullOutcome.updated(),
+        );
+        final coord = buildWith(FakeCredentialsProbe.answering(false))
+          ..registerHandler(handler);
+
+        final report = await coord.pullAll();
+
+        expect(report.skipped, isTrue);
+        expect(handler.calls, 0);
+        expect(report.processed, 0);
+      },
+    );
+
+    test('sonde à false : aucun handler appelé, rapport skipped '
+        '(pullSubset)', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = buildWith(FakeCredentialsProbe.answering(false))
+        ..registerHandler(handler);
+
+      final report = await coord.pullSubset(const {'classrooms'});
+
+      expect(report.skipped, isTrue);
+      expect(handler.calls, 0);
+    });
+
+    // Le drapeau du socle lève la garde de PERMISSION, pas celle des jetons :
+    // sans `Authorization`, le référentiel se ferait refuser comme le reste.
+    test('sonde à false : le socle ne fait pas exception', () async {
+      goOnline();
+      final referentiel = FakePullHandler(
+        'enrollment_referential',
+        const PullOutcome.updated(),
+        isBaseline: true,
+      );
+      final coord = buildWith(FakeCredentialsProbe.answering(false))
+        ..registerHandler(referentiel);
+
+      expect((await coord.pullAll()).skipped, isTrue);
+      expect(referentiel.calls, 0);
+    });
+
+    test('sonde absente (non injectée) : pas de gate, tout tire', () async {
+      goOnline();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = build()..registerHandler(handler);
+
+      expect((await coord.pullAll()).updated, 1);
+      expect(handler.calls, 1);
+    });
+
+    // Fail-open : une sonde défaillante ne doit jamais devenir elle-même la
+    // cause d'une synchronisation qui ne part plus. Le serveur reste de toute
+    // façon la seule vraie frontière.
+    test('sonde qui LÈVE : fail-open, tout tire', () async {
+      goOnline();
+      final sonde = FakeCredentialsProbe.throwing();
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = buildWith(sonde)..registerHandler(handler);
+
+      final report = await coord.pullAll();
+
+      expect(sonde.calls, 1);
+      expect(report.skipped, isFalse);
+      expect(report.updated, 1);
+      expect(handler.calls, 1);
+    });
+
+    test('sonde à true : le cycle part normalement', () async {
+      goOnline();
+      final sonde = FakeCredentialsProbe.answering(true);
+      final handler = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = buildWith(sonde)..registerHandler(handler);
+
+      expect((await coord.pullAll()).updated, 1);
+      expect(sonde.calls, 1);
+    });
+  });
+
+  // ADR-015 F6 — la garde money-grade, portée jusqu'ici par
+  // `SyncFinancePullsUseCase` seul. Les quatre arêtes n'ont PAS la même
+  // gravité : une seule fait perdre de l'argent quand on passe outre, les trois
+  // autres ne coûtent qu'un cycle imparfait. Les traiter à égalité perdrait des
+  // données pour rien.
+  group('abandon sur dépendance bloquée (ADR-015 F6)', () {
+    test('créances en échec ⇒ paiements JAMAIS appelé, sinon le caissier '
+        'réencaisse', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.error('KO'),
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(creances)
+        ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(paiements.calls, 0);
+      // Compté en `blocked`, pas en `failed` : rien n'a échoué là, on s'est
+      // abstenu. Les confondre ferait chercher une panne réseau qui n'existe pas.
+      expect(report.blocked, 1);
+      expect(report.failed, 1);
+      expect(report.processed, 1);
+      expect(report.outcomes.containsKey('finance_payments'), isFalse);
+    });
+
+    test('créances qui LÈVENT : même abandon', () async {
+      goOnline();
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(ThrowingPullHandler('finance_student_charges'))
+        ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(paiements.calls, 0);
+      expect(report.blocked, 1);
+      expect(report.failed, 1);
+    });
+
+    // Contre-épreuve indispensable : sans elle, le test ci-dessus resterait vert
+    // si les paiements n'étaient JAMAIS tirés.
+    test('contre-épreuve : créances OK ⇒ paiements bien appelé', () async {
+      goOnline();
+      final journal = <String>[];
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.updated(),
+        journal: journal,
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        journal: journal,
+      );
+      final coord = build()
+        ..registerHandler(creances)
+        ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(journal, ['finance_student_charges', 'finance_payments']);
+      expect(report.blocked, 0);
+      expect(report.updated, 2);
+      expect(report.succeeded('finance_payments'), isTrue);
+    });
+
+    // L'écran de caisse tire la paire par `pullSubset` : l'abandon doit y valoir
+    // aussi, sans quoi le chemin le plus emprunté serait précisément celui qui
+    // fait réencaisser.
+    test('l\'abandon vaut aussi dans pullSubset', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.error('KO'),
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(creances)
+        ..registerHandler(paiements);
+
+      final report = await coord.pullSubset(const {
+        'finance_payments',
+        'finance_student_charges',
+      });
+
+      expect(paiements.calls, 0);
+      expect(report.blocked, 1);
+    });
+
+    // Les trois autres arêtes ne bloquent pas. Les classes échoueront
+    // d'elles-mêmes faute de référentiel : renoncer n'éviterait qu'un appel,
+    // alors que l'issue observée a de la valeur.
+    test('arête NON bloquante : référentiel en échec n\'empêche pas les '
+        'classes d\'être tentées', () async {
+      goOnline();
+      final referentiel = FakePullHandler(
+        'enrollment_referential',
+        const PullOutcome.error('KO'),
+      );
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(referentiel)
+        ..registerHandler(classes);
+
+      final report = await coord.pullAll();
+
+      expect(classes.calls, 1);
+      expect(report.blocked, 0);
+      expect(report.failed, 1);
+      expect(report.updated, 1);
+    });
+
+    // Les cours descendent très bien sans le barème : c'est la composition du
+    // détail qui attendra un cycle. Y renoncer perdrait les cours pour rien.
+    test('arête NON bloquante : barème en échec n\'empêche pas les cours '
+        'd\'être tentés', () async {
+      goOnline();
+      final bareme = FakePullHandler(
+        'academics_grades_referential',
+        const PullOutcome.error('KO'),
+      );
+      final cours = FakePullHandler(
+        'academics_cours',
+        const PullOutcome.updated(),
+      );
+      final coord = build()
+        ..registerHandler(bareme)
+        ..registerHandler(cours);
+
+      final report = await coord.pullAll();
+
+      expect(cours.calls, 1);
+      expect(report.blocked, 0);
+    });
+
+    // Et l'arête cours → évaluations, dernière des trois bénignes : sans cours
+    // en base la boucle ne fait aucun appel, renoncer et poursuivre ont le même
+    // effet, mais poursuivre laisse l'issue observable.
+    test('arête NON bloquante : cours en échec n\'empêche pas les '
+        'évaluations d\'être tentées', () async {
+      goOnline();
+      final cours = FakePullHandler(
+        'academics_cours',
+        const PullOutcome.error('KO'),
+      );
+      final evaluations = FakePullHandler(
+        'academics_evaluations',
+        const PullOutcome.notModified(),
+      );
+      final coord = build()
+        ..registerHandler(cours)
+        ..registerHandler(evaluations);
+
+      final report = await coord.pullAll();
+
+      expect(evaluations.calls, 1);
+      expect(report.blocked, 0);
+    });
+
+    // Un échec en AVAL ne remonte pas : seule l'arête déclarée bloque, et
+    // seulement dans son sens.
+    test('paiements en échec ne bloquent rien en retour', () async {
+      goOnline();
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.error('KO'),
+      );
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.updated(),
+      );
+      // Enregistrées à l'envers exprès : ici l'ordre du registre est le seul en
+      // vigueur, et il place les paiements d'abord.
+      final coord = build()
+        ..registerHandler(paiements)
+        ..registerHandler(creances);
+
+      final report = await coord.pullAll();
+
+      expect(creances.calls, 1);
+      expect(report.blocked, 0);
+    });
+
+    test('blocked entre dans isDegraded, jamais dans failed ni processed', () {
+      const report = PullRunReport(updated: 2, blocked: 1);
+
+      expect(report.isDegraded, isTrue);
+      expect(report.failed, 0);
+      expect(report.processed, 2);
+    });
+  });
+
+  // ADR-015 F6 — les agrégats ne suffisent pas à un écran qui a demandé un
+  // sous-ensemble : il veut savoir si SA ressource est passée, pas si le cycle
+  // global s'est bien terminé.
+  group('issues par ressource (outcomes / succeeded)', () {
+    test('outcomes porte l\'issue de chaque ressource TENTÉE, et aucune de '
+        'celles qui ont été sautées', () async {
+      goOnline();
+      final coord =
+          PullCoordinator(
+              connectivity: service,
+              permissions: CurrentPermissions()
+                ..set(const [
+                  'classroom.read',
+                  'finance.charge.read',
+                  'finance.payment.read',
+                ]),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classroom_members',
+                const PullOutcome.notModified(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            // Échoue → et bloque les paiements, qui n'auront donc pas d'issue.
+            ..registerHandler(
+              FakePullHandler(
+                'finance_student_charges',
+                const PullOutcome.error('KO'),
+                requiredPermissions: const [Perm.financeChargeRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'finance_payments',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.financePaymentRead],
+              ),
+            )
+            // Sautée faute de droit : sautée n'est pas tentée.
+            ..registerHandler(
+              FakePullHandler(
+                'academics_notes',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.academicsGradeRead],
+              ),
+            );
+
+      final report = await coord.pullAll();
+
+      expect(report.outcomes, {
+        'classrooms': PullResult.updated,
+        'classroom_members': PullResult.notModified,
+        'finance_student_charges': PullResult.error,
+      });
+      expect(report.forbidden, 1);
+      expect(report.blocked, 1);
+    });
+
+    test('succeeded : vrai sur updated et sur notModified', () async {
+      goOnline();
+      final coord = build()
+        ..registerHandler(
+          FakePullHandler('classrooms', const PullOutcome.updated(upserted: 3)),
+        )
+        ..registerHandler(
+          FakePullHandler('classroom_members', const PullOutcome.notModified()),
+        );
+
+      final report = await coord.pullSubset(const {
+        'classrooms',
+        'classroom_members',
+      });
+
+      expect(report.succeeded('classrooms'), isTrue);
+      // « Rien de neuf » est un succès : le cache est à jour, c'est tout ce que
+      // l'écran demandait.
+      expect(report.succeeded('classroom_members'), isTrue);
+    });
+
+    // Les trois `false` que l'appelant n'a pas à distinguer : aucun des trois
+    // n'autorise à annoncer un cache à jour.
+    test('succeeded : faux sur error, sur une ressource sautée et sur une '
+        'ressource jamais demandée', () async {
+      goOnline();
+      final coord =
+          PullCoordinator(
+              connectivity: service,
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.error('KO'),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'finance_payments',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.financePaymentRead],
+              ),
+            );
+
+      final report = await coord.pullAll();
+
+      expect(report.succeeded('classrooms'), isFalse);
+      expect(report.succeeded('finance_payments'), isFalse);
+      expect(report.succeeded('academics_notes'), isFalse);
+    });
+
+    test(
+      'succeeded : faux sur toute ressource d\'un cycle hors ligne',
+      () async {
+        goOffline();
+        final coord = build()
+          ..registerHandler(
+            FakePullHandler('classrooms', const PullOutcome.updated()),
+          );
+
+        final report = await coord.pullSubset(const {'classrooms'});
+
+        expect(report.offline, isTrue);
+        expect(report.succeeded('classrooms'), isFalse);
       },
     );
   });

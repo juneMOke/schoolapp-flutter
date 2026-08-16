@@ -1,121 +1,48 @@
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/plan/pull_sequencer.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/pull_cycle_guard.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/core/offline/pull_run_report.dart';
+import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 
-/// Bilan d'un cycle de pull (diagnostic / UI).
-class PullRunReport {
-  final bool skipped;
-  final bool offline;
-  final int updated;
-  final int notModified;
-  final int failed;
-
-  /// Ressources sautées faute de permission de lecture (ADR-014). Comptées à
-  /// part des échecs : ce n'est ni une panne ni un incident, c'est le
-  /// fonctionnement normal d'un compte au périmètre plus étroit. Les confondre
-  /// afficherait une synchronisation « en erreur » à un enseignant dont tout
-  /// va bien.
-  ///
-  /// **Mode dégradé seulement** (ADR-015 F1/O). Quand un plan de synchro
-  /// valide gouverne le pull, c'est [outOfPlan] qui porte le périmètre du
-  /// profil et ce compteur retombe à zéro : `requiredPermissions` cesse d'être
-  /// l'autorité pour redevenir le filtre du seul repli local.
-  final int forbidden;
-
-  /// Ressources écartées parce qu'elles ne figurent pas au plan du profil
-  /// (ADR-015 F5). **Ce n'est pas une dégradation** : c'est le périmètre
-  /// correct, décidé par le serveur qui, lui, connaît le profil. À ne jamais
-  /// agréger avec [forbidden] — l'un dit « ce compte n'y a pas droit », l'autre
-  /// « ce compte n'en a pas l'usage », et seul le premier mérite d'être signalé.
-  ///
-  /// Reste à zéro tant que le plan n'existe pas (lots F2/F5).
-  final int outOfPlan;
-
-  /// Flux inscrits au plan pour lesquels **aucun handler n'est enregistré**
-  /// (ADR-015 F1/F3). Défaut de contrat, pas de droits : le serveur annonce un
-  /// flux que ce client ne sait pas tirer — une clé mal orthographiée de part
-  /// et d'autre suffit, et sous F5 ce n'est plus une dégradation mais l'arrêt
-  /// total de ce flux.
-  ///
-  /// Reste à zéro tant que le plan n'existe pas (lots F2/F5).
-  final int plannedNotPulled;
-
-  /// Les clés fautives de [plannedNotPulled], **nommément**.
-  ///
-  /// Le compteur seul ne serait pas diagnosticable : « un flux manque » n'a
-  /// jamais permis de trouver lequel. Portées dans le rapport plutôt que
-  /// journalisées — le dépôt n'a pas de canal de log (`avoid_print` est actif)
-  /// et sa convention est de faire porter le diagnostic par l'objet valeur,
-  /// comme `PullOutcome.error` ou `OutboxEntry.lastError`. Ce sont des clés de
-  /// ressource, jamais une donnée métier : rien d'un élève ni d'un montant.
-  final Set<String> plannedNotPulledKeys;
-
-  /// Horloge **serveur** (epoch ms) la plus récente observée ce cycle, tous
-  /// handlers confondus (max des [PullOutcome.serverTimeMs] non-null) — sert
-  /// de date de "dernière synchro" (badge). `null` si aucun handler n'a
-  /// ramené de donnée avec `serverTime` (rien de neuf partout, ou ressources
-  /// dont le contrat n'expose pas encore ce champ).
-  final int? latestServerTimeMs;
-
-  const PullRunReport({
-    this.skipped = false,
-    this.offline = false,
-    this.updated = 0,
-    this.notModified = 0,
-    this.failed = 0,
-    this.forbidden = 0,
-    this.outOfPlan = 0,
-    this.plannedNotPulled = 0,
-    this.plannedNotPulledKeys = const <String>{},
-    this.latestServerTimeMs,
-  });
-
-  const PullRunReport.skipped() : this(skipped: true);
-  const PullRunReport.offline() : this(offline: true);
-
-  /// Ressources réellement tirées. Les trois compteurs de ressources **sautées**
-  /// en sont exclus : une ressource sautée n'a produit ni donnée ni échec.
-  int get processed => updated + notModified + failed;
-
-  /// Vrai quand ce cycle **n'a pas couvert tout ce qu'il aurait dû** — la seule
-  /// question à laquelle la pastille de synchro doit répondre (ADR-015 F1).
-  ///
-  /// [outOfPlan] en est délibérément absent : un flux hors du plan d'un profil
-  /// est le périmètre correct de ce profil, pas un manque. L'y compter
-  /// afficherait une dégradation permanente à tout compte au périmètre étroit —
-  /// exactement le contresens que la docstring de [forbidden] écarte.
-  ///
-  /// Un rapport [skipped] ou [offline] n'a rien observé : il ne dit ni dégradé
-  /// ni sain, et l'appelant ne doit rien en conclure.
-  bool get isDegraded =>
-      !skipped &&
-      !offline &&
-      (failed > 0 || forbidden > 0 || plannedNotPulled > 0);
-}
+// Ré-exporté : le rapport a été sorti d'ici pour tenir la cible de taille, et
+// une quinzaine d'appelants l'importent via ce fichier.
+export 'package:school_app_flutter/core/offline/pull_run_report.dart';
 
 /// Orchestrateur du **pull delta** (SOC-1) — pendant *lecture* du `SyncEngine`
 /// (qui, lui, pousse l'outbox).
 ///
 /// Tient un registre de [PullHandler] par ressource et les exécute :
 ///  - **pré-garde connectivité** (radio) : hors-ligne → aucun appel ;
-///  - **verrou anti-concurrence** (`_pulling`) : un seul cycle *de coordinateur*
-///    à la fois. Il ne sérialise **pas** les pulls déclenchés directement sur un
-///    repository hors coordinateur (ex. re-pull de réassignation) — sans danger
-///    car les upserts sont idempotents (au pire un re-pull redondant) ;
+///  - **gate crédentiels** : sans jetons utilisables, on ne tente rien — chaque
+///    appel partirait en 401 pour rien ;
+///  - **filtre de permission** ([_isReadable]), dont le socle est exempté ;
+///  - **abandon sur dépendance bloquée** : une ressource dont l'amont
+///    money-grade vient d'échouer n'est pas tentée ;
 ///  - **isolation par ressource** : un handler qui échoue (ou lève) n'empêche
 ///    pas les autres — l'échec est comptabilisé, pas propagé.
 ///
-/// **Passif** : il est *déclenché* (au retour *online* par `SyncStatusCubit`, ou
-/// à la demande), il ne s'abonne pas lui-même à la connectivité — symétrique du
-/// `SyncEngine`, piloté par le même point de colle.
+/// Deux points d'entrée, et la différence entre eux est le périmètre, jamais la
+/// politique : [pullAll] pour un cycle complet, [pullSubset] pour ce dont un
+/// écran a besoin à son montage. Les deux partagent le **même** corps de cycle,
+/// délibérément — deux copies divergeraient, et celle qui divergerait serait
+/// celle que les tests ne couvrent pas.
+///
+/// **Passif** : il est *déclenché* (à l'ouverture de session et au retour
+/// *online* par `SyncStatusCubit`, ou par un écran à son montage), il ne
+/// s'abonne pas lui-même à la connectivité — symétrique du `SyncEngine`, piloté
+/// par le même point de colle.
 class PullCoordinator {
   final ConnectivityService _connectivity;
   final PullCompletionBus? _completionBus;
   final CurrentPermissions? _permissions;
+  final SessionCredentialsProbe? _credentialsProbe;
   final Map<String, PullHandler> _handlers = {};
+  final PullCycleGuard _guard = PullCycleGuard();
 
   bool _pulling = false;
 
@@ -123,9 +50,11 @@ class PullCoordinator {
     required ConnectivityService connectivity,
     PullCompletionBus? completionBus,
     CurrentPermissions? permissions,
+    SessionCredentialsProbe? credentialsProbe,
   }) : _connectivity = connectivity,
        _completionBus = completionBus,
-       _permissions = permissions;
+       _permissions = permissions,
+       _credentialsProbe = credentialsProbe;
 
   /// Enregistre le handler d'une ressource (appelé par la DI des branches).
   void registerHandler(PullHandler handler) {
@@ -136,63 +65,184 @@ class PullCoordinator {
 
   /// Tire toutes les ressources enregistrées. Ne lève pas : encapsule tout dans
   /// un [PullRunReport].
+  ///
+  /// Le verrou `_pulling` ne garde QUE ce chemin : un second cycle complet
+  /// pendant qu'un premier tourne n'apporterait rien. Il ne s'applique pas à
+  /// [pullSubset], qui a sa propre sérialisation, plus fine.
   Future<PullRunReport> pullAll() async {
     if (_pulling) return const PullRunReport.skipped();
     _pulling = true;
     try {
-      if (!await _connectivity.isOnline()) {
-        return const PullRunReport.offline();
-      }
-
-      var updated = 0, notModified = 0, failed = 0, forbidden = 0;
-      int? latestServerTimeMs;
-      for (final handler in _handlers.values) {
-        if (!_isReadable(handler)) {
-          forbidden++;
-          continue;
-        }
-        try {
-          final outcome = await handler.pull();
-          switch (outcome.result) {
-            case PullResult.updated:
-              updated++;
-              // Réveil IMMÉDIAT des écrans qui lisent cette ressource : un
-              // cycle complet enchaîne des ressources lentes, attendre la fin
-              // laisserait un écran affiché vide alors que SES données sont
-              // déjà en base (cf. `PullCompletionBus`).
-              // TOUTES les ressources de la clé de ce flux, pas la seule que le
-              // handler déclare : deux flux du contrat partagent une clé et
-              // écrivent les mêmes tables (cf. `pullCompletionSubjectsOf`).
-              _completionBus?.notifyUpdated(
-                pullCompletionSubjectsOf(handler.resource),
-              );
-            case PullResult.notModified:
-              notModified++;
-            case PullResult.error:
-              failed++;
-          }
-          final observed = outcome.serverTimeMs;
-          if (observed != null &&
-              (latestServerTimeMs == null || observed > latestServerTimeMs)) {
-            latestServerTimeMs = observed;
-          }
-        } catch (_) {
-          // Un handler qui lève (malgré son contrat) est isolé en échec.
-          failed++;
-        }
-      }
-
-      return PullRunReport(
-        updated: updated,
-        notModified: notModified,
-        failed: failed,
-        forbidden: forbidden,
-        latestServerTimeMs: latestServerTimeMs,
-      );
+      return await _runCycle(_handlers.values.toList(growable: false));
     } finally {
       _pulling = false;
     }
   }
+
+  /// Tire un **sous-ensemble** de ressources — le chemin des écrans (ADR-015 F6).
+  ///
+  /// Existe pour que les écrans cessent de tirer en direct sur les repositories.
+  /// Ces appels-là n'étaient filtrés par aucun droit, ignoraient l'ordre et ne
+  /// diffusaient rien : la largeur effective du pull était l'union du
+  /// coordinateur et d'une douzaine de portes dérobées. Tant qu'elles restent
+  /// ouvertes, faire du plan l'autorité du seul coordinateur ne resserre rien.
+  ///
+  /// **L'ordre est celui du registre, jamais celui de l'ensemble reçu.** Un
+  /// `Set` littéral au site d'appel n'a pas d'ordre porteur, et l'arête
+  /// créances → paiements ne doit pas dépendre de la façon dont un développeur
+  /// a tapé ses accolades.
+  ///
+  /// **Ne prend PAS le verrou de cycle complet.** Le prendre ferait qu'un écran
+  /// monté pendant un `pullAll()` en vol recevrait « sauté » et resterait sur un
+  /// cache froid — précisément la panne que ces pulls existent à éviter, et
+  /// d'autant plus vicieuse que le cycle complet part maintenant à l'ouverture
+  /// de session : la fenêtre tombe pile quand l'utilisateur ouvre son premier
+  /// écran. La sérialisation se fait donc **par ressource**, via
+  /// [PullCycleGuard].
+  ///
+  /// Une ressource demandée mais non enregistrée est ignorée en silence : c'est
+  /// un écran qui demande plus que ce que son APK sait tirer, pas une panne.
+  Future<PullRunReport> pullSubset(Set<String> resources) async {
+    final selected = _handlers.values
+        .where((h) => resources.contains(h.resource))
+        .toList(growable: false);
+    if (selected.isEmpty) return const PullRunReport();
+    return _runCycle(selected);
+  }
+
+  /// Le corps de cycle, unique — cf. la docstring de classe.
+  Future<PullRunReport> _runCycle(List<PullHandler> handlers) async {
+    if (!await _connectivity.isOnline()) {
+      return const PullRunReport.offline();
+    }
+    // Sans jetons utilisables, chaque ressource partirait en 401. Les use cases
+    // d'hydratation portaient cette sonde eux-mêmes, en justifiant qu'ils
+    // contournaient le coordinateur ; elle remonte ici avec eux.
+    if (!await _canAuthenticate()) {
+      return const PullRunReport.skipped();
+    }
+
+    var updated = 0, notModified = 0, failed = 0;
+    var forbidden = 0, blocked = 0;
+    int? latestServerTimeMs;
+    final outcomes = <String, PullResult>{};
+
+    /// Ressources dont l'aval bloquant ne peut PAS se fier au cache local.
+    ///
+    /// Un échec y entre, évidemment. Mais une ressource **sautée faute de
+    /// droit** aussi, et c'est moins évident : pour l'aval, « l'amont a échoué »
+    /// et « l'amont n'a pas été tenté » se valent — dans les deux cas son miroir
+    /// local est périmé. Un rôle qui détiendrait `finance.payment.read` sans
+    /// `finance.charge.read` verrait sinon les paiements descendre par-dessus un
+    /// `amount_paid_in_cents` que plus rien ne rafraîchit : la créance
+    /// s'afficherait impayée et le caissier réencaisserait.
+    ///
+    /// Avant que les écrans ne passent par ici, ce cas se réglait par accident :
+    /// leur pull n'était filtré par rien, les créances partaient, prenaient un
+    /// 403 du serveur et tombaient en échec — ce qui bloquait les paiements.
+    /// Filtrer localement supprime le 403, donc supprimerait le blocage.
+    final unusableResources = <String>{};
+
+    for (final handler in handlers) {
+      if (!_isReadable(handler)) {
+        forbidden++;
+        unusableResources.add(handler.resource);
+        continue;
+      }
+      if (_isBlockedBy(handler, unusableResources)) {
+        blocked++;
+        continue;
+      }
+      try {
+        // Sérialisé PAR RESSOURCE : un cycle complet et le pull d'un écran qui
+        // se monte peuvent se croiser, et deux cycles keyset qui écrivent le
+        // même curseur en concurrence le font régresser. Trois repositories sur
+        // douze ne se protègent pas eux-mêmes, dont l'Inscription.
+        final outcome = await _guard.run(
+          handler.resource,
+          () => handler.pull(),
+        );
+        outcomes[handler.resource] = outcome.result;
+        switch (outcome.result) {
+          case PullResult.updated:
+            updated++;
+            // Réveil IMMÉDIAT des écrans qui lisent cette ressource : un cycle
+            // complet enchaîne des ressources lentes, attendre la fin laisserait
+            // un écran affiché vide alors que SES données sont déjà en base.
+            // TOUTES les ressources de la clé de ce flux, pas la seule que le
+            // handler déclare (cf. `pullCompletionSubjectsOf`).
+            _completionBus?.notifyUpdated(
+              pullCompletionSubjectsOf(handler.resource),
+            );
+          case PullResult.notModified:
+            notModified++;
+          case PullResult.error:
+            failed++;
+            unusableResources.add(handler.resource);
+        }
+        final observed = outcome.serverTimeMs;
+        if (observed != null &&
+            (latestServerTimeMs == null || observed > latestServerTimeMs)) {
+          latestServerTimeMs = observed;
+        }
+      } catch (_) {
+        // Un handler qui lève (malgré son contrat) est isolé en échec.
+        failed++;
+        unusableResources.add(handler.resource);
+        outcomes[handler.resource] = PullResult.error;
+      }
+    }
+
+    return PullRunReport(
+      updated: updated,
+      notModified: notModified,
+      failed: failed,
+      forbidden: forbidden,
+      blocked: blocked,
+      outcomes: Map.unmodifiable(outcomes),
+      latestServerTimeMs: latestServerTimeMs,
+    );
+  }
+
+  /// Vrai si une dépendance **bloquante** de ce handler est inexploitable dans
+  /// ce cycle — qu'elle ait échoué ou qu'elle n'ait pas été tentée.
+  ///
+  /// Une seule arête est de cette nature — les paiements après les créances —
+  /// et son asymétrie est tout l'argument : poursuivre après un échec des
+  /// créances fait réencaisser, alors que renoncer ne coûte qu'un grand-livre en
+  /// retard. Les trois autres arêtes n'ont pas ce sens de panne et laissent
+  /// donc leur aval s'exécuter (cf. [MoneyGradeEdge.blocking]).
+  bool _isBlockedBy(PullHandler handler, Set<String> unusable) {
+    if (unusable.isEmpty) return false;
+    final key = planKeyOf(handler.resource);
+    if (key == null) return false;
+    for (final edge in kMoneyGradeEdges) {
+      if (!edge.blocking || edge.after != key) continue;
+      final upstream = resourcesOf(edge.before);
+      if (upstream.any(unusable.contains)) return true;
+    }
+    return false;
+  }
+
+  /// Sans sonde branchée (tests, plateformes partielles) : pas de gate.
+  ///
+  /// Fail-open comme partout ailleurs dans cette couche : une sonde défaillante
+  /// ne doit jamais devenir elle-même la cause d'une synchronisation qui ne part
+  /// plus.
+  Future<bool> _canAuthenticate() async {
+    final probe = _credentialsProbe;
+    if (probe == null) return true;
+    try {
+      return await probe.canAuthenticate();
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Sérialise un cycle sur cette ressource — réservé aux appelants qui tirent
+  /// hors coordinateur en attendant leur repli (ADR-015 F6).
+  Future<void> guarded(String resource, Future<void> Function() cycle) =>
+      _guard.run(resource, cycle);
 
   /// Vrai si la session courante peut lire cette ressource (ADR-014).
   ///

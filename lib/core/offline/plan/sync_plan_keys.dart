@@ -48,9 +48,13 @@
 /// gagne » ferait retomber `failed` à zéro et afficherait une pastille verte sur
 /// un flux qui n'est pas passé.
 ///
-/// Et la fusion ne toucherait même pas le chemin le plus emprunté :
-/// `SyncEnrollmentPullsUseCase` appelle le repository **directement** au montage
-/// des FeatureScope, sans passer par aucun handler.
+/// (Cet argument avait un troisième volet, désormais caduc : la fusion « ne
+/// toucherait même pas le chemin le plus emprunté », parce que
+/// `SyncEnrollmentPullsUseCase` appelait le repository directement au montage
+/// des FeatureScope. Depuis le repli F6, ce use case passe par `pullSubset` et
+/// donc par ces deux handlers — la perte d'isolation ci-dessus vaut maintenant
+/// pour TOUS les chemins, ce qui renforce le refus de fusionner plutôt que de
+/// l'affaiblir.)
 ///
 /// ⚠️ Conséquence à ne pas défaire : `enrollments` est déclarée par un handler
 /// **et** portée par cette liste. Le jour où l'un des deux disparaîtrait, elle
@@ -164,11 +168,15 @@ List<String> resourcesOf(String planKey) =>
 /// surveillent academics et schedule, dont toutes les clés sont
 /// mono-ressource. C'est une trappe qu'on referme avant qu'elle ne serve.
 ///
-/// Vit ici plutôt que dans le coordinateur parce que **le coordinateur n'est
-/// pas la seule bouche du bus** : les use cases d'hydratation des FeatureScope
-/// diffusent aussi, hors de tout cycle de coordinateur. Deux définitions
-/// divergeraient, et la seconde rouvrirait la trappe sans que les tests de la
-/// première ne bronchent.
+/// Vit ici plutôt que dans le coordinateur parce qu'elle se **déduit** de la
+/// table ci-dessus, au même titre que [planKeyOf] et [resourcesOf] : séparer une
+/// dérivée de sa source les fait diverger, et c'est la copie éloignée qui
+/// rouvrirait la trappe sans que les tests de l'autre ne bronchent.
+///
+/// (L'argument d'origine — « le coordinateur n'est pas la seule bouche du bus,
+/// les use cases d'hydratation diffusent aussi » — est devenu faux au lot F6 :
+/// ces use cases sont désormais des façades sur `pullSubset`, et le coordinateur
+/// est bien la seule bouche. La conclusion, elle, n'a pas bougé.)
 ///
 /// Une ressource inconnue de la table est diffusée seule : un handler neuf, pas
 /// encore inscrit ici, doit continuer de réveiller ses écrans plutôt que de

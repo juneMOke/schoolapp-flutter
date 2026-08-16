@@ -15,10 +15,33 @@ class MoneyGradeEdge {
   /// c'est ce que le test affiche quand il rougit.
   final String consequence;
 
+  /// L'aval ne doit pas être tenté **du tout** quand l'amont a échoué dans le
+  /// même cycle.
+  ///
+  /// Les quatre arêtes n'ont pas la même gravité, et les traiter à égalité
+  /// serait un mauvais arbitrage. Renoncer coûte un flux non tiré : c'est le bon
+  /// prix quand poursuivre détruit, et un prix inutile quand poursuivre ne fait
+  /// que produire un cycle imparfait.
+  ///
+  ///  - créances → paiements : **bloquant**. Les créances en échec laissent
+  ///    `amount_paid_in_cents` périmé ; tirer quand même les paiements insère
+  ///    SYNCED par-dessus, la créance s'affiche impayée et le caissier
+  ///    réencaisse. Renoncer laisse le grand-livre cohérent, en retard.
+  ///  - référentiel → classes : **non bloquant**. Les classes échoueront
+  ///    d'elles-mêmes faute de référentiel ; renoncer n'éviterait qu'un appel.
+  ///  - barème → cours : **non bloquant**. Les cours descendent très bien sans
+  ///    le barème ; c'est la composition du détail qui attendra un cycle. Y
+  ///    renoncer perdrait les cours pour rien.
+  ///  - cours → évaluations : **non bloquant**. Sans cours en base la boucle ne
+  ///    fait aucun appel : renoncer et poursuivre ont le même effet, et
+  ///    poursuivre laisse au moins l'issue observable.
+  final bool blocking;
+
   const MoneyGradeEdge({
     required this.before,
     required this.after,
     required this.consequence,
+    this.blocking = false,
   });
 }
 
@@ -42,6 +65,10 @@ const List<MoneyGradeEdge> kMoneyGradeEdges = [
     // `amount_paid_in_cents` encore périmé, la créance s'affiche IMPAYÉE, et le
     // caissier RÉENCAISSE.
     consequence: 'le caissier réencaisse — argent perdu',
+    // La seule des quatre. `SyncFinancePullsUseCase` portait déjà cette règle
+    // avant que le socle ne sache l'exprimer : elle remonte ici pour que le
+    // repli des écrans sur le coordinateur ne la perde pas en chemin.
+    blocking: true,
   ),
   MoneyGradeEdge(
     before: SyncPlanKeys.schoolReferential,
