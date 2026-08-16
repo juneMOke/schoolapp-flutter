@@ -53,6 +53,12 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
     // autre déclencheur de montage ne les tirait : sur une tablette démarrée
     // déjà connectée, l'onglet Présence restait à vie sur « Synchronisation en
     // attente » (ADR-015 §6-D).
+    //
+    // ⚠️ Depuis le repli F6, ces deux pulls passent par le `PullCoordinator` et
+    // sont donc filtrés par les droits de la session : le référentiel Classe
+    // exige `classroom.read`. Un rôle qui ne fait que l'appel sans ce droit
+    // n'aura jamais le marqueur de bootstrap — ce qui était déjà le cas, mais
+    // par un 403 du serveur ; le refus est désormais local et silencieux.
     unawaited(GetIt.instance<SyncClassroomReferentialUseCase>().call());
   }
 

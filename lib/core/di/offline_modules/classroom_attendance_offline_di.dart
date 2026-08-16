@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:dio/dio.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -9,7 +8,6 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 // ── Référentiel Inscription (dépendance des pull handlers : année courante) ──
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
-import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 // ── Classe (offline) ──
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_member_pull_api.dart';
@@ -197,23 +195,17 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
 
   // ── UseCases (factory) ──
   // Classe
+  // Hydratation au montage : une seule dépendance, le coordinateur (ADR-015 F6).
+  // Gardes, ordre, droits et diffusion vivent dans le socle, plus ici.
   getIt.registerFactory<SyncClassroomsUseCase>(
-    () => SyncClassroomsUseCase(
-      getIt<ClassroomOfflineRepository>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncClassroomsUseCase(getIt<PullCoordinator>()),
   );
-  // Hydratation du référentiel Classe sans contexte d'année — pour les modules
-  // qui CONSOMMENT le roster sans l'afficher (Contrôle des frais).
+  // Référentiel Classe complet (classes + roster + transferts) — pour les
+  // modules qui CONSOMMENT le roster sans l'afficher (Présence, Contrôle des
+  // frais). Les transferts y sont indispensables : eux seuls posent le marqueur
+  // de bootstrap dont dépend l'onglet Présence de la fiche élève.
   getIt.registerFactory<SyncClassroomReferentialUseCase>(
-    () => SyncClassroomReferentialUseCase(
-      repository: getIt<ClassroomOfflineRepository>(),
-      transferRepository: getIt<ClassroomTransferPullRepository>(),
-      referentialDao: getIt<EnrollmentReferentialDao>(),
-      currentUser: getIt<CurrentUserContext>(),
-      credentialsProbe: getIt<AuthSessionManager>(),
-      connectivity: getIt<ConnectivityService>(),
-    ),
+    () => SyncClassroomReferentialUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<GetOfflineClassroomsUseCase>(
     () => GetOfflineClassroomsUseCase(getIt<ClassroomOfflineRepository>()),
@@ -258,11 +250,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     () => GetLocalAttendanceRateUseCase(getIt<AttendanceOfflineRepository>()),
   );
   getIt.registerFactory<SyncAttendancePullUseCase>(
-    () => SyncAttendancePullUseCase(
-      getIt<AttendancePullRepository>(),
-      getIt<AuthSessionManager>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncAttendancePullUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<GetStudentAttendanceStatsUseCase>(
     () =>
@@ -300,10 +288,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     ),
   );
   getIt.registerFactory<SyncDisciplinaryPullUseCase>(
-    () => SyncDisciplinaryPullUseCase(
-      getIt<DisciplinaryPullRepository>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncDisciplinaryPullUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<GetDisciplinaryFreshnessOfflineUseCase>(
     () => GetDisciplinaryFreshnessOfflineUseCase(

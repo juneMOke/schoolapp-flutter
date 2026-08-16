@@ -8,14 +8,15 @@ sealed class ClassroomOfflineEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Pull delta des classes (CF2) : à déclencher au démarrage / retour online.
+/// Pull delta des classes + roster (CF2), déclenché au montage de l'écran.
+///
+/// **Sans `academicYearId` depuis ADR-015 F6** : le pull passe par le
+/// `PullCoordinator`, dont les handlers Classe résolvent l'année courante
+/// eux-mêmes (`ref_academic_years`, scopé école). Garder le champ ici
+/// laisserait croire que l'écran choisit l'année tirée — il ne le peut plus
+/// (cf. `SyncClassroomsUseCase`, section « couplage figé »).
 class ClassroomsSyncRequested extends ClassroomOfflineEvent {
-  final String academicYearId;
-
-  const ClassroomsSyncRequested({required this.academicYearId});
-
-  @override
-  List<Object?> get props => [academicYearId];
+  const ClassroomsSyncRequested();
 }
 
 /// Lecture offline des classes + compteurs (CF3) de TOUTE l'année (dropdowns

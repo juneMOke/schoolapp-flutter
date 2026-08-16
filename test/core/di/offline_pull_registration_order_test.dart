@@ -149,6 +149,21 @@ void main() {
       );
     });
 
+    // ADR-015 F6 — `SyncClassroomReferentialUseCase` tenait cet ordre lui-même
+    // (« TOUJOURS après les classes, ne jamais inverser ») avant d'être replié
+    // sur `pullSubset`. Le repli le confie au registre, qui n'en gardait
+    // jusqu'ici aucune trace observable : c'est ici que l'invariant atterrit.
+    // Le delta de transfert résout son `school_level_id` par un SELECT sur
+    // `ref_classrooms` — dans l'autre ordre, la colonne se remplit d'une chaîne
+    // vide.
+    test('les classes précèdent les transferts', () {
+      expectBefore(
+        kClassroomsResource,
+        kClassroomTransfersResource,
+        'le delta de transfert résout school_level_id depuis ref_classrooms',
+      );
+    });
+
     // L'arête la plus chère du dépôt : dans l'autre sens, un paiement passe
     // SYNCED et sort du `pending` alors que `amount_paid` est encore périmé —
     // la créance s'affiche impayée et le caissier RÉENCAISSE.

@@ -57,21 +57,29 @@ class ClassroomOfflineBloc
     on<MemberAssignRequested>(_onAssignRequested);
   }
 
+  /// Hydratation au montage — déléguée au `PullCoordinator` (ADR-015 F6).
+  ///
+  /// Le bilan de cycle n'est pas un `Either` : il porte l'issue de CHAQUE
+  /// ressource. On n'interroge donc pas « le cycle s'est-il bien passé ? » —
+  /// question à laquelle un cycle complet répondrait pour des flux étrangers à
+  /// cet écran — mais « **mes** deux ressources sont-elles passées ? ».
+  /// [PullRunReport.succeeded] rend `false` aussi bien sur un échec que sur une
+  /// ressource sautée (droit refusé, dépendance bloquée) : aucun de ces cas
+  /// n'autorise à annoncer un cache à jour.
   Future<void> _onSyncRequested(
     ClassroomsSyncRequested event,
     Emitter<ClassroomOfflineState> emit,
   ) async {
     emit(state.copyWith(syncStatus: ClassroomStatus.loading));
 
-    final result = await _syncClassrooms(academicYearId: event.academicYearId);
+    final report = await _syncClassrooms();
+    final allPulled = SyncClassroomsUseCase.resources.every(report.succeeded);
 
-    result.fold(
-      (_) => emit(state.copyWith(syncStatus: ClassroomStatus.failure)),
-      (outcome) => emit(
-        state.copyWith(
-          syncStatus: ClassroomStatus.success,
-          freshness: outcome.syncedAt,
-        ),
+    emit(
+      state.copyWith(
+        syncStatus: allPulled
+            ? ClassroomStatus.success
+            : ClassroomStatus.failure,
       ),
     );
   }

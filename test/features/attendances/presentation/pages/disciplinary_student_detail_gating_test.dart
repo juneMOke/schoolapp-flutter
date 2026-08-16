@@ -1,11 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
@@ -168,9 +167,11 @@ void main() {
   testWidgets('avec discipline.read : les deux volets et la pastille', (
     tester,
   ) async {
+    // Cycle hors-ligne : le socle n'a rien tenté (ADR-015 F6). La page ne lit
+    // pas le bilan — elle recharge le local — mais le stub doit exister.
     when(
       () => syncUseCase.call(),
-    ).thenAnswer((_) async => const Left(NetworkFailure('hors ligne')));
+    ).thenAnswer((_) async => const PullRunReport.offline());
     await tester.pumpWidget(host(surveillant));
     await tester.pump();
 

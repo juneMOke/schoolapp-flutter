@@ -1,141 +1,102 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/current_user_context.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_sync_outcome.dart';
-import 'package:school_app_flutter/features/classes/domain/entities/offline/classroom_transfer_pull_outcome.dart';
-import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
-import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_transfer_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/pull_handler.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/sync_classroom_referential_use_case.dart';
-import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
-class _MockRepo extends Mock implements ClassroomOfflineRepository {}
+class _MockPullCoordinator extends Mock implements PullCoordinator {}
 
-class _MockTransferRepo extends Mock
-    implements ClassroomTransferPullRepository {}
-
-class _MockDao extends Mock implements EnrollmentReferentialDao {}
-
-class _MockConnectivity extends Mock implements ConnectivityService {}
-
-class _MockProbe extends Mock implements SessionCredentialsProbe {}
-
-/// ADR-015 §6-D — `classroom.transfers` n'avait AUCUN déclencheur de montage :
-/// il ne descendait que par le `PullCoordinator`, lui-même déclenché par la
-/// seule transition hors-ligne → en ligne. Sur une tablette démarrée déjà
-/// connectée — le cas nominal — son marqueur de bootstrap n'était jamais posé,
-/// et l'onglet Présence de la fiche élève restait à vie sur « Synchronisation
-/// en attente ».
+/// ADR-015 §6-D — `classroom.transfers` n'a qu'un seul déclencheur de montage,
+/// et c'est ce use case. Sans lui, ce flux ne descend qu'au retour *online* :
+/// sur une tablette démarrée déjà connectée — le cas nominal — le marqueur de
+/// bootstrap des transferts n'est jamais posé, et l'onglet Présence de la fiche
+/// élève reste à vie sur « Synchronisation en attente ».
+///
+/// Depuis F6, le use case ne tire plus les repositories lui-même : le marqueur
+/// est posé par `ClassroomTransferPullRepositoryImpl` en fin de cycle, appelée
+/// par `ClassroomTransferPullHandler` — le MÊME `syncTransfers()`. Ce qui reste
+/// à prouver ici est donc devenu très étroit, et c'est exactement ce qui peut
+/// encore se perdre : **que les transferts figurent dans ce qui est demandé**.
+///
+/// Ce que ce fichier ne teste plus, et pourquoi :
+///  - l'ordre classes → transferts : `pullSubset` itère le registre, jamais
+///    l'ensemble reçu ; l'ordre est ancré par
+///    `test/core/di/offline_pull_registration_order_test.dart` ;
+///  - l'isolation d'un échec : le socle isole par handler, prouvé chez lui ;
+///  - les gardes connectivité / crédentiels / année : parties dans le socle.
 void main() {
-  late _MockRepo repo;
-  late _MockTransferRepo transferRepo;
-  late _MockDao dao;
-  late _MockConnectivity connectivity;
-  late _MockProbe probe;
+  late _MockPullCoordinator coordinator;
+  late SyncClassroomReferentialUseCase useCase;
+
+  setUpAll(() => registerFallbackValue(<String>{}));
 
   setUp(() {
-    repo = _MockRepo();
-    transferRepo = _MockTransferRepo();
-    dao = _MockDao();
-    connectivity = _MockConnectivity();
-    probe = _MockProbe();
-
-    when(() => connectivity.isOnline()).thenAnswer((_) async => true);
-    when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+    coordinator = _MockPullCoordinator();
     when(
-      () => dao.findCurrentAcademicYearId(any()),
-    ).thenAnswer((_) async => 'ay-1');
-    when(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
-    ).thenAnswer(
-      (_) async => const Right(
-        ClassroomSyncOutcome(
-          classroomsUpserted: 0,
-          membersUpserted: 0,
-          notModified: true,
-          syncedAt: 0,
-        ),
-      ),
-    );
-    when(() => transferRepo.syncTransfers()).thenAnswer(
-      (_) async => const Right(
-        ClassroomTransferPullOutcome(
-          upserted: 0,
-          notModified: true,
-          bootstrapComplete: true,
-          syncedAt: 0,
-        ),
-      ),
-    );
+      () => coordinator.pullSubset(any()),
+    ).thenAnswer((_) async => const PullRunReport(updated: 3));
+    useCase = SyncClassroomReferentialUseCase(coordinator);
   });
 
-  SyncClassroomReferentialUseCase build() => SyncClassroomReferentialUseCase(
-    repository: repo,
-    transferRepository: transferRepo,
-    referentialDao: dao,
-    currentUser: CurrentUserContext()..set('u-1', schoolId: 'school-1'),
-    credentialsProbe: probe,
-    connectivity: connectivity,
-  );
+  Set<String> demande() =>
+      verify(() => coordinator.pullSubset(captureAny())).captured.single
+          as Set<String>;
 
-  test('les transferts sont tirés APRÈS les classes, jamais avant', () async {
-    await build().call();
+  test('demande les trois flux du référentiel Classe', () async {
+    await useCase();
 
-    verifyInOrder([
-      () => repo.syncClassrooms(academicYearId: 'ay-1'),
-      () => transferRepo.syncTransfers(),
-    ]);
-  });
-
-  test('hors ligne : aucun appel, ni classes ni transferts', () async {
-    when(() => connectivity.isOnline()).thenAnswer((_) async => false);
-
-    expect(await build().call(), isFalse);
-    verifyNever(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
-    );
-    verifyNever(() => transferRepo.syncTransfers());
-  });
-
-  test('sans année courante résolue : aucun appel', () async {
-    when(
-      () => dao.findCurrentAcademicYearId(any()),
-    ).thenAnswer((_) async => null);
-
-    expect(await build().call(), isFalse);
-    verifyNever(() => transferRepo.syncTransfers());
+    expect(demande(), {
+      kClassroomsResource,
+      kClassroomMembersResource,
+      kClassroomTransfersResource,
+    });
   });
 
   test(
-    'un échec des transferts ne fait pas échouer l\'hydratation des classes',
+    'les transferts sont demandés : sans eux, aucun marqueur de bootstrap et '
+    'l\'onglet Présence reste à vie en attente de synchro',
     () async {
-      when(
-        () => transferRepo.syncTransfers(),
-      ).thenAnswer((_) async => const Left(NetworkFailure('boom')));
+      await useCase();
 
-      expect(await build().call(), isTrue);
-      verify(() => transferRepo.syncTransfers()).called(1);
+      expect(demande(), contains(kClassroomTransfersResource));
     },
   );
 
   test(
-    'un transfert qui LÈVE est isolé : le verdict reste celui des classes',
+    'l\'ensemble annoncé publiquement est celui réellement demandé',
     () async {
-      when(() => transferRepo.syncTransfers()).thenThrow(StateError('boom'));
+      await useCase();
 
-      expect(await build().call(), isTrue);
+      expect(demande(), SyncClassroomReferentialUseCase.resources);
     },
   );
 
-  test('un échec des classes n\'empêche pas le cycle des transferts', () async {
-    when(
-      () => repo.syncClassrooms(academicYearId: any(named: 'academicYearId')),
-    ).thenAnswer((_) async => const Left(NetworkFailure('boom')));
+  test('délègue sans condition : aucune garde n\'est rejouée ici', () async {
+    await useCase();
 
-    expect(await build().call(), isFalse);
-    verify(() => transferRepo.syncTransfers()).called(1);
+    verify(() => coordinator.pullSubset(any())).called(1);
+    verifyNoMoreInteractions(coordinator);
+  });
+
+  test('best-effort : un cycle dégradé n\'est pas un chemin d\'échec', () async {
+    when(() => coordinator.pullSubset(any())).thenAnswer(
+      (_) async => const PullRunReport(
+        updated: 1,
+        failed: 2,
+        outcomes: {
+          kClassroomsResource: PullResult.updated,
+          kClassroomMembersResource: PullResult.error,
+          kClassroomTransfersResource: PullResult.error,
+        },
+      ),
+    );
+
+    // Ne lève pas : les deux scopes appellent en `unawaited`, l'UI lit le local.
+    final rapport = await useCase();
+
+    expect(rapport.isDegraded, isTrue);
   });
 }
