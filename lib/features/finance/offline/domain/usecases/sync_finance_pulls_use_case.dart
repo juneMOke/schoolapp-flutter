@@ -1,112 +1,60 @@
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/finance_pull_outcome.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 
-/// Tire les deux ressources pull du grand-livre (créances, paiements) — déclenché
-/// au montage du module Facturation, en plus du cycle global du `PullCoordinator`
-/// (retour online). Le montage est le moment d'hydratation : le caissier ouvre la
-/// Facturation **pendant** qu'il a du réseau, avant de partir encaisser hors-ligne.
+/// Hydrate le grand-livre au montage du scope Facturation (ADR-015 F6) — le
+/// caissier ouvre la Facturation **pendant** qu'il a du réseau, avant de partir
+/// encaisser hors-ligne.
 ///
-/// Best-effort : aucun échec n'est propagé — le cache local reste en l'état ; le
-/// bilan agrège les compteurs pour un éventuel diagnostic.
+/// **Ne tire plus le repository en direct.** Ce déclencheur passe désormais par
+/// le `PullCoordinator`, qui reste seul à connaître l'ordre, les droits et —
+/// bientôt — le plan de synchronisation. Tant que des écrans tiraient à côté, la
+/// largeur effective du pull était l'union du coordinateur et d'une douzaine de
+/// portes dérobées, aucune filtrée par une permission.
 ///
-/// ⚠️ Les deux pulls ne sont PAS isolés : les paiements **dépendent** des
-/// créances. Un ordre seul ne suffit pas, il faut une GARDE — tirer les
-/// paiements par-dessus un miroir de créances périmé est le sens de panne qui
-/// fait réencaisser (cf. le ⚠️ de `registerEnrollmentFinanceOffline`, et
-/// `FinanceLedgerRefresher` qui applique la même règle). Créances KO ⇒ on
-/// n'essaie même pas les paiements.
+/// Ce qui vivait ici et vit maintenant dans le socle, pour tout le monde : la
+/// pré-garde de connectivité, la sonde de crédentiels, le filtre de permission,
+/// l'isolation des échecs et la diffusion sur le `PullCompletionBus`. Ce use
+/// case ne porte plus qu'une chose — **de quelles ressources cet écran a
+/// besoin**.
 ///
-/// **Gate crédentiels** : ce déclencheur (montage du scope) contourne le
-/// `PullCoordinator` et son gate `SessionCredentialsProbe` — sans le
-/// revérifier ici, une tablette sans session valide taperait le réseau à
-/// chaque montage de la Facturation.
+/// Le second déclencheur reste le cycle complet du coordinateur (ouverture de
+/// session, retour online) : une tablette posée sur le Wi-Fi de l'école ne
+/// verrait aucun retour online de la journée.
 ///
-/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
-/// tablette hors-ligne taperait quand même le réseau à chaque montage.
+/// ## ⚠️ La garde money-grade a été portée dans le socle, pas perdue
+///
+/// Ce use case portait une règle que rien d'autre n'avait : **créances KO ⇒ on
+/// ne tente même pas les paiements**. Le sens de panne est asymétrique et c'est
+/// tout l'argument — créances OK / paiements KO fait *refuser* un encaissement
+/// (friction, argent sauf, se résorbe seul) ; paiements OK / créances KO insère
+/// un versement SYNCED par-dessus un `amount_paid_in_cents` périmé, la créance
+/// s'affiche impayée et le caissier **réencaisse**.
+///
+/// Elle vit maintenant à deux endroits du socle, et il faut les deux :
+///  - `MoneyGradeEdge.blocking`, vrai pour la **seule** arête
+///    `finance.student-charges` → `finance.payments` (les trois autres arêtes
+///    n'ont pas ce sens de panne et laissent leur aval s'exécuter) ;
+///  - `PullCoordinator._isBlockedBy`, qui écarte l'aval du cycle en cours et le
+///    compte en `PullRunReport.blocked` — à part de `failed`, parce que rien n'a
+///    échoué : on s'est abstenu.
+///
+/// La jonction entre les deux est la table d'alias `planKeyOf` : la garde ne
+/// mord que si `finance_payments` s'y traduit bien en `finance.payments`. Une
+/// clé mal orthographiée rouvrirait la porte **en silence**, d'où le test qui
+/// prouve l'abandon pour ce chemin précis, et pas seulement l'ordre.
+///
+/// ## L'ordre vient du registre, jamais des accolades
+///
+/// `pullSubset` itère le registre filtré par l'ensemble reçu — un `Set` littéral
+/// n'a pas d'ordre porteur. L'ordre créances → paiements est tenu par la DI et
+/// verrouillé par `offline_pull_registration_order_test`.
 class SyncFinancePullsUseCase {
-  final FinancePullRepository _repository;
-  final SessionCredentialsProbe _credentialsProbe;
-  final ConnectivityService _connectivity;
+  final PullCoordinator _coordinator;
 
-  const SyncFinancePullsUseCase(
-    this._repository,
-    this._credentialsProbe,
-    this._connectivity,
-  );
+  const SyncFinancePullsUseCase(this._coordinator);
 
-  Future<FinancePullsReport> call() async {
-    if (!await _connectivity.isOnline()) {
-      // Hors-ligne : ni créances ni paiements ne peuvent partir.
-      return const FinancePullsReport(
-        updated: 0,
-        notModified: 0,
-        failed: 0,
-        skipped: 2,
-      );
-    }
-    if (!await _canAuthenticate()) {
-      // Non authentifié : ni créances ni paiements ne peuvent partir.
-      return const FinancePullsReport(
-        updated: 0,
-        notModified: 0,
-        failed: 0,
-        skipped: 2,
-      );
-    }
-    var updated = 0, notModified = 0;
-
-    void tally(FinancePullOutcome outcome) =>
-        outcome.notModified ? notModified++ : updated++;
-
-    final charges = await _repository.syncStudentCharges();
-    if (charges.isLeft()) {
-      // Paiements NON tentés (garde, pas un échec de leur part).
-      return const FinancePullsReport(
-        updated: 0,
-        notModified: 0,
-        failed: 1,
-        skipped: 1,
-      );
-    }
-    charges.fold((_) {}, tally);
-
-    var failed = 0;
-    (await _repository.syncPayments()).fold((_) => failed++, tally);
-
-    return FinancePullsReport(
-      updated: updated,
-      notModified: notModified,
-      failed: failed,
-    );
-  }
-
-  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
-  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
-  Future<bool> _canAuthenticate() async {
-    try {
-      return await _credentialsProbe.canAuthenticate();
-    } catch (_) {
-      return true;
-    }
-  }
-}
-
-/// Bilan agrégé des deux pulls (diagnostic).
-class FinancePullsReport {
-  final int updated;
-  final int notModified;
-  final int failed;
-
-  /// Pulls non tentés parce qu'une dépendance a échoué (créances KO ⇒ paiements
-  /// sautés). Distinct de [failed] : rien n'a été demandé au serveur.
-  final int skipped;
-
-  const FinancePullsReport({
-    required this.updated,
-    required this.notModified,
-    required this.failed,
-    this.skipped = 0,
+  Future<PullRunReport> call() => _coordinator.pullSubset(const {
+    FinancePullRepositoryImpl.chargesResource,
+    FinancePullRepositoryImpl.paymentsResource,
   });
 }

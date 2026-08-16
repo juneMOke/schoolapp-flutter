@@ -197,11 +197,20 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
     // d'erreur, pas de compteur, aucun événement de bus — rien à quoi
     // s'accrocher pour comprendre pourquoi des dossiers sont figés.
     //
-    // La garde vit ICI, dans le repository, et non dans le `PullHandler` :
-    // `SyncEnrollmentPullsUseCase` appelle ces méthodes EN DIRECT au montage
-    // des FeatureScope Inscription, Facturation et Documents — c'est le chemin
-    // le plus emprunté, bien plus que le coordinateur qui n'a que deux
-    // déclencheurs. Une garde posée dans le handler l'aurait laissé passer.
+    // La garde vit ICI, dans le repository, et non dans le `PullHandler`.
+    //
+    // ⚠️ Sa justification d'origine est PÉRIMÉE et ne doit pas être ressortie :
+    // elle disait que `SyncEnrollmentPullsUseCase` appelait ces méthodes EN
+    // DIRECT au montage des FeatureScope Inscription, Facturation et Documents,
+    // hors de tout handler. Ce n'est plus vrai depuis le repli F6 — ce use case
+    // ne fait plus que demander un sous-ensemble au `PullCoordinator`, et tout
+    // passe donc par les handlers.
+    //
+    // La garde reste néanmoins nécessaire, et à cette place : le coordinateur
+    // tire aussi le delta seul (`pullSubset` d'un écran qui ne demanderait que
+    // lui, ou un plan de synchro qui n'accorderait que ce flux), et le
+    // repository est le seul niveau où la question « cette base a-t-elle jamais
+    // été hydratée ? » se pose sans dupliquer le curseur de l'hydratant.
     //
     // Le curseur de l'hydratant fait office de témoin : il n'existe qu'après
     // une première page appliquée. Ce n'est pas un drapeau de bootstrap

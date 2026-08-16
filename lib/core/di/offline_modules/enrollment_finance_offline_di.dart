@@ -332,19 +332,16 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetPreEnrollmentUseCase>(
     () => GetPreEnrollmentUseCase(getIt<EnrollmentOfflineRepository>()),
   );
+  // Hydratation au montage des scopes : une seule dépendance, le coordinateur
+  // (ADR-015 F6). Gardes, ordre, permissions et diffusion sont partis dans le
+  // socle ; ces use cases ne portent plus que la liste des ressources dont leur
+  // écran a besoin. Résolution paresseuse du `PullCoordinator` : les handlers
+  // sont enregistrés en bas de cette fonction, bien après ces deux lignes.
   getIt.registerFactory<SyncEnrollmentPullsUseCase>(
-    () => SyncEnrollmentPullsUseCase(
-      getIt<EnrollmentPullRepository>(),
-      getIt<AuthSessionManager>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncEnrollmentPullsUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<SyncFinancePullsUseCase>(
-    () => SyncFinancePullsUseCase(
-      getIt<FinancePullRepository>(),
-      getIt<AuthSessionManager>(),
-      getIt<ConnectivityService>(),
-    ),
+    () => SyncFinancePullsUseCase(getIt<PullCoordinator>()),
   );
   getIt.registerFactory<SaveDraftIdentityUseCase>(
     () => SaveDraftIdentityUseCase(getIt<EnrollmentOfflineRepository>()),
@@ -481,7 +478,13 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // PORTEUR pour la paire snapshots/delta : le pull HYDRATANT (snapshots) INSÈRE
   // les lignes que le delta MAIGRE ne fait qu'UPDATE — snapshots DOIT donc
   // précéder enrollmentDelta (le coordinateur exécute dans l'ordre
-  // d'enregistrement). Cf. la même liste dans SyncEnrollmentPullsUseCase.
+  // d'enregistrement).
+  //
+  // Depuis le repli F6, cet ordre n'est plus recopié nulle part : c'est la SEULE
+  // déclaration. `SyncEnrollmentPullsUseCase` ne donne qu'un ENSEMBLE de
+  // ressources au coordinateur, qui itère ce registre-ci — les accolades du use
+  // case n'ordonnent rien. L'arête est verrouillée par
+  // `test/core/di/offline_pull_registration_order_test.dart`.
   final pullRepository = getIt<EnrollmentPullRepository>();
   getIt<PullCoordinator>()
     ..registerHandler(EnrollmentPullHandler.referential(pullRepository))

@@ -22,11 +22,22 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/sync
 /// **et** celui du référentiel Classe ([SyncClassroomReferentialUseCase], dont le
 /// roster borne la recherche par classe du Contrôle des frais)
 /// — même rôle qu'au montage de l'Inscription. Le cycle global du
-/// `PullCoordinator` ne se déclenche qu'au RETOUR online : une tablette démarrée
-/// déjà connectée ne tirerait jamais. Or ouvrir la Facturation est précisément le
-/// moment d'hydrater le cache, avant de partir encaisser hors-ligne.
+/// `PullCoordinator` ne se déclenche qu'à l'ouverture de session et au RETOUR
+/// online : une tablette démarrée déjà connectée ne tirerait jamais rien de la
+/// journée. Or ouvrir la Facturation est précisément le moment d'hydrater le
+/// cache, avant de partir encaisser hors-ligne.
 /// **Best-effort** : lancés sans attendre, aucun échec ne remonte à l'UI (qui lit
 /// le local de toute façon).
+///
+/// ⚠️ **Depuis le repli ADR-015 F6, ces trois pulls passent par le
+/// `PullCoordinator` et sont donc filtrés par les permissions de la session.**
+/// Cet écran tirait jusque-là les cinq flux Inscription sans aucun filtre :
+/// `enrollment.read` devient exigible pour que la recherche d'élève trouve
+/// quelque chose. Tous les gabarits de rôle par défaut qui atteignent la
+/// Facturation le détiennent (cf. `role_journeys_test.dart`), mais un rôle
+/// **personnalisé** avec `finance.charge.read` et sans `enrollment.read` verra sa
+/// recherche rester vide — et cela se lit dans `PullRunReport.forbidden`, pas
+/// dans une erreur.
 class FinanceFeatureScope extends StatefulWidget {
   final Widget child;
 

@@ -18,8 +18,20 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 /// Déclenche au montage le pull du module Inscription, qui hydrate les dossiers
 /// locaux dont dépend la recherche. **Best-effort** : lancé sans attendre,
 /// aucun échec ne remonte à l'UI, qui lit le local de toute façon. Le cycle
-/// global du `PullCoordinator` ne se déclenche qu'au RETOUR online — une
-/// tablette démarrée déjà connectée ne tirerait jamais.
+/// global du `PullCoordinator` ne se déclenche qu'à l'ouverture de session et au
+/// cycle COMPLET du coordinateur — qui part à l'ouverture de session et au
+/// retour online, mais pas au montage d'un écran. Ce pull passe désormais PAR le
+/// coordinateur (ADR-015 F6), donc filtré par les droits comme tous les autres
+/// de la journée.
+///
+/// ⚠️ **Depuis le repli ADR-015 F6, ce pull passe par le `PullCoordinator` et
+/// est donc filtré par les permissions de la session** : `enrollment.read`
+/// devient exigible pour que la recherche d'élève trouve quelque chose, là où
+/// cet écran tirait jusqu'ici sans aucun filtre. Tous les gabarits de rôle par
+/// défaut porteurs d'`editique.read` détiennent aussi `enrollment.read` (cf.
+/// `role_journeys_test.dart`) ; un rôle **personnalisé** qui n'aurait que le
+/// premier verra sa recherche rester vide, ce que `PullRunReport.forbidden`
+/// est seul à dire.
 class DocumentsFeatureScope extends StatefulWidget {
   final Widget child;
 

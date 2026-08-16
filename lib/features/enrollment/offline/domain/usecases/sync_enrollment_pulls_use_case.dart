@@ -1,87 +1,72 @@
-import 'package:school_app_flutter/core/offline/connectivity_service.dart';
-import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
-import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
-import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 
-/// Tire les cinq ressources pull du module Inscription (référentiel, cohorte
-/// N-1, préinscriptions, snapshots hydratants, delta descendant) — déclenché au
-/// montage du module, en plus du cycle global du `PullCoordinator` (retour
-/// online). Le montage est le moment d'hydratation d'une tablette neuve.
+/// Hydrate les caches Inscription au montage des scopes qui en dépendent
+/// (ADR-015 F6) : Inscription, Facturation et Documents — les trois écrans dont
+/// la recherche d'élève lit les dossiers locaux.
 ///
-/// Best-effort : chaque ressource est isolée (un échec ne bloque pas les
-/// autres) ; le bilan agrège les compteurs pour un éventuel diagnostic. Aucun
-/// échec n'est propagé — le cache local reste simplement en l'état.
+/// **Ne tire plus les repositories en direct.** Ce déclencheur passe désormais
+/// par le `PullCoordinator`, qui reste seul à connaître l'ordre, les droits et —
+/// bientôt — le plan de synchronisation. Tant que des écrans tiraient à côté, la
+/// largeur effective du pull était l'union du coordinateur et d'une douzaine de
+/// portes dérobées, aucune filtrée par une permission : faire du plan l'autorité
+/// du seul coordinateur n'aurait rien resserré.
 ///
-/// L'ordre est PORTEUR : `syncEnrollmentSnapshots` (INSERT hydratant) précède
-/// `syncEnrollmentDelta` (UPDATE-only) — mêmes contraintes qu'en DI
-/// (`registerEnrollmentFinanceOffline`), à garder synchronisées.
+/// Ce qui vivait ici et vit maintenant dans le socle, pour tout le monde : la
+/// pré-garde de connectivité, la sonde de crédentiels, le filtre de permission,
+/// l'isolation des échecs et la diffusion sur le `PullCompletionBus`. Ce use
+/// case ne porte plus qu'une chose — **de quelles ressources ces écrans ont
+/// besoin** — et c'est la seule qui lui appartienne vraiment.
 ///
-/// **Gate crédentiels** : déclenché au montage (scope Inscription et scope
-/// Facturation) et par `EnrollmentOfflineBloc._onPull`, tous en dehors du
-/// `PullCoordinator` — sans revérifier ici, une tablette sans session valide
-/// taperait le réseau à chaque montage de ces scopes.
+/// Le second déclencheur reste le cycle complet du coordinateur (ouverture de
+/// session, retour online). Les deux sont nécessaires : une tablette posée sur
+/// le Wi-Fi de l'école ne verrait aucun retour online de la journée.
 ///
-/// **Gate connectivité** : même raisonnement — sans `ConnectivityService`, une
-/// tablette hors-ligne taperait quand même le réseau (5 requêtes qui
-/// échoueraient après timeout) à chaque montage du scope Inscription.
+/// ## L'ordre porteur n'est plus ici — et c'est voulu
+///
+/// L'hydratant (`enrollment_snapshots`, qui INSERT) doit précéder le delta
+/// (`enrollments`, qui ne fait qu'UPDATE) : inversés, le delta consomme son
+/// backlog sans lignes à mettre à jour et le curseur avance sur des dossiers que
+/// plus rien ne redemandera — muets, sans la moindre erreur.
+///
+/// Cet ordre est désormais tenu par **l'ordre d'enregistrement en DI**, que
+/// `pullSubset` respecte : il itère le registre filtré par l'ensemble reçu,
+/// jamais l'ensemble lui-même. Les accolades ci-dessous n'ordonnent donc rien —
+/// un `Set` littéral n'a pas d'ordre porteur, et il serait malsain qu'une arête
+/// money-grade dépende de la façon dont un développeur a tapé sa liste.
+/// L'invariant est verrouillé là où il vit : `offline_pull_registration_order_test`
+/// exige que la DI enregistre les snapshots avant le delta.
+///
+/// ## Conséquence à ne pas redécouvrir dans six mois : `enrollment.read`
+///
+/// Avant ce repli, la Facturation et les Documents tiraient les cinq flux
+/// Inscription **sans aucun filtre de permission**. Le coordinateur, lui,
+/// applique `requiredPermissions` : quatre de ces cinq flux exigent
+/// `enrollment.read` (le cinquième, le référentiel, est le seul flux socle du
+/// dépôt et reste exempté — sans lui la porte de navigation ne s'ouvre pas).
+///
+/// Les gabarits de rôle par défaut qui atteignent ces trois écrans détiennent
+/// tous `enrollment.read` (secrétariat, comptabilité, direction des études,
+/// discipline, direction — cf. `test/core/auth/role_journeys_test.dart` ;
+/// l'enseignant ne l'a pas, mais n'a ni `finance.*.read` ni `editique.read`, donc
+/// n'ouvre aucun de ces trois scopes). **Rien ne casse pour eux.**
+///
+/// En revanche un rôle **personnalisé** doté de `finance.charge.read` sans
+/// `enrollment.read` verra sa recherche d'élève rester vide en Facturation et en
+/// Documents : ses dossiers locaux ne seront plus hydratés. C'est le périmètre
+/// correct — le serveur aurait répondu 403 de toute façon — mais c'est un
+/// changement de comportement observable, et il se diagnostique par
+/// `PullRunReport.forbidden`.
 class SyncEnrollmentPullsUseCase {
-  final EnrollmentPullRepository _repository;
-  final SessionCredentialsProbe _credentialsProbe;
-  final ConnectivityService _connectivity;
+  final PullCoordinator _coordinator;
 
-  const SyncEnrollmentPullsUseCase(
-    this._repository,
-    this._credentialsProbe,
-    this._connectivity,
-  );
+  const SyncEnrollmentPullsUseCase(this._coordinator);
 
-  Future<EnrollmentPullsReport> call() async {
-    if (!await _connectivity.isOnline()) {
-      return const EnrollmentPullsReport(updated: 0, notModified: 0, failed: 0);
-    }
-    if (!await _canAuthenticate()) {
-      return const EnrollmentPullsReport(updated: 0, notModified: 0, failed: 0);
-    }
-    var updated = 0, notModified = 0, failed = 0;
-    for (final pull in [
-      _repository.syncReferential,
-      _repository.syncReenrollmentCohort,
-      _repository.syncPreEnrollments,
-      _repository.syncEnrollmentSnapshots,
-      _repository.syncEnrollmentDelta,
-    ]) {
-      final result = await pull();
-      result.fold((_) => failed++, (EnrollmentPullOutcome outcome) {
-        outcome.notModified ? notModified++ : updated++;
-      });
-    }
-    return EnrollmentPullsReport(
-      updated: updated,
-      notModified: notModified,
-      failed: failed,
-    );
-  }
-
-  /// Sonde défaillante (storage indisponible…) : ne pas bloquer l'hydratation —
-  /// même politique fail-open que `SyncStatusCubit._canAuthenticate()`.
-  Future<bool> _canAuthenticate() async {
-    try {
-      return await _credentialsProbe.canAuthenticate();
-    } catch (_) {
-      return true;
-    }
-  }
-}
-
-/// Bilan agrégé des cinq pulls (diagnostic).
-class EnrollmentPullsReport {
-  final int updated;
-  final int notModified;
-  final int failed;
-
-  const EnrollmentPullsReport({
-    required this.updated,
-    required this.notModified,
-    required this.failed,
+  Future<PullRunReport> call() => _coordinator.pullSubset(const {
+    EnrollmentPullRepositoryImpl.referentialResource,
+    EnrollmentPullRepositoryImpl.cohortResource,
+    EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+    EnrollmentPullRepositoryImpl.snapshotsResource,
+    EnrollmentPullRepositoryImpl.deltaResource,
   });
 }
