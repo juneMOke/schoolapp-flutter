@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
@@ -19,6 +20,15 @@ typedef LedgerRefresh =
 ///
 /// Renvoie `true` si le cycle a abouti : la fraîcheur affichée en dépend, elle
 /// ne doit pas couvrir un historique qu'on n'a pas réussi à tirer.
+///
+/// ⚠️ **Ce que la DI branche derrière ce seam passe par le coordinateur**
+/// (`CoordinatorPaymentsSync`), et ce n'est pas un détail de câblage. Ce flux-ci
+/// est global : il porte la clé de plan `finance.payments` et un handler
+/// enregistré. Seule l'AUTRE jambe de ce refresher — le point read scopé
+/// `finance_ledger:<studentId>` — est légitimement exemptée du coordinateur, sa
+/// clé étant dynamique par élève. Rebrancher ce seam en direct sur
+/// `FinancePullRepository.syncPayments()` rouvrirait une porte dérobée : le pull
+/// redeviendrait plus large que le plan du profil.
 typedef PaymentsSync = Future<bool> Function();
 
 /// Rafraîchissement CIBLÉ des créances d'un élève (FRONT §2.1 fin / §6 step 2)
@@ -202,6 +212,22 @@ class FinanceLedgerRefresher {
   /// prochaine lecture. On renvoie alors `false` — l'historique n'est pas
   /// garanti à jour, donc aucune fraîcheur ne sera affichée : borner la latence
   /// ne doit pas devenir un mensonge.
+  /// La seule jambe PAIEMENTS, exposée pour que le **câblage** soit éprouvable.
+  ///
+  /// Ce n'est pas du confort de test. Ce seam a été la treizième porte dérobée
+  /// du lot F6 : il tirait le flux global en direct sur le repository, hors du
+  /// plan. Le refermer, c'est une ligne de DI — et une ligne de DI est
+  /// exactement ce que ce chantier a appris à ne jamais supposer branché : cinq
+  /// gardes ont déjà été écrites, testées, et jamais injectées, la suite entière
+  /// restant verte.
+  ///
+  /// Prouver que `CoordinatorPaymentsSync` est *enregistré* ne prouve pas que
+  /// c'est LUI qu'on appelle ici. Seul ce point d'entrée permet de le vérifier
+  /// sur le conteneur réel, sans que le point read des créances ne parte taper
+  /// le réseau (cf. `offline_pull_registration_order_test.dart`).
+  @visibleForTesting
+  Future<bool> debugPullPaymentsOnly() => _pullPaymentsBestEffort();
+
   Future<bool> _pullPaymentsBestEffort() async {
     final sync = _syncPayments;
     if (sync == null) return true; // pas de seam câblé : rien à attendre

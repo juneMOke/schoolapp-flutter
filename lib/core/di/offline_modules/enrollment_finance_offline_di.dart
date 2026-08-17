@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -188,6 +189,14 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   // impls offline-first : lecture du grand-livre LOCAL (reste composé, FRONT §5)
   // + rafraîchissement ciblé best-effort (§6 step 2). Admin/create délégués à
   // l'online. `unregister` sûr : lazy singletons pas encore résolus à ce stade.
+  // Enregistré plutôt qu'instancié dans la fermeture ci-dessous : c'est ce qui
+  // le rend adressable, donc éprouvable sur le conteneur RÉEL
+  // (`offline_core_wiring_test.dart`). Une fermeture anonyme aurait le même
+  // effet et aucune preuve — le défaut le plus cher de ce chantier a été une
+  // garde écrite, testée, et jamais branchée.
+  getIt.registerLazySingleton<CoordinatorPaymentsSync>(
+    () => CoordinatorPaymentsSync(getIt<PullCoordinator>()),
+  );
   getIt.registerLazySingleton<FinanceLedgerRefresher>(
     () => FinanceLedgerRefresher(
       api: getIt<FinancePullApi>(),
@@ -198,10 +207,19 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       extras: getIt<Map<String, dynamic>>(),
       // Le contrat n'a pas d'endpoint paiements scopé élève : la fraîcheur de
       // l'historique (et donc du « total payé » affiché) passe par le cycle
-      // global. Résolu paresseusement — `FinancePullRepository` est enregistré
-      // juste après.
-      syncPayments: () async =>
-          (await getIt<FinancePullRepository>().syncPayments()).isRight(),
+      // GLOBAL des paiements.
+      //
+      // ⚠️ Et parce qu'il est global, il passe par le COORDINATEUR — jamais en
+      // direct sur le repository. C'était la treizième porte dérobée du lot F6 :
+      // l'exemption accordée à Finance visait `finance_ledger:<studentId>`, dont
+      // la clé est dynamique par élève ; celui-ci porte la clé de plan
+      // `finance.payments` et un handler enregistré comme les autres. Appelé en
+      // direct, il échappait à l'autorité du plan (F5), au filtre de droits et à
+      // la diffusion sur le bus.
+      //
+      // Résolution paresseuse : les handlers sont enregistrés plus bas dans ce
+      // même fichier, et `FinancePullRepository` juste après ce bloc.
+      syncPayments: () => getIt<CoordinatorPaymentsSync>()(),
     ),
   );
   getIt.registerLazySingleton<FinancePullRepository>(

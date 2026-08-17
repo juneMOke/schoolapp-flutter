@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -17,12 +18,15 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
+import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
@@ -36,15 +40,29 @@ import '../../features/offline_full_db.dart';
 /// taperaient le réseau). L'ordre retenu est bien celui d'exécution — le
 /// coordinateur itère `_handlers.values`, et une `LinkedHashMap` rend ses
 /// valeurs dans l'ordre d'insertion des clés.
+/// `FinanceLedgerRefresher` réclame la sonde de crédentiels au conteneur. Ce
+/// montage n'exécute rien qui la consulte — la jambe éprouvée ici part APRÈS.
+class _MockAuthSessionManager extends Mock implements AuthSessionManager {}
+
 class _RecordingPullCoordinator extends PullCoordinator {
   _RecordingPullCoordinator({required super.connectivity});
 
   final List<PullHandler> registered = [];
 
+  /// Les périmètres demandés par `pullSubset`. Sert à prouver qu'un chemin qui
+  /// tirait en direct passe désormais par ici — cf. le test du seam paiements.
+  final List<Set<String>> subsets = [];
+
   @override
   void registerHandler(PullHandler handler) {
     registered.add(handler);
     super.registerHandler(handler);
+  }
+
+  @override
+  Future<PullRunReport> pullSubset(Set<String> resources) {
+    subsets.add(resources);
+    return super.pullSubset(resources);
   }
 }
 
@@ -93,6 +111,7 @@ void main() {
       SyncEngine(outbox: OutboxDao(db), connectivity: _AlwaysOffline()),
     );
     getIt.registerSingleton<PullCoordinator>(coordinator);
+    getIt.registerSingleton<AuthSessionManager>(_MockAuthSessionManager());
 
     registerOfflineModules(getIt);
   });
@@ -292,5 +311,75 @@ void main() {
       kAcademicsNotesResourcePrefix,
       kEditiqueDocumentsResource,
     });
+  });
+
+  group('le seam paiements du grand-livre passe par le coordinateur', () {
+    // ⚠️ Treizième porte dérobée du lot F6, refermée après coup. L'exemption
+    // accordée à Finance visait `finance_ledger:<studentId>`, dont la clé est
+    // dynamique par élève ; le seam des PAIEMENTS, lui, tire le flux global
+    // (`finance.payments`, handler enregistré ci-dessus) et n'avait aucune
+    // raison d'échapper au plan.
+    //
+    // Ces deux tests montent la DI RÉELLE — c'est le seul niveau où « la classe
+    // existe » et « la classe est branchée » cessent de se confondre. Ce dépôt a
+    // déjà payé cinq gardes écrites, testées, et jamais injectées.
+
+    test('il est résolvable depuis le conteneur', () {
+      expect(() => getIt<CoordinatorPaymentsSync>(), returnsNormally);
+      expect(
+        getIt<CoordinatorPaymentsSync>(),
+        same(getIt<CoordinatorPaymentsSync>()),
+        reason: 'un singleton : deux instances tireraient deux fois',
+      );
+    });
+
+    test('LE TEST DE LA PORTE : le refresher passe RÉELLEMENT par lui — pas '
+        'seulement « la classe est enregistrée »', () async {
+      // ⚠️ Sans ce test, la garde serait invérifiable. Prouver que
+      // `CoordinatorPaymentsSync` est résolvable ne prouve PAS que c'est lui
+      // qu'appelle le refresher : rebrancher le seam sur
+      // `FinancePullRepository.syncPayments()` laissait les deux autres tests
+      // de ce groupe parfaitement verts. Vérifié par mutation.
+      await getIt<FinanceLedgerRefresher>().debugPullPaymentsOnly();
+
+      expect(
+        coordinator.subsets,
+        [
+          {FinancePullRepositoryImpl.paymentsResource},
+        ],
+        reason:
+            'le seam paiements du refresher ne passe plus par le '
+            'coordinateur : le flux global échappe de nouveau au plan, au '
+            'filtre de droits et au bus de complétion',
+      );
+    });
+
+    test(
+      'et il demande EXACTEMENT le flux paiements au coordinateur enregistré',
+      () async {
+        // Hors ligne dans ce montage : le cycle ne tire rien, ce qui est sans
+        // importance — ce qu'on observe est le périmètre DEMANDÉ, donc le fait
+        // que l'appel atterrisse bien sur ce coordinateur-ci.
+        final aJour = await getIt<CoordinatorPaymentsSync>()();
+
+        expect(
+          coordinator.subsets,
+          [
+            {FinancePullRepositoryImpl.paymentsResource},
+          ],
+          reason:
+              'si ce seam repassait en direct sur '
+              'FinancePullRepository.syncPayments(), le coordinateur ne verrait '
+              'rien et le flux échapperait de nouveau au plan',
+        );
+        expect(
+          aJour,
+          isFalse,
+          reason:
+              'un cycle hors ligne n\'a rien observé : il ne doit jamais '
+              'autoriser l\'estampille « à jour » sous les totaux',
+        );
+      },
+    );
   });
 }
