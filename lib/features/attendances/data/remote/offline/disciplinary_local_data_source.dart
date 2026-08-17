@@ -239,19 +239,28 @@ class DisciplinaryLocalDataSource {
             }
             // Cas déjà SYNCED re-pullé : **le FAIT est immuable** → on ne
             // réécrit QUE le traitement (status/sanction) + les timestamps de
-            // visibilité. Un REPLACE plein effacerait `student_gender` (jamais
-            // porté par le delta → 'OTHER'), et blanchirait `content` sensible /
-            // les noms / `version` que le delta peut omettre (contrat).
+            // visibilité. Un REPLACE plein blanchirait `content` sensible, les
+            // noms et `version`, que le delta peut omettre (contrat).
+            final values = <String, Object?>{
+              'status': row.status,
+              'sanction': row.sanction,
+              'updated_at': row.updatedAt,
+              'server_updated_at': row.serverUpdatedAt,
+              'sync_status': SyncState.synced.dbValue,
+              'synced_at': row.syncedAt,
+            };
+            // Exception au FAIT immuable : le genre. Le serveur le résout
+            // depuis la fiche élève et le porte au delta — il fait autorité, et
+            // ce réalignement rattrape les cas déjà en base avec le repli
+            // 'OTHER'. **Seulement s'il l'a dit** (`studentGender` est hors
+            // `required`) : appliquer le repli écraserait le genre exact que la
+            // création hors-ligne a posé ici.
+            if (item.serverStudentGender != null) {
+              values['student_gender'] = item.serverStudentGender;
+            }
             await txn.update(
               table,
-              {
-                'status': row.status,
-                'sanction': row.sanction,
-                'updated_at': row.updatedAt,
-                'server_updated_at': row.serverUpdatedAt,
-                'sync_status': SyncState.synced.dbValue,
-                'synced_at': row.syncedAt,
-              },
+              values,
               where: 'id = ?',
               whereArgs: [row.id],
             );
