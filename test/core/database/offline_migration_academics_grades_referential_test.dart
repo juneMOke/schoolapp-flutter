@@ -8,6 +8,12 @@ import 'package:school_app_flutter/core/database/offline_schema.dart';
 /// `note_evaluation.rejection_reason`, et la purge du squelette
 /// `ref_cours_notation` (workaround online v9, retiré au profit du bundle) +
 /// son curseur `sync_meta` résiduel.
+///
+/// ⚠️ Ces tests bornent l'escalier à `newVersion: 12`. Sans cette borne ils ne
+/// testeraient plus rien : la v27 supprime la table, donc l'attente passerait
+/// même en retirant complètement l'étape v12. Le montage, lui, va jusqu'à la
+/// version courante — d'où la recréation explicite du squelette dans sa forme
+/// d'époque.
 bool _ffiInitialized = false;
 
 Future<Database> _openDb() async {
@@ -56,6 +62,10 @@ void main() {
 
       // État « v11 » simulé : le squelette de notation porte encore des
       // données (workaround online), et son curseur sync_meta existe.
+      //
+      // La table doit être recréée à la main : le montage ci-dessus a traversé
+      // la v27, qui la supprime. On reconstitue donc sa forme d'époque.
+      await _createLegacySkeleton(db);
       await db.insert('ref_cours_notation', {
         'cours_id': 'co-1',
         'classroom_id': 'c1',
@@ -89,11 +99,20 @@ void main() {
         'sync_status': 'SYNCED',
       });
 
-      // Déclenche UNIQUEMENT l'étape v12 (oldVersion=11 < 12, mais pas < 8..11).
-      await migrateOfflineDatabase(db, 11, buildOfflineSchema());
+      // Déclenche UNIQUEMENT l'étape v12 : `oldVersion=11` écarte les paliers
+      // 2..11, `newVersion: 12` écarte tous les suivants — dont la v27, qui
+      // supprimerait la table et rendrait l'attente ci-dessous vraie sans que
+      // l'étape v12 ait rien fait.
+      await migrateOfflineDatabase(
+        db,
+        11,
+        buildOfflineSchema(),
+        newVersion: 12,
+      );
 
-      // Squelette purgé (données + curseur), mais table conservée (inerte,
-      // jamais droppée — idiome constant du migrateur).
+      // Squelette purgé (données + curseur), table encore présente : c'est bien
+      // la v12 qu'on observe, pas le DROP de la v27.
+      expect(await _hasSkeleton(db), isTrue);
       expect(await db.query('ref_cours_notation'), isEmpty);
       expect(
         await db.query(
@@ -185,9 +204,34 @@ void main() {
     addTearDown(db.close);
     await migrateOfflineDatabase(db, 7, buildOfflineSchema());
 
-    await migrateOfflineDatabase(db, 11, buildOfflineSchema());
-    await migrateOfflineDatabase(db, 11, buildOfflineSchema()); // ne lève pas
+    await _createLegacySkeleton(db);
+    await migrateOfflineDatabase(db, 11, buildOfflineSchema(), newVersion: 12);
+    // ne lève pas
+    await migrateOfflineDatabase(db, 11, buildOfflineSchema(), newVersion: 12);
 
     expect(await db.query('ref_cours_notation'), isEmpty);
   });
 }
+
+/// Reconstitue `ref_cours_notation` dans sa forme d'époque (v9→v26).
+///
+/// Volontairement écrite en dur, jamais lue depuis `buildOfflineSchema()` : la
+/// table n'y figure plus, et un test de migration doit décrire le passé — s'il
+/// suit le schéma vivant, il cesse de tester la migration.
+Future<void> _createLegacySkeleton(Database db) => db.execute('''
+  CREATE TABLE IF NOT EXISTS ref_cours_notation (
+    cours_id TEXT PRIMARY KEY,
+    classroom_id TEXT,
+    branche_nom TEXT,
+    effectif INTEGER NOT NULL DEFAULT 0,
+    periodes_json TEXT NOT NULL,
+    server_updated_at INTEGER,
+    synced_at INTEGER NOT NULL
+  )
+''');
+
+Future<bool> _hasSkeleton(Database db) async => (await db.query(
+  'sqlite_master',
+  where: 'type = ? AND name = ?',
+  whereArgs: ['table', 'ref_cours_notation'],
+)).isNotEmpty;

@@ -30,19 +30,17 @@ void main() {
     await db.close();
   });
 
-  StudentLocalModel student({String id = 's1', String phone = '+243900'}) =>
-      StudentLocalModel(
-        id: id,
-        firstName: 'Amina',
-        lastName: 'Moke',
-        surname: 'Junior',
-        gender: 'FEMALE',
-        dateOfBirth: '2015-04-02',
-        birthPlace: 'Kinshasa',
-        nationality: 'CD',
-        phoneNumber: phone,
-        updatedAt: 100,
-      );
+  StudentLocalModel student({String id = 's1'}) => StudentLocalModel(
+    id: id,
+    firstName: 'Amina',
+    lastName: 'Moke',
+    surname: 'Junior',
+    gender: 'FEMALE',
+    dateOfBirth: '2015-04-02',
+    birthPlace: 'Kinshasa',
+    nationality: 'CD',
+    updatedAt: 100,
+  );
 
   EnrollmentLocalModel enrollment({
     String id = 'e1',
@@ -118,14 +116,14 @@ void main() {
       'deux dossiers, même téléphone tuteur : un seul parent dédupliqué',
       () async {
         await seedPendingEnrollment(
-          withStudent: student(id: 's1', phone: '+243900'),
+          withStudent: student(id: 's1'),
           withEnrollment: enrollment(id: 'e1', studentId: 's1'),
           parents: [parent(id: 'p1', phone: '+243111')],
           nowMs: 1000,
         );
         // Second dossier (fratrie), même téléphone mais id provisoire différent.
         await seedPendingEnrollment(
-          withStudent: student(id: 's2', phone: '+243901'),
+          withStudent: student(id: 's2'),
           withEnrollment: enrollment(id: 'e2', studentId: 's2'),
           parents: [parent(id: 'p2', phone: '+243111')],
           nowMs: 2000,
@@ -147,7 +145,7 @@ void main() {
   });
 
   group('applyEnrollmentAck (F4 remap)', () {
-    test('COMMITTED : matricule/email, parent provisoire→canonique (parents ET '
+    test('COMMITTED : matricule, parent provisoire→canonique (parents ET '
         'student_parent), doc DEFINITIVE, SYNCED', () async {
       await seedPendingEnrollment(
         parents: [parent(id: 'p-prov')],
@@ -161,11 +159,7 @@ void main() {
             status: 'ADMIN_COMPLETED',
             enrollmentCode: 'ETL-2026-001',
           ),
-          student: ResponseStudent(
-            id: 's1',
-            matriculationNumber: 'MAT-0001',
-            email: 'amina@school.cd',
-          ),
+          student: ResponseStudent(id: 's1', matriculationNumber: 'MAT-0001'),
           parents: [ParentRemap(providedId: 'p-prov', canonicalId: 'p-canon')],
           documents: [
             GeneratedDocumentDto(
@@ -181,7 +175,10 @@ void main() {
 
       final s = (await db.query('students')).first;
       expect(s['matriculation_number'], 'MAT-0001');
-      expect(s['email'], 'amina@school.cd');
+      // L'e-mail arrive dans la réponse et n'est PLUS recopié (ADR-015 F8) :
+      // personne ne le relisait. L'attente s'inverse volontairement — la
+      // colonne doit rester NULL alors même que le serveur a envoyé une valeur.
+      expect(s['email'], isNull);
       expect(s['sync_status'], SyncState.synced.dbValue);
 
       final parents = await db.query('parents');
@@ -345,24 +342,24 @@ void main() {
     setUp(() async {
       // s1/e1 : dossier finalisé PENDING_SYNC (ay-2026, lvl-1).
       await seedPendingEnrollment(
-        withStudent: student(id: 's1', phone: '+243900'),
+        withStudent: student(id: 's1'),
         withEnrollment: enrollment(id: 'e1', studentId: 's1'),
       );
       // s3/e3 : dossier SYNCED (ay-2026, lvl-1).
-      await draftDao.insertDraftStudent(student(id: 's3', phone: '+243903'));
+      await draftDao.insertDraftStudent(student(id: 's3'));
       await draftDao.insertDraftEnrollment(
         enrollment(id: 'e3', studentId: 's3'),
       );
       await setSyncStatus('e3', SyncState.synced);
       // s4/e4 : dossier finalisé mais push en échec technique (SYNC_ERROR) —
       // reste facturable (repassera PENDING_SYNC au prochain envoi).
-      await draftDao.insertDraftStudent(student(id: 's4', phone: '+243904'));
+      await draftDao.insertDraftStudent(student(id: 's4'));
       await draftDao.insertDraftEnrollment(
         enrollment(id: 'e4', studentId: 's4'),
       );
       await setSyncStatus('e4', SyncState.syncError);
       // s2/e2 : brouillon DRAFT (ay-2026, lvl-1) — inscription NON finalisée.
-      await draftDao.insertDraftStudent(student(id: 's2', phone: '+243902'));
+      await draftDao.insertDraftStudent(student(id: 's2'));
       await draftDao.insertDraftEnrollment(
         enrollment(id: 'e2', studentId: 's2'),
       );
@@ -412,8 +409,8 @@ void main() {
       // mais de TYPES différents — une vraie pré-inscription et une
       // réinscription. Sans filtre par type, la page Pré-inscriptions (qui
       // filtre par statut) afficherait aussi la réinscription.
-      await draftDao.insertDraftStudent(student(id: 's-pre', phone: '+243001'));
-      await draftDao.insertDraftStudent(student(id: 's-re', phone: '+243002'));
+      await draftDao.insertDraftStudent(student(id: 's-pre'));
+      await draftDao.insertDraftStudent(student(id: 's-re'));
       await draftDao.insertDraftEnrollment(
         const EnrollmentLocalModel(
           id: 'e-pre',
@@ -648,9 +645,7 @@ void main() {
           'téléphone en conflit avec un AUTRE parent (élève différent, saisie '
           'non liée) → ParentPhoneConflictException, transaction annulée',
           () async {
-            await draftDao.insertDraftStudent(
-              student(id: 's1', phone: '+243900'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's1'));
             await draftDao.replaceDraftParents(
               's1',
               [parent(id: 'p1', phone: '+243111')],
@@ -658,9 +653,7 @@ void main() {
               enforcePhoneUniqueness: true,
             );
 
-            await draftDao.insertDraftStudent(
-              student(id: 's2', phone: '+243901'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's2'));
             await expectLater(
               () => draftDao.replaceDraftParents(
                 's2',
@@ -691,9 +684,7 @@ void main() {
 
         test('linkedToExisting: true réutilise la fiche existante sans la '
             'réécrire (rattachement explicite via la recherche)', () async {
-          await draftDao.insertDraftStudent(
-            student(id: 's1', phone: '+243900'),
-          );
+          await draftDao.insertDraftStudent(student(id: 's1'));
           await draftDao.replaceDraftParents(
             's1',
             [parent(id: 'p1', phone: '+243111')],
@@ -701,9 +692,7 @@ void main() {
             enforcePhoneUniqueness: true,
           );
 
-          await draftDao.insertDraftStudent(
-            student(id: 's2', phone: '+243901'),
-          );
+          await draftDao.insertDraftStudent(student(id: 's2'));
           await draftDao.replaceDraftParents(
             's2',
             [
@@ -736,9 +725,7 @@ void main() {
           're-sauvegarde de la même ligne UI (même id, même téléphone) : pas '
           'de conflit, upsert par id',
           () async {
-            await draftDao.insertDraftStudent(
-              student(id: 's1', phone: '+243900'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's1'));
             await draftDao.replaceDraftParents(
               's1',
               [parent(id: 'p1', phone: '+243111')],
@@ -775,9 +762,7 @@ void main() {
           'concurrente) → auto-guérison : recrée la fiche au lieu de laisser '
           'un lien orphelin silencieux',
           () async {
-            await draftDao.insertDraftStudent(
-              student(id: 's1', phone: '+243900'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's1'));
             // AUCUNE fiche 'p1' en base (simule une disparition entre la
             // sélection dans la popin et cette écriture — ex. remap d'ACK).
             await draftDao.replaceDraftParents(
@@ -816,9 +801,7 @@ void main() {
           'comparaison de téléphone normalisée : espaces/tirets/parenthèses '
           'ignorés (même numéro sous une autre mise en forme → conflit)',
           () async {
-            await draftDao.insertDraftStudent(
-              student(id: 's1', phone: '+243900'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's1'));
             await draftDao.replaceDraftParents(
               's1',
               [parent(id: 'p1', phone: '+243 111 222 333')],
@@ -826,9 +809,7 @@ void main() {
               enforcePhoneUniqueness: true,
             );
 
-            await draftDao.insertDraftStudent(
-              student(id: 's2', phone: '+243901'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's2'));
             await expectLater(
               () => draftDao.replaceDraftParents(
                 's2',
@@ -853,9 +834,7 @@ void main() {
           'même téléphone → le second lève ParentPhoneConflictException '
           '(lecture des propres écritures de la transaction)',
           () async {
-            await draftDao.insertDraftStudent(
-              student(id: 's1', phone: '+243900'),
-            );
+            await draftDao.insertDraftStudent(student(id: 's1'));
 
             await expectLater(
               () => draftDao.replaceDraftParents(

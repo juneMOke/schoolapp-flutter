@@ -138,9 +138,17 @@ class EnrollmentSnapshotDto {
       );
 }
 
-/// Snapshot élève canonique — porte les valeurs attribuées serveur
-/// (`matriculationNumber`, `email`) et les contacts, que `StudentInput` (push)
-/// ne fournit pas. Ne porte PAS d'`updatedAt` (l'agrégat en fournit un seul).
+/// Snapshot élève canonique — porte le matricule attribué serveur, que
+/// `StudentInput` (push) ne fournit pas. Ne porte PAS d'`updatedAt` (l'agrégat
+/// en fournit un seul).
+///
+/// Ni téléphone ni e-mail, bien que le serveur les envoie : ils étaient décodés
+/// à chaque page, écrits dans `students`, et jamais relus (ADR-015 F8). Les
+/// ignorer au décodage évite de les matérialiser en mémoire à chaque agrégat —
+/// la même donnée personnelle sans destinataire, une couche plus haut.
+///
+/// Les contacts du TUTEUR, eux, restent portés par `ParentSnapshotDto` : ils
+/// sont affichés et servent de clé d'unicité au rapprochement RE/PRE.
 class StudentSnapshotDto {
   final String id;
   final String? matriculationNumber;
@@ -151,8 +159,6 @@ class StudentSnapshotDto {
   final String dateOfBirth; // yyyy-MM-dd
   final String? birthPlace;
   final String? nationality;
-  final String? phoneNumber;
-  final String? email;
   final String? city;
   final String? district;
   final String? municipality;
@@ -171,8 +177,6 @@ class StudentSnapshotDto {
     required this.dateOfBirth,
     this.birthPlace,
     this.nationality,
-    this.phoneNumber,
-    this.email,
     this.city,
     this.district,
     this.municipality,
@@ -193,8 +197,6 @@ class StudentSnapshotDto {
         dateOfBirth: j['dateOfBirth'] as String,
         birthPlace: j['birthPlace'] as String?,
         nationality: j['nationality'] as String?,
-        phoneNumber: j['phoneNumber'] as String?,
-        email: j['email'] as String?,
         city: j['city'] as String?,
         district: j['district'] as String?,
         municipality: j['municipality'] as String?,

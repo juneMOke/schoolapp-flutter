@@ -25,59 +25,12 @@ List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   return out;
 }
 
-class FeeTariffDto {
-  final String id;
-  final String? academicYearId;
-  final String? schoolLevelId;
-  final String? schoolLevelGroupId;
-  final String feeCode;
-  final String label;
-  final int amountInCents;
-  final String currency;
-  final String? dueAt;
-  final int version;
-
-  const FeeTariffDto({
-    required this.id,
-    this.academicYearId,
-    this.schoolLevelId,
-    this.schoolLevelGroupId,
-    required this.feeCode,
-    required this.label,
-    required this.amountInCents,
-    required this.currency,
-    this.dueAt,
-    this.version = 0,
-  });
-
-  factory FeeTariffDto.fromJson(Map<String, dynamic> j) => FeeTariffDto(
-    id: j['id'] as String,
-    academicYearId: j['academicYearId'] as String?,
-    schoolLevelId: j['schoolLevelId'] as String?,
-    schoolLevelGroupId: j['schoolLevelGroupId'] as String?,
-    feeCode: j['feeCode'] as String,
-    label: j['label'] as String,
-    amountInCents: (j['amountInCents'] as num).toInt(),
-    currency: j['currency'] as String,
-    dueAt: j['dueAt'] as String?,
-    version: (j['version'] as num?)?.toInt() ?? 0,
-  );
-
-  FeeTariffLocalModel toLocalModel(int now) => FeeTariffLocalModel(
-    id: id,
-    academicYearId: academicYearId,
-    schoolLevelId: schoolLevelId,
-    schoolLevelGroupId: schoolLevelGroupId,
-    feeCode: feeCode,
-    label: label,
-    amountInCents: amountInCents,
-    currency: currency,
-    dueAt: dueAt,
-    version: version,
-    syncedAt: now,
-    updatedAt: now,
-  );
-}
+// `FeeTariffDto` / `FeeTariffDelta` — **RETIRÉS (ADR-015 F8)**. Ils décodaient
+// `GET /api/v1/sync/finance/tariffs`, que rien n'appelait : la grille tarifaire
+// descend en réalité par le bundle référentiel d'Inscription
+// (`RefFeeTariffDto`), qui l'écrit dans la MÊME table locale `fee_tariffs`.
+// Deux décodeurs pour une table, un seul branché — celui qui restait donnait à
+// croire que Finance tirait ses propres tarifs.
 
 class StudentChargeDto {
   final String id;
@@ -221,19 +174,6 @@ class PaymentDto {
     syncStatus: 'SYNCED',
     syncedAt: now,
     updatedAt: now,
-  );
-}
-
-/// Delta de grille tarifaire.
-class FeeTariffDelta {
-  final List<FeeTariffDto> tariffs;
-  final int? serverCursor;
-
-  const FeeTariffDelta({this.tariffs = const [], this.serverCursor});
-
-  factory FeeTariffDelta.fromJson(Map<String, dynamic> j) => FeeTariffDelta(
-    tariffs: _lenientList(j['tariffs'], FeeTariffDto.fromJson),
-    serverCursor: (j['serverCursor'] as num?)?.toInt(),
   );
 }
 

@@ -22,22 +22,20 @@ class ResponseEnrollment {
       );
 }
 
-/// Valeurs canoniques de l'élève : matricule + email générés serveur.
+/// Valeurs canoniques de l'élève : le matricule généré serveur.
+///
+/// La réponse porte aussi un e-mail attribué ; il n'est plus décodé (ADR-015
+/// F8). L'ACK le recopiait dans `students.email`, où personne n'allait jamais le
+/// lire — contrairement au matricule, qui remonte jusqu'au ticket imprimé.
 class ResponseStudent {
   final String id;
   final String? matriculationNumber;
-  final String? email;
 
-  const ResponseStudent({
-    required this.id,
-    this.matriculationNumber,
-    this.email,
-  });
+  const ResponseStudent({required this.id, this.matriculationNumber});
 
   factory ResponseStudent.fromJson(Map<String, dynamic> j) => ResponseStudent(
     id: j['id'] as String,
     matriculationNumber: j['matriculationNumber'] as String?,
-    email: j['email'] as String?,
   );
 }
 

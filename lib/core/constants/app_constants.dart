@@ -387,7 +387,23 @@ class AppConstants {
   // `ALTER` nullable, sans backfill — les comptes déjà connus n'ont jamais reçu
   // d'ensemble, et NULL vaut exactement « aucune permission connue » jusqu'au
   // prochain contact serveur.
-  static const int offlineDbSchemaVersion = 26;
+  // v27 (2026-08-15) : hygiène (ADR-015 F8), deux gestes sans rapport réunis —
+  // aucun ne justifie seul de faire monter tout le parc.
+  //   1. `students.phone_number`/`email` remis à NULL + `idx_students_phone`
+  //      supprimé. De la PII qui descendait du pull hydratant, qu'aucune requête
+  //      ne lisait et que le mapper vers l'écran abandonnait (`StudentDetail` ne
+  //      les déclare pas) : elle dormait sur chaque tablette. Les DAO cessent de les écrire au même commit — sans
+  //      cet effacement, seul le flux futur aurait maigri, et les tablettes déjà
+  //      en service auraient gardé leurs numéros indéfiniment. `UPDATE`, jamais
+  //      `DROP COLUMN` : `students` est la source de Facturation, du Contrôle des
+  //      frais, de Documents et du ticket imprimé (tout y arrive par
+  //      `JOIN students`), et SQLite ne retire pas une colonne sans reconstruire
+  //      la table. Les colonnes restent déclarées, inertes.
+  //   2. `DROP TABLE ref_cours_notation` — squelette de notation remplacé par le
+  //      bundle `grades-referential` dès la v12, mais toujours CRÉÉ sur chaque
+  //      base neuve. Son DDL est désormais inliné dans l'étape v9, qui le lisait
+  //      dans le schéma vivant.
+  static const int offlineDbSchemaVersion = 27;
 
   /// Clé du secure storage hébergeant la clé de chiffrement SQLCipher,
   /// générée au premier lancement (cf. DatabaseKeyService).
@@ -491,9 +507,9 @@ class AppConstants {
   static const String syncEnrollmentSnapshotsEndpoint =
       '/api/v1/sync/enrollments/snapshots';
 
-  /// Pull delta de la grille tarifaire (gelée sur la saison, 304 fréquent).
-  static const String syncFinanceTariffsEndpoint =
-      '/api/v1/sync/finance/tariffs';
+  // `syncFinanceTariffsEndpoint` — **RETIRÉ (ADR-015 F8)**. Aucun appelant : la
+  // grille tarifaire descend par le bundle référentiel d'Inscription, qui écrit
+  // la même table locale `fee_tariffs`.
 
   /// Pull KEYSET des créances élèves (le plus gros volume ; paginé, résumable,
   /// jeton `cursor` opaque base64url, 304 applicatif). Contrat openapi_billing_sync.

@@ -2,8 +2,14 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 
-/// Élève lu depuis sqflite (miroir local). `matriculationNumber`/`email` sont
-/// null hors-ligne (« en cours d'attribution »).
+/// Élève lu depuis sqflite (miroir local). `matriculationNumber` est null
+/// hors-ligne (« en cours d'attribution »), posé à l'ACK.
+///
+/// Ni téléphone ni e-mail (retirés ADR-015 F8) : le serveur les envoyait, la
+/// base les gardait, et `LocalEnrollmentDetailMapper` — le seul chemin vers
+/// l'écran — ne les recopiait pas dans `StudentDetail`. De la donnée personnelle
+/// qui traversait trois couches pour être abandonnée à la dernière. Le tuteur,
+/// lui, garde les siens : `ParentSummary` les affiche.
 class LocalStudent extends Equatable {
   final String id;
   final String firstName;
@@ -18,9 +24,7 @@ class LocalStudent extends Equatable {
   final String? municipality;
   final String? neighborhood;
   final String? address;
-  final String? phoneNumber;
   final String? matriculationNumber;
-  final String? email;
   final SyncState syncState;
 
   const LocalStudent({
@@ -37,9 +41,7 @@ class LocalStudent extends Equatable {
     this.municipality,
     this.neighborhood,
     this.address,
-    this.phoneNumber,
     this.matriculationNumber,
-    this.email,
     this.syncState = SyncState.pendingSync,
   });
 
@@ -61,9 +63,7 @@ class LocalStudent extends Equatable {
     municipality,
     neighborhood,
     address,
-    phoneNumber,
     matriculationNumber,
-    email,
     syncState,
   ];
 }

@@ -211,7 +211,6 @@ void main() {
       surname: 'Divine',
       gender: 'FEMALE',
       dateOfBirth: '2015-05-05',
-      email: 'grace@school.local',
     ),
     parents: parents,
     serverUpdatedAt: serverUpdatedAt,
@@ -1196,7 +1195,11 @@ void main() {
         final s = (await db.query('students')).single;
         expect(s['sync_status'], 'SYNCED');
         expect(s['matriculation_number'], 'KIN-2026-0001');
-        expect(s['email'], 'grace@school.local');
+        // Le snapshot porte bien un e-mail, et il n'est PLUS recopié (ADR-015
+        // F8) : l'attente s'inverse volontairement. Le matricule juste au-dessus
+        // reste écrit — lui remonte jusqu'au ticket imprimé.
+        expect(s['email'], isNull);
+        expect(s['phone_number'], isNull);
         expect(await db.query('parents'), hasLength(1));
         final link = (await db.query('student_parent')).single;
         expect(link['relationship_type'], 'FATHER');

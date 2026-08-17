@@ -175,8 +175,17 @@ class EnrollmentReconciliationDao {
       'municipality': s.municipality,
       'neighborhood': s.neighborhood,
       'address': s.address,
-      'phone_number': s.phoneNumber,
-      'email': s.email,
+      // ⚠️ NI `phone_number` NI `email` (ADR-015 F8, schéma v27).
+      //
+      // Le serveur les envoie toujours, mais rien ici ne les consomme : aucune
+      // requête ne les nomme, et le mapper qui alimente l'écran les abandonne
+      // (`StudentDetail` ne déclare ni l'un ni l'autre). Les écrire, c'était
+      // poser de la donnée personnelle au repos sur chaque tablette du parc pour
+      // un lecteur qui n'existe pas.
+      //
+      // Le tuteur, lui, garde les siens plus bas : `parents.phone_number` est la
+      // clé d'unicité applicative du rapprochement RE/PRE, donc une donnée de
+      // travail, pas un contact dormant.
     };
     // Matricule canonique : jamais nullifié (n'entre au SET que s'il est posé).
     if (s.matriculationNumber != null) {
@@ -202,9 +211,10 @@ class EnrollmentReconciliationDao {
         'municipality': s.municipality,
         'neighborhood': s.neighborhood,
         'address': s.address,
-        'phone_number': s.phoneNumber,
+        // Voir `studentUpdate` ci-dessus : ni téléphone ni e-mail. Les colonnes
+        // restent déclarées au schéma (SQLite ne retire pas une colonne sans
+        // reconstruire `students`, table centrale) ; elles restent NULL.
         'matriculation_number': s.matriculationNumber,
-        'email': s.email,
       },
       updateValues: studentUpdate,
     );

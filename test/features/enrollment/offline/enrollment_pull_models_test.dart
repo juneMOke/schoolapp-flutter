@@ -395,7 +395,11 @@ void main() {
         expect(agg.enrollment.validatedPreviousYear, isTrue);
         expect(agg.enrollment.updatedAt, '2026-07-08T09:00:00Z');
         expect(agg.student.matriculationNumber, 'KIN-2026-0001');
-        expect(agg.student.email, 'grace@school.local');
+        // Le payload ci-dessus porte bien un `email` — le serveur l'envoie
+        // toujours. Le DTO ne le décode plus (ADR-015 F8) et doit l'IGNORER
+        // sans lever : un décodeur qui se braquerait sur une clé de trop
+        // figerait la ressource entière au prochain champ ajouté côté back.
+        // C'est le parsing tolérant exigé partout ici.
         expect(agg.parents.single.relationshipType, 'FATHER');
       },
     );

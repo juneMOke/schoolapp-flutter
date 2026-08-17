@@ -39,19 +39,33 @@ Future<Database> openOfflineDatabase({
       await batch.commit(noResult: true);
     },
     onUpgrade: (db, oldVersion, newVersion) =>
-        migrateOfflineDatabase(db, oldVersion, schema),
+        migrateOfflineDatabase(db, oldVersion, schema, newVersion: newVersion),
   );
 }
 
 /// Étapes de migration idempotentes ordonnées, guardées par [oldVersion].
 /// Extraite de `onUpgrade` pour être exerçable hors SQLCipher (tests ffi) :
 /// le vrai opener est chiffré et non ouvrable en test.
+///
+/// [newVersion] borne l'escalier par le HAUT. En production il vaut toujours la
+/// version courante, et le paramètre ne sert à rien — c'est un outil de test, et
+/// il en corrige un défaut réel : un test de palier qui montait jusqu'à la
+/// version courante voyait ses attentes satisfaites par une étape ULTÉRIEURE.
+/// Le cas concret : le test de la v12 vérifiait que le squelette de notation
+/// était vidé ; depuis que la v27 le supprime, l'attente passait même en
+/// retirant complètement l'étape v12. Un test vert qui ne teste plus rien est
+/// pire que pas de test — il fait croire à une couverture.
+///
+/// Chaque palier se lit donc `if (_step(...))` et non `if (oldVersion < n)`.
 Future<void> migrateOfflineDatabase(
   DatabaseExecutor db,
   int oldVersion,
-  List<TableSchema> schema,
-) async {
-  if (oldVersion < 2) {
+  List<TableSchema> schema, {
+  int newVersion = AppConstants.offlineDbSchemaVersion,
+}) async {
+  bool upTo(int version) => oldVersion < version && version <= newVersion;
+
+  if (upTo(2)) {
     // v2 — Inscription : ajout des tables de référence (cohorte RE,
     // préinscriptions, socle référentiel). On rejoue tout le schéma en
     // `IF NOT EXISTS` : les tables déjà présentes sont ignorées, seules les
@@ -63,19 +77,19 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
-  if (oldVersion < 3) {
+  if (upTo(3)) {
     // v3 — Inscription : `source_ref` sur `enrollments` (référence d'origine
     // du dossier, contrat agrégat : matricule RE / id de préinscription PRE).
     // Les bases v1/v2 ont déjà la table → ALTER.
     await db.execute('ALTER TABLE enrollments ADD COLUMN source_ref TEXT');
   }
-  if (oldVersion < 4) {
+  if (upTo(4)) {
     // v4 — Présence : passage au modèle SESSION-agrégat (contrat 1.2.0). La
     // racine d'agrégat `attendance_sessions` lève l'ambiguïté des 3 états, et
     // `attendance_records` gagne un lien logique `session_id`.
     await migrateAttendanceToSessionModel(db, schema);
   }
-  if (oldVersion < 5) {
+  if (upTo(5)) {
     // v5 — Classe : événement de transfert d'élève offline (régime A). Table
     // neuve, aucun backfill (aucun transfert passé n'était tracé — l'ancien
     // reassign online écrasait le miroir sans historique).
@@ -87,7 +101,7 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
-  if (oldVersion < 6) {
+  if (upTo(6)) {
     // v6 — Discipline : agrégat {case, comments[]} (contrat 1.1.0). Table
     // `disciplinary_case_comments` append-only (régime A, uuid honoré) — table
     // neuve, aucun backfill (aucun commentaire passé n'était tracé). Colonne
@@ -107,7 +121,7 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 7) {
+  if (upTo(7)) {
     // v7 — Auth/session offline (ADR-010) : tables `auth_local_user` et
     // `auth_local_session`. Tables neuves, aucun backfill (aucune session
     // offline n'existait avant V1). Rejeu `IF NOT EXISTS` des contributions de
@@ -120,7 +134,7 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
-  if (oldVersion < 8) {
+  if (upTo(8)) {
     // v8 — Notes / Cours (academics + schedule, ADR-006) : tables de référence
     // (`ref_time_slots`, `ref_recurring_sessions`, `ref_cours`) + écriture
     // offline `evaluation` (régime A) et `note_evaluation` (régime C). Tables
@@ -140,18 +154,34 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
-  if (oldVersion < 9) {
+  if (upTo(9)) {
     // v9 — Notes / Cours : cache du squelette de notation par cours
     // (`ref_cours_notation`) : arbre période/sous-période + statut d'ouverture +
     // effectif, requis hors ligne au détail cours et à la garde de création.
     // Table neuve → aucun backfill.
-    final table = schema.firstWhere((t) => t.name == 'ref_cours_notation');
-    await db.execute(_asIfNotExists(table.createTableSql));
-    for (final indexSql in table.createIndexSql) {
-      await db.execute(_indexAsIfNotExists(indexSql));
-    }
+    //
+    // ⚠️ DDL INLINÉ, et il doit le rester. Cette étape lisait la définition dans
+    // le schéma courant (`schema.firstWhere`) — ce qui lève un `StateError` dès
+    // que la table en sort, et elle en est sortie en v27 : elle avait cessé
+    // d'être alimentée dès la v12. Une base antérieure à la v9 aurait échoué à
+    // monter, sur une table que la v27 supprime quelques étapes plus loin.
+    //
+    // Une étape de migration décrit **le passé**, jamais l'état courant : la
+    // recopier depuis le schéma vivant, c'est la faire mentir au premier
+    // changement.
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ref_cours_notation (
+        cours_id TEXT PRIMARY KEY,
+        classroom_id TEXT,
+        branche_nom TEXT,
+        effectif INTEGER NOT NULL DEFAULT 0,
+        periodes_json TEXT NOT NULL,
+        server_updated_at INTEGER,
+        synced_at INTEGER NOT NULL
+      )
+    ''');
   }
-  if (oldVersion < 10) {
+  if (upTo(10)) {
     // v10 — Auth (ADR-010, amendement m4) : borne offline PAR UTILISATEUR
     // `auth_local_user.refresh_expires_at` (nullable). Elle mémorise la borne
     // refresh du dernier contact online de chaque compte, pour autoriser le
@@ -173,7 +203,7 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
-  if (oldVersion < 11) {
+  if (upTo(11)) {
     // v11 — Notes / Cours : purge + rebootstrap forcé après le passage au
     // contrat back scopé ENSEIGNANT (commit `1ec6be3`, DF-K/DF-L). Les pulls
     // antérieurs (cours itéré par classe, séances de l'année entière) n'étaient
@@ -230,13 +260,14 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 12) {
+  if (upTo(12)) {
     // v12 — Notes / Cours : bundle `grades-referential` (ETag, cadré prof) —
     // 5 tables réf neuves (`ref_branche`, `ref_ligne_bareme`, `ref_chapitre`,
     // `ref_periode`, `ref_sous_periode`), remplacement d'ensemble à chaque
     // pull. Devient la SEULE source du statut de clôture ; le squelette
     // `ref_cours_notation` (v9, alimenté par un endpoint ONLINE réutilisé) est
-    // retiré — sa table reste présente mais inerte, purgée ici. `evaluation`
+    // retiré — vidé ici, la table elle-même n'étant supprimée qu'au palier v27.
+    // `evaluation`
     // gagne `chapitre_ids_json` (couverture intra-agrégat, régime A) et
     // `rejection_code` (backstop 422 terminal, DF-N) ; `note_evaluation` gagne
     // `rejection_reason` (motif REJECTED, surfacé à l'UI). Tables neuves →
@@ -274,9 +305,10 @@ Future<void> migrateOfflineDatabase(
       );
     }
     // Le squelette `ref_cours_notation` (workaround online, v9) est retiré au
-    // profit du bundle : purge sa donnée (table conservée inerte, jamais
-    // droppée — idiome constant de ce migrateur) + son curseur `sync_meta`
-    // résiduel, pour ne rien laisser d'orphelin.
+    // profit du bundle : purge sa donnée + son curseur `sync_meta` résiduel,
+    // pour ne rien laisser d'orphelin. La table survit à ce palier ; c'est la
+    // v27 qui la supprimera, quinze paliers plus tard — vider tôt et supprimer
+    // tard, c'est ce qui laisse une base d'époque intacte si elle s'arrête ici.
     if (await _hasTable(db, 'ref_cours_notation')) {
       await db.delete('ref_cours_notation');
     }
@@ -287,7 +319,7 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 13) {
+  if (upTo(13)) {
     // v13 — Inscription : `ref_academic_years.school_id`, colonne neuve pour
     // scoper par école la résolution année courante/précédente (le module
     // `bootstrap` — cache Hive online-only — est remplacé par le référentiel
@@ -324,7 +356,7 @@ Future<void> migrateOfflineDatabase(
       }
     }
   }
-  if (oldVersion < 14) {
+  if (upTo(14)) {
     // v14 — Inscription : `ref_school` (identité du tenant). Le bundle
     // référentiel renvoie désormais `school` + `current`/`previous` au lieu
     // d'une liste plate d'années — table neuve, aucun backfill (réécrite au
@@ -335,7 +367,7 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
-  if (oldVersion < 15) {
+  if (upTo(15)) {
     // v15 — Inscription : `enrollments.previous_school_level_id`, id
     // référentiel du niveau N-1 (distinct du texte libre
     // `previous_school_level`), utilisé par le calcul auto de la classe
@@ -348,7 +380,7 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 16) {
+  if (upTo(16)) {
     // v16 — Classe : re-contrat CB-2 en pull KEYSET (`classrooms` bundlé →
     // deux flux indépendants `classrooms`/`classroom-members`, curseur opaque
     // au lieu de l'ancien `updatedSince` ISO). La clé `sync_meta.classrooms`
@@ -364,7 +396,7 @@ Future<void> migrateOfflineDatabase(
       await db.delete('sync_meta', where: "resource = 'classrooms'");
     }
   }
-  if (oldVersion < 17) {
+  if (upTo(17)) {
     // v17 — Inscription : recherche de tuteur existant (étape Tuteurs, popin
     // "Rechercher un parent"). Index composé (nom, prénom) pour accélérer le
     // LIKE de recherche. L'unicité du téléphone reste APPLICATIVE (DAO, cf.
@@ -379,7 +411,7 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 18) {
+  if (upTo(18)) {
     // v18 — Notes / Cours : partition par COMPTE des caches de référence cadrés
     // enseignant (`owner_uid`, cf. `core/offline/owner_scope.dart`). Sur une
     // tablette partagée, ces tables et leurs curseurs `sync_meta` étaient
@@ -388,7 +420,7 @@ Future<void> migrateOfflineDatabase(
     // jamais ses propres séances/cours — tout en lisant ceux de l'autre.
     await _addOwnerScopeToAcademicsRefTables(db, schema);
   }
-  if (oldVersion < 19) {
+  if (upTo(19)) {
     // v19 — Éditique offline (ADR-012 D-3) : le reçu provisoire est une
     // PROJECTION de lignes locales. Ces lignes doivent donc porter tout ce que
     // le ticket imprime, sans quoi une réimpression ne peut pas être identique
@@ -437,7 +469,7 @@ Future<void> migrateOfflineDatabase(
       ''');
     }
   }
-  if (oldVersion < 20) {
+  if (upTo(20)) {
     // v20 — Éditique offline (ADR-012 D-5, amendé) : table `payment_anomalies`.
     // Table neuve, aucun backfill — les trop-perçus déjà survenus n'ont laissé
     // aucune trace exploitable (`OverpaymentSignal` était désérialisé puis
@@ -448,7 +480,7 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
-  if (oldVersion < 21) {
+  if (upTo(21)) {
     // v21 — Éditique offline (ADR-012 D-2/D-7, AM-10) : `editique_cache_entries`,
     // l'INDEX du cache de restitution. Table neuve, aucun backfill — et surtout
     // aucune reprise depuis `generated_documents.pdf_blob` : cette colonne est
@@ -466,7 +498,7 @@ Future<void> migrateOfflineDatabase(
       await db.execute(_indexAsIfNotExists(indexSql));
     }
   }
-  if (oldVersion < 22) {
+  if (upTo(22)) {
     // v22 — Éditique offline (ADR-012 RG-012-6/18, lot L3.4) : l'index du cache
     // doit pouvoir décrire une pièce dont la tablette n'a PAS les octets.
     //
@@ -477,7 +509,7 @@ Future<void> migrateOfflineDatabase(
     // octets absents et l'éviction d'évincer du vide.
     await _relaxEditiqueCacheContentHash(db, schema);
   }
-  if (oldVersion < 23) {
+  if (upTo(23)) {
     // v23 — Éditique offline (ADR-012, lot back B5) : l'index du cache doit
     // pouvoir dire qu'une pièce a été RETIRÉE par le serveur.
     //
@@ -517,7 +549,7 @@ Future<void> migrateOfflineDatabase(
   // base estampillée 24. Y recoller une autre migration la rendrait invisible
   // sur ces postes — base marquée à jour, colonne absente, panne au premier
   // SQL qui la lit. Un trou de numéro ne coûte rien ; un doublon coûte une base.
-  if (oldVersion < 25) {
+  if (upTo(25)) {
     // v25 — Rattrapage d'impression du ticket de perception : retenir qu'un
     // papier est SORTI pour ce versement.
     //
@@ -543,7 +575,7 @@ Future<void> migrateOfflineDatabase(
       );
     }
   }
-  if (oldVersion < 26) {
+  if (upTo(26)) {
     // v26 — Auth (ADR-014 §4) : `auth_local_user.permissions`.
     //
     // ⚠️ Renumérotée depuis la v24 au rebase sur `main` : l'impression (v25) a
@@ -570,6 +602,59 @@ Future<void> migrateOfflineDatabase(
         'ALTER TABLE auth_local_user ADD COLUMN permissions TEXT',
       );
     }
+  }
+
+  if (upTo(27)) {
+    // v27 — hygiène (ADR-015 F8). Deux gestes sans rapport, un seul palier :
+    // aucun des deux ne justifie à lui seul de faire monter tout le parc.
+
+    // ── 1. PII élève sans destination ──────────────────────────────────────
+    //
+    // `students.phone_number` et `students.email` descendaient par le pull
+    // hydratant d'Inscription et ne remontaient jamais. Personne ne les lisait :
+    // aucune requête ne les nomme, et le seul chemin vers l'écran
+    // (`LocalEnrollmentDetailMapper`) les laissait tomber — `StudentDetail` ne
+    // les déclare pas. Ils traversaient trois couches pour être abandonnés à la
+    // dernière, en laissant de la donnée personnelle au repos sur chaque
+    // tablette du parc.
+    //
+    // On cesse de les écrire (côté DAO) ET on efface ce qui est déjà descendu :
+    // sans ce second geste, le lot n'aurait réduit que le flux futur, et chaque
+    // tablette déjà en service aurait gardé ses numéros indéfiniment.
+    //
+    // ⚠️ Un `UPDATE`, jamais un `DROP COLUMN`. SQLite ne sait pas supprimer une
+    // colonne sans reconstruire la table — et `students` est la source de
+    // Facturation, du Contrôle des frais, de Documents et du ticket imprimé
+    // (tout y arrive par `JOIN students`). Le gain d'une reconstruction serait
+    // la définition de deux colonnes vides ; le risque, une table centrale.
+    // Elles restent donc déclarées, inertes.
+    if (await _hasTable(db, 'students')) {
+      if (await _hasColumn(db, 'students', 'phone_number')) {
+        await db.execute('UPDATE students SET phone_number = NULL');
+      }
+      if (await _hasColumn(db, 'students', 'email')) {
+        await db.execute('UPDATE students SET email = NULL');
+      }
+      // Hors du garde de colonne : un index est un objet indépendant de la
+      // colonne qu'il porte, et le confondre avec elle ferait survivre l'index
+      // à une base où la colonne aurait disparu. `IF EXISTS` fait le reste.
+      //
+      // Il indexait une colonne qu'aucune requête n'interrogeait : du coût
+      // d'écriture pur à chaque INSERT d'élève. Le retirer est immédiat,
+      // contrairement à un `DROP COLUMN`.
+      await db.execute('DROP INDEX IF EXISTS idx_students_phone');
+    }
+
+    // ── 2. `ref_cours_notation`, squelette remplacé en v12 ─────────────────
+    //
+    // La table a cessé d'être alimentée quand le détail de notation a pris sa
+    // source réelle, mais elle continuait d'être CRÉÉE sur toute base neuve —
+    // et dans chaque base de test. On la retire du schéma et on la supprime ici.
+    //
+    // ⚠️ Son DDL est désormais inliné dans l'étape v9 : celle-ci le lisait par
+    // `schema.firstWhere`, qui lève un `StateError` dès que la table quitte le
+    // schéma. Toute base antérieure à la v9 aurait échoué à monter.
+    await db.execute('DROP TABLE IF EXISTS ref_cours_notation');
   }
 }
 
