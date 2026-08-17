@@ -514,5 +514,100 @@ void main() {
             'relire',
       );
     });
+
+    test(
+      'un arrivant se coalesce sur la lecture en vol MÊME périmée, et n\'y perd '
+      'qu\'un cycle',
+      () async {
+        // Compromis délibéré, documenté dans `current()` mais qu'aucun test ne
+        // figeait : `current()` ne réexamine pas la fraîcheur sur la branche
+        // single-flight. L'arrivant, dont la question date d'APRÈS le
+        // changement de droits, reçoit quand même le plan d'avant.
+        //
+        // Ce qu'on achète : pas d'aller-retour réseau par changement de droits,
+        // et un refresh de jeton peut en produire plusieurs d'affilée. Ce qu'on
+        // paie : un cycle de retard, couvert par le drapeau resté levé.
+        final permissions = CurrentPermissions()..set(const ['classroom.read']);
+        final porte = Completer<void>();
+        repo.reseau = SyncPlanState.known(_plan(const ['classroom.rosters']));
+        repo.porte = porte;
+        final holder = porteur(permissions: permissions);
+
+        final enVol = holder.current();
+        permissions.set(const ['classroom.read', 'finance.payment.read']);
+
+        // L'arrivant ne déclenche PAS une seconde lecture.
+        final arrivant = holder.current();
+        porte.complete();
+        await Future.wait([enVol, arrivant]);
+
+        expect(
+          repo.appelsRefresh,
+          1,
+          reason: 'une seule lecture réseau, l\'arrivant s\'y est coalescé',
+        );
+        expect(
+          holder.isStale,
+          isTrue,
+          reason: 'le retard est borné par le drapeau : le cycle suivant relit',
+        );
+      },
+    );
   });
+
+  group(
+    'portail captif — un 200 illisible est transitoire, pas un verdict',
+    () {
+      test(
+        'une relecture non aboutie laisse le drapeau levé ET sert le cache',
+        () async {
+          // Le repository rend désormais `null` sur corps illisible : pour le
+          // porteur c'est indistinguable d'un timeout, et c'est exactement le
+          // point. Il replie sur le cache sans se déclarer frais.
+          repo.reseau = null;
+          repo.cache = SyncPlanState.known(_plan(const ['classroom.rosters']));
+          final holder = porteur();
+
+          final etat = await holder.current();
+
+          expect(etat, isA<SyncPlanKnown>());
+          expect(repo.appelsLoadCached, 1);
+          expect(
+            holder.isStale,
+            isTrue,
+            reason:
+                'sans ce drapeau, le plan resterait figé pour TOUTE la session '
+                'et F5 rendrait la main à requiredPermissions derrière une '
+                'pastille verte',
+          );
+        },
+      );
+
+      test(
+        'et le plan valide est adopté dès que le portail est franchi',
+        () async {
+          repo.reseau = null;
+          repo.cache = const SyncPlanState.unknown(SyncPlanUnknownCause.absent);
+          final holder = porteur();
+
+          final avant = await holder.current();
+          expect(avant, isA<SyncPlanUnknown>());
+          expect(holder.isStale, isTrue);
+
+          // Le portail est franchi : le même GET aboutit.
+          repo.reseau = SyncPlanState.known(_plan(const ['classroom.rosters']));
+
+          final apres = await holder.current();
+
+          expect(
+            apres,
+            isA<SyncPlanKnown>(),
+            reason: 'le cycle suivant devait retenter, et il a retenté',
+          );
+          expect(repo.appelsRefresh, 2);
+          expect(holder.isStale, isFalse);
+        },
+      );
+    },
+  );
 }

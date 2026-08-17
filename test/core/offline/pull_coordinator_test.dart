@@ -195,7 +195,15 @@ SyncPlanState planKnownWithRejected(
 ///
 /// ⚠️ À ne jamais confondre avec [SyncPlanState.unknown] : l'un ne tire rien,
 /// l'autre tire tout ce que le registre en dur autorise.
-SyncPlanState planEmptyState() => SyncPlanState.empty(planWithKeys(const []));
+///
+/// [rejectedKeys] distingue les DEUX façons d'être vide, qui se ressemblent à
+/// l'œil et n'ont rien à voir : « ce compte n'a droit à rien » (ensemble vide)
+/// et « cet APK ne comprend plus un seul flux de ce que le serveur envoie »
+/// (toutes les clés écartées à l'analyse). L'assistant les construisait
+/// toujours sans clés — c'est précisément pourquoi aucun des tests du régime
+/// vide n'attrapait le second cas.
+SyncPlanState planEmptyState({Set<String> rejectedKeys = const {}}) =>
+    SyncPlanState.empty(planWithKeys(const []), rejectedKeys: rejectedKeys);
 
 /// Régime INCONNU : le repli sur le registre en dur.
 SyncPlanState planUnknown([
@@ -2186,6 +2194,65 @@ void main() {
       expect(report.planEmpty, isTrue);
       expect(report.isDegraded, isTrue);
     });
+
+    test('un plan vide PARCE QUE tout a été écarté à l\'analyse nomme les clés '
+        'fautives — sinon « rien à tirer » et « je ne comprends plus ce serveur » '
+        'se ressemblent', () async {
+      goOnline();
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      // Le serveur a bien envoyé des flux ; l'analyse les a TOUS retirés
+      // (un `mode` renommé, un `scope` neuf déployé d'un coup), donc
+      // `plan.streams` est vide et l'état est VIDE, pas connu.
+      final coord = plannedCoordinator(
+        planEmptyState(
+          rejectedKeys: const {'classroom.rosters', 'finance.payments'},
+        ),
+        permissions: CurrentPermissions()..set(const ['classroom.read']),
+      )..registerHandler(classes);
+
+      final report = await coord.pullAll();
+
+      expect(classes.calls, 0);
+      expect(report.planEmpty, isTrue);
+      expect(report.isDegraded, isTrue);
+      // Le cœur du test : le parc s'arrête TOTALEMENT, et le rapport doit
+      // dire pourquoi. Sans ces clés il annonce « plan vide », ce qui envoie
+      // chercher un serveur qui n'aurait rien renvoyé alors que le désaccord
+      // est de contrat.
+      expect(report.plannedNotPulledKeys, {
+        'classroom.rosters',
+        'finance.payments',
+      });
+      expect(report.plannedNotPulled, 2);
+    });
+
+    test(
+      'un plan vide SANS clé écartée ne nomme rien (le compte sans droits)',
+      () async {
+        goOnline();
+        final coord =
+            plannedCoordinator(
+              planEmptyState(),
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            );
+
+        final report = await coord.pullAll();
+
+        expect(report.planEmpty, isTrue);
+        expect(report.plannedNotPulledKeys, isEmpty);
+        expect(report.plannedNotPulled, 0);
+      },
+    );
   });
 
   // Le mode dégradé — aujourd'hui encore le plus courant, tant que le back

@@ -171,12 +171,28 @@ class PullCoordinator {
     // s'arrête **totalement** sur tout le parc, avec une pastille verte et
     // aucune trace. C'est exactement ce que `rejectedKeys` avait été calculé
     // pour éviter, et il n'était lu par personne.
+    //
+    // ⚠️ Et le cas LIMITE de cette seconde façon est le régime VIDE, pas le
+    // régime connu : si l'analyse écarte TOUS les flux — un `mode` renommé, un
+    // `scope` neuf déployé d'un coup — `plan.streams` finit vide, l'état devient
+    // `SyncPlanEmpty`, et il porte les clés écartées lui aussi. Les jeter ici
+    // laissait le rapport dire « plan vide » sans nommer un seul flux, ce qui
+    // envoie chercher un serveur qui n'aurait rien renvoyé alors que le
+    // désaccord est de contrat. C'est la seule chose qui distingue « ce compte
+    // n'a droit à rien » de « cet APK ne comprend plus ce que le serveur
+    // envoie » — les deux se ressemblent à l'œil.
+    //
+    // Les trois cas sont donc nommés : pas de `_` ici non plus, pour que le
+    // quatrième état casse la compilation comme il le fait au switch d'autorité.
     final plannedNotPulledKeys = switch (planState) {
       SyncPlanKnown(:final plan, :final rejectedKeys) => {
         ..._plannedWithoutHandler(plan),
         ...rejectedKeys,
       },
-      _ => const <String>{},
+      // `_plannedWithoutHandler` n'aurait rien à y ajouter : le plan est vide
+      // par construction, seules les clés écartées subsistent.
+      SyncPlanEmpty(:final rejectedKeys) => rejectedKeys,
+      SyncPlanUnknown() => const <String>{},
     };
 
     for (final handler in handlers) {

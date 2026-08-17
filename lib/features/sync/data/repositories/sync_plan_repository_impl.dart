@@ -64,12 +64,39 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
   /// remonte tel quel : l'appelant veut savoir si sa relecture a abouti, pas
   /// obtenir un plan à tout prix.
   ///
-  /// Un verdict serveur (route absente, refus) N'est PAS un échec de relecture :
-  /// il a bien été obtenu, et le retenter en boucle ne changerait rien. Il
-  /// remonte donc comme un état, et l'appelant cesse de marquer le plan à
-  /// relire.
+  /// Un verdict serveur (route absente, refus, plan d'un autre sujet) N'est PAS
+  /// un échec de relecture : il a bien été obtenu, et le retenter en boucle ne
+  /// changerait rien. Il remonte donc comme un état, et l'appelant cesse de
+  /// marquer le plan à relire.
+  ///
+  /// ⚠️ **Le corps illisible fait exception, et c'est tout l'objet de cette
+  /// méthode.** Un 200 qu'on ne sait pas lire, c'est le portail captif — le
+  /// dépôt le nomme lui-même comme LE cas de cette cause. Or un portail est
+  /// transitoire par construction : une fois franchi, le même GET aboutit.
+  /// Le compter comme un verdict éteignait le drapeau « à relire », donc figeait
+  /// le plan sur `malformed` pour TOUTE la session — et sous F5 un plan inconnu
+  /// rend la main à `requiredPermissions`, c'est-à-dire au comportement d'avant
+  /// ce chantier, derrière une pastille verte (`isDegraded` ignore ce cas). Le
+  /// mécanisme entier s'annulait sur l'incident le plus banal d'un wifi d'école,
+  /// sans autre issue qu'un changement de droits ou une déconnexion.
+  ///
+  /// On le traite donc comme un échec de relecture : repli sur le cache, drapeau
+  /// laissé levé, nouvelle tentative au cycle suivant — exactement un timeout.
+  ///
+  /// ⚠️ Ne surtout PAS déplacer cette règle dans `_fetch` : `load()` s'en sert
+  /// au premier démarrage, où il n'y a pas de cache, et y perdrait le
+  /// diagnostic `malformed` au profit d'`absent`. La distinction entre « le
+  /// serveur a répondu n'importe quoi » et « on n'a jamais rien reçu » est la
+  /// seule trace dont dispose un dépôt sans logger.
   @override
-  Future<SyncPlanState?> refreshFromNetwork() => _fetch();
+  Future<SyncPlanState?> refreshFromNetwork() async {
+    final fetched = await _fetch();
+    if (fetched is SyncPlanUnknown &&
+        fetched.cause == SyncPlanUnknownCause.malformed) {
+      return null;
+    }
+    return fetched;
+  }
 
   @override
   Future<SyncPlanState> loadCached() async {

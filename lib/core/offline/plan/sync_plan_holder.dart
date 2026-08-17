@@ -98,6 +98,20 @@ class SyncPlanHolder {
   /// Ne lève jamais : tout échec devient un plan inconnu, c'est-à-dire le repli
   /// sur le registre en dur. Une lecture qui remonterait une exception couperait
   /// la synchronisation sans recours.
+  ///
+  /// ⚠️ **Un arrivant se coalesce sur la lecture en vol sans réexaminer la
+  /// fraîcheur, et c'est délibéré.** Si [markStale] survient pendant le vol, le
+  /// nouvel appelant reçoit un plan déjà connu comme périmé — sa question date
+  /// pourtant d'APRÈS le changement, donc l'argument qui justifie [_commit] ne
+  /// vaut pas pour lui. Ce qu'il perd est un cycle : le drapeau reste levé, le
+  /// cycle suivant relit. Ce qu'on évite est un aller-retour réseau par
+  /// changement de droits — et un refresh de jeton peut en produire plusieurs
+  /// d'affilée.
+  ///
+  /// C'est aussi pourquoi [markStale] n'abandonne PAS la lecture en vol alors
+  /// que [clear] le fait : un plan un cycle en retard reste le plan du bon
+  /// compte, tandis qu'un plan servi après une bascule de compte serait celui de
+  /// quelqu'un d'autre. L'asymétrie est le compromis, pas un oubli.
   Future<SyncPlanState> current() {
     final memo = _memo;
     if (!_stale && memo != null) return Future<SyncPlanState>.value(memo);

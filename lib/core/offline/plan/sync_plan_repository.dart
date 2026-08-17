@@ -41,7 +41,20 @@ abstract interface class SyncPlanRepository {
   /// implémenté sur `state is SyncPlanUnknown`, le drapeau se serait éteint sur
   /// un échec, soit exactement l'inverse du comportement voulu.
   ///
-  /// `null` couvre indifféremment le réseau, la route absente et le corps
-  /// illisible : l'appelant n'a pas à les distinguer, il a seulement à retenter.
+  /// `null` = **la relecture n'a pas abouti, retente au cycle suivant.** Deux
+  /// causes seulement le produisent : l'incident de transport et le corps
+  /// illisible (le portail captif qui répond 200 en HTML) — tous deux
+  /// transitoires, tous deux démentis par le cycle d'après.
+  ///
+  /// ⚠️ Ce qui remonte en ÉTAT plutôt qu'en `null` est un **verdict** : route
+  /// absente (404, le cas nominal du dégradé — l'APK se met à jour
+  /// indépendamment du back), refus, plan d'un autre sujet. Le retenter à chaque
+  /// cycle n'y changerait rien et coûterait un aller-retour par montage d'écran
+  /// sur un parc dont le back n'est pas déployé.
+  ///
+  /// La ligne de partage n'est donc PAS « a-t-on reçu un corps », mais « une
+  /// nouvelle tentative pourrait-elle donner un autre résultat ». Un corps
+  /// illisible est bien reçu, et pourtant il change dès que le portail est
+  /// franchi.
   Future<SyncPlanState?> refreshFromNetwork();
 }

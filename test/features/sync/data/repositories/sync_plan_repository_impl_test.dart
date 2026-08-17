@@ -513,16 +513,32 @@ void main() {
     );
 
     test(
-      '200 + corps illisible → malformed, pas null, et RIEN en cache',
+      '200 + corps illisible → NULL : le portail captif est transitoire, pas un '
+      'verdict — et RIEN en cache',
       () async {
-        // Le portail captif qui répond 200 en HTML. C'est un corps reçu, donc un
-        // verdict : retenter en boucle ne le changerait pas.
+        // ⚠️ L'attente s'est INVERSÉE, et c'est le correctif d'un défaut réel.
+        //
+        // Ce test figeait « c'est un corps reçu, donc un verdict : retenter en
+        // boucle ne le changerait pas ». C'est faux précisément pour le cas
+        // qu'il met en scène : une fois le portail franchi, le même GET aboutit.
+        //
+        // Rendre un état éteignait le drapeau « à relire » du porteur, donc
+        // figeait le plan sur `malformed` pour TOUTE la session — et sous F5 un
+        // plan inconnu rend la main à `requiredPermissions`, derrière une
+        // pastille verte (`isDegraded` ignore ce cas). Le mécanisme entier
+        // s'annulait sur l'incident le plus banal d'un wifi d'école.
+        //
+        // La ligne de partage n'est donc pas « a-t-on reçu un corps » mais
+        // « une nouvelle tentative pourrait-elle donner autre chose ».
         repond('<!DOCTYPE html><html><body>portail captif</body></html>');
 
         final state = await repo.refreshFromNetwork();
 
-        expect(state, isNotNull);
-        expect(causeDe(state!), SyncPlanUnknownCause.malformed);
+        expect(
+          state,
+          isNull,
+          reason: 'null = relecture non aboutie ⇒ le porteur retentera',
+        );
         expect(
           await syncMeta.getCursor(cleA),
           isNull,
@@ -535,6 +551,19 @@ void main() {
         );
       },
     );
+
+    test('load() garde le diagnostic malformed : sans cache, il ne doit pas se '
+        'dégrader en « absent »', () async {
+      // La règle ci-dessus vaut pour `refreshFromNetwork` SEUL. Au premier
+      // démarrage il n'y a pas de cache, et confondre « le serveur a répondu
+      // n'importe quoi » avec « on n'a jamais rien reçu » perdrait la seule
+      // trace dont dispose un dépôt sans logger.
+      repond('<!DOCTYPE html><html><body>portail captif</body></html>');
+
+      final state = await repo.load();
+
+      expect(causeDe(state), SyncPlanUnknownCause.malformed);
+    });
 
     test(
       'subject DISCORDANT → foreignSubject, et RIEN n\'est écrit en cache',
