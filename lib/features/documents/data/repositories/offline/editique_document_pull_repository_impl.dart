@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_api.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
+import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 
 /// Préfixe de la clé `sync_meta` du curseur de pull des pièces scellées, et
 /// nom de la ressource pour le `PullCoordinator`.
@@ -92,6 +93,8 @@ class EditiqueDocumentPullRepositoryImpl {
   final Map<String, dynamic> _requiredAuth;
   final Clock _now;
 
+  final EditiqueCacheAccess _access;
+
   static const String resource = kEditiqueDocumentsResource;
   static const int pageLimit = 100;
 
@@ -101,12 +104,14 @@ class EditiqueDocumentPullRepositoryImpl {
     required SyncMetaDao syncMetaDao,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> requiredAuth,
+    required EditiqueCacheAccess access,
     Clock now = systemClock,
   }) : _api = api,
        _cache = cache,
        _syncMetaDao = syncMetaDao,
        _currentUser = currentUser,
        _requiredAuth = requiredAuth,
+       _access = access,
        _now = now;
 
   /// Sérialise les cycles : deux cycles concurrents rembobineraient le curseur.
@@ -134,6 +139,33 @@ class EditiqueDocumentPullRepositoryImpl {
     final syncedAt = _now();
     final cursorKey = editiqueDocumentsCursorKey(schoolId);
     final stored = await _syncMetaDao.getCursor(cursorKey); // null = bootstrap
+
+    // ⚠️ LE CURSEUR NE FRANCHIT JAMAIS CE QUI N'A PAS ÉTÉ GARDÉ.
+    //
+    // La garde d'habilitation était posée six fois — à l'écriture de l'index, à
+    // la lecture, dans les deux use cases du catalogue, à l'ouverture de
+    // session — mais jamais ici. Le cycle partait donc, descendait le catalogue
+    // entier, `recordKnownDocuments` sortait sur un `return 0` avant même sa
+    // boucle (le refus est en BLOC, jamais ligne à ligne), et le curseur était
+    // persisté quand même, page après page.
+    //
+    // Le coût n'est pas le trafic : c'est que ces pièces ne seront **jamais
+    // redemandées**. Le curseur se retrouve à la tête du catalogue avec un index
+    // vide, et le porteur suivant — entitlé, lui — repart de cette tête. Son
+    // catalogue reste vide pour tout ce qui a été scellé avant, définitivement.
+    // Ni l'élargissement de la liste, ni une mise à jour d'APK n'y changent quoi
+    // que ce soit : seul un rembobinage de `sync_meta` le répare.
+    //
+    // On sort donc AVANT le premier appel, sans toucher `sync_meta`. Le rapport
+    // reste honnête — rien de neuf, aucun octet consommé.
+    //
+    // ⚠️ Ne surtout PAS coder cela en « ne pas persister si rien n'a été
+    // retenu » : une page légitimement vide retient zéro elle aussi, et le
+    // curseur cesserait d'avancer sur un cycle parfaitement sain.
+    if (!await _access.isEntitled()) {
+      return Right(EditiqueDocumentPullOutcome.notModifiedAt(syncedAt, stored));
+    }
+
     final first = await _attemptCycle(syncedAt, schoolId, from: stored);
     // 400 = curseur illisible, forgé, ou émis pour une autre ressource →
     // repartir du bootstrap. Hors du `catch` : une exception dans un `catch`
