@@ -371,6 +371,205 @@ void main() {
     );
   });
 
+  /// La jambe réseau **seule** (ADR-015 F9).
+  ///
+  /// Elle existe pour une raison unique et étroite : `load()` replie sur le
+  /// cache et rend un `SyncPlanKnown`, verdict rigoureusement identique à une
+  /// lecture fraîche. Un appelant qui doit savoir si sa relecture a **abouti** —
+  /// pour retenter au cycle suivant plutôt que de croire son plan à jour — n'a
+  /// rien à quoi s'accrocher. C'est ce manque qui rendait le « marqué à relire »
+  /// inexprimable.
+  ///
+  /// D'où la ligne de partage que ce groupe verrouille : `null` = la jambe
+  /// réseau n'a pas abouti, **retente** ; un état = un verdict a été obtenu,
+  /// **n'insiste pas**.
+  group('refreshFromNetwork()', () {
+    test(
+      '200 + plan concordant → rend l\'état, ET le cache est écrit',
+      () async {
+        repond(planBody());
+
+        final state = await repo.refreshFromNetwork();
+
+        expect(state, isA<SyncPlanKnown>());
+        expect((state as SyncPlanKnown).plan.subject, uidA);
+        expect(state.plan.keys, ['socle']);
+
+        // Une relecture réussie sert aussi les démarrages hors ligne suivants :
+        // la jambe réseau n'est pas un chemin de diagnostic à part, c'est le
+        // chemin nominal du cycle.
+        final cache = await syncMeta.getCursor(cleA);
+        expect(cache, isNotNull, reason: 'le plan doit être mis en cache');
+        expect(jsonDecode(cache!)['subject'], uidA);
+        expect(await syncMeta.getSyncedAt(cleA), isNotNull);
+      },
+    );
+
+    test(
+      'timeout → NULL, et surtout PAS l\'état que load() aurait rendu depuis le '
+      'cache',
+      () async {
+        // Le cache est peuplé et concordant : c'est précisément la situation où
+        // les deux méthodes divergent, et la seule qui prouve quelque chose.
+        repond(planBody());
+        await repo.load();
+        expect(await syncMeta.getCursor(cleA), isNotNull);
+
+        leve(timeout());
+
+        expect(
+          await repo.refreshFromNetwork(),
+          isNull,
+          reason:
+              'une relecture qui n\'a pas abouti doit se distinguer d\'une '
+              'relecture réussie — sinon le drapeau « à relire » s\'éteint sur '
+              'un échec, soit l\'inverse exact du comportement voulu',
+        );
+        // La contre-épreuve, dans le même souffle : `load()`, lui, sert le
+        // cache et rend un état indistinguable d'une lecture fraîche.
+        expect(await repo.load(), isA<SyncPlanKnown>());
+      },
+    );
+
+    test(
+      'timeout SANS cache → null aussi (le cache n\'est pas consulté)',
+      () async {
+        leve(timeout());
+
+        expect(await repo.refreshFromNetwork(), isNull);
+        // `load()` aurait rendu `absent` — un état, donc « verdict obtenu ».
+        expect(causeDe(await repo.load()), SyncPlanUnknownCause.absent);
+      },
+    );
+
+    test('500 → null : un incident de transport, pas un verdict', () async {
+      leve(status(500));
+
+      expect(await repo.refreshFromNetwork(), isNull);
+    });
+
+    test(
+      'une erreur QUELCONQUE (pas une DioException) → null, sans lever',
+      () async {
+        // Pas de `response` à interroger : statut inconnu, donc transport, donc
+        // « retente ». Et surtout : la méthode ne lève pas plus que `load()`.
+        leve(const ErreurQuelconque());
+
+        expect(await repo.refreshFromNetwork(), isNull);
+      },
+    );
+
+    test(
+      '404 → notDeployed, PAS null : le serveur a rendu son verdict',
+      () async {
+        // Cas nominal du dégradé — l'APK se met à jour indépendamment du back.
+        // Le rendre `null` ferait retenter à chaque cycle, donc un timeout par
+        // montage d'écran sur tout un parc dont le back n'est pas déployé.
+        leve(status(404));
+
+        final state = await repo.refreshFromNetwork();
+
+        expect(state, isNotNull);
+        expect(causeDe(state!), SyncPlanUnknownCause.notDeployed);
+      },
+    );
+
+    test('401 → unauthorized, pas null', () async {
+      leve(status(401));
+
+      final state = await repo.refreshFromNetwork();
+
+      expect(state, isNotNull);
+      expect(causeDe(state!), SyncPlanUnknownCause.unauthorized);
+    });
+
+    test('403 → unauthorized, pas null', () async {
+      // Le contrat promet « jamais 403 » : c'est une anomalie de déploiement,
+      // pas un manque de droit — et retenter ne la lèvera pas.
+      leve(status(403));
+
+      final state = await repo.refreshFromNetwork();
+
+      expect(state, isNotNull);
+      expect(causeDe(state!), SyncPlanUnknownCause.unauthorized);
+    });
+
+    test(
+      '404 / 401 / 403 ne consultent PAS le cache, même peuplé et valide',
+      () async {
+        repond(planBody());
+        await repo.load();
+
+        for (final code in [404, 401, 403]) {
+          leve(status(code));
+          final state = await repo.refreshFromNetwork();
+          expect(
+            state,
+            isA<SyncPlanUnknown>(),
+            reason: 'le $code doit rendre son verdict, pas le plan en cache',
+          );
+        }
+      },
+    );
+
+    test(
+      '200 + corps illisible → malformed, pas null, et RIEN en cache',
+      () async {
+        // Le portail captif qui répond 200 en HTML. C'est un corps reçu, donc un
+        // verdict : retenter en boucle ne le changerait pas.
+        repond('<!DOCTYPE html><html><body>portail captif</body></html>');
+
+        final state = await repo.refreshFromNetwork();
+
+        expect(state, isNotNull);
+        expect(causeDe(state!), SyncPlanUnknownCause.malformed);
+        expect(
+          await syncMeta.getCursor(cleA),
+          isNull,
+          reason: 'un repli ne doit pas se lire comme une synchro réussie',
+        );
+        expect(
+          await syncMeta.getSyncedAt(cleA),
+          isNull,
+          reason: 'ni le plan, ni l\'horodatage de fraîcheur',
+        );
+      },
+    );
+
+    test(
+      'subject DISCORDANT → foreignSubject, et RIEN n\'est écrit en cache',
+      () async {
+        // Tablette partagée : sous F5 ce plan ne déciderait plus d'un affichage
+        // mais de ce que le compte courant TIRE.
+        repond(planBody(subject: uidB));
+
+        final state = await repo.refreshFromNetwork();
+
+        expect(state, isNotNull);
+        expect(causeDe(state!), SyncPlanUnknownCause.foreignSubject);
+        expect(
+          await syncMeta.getCursor(cleA),
+          isNull,
+          reason: 'le plan d\'un autre compte ne doit pas écraser le nôtre',
+        );
+        expect(await syncMeta.getSyncedAt(cleA), isNull);
+      },
+    );
+
+    test(
+      '200 + streams vide → empty, pas null, et le plan est caché',
+      () async {
+        repond(planBody(streams: const <Object?>[]));
+
+        final state = await repo.refreshFromNetwork();
+
+        expect(state, isA<SyncPlanEmpty>());
+        expect(state, isNot(isA<SyncPlanUnknown>()));
+        expect(await syncMeta.getCursor(cleA), isNotNull);
+      },
+    );
+  });
+
   group('loadCached()', () {
     test('cache absent → absent, sans toucher au réseau', () async {
       expect(causeDe(await repo.loadCached()), SyncPlanUnknownCause.absent);

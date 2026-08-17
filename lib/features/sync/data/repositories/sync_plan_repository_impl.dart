@@ -57,6 +57,20 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
     return loadCached();
   }
 
+  /// La jambe réseau seule, sans repli sur le cache.
+  ///
+  /// `_fetch` rend déjà `null` sur un incident de transport — c'est le signal
+  /// que `load` interprète comme « laisse sa chance au cache ». Ici on le
+  /// remonte tel quel : l'appelant veut savoir si sa relecture a abouti, pas
+  /// obtenir un plan à tout prix.
+  ///
+  /// Un verdict serveur (route absente, refus) N'est PAS un échec de relecture :
+  /// il a bien été obtenu, et le retenter en boucle ne changerait rien. Il
+  /// remonte donc comme un état, et l'appelant cesse de marquer le plan à
+  /// relire.
+  @override
+  Future<SyncPlanState?> refreshFromNetwork() => _fetch();
+
   @override
   Future<SyncPlanState> loadCached() async {
     String? raw;

@@ -77,6 +77,25 @@ abstract class PullHandler {
   /// frontières d'autorité). Volontairement sans implémentation par défaut : un
   /// handler neuf doit déclarer son exigence, et l'oubli est une erreur de
   /// compilation plutôt qu'une ressource silencieusement non filtrée.
+  ///
+  /// ## ⚠️ Ce n'est PLUS l'autorité de périmètre (ADR-015 O)
+  ///
+  /// Quand un plan de synchronisation **valide** gouverne le cycle, cette liste
+  /// n'est pas consultée : le plan décide seul ce qui descend, et un flux qu'il
+  /// porte est tiré même si la session ne détient pas la permission déclarée
+  /// ici. C'est tout le gain du chantier — cette liste est une copie durcie du
+  /// modèle de droits, embarquée dans l'APK, qui annulait en silence tout ce que
+  /// le serveur accorde par entraînement.
+  ///
+  /// Elle ne disparaît pas pour autant : elle devient le filtre du **mode
+  /// dégradé**, celui où le plan est illisible (serveur non déployé, réseau,
+  /// `subject` discordant). C'est-à-dire, aujourd'hui encore, le mode le plus
+  /// courant.
+  ///
+  /// **Substitution, jamais union.** Si vous vous apprêtez à rétablir ce filtre
+  /// à côté du plan « par prudence », relisez `PullCoordinator._runCycle` :
+  /// c'est précisément ce que le `switch` sur l'état du plan rend
+  /// inexprimable, et l'union des deux autorités perdrait tout le bénéfice.
   List<Perm> get requiredPermissions;
 
   /// Flux **socle** : garanti à tout compte authentifié, hors de tout filtre de

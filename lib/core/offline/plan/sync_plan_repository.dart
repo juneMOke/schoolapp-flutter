@@ -27,4 +27,21 @@ abstract interface class SyncPlanRepository {
   /// cycle de synchro veut la fraîcheur, un démarrage hors ligne veut ce qu'il
   /// a. Confondre les deux imposerait un timeout réseau à chaque lecture.
   Future<SyncPlanState> loadCached();
+
+  /// Un plan **réellement obtenu du réseau**, ou `null` si la jambe réseau n'a
+  /// pas abouti.
+  ///
+  /// Existe parce que [load] ne permet pas de distinguer une lecture fraîche
+  /// d'un repli sur le cache : sur timeout il sert le plan en cache et rend un
+  /// `SyncPlanKnown`, verdict identique à une lecture réussie. Un appelant qui
+  /// doit savoir si sa relecture a abouti — pour retenter au cycle suivant
+  /// plutôt que de croire son plan à jour — n'a rien à quoi s'accrocher.
+  ///
+  /// C'est le manque qui rendait le « marqué à relire » du lot F9 inexprimable :
+  /// implémenté sur `state is SyncPlanUnknown`, le drapeau se serait éteint sur
+  /// un échec, soit exactement l'inverse du comportement voulu.
+  ///
+  /// `null` couvre indifféremment le réseau, la route absente et le corps
+  /// illisible : l'appelant n'a pas à les distinguer, il a seulement à retenter.
+  Future<SyncPlanState?> refreshFromNetwork();
 }

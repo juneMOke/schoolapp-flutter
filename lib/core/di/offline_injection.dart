@@ -16,6 +16,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/sync/data/datasources/sync_plan_api.dart';
@@ -116,6 +117,25 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   // AVANT le coordinateur, qui le consomme.
   getIt.registerLazySingleton<PullCompletionBus>(() => PullCompletionBus());
 
+  // Porteur du plan de synchronisation : mémo, single-flight, péremption sur
+  // changement de droits (ADR-015 F5/F9). Vit dans le socle avec le coordinateur
+  // qui le consomme ; son REPOSITORY, lui, est une implémentation de branche
+  // (`features/sync`) enregistrée dans `registerOfflineModules` — résolu
+  // paresseusement, comme `AuthSessionManager` ci-dessus.
+  //
+  // Abonné à `CurrentPermissions`, qui ne notifie que sur un changement RÉEL
+  // d'ensemble : cela couvre du même coup les six chemins qui alimentent cet
+  // ensemble, dont la bascule de compte — et un ensemble redevenu inconnu
+  // (logout, wipe) fait OUBLIER le plan plutôt que le marquer périmé. Sous F5,
+  // un plan survivant ne décide plus d'un affichage mais de ce que le compte
+  // suivant TIRE.
+  getIt.registerLazySingleton<SyncPlanHolder>(
+    () => SyncPlanHolder(
+      repository: getIt<SyncPlanRepository>(),
+      permissions: getIt<CurrentPermissions>(),
+    ),
+  );
+
   getIt.registerLazySingleton<PullCoordinator>(
     () => PullCoordinator(
       connectivity: getIt<ConnectivityService>(),
@@ -131,6 +151,12 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       // Lazy comme `SyncEngine` ci-dessus : `AuthSessionManager` est enregistré
       // plus tard dans `configureDependencies()`, résolu au premier cycle.
       credentialsProbe: getIt<AuthSessionManager>(),
+      // Autorité de périmètre (ADR-015 F5). Résolu paresseusement : le porteur
+      // dépend du repository du plan, enregistré plus loin dans
+      // `registerOfflineModules`. Sans lui, le coordinateur voit un plan
+      // « inconnu » en permanence et retombe sur `requiredPermissions` —
+      // c'est-à-dire exactement le comportement d'avant ce lot.
+      planHolder: getIt<SyncPlanHolder>(),
     ),
   );
 
@@ -195,12 +221,14 @@ void registerOfflineModules(GetIt getIt) {
 /// conteneur. Tout est de toute façon résolu depuis l'intérieur de la closure —
 /// même précaution que `SyncEngine` avec `AuthSessionManager`.
 ///
-/// ⚠️ **Aucun consommateur pour l'instant, et c'est voulu.** Le plan est lu et
-/// mis en cache, mais il ne gouverne rien : `PullCoordinator` continue de tirer
-/// dans l'ordre d'enregistrement, filtré par `requiredPermissions`. Le plan ne
-/// devient l'autorité qu'au lot F5, lui-même conditionné à l'unification des
-/// points de pull (F6) — sans quoi il ne gouvernerait que le seul chemin déjà
-/// gouverné pendant que les douze autres continuent.
+/// Depuis le lot F5, le plan est l'**autorité de périmètre** du pull : consommé
+/// par le `SyncPlanHolder` enregistré dans `registerOfflineCore`, que
+/// `PullCoordinator` interroge à chaque cycle. Sur un plan connu,
+/// `requiredPermissions` cesse d'être l'autorité et ne filtre plus que le mode
+/// dégradé — il se **substitue**, il ne s'ajoute jamais.
+///
+/// Il ne gouverne toujours pas l'**ordre** : le coordinateur tire dans l'ordre
+/// d'enregistrement, et `PullSequencer` reste dormant.
 void _registerSyncPlan(GetIt getIt) {
   getIt.registerLazySingleton<SyncPlanApi>(() => SyncPlanApi(getIt<Dio>()));
   getIt.registerLazySingleton<SyncPlanRepository>(

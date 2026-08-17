@@ -62,6 +62,19 @@ class PullRunReport {
   /// ce qu'il devait.
   final int blocked;
 
+  /// Le serveur a répondu un plan **sans aucun flux**.
+  ///
+  /// Le contrat promet que cela n'arrive jamais : un plan contient au minimum le
+  /// socle, et un compte sans aucune permission reçoit 200 et ce socle. C'est
+  /// donc un serveur qui se contredit — mais sans ce drapeau, ce serait aussi la
+  /// panne la plus **totale** et la plus **silencieuse** du dispositif : la
+  /// tablette ne tire plus rien, [outOfPlan] est exclu de [isDegraded] par
+  /// construction, et la pastille resterait verte.
+  ///
+  /// Compté dans [isDegraded] pour cette seule raison. Ce n'est pas un
+  /// périmètre légitime, c'est un contrat rompu.
+  final bool planEmpty;
+
   /// L'issue de chaque ressource réellement tentée.
   ///
   /// Les agrégats ne suffisent pas à tous les appelants : un écran qui a demandé
@@ -88,6 +101,7 @@ class PullRunReport {
     this.plannedNotPulled = 0,
     this.plannedNotPulledKeys = const <String>{},
     this.blocked = 0,
+    this.planEmpty = false,
     this.outcomes = const <String, PullResult>{},
     this.latestServerTimeMs,
   });
@@ -121,5 +135,9 @@ class PullRunReport {
   bool get isDegraded =>
       !skipped &&
       !offline &&
-      (failed > 0 || forbidden > 0 || plannedNotPulled > 0 || blocked > 0);
+      (failed > 0 ||
+          forbidden > 0 ||
+          plannedNotPulled > 0 ||
+          blocked > 0 ||
+          planEmpty);
 }

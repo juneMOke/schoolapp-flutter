@@ -6,6 +6,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
@@ -117,6 +122,85 @@ class SlowPullHandler implements PullHandler {
     return const PullOutcome.updated();
   }
 }
+
+/// Repository de plan de test — rend l'état qu'on lui confie, sans réseau.
+///
+/// Compte ses appels : c'est par là qu'on observe que le plan est résolu **une
+/// fois par cycle** et **jamais avant** les gardes connectivité / crédentiels.
+/// Le lire plus tôt imposerait un aller-retour — ou son timeout — à chaque
+/// montage d'écran hors connexion.
+class FakeSyncPlanRepository implements SyncPlanRepository {
+  FakeSyncPlanRepository(this.state);
+
+  final SyncPlanState state;
+  int refreshCalls = 0;
+  int cachedCalls = 0;
+
+  @override
+  Future<SyncPlanState> load() async => state;
+
+  @override
+  Future<SyncPlanState> loadCached() async {
+    cachedCalls++;
+    return state;
+  }
+
+  /// La jambe que le porteur consulte en premier. Non-nulle ici : ces tests
+  /// portent sur ce que le coordinateur FAIT d'un plan, pas sur la péremption
+  /// du mémo — qui se teste au niveau du porteur.
+  @override
+  Future<SyncPlanState?> refreshFromNetwork() async {
+    refreshCalls++;
+    return state;
+  }
+}
+
+/// Un [SyncPlan] réduit à ses clés.
+///
+/// `clientResource` est renseigné depuis l'alias, comme le serveur le ferait,
+/// alors que le coordinateur ne le lit **jamais** : il repasse par `planKeyOf`.
+/// C'est délibéré côté production — ce champ est analysé en mode tolérant, et
+/// une omission serveur mettrait sinon les dix-neuf handlers hors plan. Le
+/// renseigner juste ici garde le montage honnête sans rien prouver de faux.
+SyncPlan planWithKeys(List<String> keys) => SyncPlan(
+  planVersion: 1,
+  subject: 'uid-serveur-1',
+  onAbsence: 'ignore',
+  streams: [
+    for (final key in keys)
+      SyncPlanFlow(
+        key: key,
+        clientResource: resourcesOf(key),
+        mode: SyncFlowMode.keyset,
+        scope: SyncFlowScope.school,
+        reason: const ['socle'],
+        dependsOn: const [],
+      ),
+  ],
+);
+
+/// Régime VALIDE : ces clés-là, et rien d'autre.
+SyncPlanState planKnown(List<String> keys) =>
+    SyncPlanState.known(planWithKeys(keys));
+
+/// Régime VALIDE dont l'analyse a **écarté** des clés (mode ou scope inconnu de
+/// cet APK). Elles ne sont PAS dans `plan.streams` — le parser les en a
+/// retirées — mais elles sont nommées dans `rejectedKeys`.
+SyncPlanState planKnownWithRejected(
+  List<String> keys,
+  Set<String> rejectedKeys,
+) => SyncPlanState.known(planWithKeys(keys), rejectedKeys: rejectedKeys);
+
+/// Régime VIDE : le serveur a répondu, et il n'y a rien à tirer.
+///
+/// ⚠️ À ne jamais confondre avec [SyncPlanState.unknown] : l'un ne tire rien,
+/// l'autre tire tout ce que le registre en dur autorise.
+SyncPlanState planEmptyState() => SyncPlanState.empty(planWithKeys(const []));
+
+/// Régime INCONNU : le repli sur le registre en dur.
+SyncPlanState planUnknown([
+  SyncPlanUnknownCause cause = SyncPlanUnknownCause.notDeployed,
+]) => SyncPlanState.unknown(cause);
 
 void main() {
   late MockConnectivity connectivity;
@@ -1521,5 +1605,1069 @@ void main() {
         expect(report.succeeded('classrooms'), isFalse);
       },
     );
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // ADR-015 F5 — LE PLAN DEVIENT L'AUTORITÉ DE PÉRIMÈTRE
+  //
+  // `requiredPermissions` cesse d'être l'autorité pour devenir le filtre du
+  // seul mode dégradé. Ce qui suit vérifie les TROIS régimes du `switch` de
+  // substitution, et surtout qu'il s'agit bien d'une substitution.
+  // ════════════════════════════════════════════════════════════════════════
+
+  /// Un coordinateur dont le plan est celui-ci.
+  ///
+  /// Le porteur est monté ici comme en production — repository + abonnement aux
+  /// permissions — plutôt que par un double du porteur : c'est la chaîne réelle
+  /// qui doit être observée, et un faux porteur ne dirait rien de l'ordre entre
+  /// les gardes et la résolution du plan.
+  PullCoordinator plannedCoordinator(
+    SyncPlanState state, {
+    CurrentPermissions? permissions,
+    FakeSyncPlanRepository? repository,
+    SessionCredentialsProbe? credentialsProbe,
+  }) => PullCoordinator(
+    connectivity: service,
+    permissions: permissions,
+    credentialsProbe: credentialsProbe,
+    planHolder: SyncPlanHolder(
+      repository: repository ?? FakeSyncPlanRepository(state),
+      permissions: permissions,
+    ),
+  );
+
+  group('un flux ÉCARTÉ À L\'ANALYSE ne s\'arrête jamais en silence', () {
+    // Trouvé en revue, reproduit par sonde, et c'était le pire défaut du lot.
+    //
+    // Quand le serveur introduit un `mode` ou un `scope` que cet APK ne connaît
+    // pas, le parser retire le flux de `plan.streams` et le nomme dans
+    // `rejectedKeys` — le contrat l'exige ainsi : « ignorer sans erreur, mais
+    // jamais sans trace ».
+    //
+    // Sauf que la clé disparue de `plan.streams`, `_covers` la ratait, donc elle
+    // tombait en `outOfPlan` — délibérément exclu de `isDegraded`. Résultat : le
+    // flux s'arrêtait TOTALEMENT sur tout le parc, avec une pastille verte et
+    // aucune trace. `rejectedKeys` était calculé depuis le lot F2 et lu par
+    // personne.
+    test(
+      'sa clé est NOMMÉE dans plannedNotPulledKeys, et la pastille le dit',
+      () async {
+        goOnline();
+        final creances = FakePullHandler(
+          'finance_student_charges',
+          const PullOutcome.updated(),
+        );
+        final coordinator = plannedCoordinator(
+          planKnownWithRejected(
+            const [SyncPlanKeys.financePayments],
+            const {SyncPlanKeys.financeStudentCharges},
+          ),
+        )..registerHandler(creances);
+
+        final report = await coordinator.pullAll();
+
+        expect(creances.calls, 0, reason: 'le flux écarté n\'est pas tiré');
+        expect(
+          report.plannedNotPulledKeys,
+          contains(SyncPlanKeys.financeStudentCharges),
+          reason: 'sans le nom, personne ne saura JAMAIS lequel s\'est arrêté',
+        );
+        expect(
+          report.isDegraded,
+          isTrue,
+          reason:
+              'un flux planifié qui ne descend plus n\'est pas un périmètre '
+              'correct : la pastille doit le dire',
+        );
+      },
+    );
+
+    test('un plan sans clé écartée ne déclare rien — contre-épreuve', () async {
+      goOnline();
+      final coordinator =
+          plannedCoordinator(planKnown(const [SyncPlanKeys.financePayments]))
+            ..registerHandler(
+              FakePullHandler('finance_payments', const PullOutcome.updated()),
+            );
+
+      final report = await coordinator.pullAll();
+
+      expect(report.plannedNotPulledKeys, isEmpty);
+      expect(report.isDegraded, isFalse);
+    });
+  });
+
+  group('le plan est l\'autorité de périmètre — régime VALIDE (ADR-015 F5)', () {
+    // ─────────────────────────────────────────────────────────────────────
+    // LE TEST QUI PORTE TOUT LE LOT.
+    //
+    // Un montage où l'union et la substitution donnent le même résultat ne
+    // prouve rien : si le plan et le registre en dur sont d'accord, les deux
+    // règles tirent la même chose et le test resterait vert sur la mauvaise.
+    //
+    // Le seul discriminant est une ressource **hors plan mais localement
+    // LISIBLE** : « planifié OU lisible » la tirerait, « planifié, point » ne
+    // la tire pas. C'est exactement la forme que D-03 interdit, et celle qu'une
+    // V1 de ce plan contenait.
+    // ─────────────────────────────────────────────────────────────────────
+    test('SUBSTITUTION, jamais union : une ressource HORS PLAN mais localement '
+        'LISIBLE n\'est PAS tirée', () async {
+      goOnline();
+      // Le compte détient bel et bien `classroom.read` : sous l'ancienne
+      // autorité, les classes descendaient. Le plan, lui, ne les porte pas.
+      final horsPlanMaisLisible = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final auPlan = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.financePayments]),
+              permissions: CurrentPermissions()
+                ..set(const ['classroom.read', 'finance.payment.read']),
+            )
+            ..registerHandler(horsPlanMaisLisible)
+            ..registerHandler(auPlan);
+
+      final report = await coord.pullAll();
+
+      // L'union aurait tiré les classes. La substitution non.
+      expect(horsPlanMaisLisible.calls, 0);
+      expect(report.outOfPlan, 1);
+      // Et le flux planifié, lui, est bien passé — sans quoi le test serait vert
+      // pour la mauvaise raison (un coordinateur qui ne tire plus rien).
+      expect(auPlan.calls, 1);
+      expect(report.updated, 1);
+      // Hors plan n'est pas « pas le droit » : les deux compteurs ne se
+      // mélangent jamais.
+      expect(report.forbidden, 0);
+    });
+
+    // Le symétrique, et le GAIN du lot (F-I9) : aucun flux d'un plan valide
+    // n'est écarté par une règle locale. `requiredPermissions` est une copie
+    // durcie du modèle de droits, embarquée dans l'APK ; elle annulait en
+    // silence ce que le serveur accorde par entraînement.
+    test('une ressource PLANIFIÉE mais NON lisible localement est bien '
+        'tirée', () async {
+      goOnline();
+      final auPlanNonLisible = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord = plannedCoordinator(
+        planKnown(const [SyncPlanKeys.financePayments]),
+        // Le compte ne détient PAS `finance.payment.read` côté client.
+        permissions: CurrentPermissions()..set(const ['classroom.read']),
+      )..registerHandler(auPlanNonLisible);
+
+      final report = await coord.pullAll();
+
+      expect(auPlanNonLisible.calls, 1);
+      expect(report.updated, 1);
+      expect(report.forbidden, 0);
+    });
+
+    test('seuls les flux du plan sont tirés, les autres comptent en '
+        'outOfPlan', () async {
+      goOnline();
+      final journal = <String>[];
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.classroomClassrooms]),
+              permissions: CurrentPermissions()
+                ..set(const ['classroom.read', 'attendance.read']),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+                journal: journal,
+              ),
+            )
+            // Les deux suivantes sont lisibles localement : seul le plan les
+            // écarte.
+            ..registerHandler(
+              FakePullHandler(
+                'classroom_members',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+                journal: journal,
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'attendance',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.attendanceRead],
+                journal: journal,
+              ),
+            );
+
+      final report = await coord.pullAll();
+
+      expect(journal, ['classrooms']);
+      expect(report.outOfPlan, 2);
+      expect(report.updated, 1);
+      expect(report.forbidden, 0);
+    });
+
+    // ─────────────────────────────────────────────────────────────────────
+    // F-I9, L'INVARIANT CENTRAL : sous un plan valide, AUCUN flux planifié
+    // n'est écarté par une règle locale. L'ensemble de permissions VIDE est le
+    // montage extrême — c'est celui où l'ancienne autorité refusait TOUT.
+    // ─────────────────────────────────────────────────────────────────────
+    test('F-I9 : un plan portant TOUTES les clés, avec un ensemble de '
+        'permissions VIDE, tire TOUS les handlers', () async {
+      goOnline();
+      final handlers = <FakePullHandler>[];
+      final coord = plannedCoordinator(
+        planKnown(kSyncPlanAliases.keys.toList(growable: false)),
+        // Aucun droit du tout. Sous `requiredPermissions`, les dix-neuf
+        // ressources seraient sautées.
+        permissions: CurrentPermissions()..set(const []),
+      );
+      for (final resource in kSyncPlanAliases.values.expand((r) => r)) {
+        final handler = FakePullHandler(
+          resource,
+          const PullOutcome.updated(upserted: 1),
+        );
+        handlers.add(handler);
+        coord.registerHandler(handler);
+      }
+
+      final report = await coord.pullAll();
+
+      expect(handlers.every((h) => h.calls == 1), isTrue);
+      expect(report.forbidden, 0);
+      expect(report.outOfPlan, 0);
+      expect(report.blocked, 0);
+      expect(report.plannedNotPulled, 0);
+      expect(report.processed, handlers.length);
+      expect(report.isDegraded, isFalse);
+    });
+
+    test('outOfPlan n\'entre ni dans processed ni dans isDegraded — c\'est le '
+        'périmètre correct, pas un manque', () async {
+      goOnline();
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.classroomClassrooms]),
+              permissions: CurrentPermissions()
+                ..set(const [
+                  'classroom.read',
+                  'finance.payment.read',
+                  'academics.grade.read',
+                ]),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'finance_payments',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.financePaymentRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'academics_notes',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.academicsGradeRead],
+              ),
+            );
+
+      final report = await coord.pullAll();
+
+      expect(report.outOfPlan, 2);
+      expect(report.processed, 1);
+      expect(report.failed, 0);
+      expect(report.forbidden, 0);
+      // Un enseignant au périmètre étroit verrait sinon « partiellement à
+      // jour » à vie, alors que tout ce qui le concerne est descendu.
+      expect(report.isDegraded, isFalse);
+    });
+
+    // ─────────────────────────────────────────────────────────────────────
+    // ARBITRAGE ASSUMÉ : une ressource hors plan ne bloque PAS son aval
+    // money-grade. Un flux hors du plan est le périmètre décidé par le serveur,
+    // pas un amont en panne — l'inscrire au registre des inexploitables ferait
+    // écarter un flux PLANIFIÉ par une règle locale, ce que F-I9 interdit
+    // frontalement. F-I9 prime donc sur l'arête.
+    // ─────────────────────────────────────────────────────────────────────
+    test('une ressource HORS PLAN ne bloque pas son aval money-grade : un plan '
+        'portant les paiements sans les créances tire bien les '
+        'paiements', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financeChargeRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.financePayments]),
+              permissions: CurrentPermissions()
+                ..set(const ['finance.charge.read', 'finance.payment.read']),
+            )
+            ..registerHandler(creances)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(creances.calls, 0);
+      expect(report.outOfPlan, 1);
+      expect(paiements.calls, 1);
+      expect(report.blocked, 0);
+      expect(report.updated, 1);
+    });
+
+    // Contre-épreuve : l'arête n'a pas disparu pour autant. Un amont PLANIFIÉ
+    // qui ÉCHOUE bloque toujours son aval — c'est le cas où le caissier
+    // réencaisserait.
+    test('contre-épreuve : un amont PLANIFIÉ qui échoue bloque toujours son '
+        'aval', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.error('KO'),
+        requiredPermissions: const [Perm.financeChargeRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [
+                SyncPlanKeys.financeStudentCharges,
+                SyncPlanKeys.financePayments,
+              ]),
+              permissions: CurrentPermissions()..set(const []),
+            )
+            ..registerHandler(creances)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(creances.calls, 1);
+      expect(paiements.calls, 0);
+      expect(report.blocked, 1);
+      expect(report.failed, 1);
+      expect(report.outOfPlan, 0);
+    });
+
+    // Un handler que la table d'alias ne connaît pas : aucune clé ne pourra
+    // jamais le désigner. C'est un défaut de contrat, pas un périmètre — mais
+    // sous un plan valide il est bel et bien hors plan.
+    test('un handler dont planKeyOf rend null est hors plan', () async {
+      goOnline();
+      final inconnue = FakePullHandler(
+        'ressource_absente_de_la_table_dalias',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final connue = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.classroomClassrooms]),
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(inconnue)
+            ..registerHandler(connue);
+
+      final report = await coord.pullAll();
+
+      expect(inconnue.calls, 0);
+      expect(report.outOfPlan, 1);
+      expect(connue.calls, 1);
+    });
+
+    // Une clé au plan qu'aucun handler ne couvre : une clé mal orthographiée de
+    // part et d'autre suffit, et sous ce lot ce n'est plus une dégradation,
+    // c'est l'arrêt total de ce flux. D'où les clés NOMMÉMENT — « un flux
+    // manque » n'a jamais permis de trouver lequel.
+    test('plannedNotPulled : une clé au plan sans handler enregistré est '
+        'comptée ET nommée', () async {
+      goOnline();
+      final coord =
+          plannedCoordinator(
+            planKnown(const [
+              SyncPlanKeys.classroomClassrooms,
+              SyncPlanKeys.academicsNotes,
+            ]),
+            permissions: CurrentPermissions()..set(const ['classroom.read']),
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      final report = await coord.pullAll();
+
+      expect(report.plannedNotPulled, 1);
+      expect(report.plannedNotPulledKeys, {SyncPlanKeys.academicsNotes});
+      // Défaut de contrat : celui-là dégrade, contrairement à `outOfPlan`.
+      expect(report.isDegraded, isTrue);
+    });
+
+    // ⚠️ Le piège du compteur : mesuré contre la SÉLECTION du cycle, un
+    // `pullSubset` d'une ressource déclarerait les dix-sept autres clés
+    // manquantes — donc une pastille dégradée à CHAQUE montage d'écran, sur un
+    // écran parfaitement sain.
+    test('plannedNotPulled est calculé contre le REGISTRE COMPLET, jamais '
+        'contre la sélection : un pullSubset d\'une ressource ne déclare pas '
+        'les autres clés manquantes', () async {
+      goOnline();
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [
+                SyncPlanKeys.classroomClassrooms,
+                SyncPlanKeys.classroomMembers,
+                SyncPlanKeys.financePayments,
+              ]),
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(classes)
+            ..registerHandler(
+              FakePullHandler(
+                'classroom_members',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'finance_payments',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.financePaymentRead],
+              ),
+            );
+
+      final report = await coord.pullSubset(const {'classrooms'});
+
+      expect(classes.calls, 1);
+      expect(report.plannedNotPulled, 0);
+      expect(report.plannedNotPulledKeys, isEmpty);
+      expect(report.isDegraded, isFalse);
+    });
+
+    // Contre-épreuve du précédent : sans elle, il resterait vert si le compteur
+    // avait purement disparu du chemin `pullSubset`.
+    test('contre-épreuve : en pullSubset aussi, une clé qu\'AUCUN handler du '
+        'registre ne couvre est bien comptée', () async {
+      goOnline();
+      final coord =
+          plannedCoordinator(
+            planKnown(const [
+              SyncPlanKeys.classroomClassrooms,
+              SyncPlanKeys.academicsNotes,
+            ]),
+            permissions: CurrentPermissions()..set(const ['classroom.read']),
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      final report = await coord.pullSubset(const {'classrooms'});
+
+      expect(report.plannedNotPulled, 1);
+      expect(report.plannedNotPulledKeys, {SyncPlanKeys.academicsNotes});
+    });
+  });
+
+  // Le contrat promet qu'un plan n'est JAMAIS vide — il contient au minimum le
+  // socle. Ce régime est donc un serveur qui se contredit ; il est compté
+  // plutôt que subi en silence.
+  group('le plan est l\'autorité de périmètre — régime VIDE (ADR-015 F5)', () {
+    test('aucun handler non-socle n\'est tiré', () async {
+      goOnline();
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planEmptyState(),
+              // Périmètre large : seul le plan vide arrête le cycle.
+              permissions: CurrentPermissions()
+                ..set(const ['classroom.read', 'finance.payment.read']),
+            )
+            ..registerHandler(classes)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(classes.calls, 0);
+      expect(paiements.calls, 0);
+      expect(report.processed, 0);
+      // Ni « pas le droit » ni « hors périmètre » : c'est le plan entier qui
+      // est vide, et le rapport le dit par son propre drapeau.
+      expect(report.forbidden, 0);
+      expect(report.outOfPlan, 0);
+    });
+
+    // Sans ce drapeau, la panne la plus TOTALE serait la plus SILENCIEUSE : la
+    // tablette ne tire plus rien, `outOfPlan` est exclu d'`isDegraded` par
+    // construction, et la pastille resterait verte.
+    test('planEmpty est vrai, et isDegraded aussi', () async {
+      goOnline();
+      final coord =
+          plannedCoordinator(
+            planEmptyState(),
+            permissions: CurrentPermissions()..set(const ['classroom.read']),
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      final report = await coord.pullAll();
+
+      expect(report.planEmpty, isTrue);
+      expect(report.isDegraded, isTrue);
+      expect(report.failed, 0);
+    });
+
+    test('planEmpty vaut aussi pour pullSubset', () async {
+      goOnline();
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final coord = plannedCoordinator(
+        planEmptyState(),
+        permissions: CurrentPermissions()..set(const ['classroom.read']),
+      )..registerHandler(classes);
+
+      final report = await coord.pullSubset(const {'classrooms'});
+
+      expect(classes.calls, 0);
+      expect(report.planEmpty, isTrue);
+      expect(report.isDegraded, isTrue);
+    });
+  });
+
+  // Le mode dégradé — aujourd'hui encore le plus courant, tant que le back
+  // n'est pas déployé partout. Le comportement doit être EXACTEMENT celui
+  // d'avant ce lot : c'est ce que garantissent, en plus de ce groupe, les tests
+  // de « filtrage par permission » restés inchangés (holder absent ⇒ inconnu).
+  group('le plan est l\'autorité de périmètre — régime INCONNU '
+      '(ADR-015 F5)', () {
+    test(
+      'le filtre de permission reprend la main, et forbidden compte',
+      () async {
+        goOnline();
+        final autorise = FakePullHandler(
+          'classrooms',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.classroomRead],
+        );
+        final interdit = FakePullHandler(
+          'finance_payments',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.financePaymentRead],
+        );
+        final coord =
+            plannedCoordinator(
+                planUnknown(),
+                permissions: CurrentPermissions()
+                  ..set(const ['classroom.read']),
+              )
+              ..registerHandler(autorise)
+              ..registerHandler(interdit);
+
+        final report = await coord.pullAll();
+
+        expect(autorise.calls, 1);
+        expect(interdit.calls, 0);
+        expect(report.forbidden, 1);
+        // Le compteur du régime valide ne bouge pas : les deux autorités ne se
+        // superposent jamais.
+        expect(report.outOfPlan, 0);
+        expect(report.isDegraded, isTrue);
+      },
+    );
+
+    // L'aval money-grade est bloqué comme avant : pour l'aval, « l'amont a
+    // échoué » et « l'amont n'a pas été tenté faute de droit » se valent — dans
+    // les deux cas son miroir local est périmé.
+    test('l\'aval money-grade est bloqué comme avant : créances sautées faute '
+        'de droit ⇒ paiements jamais tentés', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financeChargeRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planUnknown(),
+              permissions: CurrentPermissions()
+                ..set(const ['finance.payment.read']),
+            )
+            ..registerHandler(creances)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(creances.calls, 0);
+      expect(report.forbidden, 1);
+      expect(paiements.calls, 0);
+      expect(report.blocked, 1);
+    });
+
+    // Le repli ne dépend pas de la RAISON du repli : route absente, réseau,
+    // corps illisible, sujet étranger — toutes mènent au même comportement. La
+    // cause est une trace de diagnostic, jamais une politique.
+    for (final cause in SyncPlanUnknownCause.values) {
+      test('cause $cause : même repli, même filtre', () async {
+        goOnline();
+        final autorise = FakePullHandler(
+          'classrooms',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.classroomRead],
+        );
+        final interdit = FakePullHandler(
+          'finance_payments',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.financePaymentRead],
+        );
+        final coord =
+            plannedCoordinator(
+                planUnknown(cause),
+                permissions: CurrentPermissions()
+                  ..set(const ['classroom.read']),
+              )
+              ..registerHandler(autorise)
+              ..registerHandler(interdit);
+
+        final report = await coord.pullAll();
+
+        expect(autorise.calls, 1);
+        expect(interdit.calls, 0);
+        expect(report.forbidden, 1);
+        expect(report.outOfPlan, 0);
+        expect(report.planEmpty, isFalse);
+      });
+    }
+
+    // Le porteur absent est le montage d'avant ce lot — celui des ~30 tests qui
+    // précèdent. Il doit valoir « inconnu », sans quoi le lot serait une
+    // régression pour tout appelant non recâblé.
+    test('porteur de plan ABSENT ⇒ régime inconnu, à l\'identique', () async {
+      goOnline();
+      final interdit = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord = PullCoordinator(
+        connectivity: service,
+        permissions: CurrentPermissions()..set(const ['classroom.read']),
+      )..registerHandler(interdit);
+
+      final report = await coord.pullAll();
+
+      expect(interdit.calls, 0);
+      expect(report.forbidden, 1);
+      expect(report.outOfPlan, 0);
+      expect(report.planEmpty, isFalse);
+    });
+  });
+
+  // ── LE SOCLE, DANS LES TROIS RÉGIMES (ADR-015 M) ──────────────────────────
+  //
+  // Sans le référentiel, la porte de navigation ne s'ouvre pas et la seule
+  // sortie est la déconnexion. Un serveur qui l'omettrait de son plan — ou qui
+  // renverrait un plan vide — briquerait le parc. Le socle échappe donc aux
+  // TROIS branches du `switch`, et ce n'est pas « écarter » : F-I9 est sauf.
+  group('le socle échappe au plan dans les trois régimes', () {
+    FakePullHandler socle({bool baseline = true}) => FakePullHandler(
+      'enrollment_referential',
+      const PullOutcome.updated(upserted: 12),
+      requiredPermissions: const [Perm.schoolRead],
+      isBaseline: baseline,
+    );
+
+    test('régime VALIDE : tiré sous un plan qui ne le contient PAS', () async {
+      goOnline();
+      final referentiel = socle();
+      final coord = plannedCoordinator(
+        // Un plan qui omet `school.referential` — le serveur se contredit.
+        planKnown(const [SyncPlanKeys.classroomClassrooms]),
+        permissions: CurrentPermissions()..set(const []),
+      )..registerHandler(referentiel);
+
+      final report = await coord.pullAll();
+
+      expect(referentiel.calls, 1);
+      expect(report.updated, 1);
+      expect(report.outOfPlan, 0);
+      expect(report.forbidden, 0);
+    });
+
+    test('régime VIDE : tiré quand même', () async {
+      goOnline();
+      final referentiel = socle();
+      final coord = plannedCoordinator(
+        planEmptyState(),
+        permissions: CurrentPermissions()..set(const []),
+      )..registerHandler(referentiel);
+
+      final report = await coord.pullAll();
+
+      expect(referentiel.calls, 1);
+      expect(report.updated, 1);
+      // Le plan vide reste signalé — le socle sauvé n'absout pas le contrat
+      // rompu.
+      expect(report.planEmpty, isTrue);
+    });
+
+    test('régime INCONNU : tiré avec des permissions vides', () async {
+      goOnline();
+      final referentiel = socle();
+      final coord = plannedCoordinator(
+        planUnknown(),
+        permissions: CurrentPermissions()..set(const []),
+      )..registerHandler(referentiel);
+
+      final report = await coord.pullAll();
+
+      expect(referentiel.calls, 1);
+      expect(report.updated, 1);
+      expect(report.forbidden, 0);
+    });
+
+    // Contre-épreuve indispensable : sans elle, les trois tests ci-dessus
+    // resteraient verts si le `switch` de périmètre avait disparu ENTIÈREMENT.
+    // Le handler est le même à un seul champ près.
+    test('contre-épreuve : le MÊME handler sans isBaseline est écarté dans les '
+        'trois régimes', () async {
+      goOnline();
+      final permissions = CurrentPermissions()..set(const []);
+
+      final valide = socle(baseline: false);
+      final sousPlanValide = plannedCoordinator(
+        planKnown(const [SyncPlanKeys.classroomClassrooms]),
+        permissions: permissions,
+      )..registerHandler(valide);
+      final rapportValide = await sousPlanValide.pullAll();
+
+      final vide = socle(baseline: false);
+      final sousPlanVide = plannedCoordinator(
+        planEmptyState(),
+        permissions: permissions,
+      )..registerHandler(vide);
+      final rapportVide = await sousPlanVide.pullAll();
+
+      final inconnu = socle(baseline: false);
+      final sousPlanInconnu = plannedCoordinator(
+        planUnknown(),
+        permissions: permissions,
+      )..registerHandler(inconnu);
+      final rapportInconnu = await sousPlanInconnu.pullAll();
+
+      expect(valide.calls, 0);
+      expect(rapportValide.outOfPlan, 1);
+      expect(vide.calls, 0);
+      expect(rapportVide.planEmpty, isTrue);
+      expect(inconnu.calls, 0);
+      expect(rapportInconnu.forbidden, 1);
+    });
+  });
+
+  // Le plan gouverne le chemin des écrans exactement comme le cycle complet :
+  // les deux partagent le même corps de cycle, et la différence entre eux est
+  // le périmètre, jamais la politique.
+  group('le plan gouverne pullSubset aussi (ADR-015 F5 × F6)', () {
+    test('un écran qui demande une ressource HORS PLAN ne la tire pas, et son '
+        'rapport porte outOfPlan', () async {
+      goOnline();
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.classroomClassrooms]),
+              permissions: CurrentPermissions()
+                ..set(const ['classroom.read', 'finance.payment.read']),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(paiements);
+
+      final report = await coord.pullSubset(const {'finance_payments'});
+
+      expect(paiements.calls, 0);
+      expect(report.outOfPlan, 1);
+      expect(report.processed, 0);
+      expect(report.outcomes, isEmpty);
+      // Toujours pas une dégradation : c'est le périmètre du profil.
+      expect(report.isDegraded, isFalse);
+    });
+
+    test('un écran mixte : la ressource au plan descend, l\'autre est '
+        'écartée', () async {
+      goOnline();
+      final classes = FakePullHandler(
+        'classrooms',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.classroomRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnown(const [SyncPlanKeys.classroomClassrooms]),
+              permissions: CurrentPermissions()
+                ..set(const ['classroom.read', 'finance.payment.read']),
+            )
+            ..registerHandler(classes)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullSubset(const {
+        'classrooms',
+        'finance_payments',
+      });
+
+      expect(classes.calls, 1);
+      expect(paiements.calls, 0);
+      expect(report.updated, 1);
+      expect(report.outOfPlan, 1);
+      expect(report.outcomes.keys, ['classrooms']);
+    });
+  });
+
+  // Le plan est résolu APRÈS les deux gardes, et une seule fois par cycle. Le
+  // lire avant imposerait un aller-retour — ou son timeout — à chaque montage
+  // d'écran hors connexion, et un 401 sur `/sync/plan` se lirait comme une
+  // anomalie de déploiement là où il n'y a qu'une session sans jetons.
+  group('résolution du plan : où, et combien de fois', () {
+    test('hors ligne : le plan n\'est même pas lu', () async {
+      goOffline();
+      final repo = FakeSyncPlanRepository(
+        planKnown(const [SyncPlanKeys.classroomClassrooms]),
+      );
+      final coord =
+          plannedCoordinator(
+            planUnknown(),
+            repository: repo,
+            permissions: CurrentPermissions()..set(const ['classroom.read']),
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      final report = await coord.pullAll();
+
+      expect(report.offline, isTrue);
+      expect(repo.refreshCalls, 0);
+      expect(repo.cachedCalls, 0);
+    });
+
+    test('sans jetons utilisables : le plan n\'est pas lu non plus', () async {
+      goOnline();
+      final repo = FakeSyncPlanRepository(
+        planKnown(const [SyncPlanKeys.classroomClassrooms]),
+      );
+      final coord =
+          plannedCoordinator(
+            planUnknown(),
+            repository: repo,
+            credentialsProbe: FakeCredentialsProbe.answering(false),
+            permissions: CurrentPermissions()..set(const ['classroom.read']),
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      final report = await coord.pullAll();
+
+      expect(report.skipped, isTrue);
+      expect(repo.refreshCalls, 0);
+    });
+
+    // Le plan n'a délibérément pas d'ETag : chaque lecture est un corps plein.
+    // Un cycle de dix-neuf ressources doit en faire UNE, et le cycle suivant
+    // aucune tant que rien n'a changé — sans quoi une navigation normale
+    // produirait une dizaine de `GET /sync/plan` par minute.
+    test('un seul appel réseau par cycle, et zéro au cycle suivant', () async {
+      goOnline();
+      final repo = FakeSyncPlanRepository(
+        planKnown(const [
+          SyncPlanKeys.classroomClassrooms,
+          SyncPlanKeys.classroomMembers,
+        ]),
+      );
+      final coord =
+          plannedCoordinator(
+              planUnknown(),
+              repository: repo,
+              permissions: CurrentPermissions()..set(const ['classroom.read']),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classroom_members',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            );
+
+      await coord.pullAll();
+      expect(repo.refreshCalls, 1);
+
+      await coord.pullAll();
+      expect(repo.refreshCalls, 1);
+    });
+
+    // ADR-015 F9 — sans quoi ce lot introduirait une régression : un droit
+    // élargi n'aurait plus d'effet avant le login suivant, alors qu'il est
+    // immédiat aujourd'hui. Le porteur s'abonne aux permissions ; un ensemble
+    // qui CHANGE marque le plan à relire, et le cycle suivant applique le
+    // nouveau périmètre.
+    test('F9 : un changement de permissions en séance fait relire le plan, et '
+        'le nouveau périmètre s\'applique au cycle suivant', () async {
+      goOnline();
+      final permissions = CurrentPermissions()..set(const ['classroom.read']);
+      // Le plan que le serveur rendra à la RELECTURE : il porte les paiements.
+      final repo = FakeSyncPlanRepository(
+        planKnown(const [
+          SyncPlanKeys.classroomClassrooms,
+          SyncPlanKeys.financePayments,
+        ]),
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planUnknown(),
+              repository: repo,
+              permissions: permissions,
+            )
+            ..registerHandler(
+              FakePullHandler(
+                'classrooms',
+                const PullOutcome.updated(),
+                requiredPermissions: const [Perm.classroomRead],
+              ),
+            )
+            ..registerHandler(paiements);
+
+      await coord.pullAll();
+      expect(repo.refreshCalls, 1);
+
+      // Le refresh élargit les droits — sans nouveau login.
+      permissions.set(const ['classroom.read', 'finance.payment.read']);
+
+      await coord.pullAll();
+
+      expect(repo.refreshCalls, 2);
+      expect(paiements.calls, 2);
+    });
+
+    // Le pendant du précédent : un ensemble RÉÉMIS à l'identique (ordre
+    // différent compris) ne relit rien. Sous F5, un plan perpétuellement « à
+    // relire » restreint le pull au lieu de simplement être en retard.
+    test('un ensemble réémis à l\'identique, dans un autre ordre, ne fait pas '
+        'relire le plan', () async {
+      goOnline();
+      final permissions = CurrentPermissions()
+        ..set(const ['classroom.read', 'finance.payment.read']);
+      final repo = FakeSyncPlanRepository(
+        planKnown(const [SyncPlanKeys.classroomClassrooms]),
+      );
+      final coord =
+          plannedCoordinator(
+            planUnknown(),
+            repository: repo,
+            permissions: permissions,
+          )..registerHandler(
+            FakePullHandler(
+              'classrooms',
+              const PullOutcome.updated(),
+              requiredPermissions: const [Perm.classroomRead],
+            ),
+          );
+
+      await coord.pullAll();
+      expect(repo.refreshCalls, 1);
+
+      permissions.set(const ['finance.payment.read', 'classroom.read']);
+      await coord.pullAll();
+
+      expect(repo.refreshCalls, 1);
+    });
   });
 }

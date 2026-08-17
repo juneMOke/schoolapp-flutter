@@ -2,7 +2,10 @@ import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/plan/pull_sequencer.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_holder.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_cycle_guard.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
@@ -41,6 +44,7 @@ class PullCoordinator {
   final PullCompletionBus? _completionBus;
   final CurrentPermissions? _permissions;
   final SessionCredentialsProbe? _credentialsProbe;
+  final SyncPlanHolder? _planHolder;
   final Map<String, PullHandler> _handlers = {};
   final PullCycleGuard _guard = PullCycleGuard();
 
@@ -51,10 +55,12 @@ class PullCoordinator {
     PullCompletionBus? completionBus,
     CurrentPermissions? permissions,
     SessionCredentialsProbe? credentialsProbe,
+    SyncPlanHolder? planHolder,
   }) : _connectivity = connectivity,
        _completionBus = completionBus,
        _permissions = permissions,
-       _credentialsProbe = credentialsProbe;
+       _credentialsProbe = credentialsProbe,
+       _planHolder = planHolder;
 
   /// Enregistre le handler d'une ressource (appelé par la DI des branches).
   void registerHandler(PullHandler handler) {
@@ -122,8 +128,16 @@ class PullCoordinator {
       return const PullRunReport.skipped();
     }
 
+    // Le plan est résolu APRÈS les deux gardes : le lire avant imposerait un
+    // aller-retour réseau — ou son timeout — à chaque montage d'écran hors
+    // connexion, et un 401 sur `/sync/plan` se lirait comme une anomalie de
+    // déploiement là où il n'y a qu'une session sans jetons.
+    final planState =
+        await _planHolder?.current() ??
+        const SyncPlanState.unknown(SyncPlanUnknownCause.absent);
+
     var updated = 0, notModified = 0, failed = 0;
-    var forbidden = 0, blocked = 0;
+    var forbidden = 0, blocked = 0, outOfPlan = 0;
     int? latestServerTimeMs;
     final outcomes = <String, PullResult>{};
 
@@ -143,11 +157,77 @@ class PullCoordinator {
     /// Filtrer localement supprime le 403, donc supprimerait le blocage.
     final unusableResources = <String>{};
 
+    // Deux façons pour un flux d'être **au plan et jamais tiré**, et elles
+    // méritent le même compteur.
+    //
+    // La première est connue : aucun handler enregistré ne porte cette clé.
+    //
+    // La seconde est plus vicieuse — l'analyse a écarté le flux parce que son
+    // `mode` ou son `scope` est inconnu de cet APK. Le contrat prévoit ce cas et
+    // n'exige qu'une chose : l'ignorer « sans erreur, mais jamais sans trace ».
+    // Or la clé disparaît de `plan.streams`, donc `_covers` la rate, donc elle
+    // tombe en `outOfPlan` — qui est délibérément exclu de `isDegraded`. Sans
+    // cette union, le jour où le serveur introduit un mode, le flux concerné
+    // s'arrête **totalement** sur tout le parc, avec une pastille verte et
+    // aucune trace. C'est exactement ce que `rejectedKeys` avait été calculé
+    // pour éviter, et il n'était lu par personne.
+    final plannedNotPulledKeys = switch (planState) {
+      SyncPlanKnown(:final plan, :final rejectedKeys) => {
+        ..._plannedWithoutHandler(plan),
+        ...rejectedKeys,
+      },
+      _ => const <String>{},
+    };
+
     for (final handler in handlers) {
-      if (!_isReadable(handler)) {
-        forbidden++;
-        unusableResources.add(handler.resource);
-        continue;
+      // ── L'AUTORITÉ DE PÉRIMÈTRE (ADR-015 O) ────────────────────────────────
+      //
+      // **Substitution, jamais union.** Le repli local s'applique PARCE QUE le
+      // plan est inconnu, pas en plus de lui. « Tirer si planifié OU lisible
+      // localement » donnerait l'union des deux autorités, et tout le bénéfice
+      // du chantier serait perdu — c'est l'erreur qu'une V1 de ce plan
+      // contenait. Deux `if` consécutifs seraient pires encore : l'INTERSECTION,
+      // où un flux planifié reste écarté par la règle locale.
+      //
+      // Le `switch` sur la sealed rend ces deux formes inexprimables, et son
+      // exhaustivité est le seul garde-fou compilé pour un quatrième état
+      // futur : ne JAMAIS y ajouter de `default:`.
+      //
+      // Le socle échappe aux trois branches. Sans le référentiel, la porte de
+      // navigation ne s'ouvre pas et la seule sortie est la déconnexion : un
+      // serveur qui l'omettrait — ou qui renverrait un plan vide — briquerait
+      // le parc. Laisser passer n'est pas « écarter », F-I9 est sauf.
+      if (!handler.isBaseline) {
+        var skip = false;
+        switch (planState) {
+          // Le plan gouverne SEUL. `requiredPermissions` ne disparaît pas, il
+          // cesse d'être l'autorité : un flux planifié est tiré même si le
+          // compte ne détient pas la permission déclarée en dur, et c'est le
+          // serveur — seule frontière réelle — qui refusera s'il le faut.
+          case SyncPlanKnown(:final plan):
+            if (!_covers(plan, handler)) {
+              outOfPlan++;
+              // ⚠️ N'entre PAS dans `unusableResources`. Un flux hors du plan
+              // est le périmètre décidé par le serveur, pas un amont en panne :
+              // le compter comme inexploitable ferait écarter un flux PLANIFIÉ
+              // par une règle locale, ce que F-I9 interdit frontalement.
+              skip = true;
+            }
+          // Information réelle : rien à tirer. Le contrat promet pourtant qu'un
+          // plan n'est jamais vide — il contient au minimum le socle — donc ce
+          // cas est un serveur qui se contredit, et il est compté (voir
+          // `planEmpty` dans le rapport) plutôt que subi en silence.
+          case SyncPlanEmpty():
+            skip = true;
+          // Mode dégradé : l'ancien filtre reprend la main, à l'identique.
+          case SyncPlanUnknown():
+            if (!_isReadable(handler)) {
+              forbidden++;
+              unusableResources.add(handler.resource);
+              skip = true;
+            }
+        }
+        if (skip) continue;
       }
       if (_isBlockedBy(handler, unusableResources)) {
         blocked++;
@@ -199,9 +279,48 @@ class PullCoordinator {
       failed: failed,
       forbidden: forbidden,
       blocked: blocked,
+      outOfPlan: outOfPlan,
+      plannedNotPulled: plannedNotPulledKeys.length,
+      plannedNotPulledKeys: plannedNotPulledKeys,
+      planEmpty: planState is SyncPlanEmpty,
       outcomes: Map.unmodifiable(outcomes),
       latestServerTimeMs: latestServerTimeMs,
     );
+  }
+
+  /// Ce plan couvre-t-il ce handler ?
+  ///
+  /// Le routage passe par la **clé de plan**, jamais par `clientResource` : ce
+  /// champ est analysé en mode tolérant (absent ou mal typé ⇒ liste vide), donc
+  /// une omission côté serveur mettrait les dix-neuf handlers hors plan — arrêt
+  /// total, plan « valide », zéro erreur.
+  ///
+  /// Un handler que la table d'alias ne connaît pas (`planKeyOf` rend `null`)
+  /// est hors plan : aucune clé ne pourra jamais le désigner. C'est un défaut de
+  /// contrat, pas un périmètre — il est compté à part, sous son nom.
+  bool _covers(SyncPlan plan, PullHandler handler) {
+    final key = planKeyOf(handler.resource);
+    if (key == null) return false;
+    return plan.keys.contains(key);
+  }
+
+  /// Les clés du plan qu'AUCUN handler enregistré ne sait tirer.
+  ///
+  /// Calculé contre le **registre entier**, jamais contre la sélection du
+  /// cycle : un `pullSubset` demande une à cinq ressources sur dix-neuf, et le
+  /// mesurer là déclarerait une quinzaine de flux manquants à chaque montage
+  /// d'écran — donc une pastille dégradée en permanence sur un écran sain.
+  ///
+  /// Un flux au plan qu'aucun handler ne couvre est un **défaut de contrat** :
+  /// une clé mal orthographiée de part et d'autre suffit, et sous ce lot ce
+  /// n'est plus une dégradation, c'est l'arrêt total de ce flux. D'où les clés
+  /// nommément — « un flux manque » n'a jamais permis de trouver lequel.
+  Set<String> _plannedWithoutHandler(SyncPlan plan) {
+    final covered = <String>{
+      for (final resource in _handlers.keys)
+        if (planKeyOf(resource) != null) planKeyOf(resource)!,
+    };
+    return plan.keys.where((k) => !covered.contains(k)).toSet();
   }
 
   /// Vrai si une dépendance **bloquante** de ce handler est inexploitable dans
