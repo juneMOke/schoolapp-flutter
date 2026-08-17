@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/en
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_seed_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/parent_search_dao.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_outbox_handler.dart';
@@ -119,6 +120,18 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<EnrollmentReconciliationDao>(
     () => EnrollmentReconciliationDao(getIt<Database>()),
+  );
+  // ── Ce qu'une ouverture de session décide du vivier de préinscriptions ──
+  // `ref_pre_enrollments` n'a pas de colonne `school_id` : une tablette
+  // réaffectée continuait de proposer les candidats de l'établissement
+  // précédent. La garde efface le vivier ET rembobine le flux — jamais l'un
+  // sans l'autre, cette table étant la seule source d'amorçage d'un brouillon.
+  getIt.registerLazySingleton<PreEnrollmentsSchoolGuard>(
+    () => PreEnrollmentsSchoolGuard(
+      seedDao: getIt<EnrollmentSeedDao>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
   );
   // Recherche de tuteur existant (popin "Rechercher un parent", étape
   // Tuteurs) : lecture seule, DAO dédié (nouvelle responsabilité).

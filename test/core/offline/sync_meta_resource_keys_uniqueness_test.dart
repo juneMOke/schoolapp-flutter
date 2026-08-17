@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
@@ -55,8 +56,15 @@ void main() {
           EnrollmentPullRepositoryImpl.referentialResource,
       'EnrollmentPullRepositoryImpl.cohortResource':
           EnrollmentPullRepositoryImpl.cohortResource,
+      // Préinscriptions : nom du FLUX devant le coordinateur. Son curseur, lui,
+      // vit sous `…@<schoolId>` (preEnrollmentsCursorKey) — `ref_pre_enrollments`
+      // n'ayant pas de colonne `school_id`, une clé plate faisait hériter au
+      // second établissement le curseur du premier.
       'EnrollmentPullRepositoryImpl.preEnrollmentsResource':
           EnrollmentPullRepositoryImpl.preEnrollmentsResource,
+      // Non un curseur : l'école dont le vivier de préinscriptions est sur ce
+      // disque, seule trace qui rende un changement d'école détectable.
+      'kPreEnrollmentsSchoolResource': kPreEnrollmentsSchoolResource,
       'EnrollmentPullRepositoryImpl.deltaResource':
           EnrollmentPullRepositoryImpl.deltaResource,
       'EnrollmentPullRepositoryImpl.snapshotsResource':

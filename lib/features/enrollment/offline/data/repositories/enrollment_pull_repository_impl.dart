@@ -16,6 +16,42 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/l
 import 'package:school_app_flutter/features/enrollment/offline/domain/repositories/enrollment_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
 
+/// Nom de ressource du flux des préinscriptions — identité du `PullHandler`
+/// devant le `PullCoordinator` et le plan de synchro (`kSyncPlanAliases`).
+///
+/// **Ce n'est PAS la clé du curseur.** Le curseur, lui, est scopé par école —
+/// voir [preEnrollmentsCursorKey]. La distinction est la même que pour
+/// l'éditique : le coordinateur nomme un flux, `sync_meta` mémorise où en est
+/// une école dans ce flux.
+const String kEnrollmentPreEnrollmentsResource = 'enrollment_pre_enrollments';
+
+/// Clé `sync_meta` du curseur keyset des préinscriptions, **scopée par école**.
+/// Le séparateur `@` est la convention du dépôt pour une ressource scopée.
+///
+/// Le flux est cadré par l'école du jeton, et `ref_pre_enrollments` n'a aucune
+/// colonne `school_id` : un curseur unique sur une tablette réaffectée faisait
+/// reprendre le second établissement au point où le premier s'était arrêté. Le
+/// serveur répondait « rien de neuf », et les préinscriptions de la nouvelle
+/// école ne descendaient jamais — exactement le défaut que la migration v18 a dû
+/// corriger pour les caches cadrés enseignant (partition par compte).
+///
+/// ⚠️ **Cette clé orpheline la clé héritée non scopée**
+/// (`enrollment_pre_enrollments`, écrite par toutes les versions antérieures) :
+/// la ligne reste dans `sync_meta`, plus jamais lue, et chaque tablette du parc
+/// rebootstrape ce flux au premier cycle qui suit la montée de version. C'est
+/// **voulu** — c'est même le seul comportement correct, puisque rien ne permet
+/// de savoir à quelle école ce curseur hérité appartenait. Le coût est borné
+/// (le vivier des préinscriptions pèse quelques centaines de Ko) et il est payé
+/// une fois.
+///
+/// Aucune purge de migration ne vise cette ancienne clé (les seules suppressions
+/// dans `sync_meta` d'`app_database.dart` visent `academics_*`, `schedule_*` et
+/// `classrooms`) : la ligne héritée survit donc à la montée de version, inerte.
+/// Elle est en revanche balayée par [SyncMetaDao.deleteCursorsOf], dont le
+/// prédicat couvre `<prefix>` autant que `<prefix>@…`.
+String preEnrollmentsCursorKey(String schoolId) =>
+    '$kEnrollmentPreEnrollmentsResource@$schoolId';
+
 /// Pulls Inscription — miroir *lecture* de `openApi.yaml` (section Sync,
 /// ADR-008/009). Trois régimes :
 ///  - **référentiel** ([syncReferential]) : bundle full always-200, curseur =
@@ -50,8 +86,12 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   /// Clés de curseur/fraîcheur dans `sync_meta` (une par ressource).
   static const String referentialResource = 'enrollment_referential';
   static const String cohortResource = 'enrollment_reenrollment_cohort';
-  static const String preEnrollmentsResource = 'enrollment_pre_enrollments';
   static const String deltaResource = 'enrollments';
+
+  /// Nom de ressource des préinscriptions — **pas** la clé de son curseur, qui
+  /// est scopée par école ([preEnrollmentsCursorKey]).
+  static const String preEnrollmentsResource =
+      kEnrollmentPreEnrollmentsResource;
 
   /// Curseur du pull HYDRATANT — distinct du delta maigre (`deltaResource`) :
   /// les deux flux avancent indépendamment (le hydratant crée les lignes, le
@@ -171,14 +211,26 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   }
 
   @override
-  Future<Either<Failure, EnrollmentPullOutcome>> syncPreEnrollments() =>
-      _keysetPull<PreEnrollmentDto, PreEnrollmentsPageDto>(
-        resource: preEnrollmentsResource,
-        request: (cursor) =>
-            api.pullPreEnrollments(requiredAuth, cursor, pageLimit),
-        apply: (items, syncedAt) =>
-            seedDao.upsertPreEnrollments(items, syncedAt: syncedAt),
-      );
+  Future<Either<Failure, EnrollmentPullOutcome>> syncPreEnrollments() async {
+    // École inconnue → NI appel réseau, NI écriture (même forme que la garde
+    // d'hydratation du delta ci-dessous). Se rabattre ici sur la clé plate
+    // rétablirait mot pour mot le défaut que ce scope ferme : un curseur qu'une
+    // AUTRE école héritera. Et `ref_pre_enrollments` n'ayant pas de colonne
+    // `school_id`, des lignes descendues sans école connue seraient
+    // inattribuables — donc ni distinguables, ni purgeables par le changement
+    // d'école. Mieux vaut un vivier vide qu'un vivier mélangé.
+    final schoolId = currentUser.schoolId;
+    if (schoolId == null || schoolId.isEmpty) {
+      return Right(EnrollmentPullOutcome.notModifiedAt(now(), null));
+    }
+    return _keysetPull<PreEnrollmentDto, PreEnrollmentsPageDto>(
+      cursorKey: preEnrollmentsCursorKey(schoolId),
+      request: (cursor) =>
+          api.pullPreEnrollments(requiredAuth, cursor, pageLimit),
+      apply: (items, syncedAt) =>
+          seedDao.upsertPreEnrollments(items, syncedAt: syncedAt),
+    );
+  }
 
   @override
   Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentDelta() async {
@@ -230,7 +282,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       return Right(EnrollmentPullOutcome.notModifiedAt(now(), null));
     }
     return _keysetPull<EnrollmentDeltaDto, EnrollmentDeltaPageDto>(
-      resource: deltaResource,
+      cursorKey: deltaResource,
       request: (cursor) =>
           api.pullEnrollmentDelta(requiredAuth, cursor, null, pageLimit),
       apply: (items, syncedAt) =>
@@ -255,7 +307,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   @override
   Future<Either<Failure, EnrollmentPullOutcome>> syncEnrollmentSnapshots() =>
       _keysetPull<EnrollmentAggregateSnapshotDto, EnrollmentSnapshotPageDto>(
-        resource: snapshotsResource,
+        cursorKey: snapshotsResource,
         request: (cursor) =>
             api.pullEnrollmentSnapshots(requiredAuth, cursor, null, pageLimit),
         apply: (items, syncedAt) => reconciliationDao.upsertEnrollmentSnapshots(
@@ -270,15 +322,19 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
   /// tant que `hasMore` (reprise en cas d'interruption), puis `nextWatermark` en
   /// fin de cycle (Δ appliqué). Le 304 (rien de neuf) arrive en [DioException] :
   /// fraîcheur bumpée, curseur conservé. Ne lève pas.
+  ///
+  /// [cursorKey] est une clé `sync_meta`, **pas** un nom de ressource de
+  /// coordinateur : les préinscriptions y passent une clé scopée par école
+  /// ([preEnrollmentsCursorKey]) alors que leur handler garde le nom plat.
   Future<Either<Failure, EnrollmentPullOutcome>>
   _keysetPull<I, P extends KeysetPageDto<I>>({
-    required String resource,
+    required String cursorKey,
     required Future<HttpResponse<P>> Function(String? cursor) request,
     required Future<int> Function(List<I> items, int syncedAt) apply,
   }) async {
     final syncedAt = now();
     try {
-      var cursor = await syncMetaDao.getCursor(resource); // null = bootstrap
+      var cursor = await syncMetaDao.getCursor(cursorKey); // null = bootstrap
       var upserted = 0;
       String? lastServerTime;
       while (true) {
@@ -295,7 +351,7 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
         final nextToken = env.cursorToPersist;
         if (nextToken != null) cursor = nextToken;
         await syncMetaDao.setCursor(
-          resource,
+          cursorKey,
           cursor: cursor,
           syncedAt: syncedAt,
         );
@@ -311,9 +367,9 @@ class EnrollmentPullRepositoryImpl implements EnrollmentPullRepository {
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 304) {
-        final previous = await syncMetaDao.getCursor(resource);
+        final previous = await syncMetaDao.getCursor(cursorKey);
         await syncMetaDao.setCursor(
-          resource,
+          cursorKey,
           cursor: previous,
           syncedAt: syncedAt,
         );

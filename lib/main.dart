@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/payment
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
+import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
@@ -107,6 +108,28 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  /// Ce qu'une ouverture de session décide du vivier de préinscriptions.
+  ///
+  /// `ref_pre_enrollments` ne porte pas de colonne `school_id` : sur une
+  /// tablette réaffectée, la recherche PRE continuait de proposer les candidats
+  /// de l'établissement précédent. La garde efface le vivier ET rembobine le
+  /// flux — cette table étant, depuis la bascule dure du seed vers le local, la
+  /// seule source d'amorçage d'un brouillon, une purge sans rembobinage rendrait
+  /// ses lignes définitivement inatteignables.
+  ///
+  /// Déclenché AVANT le cycle de pull ci-dessous : la garde ne fait que lire
+  /// `sync_meta` et, le cas échéant, vider une table, quand le pull attend le
+  /// réseau. L'ordre inverse ne serait pas faux pour autant — la purge
+  /// rembobinant tout le flux, une page arrivée trop tôt est effacée avec son
+  /// curseur, et redescend intégralement au cycle suivant.
+  Future<void> _guardPreEnrollmentsSchool() async {
+    try {
+      await getIt<PreEnrollmentsSchoolGuard>().onSessionOpened();
+    } catch (_) {
+      // Base indisponible : sans conséquence sur la session.
+    }
+  }
+
   @override
   void dispose() {
     _academicYearContextBloc.close();
@@ -151,6 +174,11 @@ class _MyAppState extends State<MyApp> {
                 _academicYearContextBloc.add(
                   const AcademicYearContextRequested(),
                 );
+                // AVANT le cycle : une école qui a changé efface le vivier de
+                // préinscriptions et rembobine son flux, faute de quoi le
+                // nouveau guichet chercherait dans les candidats de l'ancien
+                // (`ref_pre_enrollments` n'a pas de colonne `school_id`).
+                unawaited(_guardPreEnrollmentsSchool());
                 // Jetons frais ou repli offline : dans les deux cas, pousse
                 // l'outbox en attente et recalcule la pastille de synchro
                 // (D-05, réconciliation silencieuse au retour réseau si
