@@ -106,6 +106,13 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
         },
         onSearchCommand:
             EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
+        // Read-your-writes : au retour du détail (brouillon finalisé, dossier
+        // abandonné ou simple consultation), on re-lit la base locale — sans
+        // quoi la ligne qu'on vient de finaliser resterait affichée avec son
+        // ancien badge « Brouillon ».
+        onDetailReturned: () => context.read<EnrollmentLocalListBloc>().add(
+          const LocalListRefreshRequested(),
+        ),
         resultsSummaryBuilder: (context, state, screenCtx) =>
             EnrollmentResultsBar(
               count: state.summariesTotalElements,

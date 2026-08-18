@@ -337,6 +337,103 @@ void main() {
     verifyNever(() => offlineBloc.add(any()));
   });
 
+  testWidgets(
+    'wizard POUSSÉ depuis le listing → succès → dépile vers le listing '
+    '(un goNamed y serait inerte : liste figée sur le badge « Brouillon »)',
+    (tester) async {
+      // Reprise d'un brouillon : le listing pousse le wizard (`push`), donc
+      // l'accueil reste sous la pile. Le retour doit dépiler pour que le
+      // listing se re-lise (read-your-writes), pas rediriger dans le vide.
+      late BuildContext wizardContext;
+      var listingRefreshed = false;
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            name: AppRoutesNames.home,
+            builder: (context, state) => Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  // Modèle fidèle du listing : il POUSSE le wizard et
+                  // rafraîchit sa liste au retour (`onDetailReturned`).
+                  onPressed: () => context
+                      .push('/enrollments/detail/enr-1')
+                      .then((_) => listingRefreshed = true),
+                  child: const Text('LISTING'),
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/enrollments/detail/enr-1',
+            builder: (context, state) =>
+                BlocProvider<EnrollmentOfflineBloc>.value(
+                  value: offlineBloc,
+                  child: Builder(
+                    builder: (context) {
+                      wizardContext = context;
+                      return const Scaffold(body: Text('WIZARD'));
+                    },
+                  ),
+                ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        BlocProvider<SyncStatusCubit>.value(
+          value: syncCubit,
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('fr'),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('LISTING'));
+      await tester.pumpAndSettle();
+      expect(find.text('WIZARD'), findsOneWidget);
+
+      final handler = SummaryStepHandler();
+      final pending = handler.submit(
+        buildSubmitContext(
+          wizardContext,
+          const EnrollmentDetailIntent.newFirstRegistration().withEnrollmentId(
+            'enr-1',
+          ),
+        ),
+      );
+      final result = await submitThroughDialog(
+        tester,
+        pending,
+        tapLabel: 'Valider l\'inscription',
+        terminalState: const EnrollmentDraftFinalizedPendingSync('enr-1'),
+        resultActionLabel: 'Continuer',
+      );
+      await tester.pumpAndSettle();
+
+      expect(result.status, StepSubmitStatus.completed);
+      expect(find.text('WIZARD'), findsNothing);
+      expect(find.text('LISTING'), findsOneWidget);
+      // Le point qui distingue le dépilage d'un `goNamed` inerte : seul le
+      // premier rend la main au listing, qui re-lit alors la base locale.
+      expect(
+        listingRefreshed,
+        isTrue,
+        reason:
+            'le listing n\'a jamais repris la main → il reste figé sur l\'état '
+            'd\'avant la finalisation (dossier encore badgé « Brouillon »)',
+      );
+    },
+  );
+
   testWidgets('consultation lecture seule (dossier LOCAL non synchronisé) → '
       'retour/redirect, JAMAIS de finalisation', (tester) async {
     // Garde read-only : un dossier ouvert en consultation

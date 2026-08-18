@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -632,13 +631,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   }
 
   void _leaveJourney() {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    // Wizard ouvert via `go` (pile déclarative remplacée) : retour au listing
-    // Première inscription — même atterrissage que le chemin de succès.
-    EnrollmentNavigationHelper.redirectToFirstRegistrationFromHome(context);
+    // Dépile si le wizard a été ouvert par `push` (le listing est dessous),
+    // sinon — ouvert via `go`, pile déclarative remplacée — retour au listing
+    // Première inscription : même atterrissage que le chemin de succès.
+    EnrollmentNavigationHelper.leaveWizardToListing(context);
   }
 
   /// Enveloppe le flux brouillon dans un [PopScope] : le retour SYSTÈME
