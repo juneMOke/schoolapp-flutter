@@ -2280,6 +2280,18 @@
       }
     }
   },
+  "syncRowSynced": "Synchronisé avec le serveur",
+  "@syncRowSynced": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (coche verte) : l'écriture a été acquittée par le serveur."
+  },
+  "syncRowPending": "En attente de synchronisation",
+  "@syncRowPending": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (sablier orangé) : l'écriture est dans la file d'envoi et repartira toute seule."
+  },
+  "syncRowError": "Refusée par le serveur — ne repartira pas d'elle-même",
+  "@syncRowError": {
+    "description": "Appui long sur le picto de synchro d'une ligne de listing (triangle rouge) : rejet définitif du serveur, aucune nouvelle tentative automatique."
+  },
   "syncErrorsTitle": "Écritures en échec",
   "syncErrorsSubtitle": "Ces enregistrements ont été refusés par le serveur. Ils ne repartiront pas d'eux-mêmes.",
   "syncErrorsRetry": "Réessayer",

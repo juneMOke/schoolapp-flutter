@@ -4584,6 +4584,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get syncRowSynced => 'Synchronisé avec le serveur';
+
+  @override
+  String get syncRowPending => 'En attente de synchronisation';
+
+  @override
+  String get syncRowError =>
+      'Refusée par le serveur — ne repartira pas d\'elle-même';
+
+  @override
   String get syncErrorsTitle => 'Écritures en échec';
 
   @override

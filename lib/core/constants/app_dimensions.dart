@@ -191,6 +191,11 @@ class AppDimensions {
   static const chipPaddingV = 4.0;
   static const chipIconSize = 12.0;
 
+  /// Picto d'état de synchro d'une ligne de listing (SyncStateIcon) : assez
+  /// grand pour rester lisible sans libellé, assez discret pour ne pas
+  /// concurrencer la pastille de statut métier voisine.
+  static const syncStateIconSize = 16.0;
+
   // Finance stats dashboard tokens
   static const financeStatsHeaderTitleFontSize = 20.0;
   static const financeStatsFeeTypeProgressHeight = 8.0;

@@ -2323,6 +2323,9 @@
       }
     }
   },
+  "syncRowSynced": "Synced with the server",
+  "syncRowPending": "Waiting to be synced",
+  "syncRowError": "Rejected by the server — will not retry on its own",
   "syncErrorsTitle": "Failed writes",
   "syncErrorsSubtitle": "These records were rejected by the server. They will not be sent again on their own.",
   "syncErrorsRetry": "Retry",

@@ -4539,6 +4539,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get syncRowSynced => 'Synced with the server';
+
+  @override
+  String get syncRowPending => 'Waiting to be synced';
+
+  @override
+  String get syncRowError =>
+      'Rejected by the server — will not retry on its own';
+
+  @override
   String get syncErrorsTitle => 'Failed writes';
 
   @override

@@ -7698,6 +7698,24 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{0 days ago} =1{1 day ago} other{{count} days ago}}'**
   String syncLastSyncDaysAgo(int count);
 
+  /// No description provided for @syncRowSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced with the server'**
+  String get syncRowSynced;
+
+  /// No description provided for @syncRowPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be synced'**
+  String get syncRowPending;
+
+  /// No description provided for @syncRowError.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the server — will not retry on its own'**
+  String get syncRowError;
+
   /// No description provided for @syncErrorsTitle.
   ///
   /// In en, this message translates to:
