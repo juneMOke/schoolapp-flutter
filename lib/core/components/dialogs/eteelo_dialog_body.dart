@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 
 /// Corps d'une modale dont l'en-tête et le pied restent **ancrés** tant que la
 /// hauteur offerte le permet, et rejoignent un **défilement unique** en dessous.
@@ -103,6 +104,42 @@ class _EteeloDialogBodyState extends State<EteeloDialogBody> {
   final GlobalKey _bodyKey = GlobalKey();
   final GlobalKey _footerKey = GlobalKey();
 
+  /// Dernière hauteur offerte, pour reconnaître le rétrécissement dû au
+  /// clavier.
+  double? _lastMaxHeight;
+
+  /// Ramène le champ qui a le focus dans la fenêtre visible quand la hauteur
+  /// offerte diminue.
+  ///
+  /// Le défilement automatique de Flutter se joue au moment du focus — donc
+  /// AVANT que le clavier ne soit monté, sur une géométrie qui n'existe déjà
+  /// plus. Ensuite, plus rien ne bouge : la modale rétrécit sous le champ,
+  /// qui sort de la fenêtre sans que le focus soit perdu. L'utilisateur voit
+  /// le clavier recouvrir la modale et tape à l'aveugle (mesuré sur téléphone
+  /// en paysage : modale confinée à 24..148 dp, champ focalisé à 232 dp).
+  void _keepFocusedFieldVisible(double maxHeight) {
+    final previous = _lastMaxHeight;
+    _lastMaxHeight = maxHeight;
+    if (previous == null || maxHeight >= previous) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final focused = FocusManager.instance.primaryFocus?.context;
+      if (focused == null || !focused.mounted) return;
+      // Un focus vivant AILLEURS (une autre modale, la page dessous) ne doit
+      // pas faire défiler celle-ci.
+      if (focused.findAncestorStateOfType<_EteeloDialogBodyState>() != this) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        focused,
+        alignment: 0.5,
+        duration: AppMotion.fast,
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final header = KeyedSubtree(key: _headerKey, child: widget.header);
@@ -125,6 +162,10 @@ class _EteeloDialogBodyState extends State<EteeloDialogBody> {
         final ancre =
             constraints.hasBoundedHeight &&
             constraints.maxHeight >= widget.minPinnedHeight;
+
+        if (constraints.hasBoundedHeight) {
+          _keepFocusedFieldVisible(constraints.maxHeight);
+        }
 
         if (!ancre) {
           // Hauteur non bornée ou trop courte : un défilement unique porte

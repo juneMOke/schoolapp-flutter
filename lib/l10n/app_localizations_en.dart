@@ -1760,11 +1760,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSearchAction => 'Search for a guardian';
 
   @override
-  String get guardianSearchDialogTitle => 'Search for an existing guardian';
+  String get guardianSearchDialogTitle => 'Search for an existing parent';
 
   @override
-  String get guardianSearchHint =>
-      'Enter at least one criterion (name or phone number)';
+  String get guardianSearchDialogEyebrow => 'Guardians';
+
+  @override
+  String get guardianSearchModeSemantics => 'Search mode';
+
+  @override
+  String get guardianSearchModeByPhone => 'By number';
+
+  @override
+  String get guardianSearchModeByIdentity => 'By identity';
+
+  @override
+  String get guardianSearchPhoneHint =>
+      'The number is enough, even partial: \"8169\" brings up every matching guardian.';
+
+  @override
+  String get guardianSearchIdentityHint =>
+      'Last name and first name are required. The middle name narrows the search when known.';
+
+  @override
+  String get guardianSearchResultsPlaceholder =>
+      'Matching guardians will appear here.';
 
   @override
   String get guardianSearchEmptyTitle => 'No guardian found';

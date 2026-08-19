@@ -6,4 +6,6 @@ export 'guardian_info_step_body.dart';
 export 'parent_item.dart';
 export 'parent_item_models.dart';
 export 'parent_search_dialog.dart';
+export 'parent_search_form.dart';
+export 'parent_search_results_list.dart';
 export 'relationship_chip.dart';

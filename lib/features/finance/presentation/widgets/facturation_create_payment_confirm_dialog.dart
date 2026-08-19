@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -208,7 +209,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                   resultLabel: l10n.facturationCollectStepResult,
                   onClose: _closeAction(),
                 ),
-                const FinanceModalGoldDivider(),
+                const EteeloDialogGoldDivider(),
                 Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(AppDimensions.spacingM),

@@ -1771,8 +1771,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guardianSearchDialogTitle => 'Rechercher un parent existant';
 
   @override
-  String get guardianSearchHint =>
-      'Renseignez au moins un critère (nom ou téléphone)';
+  String get guardianSearchDialogEyebrow => 'Tuteurs';
+
+  @override
+  String get guardianSearchModeSemantics => 'Mode de recherche';
+
+  @override
+  String get guardianSearchModeByPhone => 'Par numéro';
+
+  @override
+  String get guardianSearchModeByIdentity => 'Par identité';
+
+  @override
+  String get guardianSearchPhoneHint =>
+      'Le numéro suffit, même partiel : « 8169 » remonte tous les tuteurs concernés.';
+
+  @override
+  String get guardianSearchIdentityHint =>
+      'Nom et prénom sont requis. Le postnom affine la recherche s\'il est connu.';
+
+  @override
+  String get guardianSearchResultsPlaceholder =>
+      'Les tuteurs correspondants s\'afficheront ici.';
 
   @override
   String get guardianSearchEmptyTitle => 'Aucun parent trouvé';

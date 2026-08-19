@@ -2939,14 +2939,50 @@ abstract class AppLocalizations {
   /// No description provided for @guardianSearchDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Search for an existing guardian'**
+  /// **'Search for an existing parent'**
   String get guardianSearchDialogTitle;
 
-  /// No description provided for @guardianSearchHint.
+  /// No description provided for @guardianSearchDialogEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Enter at least one criterion (name or phone number)'**
-  String get guardianSearchHint;
+  /// **'Guardians'**
+  String get guardianSearchDialogEyebrow;
+
+  /// No description provided for @guardianSearchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get guardianSearchModeSemantics;
+
+  /// No description provided for @guardianSearchModeByPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'By number'**
+  String get guardianSearchModeByPhone;
+
+  /// No description provided for @guardianSearchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By identity'**
+  String get guardianSearchModeByIdentity;
+
+  /// No description provided for @guardianSearchPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The number is enough, even partial: \"8169\" brings up every matching guardian.'**
+  String get guardianSearchPhoneHint;
+
+  /// No description provided for @guardianSearchIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name and first name are required. The middle name narrows the search when known.'**
+  String get guardianSearchIdentityHint;
+
+  /// No description provided for @guardianSearchResultsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching guardians will appear here.'**
+  String get guardianSearchResultsPlaceholder;
 
   /// No description provided for @guardianSearchEmptyTitle.
   ///

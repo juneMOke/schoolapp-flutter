@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
@@ -16,7 +17,6 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/pa
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charge_allocation_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
@@ -330,12 +330,12 @@ class _FacturationCreatePaymentDialogViewState
                 // clavier ouvert, il ne reste qu'une douzaine de dp — elles
                 // rejoignent le défilement au lieu de déborder.
                 minPinnedHeight: 300,
-                header: FinanceModalDarkHeader(
+                header: EteeloDialogDarkHeader(
                   eyebrow: l10n.facturationDetailCollectPaymentAction,
                   title: _studentFullName(l10n),
                   onClose: () => Navigator.of(context).maybePop(),
                 ),
-                headerDividers: const [FinanceModalGoldDivider()],
+                headerDividers: const [EteeloDialogGoldDivider()],
                 bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
                 body: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

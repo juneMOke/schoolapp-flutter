@@ -93,6 +93,37 @@ void main() {
     matching: find.byType(TextField),
   );
 
+  /// La popin ouvre sur la recherche par numéro : les champs d'identité
+  /// n'apparaissent qu'après la bascule, et il faut nom ET prénom pour armer
+  /// la recherche.
+  Future<void> chercherParIdentite(
+    WidgetTester tester,
+    Finder dialogFinder, {
+    required String nom,
+    required String prenom,
+  }) async {
+    await tester.tap(
+      find.descendant(of: dialogFinder, matching: find.text('Par identité')),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(textFieldLabeled(dialogFinder, 'Nom'), nom);
+    await tester.enterText(textFieldLabeled(dialogFinder, 'Prénom'), prenom);
+    await tester.pump();
+    await tester.tap(
+      find.descendant(of: dialogFinder, matching: find.text('Rechercher')),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  /// Les critères défilent avec les résultats : sur une petite surface, le
+  /// premier résultat naît sous la fenêtre visible. On le rejoint comme
+  /// l'utilisateur, en défilant.
+  Future<void> choisirResultat(WidgetTester tester, Finder resultat) async {
+    await tester.ensureVisible(resultat);
+    await tester.pumpAndSettle();
+    await tester.tap(resultat);
+  }
+
   Future<void> pumpGuardianStep(
     WidgetTester tester, {
     List<ParentSummary> parents = const [_existingParent],
@@ -148,12 +179,12 @@ void main() {
       // de contenu du formulaire de recherche est donc scopé au Dialog.
       final dialogFinder = find.byType(Dialog);
 
-      await tester.enterText(textFieldLabeled(dialogFinder, 'Nom'), 'Moke');
-      await tester.pump();
-      await tester.tap(
-        find.descendant(of: dialogFinder, matching: find.text('Rechercher')),
+      await chercherParIdentite(
+        tester,
+        dialogFinder,
+        nom: 'Moke',
+        prenom: 'Sarah',
       );
-      await tester.pumpAndSettle();
 
       expect(
         find.descendant(
@@ -162,7 +193,8 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.tap(
+      await choisirResultat(
+        tester,
         find.descendant(
           of: dialogFinder,
           matching: find.text('Sarah Junior Moke'),
@@ -231,14 +263,15 @@ void main() {
 
       final dialogFinder = find.byType(Dialog);
 
-      await tester.enterText(textFieldLabeled(dialogFinder, 'Nom'), 'Dupont');
-      await tester.pump();
-      await tester.tap(
-        find.descendant(of: dialogFinder, matching: find.text('Rechercher')),
+      await chercherParIdentite(
+        tester,
+        dialogFinder,
+        nom: 'Dupont',
+        prenom: 'Sarah',
       );
-      await tester.pumpAndSettle();
 
-      await tester.tap(
+      await choisirResultat(
+        tester,
         find.descendant(of: dialogFinder, matching: find.text('Jean Dupont')),
       );
       await tester.pumpAndSettle();
@@ -278,13 +311,14 @@ void main() {
       await tester.pumpAndSettle();
 
       final dialogFinder = find.byType(Dialog);
-      await tester.enterText(textFieldLabeled(dialogFinder, 'Nom'), 'Moke');
-      await tester.pump();
-      await tester.tap(
-        find.descendant(of: dialogFinder, matching: find.text('Rechercher')),
+      await chercherParIdentite(
+        tester,
+        dialogFinder,
+        nom: 'Moke',
+        prenom: 'Sarah',
       );
-      await tester.pumpAndSettle();
-      await tester.tap(
+      await choisirResultat(
+        tester,
         find.descendant(
           of: dialogFinder,
           matching: find.text('Sarah Junior Moke'),
@@ -333,13 +367,14 @@ void main() {
       await tester.pumpAndSettle();
 
       final dialogFinder = find.byType(Dialog);
-      await tester.enterText(textFieldLabeled(dialogFinder, 'Nom'), 'Moke');
-      await tester.pump();
-      await tester.tap(
-        find.descendant(of: dialogFinder, matching: find.text('Rechercher')),
+      await chercherParIdentite(
+        tester,
+        dialogFinder,
+        nom: 'Moke',
+        prenom: 'Sarah',
       );
-      await tester.pumpAndSettle();
-      await tester.tap(
+      await choisirResultat(
+        tester,
         find.descendant(
           of: dialogFinder,
           matching: find.text('Sarah Junior Moke'),

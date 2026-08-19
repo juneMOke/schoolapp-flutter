@@ -102,9 +102,15 @@ void main() {
     addTearDown(tester.view.resetViewInsets);
   }
 
+  /// Le formulaire ouvre sur la recherche par numéro : les champs d'identité
+  /// n'existent qu'une fois la bascule faite.
+  Future<void> basculerSurIdentite(WidgetTester tester) async {
+    await tester.tap(find.text('Par identité'));
+    await tester.pumpAndSettle();
+  }
+
   /// Le champ « Prénom », désigné par son libellé et non par son rang : un
-  /// cinquième critère ajouté au formulaire ne doit pas déplacer ce test en
-  /// silence.
+  /// critère ajouté au formulaire ne doit pas déplacer ce test en silence.
   Finder champPrenom() => find.descendant(
     of: find.byWidgetPredicate(
       (widget) => widget is EteeloTextInput && widget.label == 'Prénom',
@@ -112,20 +118,13 @@ void main() {
     matching: find.byType(TextField),
   );
 
-  Finder dansLeDefilement(Finder champ) =>
-      find.ancestor(of: champ, matching: find.byType(SingleChildScrollView));
-
-  testWidgets('le clavier qui s\'ouvre DÉPLACE les critères au lieu de les '
-      'détruire : le champ garde son focus', (tester) async {
+  testWidgets('le clavier qui s\'ouvre ne détruit pas le formulaire : le '
+      'champ garde son focus', (tester) async {
     await openDialogAt(tester, const Size(800, 600));
+    await basculerSurIdentite(tester);
 
     final prenom = champPrenom();
     expect(prenom, findsOneWidget);
-    expect(
-      dansLeDefilement(prenom),
-      findsNothing,
-      reason: 'au départ, les critères sont figés hors du défilement',
-    );
 
     await tester.tap(prenom);
     await tester.pump();
@@ -139,89 +138,92 @@ void main() {
     // `Dialog` anime son `insetPadding` : la bascule tombe pendant l'animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    // 1. La bascule a bien eu lieu. Sans cette assertion le test serait VIDE :
-    //    un seuil mal simulé le laisserait vert sans que rien ne bouge.
-    expect(
-      dansLeDefilement(prenom),
-      findsOneWidget,
-      reason: 'sous le seuil, les critères doivent rejoindre le défilement',
-    );
-
-    // 2. Et le formulaire a été DÉPLACÉ, pas reconstruit — c'est tout l'objet
-    //    de la clé. Un nœud neuf ici, c'est un champ qui a perdu son focus au
-    //    moment précis où l'utilisateur allait taper dedans.
+    // Un nœud neuf ici, c'est un champ qui a perdu son focus au moment précis
+    // où l'utilisateur allait taper dedans — le clavier se refermerait, la
+    // hauteur reviendrait, et la bascule repartirait en boucle.
     expect(
       tester.widget<TextField>(prenom).focusNode,
       same(noeud),
-      reason: 'le champ ne doit pas être reconstruit par la bascule',
+      reason: 'le champ ne doit pas être reconstruit',
     );
     expect(
       tester.binding.focusManager.primaryFocus,
       same(noeud),
-      reason:
-          'focus perdu = clavier refermé = bascule en sens inverse, en '
-          'boucle : le champ devient intapable',
+      reason: 'focus perdu = clavier refermé = champ intapable',
     );
   });
 
-  testWidgets('et au retour : le clavier se referme, les critères reprennent '
-      'leur place figée, toujours sans destruction', (tester) async {
-    // Le sens inverse emprunte un autre chemin de réconciliation — l'élément
-    // porteur de la clé est encore ACTIF quand sa nouvelle position l'inflate,
-    // là où l'aller le trouvait déjà désactivé. Les deux méritent leur test.
-    await openDialogAt(tester, const Size(800, 600));
+  testWidgets('le champ focalisé reste VISIBLE quand le clavier réduit la '
+      'modale', (tester) async {
+    // La panne que ce test ferme : le focus vivait, mais le champ sortait de
+    // la fenêtre de défilement — l'utilisateur voyait le clavier recouvrir la
+    // modale et tapait à l'aveugle.
+    await openDialogAt(tester, const Size(850, 392));
 
-    final prenom = champPrenom();
-    await tester.tap(prenom);
+    final champ = find.byType(TextField).first;
+    await tester.tap(champ);
     await tester.pump();
-    final noeud = tester.widget<TextField>(prenom).focusNode;
 
-    ouvrirLeClavier(tester);
+    ouvrirLeClavier(tester, dp: 220);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(dansLeDefilement(prenom), findsOneWidget);
+    await tester.pumpAndSettle();
 
-    tester.view.resetViewInsets();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
+    final rect = tester.getRect(champ);
+    final modale = tester.getRect(
+      find
+          .descendant(
+            of: find.byType(Dialog),
+            matching: find.byType(ConstrainedBox),
+          )
+          .first,
+    );
     expect(
-      dansLeDefilement(prenom),
-      findsNothing,
-      reason: 'la hauteur revenue, les critères reprennent leur place figée',
+      rect.top,
+      greaterThanOrEqualTo(modale.top),
+      reason: 'le champ focalisé doit être ramené dans la modale',
     );
-    expect(tester.widget<TextField>(prenom).focusNode, same(noeud));
-    expect(tester.binding.focusManager.primaryFocus, same(noeud));
+    expect(
+      rect.bottom,
+      lessThanOrEqualTo(modale.bottom),
+      reason: 'un champ sous le clavier, c\'est une saisie à l\'aveugle',
+    );
   });
 
-  testWidgets('hauteur confortable : les critères restent figés en tête', (
-    tester,
-  ) async {
+  testWidgets('l\'en-tête reste ancré hors du défilement tant que la place '
+      'le permet', (tester) async {
     await openDialogAt(tester, const Size(961.5, 900));
 
     expect(tester.takeException(), isNull);
-    // Disposition d'origine : formulaire hors du défilement des résultats.
     final scrollable = find.descendant(
       of: find.byType(Dialog),
       matching: find.byType(SingleChildScrollView),
     );
     expect(scrollable, findsOneWidget);
     expect(
-      find.descendant(of: scrollable, matching: find.text('Rechercher')),
+      find.descendant(
+        of: scrollable,
+        matching: find.text('Rechercher un parent existant'),
+      ),
       findsNothing,
-      reason: 'le bouton Rechercher appartient au bloc figé, pas au défilement',
+      reason: 'le titre et la croix ne doivent jamais fuir vers le haut',
+    );
+    // Les critères, eux, défilent AVEC les résultats depuis que le formulaire
+    // porte sa bascule de mode et son aide : figé, il ne laisserait plus de
+    // place aux résultats.
+    expect(
+      find.descendant(of: scrollable, matching: find.text('Rechercher')),
+      findsOneWidget,
     );
   });
+
   // ───────────────────────────────────────────────────────────────────────────
-  // Débordements mesurés AVANT la reprise de la bascule, et que ces tailles
-  // gardent fermés :
-  //   • 411×731 et 360×640, SANS clavier  → 91 dp. Le `Wrap` des quatre
-  //     critères passe à une colonne sous 460 dp de large : figé, le formulaire
-  //     est plus haut que la modale. La hauteur seule ne pouvait pas l'éviter —
-  //     c'est la largeur qui commande la hauteur du formulaire.
-  //   • 640×360 et 731×411, clavier ouvert → 85 et 34 dp. Il ne restait que
-  //     ~63 dp à la modale : l'en-tête débordait à lui tout seul, quelle que
-  //     soit la place faite aux critères.
+  // Débordements mesurés du temps où les critères restaient figés au-dessus
+  // des résultats, et que ces tailles gardent fermés :
+  //   • 411×731 et 360×640, SANS clavier  → 91 dp : sous 460 dp de large, le
+  //     `Wrap` des critères passe à une colonne et le bloc figé devient plus
+  //     haut que la modale.
+  //   • 640×360 et 731×411, clavier ouvert → 85 et 34 dp : il ne restait que
+  //     ~63 dp à la modale, l'en-tête débordait à lui tout seul.
   // ───────────────────────────────────────────────────────────────────────────
   for (final surface in const [
     Size(360, 640), // téléphone portrait étroit

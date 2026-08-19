@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -153,7 +154,7 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FinanceModalDarkHeader(
+            EteeloDialogDarkHeader(
               eyebrow: l10n.facturationChargeDetailHeroTitle,
               title: intent.feeCode.localizedFeeLabel(l10n),
               trailing: _StatusPill(
@@ -162,7 +163,7 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
               ),
               onClose: () => _close(context),
             ),
-            const FinanceModalGoldDivider(),
+            const EteeloDialogGoldDivider(),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDimensions.spacingM),
