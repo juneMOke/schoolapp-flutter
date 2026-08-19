@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
-import 'package:school_app_flutter/core/components/status/sync_resume_observer.dart';
+import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
@@ -192,6 +192,9 @@ class _MyAppState extends State<MyApp> {
                 // `unawaited` : la porte de navigation ne dépend que du
                 // contexte académique demandé juste au-dessus, et rien de
                 // réseau ne doit la retarder.
+                // Arme aussi le battement de la file (lot 2) : la cadence est
+                // portée par `syncOnLogin` lui-même, pour qu'il n'y ait qu'un
+                // seul fil de session à ne pas oublier ici.
                 unawaited(_syncStatusCubit.syncOnLogin());
                 // Entretien du cache de restitution éditique (ADR-012 D-7) :
                 // réclame les fichiers chiffrés qu'aucune ligne d'index ne
@@ -218,6 +221,9 @@ class _MyAppState extends State<MyApp> {
                 // Sans cela, une reconnexion sur une autre école garderait le
                 // nom de la précédente le temps du rechargement.
                 _schoolIdentityCubit.clear();
+                // Coupe le battement : sans jetons, chaque tic n'interrogerait
+                // que la sonde de crédentiels d'une session qui n'existe plus.
+                _syncStatusCubit.onSessionClosed();
               }
             },
           ),
@@ -259,11 +265,16 @@ class _MyAppState extends State<MyApp> {
         // crédentiels), mais un cycle qu'on sait vide ne mérite pas d'être
         // lancé. L'anti-rafale, elle, est dans le cubit — c'est sa politique,
         // pas celle de la racine.
-        child: SyncResumeObserver(
+        child: SyncLifecycleObserver(
           onResume: () {
+            // Le battement d'abord : il ne dépend pas de la session (le cubit
+            // réconcilie les deux conditions lui-même) et un cycle de reprise
+            // qui échoue ne doit pas laisser la file sans relance périodique.
+            _syncStatusCubit.onForeground();
             if (_authBloc.state.status != AuthStatus.authenticated) return;
             unawaited(_syncStatusCubit.syncOnResume());
           },
+          onPause: _syncStatusCubit.onBackground,
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
             scrollBehavior: const AppScrollBehavior(),

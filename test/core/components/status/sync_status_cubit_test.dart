@@ -7,6 +7,8 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
@@ -1249,6 +1251,178 @@ void main() {
       await pumpEventQueue();
       verify(() => pull.pullAll()).called(1);
 
+      await cubit.close();
+    });
+  });
+
+  // Quatrième déclencheur, et le premier qui ne dépende d'AUCUN geste : les
+  // trois autres sont des événements (on écrit, le réseau revient, on rouvre
+  // l'application), or aucun ne survient pendant qu'une entrée attend la fin de
+  // son backoff ou la levée de sa dépendance.
+  group('battement de la file', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+
+    OutboxEntry anEntry() => const OutboxEntry(
+      id: 'e1',
+      aggregateType: 'ENROLLMENT',
+      aggregateId: 'a1',
+      operation: OutboxOperation.create,
+      payload: '{}',
+      createdAt: 1,
+    );
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => []);
+    });
+
+    SyncStatusCubit buildBeating({
+      Duration interval = SyncStatusCubit.kDefaultHeartbeatInterval,
+    }) => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+      heartbeatInterval: interval,
+    );
+
+    test('armé seulement quand session ouverte ET premier plan', () async {
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      expect(cubit.isHeartbeatActive, isFalse); // aucune session encore
+
+      // Par le MÊME fil que le cycle d'ouverture de session : c'est le seul
+      // que la racine ait à ne pas oublier.
+      await cubit.syncOnLogin();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      cubit.onBackground();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      cubit.onForeground();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      cubit.onSessionClosed();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      // Revenir au premier plan sans session ne rallume rien : c'est LA
+      // condition qui garde l'écran de connexion silencieux.
+      cubit.onForeground();
+      expect(cubit.isHeartbeatActive, isFalse);
+
+      await cubit.close();
+    });
+
+    test('le battement ne survit pas à la fermeture du cubit', () async {
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      cubit.onSessionOpened();
+      expect(cubit.isHeartbeatActive, isTrue);
+
+      await cubit.close();
+
+      expect(cubit.isHeartbeatActive, isFalse);
+    });
+
+    test('rien de PRÊT à partir : le tic ne fait rien du tout', () async {
+      // La condition d'entrée est `pendingReady`, jamais `pendingCount` : une
+      // file pleine d'entrées encore en backoff ferait sinon clignoter la
+      // pastille toutes les 45 s devant un utilisateur qui n'a rien fait.
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 4);
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      final emitted = <SyncStatus>[];
+      final sub = cubit.stream.listen((s) => emitted.add(s.status));
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      expect(emitted, isEmpty);
+      await sub.cancel();
+      await cubit.close();
+    });
+
+    test('une entrée prête : le tic pousse', () async {
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = buildBeating();
+      await pumpEventQueue();
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      await cubit.close();
+    });
+
+    test('un flush déjà en vol : le tic s\'efface', () async {
+      when(() => syncEngine.isFlushing).thenReturn(true);
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = buildBeating();
+      await pumpEventQueue();
+
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      await cubit.close();
+    });
+
+    test('base indisponible : le tic ne remonte pas d\'exception', () async {
+      // Un `Timer` n'a personne pour attraper ce qu'il lève.
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenThrow(StateError('base fermée'));
+      final cubit = buildBeating();
+      await pumpEventQueue();
+
+      await expectLater(cubit.heartbeatTick(), completes);
+
+      await cubit.close();
+    });
+
+    test('le tic est bien CÂBLÉ au timer, pas seulement armé', () async {
+      // Une garde peut être implémentée, testée, et jamais branchée : ici,
+      // `isHeartbeatActive` pourrait dire vrai sur un timer qui n'appelle rien.
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = buildBeating(interval: const Duration(milliseconds: 20));
+      await pumpEventQueue();
+      cubit.onSessionOpened();
+
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(greaterThan(0));
+      await cubit.close();
+    });
+
+    test('arrêté en arrière-plan, le timer ne tire plus', () async {
+      when(
+        () => outbox.pendingReady(any(), limit: any(named: 'limit')),
+      ).thenAnswer((_) async => [anEntry()]);
+      final cubit = buildBeating(interval: const Duration(milliseconds: 20));
+      await pumpEventQueue();
+      cubit.onSessionOpened();
+      cubit.onBackground();
+
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
       await cubit.close();
     });
   });

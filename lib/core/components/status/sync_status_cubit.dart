@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -101,6 +102,25 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   StreamSubscription<bool>? _connectivitySub;
 
+  /// Le battement ne tourne que si **les deux** conditions tiennent : une
+  /// session ouverte (sinon chaque tic taperait la sonde de crédentiels sur une
+  /// session fermée) et l'application au premier plan (un `Timer` Dart continue
+  /// de tirer en arrière-plan tant que l'OS n'a pas gelé le processus).
+  /// Indépendantes, donc réconciliées plutôt que séquencées.
+  bool _sessionOpen = false;
+  bool _foreground = true;
+  Timer? _heartbeat;
+
+  /// Verrou de tic : un tic lent ne doit pas se superposer au suivant.
+  bool _beating = false;
+
+  /// Période du battement. Court **parce qu'il ne fait que pousser** : le tic
+  /// s'arrête net s'il n'y a rien de prêt à partir, sans état émis ni appel
+  /// réseau. Le pull, lui, a sa propre cadence (cf. [syncOnResume]).
+  final Duration _heartbeatInterval;
+
+  static const Duration kDefaultHeartbeatInterval = Duration(seconds: 45);
+
   /// Fenêtre en-deçà de laquelle une reprise d'application ne relance PAS le
   /// cycle complet (cf. [syncOnResume]). Cinq minutes : au-delà, l'utilisateur
   /// est resté assez longtemps ailleurs pour qu'un référentiel ait bougé ;
@@ -117,6 +137,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     SessionCredentialsProbe? credentialsProbe,
     SessionReauthenticator? reauthenticator,
     Clock now = systemClock,
+    Duration heartbeatInterval = kDefaultHeartbeatInterval,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
@@ -126,6 +147,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
        _credentialsProbe = credentialsProbe,
        _reauthenticator = reauthenticator,
        _now = now,
+       _heartbeatInterval = heartbeatInterval,
        super(const SyncStatusState(status: SyncStatus.synced)) {
     _listenConnectivity();
     // Un flush peut être déclenché AILLEURS qu'ici : les repositories offline
@@ -258,7 +280,14 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// coordinateur ne connaît ni la sonde de crédentiels ni la
   /// ré-authentification, et un login offline laisse un access vide — chaque
   /// ressource partirait alors en 401, une tentative consommée par entrée.
-  Future<void> syncOnLogin() => syncNow();
+  Future<void> syncOnLogin() {
+    // Arme aussi la cadence, plutôt que de laisser la racine s'en souvenir : un
+    // battement qui n'est jamais armé ne se voit sur aucun écran et ne fait
+    // échouer aucun test. Un seul fil de session à ne pas oublier vaut mieux
+    // que deux — et celui-ci était déjà branché.
+    onSessionOpened();
+    return syncNow();
+  }
 
   /// Un cycle complet à la demande — l'ouverture de session ([syncOnLogin]) et
   /// la reprise après un échec de transport (bandeau de la feuille de synchro).
@@ -319,6 +348,88 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       return;
     }
     await _flushAndRefresh();
+  }
+
+  // ─── Battement de la file (lot 2) ────────────────────────────────────────
+  //
+  // Le quatrième déclencheur, et le premier qui ne dépende d'AUCUN geste.
+  // Les trois autres sont des événements : on écrit, le réseau revient, on
+  // rouvre l'application. Aucun ne survient pendant qu'une entrée attend la fin
+  // de son backoff ou la levée de sa dépendance — c'est précisément là que la
+  // file dormait.
+
+  /// La session vient de s'ouvrir : le battement peut tourner.
+  void onSessionOpened() {
+    _sessionOpen = true;
+    _reconcileHeartbeat();
+  }
+
+  /// La session se ferme : le battement s'arrête. Sans cela, chaque tic
+  /// interrogerait la sonde de crédentiels d'une session qui n'en a plus.
+  void onSessionClosed() {
+    _sessionOpen = false;
+    _reconcileHeartbeat();
+  }
+
+  /// L'application est au premier plan.
+  void onForeground() {
+    _foreground = true;
+    _reconcileHeartbeat();
+  }
+
+  /// L'application passe en arrière-plan. Un `Timer` Dart n'y est pas suspendu
+  /// tant que l'OS n'a pas gelé le processus : sans cet arrêt, le battement
+  /// continuerait de consommer réseau et batterie hors de tout usage — et de
+  /// brûler des tentatives d'outbox que personne ne regarde.
+  void onBackground() {
+    _foreground = false;
+    _reconcileHeartbeat();
+  }
+
+  /// Vrai si le battement est armé — exposé pour que le câblage se vérifie.
+  bool get isHeartbeatActive => _heartbeat != null;
+
+  void _reconcileHeartbeat() {
+    final shouldBeat = _sessionOpen && _foreground && !isClosed;
+    if (shouldBeat == isHeartbeatActive) return;
+    if (shouldBeat) {
+      _heartbeat = Timer.periodic(
+        _heartbeatInterval,
+        (_) => unawaited(heartbeatTick()),
+      );
+    } else {
+      _heartbeat?.cancel();
+      _heartbeat = null;
+    }
+  }
+
+  /// Un tic : **pousse ce qui est prêt, et rien d'autre.**
+  ///
+  /// La condition d'entrée est `pendingReady`, jamais `pendingCount`. La nuance
+  /// décide de tout : `pendingCount` compte aussi les entrées encore en
+  /// backoff, donc le tic partirait toutes les 45 s pour une file qui n'a rien
+  /// à envoyer — et [_flushAndRefresh] émet `syncing` avant de flusher, ce qui
+  /// ferait clignoter la pastille en permanence devant un utilisateur qui n'a
+  /// rien fait.
+  ///
+  /// Défensif comme le reste du cubit : une base indisponible ne doit pas
+  /// remonter d'exception depuis un `Timer` (personne ne l'attraperait).
+  @visibleForTesting
+  Future<void> heartbeatTick() async {
+    if (_beating || isClosed) return;
+    _beating = true;
+    try {
+      // Un flush est déjà en vol (écriture locale, reprise) : le tic n'a rien à
+      // ajouter, et `flush()` lui rendrait `skipped` de toute façon.
+      if (_syncEngine.isFlushing) return;
+      final ready = await _outbox.pendingReady(_now(), limit: 1);
+      if (ready.isEmpty) return;
+      await _flushAndRefresh();
+    } catch (_) {
+      // Base indisponible : le tic suivant retentera.
+    } finally {
+      _beating = false;
+    }
   }
 
   /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
@@ -479,6 +590,8 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   @override
   Future<void> close() {
+    _heartbeat?.cancel();
+    _heartbeat = null;
     _connectivitySub?.cancel();
     _unsubscribeFlush?.call();
     return super.close();

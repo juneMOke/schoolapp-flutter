@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/config/app_environment.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
-import 'package:school_app_flutter/core/components/status/sync_resume_observer.dart';
+import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/main.dart';
 import 'core/offline/offline_full_test_db.dart';
@@ -47,7 +47,7 @@ void main() {
   ) async {
     // Troisième déclencheur global (les deux autres : ouverture de session,
     // retour réseau). Sa politique est testée dans `SyncStatusCubit` et son
-    // câblage au cycle de vie dans `SyncResumeObserver` — reste ce qu'aucun des
+    // câblage au cycle de vie dans `SyncLifecycleObserver` — reste ce qu'aucun des
     // deux ne voit : que la racine le monte réellement. Un déclencheur de
     // synchro non branché n'apparaît sur aucun écran et ne fait échouer aucun
     // test métier.
@@ -58,7 +58,7 @@ void main() {
       step: const Duration(milliseconds: 150),
     );
 
-    expect(find.byType(SyncResumeObserver), findsOneWidget);
+    expect(find.byType(SyncLifecycleObserver), findsOneWidget);
   });
 
   testWidgets('Login layout stays stable on narrow mobile viewport', (
