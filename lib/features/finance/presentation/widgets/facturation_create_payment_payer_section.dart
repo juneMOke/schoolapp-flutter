@@ -66,10 +66,15 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
               color: AppColors.bleuArdoise,
             ),
             const SizedBox(width: AppDimensions.spacingS),
-            Text(
-              l10n.facturationCreatePaymentPayerSectionTitle,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: AppColors.bleuProfond,
+            // `Expanded` : le titre revient à la ligne au lieu de déborder.
+            // Dans la modale ouverte sur un téléphone étroit il ne reste que
+            // ~280 dp à cette ligne, quand le libellé en réclame 66 de plus.
+            Expanded(
+              child: Text(
+                l10n.facturationCreatePaymentPayerSectionTitle,
+                style: AppTextStyles.bodyStrong.copyWith(
+                  color: AppColors.bleuProfond,
+                ),
               ),
             ),
           ],

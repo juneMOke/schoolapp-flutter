@@ -7,6 +7,10 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les
 Quinze défauts confirmés. **Le #13 est corrigé** (commit `5123439`) ; les
 quatorze autres sont listés ici, aucun n'est traité.
 
+S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a
+fermé les débordements de la connexion, de l'encaissement, des deux modales de
+discipline et de la recherche de parent.
+
 > Ordre : gravité décroissante. Un défaut « haut » a une conséquence métier
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
 > ou un affichage ; un « bas » attend un appelant qui n'existe pas encore, ou ne
@@ -265,6 +269,41 @@ tablette fraîchement hydratée dont le pull Inscription n'a pas atterri tombe s
 l'opérateur corriger des critères qui n'y peuvent rien.
 
 **À faire** — rendre l'état atteignable sur les deux formes de recherche.
+
+---
+
+## 🟡 Bas — issu de la passe « clavier » (2026-08-19)
+
+### B-9 · Sept modales de lecture n'ont pas reçu la coquille sûre au clavier
+
+`lib/features/finance/presentation/widgets/facturation_payment_detail_dialog.dart:277`
+`lib/features/finance/presentation/widgets/facturation_charge_detail_dialog.dart:136`
+`lib/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart:176`
+`lib/features/documents/presentation/widgets/editique_document_dialog.dart:359`
+`lib/features/academics/presentation/widgets/detail/cours_releve_modal.dart:40`
+`lib/features/classes/presentation/widgets/classes_organisation_distribution_result_dialog.dart:129`
+`lib/features/classes/presentation/widgets/classes_organisation_reassign_dialog.dart:101`
+
+Ces modales partagent la forme qui débordait ailleurs — en-tête et pied ancrés
+autour d'un corps défilant — mais **aucune ne porte de champ de saisie** : le
+clavier ne monte pas devant elles, et aucun débordement n'y a été constaté. La
+passe les a donc laissées en l'état plutôt que d'ouvrir un large diff sur des
+écrans d'argent sans défaut prouvé (arbitrage explicite du 2026-08-19).
+
+Elles restent exposées à un seul scénario : s'ouvrir alors que le clavier est
+**déjà** monté sur l'écran d'en dessous.
+
+**À faire** — les faire passer par `EteeloDialogBody`
+(`lib/core/components/dialogs/eteelo_dialog_body.dart`) le jour où l'une d'elles
+gagne un champ, ou si le scénario ci-dessus se manifeste. Le seuil
+`minPinnedHeight` se règle au-dessus de la hauteur incompressible de l'en-tête et
+du pied — c'est elle qui déborde.
+
+⚠️ Ne pas confondre avec le plafond `MediaQuery.sizeOf(context).height * 0.88`
+que ces fichiers calculent : il n'a jamais été la cause. `ConstrainedBox` borne
+déjà ses propres contraintes à celles du parent (`BoxConstraints.enforce`), donc
+un plafond trop haut est inoffensif. Ce qui déborde, ce sont les zones **figées**
+quand la hauteur offerte passe sous leur hauteur cumulée.
 
 ---
 

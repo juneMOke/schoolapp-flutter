@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -41,6 +42,36 @@ class _ParentSearchDialog extends StatefulWidget {
 }
 
 class _ParentSearchDialogState extends State<_ParentSearchDialog> {
+  /// L'identité du bloc de critères, **stable d'une disposition à l'autre**.
+  ///
+  /// Sans elle, la bascule [pinsForm] ne déplace pas le formulaire : elle le
+  /// **détruit** d'un côté pour en construire un autre de l'autre. La
+  /// réconciliation apparie les enfants de la `Column` par le haut (en-tête,
+  /// `Divider`) puis par le bas (le `Flexible` des résultats) ; le `Padding` qui
+  /// porte les critères tombe au milieu, sans appariement, donc il est démonté
+  /// avec tout son sous-arbre — dont les `FocusNode` que chaque
+  /// `EteeloTextInput` crée et **dispose** lui-même faute d'en recevoir un.
+  ///
+  /// Et cette destruction est déclenchée par l'ouverture du clavier, qui est
+  /// exactement le geste qu'elle annule : `Dialog` ajoute les `viewInsets` à son
+  /// `insetPadding`, la hauteur offerte passe sous le seuil, les critères
+  /// rejoignent le défilement, le champ perd le focus, le clavier se referme,
+  /// la hauteur revient, la bascule repart en sens inverse. Le champ devient
+  /// **intapable** — reproduit sur tablette 10" en paysage et sur tout
+  /// téléphone en portrait.
+  ///
+  /// Une `GlobalKey` change la nature du geste : l'élément est **reparenté** au
+  /// lieu d'être détruit, son `State`, ses `FocusNode` et sa connexion clavier
+  /// survivent (`Focus.deactivate` reparente le nœud plutôt que de le rendre).
+  /// Les deux sites d'appel sont gardés par le même booléen : un seul existe à
+  /// la fois, donc jamais deux porteurs de cette clé dans l'arbre.
+  ///
+  /// ⚠️ Corriger plutôt le SEUIL (le calculer sur une hauteur qui n'inclut pas
+  /// les inserts) rouvrirait le débordement que la bascule existe à fermer :
+  /// sur un téléphone en paysage clavier ouvert, il ne reste qu'une centaine de
+  /// dp, quand l'en-tête et les critères figés en coûtent trois fois plus.
+  final GlobalKey _searchFormKey = GlobalKey();
+
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _surnameController = TextEditingController();
@@ -120,51 +151,59 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // `Dialog` retire les `viewInsets` du clavier à la hauteur offerte :
-            // en paysage il n'en reste qu'une centaine de dp, quand l'en-tête et
-            // le formulaire figés en coûtent trois fois plus. Sous ce seuil, les
-            // critères rejoignent le défilement des résultats.
+            // Les critères ne restent figés au-dessus des résultats que s'ils
+            // sont COMPACTS **et** qu'il reste de la hauteur.
+            //
+            // La largeur est le critère qu'il manquait : sous
+            // [AppBreakpoints.guardianSearchPinnedFormMinWidth] le `Wrap`
+            // empile les quatre critères sur autant de lignes, et le bloc figé
+            // devient plus haut que la modale — elle débordait de 91 dp sur un
+            // téléphone en portrait, sans même que le clavier soit ouvert.
             final pinsForm =
+                constraints.maxWidth >=
+                    AppBreakpoints.guardianSearchPinnedFormMinWidth &&
                 constraints.maxHeight >=
-                AppBreakpoints.guardianSearchPinnedFormMinHeight;
+                    AppBreakpoints.guardianSearchPinnedFormMinHeight;
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(l10n),
-                const Divider(height: 1, color: AppColors.border),
-                if (pinsForm) ...[
-                  Padding(
-                    padding: const EdgeInsets.all(AppDimensions.spacingL),
-                    child: _buildSearchForm(l10n),
-                  ),
+            return EteeloDialogBody(
+              // L'en-tête seul pèse ~72 dp. En paysage clavier ouvert il ne
+              // restait que ~63 dp à la modale : l'en-tête débordait à lui tout
+              // seul (34 dp mesurés sur 731×411, 85 sur 640×360). Sous ce
+              // seuil, il rejoint le défilement comme le reste.
+              minPinnedHeight: 160,
+              header: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(l10n),
                   const Divider(height: 1, color: AppColors.border),
+                  if (pinsForm) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(AppDimensions.spacingL),
+                      child: _buildSearchForm(l10n),
+                    ),
+                    const Divider(height: 1, color: AppColors.border),
+                  ],
                 ],
-                // Flexible + scroll : la zone résultats (squelette/vide/erreur/
-                // liste) doit pouvoir se réduire OU défiler sans jamais
-                // déborder, le budget vertical restant dépendant du nombre de
-                // lignes prises par le formulaire de recherche (Wrap
-                // responsive).
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppDimensions.spacingL),
-                    child: pinsForm
-                        ? _buildResults(l10n)
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildSearchForm(l10n),
-                              const SizedBox(height: AppDimensions.spacingL),
-                              const Divider(height: 1, color: AppColors.border),
-                              const SizedBox(height: AppDimensions.spacingL),
-                              _buildResults(l10n),
-                            ],
-                          ),
-                  ),
-                ),
-              ],
+              ),
+              // La zone résultats (squelette/vide/erreur/liste) doit pouvoir se
+              // réduire OU défiler sans jamais déborder, le budget vertical
+              // restant dépendant du nombre de lignes prises par le formulaire.
+              bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
+              footer: const [],
+              body: pinsForm
+                  ? _buildResults(l10n)
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildSearchForm(l10n),
+                        const SizedBox(height: AppDimensions.spacingL),
+                        const Divider(height: 1, color: AppColors.border),
+                        const SizedBox(height: AppDimensions.spacingL),
+                        _buildResults(l10n),
+                      ],
+                    ),
             );
           },
         ),
@@ -203,68 +242,76 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
       const FirstLetterUppercaseTextInputFormatter(),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          l10n.guardianSearchHint,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Wrap(
-          spacing: AppDimensions.spacingM,
-          runSpacing: AppDimensions.spacingM,
-          children: [
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.firstName,
-                controller: _firstNameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
+    // La clé est portée ICI, et pas aux deux sites d'accrochage : c'est le même
+    // bloc qui se déplace, et le poser au-dehors laisserait le prochain appelant
+    // l'oublier.
+    return KeyedSubtree(
+      key: _searchFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.guardianSearchHint,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
             ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.lastName,
-                controller: _lastNameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.surname,
-                controller: _surnameController,
-                inputFormatters: nameFormatters,
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: EteeloTextInput(
-                label: l10n.phoneNumberLabel,
-                controller: _phoneController,
-                keyboardType: EteeloTextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
-                ],
-                onSubmitted: (_) => _search(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
-        Align(
-          alignment: Alignment.centerRight,
-          child: EteeloButton.primary(
-            label: l10n.search,
-            onPressed: _canSearch ? _search : null,
           ),
-        ),
-      ],
+          const SizedBox(height: AppDimensions.spacingM),
+          Wrap(
+            spacing: AppDimensions.spacingM,
+            runSpacing: AppDimensions.spacingM,
+            children: [
+              SizedBox(
+                width: AppDimensions.guardianSearchCriterionWidth,
+                child: EteeloTextInput(
+                  label: l10n.firstName,
+                  controller: _firstNameController,
+                  inputFormatters: nameFormatters,
+                  onSubmitted: (_) => _search(),
+                ),
+              ),
+              SizedBox(
+                width: AppDimensions.guardianSearchCriterionWidth,
+                child: EteeloTextInput(
+                  label: l10n.lastName,
+                  controller: _lastNameController,
+                  inputFormatters: nameFormatters,
+                  onSubmitted: (_) => _search(),
+                ),
+              ),
+              SizedBox(
+                width: AppDimensions.guardianSearchCriterionWidth,
+                child: EteeloTextInput(
+                  label: l10n.surname,
+                  controller: _surnameController,
+                  inputFormatters: nameFormatters,
+                  onSubmitted: (_) => _search(),
+                ),
+              ),
+              SizedBox(
+                width: AppDimensions.guardianSearchCriterionWidth,
+                child: EteeloTextInput(
+                  label: l10n.phoneNumberLabel,
+                  controller: _phoneController,
+                  keyboardType: EteeloTextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
+                  ],
+                  onSubmitted: (_) => _search(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spacingM),
+          Align(
+            alignment: Alignment.centerRight,
+            child: EteeloButton.primary(
+              label: l10n.search,
+              onPressed: _canSearch ? _search : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -108,4 +108,31 @@ class AppBreakpoints {
   // formulaire débordaient à eux seuls : le formulaire rejoint alors le
   // défilement. On perd les critères de vue en défilant, pas la modale.
   static const double guardianSearchPinnedFormMinHeight = 480.0;
+
+  /// Largeur en dessous de laquelle les critères ne sont **jamais** figés.
+  ///
+  /// Le `Wrap` des quatre critères passe à une seule colonne sous cette largeur
+  /// : le formulaire y est trois fois plus haut qu'en paysage, et figé il
+  /// débordait la modale de 91 dp — sans le moindre clavier, sur un simple
+  /// téléphone en portrait. La hauteur seule ne pouvait pas décider, puisque
+  /// c'est la LARGEUR qui commande la hauteur du formulaire.
+  ///
+  /// La valeur est la largeur du dialogue à laquelle le `Wrap` tient DEUX
+  /// colonnes, et pas un dp de moins :
+  ///
+  ///     2 × 200 (`AppDimensions.guardianSearchCriterionWidth`)
+  ///   +      16 (`AppDimensions.spacingM`, la gouttière du `Wrap`)
+  ///   +  2 × 24 (`AppDimensions.spacingL`, la marge du bloc de critères)
+  ///   =     464
+  ///
+  /// ⚠️ L'avoir arrondie à 460 laissait une bande de quatre dp où les critères
+  /// étaient figés alors que le `Wrap` était retombé à une colonne : la modale
+  /// y débordait de 74 dp — le défaut même que cette constante existe pour
+  /// fermer. Un pas de balayage trop large l'avait enjambée.
+  ///
+  /// Elle ne peut pas être calculée ici (`app_dimensions.dart` importe ce
+  /// fichier, l'inverse ferait un cycle) : c'est
+  /// `guardian_search_pinned_form_threshold_test.dart` qui la tient alignée sur
+  /// ses tokens.
+  static const double guardianSearchPinnedFormMinWidth = 464.0;
 }

@@ -81,7 +81,11 @@ void main() {
     await pumpPage(tester, const ForgotPasswordEmailPage());
 
     expect(find.byType(ForgotPasswordEmailPage), findsOneWidget);
-    expect(find.byType(SingleChildScrollView), findsWidgets);
+    // On vérifie qu'un défilement EXISTE, sans nommer le widget qui le porte :
+    // la coquille d'auth utilise un `CustomScrollView` sur le palier empilé,
+    // et cette assertion ne doit pas retomber au rouge au prochain changement
+    // de véhicule de défilement.
+    expect(find.byType(Scrollable), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

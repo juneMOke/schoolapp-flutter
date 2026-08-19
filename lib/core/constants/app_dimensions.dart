@@ -106,6 +106,16 @@ class AppDimensions {
 
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
+
+  /// Largeur d'un critère de la recherche de parent (Nom, Post-nom, Prénom,
+  /// Téléphone), posés dans un `Wrap`.
+  ///
+  /// Commande le nombre de colonnes, donc la HAUTEUR du bloc de critères, donc
+  /// le seuil au-dessus duquel on peut se permettre de le figer
+  /// ([AppBreakpoints.guardianSearchPinnedFormMinWidth]). Les deux sont liés
+  /// par `guardian_search_pinned_form_threshold_test.dart` : changer cette
+  /// largeur sans rouvrir le seuil fait défiler la modale dans le rouge.
+  static const guardianSearchCriterionWidth = 200.0;
   static const guardianSearchResultsMinHeight = 200.0;
 
   // Connexion — panneau formulaire (spec §01).
