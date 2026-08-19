@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_resume_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
@@ -245,31 +246,50 @@ class _MyAppState extends State<MyApp> {
             },
           ),
         ],
-        child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          scrollBehavior: const AppScrollBehavior(),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          locale: const Locale('fr'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          title: 'ETEELO CONNECT',
-          theme: AppTheme.light,
-          routerConfig: _router,
-          // Bandeau global au-dessus de toutes les routes : dégradation de
-          // session offline (ADR-010 D-08). Le bandeau « données en cache »
-          // de l'ex-bootstrap est retiré (plus de distinction local/distant
-          // séparée à ce niveau) — le statut réseau global reste signalé par
-          // le `SyncIndicator` de la top bar.
-          // Deux bandeaux globaux, empilés du plus contraignant au moins :
-          // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
-          // dégradation de session (informative, ADR-010).
-          builder: (context, child) => PaymentAnomalyBanner(
-            child: SessionDegradationBanner(
-              child: child ?? const SizedBox.shrink(),
+        // Troisième déclencheur global de la boucle de synchro (les deux
+        // autres : ouverture de session et retour réseau). Rien n'est
+        // périodique dans cette boucle — un backoff ou une dépendance qui
+        // repousse une entrée ne fait que la rendre *éligible*, personne ne la
+        // reprend — et une tablette posée sur le Wi-Fi de l'école ne voit
+        // jamais de transition réseau. La reprise au premier plan est le seul
+        // signal restant qui arrive plusieurs fois par jour.
+        //
+        // Gardé sur la session : sur l'écran de connexion il n'y a ni jetons ni
+        // file à pousser. Le cubit s'en garderait de lui-même (sonde de
+        // crédentiels), mais un cycle qu'on sait vide ne mérite pas d'être
+        // lancé. L'anti-rafale, elle, est dans le cubit — c'est sa politique,
+        // pas celle de la racine.
+        child: SyncResumeObserver(
+          onResume: () {
+            if (_authBloc.state.status != AuthStatus.authenticated) return;
+            unawaited(_syncStatusCubit.syncOnResume());
+          },
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            scrollBehavior: const AppScrollBehavior(),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            locale: const Locale('fr'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            title: 'ETEELO CONNECT',
+            theme: AppTheme.light,
+            routerConfig: _router,
+            // Bandeau global au-dessus de toutes les routes : dégradation de
+            // session offline (ADR-010 D-08). Le bandeau « données en cache »
+            // de l'ex-bootstrap est retiré (plus de distinction local/distant
+            // séparée à ce niveau) — le statut réseau global reste signalé par
+            // le `SyncIndicator` de la top bar.
+            // Deux bandeaux globaux, empilés du plus contraignant au moins :
+            // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
+            // dégradation de session (informative, ADR-010).
+            builder: (context, child) => PaymentAnomalyBanner(
+              child: SessionDegradationBanner(
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         ),

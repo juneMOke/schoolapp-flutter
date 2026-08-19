@@ -1062,4 +1062,194 @@ void main() {
       },
     );
   });
+
+  // Troisième déclencheur global : le retour de l'application au premier plan.
+  // Rien n'étant périodique dans cette boucle, un backoff ou une dépendance qui
+  // repousse une entrée ne fait que la rendre *éligible* — sans ce crochet,
+  // personne ne la reprend avant la prochaine écriture de l'utilisateur.
+  group('syncOnResume — reprise de l\'application', () {
+    late MockCredentialsProbe probe;
+    late MockReauthenticator reauth;
+    late MockRevocationEvaluator revocation;
+    late MockPullCoordinator pull;
+    late int nowMs;
+
+    setUp(() {
+      probe = MockCredentialsProbe();
+      reauth = MockReauthenticator();
+      revocation = MockRevocationEvaluator();
+      pull = MockPullCoordinator();
+      nowMs = 1000;
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => revocation.evaluateRevocation(),
+      ).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
+    });
+
+    SyncStatusCubit buildResume() => SyncStatusCubit(
+      outbox: outbox,
+      connectivity: connectivity,
+      syncEngine: syncEngine,
+      syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      revocationEvaluator: revocation,
+      credentialsProbe: probe,
+      reauthenticator: reauth,
+      now: () => nowMs,
+    );
+
+    test('première reprise, aucun cycle avant : cycle complet', () async {
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(1);
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('reprise rapprochée : on pousse, on ne re-tire pas', () async {
+      // Le cas de l'utilisateur qui bascule vers sa calculatrice et revient :
+      // relancer la pagination de dix-neuf ressources à chaque aller-retour
+      // mettrait la connexion de l'école à genoux. Sa file, elle, mérite
+      // toujours un geste — c'est elle qui porte l'argent saisi.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      nowMs += 60000; // une minute plus tard
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => syncEngine.flush()).called(2);
+      verify(() => pull.pullAll()).called(1); // celui du login, pas un de plus
+      await cubit.close();
+    });
+
+    test('reprise espacée : cycle complet, pull compris', () async {
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+
+      nowMs += SyncStatusCubit.kResumeFullCycleMinIntervalMs;
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(2);
+      await cubit.close();
+    });
+
+    test('un cycle ARRÊTÉ compte aussi pour l\'anti-rafale', () async {
+      // Le cycle de login est arrêté net par un mint impossible (serveur
+      // injoignable) : il ne flushe ni ne tire rien. Il a pourtant bien eu
+      // lieu, et l'estampille est posée AVANT les gardes — sinon chaque reprise
+      // le retenterait, et c'est exactement le cycle qui échoue qu'il ne faut
+      // pas relancer dix fois par minute.
+      //
+      // Le mint ne redevient possible qu'ENSUITE : sans quoi les deux chemins
+      // s'arrêteraient au même endroit et ce test ne distinguerait rien.
+      var mintable = false;
+      when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => mintable);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verifyNever(() => syncEngine.flush());
+
+      mintable = true;
+      nowMs += 1000;
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      // Chemin court : la file part (c'est elle qui porte l'argent), le pull
+      // non. Sans estampille, ce serait un cycle complet et `pullAll` aurait
+      // été appelé.
+      verify(() => syncEngine.flush()).called(1);
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('reprise hors ligne : rien n\'est tenté', () async {
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.offline);
+      await cubit.close();
+    });
+
+    test('reprise sans jetons utilisables : aucun flush', () async {
+      when(() => probe.canAuthenticate()).thenAnswer((_) async => false);
+      when(() => outbox.pendingCount()).thenAnswer((_) async => 3);
+
+      final cubit = buildResume();
+      await pumpEventQueue();
+
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
+      expect(cubit.state.status, SyncStatus.authRequired);
+      await cubit.close();
+    });
+
+    test('une horloge qui recule ne tue pas le déclencheur', () async {
+      // L'horloge est celle du device : un NTP qui corrige une dérive de RTC,
+      // ou une date changée à la main, laisse l'estampille dans le futur.
+      // Comparé naïvement, l'écart resterait sous le seuil à jamais et le seul
+      // déclencheur qui revient plusieurs fois par jour serait mort en silence
+      // pour toute la vie du processus.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      nowMs -= 86400000; // l'horloge recule d'un jour
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('le chemin court ne repousse PAS la fenêtre', () async {
+      // Si une reprise rapprochée réarmait l'anti-rafale, une tablette qu'on
+      // reprend toutes les deux minutes n'exécuterait plus jamais de cycle
+      // complet — la panne même que ce déclencheur existe à réparer. La
+      // fenêtre se mesure donc depuis le dernier CYCLE, jamais depuis le
+      // dernier passage.
+      final cubit = buildResume();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1); // consommé : la suite est nette
+
+      nowMs += 200000; // < seuil → chemin court
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      nowMs += 150000; // 350 s depuis le CYCLE (et non depuis la reprise)
+      await cubit.syncOnResume();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      await cubit.close();
+    });
+  });
 }

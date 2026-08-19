@@ -24,10 +24,11 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 ///    [SyncStatus.pendingUpload] ;
 ///  - sinon → [SyncStatus.synced].
 ///
-/// Sert aussi de colle du « sync loop » : à chaque passage à *online*, **et à
-/// l'ouverture de session** ([syncOnLogin], ADR-015 F0), il déclenche un flush
+/// Sert aussi de colle du « sync loop » : à chaque passage à *online*, **à
+/// l'ouverture de session** ([syncOnLogin], ADR-015 F0) **et au retour de
+/// l'application au premier plan** ([syncOnResume]), il déclenche un flush
 /// opportuniste de l'outbox **puis un pull delta** ([PullCoordinator],
-/// optionnel) des ressources de référence — ce sont les deux seuls
+/// optionnel) des ressources de référence — ce sont les trois seuls
 /// déclencheurs globaux. Les écrans qui écrivent en local appellent
 /// [notifyLocalWrite] après une écriture réussie pour rafraîchir immédiatement
 /// la pastille (push seul, **sans** pull).
@@ -45,6 +46,10 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   final SessionCredentialsProbe? _credentialsProbe;
   final SessionReauthenticator? _reauthenticator;
   final SyncMetaDao _syncMetaDao;
+
+  /// Horloge injectable (epoch ms) — même typedef que le moteur de synchro, pour
+  /// que l'anti-rafale de [syncOnResume] soit déterministe en test.
+  final Clock _now;
 
   /// Clé `sync_meta` sentinelle (ne correspond à aucune ressource métier) où
   /// est persistée la date de dernière synchro globale (badge top bar).
@@ -85,7 +90,22 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// journée. Mémorisé comme [_pullDegraded], et pour la même raison.
   bool _pullRetriable = false;
 
+  /// Horloge **device** (epoch ms) du dernier cycle complet parti, quel qu'en
+  /// soit le déclencheur — ouverture de session, retour réseau ou reprise.
+  ///
+  /// Sert UNIQUEMENT d'anti-rafale à [syncOnResume]. Volontairement distincte de
+  /// [_lastSyncAtMs], qui porte l'heure **serveur** du dernier pull *fructueux*
+  /// et n'avance donc pas quand le cycle échoue — or c'est précisément le cycle
+  /// qui échoue qu'il ne faut pas relancer dix fois par minute.
+  int? _lastCycleAtMs;
+
   StreamSubscription<bool>? _connectivitySub;
+
+  /// Fenêtre en-deçà de laquelle une reprise d'application ne relance PAS le
+  /// cycle complet (cf. [syncOnResume]). Cinq minutes : au-delà, l'utilisateur
+  /// est resté assez longtemps ailleurs pour qu'un référentiel ait bougé ;
+  /// en-deçà, son cache est frais et seule sa file d'écritures mérite un geste.
+  static const int kResumeFullCycleMinIntervalMs = 300000;
 
   SyncStatusCubit({
     required OutboxDao outbox,
@@ -96,6 +116,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     RevocationEvaluator? revocationEvaluator,
     SessionCredentialsProbe? credentialsProbe,
     SessionReauthenticator? reauthenticator,
+    Clock now = systemClock,
   }) : _outbox = outbox,
        _connectivity = connectivity,
        _syncEngine = syncEngine,
@@ -104,6 +125,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
        _revocationEvaluator = revocationEvaluator,
        _credentialsProbe = credentialsProbe,
        _reauthenticator = reauthenticator,
+       _now = now,
        super(const SyncStatusState(status: SyncStatus.synced)) {
     _listenConnectivity();
     // Un flush peut être déclenché AILLEURS qu'ici : les repositories offline
@@ -168,6 +190,10 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// Le pull est silencieux (304 fréquent) et **n'altère pas** l'état de synchro,
   /// qui ne reflète que la file de push.
   Future<void> _syncOnReconnect() async {
+    // Estampillé AVANT les gardes, et non après un cycle réussi : un cycle
+    // arrêté faute de jetons ou de mint est exactement celui qu'une reprise
+    // d'application ne doit pas relancer en rafale (cf. [syncOnResume]).
+    _lastCycleAtMs = _now();
     // Gate crédentiels (V1.1) : une session ouverte OFFLINE peut être sans
     // jetons (logout sans consigne, purge d'identité croisée, consigne brûlée).
     // Flusher quand même = 401 systématique sur CHAQUE entrée → `attempts++`
@@ -253,6 +279,46 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     // `_ensureFreshAccess`, un cran plus bas, qui arrête ce cas-là.
     if (!await _isOnline()) return;
     await _syncOnReconnect();
+  }
+
+  /// Retour de l'application au premier plan.
+  ///
+  /// Troisième déclencheur global, et celui qui manquait le plus : les deux
+  /// autres n'arrivent qu'une fois (l'ouverture de session) ou jamais (le
+  /// retour réseau, qu'une tablette posée sur le Wi-Fi de l'école ne voit pas
+  /// de la journée). Or **rien n'est périodique dans cette boucle** : un
+  /// backoff qui repousse une entrée à +2 s, ou une entrée `blocked` repoussée
+  /// à +5 s, ne fixe que le moment où elle redevient *éligible* — pas celui où
+  /// quelqu'un la reprend. Sans ce crochet, une file en attente pouvait dormir
+  /// jusqu'à la prochaine écriture de l'utilisateur.
+  ///
+  /// **Deux régimes, parce qu'une reprise n'est pas un événement rare.**
+  /// L'utilisateur qui bascule vers sa calculatrice et revient déclenche ceci
+  /// autant de fois qu'il le fait ; un cycle complet à chaque fois relancerait
+  /// la pagination de dix-neuf ressources sur la connexion d'une école.
+  ///  - reprise **espacée** (≥ [kResumeFullCycleMinIntervalMs] depuis le
+  ///    dernier cycle) → cycle complet, pull compris ;
+  ///  - reprise **rapprochée** → push seul (même chemin que [notifyLocalWrite]).
+  ///    Le cache est frais de toute façon ; ce qui ne l'est pas, c'est la file.
+  ///
+  /// Comme les autres points d'entrée, entièrement gardé plus bas : hors ligne,
+  /// sans jetons ou sans mint possible, il ne tente rien.
+  Future<void> syncOnResume() async {
+    final last = _lastCycleAtMs;
+    // Écart NÉGATIF = cycle complet, jamais chemin court. L'horloge est celle
+    // du device (`DateTime.now()`), donc reculable : un NTP qui corrige une
+    // dérive de RTC, ou une date changée à la main, laisse l'estampille dans le
+    // futur. Comparé naïvement, l'écart resterait sous le seuil À JAMAIS et ce
+    // déclencheur — le seul qui revienne plusieurs fois par jour — serait mort
+    // pour toute la vie du processus, sans que rien ne le signale.
+    final elapsed = last == null ? null : _now() - last;
+    if (elapsed == null ||
+        elapsed < 0 ||
+        elapsed >= kResumeFullCycleMinIntervalMs) {
+      await syncNow();
+      return;
+    }
+    await _flushAndRefresh();
   }
 
   /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
