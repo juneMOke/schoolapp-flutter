@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/owner_scope.dart';
-import 'package:school_app_flutter/core/offline/plan/sync_plan.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_repository.dart';
 import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
@@ -83,6 +82,13 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
   /// On le traite donc comme un échec de relecture : repli sur le cache, drapeau
   /// laissé levé, nouvelle tentative au cycle suivant — exactement un timeout.
   ///
+  /// ⚠️ Le plan **dont aucun flux n'est exploitable** ne suit PAS cette
+  /// exception, alors qu'il lui ressemble : lui aussi est un corps reçu qu'on ne
+  /// sait pas exploiter. Mais la question n'est pas « a-t-on compris », elle est
+  /// « une nouvelle tentative donnerait-elle autre chose » — et non : le serveur
+  /// rendra le même corps tant que l'APK n'aura pas appris son vocabulaire. Le
+  /// retenter, c'est un aller-retour par cycle, indéfiniment, sur tout un parc.
+  ///
   /// ⚠️ Ne surtout PAS déplacer cette règle dans `_fetch` : `load()` s'en sert
   /// au premier démarrage, où il n'y a pas de cache, et y perdrait le
   /// diagnostic `malformed` au profit d'`absent`. La distinction entre « le
@@ -111,8 +117,7 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
     if (raw == null || raw.isEmpty) {
       return const SyncPlanState.unknown(SyncPlanUnknownCause.absent);
     }
-    final parsed = _decode(raw);
-    return _stateOf(parsed.plan, rejectedKeys: parsed.rejectedKeys);
+    return _stateOf(_decode(raw));
   }
 
   /// Un cycle réseau. `null` = rien d'exploitable, l'appelant retombe au cache.
@@ -144,9 +149,14 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
       return const SyncPlanState.unknown(SyncPlanUnknownCause.malformed);
     }
 
-    final state = _stateOf(plan, rejectedKeys: parsed.rejectedKeys);
-    // Le plan d'un autre compte n'est pas mis en cache : il n'a rien à faire
-    // sur cette tablette sous cette identité, et l'écrire écraserait le nôtre.
+    final state = _stateOf(parsed);
+    // **Aucun état inconnu n'est mis en cache**, et la règle vaut pour ses deux
+    // familles. Le plan d'un autre compte n'a rien à faire sur cette tablette
+    // sous cette identité, et l'écrire écraserait le nôtre. Un plan dont ce
+    // client ne comprend aucun flux, lui, est le cas où la mise en cache faisait
+    // le plus de dégâts : elle rendait le repli PERMANENT — au redémarrage
+    // suivant, la relecture du cache reproduisait le même verdict, et seule une
+    // mise à jour d'APK en sortait.
     if (state is! SyncPlanUnknown) await _cache(body);
     return state;
   }
@@ -166,10 +176,8 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
   /// « cette tablette ne sait pas qui elle est », `foreignSubject` dirait « le
   /// serveur a répondu pour quelqu'un d'autre » — et enverrait chercher une
   /// panne de tablette partagée qui n'existe pas.
-  SyncPlanState _stateOf(
-    SyncPlan? plan, {
-    Set<String> rejectedKeys = const <String>{},
-  }) {
+  SyncPlanState _stateOf(SyncPlanParseResult parsed) {
+    final plan = parsed.plan;
     if (plan == null) {
       return const SyncPlanState.unknown(SyncPlanUnknownCause.malformed);
     }
@@ -180,14 +188,29 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
     if (plan.subject != uid) {
       return const SyncPlanState.unknown(SyncPlanUnknownCause.foreignSubject);
     }
+    // ⚠️ **« Le client n'a rien compris » n'est pas « il n'y a rien à tirer ».**
+    // Le serveur a annoncé des flux et l'analyse les a tous écartés : le plan
+    // est vide, mais d'une VIDUITÉ QUI VIENT DE NOUS. Les confondre coûtait le
+    // parc entier — l'état vide arrête tout le pull non-socle, le corps partait
+    // en cache, et la panne survivait au redémarrage jusqu'à une mise à jour
+    // d'APK. Contrôlé APRÈS le `subject` : un plan qu'on ne peut attribuer à
+    // personne n'est pas à nous d'interpréter, et `foreignSubject` reste le
+    // diagnostic le plus actionnable (tablette partagée).
+    if (parsed.allStreamsDropped) {
+      return const SyncPlanState.unknown(
+        SyncPlanUnknownCause.unsupportedStreams,
+      );
+    }
     // Le contrat promet un plan jamais vide — il contient au minimum le socle.
     // Un `streams` vide est donc un serveur qui se contredit ; on le traite en
     // information (rien à tirer, rien à purger) plutôt qu'en panne, mais
-    // surtout pas comme « inconnu », qui ferait au contraire tout tirer.
+    // surtout pas comme « inconnu », qui ferait au contraire tout tirer. Ce
+    // `streams` vide-là est bien celui du serveur : le cas ci-dessus a déjà
+    // retiré celui que l'analyse aurait vidé.
     if (plan.streams.isEmpty) {
-      return SyncPlanState.empty(plan, rejectedKeys: rejectedKeys);
+      return SyncPlanState.empty(plan);
     }
-    return SyncPlanState.known(plan, rejectedKeys: rejectedKeys);
+    return SyncPlanState.known(plan, rejectedKeys: parsed.rejectedKeys);
   }
 
   /// Le corps **brut** est mis en cache, jamais le plan re-sérialisé : un flux

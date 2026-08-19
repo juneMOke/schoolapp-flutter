@@ -9,12 +9,35 @@ class SyncPlanParseResult {
   final SyncPlan? plan;
   final Set<String> rejectedKeys;
 
-  const SyncPlanParseResult._(this.plan, this.rejectedKeys);
+  /// Le serveur a annoncé des flux, et ce client n'en a retenu **aucun**.
+  ///
+  /// À ne pas confondre avec un `streams: []`, où le serveur dit lui-même
+  /// « rien à tirer ». Ici il a dit le contraire, et c'est le client qui n'a
+  /// rien compris — un `mode` renommé, un `scope` neuf déployé d'un coup sur le
+  /// parc. Le plan analysé est vide dans les deux cas, et **rien d'autre que ce
+  /// drapeau ne les sépare**.
+  ///
+  /// ⚠️ Compte AUSSI les entrées sautées sans trace — sans `key`, ou qui ne sont
+  /// pas des `Map`. Elles ne peuvent pas entrer dans [rejectedKeys], faute d'un
+  /// nom à y mettre, mais pour la tablette elles ont exactement le même effet :
+  /// un flux annoncé qu'elle ne tirera pas. Déduire ce cas de `rejectedKeys`
+  /// seul laisserait un `streams` entièrement bancal retomber sur « rien à
+  /// tirer », c'est-à-dire sur l'arrêt total.
+  final bool allStreamsDropped;
 
-  const SyncPlanParseResult.malformed() : this._(null, const <String>{});
+  const SyncPlanParseResult._(
+    this.plan,
+    this.rejectedKeys,
+    this.allStreamsDropped,
+  );
 
-  const SyncPlanParseResult.parsed(SyncPlan plan, Set<String> rejectedKeys)
-    : this._(plan, rejectedKeys);
+  const SyncPlanParseResult.malformed() : this._(null, const <String>{}, false);
+
+  const SyncPlanParseResult.parsed(
+    SyncPlan plan,
+    Set<String> rejectedKeys, {
+    bool allStreamsDropped = false,
+  }) : this._(plan, rejectedKeys, allStreamsDropped);
 
   bool get isMalformed => plan == null;
 }
@@ -44,6 +67,13 @@ class SyncPlanParseResult {
 /// [SyncPlanParseResult.rejectedKeys]. Non toléré : l'absence de l'un des
 /// quatre champs requis, un `streams` qui n'est pas une liste, un flux sans
 /// `key`.
+///
+/// **Tolérer n'est pas se taire, et écarter TOUT n'est plus tolérer.** Un flux
+/// écarté sur dix-huit laisse dix-sept flux gouverner le pull ; dix-huit sur
+/// dix-huit ne laissent rien, et le résultat ressemble trait pour trait à un
+/// plan vide. D'où [SyncPlanParseResult.allStreamsDropped], que le repository
+/// traduit en `SyncPlanUnknownCause.unsupportedStreams` — donc en repli sur le
+/// registre en dur, et non en « le serveur dit qu'il n'y a rien ».
 ///
 /// ⚠️ **`streams` ne passe jamais par `pullList`.** Le helper partagé replie
 /// `null` sur la liste vide ; appliqué ici, un plan tronqué deviendrait « plan
@@ -106,6 +136,10 @@ SyncPlanParseResult parseSyncPlan(Object? body) {
       streams: List.unmodifiable(flows),
     ),
     rejected,
+    // Mesuré sur la liste BRUTE, jamais sur `rejected` : les entrées sautées
+    // faute de `key` n'y figurent pas, et elles laissent pourtant la tablette
+    // sans rien à tirer, exactement comme un mode inconnu.
+    allStreamsDropped: streams.isNotEmpty && flows.isEmpty,
   );
 }
 

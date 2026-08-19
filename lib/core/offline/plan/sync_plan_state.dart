@@ -28,6 +28,23 @@ enum SyncPlanUnknownCause {
   /// Les confondre ferait tout tirer là où le serveur dit qu'il n'y a rien.
   malformed,
 
+  /// Le corps EST un plan — les quatre champs requis y sont, le `subject`
+  /// concorde — mais ce client n'a su retenir **aucun** de ses flux : un `mode`
+  /// renommé, un `scope` neuf déployé d'un coup, des entrées illisibles.
+  ///
+  /// ⚠️ **C'est « je ne comprends pas », jamais « il n'y a rien ».** Ce dépôt le
+  /// classait [SyncPlanEmpty], parce que le plan analysé finit vide dans les
+  /// deux cas : tout le pull non-socle s'arrêtait, le corps était mis en cache
+  /// au passage, et **la panne survivait au redémarrage** — plus rien ne
+  /// descendait sur le parc jusqu'à une mise à jour d'APK. Un plan qu'on ne sait
+  /// pas lire est une absence d'information, donc le repli sur le registre.
+  ///
+  /// C'est un **verdict**, pas un incident : la même requête rendrait le même
+  /// corps tant que l'APK n'a pas appris ce vocabulaire. Il remonte donc en état
+  /// — le drapeau « à relire » du porteur retombe — contrairement à [malformed],
+  /// qui est le portail captif et se dément au cycle suivant.
+  unsupportedStreams,
+
   /// Le plan en cache a été calculé pour un **autre compte**. Jamais « vide » :
   /// sur une tablette partagée, le plan de A relu pour B déterminerait ce que B
   /// tire.
@@ -60,8 +77,7 @@ sealed class SyncPlanState {
       SyncPlanKnown;
 
   /// Information réelle : rien à tirer, et **jamais** de purge.
-  const factory SyncPlanState.empty(SyncPlan plan, {Set<String> rejectedKeys}) =
-      SyncPlanEmpty;
+  const factory SyncPlanState.empty(SyncPlan plan) = SyncPlanEmpty;
 
   /// Repli sur le registre en dur, **zéro purge**.
   const factory SyncPlanState.unknown(SyncPlanUnknownCause cause) =
@@ -87,22 +103,25 @@ class SyncPlanKnown extends SyncPlanState {
   const SyncPlanKnown(this.plan, {this.rejectedKeys = const <String>{}});
 }
 
-/// Positivement identifié comme plan, mais sans aucun flux.
+/// Positivement identifié comme plan, et **positivement vide** : le serveur a
+/// répondu `streams: []`.
 ///
 /// Le contrat dit que le plan n'est **jamais** vide — il contient au minimum le
 /// socle. Cet état existe donc pour un serveur qui contredirait son propre
 /// contrat, et il est traité comme une information plutôt que comme une erreur :
 /// rien à tirer, rien à purger. Il ne doit surtout pas se confondre avec
 /// [SyncPlanUnknown], qui ferait au contraire tout tirer.
+///
+/// ⚠️ **Un plan dont l'analyse a écarté TOUS les flux n'arrive pas ici** : il
+/// vaut [SyncPlanUnknownCause.unsupportedStreams]. Les deux se ressemblent trait
+/// pour trait — `plan.streams` est vide de part et d'autre — et n'ont rien à
+/// voir : l'un est ce que le serveur a dit, l'autre ce que le client n'a pas
+/// compris. C'est pourquoi cet état ne porte plus de clés écartées : il ne peut
+/// plus en avoir. Lui en redonner ferait revenir l'arrêt total mis en cache.
 class SyncPlanEmpty extends SyncPlanState {
   final SyncPlan plan;
 
-  /// Cf. [SyncPlanKnown.rejectedKeys]. Un plan dont TOUS les flux ont été
-  /// écartés arrive ici : « vide » et « entièrement inexploitable » se
-  /// ressemblent à l'œil, et seule cette liste les distingue.
-  final Set<String> rejectedKeys;
-
-  const SyncPlanEmpty(this.plan, {this.rejectedKeys = const <String>{}});
+  const SyncPlanEmpty(this.plan);
 }
 
 /// Tout le reste, avec sa cause.

@@ -289,6 +289,139 @@ void main() {
     );
   });
 
+  // Le corps EST un plan — quatre champs requis, `subject` concordant — mais ce
+  // client n'a su en retenir aucun flux : un `mode` renommé, un `scope` neuf
+  // déployé d'un coup sur le parc.
+  //
+  // Ce dépôt le classait VIDE, parce que `plan.streams` finit vide dans les deux
+  // cas. Conséquences en chaîne : le coordinateur saute alors toutes les
+  // ressources non-socle, le corps part en cache — puisque l'état n'est pas
+  // « inconnu » — et **la panne survit au redémarrage**. Plus rien ne descend
+  // sur le parc, et seule une mise à jour d'APK répare.
+  group('TOUS les flux écartés → INCONNU, jamais vide', () {
+    /// Un plan dont l'unique flux porte un `mode` que cet APK ne connaît pas.
+    Map<String, Object?> planIncomprehensible() => planBody(
+      streams: const <Object?>[
+        {'key': 'teleporteur', 'mode': 'TELEPORT', 'scope': 'school'},
+      ],
+    );
+
+    test('→ unsupportedStreams, et RIEN n\'est mis en cache', () async {
+      repond(planIncomprehensible());
+
+      final state = await repo.load();
+
+      expect(causeDe(state), SyncPlanUnknownCause.unsupportedStreams);
+      expect(
+        state,
+        isNot(isA<SyncPlanEmpty>()),
+        reason:
+            'vide = « le serveur dit qu\'il n\'y a rien » ; ici c\'est nous '
+            'qui n\'avons rien compris, et le repli doit tirer',
+      );
+      expect(
+        await syncMeta.getCursor(cleA),
+        isNull,
+        reason:
+            'mis en cache, le repli deviendrait PERMANENT : la relecture '
+            'du cache reproduit le même verdict à chaque démarrage',
+      );
+      expect(await syncMeta.getSyncedAt(cleA), isNull);
+    });
+
+    test('n\'écrase pas le plan valide déjà en cache', () async {
+      repond(planBody());
+      await repo.load();
+      final avant = await syncMeta.getCursor(cleA);
+
+      repond(planIncomprehensible());
+      expect(
+        causeDe(await repo.load()),
+        SyncPlanUnknownCause.unsupportedStreams,
+      );
+
+      expect(await syncMeta.getCursor(cleA), avant);
+    });
+
+    test(
+      'refreshFromNetwork le rend en ÉTAT, pas en null : c\'est un VERDICT',
+      () async {
+        // La ligne de partage n'est pas « a-t-on compris » mais « une nouvelle
+        // tentative donnerait-elle autre chose ». Le portail captif se dément au
+        // cycle suivant (donc `null`, on retente) ; un vocabulaire que l'APK ne
+        // connaît pas rendra le même corps indéfiniment — le retenter coûterait
+        // un aller-retour par cycle sur tout un parc.
+        repond(planIncomprehensible());
+        final verdict = await repo.refreshFromNetwork();
+        expect(verdict, isNotNull);
+        expect(causeDe(verdict!), SyncPlanUnknownCause.unsupportedStreams);
+
+        // Contre-épreuve, dans le même test pour que la paire reste lisible :
+        // le corps illisible, lui, remonte bien `null`.
+        repond('<html>portail captif</html>');
+        expect(await repo.refreshFromNetwork(), isNull);
+      },
+    );
+
+    test(
+      'depuis le CACHE aussi — un plan devenu illisible ne fige pas',
+      () async {
+        // Le cas réel du parc : le corps a été caché quand l'APK le comprenait
+        // encore, puis le serveur a renommé son `mode` et l'APK a été mis à jour
+        // sans lui. Relire ce cache doit replier, jamais arrêter.
+        await syncMeta.setCursor(
+          cleA,
+          cursor: jsonEncode(planIncomprehensible()),
+          syncedAt: 1,
+        );
+
+        expect(
+          causeDe(await repo.loadCached()),
+          SyncPlanUnknownCause.unsupportedStreams,
+        );
+      },
+    );
+
+    test(
+      'CONTRE-ÉPREUVE : un streams vide reste VIDE, et reste caché',
+      () async {
+        // La distinction que tout ce groupe protège. Ici le serveur a répondu
+        // lui-même « rien à tirer » : c'est une information, on la garde — et on
+        // ne tire rien. Confondre les deux sens ferait tout tirer là où le
+        // serveur dit qu'il n'y a rien, ou l'inverse.
+        repond(planBody(streams: const <Object?>[]));
+
+        final state = await repo.load();
+
+        expect(state, isA<SyncPlanEmpty>());
+        expect(await syncMeta.getCursor(cleA), isNotNull);
+      },
+    );
+
+    test('un SEUL flux compris suffit à garder le plan connu', () async {
+      repond(
+        planBody(
+          streams: const <Object?>[
+            {'key': 'socle', 'mode': 'BUNDLE', 'scope': 'school'},
+            {'key': 'teleporteur', 'mode': 'TELEPORT', 'scope': 'school'},
+          ],
+        ),
+      );
+
+      final state = await repo.load();
+
+      expect(state, isA<SyncPlanKnown>());
+      expect((state as SyncPlanKnown).rejectedKeys, {'teleporteur'});
+      expect(
+        await syncMeta.getCursor(cleA),
+        isNotNull,
+        reason:
+            'un plan qui gouverne encore doit survivre à un démarrage '
+            'hors ligne',
+      );
+    });
+  });
+
   group('load() — le départage des échecs', () {
     test('404 → notDeployed (cas nominal du dégradé)', () async {
       leve(status(404));

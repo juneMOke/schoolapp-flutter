@@ -48,9 +48,10 @@ abstract interface class SyncPlanRepository {
   ///
   /// ⚠️ Ce qui remonte en ÉTAT plutôt qu'en `null` est un **verdict** : route
   /// absente (404, le cas nominal du dégradé — l'APK se met à jour
-  /// indépendamment du back), refus, plan d'un autre sujet. Le retenter à chaque
-  /// cycle n'y changerait rien et coûterait un aller-retour par montage d'écran
-  /// sur un parc dont le back n'est pas déployé.
+  /// indépendamment du back), refus, plan d'un autre sujet, et **plan dont
+  /// aucun flux n'est exploitable par cet APK**. Le retenter à chaque cycle n'y
+  /// changerait rien et coûterait un aller-retour par montage d'écran sur un
+  /// parc dont le back n'est pas déployé.
   ///
   /// La ligne de partage n'est donc PAS « a-t-on reçu un corps », mais « une
   /// nouvelle tentative pourrait-elle donner un autre résultat ». Un corps

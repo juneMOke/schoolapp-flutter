@@ -141,6 +141,22 @@ class PullCoordinator {
     int? latestServerTimeMs;
     final outcomes = <String, PullResult>{};
 
+    // Les clés que l'ANALYSE a écartées, faute d'en connaître le `mode` ou le
+    // `scope` (ADR-015 N-2). Le parser les retire de `plan.streams` et les nomme
+    // à part : rien, dans le plan lui-même, ne dit plus qu'elles existaient.
+    //
+    // ⚠️ Le régime VIDE n'en porte plus. Un plan dont TOUS les flux ont été
+    // écartés ne vaut plus « rien à tirer » mais « inconnu »
+    // (`unsupportedStreams`) — sans quoi le corps partait en cache et l'arrêt
+    // total survivait au redémarrage. Les deux branches sans clés restent
+    // néanmoins nommées, comme au switch d'autorité : pas de `_`, pour qu'un
+    // quatrième état casse la compilation au lieu d'atterrir sur un défaut.
+    final planRejectedKeys = switch (planState) {
+      SyncPlanKnown(:final rejectedKeys) => rejectedKeys,
+      SyncPlanEmpty() => const <String>{},
+      SyncPlanUnknown() => const <String>{},
+    };
+
     /// Ressources dont l'aval bloquant ne peut PAS se fier au cache local.
     ///
     /// Un échec y entre, évidemment. Mais une ressource **sautée faute de
@@ -155,7 +171,23 @@ class PullCoordinator {
     /// leur pull n'était filtré par rien, les créances partaient, prenaient un
     /// 403 du serveur et tombaient en échec — ce qui bloquait les paiements.
     /// Filtrer localement supprime le 403, donc supprimerait le blocage.
-    final unusableResources = <String>{};
+    ///
+    /// ⚠️ **Un flux écarté à l'analyse y entre d'entrée**, avant même la boucle,
+    /// et c'est le troisième chemin — le seul qu'aucun compteur n'attrapait. Le
+    /// jour où le serveur pose un `mode` neuf sur `finance.student-charges`, les
+    /// créances cessent de descendre : la clé quitte `plan.streams`, `_covers`
+    /// la rate, le handler tombe en `outOfPlan`, et les paiements — eux toujours
+    /// au plan — descendent par-dessus un `amount_paid_in_cents` que plus rien
+    /// ne rafraîchit. Même issue que le rôle mal taillé ci-dessus, par une porte
+    /// que le serveur ouvre tout seul. La seule différence est la durée : un
+    /// droit manquant se corrige côté serveur, un `mode` inconnu attend un APK.
+    ///
+    /// Amorcé depuis le PLAN, jamais depuis la sélection du cycle : un
+    /// `pullSubset` qui ne demande que les paiements doit renoncer lui aussi,
+    /// puisque l'amont ne sera rafraîchi par aucun cycle, pas même celui d'après.
+    final unusableResources = <String>{
+      for (final key in planRejectedKeys) ...resourcesOf(key),
+    };
 
     // Deux façons pour un flux d'être **au plan et jamais tiré**, et elles
     // méritent le même compteur.
@@ -171,27 +203,14 @@ class PullCoordinator {
     // s'arrête **totalement** sur tout le parc, avec une pastille verte et
     // aucune trace. C'est exactement ce que `rejectedKeys` avait été calculé
     // pour éviter, et il n'était lu par personne.
-    //
-    // ⚠️ Et le cas LIMITE de cette seconde façon est le régime VIDE, pas le
-    // régime connu : si l'analyse écarte TOUS les flux — un `mode` renommé, un
-    // `scope` neuf déployé d'un coup — `plan.streams` finit vide, l'état devient
-    // `SyncPlanEmpty`, et il porte les clés écartées lui aussi. Les jeter ici
-    // laissait le rapport dire « plan vide » sans nommer un seul flux, ce qui
-    // envoie chercher un serveur qui n'aurait rien renvoyé alors que le
-    // désaccord est de contrat. C'est la seule chose qui distingue « ce compte
-    // n'a droit à rien » de « cet APK ne comprend plus ce que le serveur
-    // envoie » — les deux se ressemblent à l'œil.
-    //
-    // Les trois cas sont donc nommés : pas de `_` ici non plus, pour que le
-    // quatrième état casse la compilation comme il le fait au switch d'autorité.
     final plannedNotPulledKeys = switch (planState) {
-      SyncPlanKnown(:final plan, :final rejectedKeys) => {
+      SyncPlanKnown(:final plan) => {
         ..._plannedWithoutHandler(plan),
-        ...rejectedKeys,
+        ...planRejectedKeys,
       },
-      // `_plannedWithoutHandler` n'aurait rien à y ajouter : le plan est vide
-      // par construction, seules les clés écartées subsistent.
-      SyncPlanEmpty(:final rejectedKeys) => rejectedKeys,
+      // Un plan vide n'a ni handler manquant ni clé écartée à déclarer : il est
+      // vide parce que le SERVEUR l'a dit, et `planEmpty` porte déjà ce fait.
+      SyncPlanEmpty() => const <String>{},
       SyncPlanUnknown() => const <String>{},
     };
 
@@ -223,10 +242,19 @@ class PullCoordinator {
           case SyncPlanKnown(:final plan):
             if (!_covers(plan, handler)) {
               outOfPlan++;
-              // ⚠️ N'entre PAS dans `unusableResources`. Un flux hors du plan
-              // est le périmètre décidé par le serveur, pas un amont en panne :
-              // le compter comme inexploitable ferait écarter un flux PLANIFIÉ
-              // par une règle locale, ce que F-I9 interdit frontalement.
+              // ⚠️ N'entre PAS ici dans `unusableResources`. Un flux hors du
+              // plan est le périmètre décidé par le serveur, pas un amont en
+              // panne : le compter comme inexploitable ferait écarter un flux
+              // PLANIFIÉ par une règle locale, ce que F-I9 interdit
+              // frontalement.
+              //
+              // Les clés ÉCARTÉES À L'ANALYSE passent aussi par cette branche —
+              // `_covers` ne peut pas les distinguer, elles ont quitté
+              // `plan.streams` — mais elles y sont déjà entrées, avant la
+              // boucle, sur la seule foi du plan. La différence n'est pas de
+              // degré : « le serveur ne te l'envoie pas » et « le serveur te
+              // l'envoie dans une langue que tu ne parles pas » n'ont pas le
+              // même aval.
               skip = true;
             }
           // Information réelle : rien à tirer. Le contrat promet pourtant qu'un

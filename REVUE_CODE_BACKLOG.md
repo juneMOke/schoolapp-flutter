@@ -4,8 +4,10 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les
 38 commits non poussés de la branche (233 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés. **Le #13 est corrigé** (commit `5123439`) ; les
-quatorze autres sont listés ici, aucun n'est traité.
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du
+battement. **Quatre sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3 et
+H-1 ; **plus aucun défaut « haut » n'est ouvert**. Les quinze autres sont listés
+ici, aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a
 fermé les débordements de la connexion, de l'encaissement, des deux modales de
@@ -15,73 +17,6 @@ discipline et de la recherche de parent.
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
 > ou un affichage ; un « bas » attend un appelant qui n'existe pas encore, ou ne
 > se manifeste que sur une transition rare.
-
----
-
-## 🔴 Haut
-
-### H-1 · Le champ « Prénom » de la recherche de parent est intapable
-
-`lib/features/enrollment/presentation/widgets/guardian_info/parent_search_dialog.dart:127`
-
-La bascule `pinsForm` compare la hauteur disponible à un seuil de 480 dp. Or un
-`Dialog` soustrait déjà `viewInsets` : l'ouverture du clavier fait passer sous le
-seuil, le `Column` tombe de 5 enfants à 3, et la réconciliation d'éléments
-apparie l'en-tête et le `Divider` par le haut, le `Flexible` final par le bas —
-le `Padding` qui porte le formulaire est donc **démonté** puis reconstruit dans
-la vue défilante. Les `EteeloTextInput` n'ont ni clé ni `FocusNode` externe : le
-focus meurt, le clavier se referme, la hauteur revient, la bascule repart en
-sens inverse.
-
-Reproduit sur tablette 10" en paysage (~800 dp − ~360 dp de clavier) et sur tout
-téléphone en portrait.
-
-**À faire** — donner une identité stable aux champs (clé ou `FocusNode` hissé
-hors de la branche conditionnelle), ou calculer le seuil sur une hauteur qui
-n'inclut pas les inserts de clavier.
-
----
-
-### H-2 · Un flux rejeté au parsing désarme l'arête créances → paiements
-
-`lib/core/offline/pull_coordinator.dart:225`
-
-`sync_plan_parser.dart:84` écarte tout flux dont le `mode` ou le `scope` est
-inconnu de cet APK. `_covers()` le rate donc, et il atterrit dans la branche
-`outOfPlan` — **délibérément exclue** de `unusableResources`, parce qu'un flux
-hors périmètre n'est pas un amont en panne.
-
-Sauf qu'un flux *rejeté* n'est pas un flux hors périmètre : c'est un amont dont
-le miroir local ne sera pas rafraîchi. Si le serveur déploie un nouveau `mode`
-sur `finance.student-charges`, les créances ne descendent plus, `_isBlockedBy`
-ne trouve rien à bloquer, et les paiements descendent par-dessus un
-`amount_paid_in_cents` périmé : **la créance s'affiche impayée et le caissier
-réencaisse**.
-
-C'est exactement le scénario que la docstring de `unusableResources`
-(l. 144-157) décrit et traite pour le cas `forbidden`.
-
-**À faire** — faire entrer les `rejectedKeys` (déjà en main l. 188) dans
-`unusableResources`, au même titre qu'un échec ou qu'un refus de droits.
-
----
-
-### H-3 · « Le client n'a rien compris » est classé « rien à tirer »
-
-`lib/features/sync/data/repositories/sync_plan_repository_impl.dart:187`
-
-Si le parseur rejette **tous** les flux — un `mode` renommé, un `scope` neuf
-déployé d'un coup sur le parc — `plan.streams` finit vide, l'état devient
-`SyncPlanEmpty`, et `pull_coordinator.dart:236` saute alors toutes les
-ressources non-socle. Pire : `_fetch` met le corps en cache parce que l'état
-n'est pas `SyncPlanUnknown`, donc **la panne survit au redémarrage**. Plus rien
-ne descend, et seule une mise à jour d'APK répare.
-
-Un plan que le client ne sait pas interpréter est une **absence d'information**
-(repli sur `requiredPermissions`), jamais l'information « il n'y a rien à
-tirer ».
-
-**À faire** — classer ce cas en `SyncPlanUnknown` et ne pas le mettre en cache.
 
 ---
 
@@ -99,6 +34,12 @@ droits. Un seul 403 et toute la session tourne sur le filtre `requiredPermission
 codé en dur, derrière une pastille verte (`isDegraded` ignore ce cas).
 
 **À faire** — ne traiter comme verdict définitif que `notDeployed`.
+
+⚠️ **Pas seulement `notDeployed`** depuis H-3 : `unsupportedStreams` est lui
+aussi un verdict — le serveur rendra le même corps tant que l'APK n'aura pas
+appris son vocabulaire, et le relire à chaque cycle coûterait un aller-retour par
+montage d'écran sur tout le parc. La liste des verdicts est donc
+`{notDeployed, unsupportedStreams}`.
 
 ---
 
@@ -385,6 +326,70 @@ tic, push muet, séparation tentative/pull, révocation non évaluée par le tim
 `inactive` neutre, seuil de poison du moteur, fermeture de session sur toute
 issue non authentifiée, renoncement coopératif, câblage racine testé, verrou de
 réentrance testé, prémisses périmées réécrites) — tous vérifiés par mutation.
+
+### ~~H-1 · Le champ « Prénom » de la recherche de parent est intapable~~ — corrigé
+
+`parent_search_dialog.dart` — le bloc de critères porte une `GlobalKey`
+(`_searchFormKey`, via `KeyedSubtree`) : la bascule `pinsForm` le **reparente**
+au lieu de le détruire, donc les `FocusNode` que chaque `EteeloTextInput` se crée
+— et dispose — survivent au passage. Le focus reste, le clavier ne se referme
+pas, la bascule ne repart pas en sens inverse.
+
+Le seuil n'a **pas** été touché : le calculer sur une hauteur sans les inserts de
+clavier rouvrirait le débordement que la bascule existe à fermer (téléphone en
+paysage, ~100 dp restants pour un en-tête et des critères qui en coûtent trois
+fois plus).
+
+⚠️ **Pourquoi les deux tests clavier existants ne l'ont jamais vu** : ils
+mesurent deux dispositions **statiques**, chacune à sa taille de surface, alors
+que la panne est dans la **transition**. Les deux tests ajoutés ouvrent le
+clavier (`tester.view.viewInsets`) sur un champ **déjà focalisé**, dans les deux
+sens, et vérifient d'abord que la bascule a bien eu lieu — sans quoi ils
+seraient vides — puis que le `FocusNode` est le **même objet**. Sans la clé,
+l'assertion rougit sur un élément `DEFUNCT`.
+
+---
+
+### ~~H-2 · Un flux rejeté au parsing désarme l'arête créances → paiements~~ — corrigé
+
+`lib/core/offline/pull_coordinator.dart` — les clés écartées à l'analyse
+amorcent `unusableResources` **avant la boucle**, converties en ressources par
+`resourcesOf`. Un `mode` neuf déployé sur `finance.student-charges` fait donc
+renoncer aux paiements au lieu de les poser sur un `amount_paid_in_cents`
+périmé. Amorçage pris sur le PLAN et non sur la sélection du cycle : un
+`pullSubset` de la seule ressource paiements — le chemin de l'écran de
+Facturation — renonce lui aussi, puisque l'amont ne sera rafraîchi par aucun
+cycle. Trois tests, dont une contre-épreuve (une clé écartée qui n'est l'amont
+de rien ne bloque personne) ; l'amorçage retiré fait rougir les deux premiers.
+
+---
+
+### ~~H-3 · « Le client n'a rien compris » est classé « rien à tirer »~~ — corrigé
+
+`sync_plan_parser.dart` mesure désormais `allStreamsDropped` — le serveur a
+annoncé des flux, ce client n'en a retenu aucun — et le repository le traduit en
+`SyncPlanUnknownCause.unsupportedStreams`, donc en repli sur le registre. Le
+corps n'est plus mis en cache (la garde `state is! SyncPlanUnknown` couvrait
+déjà le cas dès qu'il change de famille), donc la panne ne survit plus au
+redémarrage. C'est un **verdict** et non un incident : `refreshFromNetwork` le
+rend en état, contrairement au corps illisible, parce qu'une nouvelle tentative
+rendrait le même corps tant que l'APK n'a pas appris ce vocabulaire.
+
+Le drapeau est mesuré sur la liste **brute**, pas sur `rejectedKeys` : une entrée
+sautée faute de `key` ne peut pas être nommée dans la trace, et laisse pourtant
+la tablette sans rien à tirer. Le déduire des seules clés écartées laissait ce
+corps-là retomber sur « rien à tirer ».
+
+⚠️ **Conséquence à ne pas défaire** : `SyncPlanEmpty` ne porte plus de
+`rejectedKeys`, et le test du coordinateur qui les y vérifiait a été retiré. Ce
+champ avait été ajouté par la revue adversariale de F5/F9 pour nommer les clés
+fautives d'un plan « vide parce que tout a été écarté » — un état que ce lot
+supprime à la source. Le nommer était le lot de consolation d'un parc à l'arrêt ;
+il tire, désormais. La garantie a déménagé dans
+`sync_plan_repository_impl_test.dart`, groupe « TOUS les flux écartés → INCONNU,
+jamais vide ».
+
+---
 
 ### ~~#13 · L'anti-rafale de reprise n'est pas monotone~~ — corrigé (`5123439`)
 

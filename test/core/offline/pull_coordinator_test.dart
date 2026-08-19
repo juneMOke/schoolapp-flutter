@@ -196,14 +196,14 @@ SyncPlanState planKnownWithRejected(
 /// ⚠️ À ne jamais confondre avec [SyncPlanState.unknown] : l'un ne tire rien,
 /// l'autre tire tout ce que le registre en dur autorise.
 ///
-/// [rejectedKeys] distingue les DEUX façons d'être vide, qui se ressemblent à
-/// l'œil et n'ont rien à voir : « ce compte n'a droit à rien » (ensemble vide)
-/// et « cet APK ne comprend plus un seul flux de ce que le serveur envoie »
-/// (toutes les clés écartées à l'analyse). L'assistant les construisait
-/// toujours sans clés — c'est précisément pourquoi aucun des tests du régime
-/// vide n'attrapait le second cas.
-SyncPlanState planEmptyState({Set<String> rejectedKeys = const {}}) =>
-    SyncPlanState.empty(planWithKeys(const []), rejectedKeys: rejectedKeys);
+/// ⚠️ Il n'y a plus qu'UNE façon d'être vide. La seconde — « cet APK ne
+/// comprend plus un seul flux de ce que le serveur envoie » — ne produit plus
+/// cet état : le repository la classe `unsupportedStreams`, donc INCONNUE, donc
+/// repli sur le registre. La confondre avec celle-ci arrêtait tout le pull
+/// non-socle et mettait le corps en cache, si bien que la panne survivait au
+/// redémarrage (cf. `sync_plan_repository_impl_test.dart`, groupe « TOUS les
+/// flux écartés »).
+SyncPlanState planEmptyState() => SyncPlanState.empty(planWithKeys(const []));
 
 /// Régime INCONNU : le repli sur le registre en dur.
 SyncPlanState planUnknown([
@@ -1690,6 +1690,110 @@ void main() {
       },
     );
 
+    // ── Le flux écarté n'est pas seulement muet : il est un AMONT PÉRIMÉ ────
+    //
+    // Nommer la clé rend la panne visible ; ça ne protège pas son aval. Le jour
+    // où le serveur pose un `mode` neuf sur `finance.student-charges`, la clé
+    // quitte `plan.streams`, le handler des créances tombe en `outOfPlan` — un
+    // compteur délibérément exclu d'`isDegraded` — et les paiements, eux
+    // toujours au plan, descendent SYNCED par-dessus un `amount_paid_in_cents`
+    // que plus rien ne rafraîchit. La créance s'affiche impayée, le caissier
+    // réencaisse.
+    //
+    // C'est le scénario que la docstring d'`unusableResources` décrivait déjà —
+    // et ne traitait que pour le droit manquant.
+    test('les paiements ne descendent PAS par-dessus des créances écartées à '
+        'l\'analyse', () async {
+      goOnline();
+      final creances = FakePullHandler(
+        'finance_student_charges',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financeChargeRead],
+      );
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord =
+          plannedCoordinator(
+              planKnownWithRejected(
+                const [SyncPlanKeys.financePayments],
+                const {SyncPlanKeys.financeStudentCharges},
+              ),
+              permissions: CurrentPermissions()..set(const []),
+            )
+            ..registerHandler(creances)
+            ..registerHandler(paiements);
+
+      final report = await coord.pullAll();
+
+      expect(creances.calls, 0, reason: 'le flux écarté n\'est pas tiré');
+      expect(
+        paiements.calls,
+        0,
+        reason: 'sans ce renoncement, le caissier réencaisse',
+      );
+      expect(report.blocked, 1);
+      expect(report.failed, 0, reason: 'rien n\'a échoué : on s\'est abstenu');
+      expect(report.isDegraded, isTrue);
+    });
+
+    test(
+      'vaut aussi pour un pullSubset qui ne demande QUE les paiements',
+      () async {
+        // L'amorçage vient du PLAN, pas de la sélection : l'amont ne sera
+        // rafraîchi par aucun cycle, pas même celui d'après. Mesuré sur la
+        // sélection, l'écran de Facturation aurait continué de tirer ses paiements
+        // seuls — et c'est l'écran qui compte l'argent.
+        goOnline();
+        final paiements = FakePullHandler(
+          'finance_payments',
+          const PullOutcome.updated(),
+          requiredPermissions: const [Perm.financePaymentRead],
+        );
+        final coord = plannedCoordinator(
+          planKnownWithRejected(
+            const [SyncPlanKeys.financePayments],
+            const {SyncPlanKeys.financeStudentCharges},
+          ),
+          permissions: CurrentPermissions()..set(const []),
+        )..registerHandler(paiements);
+
+        final report = await coord.pullSubset(const {'finance_payments'});
+
+        expect(paiements.calls, 0);
+        expect(report.blocked, 1);
+      },
+    );
+
+    test('CONTRE-ÉPREUVE : une clé écartée qui n\'est l\'amont de rien ne '
+        'bloque personne', () async {
+      // Renoncer coûte un flux non tiré : c'est le bon prix quand poursuivre
+      // détruit, un prix inutile sinon. Une seule des quatre arêtes est
+      // bloquante, et `attendance.records` n'en est même pas une.
+      goOnline();
+      final paiements = FakePullHandler(
+        'finance_payments',
+        const PullOutcome.updated(),
+        requiredPermissions: const [Perm.financePaymentRead],
+      );
+      final coord = plannedCoordinator(
+        planKnownWithRejected(
+          const [SyncPlanKeys.financePayments],
+          const {SyncPlanKeys.attendanceRecords},
+        ),
+        permissions: CurrentPermissions()..set(const []),
+      )..registerHandler(paiements);
+
+      final report = await coord.pullSubset(const {'finance_payments'});
+
+      expect(paiements.calls, 1);
+      expect(report.blocked, 0);
+      // La trace, elle, reste : le flux écarté est nommé quoi qu'il arrive.
+      expect(report.plannedNotPulledKeys, {SyncPlanKeys.attendanceRecords});
+    });
+
     test('un plan sans clé écartée ne déclare rien — contre-épreuve', () async {
       goOnline();
       final coordinator =
@@ -2195,40 +2299,13 @@ void main() {
       expect(report.isDegraded, isTrue);
     });
 
-    test('un plan vide PARCE QUE tout a été écarté à l\'analyse nomme les clés '
-        'fautives — sinon « rien à tirer » et « je ne comprends plus ce serveur » '
-        'se ressemblent', () async {
-      goOnline();
-      final classes = FakePullHandler(
-        'classrooms',
-        const PullOutcome.updated(),
-        requiredPermissions: const [Perm.classroomRead],
-      );
-      // Le serveur a bien envoyé des flux ; l'analyse les a TOUS retirés
-      // (un `mode` renommé, un `scope` neuf déployé d'un coup), donc
-      // `plan.streams` est vide et l'état est VIDE, pas connu.
-      final coord = plannedCoordinator(
-        planEmptyState(
-          rejectedKeys: const {'classroom.rosters', 'finance.payments'},
-        ),
-        permissions: CurrentPermissions()..set(const ['classroom.read']),
-      )..registerHandler(classes);
-
-      final report = await coord.pullAll();
-
-      expect(classes.calls, 0);
-      expect(report.planEmpty, isTrue);
-      expect(report.isDegraded, isTrue);
-      // Le cœur du test : le parc s'arrête TOTALEMENT, et le rapport doit
-      // dire pourquoi. Sans ces clés il annonce « plan vide », ce qui envoie
-      // chercher un serveur qui n'aurait rien renvoyé alors que le désaccord
-      // est de contrat.
-      expect(report.plannedNotPulledKeys, {
-        'classroom.rosters',
-        'finance.payments',
-      });
-      expect(report.plannedNotPulled, 2);
-    });
+    // ⚠️ Il y avait ici un test du « vide PARCE QUE tout a été écarté », qui
+    // vérifiait que le rapport nommait les clés fautives. Il n'a plus d'objet :
+    // ce cas ne produit plus un plan VIDE. Le repository le classe INCONNU
+    // (`unsupportedStreams`), donc en repli sur le registre — nommer les clés
+    // aurait été le lot de consolation d'un parc à l'arrêt, alors qu'il tire.
+    // La garantie a déménagé dans `sync_plan_repository_impl_test.dart`, groupe
+    // « TOUS les flux écartés → INCONNU, jamais vide ».
 
     test(
       'un plan vide SANS clé écartée ne nomme rien (le compte sans droits)',

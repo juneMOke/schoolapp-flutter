@@ -58,6 +58,7 @@ void main() {
       );
       expect(result.isMalformed, isFalse);
       expect(result.rejectedKeys, isEmpty);
+      expect(result.allStreamsDropped, isFalse);
 
       expect(plan!.planVersion, 1);
       expect(plan.subject, 'uid-a');
@@ -350,9 +351,14 @@ void main() {
       expect(result.plan!.keys, ['socle']);
     });
 
-    test('un plan dont TOUS les flux sont écartés reste un plan valide', () {
+    test('un plan dont TOUS les flux sont écartés reste un plan valide, ET se '
+        'dénonce comme vidé PAR NOUS', () {
       // Il est vide, pas illisible — et cette différence-là est justement le
-      // tri-état que le repository doit préserver.
+      // tri-état que le repository doit préserver. Mais il est vide DE NOTRE
+      // FAIT, ce que `plan.streams` seul ne dit pas : sans ce drapeau, le
+      // repository lisait « le serveur dit qu'il n'y a rien à tirer », arrêtait
+      // tout le pull non-socle et mettait le corps en cache — la panne
+      // survivait alors au redémarrage.
       final result = parseSyncPlan(
         body(
           streams: const <Object?>[
@@ -364,6 +370,59 @@ void main() {
       expect(result.isMalformed, isFalse);
       expect(result.plan!.streams, isEmpty);
       expect(result.rejectedKeys, {'teleporteur'});
+      expect(result.allStreamsDropped, isTrue);
+    });
+
+    test('un seul flux retenu suffit à ne PAS lever le drapeau', () {
+      // La ligne de partage est « ce client peut-il encore tirer quelque chose »,
+      // pas « a-t-il tout compris ». Un flux écarté sur deux laisse un plan qui
+      // gouverne ; le lire comme inconnu rendrait la main à
+      // `requiredPermissions` alors que le serveur s'est fait comprendre.
+      final result = parseSyncPlan(
+        body(
+          streams: const <Object?>[
+            {'key': 'socle', 'mode': 'BUNDLE', 'scope': 'school'},
+            {'key': 'teleporteur', 'mode': 'TELEPORT', 'scope': 'school'},
+          ],
+        ),
+      );
+
+      expect(result.allStreamsDropped, isFalse);
+      expect(result.rejectedKeys, {'teleporteur'});
+    });
+
+    test(
+      'un streams VIDE ne lève pas le drapeau — le serveur, lui, a parlé',
+      () {
+        // Le cas que le drapeau ne doit surtout pas absorber : il n'y a rien à
+        // comprendre, et « rien à tirer » est une information que le repository
+        // garde telle quelle (état VIDE, jamais inconnu).
+        final result = parseSyncPlan(body(streams: const <Object?>[]));
+
+        expect(result.isMalformed, isFalse);
+        expect(result.plan!.streams, isEmpty);
+        expect(result.allStreamsDropped, isFalse);
+      },
+    );
+
+    test('des entrées SAUTÉES sans trace lèvent le drapeau, faute de mieux', () {
+      // Elles ne peuvent pas entrer dans `rejectedKeys` — sans `key`, il n'y a
+      // rien à nommer — mais pour la tablette elles ont le même effet qu'un mode
+      // inconnu : un flux annoncé qu'elle ne tirera pas. Déduire le drapeau de
+      // `rejectedKeys` laisserait ce corps-là retomber sur « rien à tirer ».
+      final result = parseSyncPlan(
+        body(
+          streams: const <Object?>[
+            {'mode': 'BUNDLE', 'scope': 'school'},
+            'même pas une Map',
+          ],
+        ),
+      );
+
+      expect(result.isMalformed, isFalse);
+      expect(result.plan!.streams, isEmpty);
+      expect(result.rejectedKeys, isEmpty);
+      expect(result.allStreamsDropped, isTrue);
     });
   });
 
