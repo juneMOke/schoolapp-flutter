@@ -35,6 +35,7 @@ class EnrollmentAggregateRequest {
         'previousSchoolLevelGroup': e.previousSchoolLevelGroup,
         'previousSchoolLevel': e.previousSchoolLevel,
         'transferReason': e.transferReason,
+        'previousRate': e.previousRate,
         'previousRank': e.previousRank,
         'validatedPreviousYear': e.validatedPreviousYear,
         // RE = matricule, PRE = id préinscription, NEW = null (posé au seed
