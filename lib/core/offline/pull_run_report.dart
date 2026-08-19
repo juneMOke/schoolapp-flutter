@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
 import 'package:school_app_flutter/core/offline/pull_handler.dart';
 
 /// Bilan d'un cycle de pull (diagnostic / UI).
@@ -75,6 +76,23 @@ class PullRunReport {
   /// périmètre légitime, c'est un contrat rompu.
   final bool planEmpty;
 
+  /// Pourquoi le plan de synchro n'a pas pu être lu, quand il ne l'a pas été.
+  ///
+  /// `null` dès que le plan est connu ou légitimement vide. Le repli sur le
+  /// registre en dur n'est pas une panne en soi — c'est même le mode nominal
+  /// tant que le back n'a pas déployé le plan — d'où une cause portée telle
+  /// quelle plutôt qu'un booléen : seule
+  /// [SyncPlanUnknownCause.unsupportedStreams] compte dans [isDegraded].
+  ///
+  /// ⚠️ Sans ce champ, le cas « le serveur a annoncé des flux, cet APK n'en
+  /// comprend aucun » ne laissait **aucune trace** : le plan n'est ni connu ni
+  /// vide, donc [planEmpty] est faux et [plannedNotPulledKeys] est vide ; un
+  /// compte au périmètre large n'a ni `forbidden` ni `failed` ni `blocked` ;
+  /// [isDegraded] retombait à faux et la pastille restait verte. La chute
+  /// PARTIELLE des flux était bruyante, la chute TOTALE muette — l'inverse de
+  /// l'intention. Mesuré, puis fermé.
+  final SyncPlanUnknownCause? planUnknownCause;
+
   /// L'issue de chaque ressource réellement tentée.
   ///
   /// Les agrégats ne suffisent pas à tous les appelants : un écran qui a demandé
@@ -102,6 +120,7 @@ class PullRunReport {
     this.plannedNotPulledKeys = const <String>{},
     this.blocked = 0,
     this.planEmpty = false,
+    this.planUnknownCause,
     this.outcomes = const <String, PullResult>{},
     this.latestServerTimeMs,
   });
@@ -132,6 +151,12 @@ class PullRunReport {
   ///
   /// Un rapport [skipped] ou [offline] n'a rien observé : il ne dit ni dégradé
   /// ni sain, et l'appelant ne doit rien en conclure.
+  /// [planUnknownCause] n'y entre que pour
+  /// [SyncPlanUnknownCause.unsupportedStreams] : c'est la seule qui dise « cet
+  /// APK ne comprend plus ce que le serveur envoie », donc la seule qui appelle
+  /// une mise à jour du parc. `notDeployed` et `absent` sont le fonctionnement
+  /// normal avant déploiement du plan ; les compter mettrait TOUT le parc en
+  /// alerte permanente, le contresens que ce getter existe pour éviter.
   bool get isDegraded =>
       !skipped &&
       !offline &&
@@ -139,5 +164,6 @@ class PullRunReport {
           forbidden > 0 ||
           plannedNotPulled > 0 ||
           blocked > 0 ||
-          planEmpty);
+          planEmpty ||
+          planUnknownCause == SyncPlanUnknownCause.unsupportedStreams);
 }

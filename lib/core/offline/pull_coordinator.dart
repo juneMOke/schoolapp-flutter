@@ -151,8 +151,21 @@ class PullCoordinator {
     // total survivait au redémarrage. Les deux branches sans clés restent
     // néanmoins nommées, comme au switch d'autorité : pas de `_`, pour qu'un
     // quatrième état casse la compilation au lieu d'atterrir sur un défaut.
+    //
+    // ⚠️ Les clés RETENUES sont retranchées. Rien ne garantit que `rejectedKeys`
+    // et `plan.keys` soient disjoints : le parser traite chaque entrée de
+    // `streams` pour elle-même, donc une clé annoncée DEUX fois — une entrée
+    // valide, une entrée au `mode` inconnu — atterrit dans les deux ensembles
+    // (vérifié sur le parser). Sans ce retranchement, `finance.student-charges`
+    // descendrait normalement tout en restant marquée inutilisable, et les
+    // paiements seraient bloqués **définitivement** au nom d'un amont qui, lui,
+    // est frais. Le serveur énumère ses flux depuis `SyncStream.java` et ne
+    // duplique donc rien aujourd'hui ; c'est une hypothèse sur son corps, pas
+    // un invariant que ce code peut vérifier — et l'échec serait silencieux, sur
+    // de l'argent.
     final planRejectedKeys = switch (planState) {
-      SyncPlanKnown(:final rejectedKeys) => rejectedKeys,
+      SyncPlanKnown(:final plan, :final rejectedKeys) =>
+        rejectedKeys.difference(plan.keys.toSet()),
       SyncPlanEmpty() => const <String>{},
       SyncPlanUnknown() => const <String>{},
     };
@@ -327,6 +340,12 @@ class PullCoordinator {
       plannedNotPulled: plannedNotPulledKeys.length,
       plannedNotPulledKeys: plannedNotPulledKeys,
       planEmpty: planState is SyncPlanEmpty,
+      // Le repli sur le registre n'est pas muet : la cause voyage jusqu'à la
+      // pastille, qui ne s'alarme que d'`unsupportedStreams` (cf. `isDegraded`).
+      planUnknownCause: switch (planState) {
+        SyncPlanUnknown(:final cause) => cause,
+        _ => null,
+      },
       outcomes: Map.unmodifiable(outcomes),
       latestServerTimeMs: latestServerTimeMs,
     );

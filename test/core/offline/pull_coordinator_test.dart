@@ -858,6 +858,40 @@ void main() {
     });
 
     group('isDegraded — table de vérité', () {
+      // Trouvé en revue du commit `f86a5de`, et c'était le silence que ce lot
+      // était censé supprimer : la chute TOTALE des flux ne laissait aucune
+      // trace, quand la chute partielle est bruyante.
+      test(
+        'unsupportedStreams ⇒ true — l\'APK ne comprend plus le serveur',
+        () {
+          expect(
+            const PullRunReport(
+              updated: 3,
+              planUnknownCause: SyncPlanUnknownCause.unsupportedStreams,
+            ).isDegraded,
+            isTrue,
+          );
+        },
+      );
+
+      // Le repli sur le registre est le mode NOMINAL tant que le back n'a pas
+      // déployé le plan : l'alarmer mettrait tout le parc en orange en
+      // permanence, exactement le contresens que ce getter écarte.
+      for (final cause in const [
+        SyncPlanUnknownCause.notDeployed,
+        SyncPlanUnknownCause.absent,
+        SyncPlanUnknownCause.transport,
+        SyncPlanUnknownCause.unauthorized,
+        SyncPlanUnknownCause.malformed,
+      ]) {
+        test('$cause ⇒ false — le repli seul n\'est pas une dégradation', () {
+          expect(
+            PullRunReport(updated: 3, planUnknownCause: cause).isDegraded,
+            isFalse,
+          );
+        });
+      }
+
       // Un cycle déjà en vol n'a rien observé : il ne dit ni sain ni dégradé.
       test('rapport skipped ⇒ false', () {
         expect(const PullRunReport.skipped().isDegraded, isFalse);
@@ -1645,6 +1679,84 @@ void main() {
   );
 
   group('un flux ÉCARTÉ À L\'ANALYSE ne s\'arrête jamais en silence', () {
+    // ── Deux défauts trouvés à la revue du commit `f86a5de` ──────────────────
+    test(
+      'TOUS les flux écartés : le cycle le NOMME au lieu de virer au vert',
+      () async {
+        goOnline();
+        final handler = FakePullHandler(
+          'classrooms',
+          const PullOutcome.updated(),
+        );
+        final coordinator = plannedCoordinator(
+          planUnknown(SyncPlanUnknownCause.unsupportedStreams),
+          permissions: CurrentPermissions()..set(const ['school.read']),
+        )..registerHandler(handler);
+
+        final report = await coordinator.pullAll();
+
+        // Le repli tire : ce n'est pas un arrêt, et le handler passe bien.
+        expect(handler.calls, 1);
+        expect(report.updated, 1);
+        // Mais la panne est nommée. Sans la cause portée jusqu'ici, TOUT était à
+        // zéro — `planEmpty` faux, aucune clé, aucun échec — et la pastille
+        // restait verte pendant que le parc entier retombait sur le registre.
+        expect(
+          report.planUnknownCause,
+          SyncPlanUnknownCause.unsupportedStreams,
+        );
+        expect(
+          report.isDegraded,
+          isTrue,
+          reason: 'un APK qui ne comprend plus le serveur doit se voir',
+        );
+      },
+    );
+
+    test(
+      'une clé À LA FOIS retenue et écartée ne bloque pas son aval',
+      () async {
+        goOnline();
+        // Le serveur annonce deux fois la même clé : une entrée valide, une au
+        // `mode` inconnu. Le parser la met alors dans les DEUX ensembles.
+        final creances = FakePullHandler(
+          'finance_student_charges',
+          const PullOutcome.updated(),
+        );
+        final paiements = FakePullHandler(
+          'finance_payments',
+          const PullOutcome.updated(),
+        );
+        final coordinator =
+            plannedCoordinator(
+                planKnownWithRejected(
+                  const [
+                    SyncPlanKeys.financeStudentCharges,
+                    SyncPlanKeys.financePayments,
+                  ],
+                  const {SyncPlanKeys.financeStudentCharges},
+                ),
+              )
+              ..registerHandler(creances)
+              ..registerHandler(paiements);
+
+        final report = await coordinator.pullAll();
+
+        // L'amont descend : il EST au plan, l'entrée écartée était le doublon.
+        expect(creances.calls, 1);
+        // Donc l'aval n'a aucune raison de renoncer. Sans le retranchement des
+        // clés retenues, les paiements restaient bloqués définitivement au nom
+        // d'un amont pourtant frais — silencieusement, et sur de l'argent.
+        expect(
+          paiements.calls,
+          1,
+          reason: 'une clé présente au plan ne rend pas son aval inexploitable',
+        );
+        expect(report.blocked, 0);
+        expect(report.plannedNotPulledKeys, isEmpty);
+      },
+    );
+
     // Trouvé en revue, reproduit par sonde, et c'était le pire défaut du lot.
     //
     // Quand le serveur introduit un `mode` ou un `scope` que cet APK ne connaît
