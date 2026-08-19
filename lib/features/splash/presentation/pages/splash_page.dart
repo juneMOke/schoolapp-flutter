@@ -104,6 +104,15 @@ class _SplashPageState extends State<SplashPage>
       ),
       child: Scaffold(
         backgroundColor: AppColors.surfaceDark,
+        // Le splash n'a aucun champ de saisie : le clavier logiciel n'a rien à
+        // y faire, et surtout rien à lui prendre. Sans ce `false`, il lui
+        // retire sa hauteur — or le routeur bascule sur le splash dès que
+        // l'authentification passe en `loading`, c'est-à-dire à l'instant du
+        // « Se connecter », **pendant** que le clavier se replie. En paysage il
+        // ne restait alors qu'une centaine de dp au bloc symbole + progression,
+        // qui en demande ~132 : débordement visible le temps du repli.
+        // Filet : `splash_page_test.dart`, « clavier ouvert ».
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
           // En cas d'échec du bootstrap distant, le splash bascule sur
           // l'ErrorView (+ Réessayer) au lieu du chargement. buildWhen évite de

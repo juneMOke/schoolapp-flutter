@@ -38,6 +38,7 @@ void main() {
     WidgetTester tester, {
     required Size size,
     AcademicYearContextState state = loadingState,
+    double keyboardDp = 0,
   }) async {
     // L'AuthBloc est requis depuis ADR-014 : la variante 403 offre une sortie
     // par déconnexion, sans quoi le routeur épingle l'appareil sur le splash.
@@ -61,6 +62,12 @@ void main() {
 
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = size;
+    if (keyboardDp > 0) {
+      // Le clavier tel que le framework le voit : des `viewInsets`, en pixels
+      // physiques (`MediaQuery` les divise par le `devicePixelRatio`, ici 1).
+      tester.view.viewInsets = FakeViewPadding(bottom: keyboardDp);
+      addTearDown(tester.view.resetViewInsets);
+    }
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(bloc.close);
@@ -112,6 +119,35 @@ void main() {
     await pumpSplash(tester, size: const Size(844, 320));
     expect(find.text('Simplifier la gestion de votre école'), findsNothing);
     expect(find.text('v1.0.0 (build 1)'), findsNothing);
+  });
+
+  // Le routeur bascule sur le splash dès que l'authentification passe en
+  // `loading` — donc à l'instant du « Se connecter », pendant que le clavier se
+  // replie. Le splash n'a aucun champ de saisie : il ne doit pas se laisser
+  // raboter par un clavier qui n'est pas le sien. Sans cela, en paysage il ne
+  // restait qu'une centaine de dp au bloc symbole + progression, qui en
+  // réclame ~132 : débordement le temps du repli (7 dp sur 961×440).
+  for (final surface in const <Size>[
+    Size(640, 360), // petit téléphone paysage
+    Size(731, 411), // téléphone paysage
+    Size(800, 600), // petite tablette
+    Size(961, 440), // téléphone large paysage — cas rapporté
+    Size(1280, 800), // tablette paysage (cible du projet)
+  ]) {
+    testWidgets('$surface, clavier ouvert : le splash ne déborde pas', (
+      tester,
+    ) async {
+      await pumpSplash(tester, size: surface, keyboardDp: 315);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('le clavier ne retire pas sa hauteur au splash', (tester) async {
+    await pumpSplash(tester, size: const Size(961, 440), keyboardDp: 315);
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.resizeToAvoidBottomInset, isFalse);
+    expect(tester.getSize(find.byType(SafeArea).first).height, 440);
   });
 
   testWidgets('échec du bootstrap → ErrorView + Réessayer relance l\'amorçage', (
