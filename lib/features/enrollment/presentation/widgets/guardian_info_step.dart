@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -290,6 +291,14 @@ class GuardianInfoStepState extends State<GuardianInfoStep> {
       if (value.phoneNumber.trim().isEmpty) {
         errors.add(
           'Gardien ${i + 1}: ${l10n.requiredFieldError(l10n.phoneNumberLabel)}',
+        );
+      } else if (!ParentItemValue.isPhoneAcceptable(
+        value.phoneNumber,
+        initialPhone: parent.phoneNumber,
+      )) {
+        errors.add(
+          'Gardien ${i + 1}: '
+          '${l10n.phoneNumberInvalidError(PhoneCountry.congoDrc.nationalLength)}',
         );
       }
       if (value.email.trim().isNotEmpty &&

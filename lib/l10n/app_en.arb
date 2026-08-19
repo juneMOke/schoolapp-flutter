@@ -1186,6 +1186,15 @@
   "identificationNumberHelp": "Official identification number.",
   "phoneNumberLabel": "Phone",
   "phoneNumberHelp": "Guardian's phone number.",
+  "phoneNumberCountryCodeLabel": "Country dialling code",
+  "phoneNumberInvalidError": "Invalid phone number ({expectedDigits} digits expected after the dialling code).",
+  "@phoneNumberInvalidError": {
+    "placeholders": {
+      "expectedDigits": {
+        "type": "int"
+      }
+    }
+  },
   "emailLabel": "Email",
   "emailLabelHelp": "Guardian's email address.",
   "relationshipFather": "Father",

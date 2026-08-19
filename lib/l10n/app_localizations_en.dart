@@ -2030,6 +2030,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumberHelp => 'Guardian\'s phone number.';
 
   @override
+  String get phoneNumberCountryCodeLabel => 'Country dialling code';
+
+  @override
+  String phoneNumberInvalidError(int expectedDigits) {
+    return 'Invalid phone number ($expectedDigits digits expected after the dialling code).';
+  }
+
+  @override
   String get emailLabel => 'Email';
 
   @override

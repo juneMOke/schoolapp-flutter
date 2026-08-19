@@ -1143,6 +1143,15 @@
   "identificationNumberHelp": "Numéro d'identification officiel.",
   "phoneNumberLabel": "Téléphone",
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
+  "phoneNumberCountryCodeLabel": "Indicatif pays",
+  "phoneNumberInvalidError": "Numéro de téléphone invalide ({expectedDigits} chiffres attendus après l'indicatif).",
+  "@phoneNumberInvalidError": {
+    "placeholders": {
+      "expectedDigits": {
+        "type": "int"
+      }
+    }
+  },
   "emailLabel": "Email",
   "emailLabelHelp": "Adresse email du tuteur.",
   "relationshipFather": "Père",

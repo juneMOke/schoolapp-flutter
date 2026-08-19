@@ -2040,6 +2040,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
 
   @override
+  String get phoneNumberCountryCodeLabel => 'Indicatif pays';
+
+  @override
+  String phoneNumberInvalidError(int expectedDigits) {
+    return 'Numéro de téléphone invalide ($expectedDigits chiffres attendus après l\'indicatif).';
+  }
+
+  @override
   String get emailLabel => 'Email';
 
   @override

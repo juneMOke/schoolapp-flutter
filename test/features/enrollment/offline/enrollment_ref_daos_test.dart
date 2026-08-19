@@ -1316,6 +1316,32 @@ void main() {
       expect(link['relationship_type'], 'FATHER');
     });
 
+    test('tuteur provisoire au format hérité ("0900000001") réutilisé face au '
+        'numéro E.164 du serveur — pas de doublon à la reprise', () async {
+      // Saisie hors ligne d'avant le passage du champ en E.164.
+      await db.insert('parents', {
+        'id': 'par-local',
+        'first_name': 'Jo',
+        'last_name': 'Ilunga',
+        'phone_number': '0900000001',
+        'sync_status': SyncState.pendingSync.dbValue,
+        'updated_at': 5,
+      });
+
+      await reconciliationDao.upsertEnrollmentSnapshots([
+        aggregate(),
+      ], syncedAt: 1000);
+
+      final parents = await db.query('parents');
+      expect(parents, hasLength(1));
+      expect(parents.single['id'], 'par-local');
+      expect(parents.single['sync_status'], SyncState.pendingSync.dbValue);
+      expect(
+        (await db.query('student_parent')).single['parent_id'],
+        'par-local',
+      );
+    });
+
     test('téléphone canonique corrigé côté serveur → rafraîchi par id (pas de '
         'doublon)', () async {
       await reconciliationDao.upsertEnrollmentSnapshots([

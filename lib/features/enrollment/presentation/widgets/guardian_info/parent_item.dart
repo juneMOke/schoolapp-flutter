@@ -150,7 +150,7 @@ class _ParentItemState extends State<ParentItem> {
         (changed['relationshipType'] ?? false);
 
     return ParentItemFormState(
-      valid: value.isValid,
+      valid: value.isValidAgainst(_initialValue),
       dirty: dirty,
       changedFields: changed,
     );

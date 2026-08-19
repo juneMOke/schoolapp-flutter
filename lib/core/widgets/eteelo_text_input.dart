@@ -28,6 +28,12 @@ class EteeloTextInput extends StatefulWidget {
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
 
+  /// Bloc affiché À L'INTÉRIEUR du cadre, collé au bord gauche, avant la
+  /// zone de saisie (ex. la case indicatif d'un [EteeloPhoneInput]). Il
+  /// occupe toute la hauteur du champ et gère son propre rembourrage : le
+  /// padding gauche du cadre passe donc à zéro quand il est fourni.
+  final Widget? prefix;
+
   const EteeloTextInput({
     super.key,
     required this.controller,
@@ -48,6 +54,7 @@ class EteeloTextInput extends StatefulWidget {
     this.minLines,
     this.maxLines = 1,
     this.inputFormatters,
+    this.prefix,
   });
 
   @override
@@ -305,9 +312,11 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
           minHeight: _fieldHeight,
           maxHeight: _isSingleLine ? _fieldHeight : double.infinity,
         ),
-        padding: EdgeInsets.symmetric(
-          horizontal: _horizontalPadding(),
-          vertical: _isSingleLine ? 0 : AppSpacing.md - 1,
+        padding: EdgeInsets.only(
+          left: widget.prefix == null ? _horizontalPadding() : 0,
+          right: _horizontalPadding(),
+          top: _isSingleLine ? 0 : AppSpacing.md - 1,
+          bottom: _isSingleLine ? 0 : AppSpacing.md - 1,
         ),
         decoration: BoxDecoration(
           color: _backgroundColor(),
@@ -318,8 +327,42 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
           ),
           boxShadow: [if (_focusRing() != null) _focusRing()!],
         ),
-        alignment: _isSingleLine ? Alignment.centerLeft : Alignment.topLeft,
-        child: field,
+        // Un [prefix] a son propre fond, collé au bord : sans découpe, ses
+        // angles droits dépasseraient du cadre arrondi.
+        clipBehavior: widget.prefix == null ? Clip.none : Clip.antiAlias,
+        // Sans alignement, le contenu reçoit la hauteur pleine du cadre :
+        // c'est ce qui permet au séparateur du [prefix] de filer de bord à
+        // bord. On ne s'en prive que là où la hauteur est libre (multiligne).
+        alignment: widget.prefix != null && _isSingleLine
+            ? null
+            : (_isSingleLine ? Alignment.centerLeft : Alignment.topLeft),
+        child: widget.prefix == null
+            ? field
+            : Row(
+                // stretch : le bloc préfixe reçoit la hauteur pleine du
+                // cadre, sinon son séparateur ne toucherait pas les bords.
+                crossAxisAlignment: _isSingleLine
+                    ? CrossAxisAlignment.stretch
+                    : CrossAxisAlignment.start,
+                children: [
+                  // Le préfixe occupe une bonne part du cadre : sans ce
+                  // relais, taper dessus n'ouvrirait pas le clavier alors
+                  // que tout le cadre était la zone de saisie auparavant.
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.enabled ? _focusNode.requestFocus : null,
+                    child: widget.prefix!,
+                  ),
+                  // La saisie garde sa hauteur naturelle et se centre :
+                  // étirée comme le préfixe, elle se collerait en haut du
+                  // cadre.
+                  Expanded(
+                    child: _isSingleLine
+                        ? Align(alignment: Alignment.centerLeft, child: field)
+                        : field,
+                  ),
+                ],
+              ),
       ),
     );
   }

@@ -3452,6 +3452,18 @@ abstract class AppLocalizations {
   /// **'Guardian\'s phone number.'**
   String get phoneNumberHelp;
 
+  /// No description provided for @phoneNumberCountryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country dialling code'**
+  String get phoneNumberCountryCodeLabel;
+
+  /// No description provided for @phoneNumberInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number ({expectedDigits} digits expected after the dialling code).'**
+  String phoneNumberInvalidError(int expectedDigits);
+
   /// No description provided for @emailLabel.
   ///
   /// In en, this message translates to:

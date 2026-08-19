@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_entities.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/parent_search_bloc.dart';
@@ -290,13 +291,10 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
               ),
               SizedBox(
                 width: AppDimensions.guardianSearchCriterionWidth,
-                child: EteeloTextInput(
+                child: EteeloPhoneInput(
                   label: l10n.phoneNumberLabel,
                   controller: _phoneController,
-                  keyboardType: EteeloTextInputType.phone,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\- ]')),
-                  ],
+                  dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
                   onSubmitted: (_) => _search(),
                 ),
               ),

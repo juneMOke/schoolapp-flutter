@@ -1044,6 +1044,89 @@ void main() {
       },
     );
 
+    test('dédup fratrie insensible au format : une fiche héritée '
+        '("0816939060") et la saisie E.164 du jour ("+243816939060") sont le '
+        'MÊME tuteur, pas un doublon', () async {
+      await draftDao.seedDraft(
+        student: seededStudent(),
+        enrollment: seededEnrollment(),
+        parents: [parent(id: 'p1', phone: '0816939060')],
+        nowMs: 100,
+      );
+      await draftDao.seedDraft(
+        student: const StudentLocalModel(
+          id: 's2',
+          firstName: 'Awa',
+          lastName: 'Moke',
+          surname: 'Cadette',
+          gender: 'FEMALE',
+          dateOfBirth: '2017-04-02',
+          birthPlace: 'Kinshasa',
+          nationality: 'CD',
+          city: 'Kinshasa',
+          matriculationNumber: 'KIN-2025-0002',
+          updatedAt: 100,
+        ),
+        enrollment: const EnrollmentLocalModel(
+          id: 'e2',
+          studentId: 's2',
+          enrollmentType: 'RE_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'lvl-1',
+          enrollmentDate: '2026-07-08',
+          sourceRef: 'KIN-2025-0002',
+          updatedAt: 100,
+        ),
+        parents: [parent(id: 'p2', phone: '+243816939060')],
+        nowMs: 200,
+      );
+
+      expect(await db.query('parents'), hasLength(1));
+      expect(await db.query('student_parent'), hasLength(2));
+    });
+
+    test('deux pays voisins aux mêmes derniers chiffres restent DEUX tuteurs '
+        '(+242 Brazzaville vs +243 Kinshasa)', () async {
+      await draftDao.seedDraft(
+        student: seededStudent(),
+        enrollment: seededEnrollment(),
+        parents: [parent(id: 'p1', phone: '+243816939060')],
+        nowMs: 100,
+      );
+      await draftDao.seedDraft(
+        student: const StudentLocalModel(
+          id: 's2',
+          firstName: 'Awa',
+          lastName: 'Ndala',
+          surname: 'Cadette',
+          gender: 'FEMALE',
+          dateOfBirth: '2017-04-02',
+          birthPlace: 'Kinshasa',
+          nationality: 'CD',
+          city: 'Kinshasa',
+          matriculationNumber: 'KIN-2025-0002',
+          updatedAt: 100,
+        ),
+        enrollment: const EnrollmentLocalModel(
+          id: 'e2',
+          studentId: 's2',
+          enrollmentType: 'RE_ENROLLMENT',
+          status: 'IN_PROGRESS',
+          academicYearId: 'ay-2026',
+          schoolLevelId: 'lvl-1',
+          enrollmentDate: '2026-07-08',
+          sourceRef: 'KIN-2025-0002',
+          updatedAt: 100,
+        ),
+        parents: [parent(id: 'p2', phone: '+242816939060')],
+        nowMs: 200,
+      );
+
+      // Fusionner les deux rattacherait un élève au parent d'un autre.
+      expect(await db.query('parents'), hasLength(2));
+    });
+
     test('re-save identité APRÈS seed : adresse, matricule, antécédents et '
         'source_ref conservés (sémantique préservante)', () async {
       await draftDao.seedDraft(

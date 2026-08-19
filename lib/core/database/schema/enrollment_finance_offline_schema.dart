@@ -93,6 +93,11 @@ const TableSchema parentsTable = TableSchema(
     )
   ''',
   createIndexSql: [
+    // `idx_parents_phone` ne porte plus les rapprochements de tuteurs :
+    // ceux-ci comparent une clé normalisée (`PhoneNumberSql.matchKey`) pour
+    // reconnaître un même numéro écrit autrement, ce qu'un index sur la
+    // valeur brute ne peut pas servir. Conservé faute de justifier un
+    // palier de schéma à lui seul.
     'CREATE INDEX idx_parents_phone ON parents(phone_number)',
     'CREATE INDEX idx_parents_names ON parents(last_name, first_name)',
   ],
