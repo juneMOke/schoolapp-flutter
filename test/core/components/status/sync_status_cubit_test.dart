@@ -1262,6 +1262,9 @@ void main() {
   group('battement de la file', () {
     late MockCredentialsProbe probe;
     late MockReauthenticator reauth;
+    late MockRevocationEvaluator revocation;
+    late MockPullCoordinator pull;
+    late int nowMs;
 
     OutboxEntry anEntry() => const OutboxEntry(
       id: 'e1',
@@ -1275,8 +1278,15 @@ void main() {
     setUp(() {
       probe = MockCredentialsProbe();
       reauth = MockReauthenticator();
+      revocation = MockRevocationEvaluator();
+      pull = MockPullCoordinator();
+      nowMs = 1000;
       when(() => probe.canAuthenticate()).thenAnswer((_) async => true);
       when(() => reauth.ensureFreshAccess()).thenAnswer((_) async => true);
+      when(
+        () => revocation.evaluateRevocation(),
+      ).thenAnswer((_) async => false);
+      when(() => pull.pullAll()).thenAnswer((_) async => const PullRunReport());
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenAnswer((_) async => []);
@@ -1289,10 +1299,28 @@ void main() {
       connectivity: connectivity,
       syncEngine: syncEngine,
       syncMetaDao: syncMetaDao,
+      pullCoordinator: pull,
+      revocationEvaluator: revocation,
       credentialsProbe: probe,
       reauthenticator: reauth,
+      now: () => nowMs,
       heartbeatInterval: interval,
     );
+
+    /// Ouvre une session et consomme le cycle qu'elle déclenche : c'est l'état
+    /// réel dans lequel le battement démarre en production, le seul fil qui
+    /// l'arme étant `syncOnLogin`.
+    Future<SyncStatusCubit> beatingAfterLogin({
+      Duration interval = SyncStatusCubit.kDefaultHeartbeatInterval,
+    }) async {
+      final cubit = buildBeating(interval: interval);
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verify(() => syncEngine.flush()).called(1);
+      verify(() => pull.pullAll()).called(1);
+      return cubit;
+    }
 
     test('armé seulement quand session ouverte ET premier plan', () async {
       final cubit = buildBeating();
@@ -1322,9 +1350,7 @@ void main() {
     });
 
     test('le battement ne survit pas à la fermeture du cubit', () async {
-      final cubit = buildBeating();
-      await pumpEventQueue();
-      cubit.onSessionOpened();
+      final cubit = await beatingAfterLogin();
       expect(cubit.isHeartbeatActive, isTrue);
 
       await cubit.close();
@@ -1337,8 +1363,8 @@ void main() {
       // file pleine d'entrées encore en backoff ferait sinon clignoter la
       // pastille toutes les 45 s devant un utilisateur qui n'a rien fait.
       when(() => outbox.pendingCount()).thenAnswer((_) async => 4);
-      final cubit = buildBeating();
-      await pumpEventQueue();
+      final cubit = await beatingAfterLogin();
+      nowMs += 45000;
       final emitted = <SyncStatus>[];
       final sub = cubit.stream.listen((s) => emitted.add(s.status));
 
@@ -1346,32 +1372,34 @@ void main() {
       await pumpEventQueue();
 
       verifyNever(() => syncEngine.flush());
+      verifyNever(() => pull.pullAll());
       expect(emitted, isEmpty);
       await sub.cancel();
       await cubit.close();
     });
 
-    test('une entrée prête : le tic pousse', () async {
+    test('une entrée prête : le tic pousse, sans tirer', () async {
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenAnswer((_) async => [anEntry()]);
-      final cubit = buildBeating();
-      await pumpEventQueue();
+      final cubit = await beatingAfterLogin();
+      nowMs += 45000;
 
       await cubit.heartbeatTick();
       await pumpEventQueue();
 
       verify(() => syncEngine.flush()).called(1);
+      verifyNever(() => pull.pullAll());
       await cubit.close();
     });
 
     test('un flush déjà en vol : le tic s\'efface', () async {
-      when(() => syncEngine.isFlushing).thenReturn(true);
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenAnswer((_) async => [anEntry()]);
-      final cubit = buildBeating();
-      await pumpEventQueue();
+      final cubit = await beatingAfterLogin();
+      nowMs += 45000;
+      when(() => syncEngine.isFlushing).thenReturn(true);
 
       await cubit.heartbeatTick();
       await pumpEventQueue();
@@ -1382,11 +1410,11 @@ void main() {
 
     test('base indisponible : le tic ne remonte pas d\'exception', () async {
       // Un `Timer` n'a personne pour attraper ce qu'il lève.
+      final cubit = await beatingAfterLogin();
+      nowMs += 45000;
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenThrow(StateError('base fermée'));
-      final cubit = buildBeating();
-      await pumpEventQueue();
 
       await expectLater(cubit.heartbeatTick(), completes);
 
@@ -1399,9 +1427,10 @@ void main() {
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenAnswer((_) async => [anEntry()]);
-      final cubit = buildBeating(interval: const Duration(milliseconds: 20));
-      await pumpEventQueue();
-      cubit.onSessionOpened();
+      final cubit = await beatingAfterLogin(
+        interval: const Duration(milliseconds: 20),
+      );
+      nowMs += 45000;
 
       await Future<void>.delayed(const Duration(milliseconds: 60));
       await pumpEventQueue();
@@ -1414,15 +1443,114 @@ void main() {
       when(
         () => outbox.pendingReady(any(), limit: any(named: 'limit')),
       ).thenAnswer((_) async => [anEntry()]);
-      final cubit = buildBeating(interval: const Duration(milliseconds: 20));
-      await pumpEventQueue();
-      cubit.onSessionOpened();
+      final cubit = await beatingAfterLogin(
+        interval: const Duration(milliseconds: 20),
+      );
+      nowMs += 45000;
       cubit.onBackground();
 
       await Future<void>.delayed(const Duration(milliseconds: 60));
       await pumpEventQueue();
 
       verifyNever(() => syncEngine.flush());
+      await cubit.close();
+    });
+
+    // ── Lot 3 : le battement finit par TIRER ────────────────────────────────
+    //
+    // Une tablette allumée le matin dans une école déjà en Wi-Fi ouvre sa
+    // session, exécute son cycle, et n'en voit plus jamais : ni transition
+    // réseau, ni reprise si elle reste posée sur le même écran. Elle
+    // travaillait la journée entière sur le cache du matin.
+
+    test('cache vieilli : le tic tire, file vide ou non', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      // La file est vide — sous la seule règle du lot 2, ce tic n'aurait rien
+      // fait, et le référentiel serait resté figé sur celui du matin.
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('cache frais : le tic ne tire pas', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs - 1;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verifyNever(() => pull.pullAll());
+      await cubit.close();
+    });
+
+    test('un cycle tiré repousse l\'échéance du suivant', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      // Sans ré-estampillage, CHAQUE tic suivant repartirait en cycle complet :
+      // dix-neuf ressources toutes les 45 s sur la connexion d'une école.
+      nowMs += 45000;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      await cubit.close();
+    });
+
+    test('un cycle tiré par AILLEURS repousse aussi l\'échéance', () async {
+      // Ce qui compte est l'âge du cache, jamais l'identité de qui l'a
+      // rafraîchi : une reprise d'application vaut un tic.
+      final cubit = await beatingAfterLogin();
+
+      nowMs += SyncStatusCubit.kFullCycleMaxAgeMs - 1000;
+      await cubit.syncOnResume(); // > 5 min : cycle complet
+      await pumpEventQueue();
+      verify(() => pull.pullAll()).called(1);
+
+      nowMs += 1000; // l'échéance du battement serait franchie sans cela
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      await cubit.close();
+    });
+
+    test('session ouverte HORS LIGNE : le premier tic tire', () async {
+      // `syncOnLogin` s'arrête à la pré-garde de connectivité, donc aucune
+      // estampille. Sans réseau qui revient ni reprise, ce tic est le seul
+      // rattrapage — d'où « âge inconnu ⇒ tirer », comme pour l'horloge qui
+      // recule.
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      final cubit = buildBeating();
+      await pumpEventQueue();
+      await cubit.syncOnLogin();
+      await pumpEventQueue();
+      verifyNever(() => pull.pullAll());
+
+      when(() => connectivity.isOnline()).thenAnswer((_) async => true);
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
+      await cubit.close();
+    });
+
+    test('horloge qui recule : le tic tire au lieu de se figer', () async {
+      final cubit = await beatingAfterLogin();
+
+      nowMs -= 86400000;
+      await cubit.heartbeatTick();
+      await pumpEventQueue();
+
+      verify(() => pull.pullAll()).called(1);
       await cubit.close();
     });
   });

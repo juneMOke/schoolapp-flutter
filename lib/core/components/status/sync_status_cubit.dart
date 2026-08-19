@@ -121,6 +121,22 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   static const Duration kDefaultHeartbeatInterval = Duration(seconds: 45);
 
+  /// Âge au-delà duquel le battement ne se contente plus de pousser : il tire.
+  ///
+  /// C'est le pendant *lecture* du battement (lot 3), et il répond à une panne
+  /// distincte de celle du push. Une tablette allumée le matin dans une école
+  /// déjà couverte en Wi-Fi ouvre sa session, exécute son cycle, et n'en voit
+  /// plus jamais : ni transition réseau, ni reprise d'application si elle reste
+  /// posée sur le même écran. Elle travaillait donc la journée entière sur le
+  /// cache du matin — un tarif changé à 9 h, une classe recomposée à 11 h,
+  /// invisibles jusqu'au lendemain.
+  ///
+  /// Un quart d'heure : assez espacé pour que la pagination de dix-neuf
+  /// ressources reste marginale sur la connexion d'une école (et la plupart
+  /// répondent 304), assez serré pour qu'une correction de référentiel arrive
+  /// dans la demi-heure.
+  static const int kFullCycleMaxAgeMs = 900000;
+
   /// Fenêtre en-deçà de laquelle une reprise d'application ne relance PAS le
   /// cycle complet (cf. [syncOnResume]). Cinq minutes : au-delà, l'utilisateur
   /// est resté assez longtemps ailleurs pour qu'un référentiel ait bougé ;
@@ -333,21 +349,35 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// Comme les autres points d'entrée, entièrement gardé plus bas : hors ligne,
   /// sans jetons ou sans mint possible, il ne tente rien.
   Future<void> syncOnResume() async {
-    final last = _lastCycleAtMs;
-    // Écart NÉGATIF = cycle complet, jamais chemin court. L'horloge est celle
-    // du device (`DateTime.now()`), donc reculable : un NTP qui corrige une
-    // dérive de RTC, ou une date changée à la main, laisse l'estampille dans le
-    // futur. Comparé naïvement, l'écart resterait sous le seuil À JAMAIS et ce
-    // déclencheur — le seul qui revienne plusieurs fois par jour — serait mort
-    // pour toute la vie du processus, sans que rien ne le signale.
-    final elapsed = last == null ? null : _now() - last;
-    if (elapsed == null ||
-        elapsed < 0 ||
-        elapsed >= kResumeFullCycleMinIntervalMs) {
+    final since = _sinceLastCycleMs();
+    if (since == null || since >= kResumeFullCycleMinIntervalMs) {
       await syncNow();
       return;
     }
     await _flushAndRefresh();
+  }
+
+  /// Temps écoulé depuis le dernier cycle complet, ou `null` si aucun n'est
+  /// connu — **ou si l'horloge a reculé**.
+  ///
+  /// Les deux appelants ([syncOnResume] et le battement) lisent la même
+  /// estampille avec des seuils opposés — un minimum entre deux cycles pour
+  /// l'un, un âge maximum pour l'autre — mais ils partagent ce piège-ci, d'où
+  /// le passage par un seul endroit.
+  ///
+  /// L'horloge est celle du device (`DateTime.now()`), donc reculable : un NTP
+  /// qui corrige une dérive de RTC, ou une date changée à la main, laisse
+  /// l'estampille dans le futur. Comparé naïvement, l'écart resterait sous
+  /// n'importe quel seuil À JAMAIS : la reprise ne referait plus jamais de
+  /// cycle complet, et le battement n'en déclencherait jamais un. Deux
+  /// déclencheurs morts en silence pour toute la vie du processus. Rendre
+  /// `null` — « on ne sait pas » — les fait tous deux retomber du côté sûr,
+  /// celui qui tire.
+  int? _sinceLastCycleMs() {
+    final last = _lastCycleAtMs;
+    if (last == null) return null;
+    final elapsed = _now() - last;
+    return elapsed < 0 ? null : elapsed;
   }
 
   // ─── Battement de la file (lot 2) ────────────────────────────────────────
@@ -419,6 +449,16 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     if (_beating || isClosed) return;
     _beating = true;
     try {
+      // Cache vieilli : cycle COMPLET, file vide ou non (lot 3). Testé en
+      // premier, et sans la garde `isFlushing` : subordonner la lecture à
+      // l'état de la file la ferait sauter à chaque tic sur une tablette qui
+      // écrit sans arrêt — celle-là même dont le référentiel a le plus besoin
+      // d'être frais. `syncNow` se sérialise d'ailleurs tout seul, le moteur
+      // rendant `skipped` sur un flush déjà en vol.
+      if (_isFullCycleDue()) {
+        await syncNow();
+        return;
+      }
       // Un flush est déjà en vol (écriture locale, reprise) : le tic n'a rien à
       // ajouter, et `flush()` lui rendrait `skipped` de toute façon.
       if (_syncEngine.isFlushing) return;
@@ -430,6 +470,17 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     } finally {
       _beating = false;
     }
+  }
+
+  /// Le cache a-t-il assez vieilli pour mériter un cycle complet ?
+  ///
+  /// Lit la même estampille que [syncOnResume] : un cycle déclenché par une
+  /// reprise, un retour réseau ou l'ouverture de session repousse donc
+  /// l'échéance du battement, et réciproquement. C'est voulu — ce qui compte
+  /// est l'âge du cache, jamais l'identité de qui l'a rafraîchi.
+  bool _isFullCycleDue() {
+    final since = _sinceLastCycleMs();
+    return since == null || since >= kFullCycleMaxAgeMs;
   }
 
   /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
