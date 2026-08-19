@@ -84,11 +84,24 @@ class SyncEngine {
   /// bascule en `SYNC_ERROR` au lieu d'être retentée indéfiniment. L'entrée
   /// poisonnée rejoint l'état **terminal** `SYNC_ERROR` (même sort qu'un rejet
   /// métier, surfacé en `syncConflict`) : pas de reprise automatique, le
-  /// recouvrement passe par une ré-écriture (re-enqueue du même id). Défaut
-  /// volontairement **haut** : le flush est opportuniste (aucun timer), donc
-  /// atteindre le seuil suppose ~50 flushs *en ligne* échoués — improbable pour
-  /// une simple coupure transitoire, qui laisse l'entrée en `PENDING`.
-  static const int _defaultMaxAttempts = 50;
+  /// recouvrement passe par une ré-écriture (re-enqueue du même id).
+  ///
+  /// ⚠️ **Ce seuil se lit en TEMPS, pas en tentatives.** Sa valeur d'origine
+  /// (50) était argumentée par « le flush est opportuniste, aucun timer » :
+  /// atteindre 50 flushs *en ligne* échoués supposait 50 gestes de
+  /// l'utilisateur, ce qu'aucune panne transitoire ne produit. Le battement de
+  /// synchro (`SyncHeartbeat`) est précisément ce timer. Le backoff plafonnant
+  /// à 256 s — `backoffMs` borne son décalage à 8, sous le plafond déclaré de
+  /// 300 s — les tentatives avancent désormais sur l'horloge murale, à raison
+  /// d'une par ~5 min : 50 auraient été franchies en une **après-midi** de 5xx,
+  /// empoisonnant des paiements que rien n'avait rejetés, et dont la reprise
+  /// est manuelle, entrée par entrée.
+  ///
+  /// Mille tentatives valent donc ~3,5 jours de panne continue : au-delà, il ne
+  /// s'agit plus d'un incident transitoire. Une entrée qui attend coûte une
+  /// requête toutes les 256 s ; une entrée faussement terminale coûte un geste
+  /// humain et, sur de l'argent, un doute.
+  static const int _defaultMaxAttempts = 1000;
 
   bool _flushing = false;
   final List<void Function()> _flushCompleteListeners = [];

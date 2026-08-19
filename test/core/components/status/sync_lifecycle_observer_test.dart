@@ -31,26 +31,40 @@ void main() {
     expect(calls, ['resume']);
   });
 
-  testWidgets(
-    'tout retrait déclenche onPause, quelle qu\'en soit la profondeur',
-    (tester) async {
-      await pumpObserver(tester);
+  testWidgets('un vrai retrait de l\'écran déclenche onPause', (tester) async {
+    await pumpObserver(tester);
 
-      // `inactive` compte comme les autres : le seul consommateur — l'arrêt du
-      // battement — se rétablit d'un `Timer` recréé au retour, alors que laisser
-      // tourner une boucle réseau hors de tout usage ne se rattrape pas.
-      for (final state in const [
-        AppLifecycleState.inactive,
-        AppLifecycleState.paused,
-        AppLifecycleState.hidden,
-        AppLifecycleState.detached,
-      ]) {
-        await send(tester, state);
-      }
+    for (final state in const [
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.detached,
+    ]) {
+      await send(tester, state);
+    }
 
-      expect(calls, ['pause', 'pause', 'pause', 'pause']);
-    },
-  );
+    expect(calls, ['pause', 'pause', 'pause']);
+  });
+
+  testWidgets('`inactive` n\'appelle RIEN', (tester) async {
+    // État de recouvrement transitoire — volet de notifications, boîte de
+    // permission (le chemin ESC/POS en demande), feuille de partage, sélecteur
+    // de fichiers, focus en écran partagé. L'application est toujours là.
+    //
+    // Le traiter comme un retrait coupait le battement, et le retour le
+    // recréait avec un compte à rebours neuf : un caissier qui franchit cette
+    // frontière plus souvent que la période ne recevait plus AUCUN tic, donc
+    // plus aucun push ni pull périodique, pendant que le drapeau d'armement
+    // affichait « actif ».
+    await pumpObserver(tester);
+
+    for (var i = 0; i < 5; i++) {
+      await send(tester, AppLifecycleState.inactive);
+      await send(tester, AppLifecycleState.resumed);
+    }
+
+    // Les reprises sont bien rapportées ; aucune pause ne s'est glissée entre.
+    expect(calls, List.filled(5, 'resume'));
+  });
 
   testWidgets('chaque reprise compte — l\'anti-rafale est ailleurs', (
     tester,

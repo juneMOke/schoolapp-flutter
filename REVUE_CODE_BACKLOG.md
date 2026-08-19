@@ -268,7 +268,84 @@ l'opérateur corriger des critères qui n'y peuvent rien.
 
 ---
 
+## 🟡 Bas — issus de la revue adversariale du battement (2026-08-19)
+
+### B-5 · La feuille de synchro fige des drapeaux qu'un timer peut désormais changer
+
+`lib/core/components/status/sync_errors_sheet.dart:35`
+
+La feuille capture `hasIncompleteRead` / `hasRetriableRead` à l'ouverture, sur la
+prémisse écrite qu'ils « ne peuvent de toute façon pas changer utilement le temps
+d'une modale ouverte ». Le cycle complet du battement invalide cette prémisse :
+un tic peut lever la dégradation pendant que la feuille l'affiche (« Réessayer »
+brûle alors un cycle de dix-neuf ressources pour rien), ou l'introduire alors que
+la feuille n'offre plus aucun bandeau ni geste. Même nature pour
+`OutboxErrorsCubit`, chargé une fois sans abonnement à la fin de flush : un flush
+du battement peut acquitter et supprimer une ligne que la feuille liste encore,
+et `requeue` ne touchant que les `SYNC_ERROR`, le tap devient un no-op muet.
+
+**À faire** — abonner la feuille à l'état du cubit plutôt que de le photographier.
+
+---
+
+### B-6 · Chaque tic productif redéchiffre la session complète trois à quatre fois
+
+`lib/core/components/status/sync_status_cubit.dart` (chemin de push)
+
+`TokenStorageService.readAuthSession()` enchaîne 13 `_storage.read()`, chacun un
+aller-retour MethodChannel plus un déchiffrement Keystore. Un tic avec du travail
+prêt les paie quatre fois : `_canAuthenticate()`, `_ensureFreshAccess()`, la
+propre garde de `SyncEngine.flush()`, puis `refresh()` — soit ~52 déchiffrements
+toutes les 45 s. Le coût préexistait à chaque cycle ; le battement en fait une
+cadence.
+
+**À faire** — une lecture unique passée à la sonde, au ré-authentificateur et à
+la garde du moteur, ou une mémo à TTL court dans `AuthSessionManager`.
+
+---
+
+### B-7 · L'état de cycle de vie initial est supposé, jamais lu
+
+`lib/core/components/status/sync_lifecycle_observer.dart:57`
+
+Le binding ne notifie que des *transitions* : un observateur monté alors que
+l'application est déjà hors écran n'en verra jamais aucune, et le battement
+tournerait en se croyant au premier plan. Sur la cible (tablette Android, une
+seule activité LAUNCHER, ni service ni receiver) le cas est inatteignable — le
+battement ne s'arme qu'à l'ouverture de session, qui exige un écran. Sur bureau
+ou web il ne l'est pas.
+
+Une lecture de `WidgetsBinding.instance.lifecycleState` en `initState` fermerait
+le trou, mais **elle n'est pas observable sous `testWidgets`** (le binding
+rapporte bien l'état depuis le corps du test, jamais depuis `initState`) : elle a
+été retirée plutôt que laissée non prouvée.
+
+**À faire** — si le périmètre s'étend au bureau/web, trouver un harnais qui
+l'observe avant de la remettre.
+
+---
+
+### B-8 · `sync_status_cubit.dart` dépasse largement la cible de taille
+
+420 lignes avant ces trois lots, **670 après** — contre une cible de ~250
+(CLAUDE.md, règle non-négociable n°7). L'extraction de `SyncHeartbeat` n'a sorti
+que la cadence ; le corps de cycle (`syncNow`, `_syncOnReconnect`, les trois
+gardes, les estampilles) reste entier.
+
+**À faire** — extraire un `SyncCycleRunner` qui porte le corps de cycle et ses
+gardes, laissant au cubit la seule projection d'état. Refonte de code
+préexistant : à faire à froid, pas en fin de lot.
+
+---
+
 ## ✅ Traité
+
+Douze défauts de la revue adversariale du battement ont été corrigés dans la
+foulée (garde `isFlushing` avant le cycle complet, garde hors-ligne en tête de
+tic, push muet, séparation tentative/pull, révocation non évaluée par le timer,
+`inactive` neutre, seuil de poison du moteur, fermeture de session sur toute
+issue non authentifiée, renoncement coopératif, câblage racine testé, verrou de
+réentrance testé, prémisses périmées réécrites) — tous vérifiés par mutation.
 
 ### ~~#13 · L'anti-rafale de reprise n'est pas monotone~~ — corrigé (`5123439`)
 

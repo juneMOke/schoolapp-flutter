@@ -22,14 +22,18 @@ class SyncLifecycleObserver extends StatefulWidget {
   /// déclencher.
   final VoidCallback onResume;
 
-  /// Appelé dès que l'application **cesse** d'être au premier plan, quelle que
-  /// soit la profondeur du retrait.
+  /// Appelé quand l'application quitte réellement l'écran : `paused`,
+  /// `hidden`, `detached`.
   ///
-  /// `inactive` compte, au même titre que `paused`, `hidden` et `detached` :
-  /// distinguer les degrés coûterait un état supplémentaire pour un gain nul,
-  /// puisque le seul consommateur — l'arrêt du battement — se rétablit d'un
-  /// `Timer` recréé au retour. Mieux vaut suspendre une seconde de trop que
-  /// laisser tourner une boucle réseau hors de tout usage.
+  /// ⚠️ **`inactive` n'en fait PAS partie, et n'appelle rien du tout.** C'est
+  /// un état de recouvrement transitoire — volet de notifications, boîte de
+  /// dialogue de permission, feuille de partage, sélecteur de fichiers,
+  /// changement de focus en écran partagé — pendant lequel l'application est
+  /// toujours là. Le traiter comme un retrait coupait le battement puis le
+  /// recréait au retour, compte à rebours remis à zéro : un utilisateur qui
+  /// franchit cette frontière plus souvent que la période ne recevait **plus
+  /// aucun** tic, et le drapeau d'armement affichait « actif » pendant ce
+  /// temps. Sur la cible Android de ce projet, ces états sont fréquents.
   final VoidCallback onPause;
 
   final Widget child;
@@ -51,6 +55,19 @@ class _SyncLifecycleObserverState extends State<SyncLifecycleObserver>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // ⚠️ Un observateur fraîchement ajouté ne reçoit AUCUN état : le binding ne
+    // notifie que des *transitions*. Le consommateur suppose donc « premier
+    // plan » au départ, et sur une application démarrée hors de l'écran cette
+    // supposition ne serait jamais corrigée.
+    //
+    // Rien n'est semé ici pour autant. Sur la cible de ce projet — une tablette
+    // Android dont le manifeste ne déclare qu'une activité LAUNCHER, ni service
+    // ni receiver — le seul consommateur (le battement) ne s'arme qu'à
+    // l'ouverture de session, laquelle exige un écran. Le cas ne se pose que
+    // sur bureau ou web, hors périmètre. Et la lecture de
+    // `WidgetsBinding.instance.lifecycleState` en `initState` n'est pas
+    // observable sous `testWidgets` : le poser en aveugle vaut moins qu'une
+    // supposition assumée et écrite. Cf. `REVUE_CODE_BACKLOG.md`.
   }
 
   @override
@@ -60,14 +77,20 @@ class _SyncLifecycleObserverState extends State<SyncLifecycleObserver>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Binaire, délibérément : `resumed` d'un côté, tout le reste de l'autre.
-    // Un quatrième état ajouté par Flutter tombera donc du côté prudent.
-    if (state == AppLifecycleState.resumed) {
-      widget.onResume();
-      return;
+  void didChangeAppLifecycleState(AppLifecycleState state) => _dispatch(state);
+
+  void _dispatch(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        widget.onResume();
+      case AppLifecycleState.inactive:
+        // Délibérément muet — cf. la docstring de [SyncLifecycleObserver.onPause].
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        widget.onPause();
     }
-    widget.onPause();
   }
 
   @override

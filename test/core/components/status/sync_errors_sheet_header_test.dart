@@ -21,7 +21,7 @@ class _FakeSyncStatusCubit extends Cubit<SyncStatusState>
   int syncNowCalls = 0;
 
   @override
-  Future<void> syncNow() async {
+  Future<void> syncNow({bool evaluateRevocation = true}) async {
     syncNowCalls++;
   }
 

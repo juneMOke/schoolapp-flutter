@@ -214,6 +214,14 @@ class _MyAppState extends State<MyApp> {
                 return;
               }
 
+              // TOUTE autre issue coupe le battement, pas seulement
+              // `unauthenticated` : un logout dont le nettoyage local échoue
+              // émet `failure` alors que les jetons sont DÉJÀ effacés, et le
+              // routeur affiche la connexion. Ne fermer que sur
+              // `unauthenticated` laissait le battement tourner toute la vie du
+              // processus contre une session morte, sans aucun chemin de retour.
+              _syncStatusCubit.onSessionClosed();
+
               if (state.status == AuthStatus.unauthenticated) {
                 _academicYearContextBloc.add(
                   const AcademicYearContextResetRequested(),
@@ -221,9 +229,6 @@ class _MyAppState extends State<MyApp> {
                 // Sans cela, une reconnexion sur une autre école garderait le
                 // nom de la précédente le temps du rechargement.
                 _schoolIdentityCubit.clear();
-                // Coupe le battement : sans jetons, chaque tic n'interrogerait
-                // que la sonde de crédentiels d'une session qui n'existe plus.
-                _syncStatusCubit.onSessionClosed();
               }
             },
           ),
@@ -253,12 +258,13 @@ class _MyAppState extends State<MyApp> {
           ),
         ],
         // Troisième déclencheur global de la boucle de synchro (les deux
-        // autres : ouverture de session et retour réseau). Rien n'est
-        // périodique dans cette boucle — un backoff ou une dépendance qui
-        // repousse une entrée ne fait que la rendre *éligible*, personne ne la
-        // reprend — et une tablette posée sur le Wi-Fi de l'école ne voit
-        // jamais de transition réseau. La reprise au premier plan est le seul
-        // signal restant qui arrive plusieurs fois par jour.
+        // autres événementiels : ouverture de session et retour réseau ; le
+        // quatrième est le battement). Aucun délai du moteur ne relance quoi
+        // que ce soit — un backoff ou une dépendance qui repousse une entrée ne
+        // fait que la rendre *éligible* — et une tablette posée sur le Wi-Fi de
+        // l'école ne voit jamais de transition réseau. La reprise au premier
+        // plan est le signal qui rattrape le retard immédiatement, sans
+        // attendre le prochain tic.
         //
         // Gardé sur la session : sur l'écran de connexion il n'y a ni jetons ni
         // file à pousser. Le cubit s'en garderait de lui-même (sonde de
