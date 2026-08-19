@@ -3334,6 +3334,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'No charges available. Go back to the list and try again.';
 
   @override
+  String get facturationCollectPreflightMessage => 'Checking recent payments…';
+
+  @override
   String get facturationCreatePaymentChargeDropdownHint => 'Select a charge';
 
   @override

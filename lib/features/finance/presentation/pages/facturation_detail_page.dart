@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment.dart
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
@@ -19,6 +20,7 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_preflight.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_data_loader.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_detail_statement_bar.dart';
@@ -53,12 +55,15 @@ class FacturationDetailPage extends StatelessWidget {
     return value.isEmpty ? l10n.facturationDetailUnknownValue : value;
   }
 
-  void _openCreatePayment(BuildContext context) {
+  Future<void> _openCreatePayment(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final chargesState = context.read<StudentChargesBloc>().state;
+    final messenger = ScaffoldMessenger.of(context);
+    final chargesBloc = context.read<StudentChargesBloc>();
+    final paymentsBloc = context.read<PaymentsBloc>();
+    final financeOfflineBloc = context.read<FinanceOfflineBloc>();
 
-    if (chargesState.status != StudentChargesStatus.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (chargesBloc.state.status != StudentChargesStatus.success) {
+      messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.facturationCreatePaymentChargesUnavailable),
         ),
@@ -66,15 +71,31 @@ class FacturationDetailPage extends StatelessWidget {
       return;
     }
 
+    // La SEULE attente réseau de cet écran, et elle est bornée. La fiche, elle,
+    // s'affiche depuis le local sans rien attendre — mais le « reste » composé
+    // ci-dessous borne la saisie et décide s'il faut encaisser : servi périmé
+    // parce qu'un versement du poste voisin n'est pas descendu, il fait
+    // réencaisser. C'est là que `FACTURATION_OFFLINE_PLAN.md` §13 plaçait cette
+    // attente, et nulle part ailleurs.
+    final refreshed = await runFacturationCollectPreflight(
+      context,
+      studentId: intent.studentId,
+      academicYearId: intent.academicYearId,
+    );
+    if (!context.mounted) return;
+
+    // Relecture locale en échec : on repart de ce qui est déjà affiché plutôt
+    // que de fermer le guichet. La page, elle, se remettra à jour toute seule
+    // sur le signal de revalidation (relecture silencieuse du loader).
+    final charges = refreshed ?? chargesBloc.state.studentCharges;
+
     // FRONT §6/§8 : on retient les postes dont le RESTE composé est > 0, JAMAIS
     // `status` (miroir serveur — un poste soldé localement afficherait encore
     // UNPAID et réapparaîtrait comme payable → re-encaissement sur ce guichet).
-    final unpaid = chargesState.studentCharges
-        .where((c) => c.remainingInCents > 0)
-        .toList();
+    final unpaid = charges.where((c) => c.remainingInCents > 0).toList();
 
     if (unpaid.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.facturationCreatePaymentNoChargesAvailable),
         ),
@@ -82,7 +103,8 @@ class FacturationDetailPage extends StatelessWidget {
       return;
     }
 
-    showFacturationCreatePaymentDialog(
+    if (!context.mounted) return;
+    await showFacturationCreatePaymentDialog(
       context,
       intent: FacturationCreatePaymentIntent(
         studentId: intent.studentId,
@@ -92,11 +114,11 @@ class FacturationDetailPage extends StatelessWidget {
         surname: intent.surname,
         levelName: intent.levelName,
         levelGroupName: intent.levelGroupName,
-        studentCharges: chargesState.studentCharges,
+        studentCharges: charges,
       ),
-      paymentsBloc: context.read<PaymentsBloc>(),
-      studentChargesBloc: context.read<StudentChargesBloc>(),
-      financeOfflineBloc: context.read<FinanceOfflineBloc>(),
+      paymentsBloc: paymentsBloc,
+      studentChargesBloc: chargesBloc,
+      financeOfflineBloc: financeOfflineBloc,
     );
   }
 
@@ -165,6 +187,14 @@ class FacturationDetailPage extends StatelessWidget {
         // offline-first liés en DI (BLoCs online ci-dessus inchangés).
         BlocProvider<FinanceOfflineBloc>(
           create: (_) => getIt<FinanceOfflineBloc>(),
+        ),
+        // Signal « un cycle de rafraîchissement vient d'aboutir » : c'est lui
+        // qui remplace l'attente qu'on faisait subir à chaque lecture. Le
+        // loader s'en sert pour relire sans skeleton, la légende de fraîcheur
+        // pour se réafficher même quand le grand-livre n'a pas bougé.
+        BlocProvider<LedgerRevalidationCubit>(
+          create: (_) =>
+              getIt<LedgerRevalidationCubit>()..watch(intent.studentId),
         ),
         // Fraîcheur du grand-livre (ADR-002) affichée sous les totaux.
         BlocProvider<LedgerFreshnessCubit>(

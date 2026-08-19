@@ -33,6 +33,11 @@ const tParams = GetStudentChargesParams(
   levelId: tLevelId,
 );
 
+const tYearParams = GetStudentChargesByAcademicYearParams(
+  studentId: tStudentId,
+  academicYearId: 'year-1',
+);
+
 const tUpdateParams = UpdateStudentChargeExpectedAmountParams(
   studentChargeId: 'charge-1',
   studentId: tStudentId,
@@ -97,6 +102,106 @@ void main() {
     updateStudentChargeExpectedAmountUseCase:
         mockUpdateStudentChargeExpectedAmountUseCase,
   );
+
+  // ── M-8 : relecture déclenchée par un cycle de synchro abouti ─────────────
+  // Les lectures n'attendent plus le réseau ; c'est le signal de revalidation
+  // qui les rattrape. Il tomberait à côté si la relecture rejouait un skeleton
+  // par-dessus des lignes déjà justes, ou si son échec vidait l'écran.
+  group('StudentChargesByAcademicYearRequested', () {
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'lecture normale : passe par loading',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesByAcademicYearUseCase(tYearParams),
+        ).thenAnswer((_) async => const Right([tCharge]));
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        const StudentChargesByAcademicYearRequested(
+          studentId: tStudentId,
+          academicYearId: 'year-1',
+        ),
+      ),
+      expect: () => const [
+        StudentChargesState(status: StudentChargesStatus.loading),
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tCharge],
+        ),
+      ],
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'relecture silencieuse : aucun passage par loading',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesByAcademicYearUseCase(tYearParams),
+        ).thenAnswer((_) async => const Right([tUpdatedCharge]));
+      },
+      build: buildBloc,
+      seed: () => const StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [tCharge],
+      ),
+      act: (bloc) => bloc.add(
+        const StudentChargesByAcademicYearRequested(
+          studentId: tStudentId,
+          academicYearId: 'year-1',
+          silent: true,
+        ),
+      ),
+      expect: () => const [
+        StudentChargesState(
+          status: StudentChargesStatus.success,
+          studentCharges: [tUpdatedCharge],
+        ),
+      ],
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'relecture silencieuse sans changement : rien n\'est émis (états Equatable)',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesByAcademicYearUseCase(tYearParams),
+        ).thenAnswer((_) async => const Right([tCharge]));
+      },
+      build: buildBloc,
+      seed: () => const StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [tCharge],
+      ),
+      act: (bloc) => bloc.add(
+        const StudentChargesByAcademicYearRequested(
+          studentId: tStudentId,
+          academicYearId: 'year-1',
+          silent: true,
+        ),
+      ),
+      expect: () => const <StudentChargesState>[],
+    );
+
+    blocTest<StudentChargesBloc, StudentChargesState>(
+      'échec d\'une relecture silencieuse : l\'écran garde ses lignes',
+      setUp: () {
+        when(
+          () => mockGetStudentChargesByAcademicYearUseCase(tYearParams),
+        ).thenAnswer((_) async => const Left(StorageFailure('base occupée')));
+      },
+      build: buildBloc,
+      seed: () => const StudentChargesState(
+        status: StudentChargesStatus.success,
+        studentCharges: [tCharge],
+      ),
+      act: (bloc) => bloc.add(
+        const StudentChargesByAcademicYearRequested(
+          studentId: tStudentId,
+          academicYearId: 'year-1',
+          silent: true,
+        ),
+      ),
+      expect: () => const <StudentChargesState>[],
+    );
+  });
 
   group('StudentChargesRequested', () {
     blocTest<StudentChargesBloc, StudentChargesState>(

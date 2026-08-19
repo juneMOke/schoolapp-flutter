@@ -5694,6 +5694,12 @@ abstract class AppLocalizations {
   /// **'No charges available. Go back to the list and try again.'**
   String get facturationCreatePaymentChargesUnavailable;
 
+  /// No description provided for @facturationCollectPreflightMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking recent payments…'**
+  String get facturationCollectPreflightMessage;
+
   /// No description provided for @facturationCreatePaymentChargeDropdownHint.
   ///
   /// In en, this message translates to:

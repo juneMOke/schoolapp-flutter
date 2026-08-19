@@ -1689,6 +1689,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Ajouter une allocation",
   "facturationCreatePaymentAllChargesPaid": "Toutes les charges de cet élève sont déjà réglées.",
   "facturationCreatePaymentChargesUnavailable": "Aucune charge disponible. Revenez à la liste et recommencez.",
+  "facturationCollectPreflightMessage": "Vérification des encaissements récents\u2026",
   "facturationCreatePaymentChargeDropdownHint": "Sélectionnez une charge",
   "facturationCreatePaymentAmountLabel": "Montant à payer",
   "facturationCreatePaymentAmountHint": "Ex : 5000",

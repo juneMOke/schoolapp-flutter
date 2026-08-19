@@ -56,6 +56,7 @@ class StudentChargesBloc
     on<DraftStudentChargesRequested>(_onDraftStudentChargesRequested);
     on<StudentChargesByAcademicYearRequested>(
       _onStudentChargesByAcademicYearRequested,
+      transformer: _sequential(),
     );
     on<StudentChargePaymentAllocationsRequested>(
       _onStudentChargePaymentAllocationsRequested,
@@ -65,6 +66,13 @@ class StudentChargesBloc
       _onStudentChargeExpectedAmountUpdateRequested,
     );
   }
+
+  /// Traite ces relectures une par une (`asyncExpand`) — pas de dépendance
+  /// externe. Sans ça (traitement concurrent par défaut, cf. `package:bloc`),
+  /// une relecture silencieuse déclenchée par un cycle abouti pourrait rendre
+  /// AVANT la lecture initiale et se faire écraser par un résultat plus ancien.
+  static EventTransformer<E> _sequential<E>() =>
+      (events, mapper) => events.asyncExpand(mapper);
 
   Future<void> _onStudentChargesRequested(
     StudentChargesRequested event,
@@ -212,13 +220,18 @@ class StudentChargesBloc
     StudentChargesByAcademicYearRequested event,
     Emitter<StudentChargesState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: StudentChargesStatus.loading,
-        errorType: StudentChargesErrorType.none,
-        updatingChargeId: null,
-      ),
-    );
+    // Relecture silencieuse : aucun passage en `loading`. La lecture est locale
+    // (le réseau, lui, revalide derrière sans être attendu) — faire clignoter un
+    // skeleton par-dessus des lignes déjà justes coûterait plus qu'il n'informe.
+    if (!event.silent) {
+      emit(
+        state.copyWith(
+          status: StudentChargesStatus.loading,
+          errorType: StudentChargesErrorType.none,
+          updatingChargeId: null,
+        ),
+      );
+    }
 
     final result = await _getStudentChargesByAcademicYearUseCase.call(
       GetStudentChargesByAcademicYearParams(
@@ -228,20 +241,33 @@ class StudentChargesBloc
     );
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: StudentChargesStatus.failure,
-          errorType: _mapFailureToErrorType(failure),
-          updatingChargeId: null,
-        ),
-      ),
+      (failure) {
+        // Un échec de relecture silencieuse ne détruit pas ce qui est à
+        // l'écran : l'utilisateur n'a rien demandé, il ne doit rien perdre.
+        if (event.silent) return;
+        emit(
+          state.copyWith(
+            status: StudentChargesStatus.failure,
+            errorType: _mapFailureToErrorType(failure),
+            updatingChargeId: null,
+          ),
+        );
+      },
+      // `updatingChargeId` laissé intact en silencieux : une édition de montant
+      // en cours ne doit pas voir son verrou levé par un cycle de synchro.
       (studentCharges) => emit(
-        state.copyWith(
-          status: StudentChargesStatus.success,
-          studentCharges: studentCharges,
-          errorType: StudentChargesErrorType.none,
-          updatingChargeId: null,
-        ),
+        event.silent
+            ? state.copyWith(
+                status: StudentChargesStatus.success,
+                studentCharges: studentCharges,
+                errorType: StudentChargesErrorType.none,
+              )
+            : state.copyWith(
+                status: StudentChargesStatus.success,
+                studentCharges: studentCharges,
+                errorType: StudentChargesErrorType.none,
+                updatingChargeId: null,
+              ),
       ),
     );
   }

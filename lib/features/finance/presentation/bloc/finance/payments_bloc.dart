@@ -24,21 +24,32 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
        _createPaymentUseCase = createPaymentUseCase,
        _getPaymentAllocationsUseCase = getPaymentAllocationsUseCase,
        super(const PaymentsState()) {
-    on<PaymentsRequested>(_onPaymentsRequested);
+    on<PaymentsRequested>(_onPaymentsRequested, transformer: _sequential());
     on<PaymentsCreateRequested>(_onPaymentsCreateRequested);
     on<PaymentsAllocationsRequested>(_onPaymentsAllocationsRequested);
   }
+
+  /// Traite ces relectures une par une (`asyncExpand`) — pas de dépendance
+  /// externe. Sans ça (traitement concurrent par défaut, cf. `package:bloc`),
+  /// une relecture silencieuse déclenchée par un cycle abouti pourrait rendre
+  /// AVANT la lecture initiale et se faire écraser par un résultat plus ancien.
+  static EventTransformer<E> _sequential<E>() =>
+      (events, mapper) => events.asyncExpand(mapper);
 
   Future<void> _onPaymentsRequested(
     PaymentsRequested event,
     Emitter<PaymentsState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: PaymentsStatus.loading,
-        errorType: PaymentsErrorType.none,
-      ),
-    );
+    // Voir le jumeau de `StudentChargesBloc` : une relecture silencieuse ne
+    // repasse pas par `loading`, et son échec ne vide pas l'historique affiché.
+    if (!event.silent) {
+      emit(
+        state.copyWith(
+          status: PaymentsStatus.loading,
+          errorType: PaymentsErrorType.none,
+        ),
+      );
+    }
 
     final result = await _getPaymentsUseCase(
       GetPaymentsParams(
@@ -48,12 +59,15 @@ class PaymentsBloc extends Bloc<PaymentsEvent, PaymentsState> {
     );
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: PaymentsStatus.failure,
-          errorType: _mapFailureToErrorType(failure),
-        ),
-      ),
+      (failure) {
+        if (event.silent) return;
+        emit(
+          state.copyWith(
+            status: PaymentsStatus.failure,
+            errorType: _mapFailureToErrorType(failure),
+          ),
+        );
+      },
       (payments) => emit(
         state.copyWith(
           status: PaymentsStatus.success,

@@ -1732,6 +1732,7 @@
   "facturationCreatePaymentAddAllocationLabel": "Add allocation",
   "facturationCreatePaymentAllChargesPaid": "All student charges are already paid.",
   "facturationCreatePaymentChargesUnavailable": "No charges available. Go back to the list and try again.",
+  "facturationCollectPreflightMessage": "Checking recent payments\u2026",
   "facturationCreatePaymentChargeDropdownHint": "Select a charge",
   "facturationCreatePaymentAmountLabel": "Amount to pay",
   "facturationCreatePaymentAmountHint": "E.g.: 5000",

@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/refresh_ledger_before_collection_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/watch_ledger_revalidation_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -381,5 +384,37 @@ void main() {
         );
       },
     );
+  });
+
+  // ── M-8 : le régime stale-while-revalidate du détail Facturation ──────────
+  // Les lectures n'attendent plus le rafraîchissement ; ce qui les rattrape est
+  // un signal, et un signal se câble. Mal branché, il ne casse RIEN : l'écran
+  // afficherait simplement des lignes qui ne se mettent jamais à jour, et une
+  // base encore vide resterait « Aucun frais » toute la visite. Aucun test de
+  // comportement ne broncherait — c'est le motif exact du lot F6.
+  group('détail Facturation : lecture immédiate, revalidation annoncée', () {
+    test('les trois pièces sortent du conteneur réel', () {
+      expect(() => getIt<WatchLedgerRevalidationUseCase>(), returnsNormally);
+      expect(
+        () => getIt<RefreshLedgerBeforeCollectionUseCase>(),
+        returnsNormally,
+      );
+      final cubit = getIt<LedgerRevalidationCubit>();
+      addTearDown(cubit.close);
+      expect(cubit.state, 0);
+    });
+
+    test('l\'écran écoute le canal DE ce refresher, pas un autre', () {
+      // Un `FinanceLedgerRefresher` par résolution, et le signal que la fiche
+      // écoute ne serait alimenté par aucune lecture.
+      expect(
+        getIt<FinanceLedgerRefresher>(),
+        same(getIt<FinanceLedgerRefresher>()),
+      );
+      expect(
+        getIt<WatchLedgerRevalidationUseCase>()(),
+        same(getIt<FinanceLedgerRefresher>().revalidated),
+      );
+    });
   });
 }

@@ -90,7 +90,10 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/refresh_ledger_before_collection_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/watch_ledger_revalidation_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 
 /// DI de la branche offline A (Inscription + Facturation).
 ///
@@ -424,6 +427,12 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerFactory<GetLedgerFreshnessUseCase>(
     () => GetLedgerFreshnessUseCase(getIt<FinanceLedgerRefresher>()),
   );
+  getIt.registerFactory<WatchLedgerRevalidationUseCase>(
+    () => WatchLedgerRevalidationUseCase(getIt<FinanceLedgerRefresher>()),
+  );
+  getIt.registerFactory<RefreshLedgerBeforeCollectionUseCase>(
+    () => RefreshLedgerBeforeCollectionUseCase(getIt<FinanceLedgerRefresher>()),
+  );
   getIt.registerFactory<GetPaymentReceiptDocumentUseCase>(
     () => GetPaymentReceiptDocumentUseCase(getIt<FinanceOfflineRepository>()),
   );
@@ -469,6 +478,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       getPayments: getIt<GetLocalPaymentsUseCase>(),
       recordPayment: getIt<RecordPaymentUseCase>(),
     ),
+  );
+  getIt.registerFactory<LedgerRevalidationCubit>(
+    () => LedgerRevalidationCubit(getIt<WatchLedgerRevalidationUseCase>()),
   );
   getIt.registerFactory<LedgerFreshnessCubit>(
     () => LedgerFreshnessCubit(getIt<GetLedgerFreshnessUseCase>()),

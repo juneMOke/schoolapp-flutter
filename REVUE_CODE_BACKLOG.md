@@ -5,13 +5,18 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
 Quinze défauts confirmés, plus quatre issus de la revue adversariale du
-battement. **Quatre sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3 et
-H-1 ; **plus aucun défaut « haut » n'est ouvert**. Les quinze autres sont listés
-ici, aucun n'est traité.
+battement. **Cinq sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3,
+H-1 et M-8 ; **plus aucun défaut « haut » n'est ouvert**. Les quatorze autres
+sont listés ici, aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a
 fermé les débordements de la connexion, de l'encaissement, des deux modales de
 discipline et de la recherche de parent.
+
+S'y ajoutait **M-8**, hors revue : constaté à l'usage le 2026-08-19 — le détail
+d'un élève en Facturation attendait le réseau avant d'afficher un grand-livre
+déjà présent en base. Seul défaut du lot à se manifester dans le chemin
+**nominal**, à chaque ouverture de fiche : **corrigé** (voir « Traité »).
 
 > Ordre : gravité décroissante. Un défaut « haut » a une conséquence métier
 > directe et irréversible sans intervention ; un « moyen » dégrade une décision
@@ -388,6 +393,67 @@ supprime à la source. Le nommer était le lot de consolation d'un parc à l'arr
 il tire, désormais. La garantie a déménagé dans
 `sync_plan_repository_impl_test.dart`, groupe « TOUS les flux écartés → INCONNU,
 jamais vide ».
+
+---
+
+### ~~M-8 · Le détail d'un élève attend le réseau avant de servir le grand-livre local~~ — corrigé
+
+Les deux repos offline-first (`student_charges_offline_first_repository.dart`,
+`payments_offline_first_repository.dart`) **lancent** le rafraîchissement ciblé
+sans l'attendre, et servent le DAO immédiatement. Ce qui était lent était le
+réseau, jamais la base : le skeleton tenait jusqu'à ~22 s en réseau dégradé pour
+afficher des lignes déjà en local.
+
+L'attente n'a pas été supprimée, elle a **déménagé** là où
+`FACTURATION_OFFLINE_PLAN.md` §13 la plaçait — devant l'**encaissement**, où le
+« reste » composé borne la saisie et décide s'il faut encaisser. Sous-estimé
+parce qu'un versement du poste voisin n'est pas descendu, il fait réencaisser.
+`runFacturationCollectPreflight` (nouveau) la tient au tap « Encaisser », derrière
+une barrière qui n'apparaît qu'au-delà de 220 ms — la plupart des taps n'attendent
+rien, et une modale ouverte puis refermée en 20 ms se lit comme un bug. Une
+relecture en échec **n'y ferme jamais le guichet** : on retombe sur l'affichage
+courant plutôt que de refuser une famille qui a l'argent en main.
+
+Trois bornes, et il faut les trois :
+
+| Borne | Valeur | Ce qu'elle empêche |
+|---|---|---|
+| TTL de lecture (`readMaxAge`) | 120 s | Chaque (ré)ouverture de fiche rejouait tout le cycle |
+| Fraîcheur exigée à l'encaissement | 15 s | Une rafale d'encaissements repayait l'aller-retour à chaque fois |
+| Plafond de l'attente visible | 4 s | On ne remplace pas un blocage de 22 s par un blocage indéfini |
+
+Le TTL n'est posé que sur un cycle **abouti** : un cycle en échec ne s'amortit
+pas, sinon un réseau qui retombe gèlerait la fiche jusqu'au délai suivant.
+
+⚠️ **La borne d'attente vit chez l'APPELANT** (`refresh(..., deadline:)`), pas
+dans `_refreshCharges`. Y poser un timeout retirerait l'entrée in-flight pendant
+que la pagination tourne encore, et un second cycle concurrent partirait sur le
+même élève. Passé le délai, le cycle n'est **pas annulé** : il poursuit en fond
+et annoncera son aboutissement.
+
+⚠️ **Ne pas retirer le signal `FinanceLedgerRefresher.revalidated`** en croyant
+simplifier. C'est la contrepartie exacte de l'`await` supprimé : sur une tablette
+dont la base est encore vide, l'écran afficherait « Aucun frais » et n'en
+sortirait pas de la visite. La relecture qu'il déclenche est **silencieuse**
+(drapeau `silent` sur les deux events) — pas de retour en `loading`, et son échec
+ne détruit pas ce qui est affiché. Les états étant `Equatable`, un cycle qui ne
+change rien ne reconstruit rien. La légende de fraîcheur s'y abonne aussi : sans
+ça elle resterait figée sur l'ancienne heure quand le grand-livre n'a pas bougé.
+
+Les deux lectures passent en `transformer: _sequential()` : le traitement
+concurrent par défaut laissait une relecture silencieuse rendre **avant** la
+lecture initiale et se faire écraser par un résultat plus ancien.
+
+Tests : la non-régression qui compte est un seam de rafraîchissement qui ne rend
+**jamais** la main, et une lecture qui aboutit quand même (avec `timeout`, sinon
+une régression ferait pendre le test au lieu de le faire échouer). Plus deux
+tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'écran
+écoute le canal **de ce refresher** (identité), pas d'un autre.
+
+⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses
+continuations dans la zone racine, que `tester.pump()` ne draine jamais.
+L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du
+code testé.
 
 ---
 

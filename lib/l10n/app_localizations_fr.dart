@@ -3361,6 +3361,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune charge disponible. Revenez à la liste et recommencez.';
 
   @override
+  String get facturationCollectPreflightMessage =>
+      'Vérification des encaissements récents…';
+
+  @override
   String get facturationCreatePaymentChargeDropdownHint =>
       'Sélectionnez une charge';
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,7 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
@@ -23,6 +26,17 @@ class _MockPaymentsBloc extends MockBloc<PaymentsEvent, PaymentsState>
 class _MockChargesBloc
     extends MockBloc<StudentChargesEvent, StudentChargesState>
     implements StudentChargesBloc {}
+
+/// Signal « un cycle de rafraîchissement vient d'aboutir », piloté par le test.
+class _FakeRevalidationCubit extends Cubit<int>
+    implements LedgerRevalidationCubit {
+  _FakeRevalidationCubit() : super(0);
+
+  void fire() => emit(state + 1);
+
+  @override
+  void watch(String studentId) {}
+}
 
 /// ADR-015 §6-C — séparation charge / caisse. Le secrétariat, la direction des
 /// études et la discipline détiennent `finance.charge.read` SANS
@@ -50,8 +64,10 @@ void main() {
 
   late _MockPaymentsBloc paymentsBloc;
   late _MockChargesBloc chargesBloc;
+  late _FakeRevalidationCubit revalidationCubit;
 
   setUp(() {
+    revalidationCubit = _FakeRevalidationCubit();
     paymentsBloc = _MockPaymentsBloc();
     const paymentsState = PaymentsState();
     when(() => paymentsBloc.state).thenReturn(paymentsState);
@@ -96,6 +112,9 @@ void main() {
               BlocProvider<AuthBloc>.value(value: authBloc),
               BlocProvider<PaymentsBloc>.value(value: paymentsBloc),
               BlocProvider<StudentChargesBloc>.value(value: chargesBloc),
+              BlocProvider<LedgerRevalidationCubit>.value(
+                value: revalidationCubit,
+              ),
             ],
             child: child,
           ),
@@ -163,6 +182,48 @@ void main() {
 
       verify(() => paymentsBloc.add(any())).called(1);
       verify(() => chargesBloc.add(any())).called(1);
+    });
+
+    // M-8 : les repos offline-first n'attendent plus le réseau. Ce signal est ce
+    // qui rattrape la lecture quand le cycle finit — et il doit être SILENCIEUX,
+    // sans quoi on aurait juste déplacé le skeleton au milieu de la consultation.
+    testWidgets(
+      'un cycle de rafraîchissement abouti relit, sans repasser par le skeleton',
+      (tester) async {
+        await tester.pumpWidget(host(caissier, loader()));
+        await tester.pump();
+        clearInteractions(paymentsBloc);
+        clearInteractions(chargesBloc);
+
+        revalidationCubit.fire();
+        await tester.pump();
+
+        final charges = verify(() => chargesBloc.add(captureAny())).captured;
+        expect(charges, hasLength(1));
+        expect(
+          (charges.single as StudentChargesByAcademicYearRequested).silent,
+          isTrue,
+        );
+
+        final payments = verify(() => paymentsBloc.add(captureAny())).captured;
+        expect(payments, hasLength(1));
+        expect((payments.single as PaymentsRequested).silent, isTrue);
+      },
+    );
+
+    // La lecture initiale, elle, doit garder son skeleton : il n'y a rien à
+    // l'écran à préserver, et un vide muet passerait pour « aucun frais ».
+    testWidgets('la lecture initiale n\'est PAS silencieuse', (tester) async {
+      await tester.pumpWidget(host(caissier, loader()));
+      await tester.pump();
+
+      final charges = verify(() => chargesBloc.add(captureAny())).captured;
+      expect(
+        (charges.single as StudentChargesByAcademicYearRequested).silent,
+        isFalse,
+      );
+      final payments = verify(() => paymentsBloc.add(captureAny())).captured;
+      expect((payments.single as PaymentsRequested).silent, isFalse);
     });
   });
 }

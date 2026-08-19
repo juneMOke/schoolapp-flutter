@@ -67,6 +67,7 @@ void main() {
   });
 
   tearDown(() async {
+    await refresher.dispose();
     await db.close();
   });
 
@@ -371,11 +372,159 @@ void main() {
       () => api.pullStudentCharges(any(), any(), any(), any(), any()),
     ).called(1);
 
-    // Le guard est relâché en fin de course : le prochain refresh réappelle.
+    // Le guard est relâché en fin de course : le prochain refresh réappelle —
+    // une fois le TTL passé, qui est l'AUTRE barrage (groupe dédié plus bas).
+    clock += const Duration(seconds: 121).inMilliseconds;
     await refresher.refresh(studentId, yearId);
     verify(
       () => api.pullStudentCharges(any(), any(), any(), any(), any()),
     ).called(1);
+  });
+
+  // ── M-8 : amortissement (TTL), borne d'attente, signal de revalidation ────
+  group('régime stale-while-revalidate', () {
+    void chargesRespond() {
+      when(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            httpOk(StudentChargePageDto(items: [charge('ch-1')], page: env())),
+      );
+    }
+
+    test(
+      'TTL : un cycle abouti n\'est pas rejoué — la réouverture de la fiche ne '
+      'repaie pas l\'aller-retour',
+      () async {
+        chargesRespond();
+
+        await refresher.refresh(studentId, yearId);
+        await refresher.refresh(studentId, yearId);
+        await refresher.refresh(studentId, yearId);
+
+        verify(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).called(1);
+        expect(paymentsSyncCalls, 1);
+
+        clock += const Duration(seconds: 121).inMilliseconds;
+        await refresher.refresh(studentId, yearId);
+        verify(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).called(1);
+      },
+    );
+
+    test(
+      'TTL : l\'encaissement exige une fraîcheur plus courte et rejoue le cycle',
+      () async {
+        chargesRespond();
+        await refresher.refresh(studentId, yearId);
+        verify(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).called(1);
+
+        // Le régime de LECTURE se tairait (120 s) ; celui de l'encaissement, non.
+        clock += const Duration(seconds: 16).inMilliseconds;
+        await refresher.refresh(studentId, yearId);
+        verifyNever(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        );
+
+        await refresher.refresh(
+          studentId,
+          yearId,
+          maxAge: const Duration(seconds: 15),
+        );
+        verify(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).called(1);
+      },
+    );
+
+    test(
+      'TTL : un cycle EN ÉCHEC ne s\'amortit pas — la lecture suivante retente',
+      () async {
+        when(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).thenThrow(Exception('serveur muet'));
+
+        await refresher.refresh(studentId, yearId);
+        await refresher.refresh(studentId, yearId);
+
+        verify(
+          () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+        ).called(2);
+        expect(paymentsSyncCalls, 0, reason: 'créances KO ⇒ paiements écartés');
+        expect(await syncMeta.getSyncedAt(resource), isNull);
+      },
+    );
+
+    test('deadline : l\'appelant reprend la main sans annuler le cycle ni le '
+        'dupliquer', () async {
+      final gate = Completer<void>();
+      when(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).thenAnswer((_) async {
+        await gate.future;
+        return httpOk(
+          StudentChargePageDto(items: [charge('ch-1')], page: env()),
+        );
+      });
+
+      // Rend la main alors que le réseau n'a rien rendu : c'est tout l'objet
+      // de la borne — un encaissement ne reste pas suspendu à un serveur lent.
+      await refresher
+          .refresh(
+            studentId,
+            yearId,
+            deadline: const Duration(milliseconds: 30),
+          )
+          .timeout(const Duration(seconds: 5));
+      expect(await syncMeta.getSyncedAt(resource), isNull);
+
+      // Le cycle n'a pas été annulé : il tient toujours son entrée in-flight,
+      // donc un second appel le REJOINT au lieu d'ouvrir un doublon réseau.
+      final joined = refresher.refresh(
+        studentId,
+        yearId,
+        maxAge: Duration.zero,
+      );
+      gate.complete();
+      await joined;
+
+      verify(
+        () => api.pullStudentCharges(any(), any(), any(), any(), any()),
+      ).called(1);
+      expect(await syncMeta.getSyncedAt(resource), clock);
+    });
+
+    test('signal : un cycle abouti annonce l\'élève relu', () async {
+      chargesRespond();
+      final seen = <String>[];
+      final sub = refresher.revalidated.listen(seen.add);
+      addTearDown(sub.cancel);
+
+      await refresher.refresh(studentId, yearId);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(seen, [studentId]);
+    });
+
+    test(
+      'signal : hors ligne, rien n\'est annoncé (rien n\'a été relu)',
+      () async {
+        when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+        final seen = <String>[];
+        final sub = refresher.revalidated.listen(seen.add);
+        addTearDown(sub.cancel);
+
+        await refresher.refresh(studentId, yearId);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(seen, isEmpty);
+      },
+    );
   });
 
   test(

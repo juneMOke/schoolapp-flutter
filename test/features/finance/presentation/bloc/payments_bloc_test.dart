@@ -74,6 +74,62 @@ void main() {
     getPaymentAllocationsUseCase: mockGetPaymentAllocationsUseCase,
   );
 
+  // Jumeau du groupe silencieux de `StudentChargesBloc` : c'est cette section
+  // qui replie l'historique en « total payé », l'effacer sur un échec de
+  // relecture de fond ferait afficher un total faux au moment d'encaisser.
+  group('PaymentsRequested silencieux', () {
+    const params = GetPaymentsParams(
+      studentId: _studentId,
+      academicYearId: _academicYearId,
+    );
+
+    blocTest<PaymentsBloc, PaymentsState>(
+      'relecture silencieuse : aucun passage par loading',
+      setUp: () {
+        when(
+          () => mockGetPaymentsUseCase(params),
+        ).thenAnswer((_) async => Right([_existingPayment]));
+      },
+      build: buildBloc,
+      seed: () => const PaymentsState(status: PaymentsStatus.success),
+      act: (bloc) => bloc.add(
+        const PaymentsRequested(
+          studentId: _studentId,
+          academicYearId: _academicYearId,
+          silent: true,
+        ),
+      ),
+      expect: () => [
+        PaymentsState(
+          status: PaymentsStatus.success,
+          payments: [_existingPayment],
+        ),
+      ],
+    );
+
+    blocTest<PaymentsBloc, PaymentsState>(
+      'échec d\'une relecture silencieuse : l\'historique affiché survit',
+      setUp: () {
+        when(
+          () => mockGetPaymentsUseCase(params),
+        ).thenAnswer((_) async => const Left(NetworkFailure('lien coupé')));
+      },
+      build: buildBloc,
+      seed: () => PaymentsState(
+        status: PaymentsStatus.success,
+        payments: [_existingPayment],
+      ),
+      act: (bloc) => bloc.add(
+        const PaymentsRequested(
+          studentId: _studentId,
+          academicYearId: _academicYearId,
+          silent: true,
+        ),
+      ),
+      expect: () => const <PaymentsState>[],
+    );
+  });
+
   group('PaymentsCreateRequested', () {
     blocTest<PaymentsBloc, PaymentsState>(
       'emits [create loading, create success] and prepends created payment',
