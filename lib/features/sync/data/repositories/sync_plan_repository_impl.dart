@@ -63,10 +63,15 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
   /// remonte tel quel : l'appelant veut savoir si sa relecture a abouti, pas
   /// obtenir un plan à tout prix.
   ///
-  /// Un verdict serveur (route absente, refus, plan d'un autre sujet) N'est PAS
-  /// un échec de relecture : il a bien été obtenu, et le retenter en boucle ne
-  /// changerait rien. Il remonte donc comme un état, et l'appelant cesse de
-  /// marquer le plan à relire.
+  /// Une réponse du serveur (route absente, refus, plan d'un autre sujet) N'est
+  /// PAS un échec de relecture : elle a bien été obtenue, et le cache — qui
+  /// vient du même serveur — ne la démentira pas. Elle remonte donc comme un
+  /// état.
+  ///
+  /// ⚠️ Ce qui ne veut pas dire que l'appelant cesse de relire : c'est
+  /// [SyncPlanUnknownCause.isVerdict] qui en décide, et le refus n'en est pas
+  /// un. Cette méthode répond « la jambe réseau a-t-elle abouti », pas « faut-il
+  /// retenter » — les avoir confondues gelait le repli pour toute la session.
   ///
   /// ⚠️ **Le corps illisible fait exception, et c'est tout l'objet de cette
   /// méthode.** Un 200 qu'on ne sait pas lire, c'est le portail captif — le
@@ -133,9 +138,9 @@ class SyncPlanRepositoryImpl implements SyncPlanRepository {
       body = response.data;
     } on Object catch (error) {
       final cause = _causeOf(error);
-      // Une route absente ou un refus sont des verdicts : ils ne seront pas
-      // démentis par le cache, qui vient du même serveur. Un incident de
-      // transport, lui, laisse sa chance au cache.
+      // Une route absente ou un refus sont des réponses : le cache, qui vient du
+      // même serveur, ne les démentira pas. Un incident de transport, lui,
+      // laisse sa chance au cache.
       if (cause == SyncPlanUnknownCause.transport) return null;
       return SyncPlanState.unknown(cause);
     }

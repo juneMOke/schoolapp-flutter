@@ -5,8 +5,8 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
 Quinze défauts confirmés, plus quatre issus de la revue adversariale du
-battement. **Cinq sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3,
-H-1 et M-8 ; **plus aucun défaut « haut » n'est ouvert**. Les quatorze autres
+battement. **Six sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3,
+H-1, M-8 et M-1 ; **plus aucun défaut « haut » n'est ouvert**. Les treize autres
 sont listés ici, aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a
@@ -26,27 +26,6 @@ déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 ---
 
 ## 🟠 Moyen
-
-### M-1 · Un 403 transitoire sur `/sync/plan` gèle le repli pour la session
-
-`lib/core/offline/plan/sync_plan_holder.dart:139`
-
-`refreshFromNetwork()` ne rend `null` que pour `transport` et `malformed` ;
-`unauthorized` (401/403) et `absent` (uid pas encore posé) reviennent avec un
-état, donc `_commit(..., fresh: true)` efface `_stale` **définitivement** — et
-`markStale()` n'a qu'un seul déclencheur, un vrai changement d'ensemble de
-droits. Un seul 403 et toute la session tourne sur le filtre `requiredPermissions`
-codé en dur, derrière une pastille verte (`isDegraded` ignore ce cas).
-
-**À faire** — ne traiter comme verdict définitif que `notDeployed`.
-
-⚠️ **Pas seulement `notDeployed`** depuis H-3 : `unsupportedStreams` est lui
-aussi un verdict — le serveur rendra le même corps tant que l'APK n'aura pas
-appris son vocabulaire, et le relire à chaque cycle coûterait un aller-retour par
-montage d'écran sur tout le parc. La liste des verdicts est donc
-`{notDeployed, unsupportedStreams}`.
-
----
 
 ### M-2 · `PermissionGate` deux-états affiche « relève de la caisse » à un caissier qui a le droit
 
@@ -457,6 +436,50 @@ code testé.
 
 ---
 
+### ~~M-1 · Un 403 transitoire sur `/sync/plan` gèle le repli pour la session~~ — corrigé
+
+`sync_plan_holder.dart` — `_resolve()` ne mémorise plus comme **frais** tout ce
+qui ne lui revient pas en `null`. Deux questions avaient été confondues : « la
+jambe réseau a-t-elle abouti ? », à laquelle `refreshFromNetwork` répond, et
+« relire y changerait-il quelque chose ? », qui seule autorise à éteindre le
+drapeau. Le refus (401/403), l'uid pas encore posé et le plan d'un autre sujet
+répondent oui à la première et non à la seconde : ils reviennent en état, et
+étaient donc tenus pour définitifs. Comme `markStale()` n'a qu'un déclencheur —
+un vrai changement d'ensemble de droits — un seul 403 rendait la main à
+`requiredPermissions` **jusqu'au prochain login**, derrière une pastille verte.
+
+La liste des verdicts vit désormais sur `SyncPlanUnknownCause.isVerdict`, à côté
+des causes qu'elle trie, et nulle part ailleurs. Elle en compte **deux** :
+`notDeployed` (la route n'apparaîtra pas d'ici le cycle suivant) et
+`unsupportedStreams` (le serveur rendra le même corps tant que l'APK n'aura pas
+appris son vocabulaire). Les deux `switch` — celui de l'extension, celui du
+porteur — sont exhaustifs et sans `_` : une huitième cause casse la compilation
+au lieu de tomber du côté « définitif », celui où l'erreur ne se manifeste plus
+jamais.
+
+⚠️ **Le partage `null` / état du repository n'a PAS bougé**, et il ne fallait pas
+le faire bouger : un 401/403 ne consulte toujours pas le cache — il vient du même
+serveur et ne démentirait rien — et le cycle en cours retombe donc sur le
+registre en dur. Ce que le correctif change est la **durée** : un cycle au lieu
+d'une session. Le coût est un `GET /sync/plan` par cycle tant que l'anomalie
+dure, déjà borné par la sonde `_canAuthenticate()` du coordinateur, qui empêche
+de lire le plan sans jetons utilisables.
+
+`isDegraded` n'a pas été touché : la pastille ne s'alarme toujours que
+d'`unsupportedStreams`. Un refus transitoire n'a plus à être signalé puisqu'il
+ne dure plus, et compter `notDeployed` ou `absent` mettrait tout le parc en
+alerte permanente avant déploiement du plan.
+
+Tests : trois cas paramétrés (`unauthorized`, `absent`, `foreignSubject`) qui
+vérifient le drapeau levé **puis que le cycle suivant relit vraiment** — c'est là
+qu'est le défaut, pas dans l'état rendu ; une contre-épreuve `unsupportedStreams`
+sans laquelle « ne plus rien tenir pour définitif » passerait ; et la liste des
+verdicts figée sur `values`. Vérifié par mutation dans les deux sens : rétablir
+`fresh: true` fait rougir les trois cas paramétrés, retirer `unsupportedStreams`
+de la liste fait rougir la contre-épreuve.
+
+---
+
 ### ~~#13 · L'anti-rafale de reprise n'est pas monotone~~ — corrigé (`5123439`)
 
 `lib/core/components/status/sync_status_cubit.dart` — l'horloge est celle du
@@ -476,3 +499,11 @@ l'arithmétique en centimes du contrôle des frais et la jointure `fee_code` par
 lots de 500, `ClientSidePaginator`, `PullSequencer`, la table d'alias des
 18 clés, `leaveWizardToListing` / `onDetailReturned`, `SyncStateIcon`
 (null vs DRAFT), et l'observateur de reprise du lot 1.
+
+
+======== Exception caught by rendering library =====================================================
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 62 pixels on the bottom.
+
+The relevant error-causing widget was:
+Column Column:file:///home/junethink/my_project/school_app_flutter/lib/core/components/skeletons/eteelo_list_skeleton.dart:73:18

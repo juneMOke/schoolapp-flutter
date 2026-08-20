@@ -273,6 +273,100 @@ void main() {
     );
   });
 
+  group('verdict — un état REÇU ne vaut pas toujours « ne plus relire » (M-1)', () {
+    // `refreshFromNetwork` ne rend `null` que pour le transport et le corps
+    // illisible ; le refus, l'uid pas encore posé et le plan d'un autre sujet
+    // reviennent en ÉTAT. Les tenir pour définitifs éteignait le drapeau, et
+    // `markStale()` n'a qu'un seul déclencheur — un vrai changement de droits.
+    // Un seul 403 et toute la session tournait sur le repli
+    // `requiredPermissions`, derrière une pastille verte.
+    const transitoires = <SyncPlanUnknownCause, String>{
+      SyncPlanUnknownCause.unauthorized:
+          'garde mal déployée, ou jeton en cours de renouvellement',
+      SyncPlanUnknownCause.absent:
+          'uid pas encore posé au moment de la lecture',
+      SyncPlanUnknownCause.foreignSubject:
+          'la session a changé pendant le vol de la lecture',
+    };
+
+    for (final cas in transitoires.entries) {
+      test('${cas.key.name} laisse le drapeau levé — ${cas.value}', () async {
+        repo.reseau = SyncPlanState.unknown(cas.key);
+        final holder = porteur();
+
+        final etat = await holder.current();
+
+        expect((etat as SyncPlanUnknown).cause, cas.key);
+        expect(
+          repo.appelsLoadCached,
+          0,
+          reason: 'le serveur a répondu : le cache n\'apprendrait rien de plus',
+        );
+        expect(
+          holder.isStale,
+          isTrue,
+          reason:
+              'une réponse qui se démentira au cycle suivant n\'est pas '
+              'un verdict',
+        );
+
+        // Et le cycle suivant relit VRAIMENT — c'est là que se joue le défaut :
+        // un drapeau éteint ici ne se rallume plus de la session.
+        final connu = SyncPlanState.known(
+          _plan(const [SyncPlanKeys.classroomClassrooms]),
+        );
+        repo.reseau = connu;
+
+        expect(await holder.current(), same(connu));
+        expect(repo.appelsRefresh, 2);
+        expect(holder.isStale, isFalse, reason: 'le plan est enfin frais');
+      });
+    }
+
+    test(
+      'CONTRE-ÉPREUVE : unsupportedStreams EST un verdict, comme notDeployed',
+      () async {
+        // Le serveur rendra le même corps tant que l'APK n'aura pas appris son
+        // vocabulaire : le relire à chaque cycle coûterait un aller-retour par
+        // montage d'écran sur tout un parc. Sans cette paire, « ne plus jamais
+        // rien tenir pour définitif » passerait le test ci-dessus.
+        const verdict = SyncPlanState.unknown(
+          SyncPlanUnknownCause.unsupportedStreams,
+        );
+        repo.reseau = verdict;
+        final holder = porteur();
+
+        final etat = await holder.current();
+
+        expect(etat, same(verdict));
+        expect(holder.isStale, isFalse);
+
+        repo.reseau = SyncPlanState.known(
+          _plan(const [SyncPlanKeys.classroomClassrooms]),
+        );
+
+        expect(await holder.current(), same(verdict), reason: 'servi du mémo');
+        expect(repo.appelsRefresh, 1);
+      },
+    );
+
+    test('la liste des verdicts est exactement {notDeployed, '
+        'unsupportedStreams}', () {
+      // Le porteur et le repository lisent la MÊME liste ; qu'elle vive à un
+      // seul endroit est ce qui les empêche de diverger. Une huitième cause
+      // rendra ce test rouge — c'est l'objet : la question « relire y
+      // changerait-il quelque chose ? » doit être posée à chaque ajout, et non
+      // répondue par défaut du côté où l'erreur ne se manifeste plus jamais.
+      expect(
+        SyncPlanUnknownCause.values.where((cause) => cause.isVerdict).toSet(),
+        {
+          SyncPlanUnknownCause.notDeployed,
+          SyncPlanUnknownCause.unsupportedStreams,
+        },
+      );
+    });
+  });
+
   group('permissions — le signal de relecture (F9)', () {
     test('un changement de permissions marque le plan périmé', () async {
       final permissions = CurrentPermissions()..set(const ['classroom.read']);

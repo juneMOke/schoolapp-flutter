@@ -37,6 +37,11 @@ import 'package:school_app_flutter/core/offline/plan/sync_plan_state.dart';
 /// le plan est marqué à relire ; si la relecture échoue, il **reste** marqué et
 /// retente au cycle suivant. Sous F5, un plan périmé restreint le pull — il ne
 /// se contente pas d'être en retard.
+///
+/// Et « échoue » ne veut pas dire « n'a rien reçu » : une réponse du serveur
+/// qu'une nouvelle lecture démentirait — un refus, un uid pas encore posé —
+/// laisse elle aussi le drapeau levé. Elle est reçue, elle n'est pas un
+/// verdict.
 class SyncPlanHolder {
   final SyncPlanRepository _repository;
 
@@ -92,8 +97,10 @@ class SyncPlanHolder {
   /// Le plan à appliquer à ce cycle.
   ///
   /// Sert le mémo tant qu'il est frais. Sinon relit — et **ne marque frais que
-  /// si le réseau a réellement répondu** : un repli sur le cache laisse le
-  /// drapeau levé, pour retenter au cycle suivant.
+  /// ce qu'une relecture rendrait à l'identique** : un repli sur le cache laisse
+  /// le drapeau levé, et un état transitoire obtenu du serveur (refus, uid pas
+  /// encore posé, plan d'un autre sujet) aussi. Les deux retentent au cycle
+  /// suivant.
   ///
   /// Ne lève jamais : tout échec devient un plan inconnu, c'est-à-dire le repli
   /// sur le registre en dur. Une lecture qui remonterait une exception couperait
@@ -132,11 +139,19 @@ class SyncPlanHolder {
     try {
       final fresh = await _repository.refreshFromNetwork();
       if (fresh != null) {
-        // Un verdict serveur — route absente, refus — a bien été obtenu : il
-        // n'y a rien à retenter, et le retenter à chaque cycle ajouterait un
-        // timeout par montage d'écran sur un parc dont le back n'est pas encore
-        // déployé.
-        _commit(fresh, generation, fresh: true);
+        // ⚠️ Un état reçu n'est pas encore un verdict. `null` dit seulement que
+        // la jambe réseau n'a pas abouti ; un état dit que le serveur a répondu,
+        // et le refus (401/403) comme l'uid pas encore posé en produisent un.
+        // Les mémoriser FRAIS éteignait le drapeau pour toute la session — plus
+        // rien ne relit le plan hors d'un vrai changement de droits — et un seul
+        // 403 transitoire suffisait à rendre la main à `requiredPermissions`
+        // jusqu'au prochain login, derrière une pastille verte.
+        //
+        // Seul un verdict est mémorisable comme frais : ce que relire rendrait à
+        // l'identique. Le retenter ajouterait un aller-retour par montage
+        // d'écran sur un parc entier — c'est pourquoi la route absente en est
+        // un.
+        _commit(fresh, generation, fresh: _isVerdict(fresh));
         return fresh;
       }
       // La jambe réseau n'a pas abouti. Ce que la tablette a déjà vaut mieux
@@ -153,6 +168,24 @@ class SyncPlanHolder {
       return fallback;
     }
   }
+
+  /// Cet état peut-il être tenu pour **définitif**, c'est-à-dire mémorisé sans
+  /// qu'un cycle ultérieur ait à le relire ?
+  ///
+  /// Un plan connu ou positivement vide, oui : le serveur a dit ce qu'il avait à
+  /// dire, et `markStale()` le rappellera quand les droits bougeront. Un plan
+  /// inconnu, seulement si sa cause est un verdict — et cette liste-là n'est pas
+  /// écrite ici : elle vit sur [SyncPlanUnknownCause.isVerdict], à côté des
+  /// causes qu'elle trie, pour qu'une huitième cause pose la question au lieu de
+  /// tomber dans un `else` de porteur.
+  ///
+  /// Le `switch` est exhaustif sur les trois états, sans `_` : un quatrième doit
+  /// casser la compilation plutôt que de tomber du côté « définitif ».
+  static bool _isVerdict(SyncPlanState state) => switch (state) {
+    SyncPlanKnown() => true,
+    SyncPlanEmpty() => true,
+    SyncPlanUnknown(:final cause) => cause.isVerdict,
+  };
 
   /// Enregistre le résultat d'une lecture — **sauf si le monde a changé pendant
   /// son vol**.

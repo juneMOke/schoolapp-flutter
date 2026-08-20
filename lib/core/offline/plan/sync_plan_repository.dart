@@ -46,16 +46,21 @@ abstract interface class SyncPlanRepository {
   /// illisible (le portail captif qui répond 200 en HTML) — tous deux
   /// transitoires, tous deux démentis par le cycle d'après.
   ///
-  /// ⚠️ Ce qui remonte en ÉTAT plutôt qu'en `null` est un **verdict** : route
-  /// absente (404, le cas nominal du dégradé — l'APK se met à jour
-  /// indépendamment du back), refus, plan d'un autre sujet, et **plan dont
-  /// aucun flux n'est exploitable par cet APK**. Le retenter à chaque cycle n'y
-  /// changerait rien et coûterait un aller-retour par montage d'écran sur un
-  /// parc dont le back n'est pas déployé.
+  /// Tout le reste remonte en ÉTAT : route absente (404, le cas nominal du
+  /// dégradé — l'APK se met à jour indépendamment du back), refus, plan d'un
+  /// autre sujet, uid pas encore posé, et **plan dont aucun flux n'est
+  /// exploitable par cet APK**.
   ///
-  /// La ligne de partage n'est donc PAS « a-t-on reçu un corps », mais « une
-  /// nouvelle tentative pourrait-elle donner un autre résultat ». Un corps
-  /// illisible est bien reçu, et pourtant il change dès que le portail est
-  /// franchi.
+  /// La ligne de partage n'est donc PAS « a-t-on reçu un corps », mais « la
+  /// jambe réseau a-t-elle abouti ». Un corps illisible est bien reçu, et
+  /// pourtant il n'apprend rien : c'est le portail captif, qui change dès qu'il
+  /// est franchi.
+  ///
+  /// ⚠️ **Un état rendu ici n'est pas pour autant un verdict.** Recevoir une
+  /// réponse et pouvoir cesser de relire sont deux questions distinctes : un
+  /// refus ou un uid manquant sont des réponses, et se démentent au cycle
+  /// suivant. Les confondre figeait le mémo du porteur pour toute la session sur
+  /// un seul 403. La seconde question a sa propre réponse, une seule pour tout
+  /// le dépôt : [SyncPlanUnknownCause.isVerdict].
   Future<SyncPlanState?> refreshFromNetwork();
 }

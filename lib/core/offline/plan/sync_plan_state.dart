@@ -54,6 +54,50 @@ enum SyncPlanUnknownCause {
   absent,
 }
 
+/// La cause est-elle un **verdict** — c'est-à-dire une réponse que relire ne
+/// changerait pas ?
+///
+/// C'est la question dont dépend le drapeau « à relire » du porteur, et elle
+/// n'est **pas** « a-t-on reçu quelque chose du serveur ». Les deux ont été
+/// confondues : le porteur tenait pour définitif tout ce qui ne lui revenait pas
+/// en `null`, donc aussi le refus (401/403) et l'uid pas encore posé. Un seul
+/// 403 — le temps qu'une garde mal déployée soit retirée, le temps qu'un jeton
+/// se renouvelle — et le mémo devenait frais **pour toute la session** : le plan
+/// ne serait relu qu'au prochain vrai changement de droits, seul déclencheur de
+/// `markStale()`. Toute la session tournait alors sur le repli
+/// `requiredPermissions`, derrière une pastille verte (`isDegraded` ne s'alarme
+/// que d'[unsupportedStreams]).
+///
+/// Deux causes seulement passent le test, et pour la même raison : le serveur
+/// rendra la même chose au cycle suivant, et le lui redemander coûterait un
+/// aller-retour par montage d'écran sur tout un parc.
+///
+/// - [notDeployed] : la route n'existe pas. Elle n'apparaîtra pas d'ici le
+///   prochain cycle — c'est le cas nominal du dégradé, l'APK se mettant à jour
+///   indépendamment du back.
+/// - [unsupportedStreams] : cet APK ne comprend aucun des flux annoncés. Le
+///   corps sera identique tant que l'APK n'aura pas appris ce vocabulaire.
+///
+/// Tout le reste se dément au cycle d'après : le transport revient, le portail
+/// captif est franchi, le jeton se renouvelle, l'uid finit par être posé, la
+/// session redevient celle du porteur du plan. Une seule relecture les répare —
+/// encore faut-il qu'elle ait lieu.
+///
+/// ⚠️ Pas de `default` ni de `_` : une huitième cause doit casser la
+/// compilation ici, et non atterrir du côté « définitif », qui est celui où une
+/// erreur ne se manifeste plus jamais.
+extension SyncPlanUnknownCauseVerdict on SyncPlanUnknownCause {
+  bool get isVerdict => switch (this) {
+    SyncPlanUnknownCause.notDeployed => true,
+    SyncPlanUnknownCause.unsupportedStreams => true,
+    SyncPlanUnknownCause.transport => false,
+    SyncPlanUnknownCause.malformed => false,
+    SyncPlanUnknownCause.unauthorized => false,
+    SyncPlanUnknownCause.foreignSubject => false,
+    SyncPlanUnknownCause.absent => false,
+  };
+}
+
 /// L'état du plan — **trois** états, jamais deux (ADR-015 O).
 ///
 /// La distinction porte tout le lot. « Vide » est une information réelle : le
