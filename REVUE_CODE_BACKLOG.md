@@ -5,9 +5,10 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
 Quinze défauts confirmés, plus quatre issus de la revue adversariale du
-battement. **Six sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3,
-H-1, M-8 et M-1 ; **plus aucun défaut « haut » n'est ouvert**. Les treize autres
-sont listés ici, aucun n'est traité.
+battement. **Huit sont corrigés** — le #13 (commit `5123439`), puis H-2, H-3,
+H-1, M-8, M-1, et enfin M-2 et M-3 ensemble ; **plus aucun défaut « haut »
+n'est ouvert**. **Treize restent ouverts** et sont listés ici (B-9 compris,
+ouvert hors revue par la passe « clavier ») ; aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a
 fermé les débordements de la connexion, de l'encaissement, des deux modales de
@@ -26,41 +27,6 @@ déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 ---
 
 ## 🟠 Moyen
-
-### M-2 · `PermissionGate` deux-états affiche « relève de la caisse » à un caissier qui a le droit
-
-`lib/features/finance/presentation/widgets/facturation_detail_payments_section.dart:49`
-· même trou dans `facturation_charge_allocations_section.dart:75` et
-`facturation_charge_detail_dialog.dart:38`
-
-`PermissionGate.allows` rend `false` quand `AuthState.permissions == null` —
-l'état de **tout le parc** jusqu'au premier refresh suivant la migration v24.
-Un caissier qui détient `finance.payment.read` se voit refuser l'historique des
-encaissements sur l'écran même où il décide s'il faut encaisser.
-
-Le tri-état `permissionHolding(...) == missing` existe et est utilisé
-correctement ailleurs dans le même PR (`fee_control_results_view.dart:150`,
-`facturation_student_table.dart:150`), précisément pour éviter ça.
-
-**À faire** — passer ces trois sites au tri-état.
-
----
-
-### M-3 · La décision de permission est prise une fois, puis bascule en faux « aucun versement »
-
-`lib/features/finance/presentation/widgets/facturation_detail_data_loader.dart:55`
-
-`_requestData()` ne part que du post-frame d'`initState` et du `didUpdateWidget`
-sur changement d'id ; rien ne s'abonne à `AuthBloc`. Si les permissions sont
-encore `null` à cet instant, `PaymentsRequested` n'est jamais émis — puis
-l'ensemble arrive en cours de session, un rebuild survient, `canReadPayments`
-passe à `true` alors que le bloc est resté `initial` : l'écran affiche
-**« Aucun versement enregistré »**. Seul un aller-retour sur la page corrige.
-
-**À faire** — s'abonner au changement de permissions et redemander, ou refuser
-de trancher tant que l'ensemble est inconnu.
-
----
 
 ### M-4 · Une lecture de tarifs en échec est rendue « aucun frais défini pour ce niveau »
 
@@ -477,6 +443,63 @@ sans laquelle « ne plus rien tenir pour définitif » passerait ; et la liste d
 verdicts figée sur `values`. Vérifié par mutation dans les deux sens : rétablir
 `fresh: true` fait rougir les trois cas paramétrés, retirer `unsupportedStreams`
 de la liste fait rougir la contre-épreuve.
+
+---
+
+### ~~M-2 + M-3 · La Facturation confond « droit refusé » et « droits pas encore lus »~~ — corrigés
+
+Traités ensemble parce que c'est **un seul défaut à deux moitiés** : la moitié
+qui se tait (M-2, trois écrans) et la moitié qui ne demande rien (M-3, le
+chargeur). Corriger l'une seule aurait aggravé l'autre — une section rouverte
+au-dessus d'un BLoC resté `initial` affiche « Aucun versement enregistré », qui
+est précisément la phrase que la carte « relève de la caisse » existait à
+éviter.
+
+**La règle, désormais tenue aux quatre sites :** on ne se tait, et on ne renonce
+à lire, que sur `missing` — quand on **sait** que le droit manque. Une lecture
+tentée à tort coûte un 403, rendu en état d'erreur avec « Réessayer » ; une
+lecture omise à tort ment, sur l'écran même où un caissier décide s'il faut
+encaisser. C'est la même asymétrie que le socle de synchro, qui tire sur
+inconnu.
+
+`permission_holding.dart` gagne les deux pièces qui manquaient à la matrice :
+
+| | Deux états | Trois états |
+|---|---|---|
+| **Abonné** | `PermissionGate` (une garde doit fermer sur inconnu) | `PermissionHoldingBuilder` *(nouveau)* |
+| **Ponctuel** | `PermissionGate.allows` | `permissionHolding` / `permissionHoldingOf` *(nouveau)* |
+
+`permissionHoldingOf` est la règle sans arbre, pour les appelants qui tiennent
+déjà l'état de session — un `buildWhen`, un `listenWhen`, un `State` qui décide
+d'émettre. Sans elle, chacun réécrivait « inconnu ne vaut pas refusé » pour son
+compte, et c'est exactement la divergence qui a produit le défaut.
+
+⚠️ **L'abonnement n'est pas un luxe, c'est l'autre moitié.** Le tri-état lu une
+seule fois dans un `build` extérieur fige son verdict pour la vie de l'écran :
+rien ne reconstruit la section Versements quand les permissions arrivent en
+séance. Le `buildWhen` et le `listenWhen` comparent la **décision**, jamais les
+ensembles — un droit qui bouge ailleurs dans le catalogue ne reconstruit ni ne
+relit rien, et la comparaison n'a pas à se prononcer sur les doublons d'une
+liste (cf. B-3, qui reste ouvert sur `PermissionGate._sameSet`).
+
+Côté chargeur, la lecture de rattrapage ne redemande **que** les versements — les
+créances sont déjà à l'écran, et les relire ferait clignoter une donnée intacte —
+et elle n'est **pas** silencieuse : il n'y a rien à préserver, un skeleton dit
+honnêtement qu'on est allé chercher. Un drapeau `_paymentsRequested` empêche le
+doublon, et retombe quand le droit se retire, pour qu'un élargissement ultérieur
+reparte d'une vraie lecture plutôt que d'une donnée d'avant.
+
+Tests : `facturation_permissions_unknown_test.dart`, 11 cas — les quatre sites
+sur ensemble inconnu, les deux sens de bascule en séance (le droit qui arrive
+rouvre et relit, celui qui se retire referme), la non-relecture sur un
+changement qui ne change pas la décision, et deux contre-épreuves « sans le
+droit, on se tait toujours ». Vérifié par mutation sur les cinq sites de
+décision : chacun, remis en deux états, fait rougir au moins un cas.
+
+⚠️ **Piège de test rencontré** : les sections traversent un `AnimatedSwitcher`.
+Sans `pumpAndSettle`, l'ancien enfant est encore à l'arbre et un `findsNothing`
+échoue sur une carte en train de disparaître — ce qui ressemble trait pour trait
+à un abonnement qui n'a pas fonctionné.
 
 ---
 

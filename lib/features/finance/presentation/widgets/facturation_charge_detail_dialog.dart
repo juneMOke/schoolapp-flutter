@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -35,8 +35,17 @@ Future<void> showFacturationChargeDetailDialog(
         // Les imputations ne sont demandées que si la session peut les lire :
         // `payment_allocations` n'est peuplée que par le flux paiements
         // (ADR-015 §6-C).
+        //
+        // ⚠️ Tri-état : on ne renonce que sur `missing`. `PermissionGate.allows`
+        // refusait aussi sur un ensemble encore INCONNU — et comme la demande
+        // n'est émise qu'ici, à la création, la modale s'ouvrait alors sur
+        // « aucune imputation » pour un caissier qui y a droit, sans rien pour
+        // l'en sortir hormis la refermer. Une lecture tentée à tort ne coûte
+        // qu'un 403, que la section rend en erreur ; une lecture omise à tort
+        // ment.
         if (intent.chargeId.trim().isNotEmpty &&
-            PermissionGate.allows(context, const [Perm.financePaymentRead])) {
+            permissionHolding(context, const [Perm.financePaymentRead]) !=
+                PermissionHolding.missing) {
           bloc.add(
             StudentChargePaymentAllocationsRequested(chargeId: intent.chargeId),
           );

@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 
 /// Ce que la session détient vis-à-vis d'une exigence — **trois** états, jamais
@@ -41,10 +44,25 @@ PermissionHolding permissionHolding(
   BuildContext context,
   List<Perm> requires, {
   bool requiresAll = false,
+}) => permissionHoldingOf(
+  PermissionGate.maybeBlocOf(context)?.state.permissions,
+  requires,
+  requiresAll: requiresAll,
+);
+
+/// La même règle, **sans arbre** : à partir de l'ensemble brut.
+///
+/// Existe pour les appelants qui tiennent déjà l'état de session en main — un
+/// `buildWhen`, un `listenWhen`, un `State` qui décide d'émettre une lecture.
+/// Sans elle, chacun réécrivait « inconnu ne vaut pas refusé » pour son compte,
+/// et c'est exactement la divergence qui a produit le défaut : la garde à deux
+/// états d'un côté, le tri-état de l'autre, sur le même droit et le même écran.
+PermissionHolding permissionHoldingOf(
+  Iterable<String>? permissions,
+  List<Perm> requires, {
+  bool requiresAll = false,
 }) {
-  final bloc = PermissionGate.maybeBlocOf(context);
-  final held = bloc?.state.permissions;
-  if (held == null) return PermissionHolding.unknown;
+  if (permissions == null) return PermissionHolding.unknown;
   // Exigence vide : `canAccess` refuse, délibérément — « une exigence vide est
   // presque toujours une déclaration oubliée, et un oubli doit refuser ». La
   // règle est juste pour une garde, qui **protège** ; elle s'inverse ici, où
@@ -54,9 +72,59 @@ PermissionHolding permissionHolding(
   if (requires.isEmpty) return PermissionHolding.unknown;
   return canAccess(
         requires: requires,
-        permissions: held,
+        permissions: permissions,
         requiresAll: requiresAll,
       )
       ? PermissionHolding.granted
       : PermissionHolding.missing;
+}
+
+/// Le pendant **abonné** de [permissionHolding] : trois états, et qui suit les
+/// changements de droits en séance.
+///
+/// La matrice avait un trou. `PermissionGate` s'abonne mais ne connaît que deux
+/// états — il ferme sur un ensemble inconnu, ce qui est le bon réflexe pour une
+/// garde. [permissionHolding] distingue les trois états mais ne s'abonne pas :
+/// lu dans un `build` extérieur, son verdict reste figé pour la vie de l'écran.
+/// Une zone de résultats a besoin des deux à la fois — expliquer un vide sans
+/// accuser un compte au hasard, **et** cesser de l'expliquer dès que l'ensemble
+/// arrive.
+///
+/// Le `buildWhen` compare la **décision**, pas les ensembles : un droit qui
+/// change ailleurs dans le catalogue ne reconstruit rien, et la comparaison n'a
+/// pas à se prononcer sur les doublons d'une liste.
+///
+/// Sans `AuthBloc` dans l'arbre — harnais de test qui monte une page seule — le
+/// builder reçoit [PermissionHolding.unknown], jamais `granted` : même
+/// convention que [permissionHolding].
+class PermissionHoldingBuilder extends StatelessWidget {
+  const PermissionHoldingBuilder({
+    super.key,
+    required this.requires,
+    required this.builder,
+    this.requiresAll = false,
+  });
+
+  final List<Perm> requires;
+  final bool requiresAll;
+  final Widget Function(BuildContext context, PermissionHolding holding)
+  builder;
+
+  PermissionHolding _holdingOf(AuthState state) => permissionHoldingOf(
+    state.permissions,
+    requires,
+    requiresAll: requiresAll,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = PermissionGate.maybeBlocOf(context);
+    if (bloc == null) return builder(context, PermissionHolding.unknown);
+    return BlocBuilder<AuthBloc, AuthState>(
+      bloc: bloc,
+      buildWhen: (previous, current) =>
+          _holdingOf(previous) != _holdingOf(current),
+      builder: (context, state) => builder(context, _holdingOf(state)),
+    );
+  }
 }
