@@ -96,6 +96,7 @@ Future<void> _pumpForm(
   List<LocalFeeTariff> tariffs = const <LocalFeeTariff>[],
   List<OfflineClassroom> classrooms = const <OfflineClassroom>[],
   bool feeGridMissing = false,
+  bool tariffsFailed = false,
   void Function(String, String)? onLevelSelected,
   ValueChanged<FeeControlSearchRequest>? onSearch,
   _Session? session,
@@ -108,6 +109,7 @@ Future<void> _pumpForm(
       isTariffsLoading: false,
       isClassroomsLoading: false,
       feeGridMissing: feeGridMissing,
+      tariffsFailed: tariffsFailed,
       isLoading: false,
       onLevelSelected: onLevelSelected ?? (_, _) {},
       onSearch: onSearch ?? (_) {},
@@ -328,6 +330,79 @@ void main() {
     await _selectLevel(tester, 'g1::l1');
 
     expect(find.textContaining('Aucun frais n\'est défini'), findsOneWidget);
+  });
+
+  // M-4 — la TROISIÈME cause d'un sélecteur de frais vide. `tariffsStatus:
+  // failure` était stocké et lu par personne : une base SQLCipher verrouillée
+  // annonçait « aucun frais défini pour ce niveau », c'est-à-dire une
+  // affirmation sur l'école alors que seule la lecture de l'appareil avait
+  // échoué. Le frais étant obligatoire ici, l'écran restait fermé sans
+  // explication ni issue.
+  group('lecture de la grille en échec (M-4)', () {
+    const echec = 'n\'a pas pu être lue';
+    const vide = 'Aucun frais n\'est défini';
+
+    testWidgets('dit l\'échec, et surtout PAS « aucun frais »', (tester) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, tariffsFailed: true);
+
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.textContaining(echec), findsOneWidget);
+      expect(find.textContaining(vide), findsNothing);
+    });
+
+    testWidgets('offre une reprise qui rejoue la lecture du MÊME niveau', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final demandes = <(String, String)>[];
+      await _pumpForm(
+        tester,
+        tariffsFailed: true,
+        onLevelSelected: (groupId, levelId) => demandes.add((groupId, levelId)),
+      );
+
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+      expect(demandes, [('g1', 'l1')]);
+
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+
+      expect(
+        demandes,
+        [('g1', 'l1'), ('g1', 'l1')],
+        reason:
+            'sans ce geste l\'opérateur reste devant un formulaire qu\'il '
+            'ne peut pas armer : le frais est obligatoire',
+      );
+    });
+
+    testWidgets('CONTRE-ÉPREUVE : pas de reprise quand rien n\'a échoué', (
+      tester,
+    ) async {
+      // Ni « ce niveau n'a pas de frais » ni « la grille n'est pas descendue »
+      // ne se réparent en réessayant : offrir le bouton y promettrait une issue
+      // qui n'existe pas.
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpForm(tester, feeGridMissing: true);
+
+      await _selectCycle(tester, 'g1');
+      await _selectLevel(tester, 'g1::l1');
+
+      expect(find.text('Réessayer'), findsNothing);
+    });
   });
 
   // ADR-015 F1c — une liste de classes vide a deux causes, et une seule des

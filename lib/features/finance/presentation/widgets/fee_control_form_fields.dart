@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_holding.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
@@ -18,17 +19,39 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Sélecteur du frais à contrôler, alimenté par la grille du niveau choisi.
 ///
 /// Reste fermé tant qu'aucun niveau n'est sélectionné : un frais n'existe que
-/// rapporté à un niveau. Quand la grille revient vide, le message distingue les
-/// deux causes — « ce niveau n'a pas de frais » (information) et « la grille
-/// n'est pas descendue ici » (à synchroniser) — parce qu'elles se ressemblent à
-/// l'écran et pas au guichet.
+/// rapporté à un niveau. Quand la grille revient vide, le message distingue
+/// **trois** causes — parce qu'elles se ressemblent à l'écran et pas au
+/// guichet :
+///
+///  - « ce niveau n'a pas de frais » : information, il n'y a rien à contrôler ;
+///  - « la grille n'est pas descendue ici » : à synchroniser (ou un droit à
+///    ouvrir, cf. la variante caviardée) ;
+///  - « la lecture a échoué » : on ne sait rien du tout — base verrouillée,
+///    chiffrement indisponible, fichier corrompu.
+///
+/// La troisième était rendue comme la première : une base SQLCipher verrouillée
+/// annonçait à l'opérateur que l'école n'a pas de frais pour ce niveau. Elle
+/// affirmait sur l'école ce qui n'était vrai que de l'appareil, et le frais
+/// étant **obligatoire** ici, la recherche restait fermée sans que rien
+/// n'explique pourquoi ni n'offre d'issue.
 class FeeControlFeeField extends StatelessWidget {
   final List<LocalFeeTariff> tariffs;
   final String? selectedFeeCode;
   final bool hasLevel;
   final bool isLoading;
   final bool feeGridMissing;
+
+  /// La lecture locale de la grille n'a pas abouti — à ne jamais confondre avec
+  /// une grille vide, qui, elle, est une information.
+  final bool loadFailed;
+
   final ValueChanged<String?> onChanged;
+
+  /// Rejoue la lecture du niveau courant. Seule porte de sortie de l'échec : le
+  /// frais est obligatoire, donc l'écran est bloqué tant que la grille n'est pas
+  /// lue, et remonter la cascade pour re-choisir le même niveau n'est ni évident
+  /// ni suffisant.
+  final VoidCallback onRetry;
 
   const FeeControlFeeField({
     super.key,
@@ -37,7 +60,9 @@ class FeeControlFeeField extends StatelessWidget {
     required this.hasLevel,
     required this.isLoading,
     required this.feeGridMissing,
+    required this.loadFailed,
     required this.onChanged,
+    required this.onRetry,
   });
 
   /// Un `fee_code` n'apparaît qu'une fois : la grille peut porter à la fois un
@@ -59,6 +84,11 @@ class FeeControlFeeField extends StatelessWidget {
     final String? errorText;
     if (!hasLevel || isLoading || items.isNotEmpty) {
       errorText = null;
+    } else if (loadFailed) {
+      // En tête des trois : les deux autres messages affirment quelque chose
+      // sur l'école ou sur la synchronisation, et une lecture qui n'a pas
+      // abouti n'autorise ni l'une ni l'autre affirmation.
+      errorText = l10n.feeControlFeeLoadFailed;
     } else if (feeGridMissing) {
       // Même défaut que le sélecteur de classe, et c'est le seul des trois
       // qu'un gabarit de rôle serveur produise réellement : le référentiel
@@ -75,7 +105,7 @@ class FeeControlFeeField extends StatelessWidget {
       errorText = l10n.feeControlFeeEmptyForLevel;
     }
 
-    return EteeloSelectInput<String>(
+    final field = EteeloSelectInput<String>(
       label: l10n.feeControlFeeLabel,
       placeholder: hasLevel ? null : l10n.feeControlFeePlaceholder,
       value: items.any((tariff) => tariff.feeCode == selectedFeeCode)
@@ -92,6 +122,36 @@ class FeeControlFeeField extends StatelessWidget {
             ),
           )
           .toList(growable: false),
+    );
+
+    // Une erreur sans geste de reprise laisse l'opérateur devant un formulaire
+    // qu'il ne peut pas armer. Le bouton n'apparaît que pour l'échec de
+    // lecture : « pas de frais à ce niveau » et « grille pas encore descendue »
+    // ne se réparent pas en réessayant.
+    // `items.isNotEmpty` fait partie de la garde, et pas par excès de
+    // prudence : le message d'erreur, lui, s'efface dès qu'il y a des frais à
+    // choisir. Sans cette condition, une grille non vide rendue avec le drapeau
+    // d'échec afficherait un bouton de reprise sans rien qui le motive.
+    if (!loadFailed || !hasLevel || isLoading || items.isNotEmpty) {
+      return field;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        field,
+        const SizedBox(height: AppDimensions.spacingXS),
+        EteeloButton.ghost(
+          label: l10n.feeControlFeeLoadRetry,
+          icon: Icons.refresh,
+          onPressed: onRetry,
+          // ⚠️ Jamais un `TextButton`/`OutlinedButton` nu ici : le thème du
+          // dépôt les veut pleine largeur, et un bouton inline sans
+          // `minimumSize` casse la mise en page (contrainte infinie).
+          fullWidth: false,
+          size: EteeloButtonSize.compact,
+        ),
+      ],
     );
   }
 
@@ -126,11 +186,15 @@ class FeeControlClassGroup extends StatelessWidget {
   final bool isTariffsLoading;
   final bool isClassroomsLoading;
   final bool feeGridMissing;
+  final bool tariffsFailed;
   final bool isComplete;
   final ValueChanged<String?> onCycleChanged;
   final ValueChanged<String?> onLevelChanged;
   final ValueChanged<String?> onClassroomChanged;
   final ValueChanged<String?> onFeeChanged;
+
+  /// Rejoue la lecture de la grille du niveau courant, après un échec.
+  final VoidCallback onRetryTariffs;
   final ValueChanged<FeeControlPaymentFilter?> onStatusChanged;
 
   const FeeControlClassGroup({
@@ -148,11 +212,13 @@ class FeeControlClassGroup extends StatelessWidget {
     required this.isTariffsLoading,
     required this.isClassroomsLoading,
     required this.feeGridMissing,
+    required this.tariffsFailed,
     required this.isComplete,
     required this.onCycleChanged,
     required this.onLevelChanged,
     required this.onClassroomChanged,
     required this.onFeeChanged,
+    required this.onRetryTariffs,
     required this.onStatusChanged,
   });
 
@@ -193,7 +259,9 @@ class FeeControlClassGroup extends StatelessWidget {
             hasLevel: hasLevel,
             isLoading: isLoading || isTariffsLoading,
             feeGridMissing: feeGridMissing,
+            loadFailed: tariffsFailed,
             onChanged: onFeeChanged,
+            onRetry: onRetryTariffs,
           ),
           const SizedBox(height: AppDimensions.spacingS),
           FeeControlStatusField(

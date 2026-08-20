@@ -112,6 +112,12 @@ class _FeeControlViewState extends State<_FeeControlView> {
                           state.classroomsStatus ==
                           EnrollmentLoadStatus.loading,
                       feeGridMissing: state.feeGridMissing,
+                      // `tariffsStatus: failure` était stocké et lu par
+                      // personne : le sélecteur de frais retombait alors sur
+                      // « aucun frais défini pour ce niveau », qui affirme sur
+                      // l'école ce qui n'est vrai que de cet appareil.
+                      tariffsFailed:
+                          state.tariffsStatus == EnrollmentLoadStatus.failure,
                       isLoading: state.status == EnrollmentLoadStatus.loading,
                       // Un niveau choisi ouvre deux lectures locales : sa grille
                       // tarifaire et ses classes.
@@ -136,8 +142,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
                           request: request,
                         ),
                       ),
-                      onClear: () =>
-                          bloc.add(const FeeControlResetRequested()),
+                      onClear: () => bloc.add(const FeeControlResetRequested()),
                     );
                   },
                 ),

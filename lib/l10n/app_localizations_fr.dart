@@ -2726,6 +2726,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'La grille tarifaire relève d\'un module auquel ce profil n\'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.';
 
   @override
+  String get feeControlFeeLoadFailed =>
+      'La liste des frais de ce niveau n\'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l\'application.';
+
+  @override
+  String get feeControlFeeLoadRetry => 'Réessayer';
+
+  @override
   String get feeControlPaymentStatusLabel => 'Statut de paiement';
 
   @override

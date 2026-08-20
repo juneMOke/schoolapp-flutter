@@ -2708,6 +2708,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.';
 
   @override
+  String get feeControlFeeLoadFailed =>
+      'The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.';
+
+  @override
+  String get feeControlFeeLoadRetry => 'Try again';
+
+  @override
   String get feeControlPaymentStatusLabel => 'Payment status';
 
   @override

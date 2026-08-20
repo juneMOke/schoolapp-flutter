@@ -38,6 +38,10 @@ class FeeControlSearchForm extends StatefulWidget {
   /// « ce niveau n'a pas de frais »).
   final bool feeGridMissing;
 
+  /// Vrai quand la lecture locale de la grille a ÉCHOUÉ — troisième cause d'un
+  /// sélecteur de frais vide, et la seule qui se répare en réessayant.
+  final bool tariffsFailed;
+
   final bool isLoading;
 
   /// Émis à chaque changement de niveau pour charger la grille correspondante.
@@ -55,6 +59,7 @@ class FeeControlSearchForm extends StatefulWidget {
     required this.isTariffsLoading,
     required this.isClassroomsLoading,
     required this.feeGridMissing,
+    required this.tariffsFailed,
     required this.isLoading,
     required this.onLevelSelected,
     required this.onSearch,
@@ -155,6 +160,20 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
     widget.onLevelSelected(option.schoolLevelGroupId, option.schoolLevelId);
   }
 
+  /// Rejoue les deux lectures locales du niveau déjà sélectionné.
+  ///
+  /// Passe par le même canal que la sélection de niveau — le parent y répond en
+  /// réémettant grille ET classes — plutôt que par un canal de reprise dédié :
+  /// une base qui refuse la grille refuse en général aussi le roster, et deux
+  /// portes pour la même panne divergeraient. La sélection courante n'est pas
+  /// touchée : contrairement à `_onLevelChanged`, on ne remet à zéro ni la
+  /// classe ni le frais, puisque le niveau n'a pas changé.
+  void _retryLevelReads() {
+    final option = _selectedOption;
+    if (option == null) return;
+    widget.onLevelSelected(option.schoolLevelGroupId, option.schoolLevelId);
+  }
+
   /// La sentinelle « toutes les classes » revient à `null` côté critères.
   void _onClassroomChanged(String? classroomId) {
     setState(
@@ -232,11 +251,13 @@ class _FeeControlSearchFormState extends State<FeeControlSearchForm> {
       isTariffsLoading: widget.isTariffsLoading,
       isClassroomsLoading: widget.isClassroomsLoading,
       feeGridMissing: widget.feeGridMissing,
+      tariffsFailed: widget.tariffsFailed,
       isComplete: _canSearch,
       onCycleChanged: _onCycleChanged,
       onLevelChanged: _onLevelChanged,
       onClassroomChanged: _onClassroomChanged,
       onFeeChanged: _onFeeChanged,
+      onRetryTariffs: _retryLevelReads,
       onStatusChanged: _onStatusChanged,
     );
 

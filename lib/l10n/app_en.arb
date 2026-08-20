@@ -1474,6 +1474,8 @@
   "feeControlFeeEmptyForLevel": "No fee is defined for this level.",
   "feeControlFeeGridMissing": "The fee schedule has not reached this device yet. Sync to control a fee.",
   "feeControlFeeGridWithheld": "The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.",
+  "feeControlFeeLoadFailed": "The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.",
+  "feeControlFeeLoadRetry": "Try again",
   "feeControlPaymentStatusLabel": "Payment status",
   "feeControlPaymentStatusAll": "All",
   "feeControlViewDetailLabel": "Open the financial record",

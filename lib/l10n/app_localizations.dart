@@ -4670,6 +4670,18 @@ abstract class AppLocalizations {
   /// **'The fee schedule belongs to a module this profile cannot access: it will not reach this device, however often you sync. Your administrator can grant that access.'**
   String get feeControlFeeGridWithheld;
 
+  /// No description provided for @feeControlFeeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fees for this level could not be read on this device. Try again; if it keeps failing, close and reopen the app.'**
+  String get feeControlFeeLoadFailed;
+
+  /// No description provided for @feeControlFeeLoadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get feeControlFeeLoadRetry;
+
   /// No description provided for @feeControlPaymentStatusLabel.
   ///
   /// In en, this message translates to:

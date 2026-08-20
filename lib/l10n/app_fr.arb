@@ -1431,6 +1431,8 @@
   "feeControlFeeEmptyForLevel": "Aucun frais n'est défini pour ce niveau.",
   "feeControlFeeGridMissing": "La grille tarifaire n'est pas encore descendue sur cet appareil. Synchronisez pour pouvoir contrôler un frais.",
   "feeControlFeeGridWithheld": "La grille tarifaire relève d'un module auquel ce profil n'a pas accès : elle ne descendra pas sur cet appareil, quelle que soit la synchronisation. Votre administrateur peut ouvrir cet accès.",
+  "feeControlFeeLoadFailed": "La liste des frais de ce niveau n'a pas pu être lue sur cet appareil. Réessayez ; si le problème persiste, fermez puis rouvrez l'application.",
+  "feeControlFeeLoadRetry": "Réessayer",
   "feeControlPaymentStatusLabel": "Statut de paiement",
   "feeControlPaymentStatusAll": "Tous",
   "feeControlViewDetailLabel": "Voir la fiche financière",
