@@ -300,7 +300,11 @@ class FacturationDetailPage extends StatelessWidget {
                           academicYearId: intent.academicYearId,
                         ),
                         SizedBox(height: blockSpacing),
-                        if (!intent.hasDisplayContext)
+                        // Identité inconnue — lien profond ouvert sans
+                        // `extra` : on n'affiche pas un solde sans pouvoir dire
+                        // à qui il appartient. Une classe manquante, elle, ne
+                        // justifie rien de tel : elle ne sert qu'au sur-titre.
+                        if (!intent.hasStudentIdentity)
                           FinanceContextErrorCard(
                             title: l10n.facturationDetailContextErrorTitle,
                             message: l10n.facturationDetailContextErrorMessage,

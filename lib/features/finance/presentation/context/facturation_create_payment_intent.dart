@@ -36,11 +36,15 @@ class FacturationCreatePaymentIntent extends Equatable {
          studentCharges: const [],
        );
 
+  /// Sait-on **de qui** est cet argent ?
+  ///
+  /// L'identité seule, jamais la classe : voir la docstring de
+  /// `FacturationDetailIntent.hasStudentIdentity`. Un encaissement ouvert
+  /// depuis une fiche trouvée **par identité** n'a pas de classe à transmettre,
+  /// et la classe ne figure sur aucune pièce émise — elle n'alimente que le
+  /// sur-titre de l'écran.
   bool get hasDisplayContext =>
-      firstName.trim().isNotEmpty &&
-      lastName.trim().isNotEmpty &&
-      levelName.trim().isNotEmpty &&
-      levelGroupName.trim().isNotEmpty;
+      firstName.trim().isNotEmpty && lastName.trim().isNotEmpty;
 
   List<StudentCharge> get unpaidCharges => studentCharges
       .where((c) => c.status != StudentChargeStatus.paid)

@@ -54,12 +54,18 @@ class FacturationChargeDetailIntent extends Equatable {
          chargeStatus: StudentChargeStatus.due,
        );
 
+  /// Sait-on **de qui** est cet argent, et de **quelle** ligne ?
+  ///
+  /// Identité + identifiant de la ligne, jamais la classe : voir la docstring de
+  /// `FacturationDetailIntent.hasStudentIdentity`. Une fiche ouverte depuis une
+  /// recherche **par identité** n'a pas de classe à transmettre — le résumé
+  /// d'élève n'en porte pas — et l'exiger ici referait, dans cette modale, la
+  /// panne que la fiche vient de perdre : « contexte indisponible » par-dessus
+  /// une ligne parfaitement identifiée.
   bool get hasDisplayContext =>
       chargeId.trim().isNotEmpty &&
       firstName.trim().isNotEmpty &&
-      lastName.trim().isNotEmpty &&
-      levelName.trim().isNotEmpty &&
-      levelGroupName.trim().isNotEmpty;
+      lastName.trim().isNotEmpty;
 
   FacturationChargeDetailIntent withRouteParams({
     required String chargeId,

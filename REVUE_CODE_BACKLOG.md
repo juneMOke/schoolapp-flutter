@@ -12,6 +12,11 @@ aucun n'est traité.
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
 de l'encaissement, des deux modales de discipline et de la recherche de parent.
 
+S'y ajoutait **H-4**, hors revue : signalé à l'usage le 2026-08-20 — en Facturation, un élève trouvé par
+**recherche d'identité** ouvrait une fiche vide, « contexte de détail indisponible » à la place du
+grand-livre. Un mode de recherche entier était inexploitable sur l'écran de caisse : **corrigé** (voir
+« Traité »).
+
 S'y ajoutait **M-8**, hors revue : constaté à l'usage le 2026-08-19 — le détail d'un élève en Facturation attendait le
 réseau avant d'afficher un grand-livre déjà présent en base. Seul défaut du lot à se manifester dans le chemin
 **nominal**, à chaque ouverture de fiche : **corrigé** (voir « Traité »).
@@ -335,6 +340,53 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~H-4 · Une fiche ouverte depuis une recherche par identité n'affiche aucun détail~~ — corrigé
+
+Signalé à l'usage, hors revue. La chaîne, entière, tenait à une condition de trop :
+
+1. le formulaire bi-mode arme la recherche sur « les **trois noms** ou un niveau » — en mode identité,
+   aucun niveau n'est choisi, donc `schoolLevelId` part vide ;
+2. `facturation_student_table.dart` lit le niveau de la ligne dans… **les derniers critères de
+   recherche** (`lastSummariesQuery.schoolLevelId`) — vide, donc, dans ce mode ;
+3. `facturation_page.dart` cherche le nom du niveau dans le référentiel avec cet id vide : aucun
+   `levelName`, aucun `levelGroupName` dans l'intent ;
+4. `FacturationDetailIntent.hasDisplayContext` exigeait **les deux** en plus de l'identité ;
+5. la page rendait `FinanceContextErrorCard` **à la place** du chargeur : ni frais, ni versements, ni
+   totaux — pour un élève dont on connaissait parfaitement le nom.
+
+La classe ne sert qu'au sur-titre « Facturation · {classe} ». Le grand-livre, lui, ne se lit qu'avec
+`studentId` + `academicYearId`. La condition a donc été ramenée à ce qu'elle protège réellement —
+`hasStudentIdentity` : **on n'affiche pas un solde sans pouvoir dire à qui il appartient**, et rien de
+plus. Un lien profond sans `extra` (le vrai cas sans contexte) garde la carte d'erreur.
+
+⚠️ **Ce n'est pas une invention locale : les deux modules voisins avaient déjà tranché ainsi.**
+`DisciplinaryStudentDetailIntent` porte niveau, cycle et classe, et n'exige que les noms. Le catalogue
+Documents l'écrit en toutes lettres — la classe est « du contexte d'affichage, jamais une condition
+d'ouverture » — et vit très bien avec un sur-titre vide après une recherche par nom. Facturation était
+le seul des trois à en faire une porte.
+
+Les **trois intents frères** (détail d'un frais, détail d'un versement, encaissement) portaient la même
+condition class-inclusive. Aucun n'était lu — getters morts — mais les laisser ainsi, c'était laisser
+trois mines : la première modale qu'on y câblerait aurait refait la panne au-dessus d'une ligne
+parfaitement identifiée. Alignés sur la même règle, identifiant de ligne compris (un frais sans
+`chargeId` n'a toujours rien à afficher).
+
+⚠️ **Ce qui n'est PAS corrigé, et qui est un choix** : le sur-titre affiche « Facturation · - » après une
+recherche par identité, faute de classe à mettre. La corriger vraiment demanderait de porter le niveau
+**par ligne** — projection du DAO (`e.school_level_id`, `e.school_level_group_id` ne sont pas dans le
+`SELECT`), `LocalEnrollmentListItem`, `EnrollmentSummary`, puis la table — pour un sur-titre. Documents
+vit avec le même « - » depuis son lot. À rouvrir si l'usage le réclame ; une variante moins chère
+existe (dériver la classe des créances déjà chargées, qui portent `schoolLevelId`), au prix d'un
+sur-titre qui se remplit un instant après l'ouverture.
+
+Tests : deux au niveau **page** — la fiche issue d'une recherche par identité rend bien ses deux
+sections, et la contre-épreuve du lien profond sans identité garde la carte d'erreur — plus cinq
+unitaires qui figent la règle sur les quatre intents. Le test de page a d'abord été écrit **rouge** : il
+reproduit la panne signalée avant de la corriger. Vérifié par mutation (la classe remise dans la
+condition fait rougir le cas nominal).
 
 ---
 
