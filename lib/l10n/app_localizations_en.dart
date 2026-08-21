@@ -1393,29 +1393,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Find a student or a class from the previous year to re-enroll';
 
   @override
-  String get reRegistrationSearchHelpPill =>
-      'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.';
-
-  @override
   String get reRegistrationSearchTitle => 'Search a student';
-
-  @override
-  String get reRegistrationSearchByNameGroup => 'By name';
-
-  @override
-  String get reRegistrationSearchByLevelGroup => 'By cycle / level';
-
-  @override
-  String get reRegistrationSearchOrSeparator => 'OR';
-
-  @override
-  String get reRegistrationSearchActiveModeLabel => 'Active search by:';
-
-  @override
-  String get reRegistrationSearchModeNameBadge => 'Name';
-
-  @override
-  String get reRegistrationSearchModeLevelBadge => 'Cycle / level';
 
   @override
   String get reRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
@@ -1449,29 +1427,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Find a pre-registration by student or by desired cycle/level';
 
   @override
-  String get preRegistrationSearchHelpPill =>
-      'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.';
-
-  @override
   String get preRegistrationSearchTitle => 'Search a pre-registration';
-
-  @override
-  String get preRegistrationSearchByNameGroup => 'By name';
-
-  @override
-  String get preRegistrationSearchByLevelGroup => 'By cycle / level';
-
-  @override
-  String get preRegistrationSearchOrSeparator => 'OR';
-
-  @override
-  String get preRegistrationSearchActiveModeLabel => 'Active search by:';
-
-  @override
-  String get preRegistrationSearchModeNameBadge => 'Name';
-
-  @override
-  String get preRegistrationSearchModeLevelBadge => 'Cycle / level';
 
   @override
   String get preRegistrationSearchLevelPlaceholder => 'Choose a cycle first';
@@ -1483,24 +1439,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get preRegistrationSearchInvitationMessage =>
       'Fill the form above then click Search to display requests.';
-
-  @override
-  String get firstRegistrationSearchByStudentGroup => 'By student';
-
-  @override
-  String get firstRegistrationSearchByLevelGroup => 'By target level';
-
-  @override
-  String get firstRegistrationSearchOrSeparator => 'OR';
-
-  @override
-  String get firstRegistrationSearchActiveModeLabel => 'Active search by:';
-
-  @override
-  String get firstRegistrationSearchModeStudentBadge => 'Student';
-
-  @override
-  String get firstRegistrationSearchModeLevelBadge => 'Level';
 
   @override
   String get firstRegistrationSearchLevelPlaceholder => 'Choose a cycle';
@@ -1522,6 +1460,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clear => 'Clear';
+
+  @override
+  String get searchModeSwitchLabel => 'Search by';
+
+  @override
+  String get searchModeSemantics => 'Search mode';
+
+  @override
+  String get searchModeByClass => 'By class';
+
+  @override
+  String get searchModeByIdentity => 'By identity';
+
+  @override
+  String get searchModeClassHint =>
+      'Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.';
+
+  @override
+  String get searchModeIdentityHint =>
+      'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.';
+
+  @override
+  String get searchRefineByNameLabel => 'Refine by last name (optional)';
+
+  @override
+  String get searchRefineByNamePlaceholder =>
+      'Student\'s last name, even partial';
 
   @override
   String get viewDetails => 'View details';
@@ -2619,25 +2584,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationSearchHelpBanner =>
-      'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.';
-
-  @override
-  String get facturationSearchByStudentGroup => 'By student';
-
-  @override
-  String get facturationSearchByClassGroup => 'By class';
-
-  @override
-  String get facturationSearchOrSeparator => 'OR';
-
-  @override
-  String get facturationSearchActiveModeLabel => 'Active search by:';
-
-  @override
-  String get facturationSearchModeStudentBadge => 'Student';
-
-  @override
-  String get facturationSearchModeClassBadge => 'Class';
+      'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).';
 
   @override
   String get facturationSearchCycleLabel => 'Cycle';
@@ -6015,24 +5962,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentsSearchHelpBanner =>
       'Search for one student, or a whole class, then open their document catalogue.';
-
-  @override
-  String get documentsSearchByStudentGroup => 'By student';
-
-  @override
-  String get documentsSearchByClassGroup => 'By class';
-
-  @override
-  String get documentsSearchOrSeparator => 'OR';
-
-  @override
-  String get documentsSearchActiveModeLabel => 'Active mode';
-
-  @override
-  String get documentsSearchModeStudentBadge => 'Student';
-
-  @override
-  String get documentsSearchModeClassBadge => 'Class';
 
   @override
   String get documentsSearchCycleLabel => 'Cycle';

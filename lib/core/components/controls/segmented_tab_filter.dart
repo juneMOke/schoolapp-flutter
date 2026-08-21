@@ -78,6 +78,10 @@ class SegmentedTabFilter<T> extends StatelessWidget {
   /// intrinsèque (comportement des filtres de période des dashboards).
   final bool expand;
 
+  /// Faux pendant qu'une action déclenchée par l'onglet actif est en vol :
+  /// le contrôle se grise et n'accepte plus de tap.
+  final bool enabled;
+
   const SegmentedTabFilter({
     super.key,
     required this.options,
@@ -86,7 +90,11 @@ class SegmentedTabFilter<T> extends StatelessWidget {
     this.semanticsLabel,
     this.style = const SegmentedTabFilterStyle(),
     this.expand = false,
+    this.enabled = true,
   });
+
+  /// Opacité du contrôle grisé.
+  static const double _disabledOpacity = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -94,21 +102,32 @@ class SegmentedTabFilter<T> extends StatelessWidget {
       container: true,
       explicitChildNodes: true,
       label: semanticsLabel,
-      child: Container(
-        height: AppDimensions.enrollmentStatsPeriodFilterHeight,
-        decoration: BoxDecoration(
-          color: style.backgroundColor,
-          borderRadius: BorderRadius.circular(style.borderRadius),
-          border: Border.all(color: style.borderColor),
-        ),
-        padding: style.containerPadding,
-        child: Row(
-          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            for (final opt in options)
-              if (expand) Expanded(child: _buildTab(opt)) else _buildTab(opt),
-          ],
-        ),
+      // Grisé : on n'enveloppe QUE dans ce cas, pour que l'arbre du cas normal
+      // reste exactement celui d'avant.
+      child: enabled
+          ? _buildBar()
+          : Opacity(
+              opacity: _disabledOpacity,
+              child: IgnorePointer(child: _buildBar()),
+            ),
+    );
+  }
+
+  Widget _buildBar() {
+    return Container(
+      height: AppDimensions.enrollmentStatsPeriodFilterHeight,
+      decoration: BoxDecoration(
+        color: style.backgroundColor,
+        borderRadius: BorderRadius.circular(style.borderRadius),
+        border: Border.all(color: style.borderColor),
+      ),
+      padding: style.containerPadding,
+      child: Row(
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          for (final opt in options)
+            if (expand) Expanded(child: _buildTab(opt)) else _buildTab(opt),
+        ],
       ),
     );
   }

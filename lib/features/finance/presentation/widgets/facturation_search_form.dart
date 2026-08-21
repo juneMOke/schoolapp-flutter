@@ -76,20 +76,9 @@ class FacturationSearchForm extends StatelessWidget {
       labels: BiModeSearchLabels(
         title: l10n.facturationSearchTitle,
         helpBanner: l10n.facturationSearchHelpBanner,
-        byStudentGroup: l10n.facturationSearchByStudentGroup,
-        byClassGroup: l10n.facturationSearchByClassGroup,
-        orSeparator: l10n.facturationSearchOrSeparator,
-        activeModeLabel: l10n.facturationSearchActiveModeLabel,
-        studentBadge: l10n.facturationSearchModeStudentBadge,
-        classBadge: l10n.facturationSearchModeClassBadge,
         cycleLabel: l10n.facturationSearchCycleLabel,
         levelLabel: l10n.facturationSearchLevelLabel,
         levelPlaceholder: l10n.facturationSearchLevelPlaceholder,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        searchLabel: l10n.search,
-        clearLabel: l10n.clear,
       ),
     );
   }

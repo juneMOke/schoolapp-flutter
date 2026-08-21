@@ -2300,53 +2300,11 @@ abstract class AppLocalizations {
   /// **'Find a student or a class from the previous year to re-enroll'**
   String get reRegistrationSearchHint;
 
-  /// No description provided for @reRegistrationSearchHelpPill.
-  ///
-  /// In en, this message translates to:
-  /// **'Find a specific student (last name + middle name + first name) or a whole class from the previous year (cycle + level) to re-enroll for the new year. You can also combine both.'**
-  String get reRegistrationSearchHelpPill;
-
   /// No description provided for @reRegistrationSearchTitle.
   ///
   /// In en, this message translates to:
   /// **'Search a student'**
   String get reRegistrationSearchTitle;
-
-  /// No description provided for @reRegistrationSearchByNameGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By name'**
-  String get reRegistrationSearchByNameGroup;
-
-  /// No description provided for @reRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By cycle / level'**
-  String get reRegistrationSearchByLevelGroup;
-
-  /// No description provided for @reRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get reRegistrationSearchOrSeparator;
-
-  /// No description provided for @reRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get reRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @reRegistrationSearchModeNameBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get reRegistrationSearchModeNameBadge;
-
-  /// No description provided for @reRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Cycle / level'**
-  String get reRegistrationSearchModeLevelBadge;
 
   /// No description provided for @reRegistrationSearchLevelPlaceholder.
   ///
@@ -2396,53 +2354,11 @@ abstract class AppLocalizations {
   /// **'Find a pre-registration by student or by desired cycle/level'**
   String get preRegistrationSearchHint;
 
-  /// No description provided for @preRegistrationSearchHelpPill.
-  ///
-  /// In en, this message translates to:
-  /// **'Find a specific request (last name + middle name + first name) or all requests for a desired cycle/level. You can also combine both.'**
-  String get preRegistrationSearchHelpPill;
-
   /// No description provided for @preRegistrationSearchTitle.
   ///
   /// In en, this message translates to:
   /// **'Search a pre-registration'**
   String get preRegistrationSearchTitle;
-
-  /// No description provided for @preRegistrationSearchByNameGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By name'**
-  String get preRegistrationSearchByNameGroup;
-
-  /// No description provided for @preRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By cycle / level'**
-  String get preRegistrationSearchByLevelGroup;
-
-  /// No description provided for @preRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get preRegistrationSearchOrSeparator;
-
-  /// No description provided for @preRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get preRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @preRegistrationSearchModeNameBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get preRegistrationSearchModeNameBadge;
-
-  /// No description provided for @preRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Cycle / level'**
-  String get preRegistrationSearchModeLevelBadge;
 
   /// No description provided for @preRegistrationSearchLevelPlaceholder.
   ///
@@ -2461,42 +2377,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill the form above then click Search to display requests.'**
   String get preRegistrationSearchInvitationMessage;
-
-  /// No description provided for @firstRegistrationSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get firstRegistrationSearchByStudentGroup;
-
-  /// No description provided for @firstRegistrationSearchByLevelGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By target level'**
-  String get firstRegistrationSearchByLevelGroup;
-
-  /// No description provided for @firstRegistrationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get firstRegistrationSearchOrSeparator;
-
-  /// No description provided for @firstRegistrationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get firstRegistrationSearchActiveModeLabel;
-
-  /// No description provided for @firstRegistrationSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get firstRegistrationSearchModeStudentBadge;
-
-  /// No description provided for @firstRegistrationSearchModeLevelBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Level'**
-  String get firstRegistrationSearchModeLevelBadge;
 
   /// No description provided for @firstRegistrationSearchLevelPlaceholder.
   ///
@@ -2539,6 +2419,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @searchModeSwitchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by'**
+  String get searchModeSwitchLabel;
+
+  /// No description provided for @searchModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mode'**
+  String get searchModeSemantics;
+
+  /// No description provided for @searchModeByClass.
+  ///
+  /// In en, this message translates to:
+  /// **'By class'**
+  String get searchModeByClass;
+
+  /// No description provided for @searchModeByIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'By identity'**
+  String get searchModeByIdentity;
+
+  /// No description provided for @searchModeClassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cycle then a level to list the whole class; a name, even partial, narrows that list. To find a student without knowing their class, switch to “By identity”.'**
+  String get searchModeClassHint;
+
+  /// No description provided for @searchModeIdentityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the student\'s last name, middle name and first name. To list a whole class, switch to “By class”.'**
+  String get searchModeIdentityHint;
+
+  /// No description provided for @searchRefineByNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine by last name (optional)'**
+  String get searchRefineByNameLabel;
+
+  /// No description provided for @searchRefineByNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Student\'s last name, even partial'**
+  String get searchRefineByNamePlaceholder;
 
   /// No description provided for @viewDetails.
   ///
@@ -4505,44 +4433,8 @@ abstract class AppLocalizations {
   /// No description provided for @facturationSearchHelpBanner.
   ///
   /// In en, this message translates to:
-  /// **'Search for a specific student (last name + middle name + first name) or a whole class (cycle + level). You can also combine both to refine.'**
+  /// **'Search a whole class (cycle + level), or one specific student (last name + middle name + first name).'**
   String get facturationSearchHelpBanner;
-
-  /// No description provided for @facturationSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get facturationSearchByStudentGroup;
-
-  /// No description provided for @facturationSearchByClassGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By class'**
-  String get facturationSearchByClassGroup;
-
-  /// No description provided for @facturationSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get facturationSearchOrSeparator;
-
-  /// No description provided for @facturationSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active search by:'**
-  String get facturationSearchActiveModeLabel;
-
-  /// No description provided for @facturationSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get facturationSearchModeStudentBadge;
-
-  /// No description provided for @facturationSearchModeClassBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Class'**
-  String get facturationSearchModeClassBadge;
 
   /// No description provided for @facturationSearchCycleLabel.
   ///
@@ -10124,42 +10016,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for one student, or a whole class, then open their document catalogue.'**
   String get documentsSearchHelpBanner;
-
-  /// No description provided for @documentsSearchByStudentGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By student'**
-  String get documentsSearchByStudentGroup;
-
-  /// No description provided for @documentsSearchByClassGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'By class'**
-  String get documentsSearchByClassGroup;
-
-  /// No description provided for @documentsSearchOrSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get documentsSearchOrSeparator;
-
-  /// No description provided for @documentsSearchActiveModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Active mode'**
-  String get documentsSearchActiveModeLabel;
-
-  /// No description provided for @documentsSearchModeStudentBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Student'**
-  String get documentsSearchModeStudentBadge;
-
-  /// No description provided for @documentsSearchModeClassBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Class'**
-  String get documentsSearchModeClassBadge;
 
   /// No description provided for @documentsSearchCycleLabel.
   ///

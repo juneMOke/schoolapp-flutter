@@ -27,8 +27,6 @@ class PreRegistrationSearchForm extends StatelessWidget {
 
     return BiModeSearchForm(
       isLoading: isLoading,
-      helpPill: l10n.preRegistrationSearchHelpPill,
-      helpPillIcon: Icons.school_outlined,
       options: options,
       onSearch: (request) => dispatch(
         AcademicInfoSearchCommand(
@@ -42,20 +40,9 @@ class PreRegistrationSearchForm extends StatelessWidget {
       labels: BiModeSearchLabels(
         title: l10n.preRegistrationSearchTitle,
         helpBanner: l10n.preRegistrationSearchHint,
-        byStudentGroup: l10n.preRegistrationSearchByNameGroup,
-        byClassGroup: l10n.preRegistrationSearchByLevelGroup,
-        orSeparator: l10n.preRegistrationSearchOrSeparator,
-        activeModeLabel: l10n.preRegistrationSearchActiveModeLabel,
-        studentBadge: l10n.preRegistrationSearchModeNameBadge,
-        classBadge: l10n.preRegistrationSearchModeLevelBadge,
         cycleLabel: l10n.targetCycleLabel,
         levelLabel: l10n.targetLevelLabel,
         levelPlaceholder: l10n.preRegistrationSearchLevelPlaceholder,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        searchLabel: l10n.search,
-        clearLabel: l10n.clear,
       ),
     );
   }

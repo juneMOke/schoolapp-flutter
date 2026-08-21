@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/search_form_actions.dart';
-import 'package:school_app_flutter/core/components/search/search_group_box.dart';
-import 'package:school_app_flutter/core/components/search/search_level_cascade.dart';
-import 'package:school_app_flutter/core/components/search/search_mode_badges.dart';
+import 'package:school_app_flutter/core/components/search/search_level_mode_fields.dart';
+import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
-import 'package:school_app_flutter/core/components/search/search_two_groups_layout.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_filter_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Carte de recherche bi-mode de la Première inscription — recherche par élève
-/// (nom/prénom/postnom) OU par niveau visé (cycle/niveau), toujours bornée au
-/// statut actif de l'onglet. Inspirée de [ReRegistrationSearchForm] : même
-/// anatomie (groupes + « OU » + badges de mode, briques partagées avec
-/// [BiModeSearchForm] via `core/components/search`), mais sans l'envelopper —
-/// le statut est un champ à part entière qui redéclenche immédiatement la
-/// recherche courante, hors de la logique d'armement du bouton Rechercher.
+/// Carte de recherche bi-mode de la Première inscription — par classe (cycle →
+/// niveau) OU par identité, toujours bornée au statut actif de l'onglet.
+///
+/// Même anatomie que [BiModeSearchForm] (bascule de mode, aide, champs du mode
+/// actif — briques partagées via `core/components/search`) sans l'envelopper :
+/// le statut est ici un champ à part entière, qui redéclenche immédiatement la
+/// recherche courante hors de la logique d'armement du bouton Rechercher.
 class FirstRegistrationSearchForm extends StatefulWidget {
   final List<SearchLevelOption> options;
   final bool isLoading;
@@ -45,12 +43,43 @@ class _FirstRegistrationSearchFormState
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _surnameController = TextEditingController();
+
+  /// Affinage du mode « Par classe » — distinct du « Nom » du mode identité :
+  /// chaque mode garde ses propres critères, y compris sur la même colonne.
+  final _refineNameController = TextEditingController();
+  SearchMode _mode = SearchMode.level;
+
+  /// Vrai tant que l'utilisateur n'a rien engagé — ni bascule, ni saisie, ni
+  /// sélection. Tant qu'on est là, le mode par défaut peut encore suivre le
+  /// référentiel ; après, il n'appartient plus qu'à l'utilisateur.
+  bool _isPristine = true;
   String? _selectedGroupId;
   String? _selectedLevelKey;
 
   @override
+  void initState() {
+    super.initState();
+    _mode = _defaultMode();
+  }
+
+  /// Sans référentiel, « Par classe » n'offre que deux listes grisées et un
+  /// affinage qui n'arme rien : on ouvre alors sur l'identité, seule porte
+  /// praticable. Avant la bascule, le groupe « par nom » restait visible dans
+  /// ce cas — le perdre serait une régression silencieuse sur une tablette dont
+  /// le référentiel n'est pas encore descendu.
+  SearchMode _defaultMode() =>
+      widget.options.isEmpty ? SearchMode.identity : SearchMode.level;
+
+  @override
   void didUpdateWidget(covariant FirstRegistrationSearchForm oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Le référentiel arrive souvent après le premier rendu. Tant que rien n'est
+    // engagé, le mode par défaut le suit ; dès que l'utilisateur a touché à
+    // quoi que ce soit, on ne lui reprend plus la main.
+    if (_isPristine && _mode != _defaultMode()) {
+      setState(() => _mode = _defaultMode());
+    }
 
     final key = _selectedLevelKey;
     final levelStillValid =
@@ -73,6 +102,7 @@ class _FirstRegistrationSearchFormState
     _firstNameController.dispose();
     _lastNameController.dispose();
     _surnameController.dispose();
+    _refineNameController.dispose();
     super.dispose();
   }
 
@@ -85,7 +115,14 @@ class _FirstRegistrationSearchFormState
       _selectedLevelKey != null &&
       widget.options.any((option) => option.key == _selectedLevelKey);
 
-  bool get _canSearch => !widget.isLoading && (_hasAllNames() || _hasLevel());
+  /// Seul le mode actif arme la recherche : des noms saisis puis abandonnés au
+  /// profit d'une classe ne décident pas à sa place.
+  bool get _canSearch =>
+      !widget.isLoading &&
+      switch (_mode) {
+        SearchMode.level => _hasLevel(),
+        SearchMode.identity => _hasAllNames(),
+      };
 
   List<SearchLevelOption> get _uniqueOptions {
     final seen = <String>{};
@@ -98,25 +135,24 @@ class _FirstRegistrationSearchFormState
       .where((option) => option.key == _selectedLevelKey)
       .firstOrNull;
 
-  /// Rejoue les critères actuellement saisis (élève OU niveau, sinon rien)
-  /// sous le [status] donné. Utilisé à la fois par « Rechercher » et par le
-  /// changement de statut (qui doit préserver, pas effacer, une recherche déjà
-  /// engagée — cf. le comportement historique de `SearchForm`).
+  /// Rejoue les critères du **mode actif** sous le [status] donné. Utilisé à
+  /// la fois par « Rechercher » et par le changement de statut, qui doit
+  /// préserver — pas effacer — une recherche déjà engagée.
   ///
-  /// Le niveau est prioritaire : quand un niveau est choisi, les noms déjà
-  /// saisis (même partiels) sont transmis EN PLUS via `AcademicInfoSearchCommand`
-  /// (raffinement nom côté projector, cf. `EnrollmentLocalListProjector.project`)
-  /// plutôt qu'ignorés — les deux badges de `SearchModeBadges` peuvent
-  /// s'afficher armés ensemble sans qu'aucun critère ne soit silencieusement
-  /// perdu.
+  /// Les critères de l'autre mode restent saisis mais ne partent pas : c'est ce
+  /// qui distingue une bascule d'un formulaire replié en deux. Sans critère
+  /// armé, seul le statut voyage — l'onglet se recharge sans filtre.
   void _dispatchForCriteria(String status) {
-    if (_hasLevel()) {
+    if (_mode == SearchMode.level && _hasLevel()) {
       final option = _selectedOption;
       widget.dispatch(
         AcademicInfoSearchCommand(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          surname: _surnameController.text.trim(),
+          firstName: '',
+          // Le nom d'affinage emprunte la colonne « Nom » : seul critère de ce
+          // mode qui n'ouvre pas la recherche mais la restreint (raffinement
+          // partiel côté `EnrollmentLocalListProjector`).
+          lastName: _refineNameController.text.trim(),
+          surname: '',
           schoolLevelGroupId: option?.schoolLevelGroupId ?? '',
           schoolLevelId: option?.schoolLevelId ?? '',
           status: status,
@@ -124,7 +160,7 @@ class _FirstRegistrationSearchFormState
       );
       return;
     }
-    if (_hasAllNames()) {
+    if (_mode == SearchMode.identity && _hasAllNames()) {
       widget.dispatch(
         StandardSearchCommand(
           firstName: _firstNameController.text.trim(),
@@ -148,23 +184,36 @@ class _FirstRegistrationSearchFormState
       _firstNameController.clear();
       _lastNameController.clear();
       _surnameController.clear();
+      _refineNameController.clear();
       _selectedGroupId = null;
       _selectedLevelKey = null;
     });
     widget.dispatch(StandardSearchCommand(status: widget.status));
   }
 
-  void _onNameChanged(String _) => setState(() {});
+  void _onModeChanged(SearchMode mode) {
+    if (mode == _mode) return;
+    setState(() {
+      _mode = mode;
+      _isPristine = false;
+    });
+  }
+
+  void _onNameChanged(String _) => setState(() => _isPristine = false);
 
   void _onCycleChanged(String? groupId) {
     setState(() {
+      _isPristine = false;
       _selectedGroupId = groupId;
       _selectedLevelKey = null;
     });
   }
 
   void _onLevelChanged(String? levelKey) {
-    setState(() => _selectedLevelKey = levelKey);
+    setState(() {
+      _isPristine = false;
+      _selectedLevelKey = levelKey;
+    });
   }
 
   void _onStatusChanged(String newStatus) {
@@ -175,73 +224,10 @@ class _FirstRegistrationSearchFormState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final options = _uniqueOptions;
-    final cycles = buildSearchCycles(options);
-    final selectedGroupId =
-        cycles.any((cycle) => cycle.groupId == _selectedGroupId)
-        ? _selectedGroupId
-        : null;
-    final selectedLevelKey =
-        options.any((option) => option.key == _selectedLevelKey)
-        ? _selectedLevelKey
-        : null;
-
-    final hasNames = _hasAllNames();
-    final hasLevel = _hasLevel();
-
-    final studentGroup = SearchGroupBox(
-      icon: Icons.person_outline,
-      title: l10n.firstRegistrationSearchByStudentGroup,
-      isComplete: hasNames,
-      child: SearchNameFields(
-        firstNameController: _firstNameController,
-        lastNameController: _lastNameController,
-        surnameController: _surnameController,
-        firstNameLabel: l10n.firstName,
-        lastNameLabel: l10n.lastName,
-        surnameLabel: l10n.surname,
-        enabled: !widget.isLoading,
-        onChanged: _onNameChanged,
-      ),
-    );
-
-    final classGroup = SearchGroupBox(
-      icon: Icons.grid_view_rounded,
-      title: l10n.firstRegistrationSearchByLevelGroup,
-      isComplete: hasLevel,
-      child: SearchLevelCascade(
-        cycles: cycles,
-        selectedGroupId: selectedGroupId,
-        selectedLevelKey: selectedLevelKey,
-        isLoading: widget.isLoading,
-        cycleLabel: l10n.targetCycleLabel,
-        levelLabel: l10n.targetLevelLabel,
-        levelPlaceholder: l10n.firstRegistrationSearchLevelPlaceholder,
-        onCycleChanged: _onCycleChanged,
-        onLevelChanged: _onLevelChanged,
-      ),
-    );
-
-    final modeBadges = SearchModeBadges(
-      activeModeLabel: l10n.firstRegistrationSearchActiveModeLabel,
-      studentBadgeLabel: l10n.firstRegistrationSearchModeStudentBadge,
-      classBadgeLabel: l10n.firstRegistrationSearchModeLevelBadge,
-      studentArmed: hasNames,
-      classArmed: hasLevel,
-    );
 
     final statusField = SearchFormStatusFilterField(
       selectedStatus: widget.status,
       onChanged: _onStatusChanged,
-    );
-
-    final actions = SearchFormActions(
-      isLoading: widget.isLoading,
-      canSearch: _canSearch,
-      onClear: _reset,
-      onSearch: _submit,
-      clearLabel: l10n.clear,
-      searchLabel: l10n.search,
     );
 
     return BiToneSectionCard(
@@ -252,12 +238,15 @@ class _FirstRegistrationSearchFormState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SearchTwoGroupsLayout(
-            studentGroup: studentGroup,
-            classGroup: classGroup,
-            orSeparatorLabel: l10n.firstRegistrationSearchOrSeparator,
+          SearchModeSwitch(
+            selected: _mode,
+            onChanged: _onModeChanged,
+            enabled: !widget.isLoading,
           ),
+          const SizedBox(height: AppDimensions.spacingL),
+          _fields(l10n),
           const SizedBox(height: AppDimensions.spacingM),
+          // Le statut borne les DEUX modes : il reste hors de la bascule.
           Align(
             alignment: Alignment.centerLeft,
             child: SizedBox(
@@ -266,16 +255,55 @@ class _FirstRegistrationSearchFormState
             ),
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: modeBadges),
-              const SizedBox(width: AppDimensions.spacingM),
-              actions,
-            ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: SearchFormActions(
+              isLoading: widget.isLoading,
+              canSearch: _canSearch,
+              onClear: _reset,
+              onSearch: _submit,
+              clearLabel: l10n.clear,
+              searchLabel: l10n.search,
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _fields(AppLocalizations l10n) {
+    if (_mode == SearchMode.identity) {
+      return SearchNameFields(
+        firstNameController: _firstNameController,
+        lastNameController: _lastNameController,
+        surnameController: _surnameController,
+        firstNameLabel: l10n.firstName,
+        lastNameLabel: l10n.lastName,
+        surnameLabel: l10n.surname,
+        enabled: !widget.isLoading,
+        onChanged: _onNameChanged,
+      );
+    }
+
+    final options = _uniqueOptions;
+    final cycles = buildSearchCycles(options);
+
+    return SearchLevelModeFields(
+      cycles: cycles,
+      selectedGroupId: cycles.any((cycle) => cycle.groupId == _selectedGroupId)
+          ? _selectedGroupId
+          : null,
+      selectedLevelKey: options.any((o) => o.key == _selectedLevelKey)
+          ? _selectedLevelKey
+          : null,
+      isLoading: widget.isLoading,
+      cycleLabel: l10n.targetCycleLabel,
+      levelLabel: l10n.targetLevelLabel,
+      levelPlaceholder: l10n.firstRegistrationSearchLevelPlaceholder,
+      onCycleChanged: _onCycleChanged,
+      onLevelChanged: _onLevelChanged,
+      refineNameController: _refineNameController,
+      onRefineSubmitted: _submit,
     );
   }
 }

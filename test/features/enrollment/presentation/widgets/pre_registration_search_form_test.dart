@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_listing_page_contracts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/pre_registration_search_form.dart';
@@ -25,6 +26,10 @@ Future<void> _pump(
   WidgetTester tester, {
   required void Function(EnrollmentSearchCommand) dispatch,
 }) async {
+  tester.view.physicalSize = const Size(1400, 1000);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
@@ -45,34 +50,32 @@ Future<void> _pump(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('rendu bi-mode (carte + 3 champs nom) sans erreur de layout', (
+  testWidgets('la carte s\'ouvre sur « Par classe », bascule annoncée', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1400, 1000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
     await _pump(tester, dispatch: (_) {});
 
     expect(tester.takeException(), isNull);
     expect(find.byType(BiToneSectionCard), findsOneWidget);
-    expect(find.byType(EteeloTextInput), findsNWidgets(3));
-    expect(find.text('Par nom'), findsOneWidget);
-    expect(find.text('Par cycle / niveau'), findsOneWidget);
-    expect(find.byIcon(Icons.school_outlined), findsOneWidget);
-    expect(find.textContaining('combiner les deux'), findsOneWidget);
+    expect(find.text('RECHERCHER PAR'), findsOneWidget);
+    expect(find.text('Par classe'), findsOneWidget);
+    expect(find.text('Par identité'), findsOneWidget);
+    expect(find.byType(EteeloSelectInput<String>), findsNWidgets(2));
+    // Le seul champ du mode classe : l'affinage facultatif.
+    expect(find.byType(EteeloTextInput), findsOneWidget);
+    expect(find.text('Affiner par nom (facultatif)'), findsOneWidget);
   });
 
-  testWidgets('recherche par noms : dispatch AcademicInfoSearchCommand', (
+  testWidgets('identité : dispatch AcademicInfoSearchCommand sans niveau', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1400, 1000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
     EnrollmentSearchCommand? captured;
     await _pump(tester, dispatch: (cmd) => captured = cmd);
+    await _switchToIdentity(tester);
 
+    expect(find.byType(EteeloTextInput), findsNWidgets(3));
+
+    // Ordre des champs (SearchNameFields) : Nom, Post-nom, Prénom.
     final fields = find.byType(TextField);
     await tester.enterText(fields.at(0), 'Kabongo');
     await tester.enterText(fields.at(1), 'Mwamba');
@@ -82,7 +85,6 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Rechercher'));
     await tester.pumpAndSettle();
 
-    expect(captured, isA<AcademicInfoSearchCommand>());
     final command = captured! as AcademicInfoSearchCommand;
     expect(command.firstName, 'Daniel');
     expect(command.lastName, 'Kabongo');
@@ -93,26 +95,50 @@ void main() {
     expect(command.status, isNull);
   });
 
-  testWidgets('recherche désactivée tant qu\'aucun critère complet', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1400, 1000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+  testWidgets('classe : seul le niveau part', (tester) async {
+    EnrollmentSearchCommand? captured;
+    await _pump(tester, dispatch: (cmd) => captured = cmd);
 
-    await _pump(tester, dispatch: (_) {});
-
-    final searchButton = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Rechercher'),
-    );
-    expect(searchButton.onPressed, isNull);
-
-    await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
+    _selects(tester)[0].onChanged('g2');
+    await tester.pumpAndSettle();
+    _selects(tester)[1].onChanged('g2::l3');
     await tester.pumpAndSettle();
 
-    final stillDisabled = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Rechercher'),
-    );
-    expect(stillDisabled.onPressed, isNull);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Rechercher'));
+    await tester.pumpAndSettle();
+
+    final command = captured! as AcademicInfoSearchCommand;
+    expect(command.schoolLevelGroupId, 'g2');
+    expect(command.schoolLevelId, 'l3');
+    expect(command.firstName, isEmpty);
+  });
+
+  testWidgets('recherche désactivée tant que le mode actif est incomplet', (
+    tester,
+  ) async {
+    await _pump(tester, dispatch: (_) {});
+
+    expect(_searchButton(tester).onPressed, isNull);
+
+    await _switchToIdentity(tester);
+    await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
+    await tester.pumpAndSettle();
+    expect(_searchButton(tester).onPressed, isNull);
   });
 }
+
+ElevatedButton _searchButton(WidgetTester tester) => tester
+    .widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Rechercher'));
+
+Future<void> _switchToIdentity(WidgetTester tester) async {
+  await tester.tap(find.text('Par identité'));
+  await tester.pumpAndSettle();
+}
+
+// Les listes déroulantes du DS ouvrent un panneau en overlay : le test invoque
+// directement leur `onChanged` plutôt que d'en simuler l'ouverture.
+List<EteeloSelectInput<String>> _selects(WidgetTester tester) => tester
+    .widgetList<EteeloSelectInput<String>>(
+      find.byType(EteeloSelectInput<String>),
+    )
+    .toList(growable: false);

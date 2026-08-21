@@ -756,9 +756,16 @@ DRAFT), et l'observateur de reprise du lot 1.
 
 
 * Retravailler les Formulaires pour : 
-- Inclure la version des switch comme dans documents
-- Inclure le formattage des champs
-- Inclure la recherche interactive
+- ~~Inclure la version des switch~~ — FAIT : `BiModeSearchForm` et
+  `FirstRegistrationSearchForm` passent sur une bascule exclusive
+  (`SearchModeSwitch`, classe puis identité). Le « OU », les badges de mode et
+  la disposition à deux colonnes sont supprimés. Résultats garde sa propre
+  bascule : ses deux modes sont additifs (le mode élève a besoin de la classe et
+  de la période).
+- ~~Inclure le formattage des champs~~ — FAIT : la capitalisation est le défaut
+  d'`EteeloTextInput` (mot par mot / phrase, résolue sur le type de clavier),
+  l'exception se déclare. Formatters promus dans `lib/core/formatters/`.
+- Inclure la recherche interactive — RESTE À FAIRE.
 ======== Exception caught by rendering library ===================================================== The following
 assertion was thrown during layout:
 A RenderFlex overflowed by 62 pixels on the bottom.

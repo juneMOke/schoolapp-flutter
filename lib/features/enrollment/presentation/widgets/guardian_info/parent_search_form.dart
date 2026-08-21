@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/components/search/search_hint_pill.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -41,7 +41,15 @@ class ParentSearchCriteria {
 class ParentSearchForm extends StatefulWidget {
   final ValueChanged<ParentSearchCriteria> onSearch;
 
-  const ParentSearchForm({super.key, required this.onSearch});
+  /// Vrai pendant qu'une recherche est en vol : la bascule se grise, pour ne
+  /// pas changer les champs sous l'utilisateur pendant que la requête court.
+  final bool isSearching;
+
+  const ParentSearchForm({
+    super.key,
+    required this.onSearch,
+    this.isSearching = false,
+  });
 
   @override
   State<ParentSearchForm> createState() => _ParentSearchFormState();
@@ -124,6 +132,21 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Même annonce que les cartes de recherche (`SearchModeSwitch`) : la
+        // bascule se lit comme un choix, pas comme un filtre décoratif. La
+        // modale ne peut pas monter le composant lui-même, qui est typé sur
+        // `SearchMode` (classe / identité) — l'axe est ici numéro / identité.
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            l10n.searchModeSwitchLabel.toUpperCase(),
+            style: AppTextStyles.badge.copyWith(
+              color: AppColors.terreCuite,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingS),
         // `expand` : dans une modale étroite, deux onglets à largeur
         // intrinsèque débordent (mesuré : 118 dp de trop sur 360 dp de large).
         SegmentedTabFilter<ParentSearchMode>(
@@ -131,6 +154,7 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
           onSelected: _onModeChanged,
           semanticsLabel: l10n.guardianSearchModeSemantics,
           expand: true,
+          enabled: !widget.isSearching,
           options: [
             SegmentedTabOption<ParentSearchMode>(
               label: l10n.guardianSearchModeByPhone,
@@ -145,7 +169,7 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
           ],
         ),
         const SizedBox(height: AppDimensions.spacingM),
-        _ModeHint(
+        SearchHintPill(
           text: _mode == ParentSearchMode.phone
               ? l10n.guardianSearchPhoneHint
               : l10n.guardianSearchIdentityHint,
@@ -217,47 +241,6 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Aide contextuelle du mode actif : dit ce que le mode accepte, pour éviter
-/// que l'utilisateur ne renonce devant un bouton grisé.
-class _ModeHint extends StatelessWidget {
-  final String text;
-
-  const _ModeHint({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.bleuArdoise.withValues(alpha: 0.06),
-        borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.bleuArdoise.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.info_outline,
-            size: 18,
-            color: AppColors.bleuArdoise,
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

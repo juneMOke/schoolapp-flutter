@@ -117,7 +117,18 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ParentSearchForm(onSearch: _search),
+              // Seul l'état de chargement compte ici : `buildWhen` évite de
+              // reconstruire le formulaire (et sa saisie en cours) à chaque
+              // arrivée de résultats.
+              BlocBuilder<ParentSearchBloc, ParentSearchState>(
+                buildWhen: (prev, curr) =>
+                    (prev is ParentSearchLoading) !=
+                    (curr is ParentSearchLoading),
+                builder: (context, state) => ParentSearchForm(
+                  onSearch: _search,
+                  isSearching: state is ParentSearchLoading,
+                ),
+              ),
               const SizedBox(height: AppDimensions.spacingL),
               const Divider(height: 1, color: AppColors.border),
               const SizedBox(height: AppDimensions.spacingL),
