@@ -37,7 +37,7 @@ void main() {
   setUp(() {
     stored = <String, String>{};
     FlutterSecureStorage.setMockInitialValues(stored);
-    service = const TokenStorageService(FlutterSecureStorage());
+    service = TokenStorageService(const FlutterSecureStorage());
   });
 
   test('les permissions survivent au save → read', () async {

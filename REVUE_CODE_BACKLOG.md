@@ -4,9 +4,9 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Douze sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, et M-7 ; **il ne reste plus aucun défaut
-« haut » ni « moyen »**. **Neuf restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Quinze sont corrigés** — le #13
+(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5 et B-6 ensemble (B-7 clos sans changement) ; **il ne reste plus aucun défaut
+« haut » ni « moyen »**. **Six restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
 par la passe « clavier ») ; aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
@@ -123,54 +123,6 @@ quand la hauteur offerte passe sous leur hauteur cumulée.
 ---
 
 ## 🟡 Bas — issus de la revue adversariale du battement (2026-08-19)
-
-### B-5 · La feuille de synchro fige des drapeaux qu'un timer peut désormais changer
-
-`lib/core/components/status/sync_errors_sheet.dart:35`
-
-La feuille capture `hasIncompleteRead` / `hasRetriableRead` à l'ouverture, sur la prémisse écrite qu'ils « ne peuvent de
-toute façon pas changer utilement le temps d'une modale ouverte ». Le cycle complet du battement invalide cette
-prémisse :
-un tic peut lever la dégradation pendant que la feuille l'affiche (« Réessayer » brûle alors un cycle de dix-neuf
-ressources pour rien), ou l'introduire alors que la feuille n'offre plus aucun bandeau ni geste. Même nature pour
-`OutboxErrorsCubit`, chargé une fois sans abonnement à la fin de flush : un flush du battement peut acquitter et
-supprimer une ligne que la feuille liste encore, et `requeue` ne touchant que les `SYNC_ERROR`, le tap devient un no-op
-muet.
-
-**À faire** — abonner la feuille à l'état du cubit plutôt que de le photographier.
-
----
-
-### B-6 · Chaque tic productif redéchiffre la session complète trois à quatre fois
-
-`lib/core/components/status/sync_status_cubit.dart` (chemin de push)
-
-`TokenStorageService.readAuthSession()` enchaîne 13 `_storage.read()`, chacun un aller-retour MethodChannel plus un
-déchiffrement Keystore. Un tic avec du travail prêt les paie quatre fois : `_canAuthenticate()`, `_ensureFreshAccess()`,
-la propre garde de `SyncEngine.flush()`, puis `refresh()` — soit ~52 déchiffrements toutes les 45 s. Le coût préexistait
-à chaque cycle ; le battement en fait une cadence.
-
-**À faire** — une lecture unique passée à la sonde, au ré-authentificateur et à la garde du moteur, ou une mémo à TTL
-court dans `AuthSessionManager`.
-
----
-
-### B-7 · L'état de cycle de vie initial est supposé, jamais lu
-
-`lib/core/components/status/sync_lifecycle_observer.dart:57`
-
-Le binding ne notifie que des *transitions* : un observateur monté alors que l'application est déjà hors écran n'en
-verra jamais aucune, et le battement tournerait en se croyant au premier plan. Sur la cible (tablette Android, une seule
-activité LAUNCHER, ni service ni receiver) le cas est inatteignable — le battement ne s'arme qu'à l'ouverture de
-session, qui exige un écran. Sur bureau ou web il ne l'est pas.
-
-Une lecture de `WidgetsBinding.instance.lifecycleState` en `initState` fermerait le trou, mais **elle n'est pas
-observable sous `testWidgets`** (le binding rapporte bien l'état depuis le corps du test, jamais depuis `initState`) :
-elle a été retirée plutôt que laissée non prouvée.
-
-**À faire** — si le périmètre s'étend au bureau/web, trouver un harnais qui l'observe avant de la remettre.
-
----
 
 ### B-8 · `sync_status_cubit.dart` dépasse largement la cible de taille
 
@@ -293,6 +245,69 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~B-5 + B-6 · Ce que le battement a périmé : une feuille photographiée, et quatre déchiffrements par tic~~ — corrigés
+
+Traités ensemble : ce sont les deux dettes que le battement de la file a créées sans les inventer. Le
+code était juste **avant** que quelque chose ne tourne toutes les 45 secondes.
+
+**B-5 — la feuille ne photographie plus, elle suit.** `hasIncompleteRead` / `hasRetriableRead` étaient
+relevés à l'ouverture, sur la prémisse écrite qu'ils « ne peuvent de toute façon pas changer utilement le
+temps d'une modale ouverte ». Un tic peut lever la dégradation pendant qu'on lit — « Réessayer » brûlait
+alors dix-neuf ressources pour rien — ou l'introduire alors que la feuille n'offrait plus ni bandeau ni
+geste. C'est l'**instance** du cubit qui est emportée dans le sous-arbre du `Navigator` (`.value`, la
+racine en reste propriétaire), et un `buildWhen` borne la reconstruction aux deux champs lus : une
+feuille qui se repeindrait à chaque tic sous les doigts de l'utilisateur serait le remède pire que le
+mal.
+
+Même nature côté écritures : `OutboxErrorsCubit` était chargé une fois, sans abonnement. Un flush du
+battement peut acquitter et supprimer une ligne que la feuille liste encore, et `requeue` ne touchant que
+les `SYNC_ERROR`, le tap devenait un **no-op muet**. Il s'abonne désormais à la fin de flush — même point
+d'accroche que `PaymentAnomaliesCubit`, et pour la même raison : c'est la transaction d'ACK qui modifie
+la file. ⚠️ La relecture est **refusée pendant `_runAction`**, qui tient déjà `busy` et recharge en
+sortie : recharger au milieu rendrait la main aux boutons pendant leur propre geste.
+
+**B-6 — une session lue une fois par tic, pas quatre.** `readAuthSession()` enchaînait treize `read()`,
+chacun un aller-retour MethodChannel et un déchiffrement Keystore ; un tic avec du travail prêt les
+payait quatre fois (sonde, ré-authentificateur, garde du moteur, refresh) — une cinquantaine de
+déchiffrements toutes les 45 s sur une tablette d'école. Le mémo vit dans `TokenStorageService`, et **le
+choix du lieu est le cœur de la correction** : toutes les écritures de ces clés passent par cette classe
+et par elle seule, donc l'invalidation est *prouvablement* complète. C'est elle, et non le délai de 3 s,
+qui garantit qu'un mint tout juste écrit est vu par la garde du moteur un dixième de seconde plus tard ;
+le délai n'est qu'un plafond de dégâts si une écriture apparaissait un jour ailleurs. Les douze lectures
+restantes partent désormais **ensemble** (`Future.wait`) au lieu de s'additionner, et l'absence de
+session est mémorisée comme le reste — c'est le cas le plus fréquent du parc hors ligne.
+
+⚠️ **Piège pour les tests** : écrire directement dans le faux en mémoire de `flutter_secure_storage`
+contourne l'invalidation. Passer par le service, ou avancer l'horloge injectée.
+
+Tests : trois cas de feuille (le tic qui lève la dégradation, celui qui l'introduit, celui qui ne change
+que l'horodatage et ne doit rien repeindre), deux de file (un flush du moteur retire la ligne acquittée ;
+un cubit fermé ne s'abonne plus), six de mémo (une seule lecture pour quatre appels, l'absence mémorisée,
+les trois invalidations, le plafond de délai). Vérifiés par mutation : `buildWhen` figé, abonnement
+retiré, invalidation retirée — chacun fait rougir son cas.
+
+---
+
+### ~~B-7 · L'état de cycle de vie initial est supposé, jamais lu~~ — clos sans changement
+
+Vérifié, pas corrigé, et c'est le résultat qui compte : **trois harnais essayés, aucun ne l'observe.**
+`WidgetsBinding.instance.lifecycleState` rend bien l'état depuis le corps du test — après
+`handleAppLifecycleStateChanged` comme après un message de plateforme sur `flutter/lifecycle` — mais
+`null` depuis `initState`, y compris après un premier `pumpWidget`. La note de la revue disait vrai ; on
+sait maintenant qu'elle tient à autre chose qu'un oubli de harnais.
+
+La décision reste donc celle du code : ne rien semer, et l'écrire. Sur la cible — tablette Android, une
+seule activité LAUNCHER, ni service ni receiver — le battement ne s'arme qu'à l'ouverture de session,
+laquelle exige un écran. Poser une garde qu'aucun test n'exerce, c'est exactement la panne que le dépôt a
+déjà payée une fois (une sonde livrée, jamais branchée, toute la suite verte).
+
+⚠️ **À rouvrir si le périmètre s'étend au bureau ou au web.** Une piste alors, qui rendrait la politique
+testable sans dépendre du binding : injecter l'état initial en paramètre du widget (défaut =
+`WidgetsBinding.instance.lifecycleState`), ce qui laisse hors test une seule expression par défaut au
+lieu de tout le comportement.
 
 ---
 

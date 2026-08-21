@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_state.dart';
 import 'package:school_app_flutter/core/components/status/outbox_retry_policy.dart';
@@ -23,6 +25,9 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
   final CurrentUserContext? _currentUser;
   final OutboxAuthorDirectory? _authorDirectory;
 
+  /// Désabonnement de la fin de flush.
+  void Function()? _unsubscribeFlush;
+
   OutboxErrorsCubit({
     required OutboxDao outbox,
     required SyncEngine syncEngine,
@@ -32,7 +37,35 @@ class OutboxErrorsCubit extends Cubit<OutboxErrorsState> {
        _syncEngine = syncEngine,
        _currentUser = currentUser,
        _authorDirectory = authorDirectory,
-       super(const OutboxErrorsState());
+       super(const OutboxErrorsState()) {
+    // La feuille était chargée une fois, à l'ouverture, et ne bougeait plus.
+    // Le battement de la file a périmé cette hypothèse : un flush automatique
+    // peut acquitter et supprimer, pendant la lecture, une ligne que la feuille
+    // liste encore. Le tap « Réessayer » devient alors un no-op MUET —
+    // `requeue` ne touche que les `SYNC_ERROR`, et il n'y a plus de ligne à
+    // toucher. S'abonner à la FIN de chaque flush est le même point d'accroche
+    // que `PaymentAnomaliesCubit`, et pour la même raison : c'est la
+    // transaction d'ACK qui modifie la file, et aucune transition de
+    // connectivité ne l'encadre.
+    _unsubscribeFlush = _syncEngine.addFlushCompleteListener(_onFlushCompleted);
+  }
+
+  /// Relit la file après un flush **du moteur**, jamais après le nôtre.
+  ///
+  /// [_runAction] tient déjà `busy` du début à la fin et recharge lui-même en
+  /// sortie : recharger ici pendant qu'il travaille rendrait la main aux
+  /// boutons au milieu de leur propre geste (`load()` remet `busy` à faux).
+  void _onFlushCompleted() {
+    if (isClosed || state.busy) return;
+    unawaited(load());
+  }
+
+  @override
+  Future<void> close() {
+    _unsubscribeFlush?.call();
+    _unsubscribeFlush = null;
+    return super.close();
+  }
 
   /// Charge (ou recharge) les entrées terminales, puis ce qui reste en file au
   /// nom d'autres comptes.

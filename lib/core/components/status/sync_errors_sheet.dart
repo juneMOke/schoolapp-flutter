@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/components/status/sync_held_tile.dart';
 import 'package:school_app_flutter/core/components/status/sync_incomplete_read_band.dart';
 import 'package:school_app_flutter/core/components/status/sync_other_account_band.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
@@ -27,13 +28,18 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// À la fermeture, rafraîchit la pastille globale : un requeue réussi doit faire
 /// retomber « Conflit » sans attendre un autre événement.
 Future<void> showSyncErrorsSheet(BuildContext context) async {
+  // Le cubit est relevé MAINTENANT, sur le contexte de l'appelant : la feuille
+  // est montée dans le sous-arbre du `Navigator`, où l'on n'a pas à parier sur
+  // la visibilité des providers de la racine. C'est l'INSTANCE qu'on emporte,
+  // pas une photo de son état.
+  //
+  // ⚠️ La photo était justifiée par « la valeur ne peut de toute façon pas
+  // changer utilement le temps d'une modale ouverte ». Le battement de la file
+  // a périmé cette prémisse : un tic de 45 s tombe pendant qu'on lit. Il peut
+  // lever la dégradation sous les yeux de l'utilisateur — « Réessayer » brûle
+  // alors un cycle de dix-neuf ressources pour rien — ou l'introduire alors que
+  // la feuille n'offre plus ni bandeau ni geste.
   final syncStatusCubit = context.read<SyncStatusCubit>();
-  // Relevé MAINTENANT, sur le contexte de l'appelant. La feuille est montée
-  // dans le sous-arbre du `Navigator`, où l'on n'a pas à parier sur la
-  // visibilité des providers de la racine — et la valeur ne peut de toute
-  // façon pas changer utilement le temps d'une modale ouverte.
-  final hasIncompleteRead = syncStatusCubit.state.hasIncompleteRead;
-  final hasRetriableRead = syncStatusCubit.state.hasRetriableRead;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -41,11 +47,16 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: AppRadius.card),
     ),
-    builder: (sheetContext) => BlocProvider<OutboxErrorsCubit>(
-      create: (_) => getIt<OutboxErrorsCubit>()..load(),
+    builder: (sheetContext) => MultiBlocProvider(
+      providers: [
+        // `.value` : la racine reste propriétaire du cubit, la feuille ne le
+        // ferme pas en se refermant.
+        BlocProvider<SyncStatusCubit>.value(value: syncStatusCubit),
+        BlocProvider<OutboxErrorsCubit>(
+          create: (_) => getIt<OutboxErrorsCubit>()..load(),
+        ),
+      ],
       child: _SyncErrorsSheet(
-        hasIncompleteRead: hasIncompleteRead,
-        retriable: hasRetriableRead,
         // Ferme la feuille PUIS relance : le cycle dure, et le laisser tourner
         // derrière une modale ouverte n'y afficherait rien de plus. La pastille
         // passe à « Synchro… », et le `refresh()` de fermeture ci-dessous
@@ -61,22 +72,33 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
 }
 
 class _SyncErrorsSheet extends StatelessWidget {
-  /// Le dernier cycle de lecture n'a pas tout ramené (ADR-015 F1).
-  final bool hasIncompleteRead;
-
-  /// …et au moins une cause est un échec de transport, donc rattrapable.
-  final bool retriable;
-
   final VoidCallback onRetry;
 
-  const _SyncErrorsSheet({
-    required this.hasIncompleteRead,
-    required this.retriable,
-    required this.onRetry,
-  });
+  const _SyncErrorsSheet({required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
+    // Abonné, plus photographié : le titre, le sous-titre et le bandeau suivent
+    // le cycle en cours. `buildWhen` borne la reconstruction aux deux champs
+    // lus — un tic qui ne change que l'horodatage de dernière synchro ne doit
+    // pas repeindre la feuille sous les doigts de l'utilisateur.
+    return BlocBuilder<SyncStatusCubit, SyncStatusState>(
+      buildWhen: (previous, current) =>
+          previous.hasIncompleteRead != current.hasIncompleteRead ||
+          previous.hasRetriableRead != current.hasRetriableRead,
+      builder: (context, status) => _buildSheet(
+        context,
+        status.hasIncompleteRead,
+        status.hasRetriableRead,
+      ),
+    );
+  }
+
+  Widget _buildSheet(
+    BuildContext context,
+    bool hasIncompleteRead,
+    bool retriable,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     return FractionallySizedBox(
       heightFactor: 0.85,

@@ -18,6 +18,10 @@ class _FakeSyncStatusCubit extends Cubit<SyncStatusState>
     implements SyncStatusCubit {
   _FakeSyncStatusCubit(super.initialState);
 
+  /// Le tic du battement, joué depuis le test : c'est ce qui n'existait pas
+  /// quand la feuille photographiait son état.
+  void tick(SyncStatusState next) => emit(next);
+
   int syncNowCalls = 0;
 
   @override
@@ -203,5 +207,79 @@ void main() {
         expect(find.text(_titreEtatSynchro), findsNothing);
       },
     );
+  });
+
+  // B-5 — la feuille relevait `hasIncompleteRead` / `hasRetriableRead` à
+  // l'ouverture, sur la prémisse écrite qu'ils « ne peuvent de toute façon pas
+  // changer utilement le temps d'une modale ouverte ». Le battement de la file
+  // l'a périmée : un tic de 45 s tombe pendant qu'on lit.
+  group('la feuille suit le cycle, elle ne le photographie plus', () {
+    testWidgets('un tic qui LÈVE la dégradation retire le bandeau et son '
+        'geste', (tester) async {
+      // Sans abonnement, « Réessayer » restait offert sur une dégradation déjà
+      // résorbée : le tap brûlait un cycle de dix-neuf ressources pour rien.
+      await ouvrirLaFeuille(
+        tester,
+        hasIncompleteRead: true,
+        hasRetriableRead: true,
+      );
+      expect(find.byType(SyncIncompleteReadBand), findsOneWidget);
+
+      syncStatusCubit.tick(const SyncStatusState(status: SyncStatus.synced));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SyncIncompleteReadBand), findsNothing);
+      expect(find.text(_titreEtatSynchro), findsNothing);
+      expect(find.text(_titreEcrituresEnEchec), findsOneWidget);
+    });
+
+    testWidgets('un tic qui INTRODUIT la dégradation ouvre le bandeau', (
+      tester,
+    ) async {
+      // L'autre sens, tout aussi muet : la feuille n'offrait plus ni bandeau ni
+      // geste alors que la lecture venait de tomber en panne.
+      await ouvrirLaFeuille(tester, hasIncompleteRead: false);
+      expect(find.byType(SyncIncompleteReadBand), findsNothing);
+
+      syncStatusCubit.tick(
+        const SyncStatusState(
+          status: SyncStatus.partiallySynced,
+          hasIncompleteRead: true,
+          hasRetriableRead: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SyncIncompleteReadBand), findsOneWidget);
+      expect(find.text(_titreEtatSynchro), findsOneWidget);
+    });
+
+    testWidgets('un tic qui ne change QUE l\'horodatage ne repeint rien', (
+      tester,
+    ) async {
+      // `buildWhen` borne la reconstruction aux deux champs lus : une feuille
+      // qui se repeint sous les doigts de l'utilisateur à chaque tic serait le
+      // remède pire que le mal.
+      await ouvrirLaFeuille(tester, hasIncompleteRead: true);
+      final avant = tester.widget<SyncIncompleteReadBand>(
+        find.byType(SyncIncompleteReadBand),
+      );
+
+      syncStatusCubit.tick(
+        const SyncStatusState(
+          status: SyncStatus.synced,
+          hasIncompleteRead: true,
+          lastSyncAtMs: 123456,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<SyncIncompleteReadBand>(
+          find.byType(SyncIncompleteReadBand),
+        ),
+        same(avant),
+      );
+    });
   });
 }

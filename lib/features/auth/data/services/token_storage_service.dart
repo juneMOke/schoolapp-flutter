@@ -12,10 +12,56 @@ import 'package:school_app_flutter/features/auth/domain/entities/authenticated_u
 /// lui, dans `auth_local` (SQLCipher).
 class TokenStorageService {
   final FlutterSecureStorage _storage;
+  final int Function() _now;
 
-  const TokenStorageService(this._storage);
+  TokenStorageService(this._storage, {int Function()? now})
+    : _now = now ?? _systemNow;
+
+  static int _systemNow() => DateTime.now().millisecondsSinceEpoch;
+
+  /// Dernière session lue, et l'instant où elle l'a été.
+  ///
+  /// ## Pourquoi mémoriser une lecture de secure storage
+  ///
+  /// [readAuthSession] enchaîne treize `read()`, chacun un aller-retour
+  /// MethodChannel **et** un déchiffrement Keystore. Un tic de battement qui a
+  /// du travail prêt la paie quatre fois : la sonde de crédentiels, le
+  /// ré-authentificateur, la garde propre du moteur, puis le refresh — soit
+  /// une cinquantaine de déchiffrements toutes les 45 secondes, sur une
+  /// tablette d'école. Le coût préexistait à chaque cycle ; le battement en a
+  /// fait une cadence.
+  ///
+  /// ## Pourquoi ICI et pas dans le manager
+  ///
+  /// Toutes les écritures de ces clés passent par cette classe —
+  /// [saveAuthSession], [updateTokens], [clearAuthSession] — et par elle seule
+  /// (vérifié : aucune autre référence aux clés de session hors
+  /// `AppConstants`). L'invalidation est donc **prouvablement complète**, ce
+  /// qu'un mémo posé un cran plus haut ne pourrait pas garantir. C'est
+  /// l'invalidation, et non le délai, qui porte la correction : un mint qui
+  /// vient de réécrire l'access DOIT être vu par la garde du moteur, un
+  /// dixième de seconde plus tard.
+  ///
+  /// Le délai n'est qu'un plafond de dégâts, au cas où une écriture
+  /// apparaîtrait un jour ailleurs : il borne la péremption à quelques
+  /// secondes au lieu de la vie du processus.
+  AuthSession? _memo;
+  bool _memoValid = false;
+  int _memoAtMs = 0;
+
+  /// Assez long pour couvrir les quatre lectures d'un même tic (elles
+  /// s'enchaînent sans réseau entre elles), assez court pour qu'une péremption
+  /// imprévue se résorbe seule.
+  static const int _memoTtlMs = 3000;
+
+  /// Oublie la session mémorisée. Appelée par **chaque** écriture de ces clés.
+  void _invalidateMemo() {
+    _memo = null;
+    _memoValid = false;
+  }
 
   Future<void> saveAuthSession(AuthSession session) async {
+    _invalidateMemo();
     await Future.wait(<Future<void>>[
       _storage.write(
         key: AppConstants.accessTokenKey,
@@ -70,6 +116,7 @@ class TokenStorageService {
   /// le refresh token existant plutôt que de l'effacer (sinon le refresh suivant
   /// serait impossible). Idem pour la borne d'expiration du refresh.
   Future<void> updateTokens(AuthSession session) async {
+    _invalidateMemo();
     await Future.wait(<Future<void>>[
       _storage.write(
         key: AppConstants.accessTokenKey,
@@ -143,33 +190,57 @@ class TokenStorageService {
     ]);
   }
 
+  /// La session courante, **mémorisée** entre deux écritures (cf. [_memo]).
+  ///
+  /// L'absence de session est mémorisée comme le reste : c'est même le cas le
+  /// plus fréquent du chemin froid — hors ligne, déconnecté — et celui où
+  /// treize allers-retours pour rien coûtent le plus cher.
   Future<AuthSession?> readAuthSession() async {
+    if (_memoValid && _now() - _memoAtMs < _memoTtlMs) return _memo;
+
+    final session = await _readAuthSessionFromStorage();
+    _memo = session;
+    _memoValid = true;
+    _memoAtMs = _now();
+    return session;
+  }
+
+  Future<AuthSession?> _readAuthSessionFromStorage() async {
     final accessToken = await _storage.read(key: AppConstants.accessTokenKey);
+    // Sans access, il n'y a pas de session à composer : les douze autres
+    // lectures seraient payées pour rien.
     if (accessToken == null) return null;
 
-    final tokenType =
-        await _storage.read(key: AppConstants.tokenTypeKey) ?? 'Bearer';
-    final expiresInStr =
-        await _storage.read(key: AppConstants.expiresInKey) ?? '0';
-    final refreshToken = await _storage.read(key: AppConstants.refreshTokenKey);
-    final accessExpiresAt = await _storage.read(
-      key: AppConstants.accessExpiresAtKey,
-    );
-    final refreshExpiresAt = await _storage.read(
-      key: AppConstants.refreshExpiresAtKey,
-    );
-    final userId = await _storage.read(key: AppConstants.userIdKey) ?? '';
-    final userEmail = await _storage.read(key: AppConstants.userEmailKey) ?? '';
-    final userFirstName =
-        await _storage.read(key: AppConstants.userFirstNameKey) ?? '';
-    final userLastName =
-        await _storage.read(key: AppConstants.userLastNameKey) ?? '';
-    final userRole = await _storage.read(key: AppConstants.userRoleKey) ?? '';
-    final userSchoolId =
-        await _storage.read(key: AppConstants.userSchoolIdKey) ?? '';
-    final permissions = await _storage.read(
-      key: AppConstants.userPermissionsKey,
-    );
+    // Lues ENSEMBLE : chacune est un aller-retour MethodChannel, et rien ne les
+    // ordonne entre elles. Sérialisées, elles additionnaient douze latences là
+    // où une seule suffit.
+    final values = await Future.wait(<Future<String?>>[
+      _storage.read(key: AppConstants.tokenTypeKey),
+      _storage.read(key: AppConstants.expiresInKey),
+      _storage.read(key: AppConstants.refreshTokenKey),
+      _storage.read(key: AppConstants.accessExpiresAtKey),
+      _storage.read(key: AppConstants.refreshExpiresAtKey),
+      _storage.read(key: AppConstants.userIdKey),
+      _storage.read(key: AppConstants.userEmailKey),
+      _storage.read(key: AppConstants.userFirstNameKey),
+      _storage.read(key: AppConstants.userLastNameKey),
+      _storage.read(key: AppConstants.userRoleKey),
+      _storage.read(key: AppConstants.userSchoolIdKey),
+      _storage.read(key: AppConstants.userPermissionsKey),
+    ]);
+
+    final tokenType = values[0] ?? 'Bearer';
+    final expiresInStr = values[1] ?? '0';
+    final refreshToken = values[2];
+    final accessExpiresAt = values[3];
+    final refreshExpiresAt = values[4];
+    final userId = values[5] ?? '';
+    final userEmail = values[6] ?? '';
+    final userFirstName = values[7] ?? '';
+    final userLastName = values[8] ?? '';
+    final userRole = values[9] ?? '';
+    final userSchoolId = values[10] ?? '';
+    final permissions = values[11];
 
     return AuthSession(
       accessToken: accessToken,
@@ -191,6 +262,7 @@ class TokenStorageService {
   }
 
   Future<void> clearAuthSession() async {
+    _invalidateMemo();
     await Future.wait(<Future<void>>[
       _storage.delete(key: AppConstants.accessTokenKey),
       _storage.delete(key: AppConstants.tokenTypeKey),
