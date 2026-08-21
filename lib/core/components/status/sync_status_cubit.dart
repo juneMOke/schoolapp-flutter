@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/offline/session_reauthenticator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/core/offline/sync_cycle_runner.dart';
 import 'package:school_app_flutter/core/offline/sync_heartbeat.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 
@@ -39,14 +40,19 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 /// exception dans l'arbre de widgets — les tests ne mockent pas
 /// `connectivity_plus`, et la base peut être indisponible. En cas d'échec on
 /// conserve le dernier état connu.
+///
+/// ## Ce qui n'est PAS ici
+///
+/// Le **corps** d'un cycle — la séquence `flush → révocation → pull`, ses trois
+/// gardes et les estampilles qui datent le cache — vit dans [SyncCycleRunner].
+/// Ce fichier tenait les deux métiers ; le second a doublé de taille en trois
+/// lots et noyait le premier. Ce qui reste ici décide **quand** un cycle part
+/// (les quatre déclencheurs) et **ce qui s'affiche** ensuite ; le runner
+/// exécute et rend ce qu'il a observé.
 class SyncStatusCubit extends Cubit<SyncStatusState> {
   final OutboxDao _outbox;
   final ConnectivityService _connectivity;
   final SyncEngine _syncEngine;
-  final PullCoordinator? _pullCoordinator;
-  final RevocationEvaluator? _revocationEvaluator;
-  final SessionCredentialsProbe? _credentialsProbe;
-  final SessionReauthenticator? _reauthenticator;
   final SyncMetaDao _syncMetaDao;
 
   /// Horloge injectable (epoch ms) — même typedef que le moteur de synchro, pour
@@ -94,59 +100,26 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// [_pullDegraded], et pour la même raison.
   bool _pullRetriable = false;
 
-  /// Horloge **device** (epoch ms) de la dernière **tentative** de cycle, quel
-  /// qu'en soit le déclencheur et quelle qu'en soit l'issue.
-  ///
-  /// Estampillée avant toute garde, délibérément : un cycle arrêté par un mint
-  /// impossible est exactement celui qu'une reprise d'application ne doit pas
-  /// relancer en rafale.
-  ///
-  /// ⚠️ **Ne dit RIEN de la fraîcheur du cache** — c'est [_lastPullAtMs] qui la
-  /// porte. Les confondre laissait un cycle qui n'avait rien tiré (portail
-  /// captif, jetons refusés) déclarer le cache frais pour un quart d'heure de
-  /// plus, ce qui est précisément la panne que le battement de lecture existe à
-  /// réparer.
-  int? _lastCycleAttemptAtMs;
-
-  /// Horloge **device** (epoch ms) du dernier cycle qui a réellement **tiré**.
-  ///
-  /// Avancée seulement quand le coordinateur a rendu un rapport exploitable —
-  /// ni `skipped` (cycle déjà en vol) ni `offline`. C'est la mesure d'âge du
-  /// cache, et donc la seule que consulte [_isFullCycleDue].
-  ///
-  /// Distincte de [_lastSyncAtMs], qui porte l'heure **serveur** du dernier
-  /// pull *fructueux* : celle-là s'affiche, celle-ci décide.
-  int? _lastPullAtMs;
-
   StreamSubscription<bool>? _connectivitySub;
 
   /// Cadence du battement — le timer et ses conditions d'armement vivent là
   /// (cf. [SyncHeartbeat]). Ce cubit ne garde que la **politique** du tic.
   late final SyncHeartbeat _heartbeat;
 
+  /// Le corps de cycle, ses gardes et ses estampilles (cf. [SyncCycleRunner]).
+  ///
+  /// Ce cubit **projette** un état ; il ne l'exécute plus. Les deux métiers
+  /// vivaient dans le même fichier, et le second — trois lots de battement plus
+  /// tard — noyait le premier.
+  late final SyncCycleRunner _cycle;
+
   static const Duration kDefaultHeartbeatInterval = Duration(seconds: 45);
 
-  /// Âge au-delà duquel le battement ne se contente plus de pousser : il tire.
-  ///
-  /// C'est le pendant *lecture* du battement (lot 3), et il répond à une panne
-  /// distincte de celle du push. Une tablette allumée le matin dans une école
-  /// déjà couverte en Wi-Fi ouvre sa session, exécute son cycle, et n'en voit
-  /// plus jamais : ni transition réseau, ni reprise d'application si elle reste
-  /// posée sur le même écran. Elle travaillait donc la journée entière sur le
-  /// cache du matin — un tarif changé à 9 h, une classe recomposée à 11 h,
-  /// invisibles jusqu'au lendemain.
-  ///
-  /// Un quart d'heure : assez espacé pour que la pagination de dix-neuf
-  /// ressources reste marginale sur la connexion d'une école (et la plupart
-  /// répondent 304), assez serré pour qu'une correction de référentiel arrive
-  /// dans la demi-heure.
-  static const int kFullCycleMaxAgeMs = 900000;
-
-  /// Plancher entre deux cycles quand ils échouent — un portail captif laisse
-  /// le cache éternellement périmé, donc [kFullCycleMaxAgeMs] serait franchi à
-  /// chaque tic. Cinq minutes : la reprise reste bien plus rapide que l'âge
-  /// maximum, sans qu'un réseau qui ment coûte un cycle complet par tic.
-  static const int kFailedCycleRetryMs = 300000;
+  /// Seuils du cycle complet — définis une seule fois, sur le runner qui les
+  /// applique. Repris ici parce que la politique du tic et les tests les lisent
+  /// sur le cubit depuis toujours.
+  static const int kFullCycleMaxAgeMs = SyncCycleRunner.kFullCycleMaxAgeMs;
+  static const int kFailedCycleRetryMs = SyncCycleRunner.kFailedCycleRetryMs;
 
   /// Fenêtre en-deçà de laquelle une reprise d'application ne relance PAS le
   /// cycle complet (cf. [syncOnResume]). Cinq minutes : au-delà, l'utilisateur
@@ -169,15 +142,20 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
        _connectivity = connectivity,
        _syncEngine = syncEngine,
        _syncMetaDao = syncMetaDao,
-       _pullCoordinator = pullCoordinator,
-       _revocationEvaluator = revocationEvaluator,
-       _credentialsProbe = credentialsProbe,
-       _reauthenticator = reauthenticator,
        _now = now,
        super(const SyncStatusState(status: SyncStatus.synced)) {
     _heartbeat = SyncHeartbeat(
       interval: heartbeatInterval,
       onTick: _onHeartbeat,
+    );
+    _cycle = SyncCycleRunner(
+      syncEngine: syncEngine,
+      connectivity: connectivity,
+      pullCoordinator: pullCoordinator,
+      revocationEvaluator: revocationEvaluator,
+      credentialsProbe: credentialsProbe,
+      reauthenticator: reauthenticator,
+      now: now,
     );
     _listenConnectivity();
     // Un flush peut être déclenché AILLEURS qu'ici : les repositories offline
@@ -230,81 +208,39 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     await _syncOnReconnect();
   }
 
-  /// Au retour *online* : ordre **`flush → evaluate → pull`** (ADR-010 D-11).
+  /// Un cycle complet, puis sa projection.
   ///
-  /// 1. **POUSSE** l'outbox (le travail légitime saisi offline est drainé
-  ///    d'abord — un `userVersion++` ne détruit jamais un paiement en file) ;
-  /// 2. **ÉVALUE** la révocation (`userVersion` observé vs local) : en cas de
-  ///    divergence, la session est wipée (jamais l'outbox) et on **saute le
-  ///    pull** (on repasse `unauthenticated`) ;
-  /// 3. sinon **TIRE** (pull delta) pour rafraîchir le cache local.
+  /// La séquence elle-même — `flush → évaluation de révocation → pull`
+  /// (ADR-010 D-11) — et les gardes qui la protègent sont chez
+  /// [SyncCycleRunner.runFullCycle]. Ne reste ici que ce que le cubit sait
+  /// faire : annoncer, projeter ce qui a été observé, rafraîchir.
   ///
   /// Le pull est silencieux (304 fréquent) et **n'altère pas** l'état de synchro,
   /// qui ne reflète que la file de push.
   Future<void> _syncOnReconnect({bool evaluateRevocation = true}) async {
-    // Estampillé AVANT les gardes, et non après un cycle réussi : un cycle
-    // arrêté faute de jetons ou de mint est exactement celui qu'une reprise
-    // d'application ne doit pas relancer en rafale (cf. [syncOnResume]).
-    // ⚠️ Ceci N'EST PAS une mesure de fraîcheur du cache : voir [_lastPullAtMs].
-    _lastCycleAttemptAtMs = _now();
-    // Gate crédentiels (V1.1) : une session ouverte OFFLINE peut être sans
-    // jetons (logout sans consigne, purge d'identité croisée, consigne brûlée).
-    // Flusher quand même = 401 systématique sur CHAQUE entrée → `attempts++`
-    // jusqu'au poison SYNC_ERROR, sans qu'aucune écriture n'ait pu partir.
-    // On ne tente donc RIEN (ni flush, ni pull — tous deux authentifiés) et
-    // `refresh()` surfacera « Reconnexion requise » à la place.
-    if (!await _canAuthenticate()) {
-      await refresh();
-      return;
-    }
-    // Ré-authentification silencieuse AVANT tout appel authentifié (ADR-010) :
-    // une session ouverte offline revient avec un access vide (déconsignation)
-    // ou périmé (TTL en heures, coupure en jours). Laisser la première requête
-    // métier porter le renouvellement, c'est consommer une tentative d'outbox
-    // par entrée pour un jeton mort — et dépendre d'un 401 propre du serveur.
-    // Mint impossible (infra, proxy, portail) → on ne tente RIEN : la session
-    // reste ouverte, l'utilisateur reste sur son écran, la file reste intacte,
-    // le prochain cycle retentera.
-    if (!await _ensureFreshAccess()) {
-      await refresh();
-      return;
-    }
-    _safeEmit(SyncStatus.syncing);
-    try {
-      await _syncEngine.flush();
-    } catch (_) {
-      // flush() encapsule déjà ses erreurs ; garde-fou par prudence.
-    }
-    bool revoked = false;
-    if (evaluateRevocation) {
-      try {
-        revoked = await _revocationEvaluator?.evaluateRevocation() ?? false;
-      } catch (_) {
-        // evaluateRevocation ne lève pas (contrat) ; garde-fou par prudence.
-      }
-    }
-    if (!revoked) {
-      try {
-        final report = await _pullCoordinator?.pullAll();
-        // L'âge du cache n'avance QUE sur un cycle qui a réellement observé
-        // quelque chose. Un rapport `skipped` (cycle déjà en vol) ou `offline`
-        // ne dit rien, et le compter pour frais figerait le référentiel pour un
-        // quart d'heure de plus. Aucun coordinateur branché : il n'y a rien à
-        // tirer, donc rien qui puisse vieillir.
-        if (report == null) {
-          _lastPullAtMs = _now();
-        } else if (!report.skipped && !report.offline) {
-          _pullDegraded = report.isDegraded;
-          _pullRetriable = report.failed > 0;
-          _lastPullAtMs = _now();
-        }
-        final observed = report?.latestServerTimeMs;
-        if (observed != null) await _advanceLastSync(observed);
-      } catch (_) {
-        // pullAll() encapsule déjà ses erreurs ; garde-fou par prudence.
-      }
-    }
+    final outcome = await _cycle.runFullCycle(
+      evaluateRevocation: evaluateRevocation,
+      // Le seul instant où le cycle a quelque chose à annoncer : les gardes
+      // sont franchies, le premier appel réseau part.
+      onSyncingStarted: () => _safeEmit(SyncStatus.syncing),
+    );
+    await _applyOutcome(outcome);
+    // Rafraîchi dans TOUS les cas, garde fermée comprise : une session sans
+    // jetons doit surfacer « Reconnexion requise » plutôt que rester sur le
+    // dernier état connu.
     await refresh();
+  }
+
+  /// Projette ce qu'un cycle a observé — et **seulement** ce qu'il a observé.
+  ///
+  /// Les drapeaux nuls ne sont pas des « faux » : un cycle arrêté sur une garde
+  /// ou un rapport `skipped` n'ont rien vu, et les écraser par « sain »
+  /// effacerait une dégradation bien réelle.
+  Future<void> _applyOutcome(SyncCycleOutcome outcome) async {
+    if (outcome.pullDegraded != null) _pullDegraded = outcome.pullDegraded!;
+    if (outcome.pullRetriable != null) _pullRetriable = outcome.pullRetriable!;
+    final observed = outcome.latestServerTimeMs;
+    if (observed != null) await _advanceLastSync(observed);
   }
 
   /// Cycle complet à l'ouverture de session (ADR-015 F0).
@@ -347,7 +283,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     // lit que la radio et ne suffit donc pas à elle seule — un login offline
     // survient typiquement radio allumée, serveur injoignable. C'est
     // `_ensureFreshAccess`, un cran plus bas, qui arrête ce cas-là.
-    if (!await _isOnline()) return;
+    if (!await _cycle.isOnline()) return;
     await _syncOnReconnect(evaluateRevocation: evaluateRevocation);
   }
 
@@ -375,33 +311,12 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// Comme les autres points d'entrée, entièrement gardé plus bas : hors ligne,
   /// sans jetons ou sans mint possible, il ne tente rien.
   Future<void> syncOnResume() async {
-    final since = _elapsedSince(_lastCycleAttemptAtMs);
+    final since = _cycle.elapsedSince(_cycle.lastCycleAttemptAtMs);
     if (since == null || since >= kResumeFullCycleMinIntervalMs) {
       await syncNow();
       return;
     }
     await _flushAndRefresh();
-  }
-
-  /// Temps écoulé depuis [stampMs], ou `null` s'il est absent — **ou si
-  /// l'horloge a reculé**.
-  ///
-  /// Les trois appelants portent des seuils différents et parfois opposés (un
-  /// minimum entre deux cycles, un âge maximum de cache, un plancher de
-  /// reprise) mais partagent ce piège-ci, d'où le passage par un seul endroit.
-  ///
-  /// L'horloge est celle du device (`DateTime.now()`), donc reculable : un NTP
-  /// qui corrige une dérive de RTC, ou une date changée à la main, laisse
-  /// l'estampille dans le futur. Comparé naïvement, l'écart resterait sous
-  /// n'importe quel seuil À JAMAIS : la reprise ne referait plus jamais de
-  /// cycle complet, et le battement n'en déclencherait jamais un. Deux
-  /// déclencheurs morts en silence pour toute la vie du processus. Rendre
-  /// `null` — « on ne sait pas » — les fait tous retomber du côté sûr, celui
-  /// qui tire.
-  int? _elapsedSince(int? stampMs) {
-    if (stampMs == null) return null;
-    final elapsed = _now() - stampMs;
-    return elapsed < 0 ? null : elapsed;
   }
 
   // ─── Battement de la file (lots 2 & 3) ───────────────────────────────────
@@ -460,13 +375,13 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   /// dans [SyncHeartbeat], qui appelle ceci.
   Future<void> _onHeartbeat() async {
     if (_stopBeating) return;
-    if (!await _isOnline()) return;
+    if (!await _cycle.isOnline()) return;
     // Relu après chaque attente : `dispose()` et `sessionClosed()` coupent le
     // timer, mais rien n'interrompt un tic déjà parti. Sans ces reprises, un
     // cycle lancé deux secondes avant un logout continuerait d'écrire
     // référentiel et curseurs pour une session que la racine a déclarée close.
     if (_stopBeating || _syncEngine.isFlushing) return;
-    if (_isFullCycleDue()) {
+    if (_cycle.isFullCycleDue()) {
       // Sans évaluation de révocation : celle-ci peut wiper la session et
       // renvoyer l'utilisateur à l'écran de connexion. Les trois autres
       // déclencheurs surviennent quand il ne saisit rien (il se connecte, il
@@ -488,21 +403,6 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
 
   /// Le tic doit-il renoncer ? Relu entre deux étapes (cf. [_onHeartbeat]).
   bool get _stopBeating => isClosed || !_heartbeat.isActive;
-
-  /// Le cache a-t-il assez vieilli pour mériter un cycle complet ?
-  ///
-  /// Deux questions, pas une. La première porte sur l'âge du **cache**
-  /// ([_lastPullAtMs]) : c'est elle qui décide qu'un cycle est dû. La seconde
-  /// porte sur la dernière **tentative** ([_lastCycleAttemptAtMs]) et ne sert
-  /// qu'à espacer les reprises quand les cycles échouent — un portail captif
-  /// laisse le cache éternellement périmé, et sans ce plancher le tic
-  /// relancerait un cycle complet toutes les 45 s pour rien.
-  bool _isFullCycleDue() {
-    final sincePull = _elapsedSince(_lastPullAtMs);
-    if (sincePull != null && sincePull < kFullCycleMaxAgeMs) return false;
-    final sinceAttempt = _elapsedSince(_lastCycleAttemptAtMs);
-    return sinceAttempt == null || sinceAttempt >= kFailedCycleRetryMs;
-  }
 
   /// Avance la date de dernière synchro (heure **serveur**) si [serverTimeMs]
   /// est plus récent que celle connue, et la persiste — `sync_meta` réutilisé
@@ -538,7 +438,7 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
       // ni « À envoyer » ni « Conflit » ne diraient la vraie condition de
       // déblocage (un login online) — l'auth est la cause racine qui gèle
       // TOUT le reste, elle prime donc sur le conflit (revue adversariale).
-      if (pending > 0 && !await _canAuthenticate()) {
+      if (pending > 0 && !await _cycle.canAuthenticate()) {
         _safeEmit(SyncStatus.authRequired);
         return;
       }
@@ -578,29 +478,6 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
     }
   }
 
-  /// Sans sonde branchée (tests, plateformes partielles) : pas de gate.
-  Future<bool> _canAuthenticate() async {
-    final probe = _credentialsProbe;
-    if (probe == null) return true;
-    try {
-      return await probe.canAuthenticate();
-    } catch (_) {
-      return true; // sonde défaillante : ne pas bloquer la synchro
-    }
-  }
-
-  /// Sans ré-authentificateur branché (tests, plateformes partielles) : on
-  /// laisse passer — l'intercepteur de refresh reste le filet de rattrapage.
-  Future<bool> _ensureFreshAccess() async {
-    final reauth = _reauthenticator;
-    if (reauth == null) return true;
-    try {
-      return await reauth.ensureFreshAccess();
-    } catch (_) {
-      return true; // ne pas geler la synchro sur une défaillance de la sonde
-    }
-  }
-
   /// À appeler après une écriture locale (write-path) réussie : reflète
   /// immédiatement la file d'attente, puis tente un push opportuniste en fond.
   Future<void> notifyLocalWrite() async {
@@ -609,43 +486,12 @@ class SyncStatusCubit extends Cubit<SyncStatusState> {
   }
 
   Future<void> _flushAndRefresh({bool announce = true}) async {
-    // Même gate que le reconnect : sans crédentiels, le push opportuniste
-    // post-écriture ne ferait que consommer des tentatives en 401. Et même
-    // ré-authentification préalable : ce chemin est celui du login offline
-    // (main.dart appelle `notifyLocalWrite` à la transition `authenticated`),
-    // donc typiquement celui d'un access vide à renouveler.
-    // Hors ligne, ni le mint ni le flush n'ont de sens (le moteur no-ope de
-    // toute façon) — et tenter le mint imposerait un timeout réseau à CHAQUE
-    // écriture locale, soit exactement le régime de travail hors connexion.
-    if (!await _isOnline()) {
-      await refresh();
-      return;
-    }
-    if (!await _canAuthenticate()) {
-      await refresh();
-      return;
-    }
-    if (!await _ensureFreshAccess()) {
-      await refresh();
-      return;
-    }
-    if (announce) _safeEmit(SyncStatus.syncing);
-    try {
-      await _syncEngine.flush();
-    } catch (_) {
-      // flush() encapsule déjà ses erreurs ; garde-fou par prudence.
-    }
+    await _cycle.runPushOnly(
+      // `announce: false` : un push que personne n'a demandé (le tic) ne doit
+      // rien annoncer — la pastille clignoterait toutes les 45 s.
+      onSyncingStarted: announce ? () => _safeEmit(SyncStatus.syncing) : null,
+    );
     await refresh();
-  }
-
-  /// Défensif comme le reste du cubit : une plateforme sans `connectivity_plus`
-  /// (tests) ne doit pas geler la synchro — on suppose alors « en ligne ».
-  Future<bool> _isOnline() async {
-    try {
-      return await _connectivity.isOnline();
-    } catch (_) {
-      return true;
-    }
   }
 
   void _safeEmit(SyncStatus status) {

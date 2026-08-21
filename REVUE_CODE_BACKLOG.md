@@ -4,9 +4,9 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Quinze sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5 et B-6 ensemble (B-7 clos sans changement) ; **il ne reste plus aucun défaut
-« haut » ni « moyen »**. **Six restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Seize sont corrigés** — le #13
+(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, M-7, puis B-5, B-6 et B-8 (B-7 clos sans changement) ; **il ne reste plus aucun défaut
+« haut » ni « moyen »**. **Cinq restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
 par la passe « clavier ») ; aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
@@ -124,16 +124,7 @@ quand la hauteur offerte passe sous leur hauteur cumulée.
 
 ## 🟡 Bas — issus de la revue adversariale du battement (2026-08-19)
 
-### B-8 · `sync_status_cubit.dart` dépasse largement la cible de taille
-
-420 lignes avant ces trois lots, **670 après** — contre une cible de ~250 (CLAUDE.md, règle non-négociable n°7).
-L'extraction de `SyncHeartbeat` n'a sorti que la cadence ; le corps de cycle (`syncNow`, `_syncOnReconnect`, les trois
-gardes, les estampilles) reste entier.
-
-**À faire** — extraire un `SyncCycleRunner` qui porte le corps de cycle et ses gardes, laissant au cubit la seule
-projection d'état. Refonte de code préexistant : à faire à froid, pas en fin de lot.
-
----
+*Les quatre sont clos : B-5, B-6 et B-8 corrigés, B-7 tranché sans changement.*
 
 ## ✅ Traité
 
@@ -245,6 +236,43 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~B-8 · `sync_status_cubit.dart` dépasse largement la cible de taille~~ — corrigé
+
+Le fichier faisait **deux métiers** : projeter un état sur une pastille, et exécuter la séquence
+`flush → évaluation de révocation → pull` avec les trois gardes qui la protègent. Le second avait doublé
+en trois lots de battement et noyait le premier. `SyncCycleRunner` (`lib/core/offline/`) porte désormais
+le corps de cycle, ses gardes et les estampilles qui datent le cache ; le cubit garde les quatre
+déclencheurs et la projection.
+
+| | avant | après |
+|---|---|---|
+| `sync_status_cubit.dart` | 670 lignes, **293 de code** | 516 lignes, **219 de code** |
+| `sync_cycle_runner.dart` | — | 292 lignes, **134 de code** |
+
+⚠️ **La cible de ~250 lignes est atteinte sur le code, pas sur le fichier**, et c'est la mesure qui
+compte ici : le reste est de la documentation que ce dépôt garde délibérément (les deux fichiers sont à
+~50 % de commentaire). Aller chercher les 516 lignes brutes demanderait de sortir aussi la politique du
+tic et les déclencheurs, en donnant au cubit une référence arrière vers eux : on échangerait de la
+taille contre du couplage circulaire. À rouvrir si le fichier se remet à grossir par le code.
+
+**Refonte pure, zéro changement de comportement** — et c'est vérifiable : les **77 tests** du cubit
+passent sans une seule modification. C'était le critère d'acceptation, l'API publique et le constructeur
+étant inchangés (les deux seuils restent lisibles sur `SyncStatusCubit`, alias de ceux du runner, pour
+que la politique n'ait qu'une définition).
+
+La frontière neuve, elle, est épinglée par onze tests directs : `SyncCycleOutcome` porte des drapeaux
+**nullables au sens de « rien observé »**, jamais « sain ». Un cycle arrêté sur une garde, un rapport
+`skipped` ou `offline` n'ont rien vu ; les traduire en « tout va bien » effacerait une dégradation bien
+réelle. La paire de tests qui le prouve compare l'après-`skipped` (un cycle redevient dû dès le plancher
+de reprise, le cache n'ayant jamais été rajeuni) à l'après-rapport-exploitable (le même délai ne suffit
+pas, le cache tient son quart d'heure).
+
+⚠️ **Écrit en le vérifiant, pas en le supposant** : ma première attente sur le rapport `skipped` était
+fausse — je croyais le cycle immédiatement dû, alors que le plancher de reprise de cinq minutes
+s'applique d'abord. Le test a été corrigé, pas le code.
 
 ---
 
