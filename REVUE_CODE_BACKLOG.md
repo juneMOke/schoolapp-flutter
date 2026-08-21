@@ -765,7 +765,12 @@ DRAFT), et l'observateur de reprise du lot 1.
 - ~~Inclure le formattage des champs~~ — FAIT : la capitalisation est le défaut
   d'`EteeloTextInput` (mot par mot / phrase, résolue sur le type de clavier),
   l'exception se déclare. Formatters promus dans `lib/core/formatters/`.
-- Inclure la recherche interactive — RESTE À FAIRE.
+- Inclure la recherche interactive — ANALYSÉ, pas ouvert :
+  `RECHERCHE_INTERACTIVE_PLAN.md` (7 lots, 9-12 j, décisions verrouillées).
+  ⚠ Le fait déterminant : le SQL ne filtre JAMAIS sur un nom — tout le
+  filtrage par nom est en Dart, sur la totalité des inscriptions de l'année,
+  rejouée à chaque frappe. Le plan attaque par là (corpus chaud), pas par
+  l'UI.
 ======== Exception caught by rendering library ===================================================== The following
 assertion was thrown during layout:
 A RenderFlex overflowed by 62 pixels on the bottom.
