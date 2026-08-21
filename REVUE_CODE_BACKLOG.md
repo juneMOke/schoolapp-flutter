@@ -4,10 +4,10 @@ Sortie de la revue `/code-review high` du **2026-08-19**, portée sur les 38 com
 fichiers) plus l'arbre de travail.
 `flutter analyze` propre, **3621 tests verts** au moment de la revue.
 
-Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Onze sont corrigés** — le #13
-(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble ; **plus aucun défaut « haut » n'est
-ouvert**. **Dix restent ouverts** et sont listés ici (B-9 compris, ouvert hors revue par la passe « clavier ») ;
-aucun n'est traité.
+Quinze défauts confirmés, plus quatre issus de la revue adversariale du battement. **Douze sont corrigés** — le #13
+(commit `5123439`), puis H-2, H-3, H-1, M-8, M-1, M-2 et M-3 ensemble, M-4, puis M-5 et M-6 ensemble, et M-7 ; **il ne reste plus aucun défaut
+« haut » ni « moyen »**. **Neuf restent ouverts**, tous « bas », et sont listés ici (B-9 compris, ouvert hors revue
+par la passe « clavier ») ; aucun n'est traité.
 
 S'y ajoute **B-9**, ouvert par la passe « clavier » du 2026-08-19 — celle qui a fermé les débordements de la connexion,
 de l'encaissement, des deux modales de discipline et de la recherche de parent.
@@ -30,20 +30,7 @@ réseau avant d'afficher un grand-livre déjà présent en base. Seul défaut du
 
 ## 🟠 Moyen
 
-### M-7 · Le verrou de tarifs mute sans reconstruire
-
-`lib/features/enrollment/presentation/widgets/student_charges/student_charges_step.dart:130` (listener l. 332)
-
-`_syncTariffsWithheld` compte sur `_recomputeFormState` pour appeler `setState`, et `tariffsWithheld` n'entre dans ce
-calcul que via
-`blocked = (tariffsWithheld || feeGridUnavailable) && _studentCharges.isEmpty` — donc sans effet dès que les créances
-sont chargées, c'est-à-dire dans le cas normal. Une perte de `finance.grid.read` en cours de session laisse les montants
-de tarifs à l'écran jusqu'à la fin. Les deux widgets frères touchés par le même commit, eux, reconstruisent
-inconditionnellement.
-
-**À faire** — reconstruire sur le changement de droit, comme les frères.
-
----
+*Aucun défaut « moyen » ouvert.*
 
 ## 🟡 Bas
 
@@ -306,6 +293,40 @@ tests de câblage sur le conteneur réel — les trois pièces en sortent, et l'
 ⚠️ **Piège de test rencontré** : un `Completer` créé dans `setUp` planifie ses continuations dans la zone racine, que
 `tester.pump()` ne draine jamais. L'attente ne se dénouait pas, et cela ressemblait trait pour trait à un défaut du code
 testé.
+
+---
+
+### ~~M-7 · Le verrou de tarifs mute sans reconstruire~~ — corrigé
+
+`_syncTariffsWithheld` s'en remettait à `_recomputeFormState` pour appeler `setState`, or celui-ci ne
+reconstruit que si la **validité** de l'étape bascule — et le droit sur la grille n'y entre que par
+`blocked = (tariffsWithheld || feeGridUnavailable) && charges.isEmpty`. Dès que des créances sont
+chargées, le verdict de droit changeait sans que rien ne reconstruise. Le listener de droits passe
+désormais par `_onPermissionsChanged`, qui reconstruit sur changement, comme le frère
+`disciplinary_student_detail_page.dart`.
+
+⚠️ **La fiche annonçait un symptôme qui n'était pas atteignable, vérification faite.** « Une perte de
+`finance.grid.read` laisse les montants de tarifs à l'écran » : c'est vrai, mais ce n'est pas ce défaut
+— `StudentChargesStepBody` n'utilise `tariffsWithheld` **que** sur liste vide, et affiche les créances
+quel que soit le droit dès qu'il y en a. C'est même une décision explicite, épinglée par le test
+« grille caviardée mais créances présentes → aucune alerte » : si des créances sont là, elles font foi.
+Reconstruire ne change donc rien à l'écran aujourd'hui.
+
+Ce qui était réellement cassé est le **contrat** : le corps recevait le droit du montage jusqu'à ce
+qu'un changement d'état sans rapport le rafraîchisse. Le rebuild n'était garanti que par une
+**coïncidence** — les cas où l'affichage dépend du droit (liste vide) sont exactement ceux où la
+validité bascule. Le jour où ce rendu dépendra du droit avec une liste non vide, la panne serait
+visible, silencieuse, et cherchée ailleurs.
+
+⚠️ **`didChangeDependencies` ne reconstruit toujours pas, et c'est délibéré** : il précède
+immédiatement un `build`, et Flutter n'y tolère un `markNeedsBuild` que parce que l'élément est dans la
+portée de la construction en cours. Les deux appelants sont donc séparés — relecture nue depuis
+`didChangeDependencies`, relecture **et** rebuild depuis le listener, qui est hors phase de build.
+
+Tests : un cas neuf dans `student_charges_step_permission_read_test.dart` — créances à l'écran, droit
+retiré en séance, le corps doit recevoir le droit courant. Il mesure le **prop** reçu et non un pixel,
+puisqu'aucun pixel ne bouge : c'est le contrat qui est en jeu. Écrit rouge d'abord (il reproduit le
+défaut), vérifié par mutation ensuite.
 
 ---
 

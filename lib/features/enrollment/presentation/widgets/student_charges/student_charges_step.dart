@@ -125,8 +125,14 @@ class StudentChargesStepState extends State<StudentChargesStep> {
   /// arrière-plan peut accorder ou retirer `finance.grid.read` pendant que le
   /// wizard est ouvert. [PermissionGate.allows] ne s'abonne à rien (lecture
   /// ponctuelle), et la valeur vit hors `build` puisque la validité de l'étape
-  /// en dépend — sans l'abonnement ci-dessous, le verdict restait celui du
-  /// montage.
+  /// en dépend — sans l'abonnement posé par [_withPermissionWatch], le verdict
+  /// restait celui du montage.
+  ///
+  /// ⚠️ **Ne reconstruit pas lui-même**, et c'est réservé à l'appel depuis
+  /// [didChangeDependencies] : celui-ci précède immédiatement un `build`, et un
+  /// `setState` y marquerait dirty un élément déjà en cours de construction.
+  /// L'autre appelant — le listener de droits, hors phase de build — passe par
+  /// [_onPermissionsChanged], qui reconstruit.
   void _syncTariffsWithheld() {
     final withheld = !PermissionGate.allows(context, const [
       Perm.financeGridRead,
@@ -138,6 +144,32 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       if (!mounted) return;
       _emitStepState();
     });
+  }
+
+  /// Les droits ont changé **en séance** : relire ne suffit pas, il faut
+  /// reconstruire.
+  ///
+  /// `_syncTariffsWithheld` s'en remettait à `_recomputeFormState` pour appeler
+  /// `setState` — or celui-ci ne reconstruit que si la **validité** de l'étape
+  /// bascule, et le droit sur la grille n'y entre que par
+  /// `blocked = (tariffsWithheld || feeGridUnavailable) && charges.isEmpty`.
+  /// Dès que des créances sont chargées, c'est-à-dire dans le cas normal, le
+  /// verdict de droit changeait sans que rien ne reconstruise : le corps
+  /// continuait de recevoir celui du montage jusqu'à ce qu'un changement
+  /// d'état sans rapport le rafraîchisse.
+  ///
+  /// Rien ne s'en voyait à l'écran — avec une liste non vide, le corps affiche
+  /// les créances quel que soit le droit — et c'est bien ce qui a laissé passer
+  /// le défaut : le rebuild n'était garanti que par une **coïncidence**, celle
+  /// des cas où l'affichage dépend du droit étant exactement ceux où la
+  /// validité bascule. Le contrat est rétabli ici, et les deux widgets frères
+  /// du même lot reconstruisent déjà inconditionnellement
+  /// (`disciplinary_student_detail_page.dart`).
+  void _onPermissionsChanged() {
+    if (!mounted) return;
+    final before = _tariffsWithheld;
+    _syncTariffsWithheld();
+    if (_tariffsWithheld != before) setState(() {});
   }
 
   @override
@@ -318,7 +350,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
     return _withPermissionWatch(child: _buildStep(context, l10n));
   }
 
-  /// Rebranche [_syncTariffsWithheld] sur les changements de droits. Absent de
+  /// Rebranche [_onPermissionsChanged] sur les changements de droits. Absent de
   /// l'arbre en test, l'[AuthBloc] rend l'enveloppe transparente — même
   /// convention que `PermissionGate`.
   Widget _withPermissionWatch({required Widget child}) {
@@ -329,7 +361,7 @@ class StudentChargesStepState extends State<StudentChargesStep> {
       bloc: authBloc,
       listenWhen: (prev, curr) =>
           !listEquals(prev.permissions, curr.permissions),
-      listener: (_, _) => _syncTariffsWithheld(),
+      listener: (_, _) => _onPermissionsChanged(),
       child: child,
     );
   }
